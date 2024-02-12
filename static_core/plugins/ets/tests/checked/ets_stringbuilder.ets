@@ -18,7 +18,7 @@
 //! RUN_PAOC      options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false"
 //!
 //! METHOD        "ETSGLOBAL::toString0"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -28,7 +28,7 @@
 //! INST_NOT      /StringBuilder::toString/
 //!
 //! METHOD        "ETSGLOBAL::toString1"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -38,7 +38,7 @@
 //! INST_NOT      /StringBuilder::toString/
 //!
 //! METHOD        "ETSGLOBAL::toString2"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -59,7 +59,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString3"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -73,7 +73,7 @@
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString4"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -91,7 +91,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString5"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -109,7 +109,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString6"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -127,7 +127,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString7"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -145,7 +145,7 @@
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString8"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -158,7 +158,7 @@
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString10"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
 //! PASS_AFTER    "ChecksElimination"
@@ -171,7 +171,7 @@
 //! RUN           force_jit: true, options: "--compiler-regex='.*toString[0-9]+.*' --compiler-inlining=false", entry: "ETSGLOBAL::main"
 //!
 //! METHOD        "ETSGLOBAL::toString0"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -181,7 +181,7 @@
 //! INST_NOT      /StringBuilder::toString/
 //!
 //! METHOD        "ETSGLOBAL::toString1"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -191,7 +191,7 @@
 //! INST_NOT      /StringBuilder::toString/
 //!
 //! METHOD        "ETSGLOBAL::toString2"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -212,7 +212,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString3"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -226,7 +226,7 @@
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString4"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -244,7 +244,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString5"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -262,7 +262,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString6"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -280,7 +280,7 @@
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString7"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -298,7 +298,7 @@
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString8"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -311,7 +311,7 @@
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString9"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
 //! PASS_AFTER    "ChecksElimination"
@@ -319,7 +319,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //!
 //! METHOD        "ETSGLOBAL::toString10"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
 //! PASS_AFTER    "ChecksElimination"
@@ -327,7 +327,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
 //! METHOD        "ETSGLOBAL::toString11"
-//! PASS_BEFORE   "SimplifyStringBuilder"
+//! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"

@@ -172,6 +172,8 @@ public:
         return depth_;
     }
 
+    bool IsPostExitBlock(const BasicBlock *block) const;
+
 private:
     void CheckInfinity();
 

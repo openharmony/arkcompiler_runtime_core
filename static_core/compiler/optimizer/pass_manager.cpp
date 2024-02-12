@@ -104,12 +104,14 @@ std::string PassManager::GetFileName([[maybe_unused]] const char *passName, [[ma
 void PassManager::DumpGraph([[maybe_unused]] const char *passName)
 {
 #ifdef ENABLE_IR_DUMP
-    std::ofstream strm(GetFileName(passName, ".ir"));
+    std::string fileName = GetFileName(passName, ".ir");
+    std::ofstream strm(fileName);
     if (!strm.is_open()) {
-        std::cerr << errno << " ERROR: " << strerror(errno) << "\n" << GetFileName(passName, ".ir") << std::endl;
+        std::cerr << errno << " ERROR: " << strerror(errno) << "\n" << fileName << std::endl;
     }
     ASSERT(strm.is_open());
     GetGraph()->Dump(&strm);
+    LOG(DEBUG, COMPILER) << "Dump IR to " << fileName;
 #endif  // ENABLE_IR_DUMP
 }
 void PassManager::DumpLifeIntervals([[maybe_unused]] const char *passName)

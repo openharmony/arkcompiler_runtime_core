@@ -84,6 +84,7 @@ TEST_F(AsmTest, BitopsBitwiseAnd)
             CONSTANT(23U, 0x5f5e100U).s32();
             CONSTANT(2U, 1U).s32();
             CONSTANT(1U, 0x100000000U).s64();
+            INST(25U, Opcode::SaveState);
             INST(0U, Opcode::SaveStateDeoptimize).NoVregs();
             INST(26U, Opcode::SpillFill);
         }
@@ -101,6 +102,7 @@ TEST_F(AsmTest, BitopsBitwiseAnd)
         }
         BASIC_BLOCK(5U, 7U, 6U)
         {
+            INST(24U, Opcode::SaveState);
             CONSTANT(22U, 0U).s64();
             INST(13U, Opcode::Cmp).s32().Inputs(4U, 22U);
             INST(15U, Opcode::IfImm).SrcType(INT32).CC(compiler::CC_EQ).Imm(0U).Inputs(13U);

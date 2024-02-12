@@ -13,6 +13,7 @@ String Builder is used to construct a string out of smaller pieces. In some case
 * BoundsAnalysis
 * AliasAnalysis
 * LoopAnalysis
+* DominatorsTree
 
 ## Algorithm
 
@@ -85,26 +86,178 @@ let output = sb.toString()
 
 ## Pseudocode
 
-**Remove unnecessary String Builder**
+**Complete algorithm**
+
 ```C#
-foreach block in graph
+function SimplifyStringBuilder(graph: Graph)
+    foreach loop in graph
+        OptimizeStringConcatenation(loop)
+    foreach block in graph (in RPO)
+        OptimizeStringBuilderToString(block)
+        OptimizeStringConcatenation(block)
+```
+
+Below we describe the algorithm in more details
+
+**Remove unnecessary String Builder**
+
+The algorithm works as follows: first we search for all the StringBuilder instances in a basic block, then we replace all their toString-call usages with instance constructor argument until we meet any other usage in RPO.
+```C#
+function OptimizeStringBuilderToString(block: BasicBlock)
     foreach ctor being StringBuilder constructor with String argument in block
-        let instance be StringBuilder instance
-        let arg be ctor-call argument
-        foreach usage of instance
+        let instance be StringBuilder instance of ctor-call
+        let arg be ctor-call string argument
+        foreach usage of instance (in RPO)
             if usage is toString-call
                 replace usage with arg
             else
                 break
-        remove ctor if instance is not used anymore
+        if instance is not used
+            remove ctor from block
+            remove instance from block
 ```
 **Replace String Builder with string concatenation**
-```
-To be added later
+
+The algorithm works as follows: first we search for all the StringBuilder instances in a basic block, then we check if the use of instance matches concatenation pattern for 2, 3, or 4 arguments. If so, we replace the whole use of StringBuilder object with concatenation intrinsics.
+```C#
+function OptimizeStringConcatenation(block: BasicBlock)
+    foreach ctor being StringBuilder default constructor in block
+        let instance be StringBuilder instance of ctor-call
+        let match = MatchConcatenation(instance)
+        let appendCount = match.appendCount be number of append-calls of instance
+        let append = match.append be an array of append-calls of instance
+        let toStringCall = match.toStringCall be toString-call of instance
+        let concat01 = ConcatIntrinsic(append[0].input(1), append[1].input(1))
+        remove append[0] from block
+        remove append[1] from block
+        switch appendCount
+            case 2
+                replace toStringCall with concat01
+                break
+            case 3
+                let concat012 = ConcatIntrinsic(concat01, append[2].input(1))
+                remove append[2] from block
+                replace toStringCall with concat012
+                break
+            case 4
+                let concat23 = ConcatIntrinsic(append[2].input(1), append[3].input(1))
+                let concat0123 = ConcatIntrinsic(concat01, concat23)
+                remove append[2] from block
+                remove append[3] from block
+                replace toStringCall with concat0123
+        remove toStringCall from block
+        remove ctor from block
+        remove instance from block
+
+function ConcatIntrinsic(arg0, arg1): IntrinsicInst
+    return concatenation intrinsic for arg0 and arg1
+
+type Match
+    toStringCall: CallInst
+    appendCount: Integer
+    append: array of CallInst
+
+function MatchConcatenation(instance: StringBuilder): Match
+    let match: Match
+    foreach usage of instance
+        if usage is toString-call
+            set match.toStringCall = usage
+        elif usage is append-call
+            add usage to match.append array
+            increment match.appendCount
+    return match
 ```
 **Optimize concatenation loops**
-```
-To be added later
+
+The algorithm works as follows: first we recursively process all the inner loops of current loop, then we search for string concatenation patterns within a current loop. For each pattern found we reconnect StringBuilder usage instructions in a correct way (making them point to the only one instance we have chosen), move chosen String Builder object creation and initial string value appending to a loop pre-header, move chosen StringBuilder object toString-call to loop exit block. We cleanup unused instructions at the end.
+```C#
+function OptimizeStringConcatenation(loop: Loop)
+    foreach innerLoop being inner loop of loop
+        OptimizeStringConcatenation(innerLoop)
+    let matches = MatchConcatenationLoop(loop)
+    foreach match in matches)
+        ReconnectInstructions(match)
+        HoistInstructionsToPreHeader(match)
+        HoistInstructionsToExitBlock(match)
+    }
+    Cleanup(loop, matches)
+
+type Match
+    accValue: PhiInst
+    initialValue: Inst
+    // instructions to be hoisted to preheader
+    preheader: type
+        instance: Inst
+        appendAccValue: IntrinsicInst
+    // instructions to be left inside loop
+    loop: type
+        appendIntrinsics: array of IntrinsicInst
+    // instructions to be deleted
+    temp: array of type
+        toStringCall: Inst
+        instance: Inst
+        appendAccValue: IntrinsicInst
+    // instructions to be hoisted to exit block
+    exit: type
+        toStringCall: Inst
+
+function MatchConcatenationLoop(loop: Loop)
+    let matches: array of Match
+    foreach accValue being string accumulator in a loop
+        let match: Match
+        foreach instance being StringBuilder instance used to update accValue (in RPO)
+            if match is empty
+                // Fill preheader and exit parts of a match
+                set match.accValue = accValue
+                set match.initialValue = FindInitialValue(accValue)
+                set match.exit.toStringCall = FindToStringCall(instance)
+                set match.preheader.instance = instance
+                set match.preheader.appendAccValue = FindAppendIntrinsic(instance, accValue)
+                // Init loop part of a match
+                add other append instrinsics to match.loop.appendInstrinsics array
+            else
+                // Fill loop and temporary parts of a match
+                let temp: TemporaryInstructions
+                set temp.instance = instance
+                set temp.toStringCall = FindToStringCall(instance)
+                foreach appendIntrinsic in FindAppendIntrinsics(instance)
+                    if appendIntrinsic.input(1) is accValue
+                        set temp.appendAccValue = appendIntrinsic
+                    else
+                        add appendIntricsic to match.loop.appendInstrinsics array
+                add temp to match.temp array
+        add match to matches array
+    return matches
+
+function ReconnectInstructions(match: Match)    
+    match.preheader.appendAcc.setInput(0, match.preheader.instance)
+    match.preheader.appendAcc.setInput(1, be match.initialValue)
+    match.exit.toStringCall.setInput(0, match.preheader.instance)
+    foreach user being users of match.accValue outside loop
+        user.replaceInput(match.accValue, match.exit.toStringCall)
+
+function HoistInstructionsToPreHeader(match: Match)
+    foreach inst in match.preheader
+        hoist inst to loop preheader
+    fix broken save states
+
+function HoistInstructionsToExitBlock(match: Match)
+    let exitBlock be to exit block of loop
+    hoist match.exit.toStringCall to exitBlock
+    foreach input being inputs of match.exit.toStringCall inside loop
+        hoist input to exitBlock
+
+function Cleanup(loop: Loop, matches: array of Match)
+    foreach block in loop
+        fix save states in block
+    foreach match in matches
+        foreach temp in match.temp
+            foreach inst in temp
+                remove inst
+    foreach block in loop
+        foreach phi in block
+            if phi is not used
+                remove phi from block
 ```
 
 ## Examples
@@ -119,71 +272,195 @@ function toString0(str: String): String {
 ```
 
 IR before transformation:
+
+(Save state and null check instructions are skipped for simplicity)
 ```
-Method: std.core.String ETSGLOBAL::toString0(std.core.String) 0x7fb0ff9f61f0
+Method: std.core.String ETSGLOBAL::toString0(std.core.String)
 
 BB 1
-prop: start, bc: 0x00000000
-    0.ref  Parameter                  arg 0 -> (v6, v5, v2, v1)
-    1.     SafePoint                  v0(vr1), inlining_depth=0
+prop: start
+    0.ref  Parameter                  arg 0 -> (v5)
 succs: [bb 0]
 
 BB 0  preds: [bb 1]
-prop: bc: 0x00000000
-    2.     SaveState                  v0(vr1), inlining_depth=0 -> (v4, v3)
-    3.ref  LoadAndInitClass 'std.core.StringBuilder' v2 -> (v4)
-    4.ref  NewObject 15300            v3, v2 -> (v7, v9, v6, v5)
-    6.     SaveState                  v0(vr1), v4(ACC), inlining_depth=0 -> (v5)
-    5.void CallStatic 51211 std.core.StringBuilder::<ctor> v4, v0, v6
-    7.     SaveState                  v4(ACC), inlining_depth=0 -> (v10, v9)
-    9.ref  NullCheck                  v4, v7 -> (v10)
-   10.ref  CallVirtual 51332 std.core.StringBuilder::toString v9, v7 -> (v11)
+prop:
+    3.ref  LoadAndInitClass 'std.core.StringBuilder' ss -> (v4)
+    4.ref  NewObject 15300            v3, ss -> (v5, v10)
+    5.void CallStatic 51211 std.core.StringBuilder::<ctor> v4, v0, ss
+   10.ref  CallVirtual 51332 std.core.StringBuilder::toString v4, ss -> (v11)
    11.ref  Return                     v10
 succs: [bb 2]
 
 BB 2  preds: [bb 0]
-prop: end, bc: 0x00000009
+prop: end
 ```
 IR after transformation:
 ```
-Method: std.core.String ETSGLOBAL::toString0(std.core.String) 0x7fb0ff9f61f0
+Method: std.core.String ETSGLOBAL::toString0(std.core.String)
 
 BB 1
-prop: start, bc: 0x00000000
-    0.ref  Parameter                  arg 0 -> (v10, v2)
+prop: start
+    0.ref  Parameter                  arg 0 -> (v10)
 succs: [bb 0]
 
 BB 0  preds: [bb 1]
-prop: bc: 0x00000000
-    2.     SaveState                  v0(vr1), inlining_depth=0 -> (v3)
-    3.ref  LoadAndInitClass 'std.core.StringBuilder' v2
+prop:
    10.ref  Return                     v0
 succs: [bb 2]
 
 BB 2  preds: [bb 0]
-prop: end, bc: 0x00000009
+prop: end
 ```
 
 **Replace String Builder with string concatenation**
 
+ETS function example:
+```TS
+function concat0(a: String, b: String): String {
+    return a + b;
+}
+```
 IR before transformation:
 ```
-To be added later
+Method: std.core.String ETSGLOBAL::concat0(std.core.String, std.core.String)
+
+BB 1
+prop: start
+    0.ref  Parameter                  arg 0 -> (v10)
+    1.ref  Parameter                  arg 1 -> (v13)
+succs: [bb 0]
+
+BB 0  preds: [bb 1]
+prop:
+    4.ref  LoadAndInitClass 'std.core.StringBuilder' ss -> (v5)
+    5.ref  NewObject 11355            v4, ss -> (v13, v10, v6)
+    6.void CallStatic 60100 std.core.StringBuilder::<ctor> v5, ss
+   10.ref  Intrinsic.StdCoreSbAppendString v5, v0, ss
+   13.ref  Intrinsic.StdCoreSbAppendString v5, v1, ss
+   16.ref  CallStatic 60290 std.core.StringBuilder::toString v5, ss -> (v17)
+   17.ref  Return                     v16
+succs: [bb 2]
+
+BB 2  preds: [bb 0]
+prop: end
 ```
 IR after transformation:
 ```
-To be added later
+Method: std.core.String ETSGLOBAL::concat0(std.core.String, std.core.String)
+
+BB 1
+prop: start
+    0.ref  Parameter                  arg 0 -> (v18)
+    1.ref  Parameter                  arg 1 -> (v18)
+succs: [bb 0]
+
+BB 0  preds: [bb 1]
+prop:
+   18.ref  Intrinsic.StdCoreStringBuilderConcatStrings v0, v1, ss -> (v17)
+   17.ref  Return                     v18
+succs: [bb 2]
+
+BB 2  preds: [bb 0]
+prop: end
 ```
 
 **Optimize concatenation loops**
 
+ETS function example:
+```TS
+function concat_loop0(a: String, n: int): String {
+    let str: String = "";
+    for (let i = 0; i < n; ++i)
+        str = str + a;
+    return str;
+}
+```
 IR before transformation:
 ```
-To be added later
+Method: std.core.String ETSGLOBAL::concat_loop0(std.core.String, i32)
+
+BB 4
+prop: start
+    0.ref  Parameter                  arg 0 -> (v9p)
+    1.i32  Parameter                  arg 1 -> (v10p)
+    3.i64  Constant                   0x0 -> (v7p)
+   30.i64  Constant                   0x1 -> (v29)
+succs: [bb 0]
+
+BB 0  preds: [bb 4]
+prop: prehead
+    4.ref  LoadString 63726           v5 -> (v8p)
+succs: [bb 3]
+
+BB 3  preds: [bb 0, bb 2]
+prop: head, loop 1, depth 1
+   7p.i32  Phi                        v3(bb0), v29(bb2) -> (v29, v13)
+   8p.ref  Phi                        v4(bb0), v28(bb2) -> (v31, v12)
+   9p.ref  Phi                        v0(bb0), v9p(bb2) -> (v12, v9p, v25)
+  10p.i32  Phi                        v1(bb0), v10p(bb2) -> (v10p, v13)
+   13.b    Compare GE i32             v7p, v10p -> (v14)
+   14.     IfImm NE b                 v13, 0x0
+succs: [bb 1, bb 2]
+
+BB 2  preds: [bb 3]
+prop: loop 1, depth 1
+   16.ref  LoadAndInitClass 'std.core.StringBuilder' ss -> (v17)
+   17.ref  NewObject 22178            v16, ss -> (v28, v25, v22)
+   18.void CallStatic 60220 std.core.StringBuilder::<ctor> v17, ss
+   22.ref  Intrinsic.StdCoreSbAppendString v17, v8p, ss
+   25.ref  Intrinsic.StdCoreSbAppendString v17, v9p, ss
+   28.ref  CallStatic 60410 std.core.StringBuilder::toString v17, ss -> (v11p, v8p)
+   29.i32  Add                        v7p, v30 -> (v7p)
+succs: [bb 3]
+
+BB 1  preds: [bb 3]
+prop:
+   31.ref  Return                     v8p
+succs: [bb 5]
+
+BB 5  preds: [bb 1]
+prop: end
 ```
 IR after transformation:
 ```
-To be added later
+Method: std.core.String ETSGLOBAL::concat_loop0(std.core.String, i32)
+
+BB 4
+prop: start
+    0.ref  Parameter                  arg 0 -> (v25)
+    1.i32  Parameter                  arg 1 -> (v40, v13)
+    3.i64  Constant                   0x0 -> (v40, v7p)
+   30.i64  Constant                   0x1 -> (v29)
+succs: [bb 0]
+
+BB 0  preds: [bb 4]
+prop: prehead
+    4.ref  LoadString 63726           ss -> (v22)
+   16.ref  LoadAndInitClass 'std.core.StringBuilder' ss -> (v17)
+   17.ref  NewObject 22178            v16, ss -> (v25, v28, v22, v18)
+   18.void CallStatic 60220 std.core.StringBuilder::<ctor> v17, ss
+   22.ref  Intrinsic.StdCoreSbAppendString v17, v4, ss
+   40.b    Compare GE i32             v3, v1 -> (v41)
+   41.     IfImm NE b                 v40, 0x0
+succs: [bb 1, bb 2]
+
+BB 2  preds: [bb 0, bb 2]
+prop: head, loop 1, depth 1
+   7p.i32  Phi                        v3(bb0), v29(bb2) -> (v29)
+   25.ref  Intrinsic.StdCoreSbAppendString v17, v0, ss
+   29.i32  Add                        v7p, v30 -> (v13, v7p)
+   13.b    Compare GE i32             v29, v1 -> (v14)
+   14.     IfImm NE b                 v13, 0x0
+succs: [bb 1, bb 2]
+
+BB 1  preds: [bb 2, bb 0]
+prop:
+   28.ref  CallStatic 60410 std.core.StringBuilder::toString v17, ss
+   31.ref  Return                     v28
+succs: [bb 5]
+
+BB 5  preds: [bb 1]
+prop: end
 ```
 
 ## Links
@@ -193,6 +470,6 @@ To be added later
     * [simplify_string_builder.cpp](../optimizer/optimizations/simplify_string_builder.cpp)
 * Tests
     * [ets_string_builder.ets](../../plugins/ets/tests/checked/ets_string_builder.ets)
-    * ets_string_concat.ets (To be added later)
-    * ets_string_concat_loop.ets (To be added later)
+    * [ets_string_concat.ets](../../plugins/ets/tests/checked/ets_string_concat.ets)
+    * [ets_string_concat_loop.ets](../../plugins/ets/tests/checked/ets_string_concat_loop.ets)
 

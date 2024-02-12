@@ -49,6 +49,22 @@ bool BasicBlock::IsLoopHeader() const
     return (GetLoop()->GetHeader() == this);
 }
 
+bool BasicBlock::IsLoopPostExit() const
+{
+    for (auto innerLoop : GetLoop()->GetInnerLoops()) {
+        if (innerLoop->IsPostExitBlock(this)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool BasicBlock::IsTryCatch() const
+{
+    return IsTry() || IsTryBegin() || IsTryEnd() || IsCatch() || IsCatchBegin() || IsCatchEnd();
+}
+
 BasicBlock *BasicBlock::SplitBlockAfterInstruction(Inst *inst, bool makeEdge)
 {
     ASSERT(inst != nullptr);

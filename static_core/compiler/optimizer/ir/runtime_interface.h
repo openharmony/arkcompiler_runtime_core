@@ -361,6 +361,11 @@ public:
         return false;
     }
 
+    virtual bool IsMethodStringBuilderDefaultConstructor([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual bool IsMethodStringBuilderToString([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -1116,6 +1121,26 @@ public:
     virtual bool IsIntrinsicStringBuilderToString([[maybe_unused]] IntrinsicId id) const
     {
         return false;
+    }
+
+    virtual bool IsIntrinsicStringBuilderAppendString([[maybe_unused]] IntrinsicId id) const
+    {
+        return false;
+    }
+
+    virtual bool IsIntrinsicStringBuilderAppend([[maybe_unused]] IntrinsicId id) const
+    {
+        return false;
+    }
+
+    virtual IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId([[maybe_unused]] DataType::Type type) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual IntrinsicId GetStringBuilderConcatStringsIntrinsicId() const
+    {
+        UNREACHABLE();
     }
 
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const

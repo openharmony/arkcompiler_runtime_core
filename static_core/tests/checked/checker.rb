@@ -418,7 +418,7 @@ class Checker
   def IN_BLOCK(match)
     return if @options.release
 
-    @ir_scope.find_block("prop: " + match)
+    @ir_scope.find_block(/prop: #{match}/)
   end
 
   def LLVM_METHOD(match)

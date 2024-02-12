@@ -122,6 +122,7 @@ private:
 
     bool CheckMethodLimitations(const BytecodeInstructions &instructions, size_t vregsCount);
     void BuildBasicBlocks(const BytecodeInstructions &instructions);
+    bool CreateSaveStateForLoopBlocks(BasicBlock *bb, InstBuilder *instBuilder);
     bool BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf);
     template <bool NEED_SS_DEOPT>
     bool BuildInstructionsForBB(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf);

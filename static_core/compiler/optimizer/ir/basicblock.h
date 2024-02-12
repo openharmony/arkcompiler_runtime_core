@@ -385,6 +385,8 @@ public:
         return GetLoop() != nullptr;
     }
     bool IsLoopHeader() const;
+    bool IsLoopPostExit() const;
+    bool IsTryCatch() const;
 
     void SetNextLoop(Loop *loop)
     {

@@ -146,6 +146,12 @@ bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithStringArg(MethodPt
            MethodCast(method)->GetProto().GetSignature() == "(Lstd/core/String;)V";
 }
 
+bool EtsRuntimeInterface::IsMethodStringBuilderDefaultConstructor(MethodPtr method) const
+{
+    return MethodCast(method)->IsConstructor() && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
+           MethodCast(method)->GetProto().GetSignature() == "()V";
+}
+
 bool EtsRuntimeInterface::IsMethodStringBuilderToString(MethodPtr method) const
 {
     return GetMethodFullName(method, false) == "std.core.StringBuilder::toString" &&
@@ -157,4 +163,51 @@ bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const
     return id == RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_TO_STRING;
 }
 
+bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppendString(IntrinsicId id) const
+{
+    return id == IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING;
+}
+
+bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppend(IntrinsicId id) const
+{
+    switch (id) {
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_LONG:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_INT:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_CHAR:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_BOOL:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING:
+            return true;
+        default:
+            return false;
+    }
+}
+
+EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::ConvertTypeToStringBuilderAppendIntrinsicId(
+    compiler::DataType::Type type) const
+{
+    switch (type) {
+        case compiler::DataType::BOOL:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_BOOL;
+        case compiler::DataType::INT8:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_CHAR;
+        case compiler::DataType::INT32:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_INT;
+        case compiler::DataType::INT64:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_LONG;
+        case compiler::DataType::REFERENCE:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING;
+        default:
+            UNREACHABLE();
+    }
+    return IntrinsicId::INVALID;
+}
+
+EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderConcatStringsIntrinsicId() const
+{
+    return IntrinsicId::INTRINSIC_STD_CORE_STRING_BUILDER_CONCAT_STRINGS;
+}
 }  // namespace ark::ets

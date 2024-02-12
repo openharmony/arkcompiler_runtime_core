@@ -5485,6 +5485,7 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
         BASIC_BLOCK(14U, 4U) {}
         BASIC_BLOCK(4U, 6U)
         {
+            INST(18U, Opcode::SaveState).Inputs(0U).SrcVregs({0U}).SetFlag(inst_flags::NO_DCE);
             INST(16U, Opcode::SaveStateDeoptimize).Inputs(0U, 0U).SrcVregs({0U, 2U});
         }
         BASIC_BLOCK(6U, 5U, 7U)
@@ -5500,6 +5501,7 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
         BASIC_BLOCK(5U, -1L)
         {
             INST(13U, Opcode::Phi).s32().Inputs(7U, 9U);
+            INST(17U, Opcode::SaveState).Inputs(13U).SrcVregs({2U}).SetFlag(inst_flags::NO_DCE);
             INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
@@ -5824,6 +5826,7 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimize)
 
         BASIC_BLOCK(2U, 3U)
         {
+            INST(10U, Opcode::SaveState).Inputs(0U).SrcVregs({0U}).SetFlag(inst_flags::NO_DCE);
             INST(4U, Opcode::SaveStateDeoptimize).Inputs(0U, 0U).SrcVregs({0U, 1U});
         }
         BASIC_BLOCK(3U, 5U, 4U)
@@ -5838,6 +5841,7 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimize)
         }
         BASIC_BLOCK(5U, -1L)
         {
+            INST(9U, Opcode::SaveState).Inputs(3U).SrcVregs({1U}).SetFlag(inst_flags::NO_DCE);
             INST(8U, Opcode::Return).u32().Inputs(3U);
         }
     }
@@ -5863,6 +5867,7 @@ TEST_F(IrBuilderTest, InfiniteLoop)
         CONSTANT(1U, 1U);
         BASIC_BLOCK(3U, 2U)
         {
+            INST(5U, Opcode::SaveState).Inputs(0U).SrcVregs({0U}).SetFlag(inst_flags::NO_DCE);
             INST(4U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
         }
         BASIC_BLOCK(2U, 2U)
@@ -5913,6 +5918,7 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
         BASIC_BLOCK(10U, 3U)
         {
             INST(12U, Opcode::Phi).s32().Inputs({{2U, 20U}, {11U, 0U}});
+            INST(13U, Opcode::SaveState).Inputs(0U, 12U).SrcVregs({0U, 1U}).SetFlag(inst_flags::NO_DCE);
             INST(4U, Opcode::SaveStateDeoptimize).Inputs(0U, 12U).SrcVregs({0U, 1U});
         }
         BASIC_BLOCK(3U, 5U, 4U)
@@ -5927,6 +5933,7 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
         }
         BASIC_BLOCK(5U, -1L)
         {
+            INST(9U, Opcode::SaveState).Inputs(3U).SrcVregs({1U}).SetFlag(inst_flags::NO_DCE);
             INST(8U, Opcode::Return).u32().Inputs(3U);
         }
     }
@@ -5958,6 +5965,7 @@ TEST_F(IrBuilderTest, TestEmptyLoop)
         CONSTANT(1U, 0U);
         BASIC_BLOCK(2U, 3U)
         {
+            INST(7U, Opcode::SaveState).SetFlag(inst_flags::NO_DCE);
             INST(2U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
         }
         BASIC_BLOCK(3U, 3U, 4U)
@@ -5967,6 +5975,7 @@ TEST_F(IrBuilderTest, TestEmptyLoop)
         }
         BASIC_BLOCK(4U, -1L)
         {
+            INST(6U, Opcode::SaveState).Inputs(0U).SrcVregs({0U}).SetFlag(inst_flags::NO_DCE);
             INST(5U, Opcode::Return).s32().Inputs(1U);
         }
     }
@@ -6207,6 +6216,7 @@ TEST_F(IrBuilderTest, InfiniteLoopInsideTryBlock)
 
         BASIC_BLOCK(2U, 4U)
         {
+            INST(17U, Opcode::SaveState).SetFlag(inst_flags::NO_DCE);
             INST(6U, Opcode::SaveStateDeoptimize).Inputs(7U, 7U).SrcVregs({0U, 2U});
         }
         BASIC_BLOCK(4U, 3U, 19U)  // try_begin, loop
@@ -6224,6 +6234,7 @@ TEST_F(IrBuilderTest, InfiniteLoopInsideTryBlock)
         BASIC_BLOCK(19U, 9U)
         {
             INST(3U, Opcode::CatchPhi).b().Inputs(9U);
+            INST(16U, Opcode::SaveState).Inputs(3U).SrcVregs({2U}).SetFlag(inst_flags::NO_DCE);
         }
         BASIC_BLOCK(9U, -1L)  // catch
         {
