@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ namespace ark::mem {
 
 uint32_t Region::GetAllocatedBytes() const
 {
-    if (!IsTLAB()) {
+    if (!IsTLAB() || IsMixedTLAB()) {
         return top_ - begin_;
     }
     uint32_t allocatedBytes = 0;
@@ -56,6 +56,9 @@ bool Region::IsInAllocRange(const ObjectHeader *object) const
                 break;
             }
         }
+        if (IsMixedTLAB() && !inRange) {
+            inRange = (ToUintPtr(object) >= ToUintPtr(tlabVector_->back()->GetEndAddr()) && ToUintPtr(object) < top_);
+        }
     }
     return inRange;
 }
@@ -86,6 +89,7 @@ void Region::CreateTLABSupport()
 size_t Region::GetRemainingSizeForTLABs() const
 {
     ASSERT(IsTLAB());
+    ASSERT(!IsMixedTLAB());
     // TLABs are stored one by one.
     uintptr_t lastTlabEndByte = tlabVector_->empty() ? Top() : ToUintPtr(tlabVector_->back()->GetEndAddr());
     ASSERT((lastTlabEndByte <= End()) && (lastTlabEndByte >= Top()));
@@ -95,6 +99,7 @@ size_t Region::GetRemainingSizeForTLABs() const
 TLAB *Region::CreateTLAB(size_t size)
 {
     ASSERT(IsTLAB());
+    ASSERT(!IsMixedTLAB());
     ASSERT(Begin() != 0);
     ASSERT(Top() == Begin());
     size_t remainingSize = GetRemainingSizeForTLABs();
@@ -413,6 +418,10 @@ void RegionSpace::PromoteYoungRegion(Region *region)
 {
     ASSERT(region->GetSpace() == this);
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
+    if (region->IsTLAB()) {
+        region->AddFlag(RegionFlag::IS_MIXEDTLAB);
+        region->SetTop(ToUintPtr(region->GetLastTLAB()->GetEndAddr()));
+    }
     regionPool_->PromoteYoungRegion(region);
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
     // on other reads or writes

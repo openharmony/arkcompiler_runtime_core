@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,9 +66,10 @@ String *String::CreateFromString(String *str, const LanguageContext &ctx, PandaV
 
 /* static */
 String *String::CreateFromMUtf8(const uint8_t *mutf8Data, size_t mutf8Length, uint32_t utf16Length,
-                                bool canBeCompressed, const LanguageContext &ctx, PandaVM *vm, bool movable)
+                                bool canBeCompressed, const LanguageContext &ctx, PandaVM *vm, bool movable,
+                                bool pinned)
 {
-    auto string = AllocStringObject(utf16Length, canBeCompressed, ctx, vm, movable);
+    auto string = AllocStringObject(utf16Length, canBeCompressed, ctx, vm, movable, pinned);
     if (string == nullptr) {
         return nullptr;
     }
@@ -89,53 +90,56 @@ String *String::CreateFromMUtf8(const uint8_t *mutf8Data, size_t mutf8Length, ui
 
 /* static */
 String *String::CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t utf16Length, const LanguageContext &ctx, PandaVM *vm,
-                                bool movable)
+                                bool movable, bool pinned)
 {
     bool canBeCompressed = CanBeCompressedMUtf8(mutf8Data);
-    return CreateFromMUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), utf16Length, canBeCompressed, ctx, vm, movable);
+    return CreateFromMUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), utf16Length, canBeCompressed, ctx, vm, movable,
+                           pinned);
 }
 
 /* static */
 String *String::CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t utf16Length, bool canBeCompressed,
-                                const LanguageContext &ctx, PandaVM *vm, bool movable)
+                                const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned)
 {
-    return CreateFromMUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), utf16Length, canBeCompressed, ctx, vm, movable);
+    return CreateFromMUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), utf16Length, canBeCompressed, ctx, vm, movable,
+                           pinned);
 }
 
 /* static */
-String *String::CreateFromMUtf8(const uint8_t *mutf8Data, const LanguageContext &ctx, PandaVM *vm, bool movable)
+String *String::CreateFromMUtf8(const uint8_t *mutf8Data, const LanguageContext &ctx, PandaVM *vm, bool movable,
+                                bool pinned)
 {
     size_t mutf8Length = utf::Mutf8Size(mutf8Data);
     size_t utf16Length = utf::MUtf8ToUtf16Size(mutf8Data, mutf8Length);
     bool canBeCompressed = CanBeCompressedMUtf8(mutf8Data);
-    return CreateFromMUtf8(mutf8Data, mutf8Length, utf16Length, canBeCompressed, ctx, vm, movable);
+    return CreateFromMUtf8(mutf8Data, mutf8Length, utf16Length, canBeCompressed, ctx, vm, movable, pinned);
 }
 
 /* static */
 String *String::CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Length, const LanguageContext &ctx, PandaVM *vm,
-                               bool movable)
+                               bool movable, bool pinned)
 {
     coretypes::String *s = nullptr;
     auto utf16Length = utf::Utf8ToUtf16Size(utf8Data, utf8Length);
     if (CanBeCompressedMUtf8(utf8Data, utf8Length)) {
         // ascii string have equal representation in utf8 and mutf8 formats
-        s = coretypes::String::CreateFromMUtf8(utf8Data, utf8Length, utf16Length, true, ctx, vm, movable);
+        s = coretypes::String::CreateFromMUtf8(utf8Data, utf8Length, utf16Length, true, ctx, vm, movable, pinned);
     } else {
         PandaVector<uint16_t> tmpBuffer(utf16Length);
         [[maybe_unused]] auto len =
             utf::ConvertRegionUtf8ToUtf16(utf8Data, tmpBuffer.data(), utf8Length, utf16Length, 0);
         ASSERT(len == utf16Length);
-        s = coretypes::String::CreateFromUtf16(tmpBuffer.data(), utf16Length, ctx, vm, movable);
+        s = coretypes::String::CreateFromUtf16(tmpBuffer.data(), utf16Length, ctx, vm, movable, pinned);
     }
     return s;
 }
 
 /* static */
 String *String::CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length, const LanguageContext &ctx,
-                                PandaVM *vm, bool movable)
+                                PandaVM *vm, bool movable, bool pinned)
 {
     bool canBeCompressed = CanBeCompressed(utf16Data, utf16Length);
-    auto string = AllocStringObject(utf16Length, canBeCompressed, ctx, vm, movable);
+    auto string = AllocStringObject(utf16Length, canBeCompressed, ctx, vm, movable, pinned);
     if (string == nullptr) {
         return nullptr;
     }
@@ -1016,7 +1020,8 @@ String *String::Concat(String *string1, String *string2, const LanguageContext &
 }
 
 /* static */
-String *String::AllocStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm, bool movable)
+String *String::AllocStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm, bool movable,
+                                  bool pinned)
 {
     ASSERT(vm != nullptr);
     auto *thread = ManagedThread::GetCurrent();
@@ -1024,8 +1029,9 @@ String *String::AllocStringObject(size_t length, bool compressed, const Language
     size_t size = compressed ? String::ComputeSizeMUtf8(length) : String::ComputeSizeUtf16(length);
     auto string =
         movable
-            ? reinterpret_cast<String *>(vm->GetHeapManager()->AllocateObject(
-                  stringClass, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT))
+            ? reinterpret_cast<String *>(
+                  vm->GetHeapManager()->AllocateObject(stringClass, size, DEFAULT_ALIGNMENT, thread,
+                                                       mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT, pinned))
             : reinterpret_cast<String *>(vm->GetHeapManager()->AllocateNonMovableObject(
                   stringClass, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT));
     if (string != nullptr) {

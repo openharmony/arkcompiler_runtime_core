@@ -51,7 +51,8 @@ public:
 
     [[nodiscard]] PANDA_PUBLIC_API ObjectHeader *AllocateObject(
         BaseClass *cls, size_t size, Alignment align = DEFAULT_ALIGNMENT, ManagedThread *thread = nullptr,
-        ObjectAllocatorBase::ObjMemInitPolicy objInitType = ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT);
+        ObjectAllocatorBase::ObjMemInitPolicy objInitType = ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT,
+        bool pinned = false);
 
     template <bool IS_FIRST_CLASS_CLASS = false>
     [[nodiscard]] ObjectHeader *AllocateNonMovableObject(
@@ -240,12 +241,12 @@ private:
     void TriggerGCIfNeeded();
 
     void *TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread,
-                        ObjectAllocatorBase::ObjMemInitPolicy objInitType);
+                        ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned = false);
 
     void *AllocByTLAB(size_t size, ManagedThread *thread);
 
     void *AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
-                                  ObjectAllocatorBase::ObjMemInitPolicy objInitType);
+                                  ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned = false);
 
     ObjectAllocatorPtr GetObjectAllocator();
 

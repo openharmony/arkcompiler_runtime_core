@@ -47,8 +47,8 @@ public:
 
     ~ObjectAllocatorG1() final = default;
 
-    void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                   ObjMemInitPolicy objInit) final;
+    void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread, ObjMemInitPolicy objInit,
+                   bool pinned) final;
 
     void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                              ObjMemInitPolicy objInit) final;
@@ -175,6 +175,10 @@ public:
 
     void CompactYoungRegions(const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveChecker);
 
+    void AddPromotedRegionToQueueIfPinned(Region *region)
+    {
+        objectAllocator_->AddPromotedRegionToQueueIfPinned(region);
+    }
     template <RegionFlag REGION_TYPE, bool USE_MARKBITMAP = false>
     void CompactRegion(Region *region, const GCObjectVisitor &deathChecker, const ObjectVisitorEx &moveChecker)
     {

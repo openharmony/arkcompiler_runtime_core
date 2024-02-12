@@ -97,7 +97,7 @@ bool HeapManager::Finalize()
 }
 
 ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment align, ManagedThread *thread,
-                                          ObjectAllocatorBase::ObjMemInitPolicy objInitType)
+                                          ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned)
 {
     ASSERT(size >= ObjectHeader::ObjectHeaderSize());
     ASSERT(GetGC()->IsMutatorAllowed());
@@ -107,9 +107,9 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
         thread = ManagedThread::GetCurrent();
         ASSERT(thread != nullptr);
     }
-    void *mem = AllocateMemoryForObject(size, align, thread, objInitType);
+    void *mem = AllocateMemoryForObject(size, align, thread, objInitType, pinned);
     if (UNLIKELY(mem == nullptr)) {
-        mem = TryGCAndAlloc(size, align, thread, objInitType);
+        mem = TryGCAndAlloc(size, align, thread, objInitType, pinned);
         if (UNLIKELY(mem == nullptr)) {
             ThrowOutOfMemoryError("AllocateObject failed");
             return nullptr;
@@ -130,7 +130,7 @@ ObjectHeader *HeapManager::AllocateObject(BaseClass *cls, size_t size, Alignment
 }
 
 void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *thread,
-                                 ObjectAllocatorBase::ObjMemInitPolicy objInitType)
+                                 ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned)
 {
     // do not try many times in case of OOM scenarios.
     constexpr size_t ALLOC_RETRY = 4;
@@ -149,7 +149,7 @@ void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *th
             cause = GCTaskCause::YOUNG_GC_CAUSE;
         }
         GetGC()->WaitForGCInManaged(GCTask(cause));
-        mem = AllocateMemoryForObject(size, align, thread, objInitType);
+        mem = AllocateMemoryForObject(size, align, thread, objInitType, pinned);
         if (mem != nullptr) {
             // we could set OOM in gc, but we need to clear it if next gc was successfully and we allocated memory
             thread->ClearException();
@@ -167,10 +167,10 @@ void *HeapManager::TryGCAndAlloc(size_t size, Alignment align, ManagedThread *th
 }
 
 void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
-                                           ObjectAllocatorBase::ObjMemInitPolicy objInitType)
+                                           ObjectAllocatorBase::ObjMemInitPolicy objInitType, bool pinned)
 {
     void *mem = nullptr;
-    if (UseTLABForAllocations() && size <= GetTLABMaxAllocSize()) {
+    if (UseTLABForAllocations() && size <= GetTLABMaxAllocSize() && !pinned) {
         ASSERT(thread != nullptr);
         ASSERT(GetGC()->IsTLABsSupported());
         // Try to allocate an object via TLAB
@@ -190,7 +190,7 @@ void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, Managed
         }
     }
     if (mem == nullptr) {  // if mem == nullptr, try to use common allocate scenario
-        mem = objectAllocator_.AsObjectAllocator()->Allocate(size, align, thread, objInitType);
+        mem = objectAllocator_.AsObjectAllocator()->Allocate(size, align, thread, objInitType, pinned);
     }
     return mem;
 }

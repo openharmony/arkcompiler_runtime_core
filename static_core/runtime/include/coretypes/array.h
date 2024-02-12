@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,13 +56,16 @@ public:
     }
 
     PANDA_PUBLIC_API static Array *Create(ark::Class *arrayClass, const uint8_t *data, ArraySizeT length,
-                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT);
+                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT,
+                                          bool pinned = false);
 
     PANDA_PUBLIC_API static Array *Create(ark::Class *arrayClass, ArraySizeT length,
-                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT);
+                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT,
+                                          bool pinned = false);
 
     PANDA_PUBLIC_API static Array *Create(DynClass *dynarrayclass, ArraySizeT length,
-                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT);
+                                          ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT,
+                                          bool pinned = false);
 
     static Array *CreateTagged(const PandaVM *vm, ark::BaseClass *arrayClass, ArraySizeT length,
                                ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT,

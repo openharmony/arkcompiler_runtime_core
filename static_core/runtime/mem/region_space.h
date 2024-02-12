@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,9 @@ enum RegionFlag {
     IS_COLLECTION_SET = 1U << 6U,
     IS_FREE = 1U << 7U,
     IS_PROMOTED = 1U << 8U,
-    IS_RESERVED = 1U << 9U
+    IS_RESERVED = 1U << 9U,
+    IS_PINNED = 1U << 10U,
+    IS_MIXEDTLAB = 1U << 11U
 };
 
 constexpr bool IsYoungRegionFlag(RegionFlag flag)
@@ -94,7 +96,7 @@ public:
 
     void SetTop(uintptr_t newTop)
     {
-        ASSERT(!IsTLAB());
+        ASSERT(!IsTLAB() || IsMixedTLAB());
         top_ = newTop;
     }
 
@@ -217,8 +219,13 @@ public:
 
     bool IsTLAB() const
     {
-        ASSERT((tlabVector_ == nullptr) || (top_ == begin_));
+        ASSERT((tlabVector_ == nullptr) || (top_ == begin_) || IsMixedTLAB());
         return tlabVector_ != nullptr;
+    }
+
+    bool IsMixedTLAB() const
+    {
+        return HasFlag(RegionFlag::IS_MIXEDTLAB);
     }
 
     size_t Size() const
@@ -294,6 +301,13 @@ public:
 
     size_t GetRemainingSizeForTLABs() const;
     TLAB *CreateTLAB(size_t size);
+
+    TLAB *GetLastTLAB() const
+    {
+        ASSERT(tlabVector_ != nullptr);
+        ASSERT(!tlabVector_->empty());
+        return tlabVector_->back();
+    };
 
     MarkBitmap *CreateMarkBitmap();
     MarkBitmap *CreateLiveBitmap();

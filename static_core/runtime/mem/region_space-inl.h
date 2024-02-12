@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ void *Region::Alloc(size_t alignedSize)
 {
     RegionAllocCheck alloc(this);
     ASSERT(AlignUp(alignedSize, DEFAULT_ALIGNMENT_IN_BYTES) == alignedSize);
-    ASSERT(!IsTLAB());
+    ASSERT(!IsTLAB() || IsMixedTLAB());
     uintptr_t oldTop;
     uintptr_t newTop;
     if (ATOMIC) {
@@ -106,6 +106,16 @@ void Region::IterateOverObjects(const ObjectVisitor &visitor)
     } else {
         for (auto i : *tlabVector_) {
             i->IterateOverObjects(visitor);
+        }
+        if (IsMixedTLAB()) {
+            auto curPtr = ToUintPtr(GetLastTLAB()->GetEndAddr());
+            auto endPtr = Top();
+            while (curPtr < endPtr) {
+                auto *objectHeader = reinterpret_cast<ObjectHeader *>(curPtr);
+                size_t objectSize = GetObjectSize(objectHeader);
+                visitor(objectHeader);
+                curPtr = AlignUp(curPtr + objectSize, DEFAULT_ALIGNMENT_IN_BYTES);
+            }
         }
     }
 }

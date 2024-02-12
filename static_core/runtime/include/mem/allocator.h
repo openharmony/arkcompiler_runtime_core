@@ -344,7 +344,7 @@ public:
     }
 
     [[nodiscard]] virtual void *Allocate(size_t size, Alignment align, ark::ManagedThread *thread,
-                                         ObjMemInitPolicy objInit) = 0;
+                                         ObjMemInitPolicy objInit, bool pinned) = 0;
     [[nodiscard]] virtual void *AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
                                                    ObjMemInitPolicy objInit) = 0;
 
@@ -640,7 +640,7 @@ public:
     ~ObjectAllocatorNoGen() final;
 
     [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                                 ObjMemInitPolicy objInit) final;
+                                 ObjMemInitPolicy objInit, bool pinned) final;
 
     [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
                                            ObjMemInitPolicy objInit) final;
@@ -816,7 +816,7 @@ public:
     ~ObjectAllocatorGen() final;
 
     [[nodiscard]] void *Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                                 ObjMemInitPolicy objInit) final;
+                                 ObjMemInitPolicy objInit, bool pinned) final;
 
     [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
                                            ObjMemInitPolicy objInit) final;

@@ -111,7 +111,7 @@ ObjectAllocatorNoGen<MT_MODE>::~ObjectAllocatorNoGen()
 
 template <MTModeT MT_MODE>
 void *ObjectAllocatorNoGen<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                                              ObjMemInitPolicy objInit)
+                                              ObjMemInitPolicy objInit, [[maybe_unused]] bool pinned)
 {
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
@@ -142,7 +142,7 @@ void *ObjectAllocatorNoGen<MT_MODE>::AllocateNonMovable(size_t size, Alignment a
         mem = pygoteSpaceAllocator_->Alloc(size, align);
     } else {
         // Without generations - no compaction now, so all allocations are non-movable
-        mem = Allocate(size, align, thread, objInit);
+        mem = Allocate(size, align, thread, objInit, false);
     }
     if (objInit == ObjMemInitPolicy::REQUIRE_INIT) {
         ObjectMemoryInit(mem, size);
@@ -266,7 +266,7 @@ bool ObjectAllocatorNoGen<MT_MODE>::IsLive(const ObjectHeader *obj)
 
 template <MTModeT MT_MODE>
 void *ObjectAllocatorGen<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                                            ObjMemInitPolicy objInit)
+                                            ObjMemInitPolicy objInit, [[maybe_unused]] bool pinned)
 {
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
