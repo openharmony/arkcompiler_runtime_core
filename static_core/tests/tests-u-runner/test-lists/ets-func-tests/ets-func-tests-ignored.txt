@@ -569,6 +569,10 @@ spec/expressions/compound_assignment_03_simple_assign_short_mult_double.ets
 spec/expressions/compound_assignment_03_simple_assign_short_mult_float.ets
 spec/expressions/compound_assignment_03_simple_assign_short_mult_long.ets
 spec/expressions/compound_assignment_03_simple_assign_short_mult_number.ets
+### Issue 15726
+spec/07.expressions/05.array_literal/01.type_inference_from_context/issue14062_8.ets
+### Issue 15723
+spec/07.expressions/17.instanceof_expression/issue15723.ets
 ###
 
 ### Issue 14536: usage of === with primitive types
