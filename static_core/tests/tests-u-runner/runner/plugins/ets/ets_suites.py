@@ -24,3 +24,4 @@ class EtsSuites(Enum):
     RUNTIME = "ets-runtime"
     GCSTRESS = "ets-gc-stress"
     ESCHECKED = "ets-es-checked"
+    CUSTOM = "ets-custom"

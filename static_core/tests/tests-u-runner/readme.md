@@ -298,3 +298,35 @@ sudo n install 21.4.0
 cd $PROJECT/tests/tests-u-runner/tools/generate-es-checked
 npm install
 ```
+
+## Custom suite
+If you want to run arbitrary set of ETS tests with URunner you can use a custom suite like (minimal configuration):
+
+`$PROJECT/tests/tests-u-runner/runner.sh $PROJECT --ets-custom --build-dir $BUILD --custom-suite SUITE_NAME --custom-test-root TEST_ROOT --custom-list-root LIST_ROOT`
+
+where:
+- SUITE_NAME - a tag used to name the suite
+- TEST_ROOT - a path to the folder with tests (*.ets files or templates)
+- LIST_ROOT - a path to the folder with ignored/excluded lists. Note: SUITE_NAME is used as a <test-suite-name> in the name of the test list (see #Test lists for details)
+
+In yaml configuration file these options can be specified as:
+```yaml
+  custom:
+      suite-name: SUITE_NAME
+      test-root: TEST_ROOT
+      list-root: LIST_ROOT
+```
+
+### Custom generator
+It is possible to specify a custom generator. It should be executable file accepting following parameters:
+
+`custom_generator --source SOURCE_PATH --target TARGET_PATH <other-options>`
+
+Here:
+- SOURCE_PATH - path where template files are located. URunner fills this parameter with TEST_ROOT specified above.
+- TARGET_PATH - path where generated tests should be put. URunner fills this parameter with value from --work-dir option ($WorkDir/gen)
+- other-options - other options that might be required by the generator (optional)
+
+To specify generator and its options use:
+- `--custom-generator PATH`/`custom.generator: PATH` - path to the executable file-generator
+- `--custom-generator-option`/`custom.generator-options: [OPTIONS]` - multiple value option (can be specified several times)

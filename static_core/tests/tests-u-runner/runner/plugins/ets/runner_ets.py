@@ -72,7 +72,7 @@ class RunnerETS(RunnerFileBased):
         Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
-        suite_name = self.__ets_suite_name if self.__ets_suite_name != "ets_runtime" else None
+        suite_name = self.__ets_suite_name if self.__ets_suite_name != "ets-custom" else self.config.custom.suite_name
         self.collect_excluded_test_lists(test_name=suite_name)
         self.collect_ignored_test_lists(test_name=suite_name)
 
@@ -95,6 +95,8 @@ class RunnerETS(RunnerFileBased):
             name = EtsSuites.GCSTRESS.value
         elif 'ets_es_checked' in test_suites:
             name = EtsSuites.ESCHECKED.value
+        elif 'ets_custom' in test_suites:
+            name = EtsSuites.CUSTOM.value
         else:
             Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name

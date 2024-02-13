@@ -104,6 +104,8 @@ def generate(name: str, url: str, revision: str, generated_root: Path, *,
 
 def copy(source_path: Union[Path, str], dest_path: Union[Path, str], remove_if_exist: bool = True) -> None:
     try:
+        if source_path == dest_path:
+            return
         if path.exists(dest_path) and remove_if_exist:
             shutil.rmtree(dest_path)
         shutil.copytree(source_path, dest_path, dirs_exist_ok=not remove_if_exist)
