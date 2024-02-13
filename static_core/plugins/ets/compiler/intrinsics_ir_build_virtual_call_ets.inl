@@ -27,6 +27,14 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET_LENGTH: {
     BuildStringLengthIntrinsic(bcInst, accRead);
     break;
 }
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_LENGTH: {
+    BuildStringLengthIntrinsic(bcInst, accRead);
+    auto input = GetDefinitionAcc();
+    auto inst = graph_->CreateInstCast(DataType::FLOAT64, GetPc(bcInst->GetAddress()), input, DataType::INT32);
+    UpdateDefinitionAcc(inst);
+    AddInstruction(inst);
+    break;
+}
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_EMPTY: {
     BuildStringIsEmptyIntrinsic(bcInst, accRead);
     break;

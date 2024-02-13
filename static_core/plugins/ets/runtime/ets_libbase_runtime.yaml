@@ -589,6 +589,17 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStringGetLength
     clear_flags: [ ]
 
+  - name: StdCoreStringLength
+    space: ets
+    class_name: std.core.String
+    method_name: <get>length
+    static: false
+    signature:
+      ret: f64
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreStringLength
+    clear_flags: [ ]
+
   - name: StdCoreStringIsEmpty
     space: ets
     class_name: std.core.String

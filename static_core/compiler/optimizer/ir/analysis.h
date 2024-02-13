@@ -34,6 +34,12 @@ bool HasOsrEntryBetween(T *dominate, T *current);
 bool HasTryBlockBetween(Inst *dominateInst, Inst *inst);
 bool IsSuitableForImplicitNullCheck(const Inst *inst);
 bool IsInstNotNull(const Inst *inst);
+bool CheckFcmpInputs(Inst *input0, Inst *input1);
+int64_t GetPowerOfTwo(uint64_t n);
+bool CanRemoveOverflowCheck(Inst *inst, Marker marker);
+bool IsCastAllowedInBytecode(const Inst *inst);
+bool IsInputTypeMismatch(Inst *inst, int32_t inputIndex, Arch arch);
+bool ApplyForCastJoin(Inst *cast, Inst *input, Inst *origInst, Arch arch);
 SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst);
 bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Inst *startFrom, Marker visited,
                     Inst **failedSs = nullptr);

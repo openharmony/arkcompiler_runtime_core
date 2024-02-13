@@ -131,10 +131,6 @@ private:
     // This function check that we can merge two Phi instructions in one basic block.
     static bool IsPhiUnionPossible(PhiInst *phi1, PhiInst *phi2);
 
-    // Get power of 2
-    // if n not power of 2 return -1;
-    static int64_t GetPowerOfTwo(uint64_t n);
-
     // Create new instruction instead of current inst
     static Inst *CreateAndInsertInst(Opcode newOpc, Inst *currInst, Inst *input0, Inst *input1 = nullptr);
 

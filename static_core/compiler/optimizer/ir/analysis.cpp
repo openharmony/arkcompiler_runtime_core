@@ -220,6 +220,132 @@ bool CanObjectPairAccessBeImplicit(T *objpair, const Graph *graph, size_t maxoff
     return GetObjectOffset(graph, objpair->GetObjectType(), objpair->GetObjField1(), objpair->GetTypeId1()) < maxoffset;
 }
 
+bool CheckFcmpInputs(Inst *input0, Inst *input1)
+{
+    if (input0->GetOpcode() != Opcode::Cast || input1->GetOpcode() != Opcode::Cast) {
+        return false;
+    }
+    if (input0->CastToCast()->GetOperandsType() != DataType::INT32 ||
+        input1->CastToCast()->GetOperandsType() != DataType::INT32) {
+        return false;
+    }
+    return true;
+}
+
+// Get power of 2
+// if n not power of 2 return -1;
+int64_t GetPowerOfTwo(uint64_t n)
+{
+    int64_t result = -1;
+    if (n != 0 && (n & (n - 1)) == 0) {
+        for (; n != 0; n >>= 1U) {
+            ++result;
+        }
+    }
+    return result;
+}
+
+bool IsInputTypeMismatch(Inst *inst, int32_t inputIndex, Arch arch)
+{
+    auto inputInst = inst->GetInput(inputIndex).GetInst();
+    auto inputTypeSize = DataType::GetTypeSize(inputInst->GetType(), arch);
+    auto instInputSize = DataType::GetTypeSize(inst->GetInputType(inputIndex), arch);
+    return (inputTypeSize > instInputSize) ||
+           (inputTypeSize == instInputSize &&
+            DataType::IsTypeSigned(inputInst->GetType()) != DataType::IsTypeSigned(inst->GetInputType(inputIndex)));
+}
+
+bool ApplyForCastJoin(Inst *cast, Inst *input, Inst *origInst, Arch arch)
+{
+    auto inputTypeMismatch = IsInputTypeMismatch(cast, 0, arch);
+#ifndef NDEBUG
+    ASSERT(!inputTypeMismatch);
+#else
+    if (inputTypeMismatch) {
+        return false;
+    }
+#endif
+    auto inputType = input->GetType();
+    auto inputTypeSize = DataType::GetTypeSize(inputType, arch);
+    auto currType = cast->GetType();
+    auto origType = origInst->GetType();
+    return DataType::GetCommonType(inputType) == DataType::INT64 &&
+           DataType::GetCommonType(currType) == DataType::INT64 &&
+           DataType::GetCommonType(origType) == DataType::INT64 &&
+           inputTypeSize > DataType::GetTypeSize(currType, arch) &&
+           DataType::GetTypeSize(origType, arch) > inputTypeSize;
+}
+
+bool IsCastAllowedInBytecode(const Inst *inst)
+{
+    auto type = inst->GetType();
+    switch (type) {
+        case DataType::Type::INT32:
+        case DataType::Type::INT64:
+        case DataType::Type::FLOAT32:
+        case DataType::Type::FLOAT64:
+            return true;
+        default:
+            return false;
+    }
+}
+
+// OverflowCheck can be removed if all its indirect users truncate input to int32
+bool CanRemoveOverflowCheck(Inst *inst, Marker marker)
+{
+    if (inst->SetMarker(marker)) {
+        return true;
+    }
+    if (inst->GetOpcode() == Opcode::AnyTypeCheck) {
+        auto anyTypeCheck = inst->CastToAnyTypeCheck();
+        auto graph = inst->GetBasicBlock()->GetGraph();
+        auto language = graph->GetRuntime()->GetMethodSourceLanguage(graph->GetMethod());
+        auto intAnyType = NumericDataTypeToAnyType(DataType::INT32, language);
+        // Bail out if this AnyTypeCheck can be triggered
+        if (IsAnyTypeCanBeSubtypeOf(language, anyTypeCheck->GetAnyType(), intAnyType,
+                                    anyTypeCheck->GetAllowedInputType()) != true) {
+            return false;
+        }
+    }
+    switch (inst->GetOpcode()) {
+        case Opcode::Shl:
+        case Opcode::Shr:
+        case Opcode::AShr:
+        case Opcode::And:
+        case Opcode::Or:
+        case Opcode::Xor:
+            return true;
+        // Next 3 opcodes should be removed in Peepholes and ChecksElimination, but Cast(f64).i32 or Or(x, 0)
+        // may be optimized out by that moment
+        case Opcode::CastAnyTypeValue:
+        case Opcode::CastValueToAnyType:
+        case Opcode::AnyTypeCheck:
+
+        case Opcode::AddOverflowCheck:
+        case Opcode::SubOverflowCheck:
+        case Opcode::NegOverflowAndZeroCheck:
+        case Opcode::Phi:
+        // We check SaveState because if some of its users cannot be removed, result of OverflowCheck
+        // may be used in interpreter after deoptimization
+        case Opcode::SaveState:
+            for (auto &user : inst->GetUsers()) {
+                auto userInst = user.GetInst();
+                bool canRemove;
+                if (DataType::IsFloatType(inst->GetType())) {
+                    canRemove = userInst->GetOpcode() == Opcode::Cast && userInst->CastToCast()->IsDynamicCast();
+                } else {
+                    canRemove = CanRemoveOverflowCheck(userInst, marker);
+                }
+                if (!canRemove) {
+                    return false;
+                }
+            }
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool IsSuitableForImplicitNullCheck(const Inst *inst)
 {
     auto graph = inst->GetBasicBlock()->GetGraph();

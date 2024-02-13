@@ -1167,51 +1167,6 @@ void Peepholes::VisitCompareAnyType(GraphVisitor *v, Inst *inst)
     }
 }
 
-static bool IsInputTypeMismatch(Inst *inst, int32_t inputIndex, Arch arch)
-{
-    auto inputInst = inst->GetInput(inputIndex).GetInst();
-    auto inputTypeSize = DataType::GetTypeSize(inputInst->GetType(), arch);
-    auto instInputSize = DataType::GetTypeSize(inst->GetInputType(inputIndex), arch);
-    return (inputTypeSize > instInputSize) ||
-           (inputTypeSize == instInputSize &&
-            DataType::IsTypeSigned(inputInst->GetType()) != DataType::IsTypeSigned(inst->GetInputType(inputIndex)));
-}
-
-static bool ApplyForCastJoin(Inst *cast, Inst *input, Inst *origInst, Arch arch)
-{
-    auto inputTypeMismatch = IsInputTypeMismatch(cast, 0, arch);
-#ifndef NDEBUG
-    ASSERT(!inputTypeMismatch);
-#else
-    if (inputTypeMismatch) {
-        return false;
-    }
-#endif
-    auto inputType = input->GetType();
-    auto inputTypeSize = DataType::GetTypeSize(inputType, arch);
-    auto currType = cast->GetType();
-    auto origType = origInst->GetType();
-    return DataType::GetCommonType(inputType) == DataType::INT64 &&
-           DataType::GetCommonType(currType) == DataType::INT64 &&
-           DataType::GetCommonType(origType) == DataType::INT64 &&
-           inputTypeSize > DataType::GetTypeSize(currType, arch) &&
-           DataType::GetTypeSize(origType, arch) > inputTypeSize;
-}
-
-static inline bool IsCastAllowedInBytecode(const Inst *inst)
-{
-    auto type = inst->GetType();
-    switch (type) {
-        case DataType::Type::INT32:
-        case DataType::Type::INT64:
-        case DataType::Type::FLOAT32:
-        case DataType::Type::FLOAT64:
-            return true;
-        default:
-            return false;
-    }
-}
-
 void Peepholes::VisitCastCase1([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     // case 1:
@@ -1582,62 +1537,6 @@ void Peepholes::VisitStoreStatic([[maybe_unused]] GraphVisitor *v, Inst *inst)
     EliminateInstPrecedingStore<StoreStaticInst>(v, inst);
 }
 
-// OverflowCheck can be removed if all its indirect users truncate input to int32
-static bool CanRemoveOverflowCheck(Inst *inst, Marker marker)
-{
-    if (inst->SetMarker(marker)) {
-        return true;
-    }
-    if (inst->GetOpcode() == Opcode::AnyTypeCheck) {
-        auto anyTypeCheck = inst->CastToAnyTypeCheck();
-        auto graph = inst->GetBasicBlock()->GetGraph();
-        auto language = graph->GetRuntime()->GetMethodSourceLanguage(graph->GetMethod());
-        auto intAnyType = NumericDataTypeToAnyType(DataType::INT32, language);
-        // Bail out if this AnyTypeCheck can be triggered
-        if (IsAnyTypeCanBeSubtypeOf(language, anyTypeCheck->GetAnyType(), intAnyType,
-                                    anyTypeCheck->GetAllowedInputType()) != true) {
-            return false;
-        }
-    }
-    switch (inst->GetOpcode()) {
-        case Opcode::Shl:
-        case Opcode::Shr:
-        case Opcode::AShr:
-        case Opcode::And:
-        case Opcode::Or:
-        case Opcode::Xor:
-            return true;
-        // Next 3 opcodes should be removed in Peepholes and ChecksElimination, but Cast(f64).i32 or Or(x, 0)
-        // may be optimized out by that moment
-        case Opcode::CastAnyTypeValue:
-        case Opcode::CastValueToAnyType:
-        case Opcode::AnyTypeCheck:
-
-        case Opcode::AddOverflowCheck:
-        case Opcode::SubOverflowCheck:
-        case Opcode::NegOverflowAndZeroCheck:
-        case Opcode::Phi:
-        // We check SaveState because if some of its users cannot be removed, result of OverflowCheck
-        // may be used in interpreter after deoptimization
-        case Opcode::SaveState:
-            for (auto &user : inst->GetUsers()) {
-                auto userInst = user.GetInst();
-                bool canRemove;
-                if (DataType::IsFloatType(inst->GetType())) {
-                    canRemove = userInst->GetOpcode() == Opcode::Cast && userInst->CastToCast()->IsDynamicCast();
-                } else {
-                    canRemove = CanRemoveOverflowCheck(userInst, marker);
-                }
-                if (!canRemove) {
-                    return false;
-                }
-            }
-            return true;
-        default:
-            return false;
-    }
-}
-
 void Peepholes::TryRemoveOverflowCheck(Inst *inst)
 {
     auto block = inst->GetBasicBlock();
@@ -1702,19 +1601,6 @@ bool Peepholes::IsPhiUnionPossible(PhiInst *phi1, PhiInst *phi2)
         }
     }
     return true;
-}
-
-// Get power of 2
-// if n not power of 2 return -1;
-int64_t Peepholes::GetPowerOfTwo(uint64_t n)
-{
-    int64_t result = -1;
-    if (n != 0 && (n & (n - 1)) == 0) {
-        for (; n != 0; n >>= 1U) {
-            ++result;
-        }
-    }
-    return result;
 }
 
 // Create new instruction instead of current inst
@@ -2316,9 +2202,17 @@ bool Peepholes::TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked)
     if (!constInput->IsEqualConstAllTypes(0)) {
         return false;
     }
+    auto input0 = input->GetInput(0).GetInst();
+    auto input1 = input->GetInput(1).GetInst();
     auto cmpOpType = input->CastToCmp()->GetOperandsType();
     if (IsFloatType(cmpOpType)) {
-        return false;
+        ASSERT(compare->GetOperandsType() == DataType::INT32);
+        if (!CheckFcmpInputs(input0, input1)) {
+            return false;
+        }
+        input0 = input0->GetInput(0).GetInst();
+        input1 = input1->GetInput(0).GetInst();
+        cmpOpType = DataType::INT32;
     }
     ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
     if (!IsTypeSigned(cmpOpType)) {
@@ -2326,13 +2220,12 @@ bool Peepholes::TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked)
         // If Cmp operands are unsigned then Compare.CC must be converted to unsigned.
         cc = InverseSignednessConditionCode(cc);
     }
-    if (SkipThisPeepholeInOSR(compare, input->GetInput(0).GetInst()) ||
-        SkipThisPeepholeInOSR(compare, input->GetInput(1).GetInst())) {
+    if (SkipThisPeepholeInOSR(compare, input0) || SkipThisPeepholeInOSR(compare, input1)) {
         *isOsrBlocked = true;
         return true;
     }
-    compare->SetInput(0, input->GetInput(0).GetInst());
-    compare->SetInput(1, input->GetInput(1).GetInst());
+    compare->SetInput(0, input0);
+    compare->SetInput(1, input1);
     compare->SetOperandsType(cmpOpType);
     compare->SetCc(cc);
     return true;
