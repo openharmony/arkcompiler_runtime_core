@@ -1841,8 +1841,7 @@
 17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_15.ets
 #
 
-#15642
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_14.ets
+#15664
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_7.ets
 #
 
