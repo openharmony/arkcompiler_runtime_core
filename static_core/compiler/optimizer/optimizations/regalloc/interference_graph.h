@@ -40,7 +40,7 @@ public:
     static constexpr uint16_t NO_BIAS = 0xffff;
 
     template <typename T>
-    ColorNode(unsigned number, T alloc) : csPointSet_(alloc), number_(number), physical_(), fixed_()
+    ColorNode(unsigned number, T alloc) : csPointSet_(alloc), number_(number)
     {
     }
 
@@ -132,32 +132,50 @@ private:
     float weight_ {};
     uint16_t bias_ = NO_BIAS;  // Bias is a group of nodes for coalescing
     Register color_ = INVALID_REG;
-    uint8_t physical_ : 1;
-    uint8_t fixed_ : 1;
+    bool physical_ {};
+    bool fixed_ {};
 };
 
 class GraphMatrix {
 public:
-    explicit GraphMatrix(ArenaAllocator *alloc) : matrix_(alloc->Adapter()) {}
+    explicit GraphMatrix(ArenaAllocator *alloc) : matrix_(alloc->Adapter()), amatrix_(alloc->Adapter()) {}
     void SetCapacity(unsigned capacity)
     {
         capacity_ = RoundUp(capacity, sizeof(uintptr_t));
         matrix_.clear();
         matrix_.resize(capacity_ * capacity_);
+        amatrix_.clear();
+        amatrix_.resize(capacity_ * capacity_);
     }
 
-    bool AddEdge(unsigned a, unsigned b);
+    bool AddEdge(unsigned a, unsigned b)
+    {
+        auto it = matrix_.begin() + a * capacity_ + b;
+        bool oldVal = (*it != 0U);
+        *it = 1U;
+        auto it1 = matrix_.begin() + b * capacity_ + a;
+        *it1 = 1U;
+        return oldVal;
+    }
+
+    bool AddAffinityEdge(unsigned a, unsigned b)
+    {
+        auto it = amatrix_.begin() + a * capacity_ + b;
+        bool oldVal = (*it != 0U);
+        *it = 1U;
+        auto it1 = amatrix_.begin() + b * capacity_ + a;
+        *it1 = 1U;
+        return oldVal;
+    }
 
     bool HasEdge(unsigned a, unsigned b) const
     {
-        return matrix_[FindEdge(a, b)];
+        return matrix_[a * capacity_ + b] != 0U;
     }
-
-    bool AddAffinityEdge(unsigned a, unsigned b);
 
     bool HasAffinityEdge(unsigned a, unsigned b) const
     {
-        return matrix_[FindAffinityEdge(a, b)];
+        return amatrix_[a * capacity_ + b] != 0U;
     }
 
     unsigned GetCapacity() const noexcept
@@ -166,31 +184,8 @@ public:
     }
 
 private:
-    template <typename T>
-    void OrderNodes(T &a, T &b) const noexcept
-    {
-        ASSERT(a < capacity_);
-        ASSERT(b < capacity_);
-        if (a < b) {
-            std::swap(a, b);
-        }
-    }
-
-    unsigned FindEdge(unsigned a, unsigned b) const
-    {
-        // Placement in lower triangulated adjacency matrix
-        OrderNodes(a, b);
-        return a * capacity_ + b;
-    }
-
-    unsigned FindAffinityEdge(unsigned a, unsigned b) const
-    {
-        // Placement in lower triangulated adjacency matrix
-        OrderNodes(a, b);
-        return b * capacity_ + a;
-    }
-
-    ArenaVector<bool> matrix_;
+    ArenaVector<uint8_t> matrix_;
+    ArenaVector<uint8_t> amatrix_;
     unsigned capacity_ = 0;
 };
 
@@ -303,6 +298,7 @@ public:
         std::bitset<MAX_COLORS> nbrBiasColors;
 
         bool success = true;
+        size_ = Size();
         for (unsigned id : GetOrderedNodesIds()) {
             auto &node = GetNode(id);
             COMPILER_LOG(DEBUG, REGALLOC)
@@ -363,7 +359,7 @@ private:
         nbrColors->reset();
         nbrBiasColors->reset();
         // Collect neighbors colors
-        for (unsigned nbrId = 0; nbrId < Size(); nbrId++) {
+        for (unsigned nbrId = 0; nbrId < size_; nbrId++) {
             auto &nbrNode = GetNode(nbrId);
 
             // Collect neighbour color
@@ -407,6 +403,7 @@ private:
     static const size_t DEFAULT_BIAS_SIZE = 16;
     SmallVector<Bias, DEFAULT_BIAS_SIZE> biases_;
     uint8_t useSpillWeight_ : 1;
+    size_t size_ {0};
 };
 }  // namespace ark::compiler
 

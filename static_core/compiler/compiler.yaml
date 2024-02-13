@@ -732,6 +732,12 @@ options:
   description: Try to create single scope for method in ArkTS->EcmaScript interop whenever possible
   tags: [perf]
 
+- name: compiler-inst-graph-coloring-limit
+  type: uint32_t
+  default: 5000
+  description: Maximum number of the IR instructions to be chosen for graph coloring algorithm of register allocator
+  tags: [perf]
+
 events:
 - name: branch-elimination
   fields:

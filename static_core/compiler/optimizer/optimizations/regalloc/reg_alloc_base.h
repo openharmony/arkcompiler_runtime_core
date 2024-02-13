@@ -97,7 +97,8 @@ protected:
 
     StackSlot GetNextStackSlotImpl(LifeIntervals *interval)
     {
-        for (size_t slot = 0; slot < GetStackMask().GetSize(); slot++) {
+        auto size = GetStackMask().GetSize();
+        for (size_t slot = 0; slot < size; slot++) {
             if (GetStackMask().IsSet(slot)) {
                 continue;
             }
