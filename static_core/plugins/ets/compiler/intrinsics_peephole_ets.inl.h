@@ -12,8 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_PEEPHOLE_ETS_INL_H
+#define PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_PEEPHOLE_ETS_INL_H
 
 static bool PeepholeStringEquals(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStringSubstring(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeLdObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
 static bool PeepholeStObjByName(GraphVisitor *v, IntrinsicInst *intrinsic);
+
+#endif  // PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_PEEPHOLE_ETS_INL_H

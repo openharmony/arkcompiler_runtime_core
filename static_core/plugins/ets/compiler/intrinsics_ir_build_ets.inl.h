@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_IR_BUILD_ETS_INL_H
+#define PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_IR_BUILD_ETS_INL_H
 
 void BuildIsFiniteIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 void BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool accRead);
+
+#endif  // PANDA_PLUGINS_ETS_COMPILER_INTRINSICS_IR_BUILD_ETS_INL_H

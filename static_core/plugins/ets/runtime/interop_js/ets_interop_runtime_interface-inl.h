@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_INTEROP_RUNTIME_INTERFACE_INL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_INTEROP_RUNTIME_INTERFACE_INL_H
 
 void GetInfoForInteropCallArgsConversion(
     MethodPtr methodPtr, ArenaVector<std::pair<IntrinsicId, compiler::DataType::Type>> *intrinsics) const override
@@ -123,3 +125,5 @@ GetInfoForInteropCallRetValueConversion(MethodPtr methodPtr) const override
     }
     return {};
 }
+
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_INTEROP_RUNTIME_INTERFACE_INL_H
