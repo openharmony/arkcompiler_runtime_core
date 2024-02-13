@@ -41,6 +41,11 @@ export const LN2: double = 0.6931471805599453;
 export const LOG2E: double = 1.4426950408889634;
 
 /**
+ * Logarithm base 10 of Euler number as double value
+ */
+export const LOG10E: double = 0.4342944819032518;
+
+/**
  * Square root of 1/2 as double value
  */
 export const SQRT1_2: double = 0.7071067811865476;
