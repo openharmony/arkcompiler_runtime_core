@@ -18,8 +18,8 @@ let removed_object_callbacks: boolean[] = new boolean[3];
 let object1 : Object | null = null;
 let object2 : Object | null = null;
 let object3 : Object | null = null;
-let queue: FinalizationQueue | null = null;
-let unused_queue: FinalizationQueue | null = null;
+let queue: FinalizationRegistry | null = null;
+let unused_queue: FinalizationRegistry | null = null;
 
 function doFullGC() {
     try {
@@ -41,7 +41,7 @@ function callback(object: Object): void {
     }
 }
 
-function finalizationQueueTest(queue: FinalizationQueue | null): void {
+function finalizationRegistryTest(queue: FinalizationRegistry | null): void {
     object1 = new Object();
     let object1_token = new Object();
     let object1_callbackArg = new String("First object removed");
@@ -55,8 +55,8 @@ function finalizationQueueTest(queue: FinalizationQueue | null): void {
     queue.register(object2!, object2_callbackArg as Object, object2_token);
     queue.register(object3!, object3_callbackArg as Object);
 
-    unused_queue = new FinalizationQueue(callback);
-    
+    unused_queue = new FinalizationRegistry(callback);
+
     // Try to unregister unknown tokens:
     queue.unregister(unregistered_token);
     queue.unregister(null);
@@ -87,9 +87,9 @@ function main(): void {
     for (let i = 0; i < removed_object_callbacks.length; i++) {
         removed_object_callbacks[i] = false;
     }
-    queue = new FinalizationQueue(callback);
-    finalizationQueueTest(queue);
-    // Check that we successfully remove FinalizationQueue instance
+    queue = new FinalizationRegistry(callback);
+    finalizationRegistryTest(queue);
+    // Check that we successfully remove FinalizationRegistry instance
     // elemets and this cause no error during collection.
     doFullGC();
 

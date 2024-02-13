@@ -25,7 +25,7 @@
 
 namespace ark::ets::interop::js {
 
-static void JSRuntimeFinalizationQueueCallback(EtsObject *cbarg)
+static void JSRuntimeFinalizationRegistryCallback(EtsObject *cbarg)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -682,7 +682,7 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
 }
 
 const IntrinsicsAPI G_INTRINSICS_API = {
-    JSRuntimeFinalizationQueueCallback,
+    JSRuntimeFinalizationRegistryCallback,
     JSRuntimeNewJSValueDouble,
     JSRuntimeNewJSValueString,
     JSRuntimeNewJSValueObject,

@@ -100,7 +100,7 @@ add_ets_gc_test(FILE space_type_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger
 add_ets_gc_test(FILE weak_ref_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE concurrent_start_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE register_native_allocation_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
-add_ets_gc_test(FILE finalization_queue_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
+add_ets_gc_test(FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
 
 if (NOT PANDA_ENABLE_THREAD_SANITIZER)

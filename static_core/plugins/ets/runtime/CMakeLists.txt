@@ -41,7 +41,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_String.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StringBuilder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_queue.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_TypeCreator.cpp

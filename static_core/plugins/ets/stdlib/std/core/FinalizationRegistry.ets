@@ -15,10 +15,10 @@
 
 package std.core;
 
-export final class FinalizationQueue {
+export final class FinalizationRegistry {
 
     private callback: (value: Object) => void;
-    private trimplets: (Object | null)[];
+    private triplets: (Object | null)[];
     // Contains chains of used and free trimplet indexes, [0] serves as uselist head
     private idxarr: int[];
     private freeidx: int = -1;
@@ -31,7 +31,7 @@ export final class FinalizationQueue {
         this.idxarr[0] = -1; // first elem reserved for useidx head
         this.enlarge_freeidx(1);
 
-        this.trimplets = new Object[3 * size];
+        this.triplets = new Object[3 * size];
     }
 
     private enlarge_arrays(newsize: int): void {
@@ -42,10 +42,10 @@ export final class FinalizationQueue {
         }
         this.enlarge_freeidx(old_idxarr.length);
 
-        let old_trimplets = this.trimplets;
-        this.trimplets = new Object[newsize * 3];
-        for (let i = 0; i < old_trimplets.length; ++i) {
-            this.trimplets[i] = old_trimplets[i];
+        let old_triplets = this.triplets;
+        this.triplets = new Object[newsize * 3];
+        for (let i = 0; i < old_triplets.length; ++i) {
+            this.triplets[i] = old_triplets[i];
         }
     }
 
@@ -60,9 +60,9 @@ export final class FinalizationQueue {
     }
 
     /**
-     * Returns size of the FinalizationQueue
+     * Returns size of the FinalizationRegistry
      *
-     * @returns size of the FinalizationQueue
+     * @returns size of the FinalizationRegistry
      */
     public getSize(): int {
         let count: int;
@@ -73,7 +73,7 @@ export final class FinalizationQueue {
     }
 
     /**
-     * Creates FinalizationQueue object with the specific callback function.
+     * Creates FinalizationRegistry object with the specific callback function.
      * One can register an object to this queue and after reclamation of this object
      * the callback function will be called.
      *
@@ -81,9 +81,9 @@ export final class FinalizationQueue {
      * after registered object reclamation.
      */
     public constructor(callback_value: (value: Object) => void) {
-        this.init_arrays(FinalizationQueue.FIRST_SIZE);
+        this.init_arrays(FinalizationRegistry.FIRST_SIZE);
         this.callback = callback_value;
-        FinalizationQueue.registerInstance(this);
+        FinalizationRegistry.registerInstance(this);
     }
 
     /**
@@ -181,21 +181,21 @@ export final class FinalizationQueue {
     }
 
     private getObject(index: int): WeakRef<Object> | null {
-        return this.trimplets[3 * index] as (WeakRef<Object> | null);
+        return this.triplets[3 * index] as (WeakRef<Object> | null);
     }
 
     private getCallbackArg(index: int): Object | null {
-        return this.trimplets[3 * index + 1];
+        return this.triplets[3 * index + 1];
     }
 
     private getToken(index: int): WeakRef<Object> | null {
-        return this.trimplets[3 * index + 2] as (WeakRef<Object> | null);
+        return this.triplets[3 * index + 2] as (WeakRef<Object> | null);
     }
 
     private setTrimplet(index: int, obj: WeakRef<Object> | null, cbArg: Object | null, token: WeakRef<Object> | null): void {
-        this.trimplets[3 * index] = obj;
-        this.trimplets[3 * index + 1] = cbArg;
-        this.trimplets[3 * index + 2] = token;
+        this.triplets[3 * index] = obj;
+        this.triplets[3 * index + 1] = cbArg;
+        this.triplets[3 * index + 2] = token;
     }
 
     private static native registerInstance(object: Object): void;

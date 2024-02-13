@@ -36,7 +36,7 @@ namespace ark::ets::interop::js {
     mirror->type_ = handle->type_;
     mirror->data_ = handle->data_;
 
-    if (UNLIKELY(!ctx->PushOntoFinalizationQueue(coro, handle.GetPtr(), mirror))) {
+    if (UNLIKELY(!ctx->PushOntoFinalizationRegistry(coro, handle.GetPtr(), mirror))) {
         FinalizeETSWeak(ctx, handle.GetPtr());
         return nullptr;
     }

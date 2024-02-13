@@ -99,7 +99,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_Method.cpp",
   "runtime/intrinsics/std_core_Value.cpp",
   "runtime/intrinsics/std_core_gc.cpp",
-  "runtime/intrinsics/std_core_finalization_queue.cpp",
+  "runtime/intrinsics/std_core_finalization_registry.cpp",
   "runtime/intrinsics/std_math.cpp",
   "runtime/intrinsics/helpers/ets_intrinsics_helpers.cpp",
   "runtime/mem/ets_reference_processor.cpp",

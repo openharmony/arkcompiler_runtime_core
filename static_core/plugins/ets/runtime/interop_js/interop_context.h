@@ -207,23 +207,23 @@ public:
         GetLocalScopesStorage()->DestroyLocalScopeForTopFrame(jsEnv_, frame);
     }
 
-    mem::Reference *GetJSValueFinalizationQueue() const
+    mem::Reference *GetJSValueFinalizationRegistry() const
     {
-        return jsvalueFqueueRef_;
+        return jsvalueFregistryRef_;
     }
 
     Method *GetRegisterFinalizerMethod() const
     {
-        return jsvalueFqueueRegister_;
+        return jsvalueFregistryRegister_;
     }
 
     // NOTE(vpukhov): implement in native code
-    [[nodiscard]] bool PushOntoFinalizationQueue(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
+    [[nodiscard]] bool PushOntoFinalizationRegistry(EtsCoroutine *coro, EtsObject *obj, EtsObject *cbarg)
     {
-        auto queue = Refstor()->Get(jsvalueFqueueRef_);
+        auto queue = Refstor()->Get(jsvalueFregistryRef_);
         std::array<Value, 4U> args = {Value(queue), Value(obj->GetCoreType()), Value(cbarg->GetCoreType()),
                                       Value(static_cast<ObjectHeader *>(nullptr))};
-        jsvalueFqueueRegister_->Invoke(coro, args.data());
+        jsvalueFregistryRegister_->Invoke(coro, args.data());
         return !coro->HasPendingException();
     }
 
@@ -449,7 +449,7 @@ private:
     ClassLinkerContext *linkerCtx_ {};
     JSValueStringStorage jsValueStringStor_ {};
     LocalScopesStorage localScopesStorage_ {};
-    mem::Reference *jsvalueFqueueRef_ {};
+    mem::Reference *jsvalueFregistryRef_ {};
 
     std::vector<InteropFrameRecord> interopFrames_ {};
 
@@ -473,7 +473,7 @@ private:
     Class *arrayClass_ {};
     Class *arraybufClass_ {};
 
-    Method *jsvalueFqueueRegister_ {};
+    Method *jsvalueFregistryRegister_ {};
 
     // ets_proxy data
     EtsObject *pendingNewInstance_ {};

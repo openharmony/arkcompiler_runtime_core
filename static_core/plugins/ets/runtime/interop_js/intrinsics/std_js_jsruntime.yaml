@@ -35,15 +35,15 @@ intrinsics_namespace: ark::ets::interop::js::intrinsics
 # std.js.JSRuntime #
 ####################
 intrinsics:
-  - name: JSRuntimeFinalizationQueueCallback
+  - name: JSRuntimeFinalizationRegistryCallback
     space: ets
     class_name: std.interop.js.JSRuntime
-    method_name: finalizationQueueCallback
+    method_name: finalizationRegistryCallback
     static: true
     signature:
       ret: std.core.void
       args: [ std.core.Object ]
-    impl: ark::ets::interop::js::intrinsics::JSRuntimeFinalizationQueueCallbackIntrinsic
+    impl: ark::ets::interop::js::intrinsics::JSRuntimeFinalizationRegistryCallbackIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeNewJSValueDouble

@@ -246,7 +246,7 @@ public:
         return static_cast<PandaEtsVM *>(vm);
     }
 
-    void RegisterFinalizationQueueInstance(EtsObject *instance);
+    void RegisterFinalizationRegistryInstance(EtsObject *instance);
 
     [[noreturn]] static void Abort(const char *message = nullptr);
 
@@ -367,8 +367,8 @@ private:
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
     mem::Reference *undefinedObjRef_ {nullptr};
     NativeLibraryProvider nativeLibraryProvider_;
-    os::memory::Mutex finalizationQueueLock_;
-    PandaList<EtsObject *> registeredFinalizationQueueInstances_ GUARDED_BY(finalizationQueueLock_);
+    os::memory::Mutex finalizationRegistryLock_;
+    PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
     PandaUniquePtr<JobQueue> jobQueue_;
     os::memory::Mutex promiseListenersLock_;
     // NOTE(audovichenko) Should be refactored #12030

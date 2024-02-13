@@ -338,11 +338,11 @@ void PandaEtsVM::HandleGCRoutineInMutator()
     ASSERT(GetMutatorLock()->HasLock());
     auto coroutine = Coroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> handleScope(coroutine);
-    os::memory::LockHolder lock(finalizationQueueLock_);
-    if (!registeredFinalizationQueueInstances_.empty()) {
-        EtsClass *finalizationQueueClass = registeredFinalizationQueueInstances_.front()->GetClass();
-        EtsMethod *cleanup = finalizationQueueClass->GetMethod("cleanup");
-        for (auto *entry : registeredFinalizationQueueInstances_) {
+    os::memory::LockHolder lock(finalizationRegistryLock_);
+    if (!registeredFinalizationRegistryInstances_.empty()) {
+        EtsClass *finalizationRegistryClass = registeredFinalizationRegistryInstances_.front()->GetClass();
+        EtsMethod *cleanup = finalizationRegistryClass->GetMethod("cleanup");
+        for (auto *entry : registeredFinalizationRegistryInstances_) {
             VMHandle<ObjectHeader> handle(coroutine, entry->GetCoreType());
             Value arg(handle.GetPtr());
             cleanup->GetPandaMethod()->Invoke(coroutine, &arg);
@@ -556,12 +556,12 @@ void PandaEtsVM::SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
 {
     PandaVM::SweepVmRefs(gcObjectVisitor);
     {
-        os::memory::LockHolder lock(finalizationQueueLock_);
-        auto it = registeredFinalizationQueueInstances_.begin();
-        while (it != registeredFinalizationQueueInstances_.end()) {
+        os::memory::LockHolder lock(finalizationRegistryLock_);
+        auto it = registeredFinalizationRegistryInstances_.begin();
+        while (it != registeredFinalizationRegistryInstances_.end()) {
             if (gcObjectVisitor((*it)->GetCoreType()) == ObjectStatus::DEAD_OBJECT) {
                 auto toRemove = it++;
-                registeredFinalizationQueueInstances_.erase(toRemove);
+                registeredFinalizationRegistryInstances_.erase(toRemove);
             } else {
                 ++it;
             }
@@ -683,8 +683,8 @@ void PandaEtsVM::UpdateVmRefs()
     });
 
     {
-        os::memory::LockHolder lock(finalizationQueueLock_);
-        for (auto &entry : registeredFinalizationQueueInstances_) {
+        os::memory::LockHolder lock(finalizationRegistryLock_);
+        for (auto &entry : registeredFinalizationRegistryInstances_) {
             if ((entry->GetCoreType())->IsForwarded()) {
                 entry = EtsObject::FromCoreType(ark::mem::GetForwardAddress(entry->GetCoreType()));
             }
@@ -731,10 +731,10 @@ void PandaEtsVM::DeleteWeakGlobalRef(ets_weak weakRef)
     GetGlobalObjectStorage()->Remove(ref);
 }
 
-void PandaEtsVM::RegisterFinalizationQueueInstance(EtsObject *instance)
+void PandaEtsVM::RegisterFinalizationRegistryInstance(EtsObject *instance)
 {
-    os::memory::LockHolder lock(finalizationQueueLock_);
-    registeredFinalizationQueueInstances_.push_back(instance);
+    os::memory::LockHolder lock(finalizationRegistryLock_);
+    registeredFinalizationRegistryInstances_.push_back(instance);
 }
 
 /* static */

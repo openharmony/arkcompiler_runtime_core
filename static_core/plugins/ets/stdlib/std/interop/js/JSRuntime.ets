@@ -309,13 +309,13 @@ export final class JSRuntime {
         return JSRuntime.finQueue.getSize();
     }
 
-    private static finalizationQueueCallback(obj: Object): void {
+    private static finalizationRegistryCallback(obj: Object): void {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    private static createFinalizationQueue(): FinalizationQueue {
+    private static createFinalizationRegistry(): FinalizationRegistry {
         assert JSRuntime.finQueue == null;
-        JSRuntime.finQueue = new FinalizationQueue((obj: Object): void => { JSRuntime.finalizationQueueCallback(obj); });
+        JSRuntime.finQueue = new FinalizationRegistry((obj: Object): void => { JSRuntime.finalizationRegistryCallback(obj); });
         return JSRuntime.finQueue!;
     }
 
@@ -339,5 +339,5 @@ export final class JSRuntime {
         throw new Error(msg);
     }
 
-    private static finQueue: FinalizationQueue | null = null;
+    private static finQueue: FinalizationRegistry | null = null;
 }
