@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,10 @@ inline Pool MmapPoolMap::PopFreePool(size_t size)
     ASSERT(elementSize == mmapPool->GetSize());
     auto elementMem = mmapPool->GetMem();
 
+    if (unreturnedPool_.GetMmapPool() == mmapPool) {
+        unreturnedPool_ = UnreturnedToOSPool();
+    }
+
     mmapPool->SetFreePoolsIter(freePools_.end());
     Pool pool(size, elementMem);
     freePools_.erase(element);
@@ -83,6 +87,7 @@ inline std::pair<size_t, OSPagesPolicy> MmapPoolMap::PushFreePool(Pool pool)
 
     auto prevPool = (mmapPoolElement != poolMap_.begin()) ? (prev(mmapPoolElement, 1)->second) : nullptr;
     if (prevPool != nullptr && !prevPool->IsUsed(freePools_.end())) {
+        unreturnedPool_ = unreturnedPool_.GetMmapPool() == prevPool ? UnreturnedToOSPool() : unreturnedPool_;
         ASSERT(ToUintPtr(prevPool->GetMem()) + prevPool->GetSize() == ToUintPtr(mmapPool->GetMem()));
         returnedToOs = returnedToOs && prevPool->IsReturnedToOS();
         freePools_.erase(prevPool->GetFreePoolsIter());
@@ -94,6 +99,7 @@ inline std::pair<size_t, OSPagesPolicy> MmapPoolMap::PushFreePool(Pool pool)
 
     auto nextPool = (mmapPoolElement != prev(poolMap_.end(), 1)) ? (next(mmapPoolElement, 1)->second) : nullptr;
     if (nextPool != nullptr && !nextPool->IsUsed(freePools_.end())) {
+        unreturnedPool_ = unreturnedPool_.GetMmapPool() == nextPool ? UnreturnedToOSPool() : unreturnedPool_;
         ASSERT(ToUintPtr(mmapPool->GetMem()) + mmapPool->GetSize() == ToUintPtr(nextPool->GetMem()));
         returnedToOs = returnedToOs && nextPool->IsReturnedToOS();
         freePools_.erase(nextPool->GetFreePoolsIter());
@@ -189,6 +195,47 @@ inline MmapMemPool::MmapMemPool() : MemPool("MmapMemPool"), nonObjectSpacesCurre
         mem::MemConfig::GetNativeStacksMemorySizeLimit();
     LOG_MMAP_MEM_POOL(DEBUG) << "Successfully initialized MMapMemPool. Object memory start from addr "
                              << ToVoidPtr(minObjectMemoryAddr_) << " Preallocated size is equal to " << objectSpaceSize;
+}
+
+inline bool MmapPoolMap::FindAndSetUnreturnedFreePool()
+{
+    ASSERT(unreturnedPool_.IsEmpty());
+    for (auto &&[_, pool] : freePools_) {
+        if (!pool->IsReturnedToOS()) {
+            unreturnedPool_ = UnreturnedToOSPool(pool);
+            return true;
+        }
+    }
+    return false;
+}
+
+inline void MmapPoolMap::ReleasePagesInUnreturnedPool(size_t poolSize)
+{
+    ASSERT(poolSize != 0 && !unreturnedPool_.IsEmpty());
+
+    auto pool = unreturnedPool_.GetAndClearUnreturnedPool(poolSize);
+    auto unreturnedMem = ToUintPtr(pool.GetMem());
+    os::mem::ReleasePages(unreturnedMem, unreturnedMem + pool.GetSize());
+    if (unreturnedPool_.GetUnreturnedSize() == 0) {
+        unreturnedPool_.SetReturnedToOS();
+        unreturnedPool_ = UnreturnedToOSPool();
+    }
+    LOG_MMAP_MEM_POOL(DEBUG) << "Return pages to OS from Free Pool: start = " << pool.GetMem() << " with size "
+                             << pool.GetSize();
+}
+
+inline void MmapPoolMap::ReleasePagesInFreePools()
+{
+    IterateOverFreePools([](size_t poolSize, MmapPool *pool) {
+        // Iterate over non returned to OS pools:
+        if (!pool->IsReturnedToOS()) {
+            pool->SetReturnedToOS(true);
+            auto poolStart = ToUintPtr(pool->GetMem());
+            LOG_MMAP_MEM_POOL(DEBUG) << "Return pages to OS from Free Pool: start = " << pool->GetMem() << " with size "
+                                     << poolSize;
+            os::mem::ReleasePages(poolStart, poolStart + poolSize);
+        }
+    });
 }
 
 inline void MmapMemPool::ClearNonObjectMmapedPools()
@@ -555,31 +602,96 @@ inline size_t MmapMemPool::GetObjectUsedBytes() const
     return commonSpace_.GetOccupiedMemorySize() - commonSpacePools_.GetAllSize();
 }
 
-inline void MmapMemPool::IterateOverFreePools()
-{
-    commonSpacePools_.IterateOverFreePools([](size_t poolSize, MmapPool *pool) {
-        // Iterate over non returned to OS pools:
-        if (!pool->IsReturnedToOS()) {
-            pool->SetReturnedToOS(true);
-            auto poolStart = ToUintPtr(pool->GetMem());
-            LOG_MMAP_MEM_POOL(DEBUG) << "Return pages to OS from Free Pool: start = " << pool->GetMem() << " with size "
-                                     << poolSize;
-            os::mem::ReleasePages(poolStart, poolStart + poolSize);
-        }
-    });
-}
-
-inline void MmapMemPool::ReleasePagesInFreePools()
+inline void MmapMemPool::ReleaseFreePagesToOS()
 {
     os::memory::LockHolder lk(lock_);
-    IterateOverFreePools();
-    Pool mainPool = commonSpace_.GetAndClearUnreturnedToOSMemory();
-    if (mainPool.GetSize() != 0) {
-        auto poolStart = ToUintPtr(mainPool.GetMem());
-        LOG_MMAP_MEM_POOL(DEBUG) << "Return pages to OS from common_space: start = " << mainPool.GetMem()
-                                 << " with size " << mainPool.GetSize();
-        os::mem::ReleasePages(poolStart, poolStart + mainPool.GetSize());
+    auto unreturnedSize = commonSpacePools_.GetUnreturnedToOsSize();
+    if (unreturnedSize != 0) {
+        commonSpacePools_.ReleasePagesInUnreturnedPool(unreturnedSize);
     }
+    commonSpacePools_.ReleasePagesInFreePools();
+    unreturnedSize = commonSpace_.GetUnreturnedToOsSize();
+    if (unreturnedSize != 0) {
+        commonSpace_.ReleasePagesInMainPool(unreturnedSize);
+    }
+}
+
+inline bool MmapMemPool::ReleaseFreePagesToOSWithInterruption(const InterruptFlag &interruptFlag)
+{
+    bool wasInterrupted = ReleasePagesInUnreturnedPoolWithInterruption(interruptFlag);
+    if (wasInterrupted) {
+        return true;
+    }
+    wasInterrupted = ReleasePagesInFreePoolsWithInterruption(interruptFlag);
+    if (wasInterrupted) {
+        return true;
+    }
+    wasInterrupted = ReleasePagesInMainPoolWithInterruption(interruptFlag);
+    return wasInterrupted;
+}
+
+inline bool MmapMemPool::ReleasePagesInUnreturnedPoolWithInterruption(const InterruptFlag &interruptFlag)
+{
+    while (true) {
+        {
+            os::memory::LockHolder lk(lock_);
+            auto unreturnedSize = commonSpacePools_.GetUnreturnedToOsSize();
+            if (unreturnedSize == 0) {
+                return false;
+            }
+            if (interruptFlag == ReleasePagesStatus::NEED_INTERRUPT) {
+                return true;
+            }
+            auto poolSize = std::min(RELEASE_MEM_SIZE, unreturnedSize);
+            commonSpacePools_.ReleasePagesInUnreturnedPool(poolSize);
+        }
+        /* @sync 1
+         * @description Wait for interruption from G1GC Mixed collection
+         */
+    }
+}
+
+inline bool MmapMemPool::ReleasePagesInFreePoolsWithInterruption(const InterruptFlag &interruptFlag)
+{
+    while (true) {
+        {
+            os::memory::LockHolder lk(lock_);
+            auto poolFound = commonSpacePools_.FindAndSetUnreturnedFreePool();
+            if (!poolFound) {
+                return false;
+            }
+        }
+        auto wasInterrupted = ReleasePagesInUnreturnedPoolWithInterruption(interruptFlag);
+        if (wasInterrupted) {
+            return true;
+        }
+    }
+}
+
+inline bool MmapMemPool::ReleasePagesInMainPoolWithInterruption(const InterruptFlag &interruptFlag)
+{
+    while (true) {
+        os::memory::LockHolder lk(lock_);
+        auto unreturnedSize = commonSpace_.GetUnreturnedToOsSize();
+        if (unreturnedSize == 0) {
+            return false;
+        }
+        if (interruptFlag == ReleasePagesStatus::NEED_INTERRUPT) {
+            return true;
+        }
+        auto poolSize = std::min(RELEASE_MEM_SIZE, unreturnedSize);
+        commonSpace_.ReleasePagesInMainPool(poolSize);
+    }
+}
+
+inline void MmapMemPool::SpaceMemory::ReleasePagesInMainPool(size_t poolSize)
+{
+    ASSERT(poolSize != 0);
+    Pool mainPool = GetAndClearUnreturnedToOSMemory(poolSize);
+    auto poolStart = ToUintPtr(mainPool.GetMem());
+    os::mem::ReleasePages(poolStart, poolStart + mainPool.GetSize());
+    LOG_MMAP_MEM_POOL(DEBUG) << "Return pages to OS from common_space: start = " << mainPool.GetMem() << " with size "
+                             << mainPool.GetSize();
 }
 
 #undef LOG_MMAP_MEM_POOL

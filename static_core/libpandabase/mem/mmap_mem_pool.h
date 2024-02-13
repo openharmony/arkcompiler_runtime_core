@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@
 #include <utility>
 
 namespace ark {
+
+enum class ReleasePagesStatus { RELEASING_PAGES, NEED_INTERRUPT, WAS_INTERRUPTED, FINISHED };
 
 class MMapMemPoolTest;
 namespace mem::test {
@@ -71,8 +73,8 @@ public:
         return pool_.GetMem();
     }
 
-    // A free pool will be store in the free_pools_, and it's iterator will be recorded in the free_pools_iter_.
-    // If the free_pools_iter_ is equal to the end of free_pools_, the pool is used.
+    // A free pool will be store in the free_pools_, and it's iterator will be recorded in the freePoolsIter_.
+    // If the freePoolsIter_ is equal to the end of freePools_, the pool is used.
     bool IsUsed(FreePoolsIter endIter)
     {
         return freePoolsIter_ == endIter;
@@ -93,6 +95,56 @@ private:
     bool returnedToOs_;
     // record the iterator of the pool in the multimap
     FreePoolsIter freePoolsIter_;
+};
+
+/// @brief Class represents current pool that is returning to OS
+class UnreturnedToOSPool {
+public:
+    UnreturnedToOSPool() = default;
+    explicit UnreturnedToOSPool(MmapPool *pool) : pool_(pool)
+    {
+        ASSERT(pool_ == nullptr || !pool_->IsReturnedToOS());
+    }
+
+    /**
+     * Separates part of unreturned to OS memory from MmapPool
+     * and creates a pool with @param size that needs to be cleared
+     * @param size size of unreturned to OS pool
+     * @return pool that needs to be cleared
+     */
+    Pool GetAndClearUnreturnedPool(size_t size)
+    {
+        ASSERT(pool_ != nullptr && (returnedToOsSize_ + size <= pool_->GetSize()));
+        auto unreturnedMem = ToVoidPtr(ToUintPtr(pool_->GetMem()) + returnedToOsSize_);
+        returnedToOsSize_ += size;
+        return Pool(size, unreturnedMem);
+    }
+
+    void SetReturnedToOS()
+    {
+        ASSERT(pool_ != nullptr && (returnedToOsSize_ == pool_->GetSize()));
+        pool_->SetReturnedToOS(true);
+    }
+
+    bool IsEmpty() const
+    {
+        return pool_ == nullptr;
+    }
+
+    size_t GetUnreturnedSize() const
+    {
+        ASSERT(pool_ != nullptr);
+        return pool_->GetSize() - returnedToOsSize_;
+    }
+
+    MmapPool *GetMmapPool() const
+    {
+        return pool_;
+    }
+
+private:
+    MmapPool *pool_ {nullptr};
+    size_t returnedToOsSize_ {0};
 };
 
 class MmapPoolMap {
@@ -133,15 +185,27 @@ public:
 
     /**
      * To check if we can alloc enough pools from free pools
-     * @param pools_num the number of pools we need
-     * @param pool_size the size of the pool we need
+     * @param poolsNum the number of pools we need
+     * @param poolSize the size of the pool we need
      * @return true if we can make sure that we have enough space in free pools to alloc pools we need
      */
     bool HaveEnoughFreePools(size_t poolsNum, size_t poolSize) const;
 
+    bool FindAndSetUnreturnedFreePool();
+
+    void ReleasePagesInUnreturnedPool(size_t poolSize);
+
+    void ReleasePagesInFreePools();
+
+    size_t GetUnreturnedToOsSize() const
+    {
+        return unreturnedPool_.IsEmpty() ? 0 : unreturnedPool_.GetUnreturnedSize();
+    }
+
 private:
     std::map<void *, MmapPool *> poolMap_;
     std::multimap<size_t, MmapPool *> freePools_;
+    UnreturnedToOSPool unreturnedPool_;
 };
 
 class MmapMemPool : public MemPool<MmapMemPool> {
@@ -150,6 +214,10 @@ public:
     NO_MOVE_SEMANTIC(MmapMemPool);
     void ClearNonObjectMmapedPools();
     ~MmapMemPool() override;
+
+    using InterruptFlag = std::atomic<ReleasePagesStatus>;
+
+    static constexpr size_t RELEASE_MEM_SIZE = 8_MB;
 
     /**
      * Get min address in pool
@@ -190,8 +258,8 @@ public:
     bool HaveEnoughPoolsInObjectSpace(size_t poolsNum, size_t poolSize) const;
 
     /// Release pages in all cached free pools
-    void IterateOverFreePools();
-    void ReleasePagesInFreePools();
+    void ReleaseFreePagesToOS();
+    bool ReleaseFreePagesToOSWithInterruption(const InterruptFlag &interruptFlag);
 
     /// @return used bytes count in object space (so exclude bytes in free pools)
     size_t GetObjectUsedBytes() const;
@@ -227,6 +295,10 @@ private:
     void RemoveFromNonObjectPoolsMap(void *poolAddr);
     std::tuple<Pool, AllocatorInfo, SpaceType> FindAddrInNonObjectPoolsMap(const void *addr) const;
 
+    bool ReleasePagesInUnreturnedPoolWithInterruption(const InterruptFlag &interruptFlag);
+    bool ReleasePagesInFreePoolsWithInterruption(const InterruptFlag &interruptFlag);
+    bool ReleasePagesInMainPoolWithInterruption(const InterruptFlag &interruptFlag);
+
     MmapMemPool();
 
     // A super class for raw memory allocation for spaces.
@@ -261,6 +333,11 @@ private:
             return maxSize_ - curAllocOffset_;
         }
 
+        size_t GetUnreturnedToOsSize() const
+        {
+            return unreturnedToOsSize_;
+        }
+
         template <OSPagesAllocPolicy OS_ALLOC_POLICY>
         void *AllocRawMem(size_t size, MmapPoolMap *poolMap)
         {
@@ -285,14 +362,6 @@ private:
             return mem;
         }
 
-        Pool GetAndClearUnreturnedToOSMemory()
-        {
-            void *mem = ToVoidPtr(minAddress_ + curAllocOffset_);
-            size_t size = unreturnedToOsSize_;
-            unreturnedToOsSize_ = 0;
-            return Pool(size, mem);
-        }
-
         void FreeMem(size_t size, OSPagesPolicy pagesPolicy)
         {
             ASSERT(curAllocOffset_ >= size);
@@ -303,11 +372,21 @@ private:
             }
         }
 
+        void ReleasePagesInMainPool(size_t poolSize);
+
     private:
+        Pool GetAndClearUnreturnedToOSMemory(size_t size)
+        {
+            ASSERT(size <= unreturnedToOsSize_);
+            unreturnedToOsSize_ -= size;
+            void *mem = ToVoidPtr(minAddress_ + curAllocOffset_ + unreturnedToOsSize_);
+            return Pool(size, mem);
+        }
+
         uintptr_t minAddress_ {0U};       ///< Min address for the space
         size_t maxSize_ {0U};             ///< Max size in bytes for the space
-        size_t curAllocOffset_ {0U};      ///< A value of occupied memory from the min_address_
-        size_t unreturnedToOsSize_ {0U};  ///< A value of unreturned memory from the min_address_ + cur_alloc_offset_
+        size_t curAllocOffset_ {0U};      ///< A value of occupied memory from the minAddress_
+        size_t unreturnedToOsSize_ {0U};  ///< A value of unreturned memory from the minAddress_ + curAllocOffset_
     };
 
     uintptr_t minObjectMemoryAddr_ {0U};  ///< Minimal address of the mmaped object memory

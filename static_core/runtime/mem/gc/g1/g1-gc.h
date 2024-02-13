@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -351,6 +351,16 @@ private:
 
     void UpdateCollectionSet(const CollectionSet &collectibleRegions);
 
+    /// Interrupts release pages if the process is running
+    void InterruptReleasePagesIfNeeded();
+
+    /**
+     * Starts release pages if the current status
+     *  of releasePagesInterruptFlag_ equals @param oldStatus
+     * @param oldStatus estimated status of releasePagesInterruptFlag_
+     */
+    void StartReleasePagesIfNeeded(ReleasePagesStatus oldStatus);
+
     /// Estimate space in tenured to objects from collectible regions
     bool HaveEnoughSpaceToMove(const CollectionSet &collectibleRegions);
 
@@ -478,6 +488,9 @@ private:
     os::memory::Mutex mixedMarkedObjectsMutex_;
     os::memory::ConditionVariable concurrentMarkCondVar_;
     G1Analytics analytics_;
+
+    /// Flag indicates if we need to interrupt release physical pages to OS
+    std::atomic<ReleasePagesStatus> releasePagesInterruptFlag_ {ReleasePagesStatus::FINISHED};
 
     template <class>
     friend class RefCacheBuilder;
