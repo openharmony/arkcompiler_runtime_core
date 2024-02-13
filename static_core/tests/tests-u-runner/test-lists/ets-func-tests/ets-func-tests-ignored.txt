@@ -432,10 +432,6 @@ spec/import_export/03.import_directives/05.default_import_binding/default_import
 ### Issue 15312
 std/core/std_core_string_String_fromCharCode_008.ets
 std/core/std_core_string_String_search_String_005.ets
-std/core/std_core_string_String_localeCompare_string.ets
-std/core/std_core_string_String_localeCompare_string_001.ets
-std/core/std_core_string_String_localeCompare_string_002.ets
-std/core/std_core_string_String_localeCompare_string_004.ets
 ### Issue 15693
 std/core/std_core_string_String_localeCompare_string_005.ets
 std/core/std_core_string_String_match_RegExp.ets
@@ -443,14 +439,8 @@ std/core/std_core_string_String_match_String.ets
 std/core/std_core_string_String_fromCharCode_009.ets
 ### Issue 15119
 std/core/std_core_string_String_fromCharCode_006.ets
-### Issue 15274
-std/core/std_core_string_String_localeCompare_string.ets
-std/core/std_core_string_String_localeCompare_string_001.ets
 ### Issue 15304
 std/core/std_core_string_String_split_RegExp_int.ets
-### Issue 15306
-std/core/std_core_string_String_replace_RegExp_String.ets
-std/core/std_core_string_String_replaceAll_RegExp_String.ets
 ### Issue 14343
 spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_03.ets
 spec/import_export/07.export_directives/03.re-export_directives/re_export_all_2.ets

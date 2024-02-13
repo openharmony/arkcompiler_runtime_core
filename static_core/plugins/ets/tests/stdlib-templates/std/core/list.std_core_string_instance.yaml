@@ -246,12 +246,12 @@
     init_object_data_type: "String[]",
     init_object_type: String,
     init_object_data: '[" abc", "abcde", "abcdefghij", "abcdefhgcdefgh", "abcdefhgcdefgh", "abcdefhgcdefgh", "aBcdefghijbc", "abcdABCD", "abcd ", " abcd"]',
-    
+
     param_init_data_types: {"param1": "String[]", "param2": "number[]"},
     param_types: {"param1": String, "param2": number},
     param_nature: {"param1": primitive, "param2": primitive},
     param_list: {"param1": '["a", "c", "abc", "bc", "cd", "bb", "B", "A", " ", "d"]', "param2": "[2, 3.8, 5.9, 3.9, -2, -2.6, -1, 5.0, 5, 5]"},
-    
+
     method_return_type: boolean,
     expected_data_type: "boolean[]",
     expected_test_data: "[true, true, false, true, false, false, false, true, true, true]",
@@ -2330,9 +2330,9 @@
     param_init_data_types: {localeStr: "string[]"},
     param_list: {localeStr: '["a", "pear", "apple"]'},
 
-    method_return_type: short,
-    expected_test_data_item_type: short,
-    expected_data_type: "short[]",
+    method_return_type: number,
+    expected_test_data_item_type: number,
+    expected_data_type: "number[]",
     expected_test_data: '[0, -1, 1]',
     verify_test_result_function: comparePrimitiveValue
   }
@@ -2348,9 +2348,9 @@
     param_init_data_types: {localeStr: "string[]"},
     param_list: {localeStr: '["\x68", "\u0068", "h", "H", "h"]'},
 
-    method_return_type: short,
-    expected_test_data_item_type: short,
-    expected_data_type: "short[]",
+    method_return_type: number,
+    expected_test_data_item_type: number,
+    expected_data_type: "number[]",
     expected_test_data: '[0, 0, 0, 1, -1]',
     verify_test_result_function: comparePrimitiveValue
   }
