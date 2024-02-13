@@ -88,7 +88,7 @@ private:
 
     void IncreaseSolvedTasks();
 
-    ALWAYS_INLINE void ResetTasks()
+    ALWAYS_INLINE void ResetTasks() REQUIRES(allSolvedTasksCondVarLock_)
     {
         solvedTasks_ = 0U;
         sendedTasks_ = 0U;
@@ -104,7 +104,7 @@ private:
      * @see IncreaseSolvedTasks
      */
     os::memory::ConditionVariable allSolvedTasksCondVar_ GUARDED_BY(allSolvedTasksCondVarLock_);
-    std::atomic_size_t solvedTasksSnapshot_ {0U};
+    size_t solvedTasksSnapshot_ GUARDED_BY(allSolvedTasksCondVarLock_) {0U};
     std::atomic_size_t solvedTasks_ {0U};
     std::atomic_size_t sendedTasks_ {0U};
 };
