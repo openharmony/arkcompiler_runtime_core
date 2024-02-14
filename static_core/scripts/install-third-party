@@ -50,12 +50,16 @@ function print_help() {
 
     --node             Install node js to third-party
 
+    --repo-name=repo   install specific repo
+
     CAVEAT
     * Manifest file format is documented in the default manifest.
     "
 
     echo "$HELP_MESSAGE"
 }
+
+declare -a REPOS=()
 
 for opt in "$@"; do
     case $opt in
@@ -76,7 +80,7 @@ for opt in "$@"; do
         ARK_INSTALL_NODE=yes
         ;;
     --repo-name=*)
-        REPO_NAME="${opt#*=}"
+        REPOS+=("${opt#*=}")
         ;;
     *)
       echo "Error: Unsupported flag $opt" >&2
@@ -84,6 +88,21 @@ for opt in "$@"; do
       ;;
   esac
 done
+
+
+mapfile -t REPOS< <(for r in "${REPOS[@]}"; do echo "$r"; done | sort -u)
+readonly -a REPOS
+
+function requested_repo() {
+    for one_repo in "${REPOS[@]}"
+    do
+        if [[ "${one_repo}" == "$1" ]]
+        then
+            return 0
+        fi
+    done
+    return 1
+}
 
 function clone_repository_branch() {
     local lib_repo="$1"
@@ -161,13 +180,13 @@ function process_manifest() {
         local commit_id="${info[3]}"
         local patch_mode="${info[4]}"
         local submodule_mode="${info[5]}"
-        if [[ -n "$REPO_NAME" && "$REPO_NAME" != "$lib_name" ]] ; then
+        if [[ ${#REPOS[@]} -ne 0 ]] && ! requested_repo "${lib_name}" ; then
             continue
         fi
 
         local lib_dir="$ARK_THIRD_PARTY_DIR/$lib_name"
 
-        if [[ -d "$lib_dir" && -z "$REPO_NAME" ]] ; then
+        if [[ -d "$lib_dir" && ${#REPOS[@]} -eq 0 ]] ; then
             echo "$MSG_PREFIX $lib_dir already exists. Skip download."
             continue
         fi;
@@ -229,14 +248,16 @@ if [[ "$ARK_THIRD_PARTY_FORCE_CLONE" == "yes" ]] ; then
     rm -rf "$ARK_THIRD_PARTY_DIR"
 fi
 
-if [[ -d "$ARK_THIRD_PARTY_DIR" && -z "$REPO_NAME" ]] ; then
+if [[ -d "$ARK_THIRD_PARTY_DIR" && ${#REPOS[@]} -eq 0 ]] ; then
     echo "$MSG_PREFIX Third-party dependencies are found in $ARK_THIRD_PARTY_DIR"
     echo "$MSG_PREFIX If you need to update all, restart this script with --force-clone"
 fi
 
-if [[ -n "$REPO_NAME" ]] ; then
-    rm -rf "$ARK_THIRD_PARTY_DIR/$REPO_NAME"
-
+if [[ ${#REPOS[@]} -ne 0 ]] ; then
+    for third_party_repo in "${REPOS[@]}"
+    do
+        rm -rf "$ARK_THIRD_PARTY_DIR/${third_party_repo}"
+    done
 fi
 
 echo "$MSG_PREFIX Third-party dependencies are not found in $ARK_THIRD_PARTY_DIR"
