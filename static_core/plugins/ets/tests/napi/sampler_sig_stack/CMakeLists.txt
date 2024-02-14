@@ -15,6 +15,10 @@ if (NOT PANDA_TARGET_ARM64 AND NOT PANDA_TARGET_AMD64)
     return()
 endif()
 
+if (PANDA_QEMU_BUILD)
+    return()
+endif()
+
 enable_language(ASM)
 
 # Build ETSNAPI library

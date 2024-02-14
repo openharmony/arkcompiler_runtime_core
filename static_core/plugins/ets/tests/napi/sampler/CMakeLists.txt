@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (PANDA_TARGET_ARM32)
+if (PANDA_TARGET_ARM32 OR PANDA_QEMU_BUILD)
     return()
 endif()
 

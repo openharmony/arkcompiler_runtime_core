@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (PANDA_TARGET_ARM32)
+if (PANDA_TARGET_ARM32 OR PANDA_QEMU_BUILD)
     return()
 endif()
 
@@ -58,9 +58,10 @@ add_custom_target(sampler_es2panda
 set(ETS_ENTRY_POINT "main")
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(ETS_ENTRY_POINT "release_main")
-    # NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)
-    set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --ets.workers-type=threadpool)
 endif()
+
+# NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)
+set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --ets.workers-type=threadpool)
 
 foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
     foreach(i_arg ${INTERPRETER_ARGUMENTS_LIST})
