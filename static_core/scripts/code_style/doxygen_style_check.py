@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 # Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -237,11 +236,11 @@ def check_file_list(file_list: list) -> bool:
 
 if __name__ == "__main__":
     args = get_args()
-    file_list = get_file_list(args.panda_dir)
-    if not file_list:
+    files_list = get_file_list(args.panda_dir)
+    if not files_list:
         sys.exit(
             "Source list can't be prepared. Please check panda_dir variable: " + args.panda_dir)
 
-    if not check_file_list(file_list):
+    if not check_file_list(files_list):
         sys.exit("Failed: doxygen style checker got errors")
     print("Doxygen style checker was passed successfully!")

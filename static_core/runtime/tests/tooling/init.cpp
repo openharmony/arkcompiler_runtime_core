@@ -21,8 +21,6 @@
 #include "test_util.h"
 
 namespace ark::tooling::test {
-extern const char *GetCurrentTestName();
-
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static std::thread g_gDebuggerThread;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)

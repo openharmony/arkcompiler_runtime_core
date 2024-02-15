@@ -122,18 +122,18 @@ def get_file_list(panda_dir):
 
 if __name__ == "__main__":
     args = get_args()
-    file_list = []
+    files_list = []
 
-    file_list = get_file_list(args.panda_dir)
+    files_list = get_file_list(args.panda_dir)
 
-    if not file_list:
+    if not files_list:
         sys.exit(
             "Can't be prepaired source list. Please check panda_dir variable: " + args.panda_dir)
 
-    proc_count = get_proc_count(args.proc_count)
-    print('clang-format proc_count: ' + str(proc_count))
+    process_count = get_proc_count(args.proc_count)
+    print('clang-format proc_count: ' + str(process_count))
 
-    if not check_file_list(file_list, args.panda_dir, args.reformat, proc_count):
+    if not check_file_list(files_list, args.panda_dir, args.reformat, process_count):
         sys.exit("Failed: clang-format get errors")
 
     print("Clang-format was passed successfully!")

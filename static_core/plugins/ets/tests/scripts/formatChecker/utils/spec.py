@@ -61,7 +61,7 @@ def __parse_spec(path: str) -> Spec:
     text = read_file(path)
 
     try:
-        spec = yaml.load(text, Loader=yaml.FullLoader)
+        spec = yaml.safe_load(text)
     except Exception as e:
         raise InvalidFileFormatException(message=f"Could not load YAML: {str(e)}", filepath=path)
     

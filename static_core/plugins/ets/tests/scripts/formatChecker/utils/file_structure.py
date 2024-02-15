@@ -54,7 +54,7 @@ class TestDirectory:
         
         self.parent = parent
         if subdirs is None:
-            self.subdirs = [];
+            self.subdirs = []
         else:
             self.subdirs = list(subdirs)
         
@@ -67,10 +67,10 @@ class TestDirectory:
             cur = cur.parent
         return list(reversed(result))
     
-    def iter_files(self, allowed_ext: List[str] = []) -> Iterable[Path]:
+    def iter_files(self, allowed_ext: List[str] = None) -> Iterable[Path]:
         for filename in os.listdir(str(self.path)):
             filepath: Path = self.path / filename
-            if len(allowed_ext) > 0 and filepath.suffix not in allowed_ext:
+            if allowed_ext is not None and len(allowed_ext) > 0 and filepath.suffix not in allowed_ext:
                 continue
             yield filepath
     

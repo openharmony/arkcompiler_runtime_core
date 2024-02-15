@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,14 +27,17 @@ struct smth;
 static const auto FOO = [](Action act, [[maybe_unused]] Context &, auto &it) {
     switch (act) {
         case Action::START:
-            if (*it != 'f')
+            if (*it != 'f') {
                 return false;
+            }
             ++it;
-            if (*it != 'o')
+            if (*it != 'o') {
                 return false;
+            }
             ++it;
-            if (*it != 'o')
+            if (*it != 'o') {
                 return false;
+            }
             ++it;
             return true;
 
@@ -52,14 +55,17 @@ static const auto FOO = [](Action act, [[maybe_unused]] Context &, auto &it) {
 static const auto BAR = [](Action act, [[maybe_unused]] Context &, auto &it) {
     switch (act) {
         case Action::START:
-            if (*it != 'b')
+            if (*it != 'b') {
                 return false;
+            }
             ++it;
-            if (*it != 'a')
+            if (*it != 'a') {
                 return false;
+            }
             ++it;
-            if (*it != 'r')
+            if (*it != 'r') {
                 return false;
+            }
             ++it;
             return true;
 

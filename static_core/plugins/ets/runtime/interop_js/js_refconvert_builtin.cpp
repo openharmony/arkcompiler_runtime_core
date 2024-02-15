@@ -54,7 +54,7 @@ static inline void RegisterBuiltinRefConvertor(JSRefConvertCache *cache, Class *
 {
     [[maybe_unused]] bool res = CheckClassInitialized<true>(klass);
     ASSERT(res);
-    cache->Insert(klass, std::unique_ptr<JSRefConvert>(new JSRefConvertBuiltin<Conv>()));
+    cache->Insert(klass, std::make_unique<JSRefConvertBuiltin<Conv>>());
 }
 
 static ets_proxy::EtsClassWrapper *RegisterEtsProxyForStdClass(

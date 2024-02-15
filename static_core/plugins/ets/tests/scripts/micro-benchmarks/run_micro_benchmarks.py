@@ -101,7 +101,7 @@ class EtsBenchmarksRunner:
     def compile_test(self, asm_filepath, bin_filepath):
         cmd = self.prefix + [self.ark_asm, str(asm_filepath), str(bin_filepath)]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
+        stdout, stderr = proc.communicate(timeout=5400)
         self.dump_stdout(stdout, "asm")
         if proc.returncode == 0:
             return True
@@ -119,7 +119,7 @@ class EtsBenchmarksRunner:
             "--paoc-output", aot_filepath
             ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
+        stdout, stderr = proc.communicate(timeout=5400)
         self.dump_stdout(stdout, "aot")
         if proc.returncode == 0:
             return True
@@ -135,7 +135,7 @@ class EtsBenchmarksRunner:
         # NOTE(ipetrov, #14164): return limit standard allocation after fix in taskmanager
         cmd = self.prefix + [self.ark, f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets", "--compiler-ignore-failures=false"] + self.ark_opts + additional_opts + [bin_filepath,  "_GLOBAL::main"]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
+        stdout, stderr = proc.communicate(timeout=5400)
         self.dump_stdout(stdout, "ark")
         if proc.returncode == 0:
             self.logger.debug(f"{self.current_bench_name} PASS")

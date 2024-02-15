@@ -55,7 +55,7 @@ def __parse_yaml_list(path: str) -> Params:
     text = read_file(path)
     
     try:
-        params = yaml.load(text, Loader=yaml.FullLoader)
+        params = yaml.safe_load(text)
     except Exception as e:
         raise InvalidFileFormatException(message=f"Could not load YAML: {str(e)}", filepath=path)
     

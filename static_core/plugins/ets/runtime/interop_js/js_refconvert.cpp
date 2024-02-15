@@ -29,7 +29,7 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
         if (type != panda_file::Type::TypeId::REFERENCE) {
             ctx->Fatal(std::string("Unhandled primitive array: ") + utf::Mutf8AsCString(klass->GetDescriptor()));
         }
-        return std::unique_ptr<JSRefConvert>(new JSRefConvertReftypeArray(klass));
+        return std::make_unique<JSRefConvertReftypeArray>(klass);
     }
 
     if (js_proxy::JSProxy::IsProxyClass(klass)) {

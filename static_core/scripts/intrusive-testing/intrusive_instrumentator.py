@@ -635,8 +635,8 @@ if __name__ == '__main__':
     errMsgSuffix = "Error! Source code instrumentation failed. Reason:"
     try:
         exitCode = 0
-        argsParser = ArgsParser()
-        instrumentator = Instrumentator(argsParser)
+        argumentParser = ArgsParser()
+        instrumentator = Instrumentator(argumentParser)
         instrumentator.run()
     except yaml.YAMLError as yamlErr:
         exitCode = 1
@@ -647,18 +647,18 @@ if __name__ == '__main__':
         print(errMsgSuffix)
         for res in yamaleErr.results:
             print("Error validating '%s' against schema '%s'\n\t" % (res.data, res.schema))
-            for e in res.errors:
-                print('\t%s' % e)
+            for er in res.errors:
+                print('\t%s' % er)
     except OSError as osErr:
         exitCode = 3
-        errMsg = [osErr.strerror]
+        errMessage = [osErr.strerror]
         if(hasattr(osErr, 'filename') and (osErr.filename is not None)):
-            errMsg.append(": ")
-            errMsg.append(osErr.filename)
+            errMessage.append(": ")
+            errMessage.append(osErr.filename)
         if(hasattr(osErr, 'filename2') and (osErr.filename2 is not None)):
-            errMsg.append(", ")
-            errMsg.append(osErr.filename2)
-        print(''.join(errMsg))
+            errMessage.append(", ")
+            errMessage.append(osErr.filename2)
+        print(''.join(errMessage))
     except FatalError as ferr:
         exitCode = 4
         print(errMsgSuffix, ferr.getErrMsg())

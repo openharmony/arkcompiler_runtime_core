@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -93,7 +93,6 @@ def walk_test_subdirs(path: Path, parent: Optional[TestDirectory] = None) -> Ite
     for name in os.listdir(str(path)):
         if (path / name).is_dir():
             subdirs.append(TestDirectory(parent=parent, path=(path / name)))
-    # subdirs = sorted(subdirs, key=lambda dir: dir.test_id)
 
     for subdir in subdirs:
         yield subdir
@@ -106,7 +105,8 @@ def build_directory_tree(test_dir: TestDirectory) -> None:
     subdirs = []
     for name in os.listdir(str(test_dir.path)):
         if (test_dir.path / name).is_dir():
-            subdirs.append(TestDirectory(parent=test_dir, path=(test_dir.path / name)))
+            subdirs.append(TestDirectory(
+                parent=test_dir, path=(test_dir.path / name)))
     subdirs = sorted(subdirs, key=lambda dir: dir.test_id)
 
     for sub_dir in subdirs:
@@ -119,7 +119,8 @@ def print_tree(test_dir: TestDirectory) -> None:
         left_space = " " * 2 * len(sub_dir.full_index())
         section_index = str(sub_dir.test_id)
         section_name = sub_dir.name.replace("_", " ").title()
-        right_space = 90 - len(left_space) - len(section_index) - len(section_name)
+        right_space = 90 - len(left_space) - \
+            len(section_index) - len(section_name)
 
         print(left_space, section_index, section_name, "." * right_space, "\n")
         print_tree(sub_dir)
