@@ -662,3 +662,7 @@ spec/07.expressions/nullish-coalescing_expressions/issue14609_02.ets
 ### Issue 1654
 spec/07.expressions/nullish-coalescing_expressions/issue14609_01.ets
 ### Issue 1654 end
+
+### Issue 1643
+spec/13.Compilation_Units_Packages_and_Modules/import_export/issue14991_01.ets
+### Issue 1643 end
