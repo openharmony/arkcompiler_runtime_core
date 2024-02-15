@@ -411,66 +411,6 @@ run_deterministic_tests(GEN_STD_LIB
                         ITER_NUM 3)
 #add_dependencies(ets_tests ets-stdlib-deterministic)
 
-add_custom_target(ets-func-tests-run)
-add_custom_target(ets-func-tests-run-int)
-add_custom_target(ets-func-tests-run-jit)
-add_dependencies(ets-func-tests-run ets-func-tests-run-int ets-func-tests-run-jit)
-add_dependencies(ets_tests ets-func-tests-run)
-
-set (ETS_RUNNER ${CMAKE_SOURCE_DIR}/tests/tests-u-runner/runner.sh)
-set (ETS_RESULT_FOLDER ${CMAKE_BINARY_DIR}/tests/ets-func-tests)
-
-# It takes too much time to run all ets-func-tests on CI by cmake so they run in separate job
-# and here we run only a small subset. 
-# All possible groups are listed in the file tests/tests-u-runner/test-lists/ets-func-tests/chapters.yaml
-set(ETS_FUNC_TESTS_GROUPS
-   "algorithms-dir"
-   "regression-dir"
-)
-
-set(TIMEOUT 60)
-if(PANDA_ENABLE_UNDEFINED_BEHAVIOR_SANITIZER OR PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER)
-    set(TIMEOUT 120)
-endif()
-
-# TODO(nsizov): remove this if when runner will be able to resole host tools
-if(NOT CMAKE_CROSSCOMPILING)
-    set(ETS_FUNC_TESTS_DEPENDENCIES ark ark_aot es2panda verifier)
-    foreach(CURRENT_GROUP ${ETS_FUNC_TESTS_GROUPS})
-        add_custom_target(ets-func-tests-run-int-${CURRENT_GROUP})
-        add_custom_command(TARGET ets-func-tests-run-int-${CURRENT_GROUP}
-                        COMMAND ${ETS_RUNNER} ${CMAKE_SOURCE_DIR}
-                                                --ets-func-tests
-                                                --work-dir=${ETS_RESULT_FOLDER}/int-${CURRENT_GROUP}
-                                                --force-generate
-                                                --processes=1
-                                                --build-dir ${CMAKE_BINARY_DIR}
-                                                --chapter ${CURRENT_GROUP}
-                                                --es2panda-timeout=${TIMEOUT}
-                                                --timeout=${TIMEOUT}
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-        add_dependencies(ets-func-tests-run-int-${CURRENT_GROUP} ${ETS_FUNC_TESTS_DEPENDENCIES})
-        add_dependencies(ets-func-tests-run-int ets-func-tests-run-int-${CURRENT_GROUP})
-
-        add_custom_target(ets-func-tests-run-jit-${CURRENT_GROUP})
-        add_custom_command(TARGET ets-func-tests-run-jit-${CURRENT_GROUP}
-                        COMMAND ${ETS_RUNNER} ${CMAKE_SOURCE_DIR}
-                                                --ets-func-tests
-                                                --jit
-                                                --work-dir=${ETS_RESULT_FOLDER}/jit-${CURRENT_GROUP}
-                                                --force-generate
-                                                --processes=1
-                                                --ark-args='--compiler-ignore-failures=false'
-                                                --build-dir ${CMAKE_BINARY_DIR}
-                                                --chapter ${CURRENT_GROUP}
-                                                --es2panda-timeout=${TIMEOUT}
-                                                --timeout=${TIMEOUT}
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-        add_dependencies(ets-func-tests-run-jit-${CURRENT_GROUP} ${ETS_FUNC_TESTS_DEPENDENCIES})
-        add_dependencies(ets-func-tests-run-jit ets-func-tests-run-jit-${CURRENT_GROUP})
-    endforeach()
-endif()
-
 if(NOT CMAKE_CROSSCOMPILING)
     if (NOT (PANDA_ENABLE_ADDRESS_SANITIZER OR PANDA_ENABLE_THREAD_SANITIZER) OR
         NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
