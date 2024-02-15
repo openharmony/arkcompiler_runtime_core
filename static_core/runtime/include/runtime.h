@@ -127,7 +127,7 @@ public:
     template <typename Handler>
     static auto GetCurrentSync(Handler &&handler)
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+        os::memory::LockHolder lock(mutex_);
         return handler(*GetCurrent());
     }
 

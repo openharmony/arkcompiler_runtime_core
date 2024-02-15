@@ -246,7 +246,7 @@ bool Runtime::CreateInstance(const RuntimeOptions &options, mem::InternalAllocat
     }
 
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+        os::memory::LockHolder lock(mutex_);
 
         if (instance_ != nullptr) {
             return false;
@@ -381,7 +381,7 @@ Runtime *Runtime::GetCurrent()
 /* static */
 bool Runtime::DestroyUnderLockHolder()
 {
-    os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+    os::memory::LockHolder lock(mutex_);
 
     if (instance_ == nullptr) {
         return false;
@@ -1205,7 +1205,7 @@ int Runtime::StartDProfiler(std::string_view appName)
 
 Runtime::DebugSessionHandle Runtime::StartDebugSession()
 {
-    os::memory::LockHolder<os::memory::Mutex> lock(debugSessionCreationMutex_);
+    os::memory::LockHolder lock(debugSessionCreationMutex_);
 
     auto session = debugSession_;
     if (session) {

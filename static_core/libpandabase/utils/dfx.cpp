@@ -108,7 +108,7 @@ void DfxController::Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> op
         return;
     }
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+        os::memory::LockHolder lock(mutex_);
         if (IsInitialized()) {
             dfxController_->SetDefaultOption();
             return;
@@ -125,7 +125,7 @@ void DfxController::Initialize()
         return;
     }
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+        os::memory::LockHolder lock(mutex_);
         if (IsInitialized()) {
             dfxController_->SetDefaultOption();
             return;
@@ -182,7 +182,7 @@ void DfxController::Destroy()
     }
     DfxController *d = nullptr;
     {
-        os::memory::LockHolder<os::memory::Mutex> lock(mutex_);
+        os::memory::LockHolder lock(mutex_);
         if (!IsInitialized()) {
             return;
         }

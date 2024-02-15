@@ -24,9 +24,11 @@
 
 #include "clang.h"
 #include "macros.h"
+#include "os/thread.h"
 
 #include <atomic>
 #include <pthread.h>
+#include <tuple>
 
 namespace ark::os::memory {
 
@@ -36,6 +38,18 @@ namespace ark::os::memory {
 class DummyLock {
 public:
     void Lock() const {}
+    bool TryLock() const
+    {
+        return true;
+    }
+    bool TryReadLock() const
+    {
+        return true;
+    }
+    bool TryWriteLock() const
+    {
+        return true;
+    }
     void Unlock() const {}
     void ReadLock() const {}
     void WriteLock() const {}
@@ -220,6 +234,183 @@ private:
 
     NO_COPY_SEMANTIC(WriteLockHolder);
     NO_MOVE_SEMANTIC(WriteLockHolder);
+};
+
+enum class LockType : uint8_t {
+    LOCK,
+    READ_LOCK,
+    WRITE_LOCK,
+};
+
+namespace detail {
+
+template <LockType TYPE, class L>
+inline bool TryLockMutex(L &lock) NO_THREAD_SAFETY_ANALYSIS
+{
+    if constexpr (TYPE == LockType::LOCK) {
+        return lock.TryLock();
+    } else if constexpr (TYPE == LockType::READ_LOCK) {
+        return lock.TryReadLock();
+    } else if constexpr (TYPE == LockType::WRITE_LOCK) {
+        return lock.TryWriteLock();
+    }
+    return true;
+}
+
+template <LockType TYPE, class L>
+inline int TryLock(L &lock)
+{
+    if (TryLockMutex<TYPE>(lock)) {
+        return -1;
+    }
+    return 0;
+}
+
+template <LockType TYPE, class L0, class... L1>
+inline int TryLock(L0 &lock0, L1 &...rest) NO_THREAD_SAFETY_ANALYSIS
+{
+    if (TryLockMutex<TYPE>(lock0)) {
+        int failedIndex = TryLock<TYPE>(rest...);
+        if (failedIndex == -1) {
+            return -1;
+        }
+        lock0.Unlock();
+        return failedIndex + 1;
+    }
+    return 0;
+}
+
+template <LockType TYPE, class L>
+inline void LockMutex(L &lock) NO_THREAD_SAFETY_ANALYSIS
+{
+    if constexpr (TYPE == LockType::LOCK) {
+        lock.Lock();
+    } else if constexpr (TYPE == LockType::READ_LOCK) {
+        lock.ReadLock();
+    } else if constexpr (TYPE == LockType::WRITE_LOCK) {
+        lock.WriteLock();
+    }
+}
+
+}  // namespace detail
+
+template <LockType TYPE, class L0>
+inline void Lock(L0 &lock)
+{
+    detail::LockMutex<TYPE>(lock);
+}
+
+template <LockType TYPE, class L0, class... L1>
+void Lock(L0 &lock0, L1 &...rest) NO_THREAD_SAFETY_ANALYSIS
+{
+    detail::LockMutex<TYPE>(lock0);
+    int failedIndex = detail::TryLock<TYPE>(rest...);
+    if (failedIndex == -1) {
+        return;
+    }
+
+    lock0.Unlock();
+    thread::Yield();
+    Lock<TYPE>(rest..., lock0);
+}
+
+/**
+ * @brief RAII handle for locking an arbitrary number of mutexes using a deadlock avoidance algorithm
+ * @warning: Does not support thread safety analysis
+ * @tparam locks - locks to be locked for the scope duration
+ * @tparam NEED_LOCK - specifies whether the locks are actually aquired
+ */
+template <bool NEED_LOCK = true, class... T>
+class ScopedLock {
+public:
+    explicit ScopedLock(T &...locks) : locks_(std::tie(locks...))
+    {
+        static_assert(sizeof...(T) > 0, "ScopedLock argument list can not be empty");
+
+        if constexpr (NEED_LOCK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            Lock<LockType::LOCK>(locks...);
+        }
+    }
+
+    ~ScopedLock()
+    {
+        if constexpr (NEED_LOCK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            auto unlock = [](auto &...lock) NO_THREAD_SAFETY_ANALYSIS { (lock.Unlock(), ...); };
+            std::apply(unlock, locks_);
+        }
+    }
+
+private:
+    std::tuple<T &...> locks_;
+
+    NO_COPY_SEMANTIC(ScopedLock);
+    NO_MOVE_SEMANTIC(ScopedLock);
+};
+
+/**
+ * @brief RAII handle for read locking an arbitrary number of mutexes using a deadlock avoidance algorithm
+ * @warning: Does not support thread safety analysis
+ * @tparam locks - locks to be locked for the scope duration
+ * @tparam NEED_LOCK - specifies whether the locks are actually aquired
+ */
+template <bool NEED_LOCK = true, class... T>
+class ReadScopedLock {
+public:
+    explicit ReadScopedLock(T &...locks) : locks_(std::tie(locks...))
+    {
+        static_assert(sizeof...(T) > 0, "ReadScopedLock argument list can not be empty");
+
+        if constexpr (NEED_LOCK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            Lock<LockType::READ_LOCK>(locks...);
+        }
+    }
+
+    ~ReadScopedLock()
+    {
+        if constexpr (NEED_LOCK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            auto unlock = [](auto &...lock) NO_THREAD_SAFETY_ANALYSIS { (lock.Unlock(), ...); };
+            std::apply(unlock, locks_);
+        }
+    }
+
+private:
+    std::tuple<T &...> locks_;
+
+    NO_COPY_SEMANTIC(ReadScopedLock);
+    NO_MOVE_SEMANTIC(ReadScopedLock);
+};
+
+/**
+ * @brief RAII handle for write locking an arbitrary number of mutexes using a deadlock avoidance algorithm
+ * @warning: Does not support thread safety analysis
+ * @tparam locks - locks to be locked for the scope duration
+ * @tparam NEED_LOCK - specifies whether the locks are actually aquired
+ */
+template <bool NEED_LOCK = true, class... T>
+class WriteScopedLock {
+public:
+    explicit WriteScopedLock(T &...locks) : locks_(std::tie(locks...))
+    {
+        static_assert(sizeof...(T) > 0, "WriteLockHolder argument list can not be empty");
+
+        if constexpr (NEED_LOCK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            Lock<LockType::WRITE_LOCK>(locks...);
+        }
+    }
+
+    ~WriteScopedLock()
+    {
+        if constexpr (NEED_LOCK) {  // NOLINTNEXTLINE(readability-braces-around-statements)
+            auto unlock = [](auto &...lock) NO_THREAD_SAFETY_ANALYSIS { (lock.Unlock(), ...); };
+            std::apply(unlock, locks_);
+        }
+    }
+
+private:
+    std::tuple<T &...> locks_;
+
+    NO_COPY_SEMANTIC(WriteScopedLock);
+    NO_MOVE_SEMANTIC(WriteScopedLock);
 };
 
 }  // namespace ark::os::memory
