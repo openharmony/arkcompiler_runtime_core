@@ -49,6 +49,49 @@ export final class Runtime {
         return o1!.equals(o2!);
     }
 
+    public sameValue(o1: NullishType, o2: NullishType): boolean {
+        if (this.isSameReference(o1, null)) {
+            return this.isSameReference(o2, null)
+        }
+        if (this.isSameReference(o1, undefined)) {
+            return this.isSameReference(o2, undefined)
+        }
+        if (this.isSameReference(o2, null) || this.isSameReference(o2, undefined)) {
+            return false;
+        }
+        if (o1 instanceof Number && o2 instanceof Number) {
+            const n1 = (o1 as Number).valueOf()
+            const n2 = (o2 as Number).valueOf()
+            const pos0 = Double.bitCastToLong(+0);
+            const neg0 = Double.bitCastToLong(-0);
+            if (n1 == 0 || n2 == 0) {
+                return Double.bitCastToLong(n1) == Double.bitCastToLong(n2);
+            }
+            if (isNaN(n1) != isNaN(n2)) {
+                return false;
+            }
+            if (isNaN(n1)) {
+                return true;
+            }
+            if (n1 == n2) {
+                return true;
+            }
+        }
+        return o1!.equals(o2!);
+    }
+
+    public sameValueZero(o1: NullishType, o2: NullishType): boolean {
+        if (this.sameValue(o1, o2)) {
+            return true;
+        }
+        if (o1 instanceof Number && o2 instanceof Number) {
+            const n1 = (o1 as Number).valueOf()
+            const n2 = (o2 as Number).valueOf()
+            return n1 == 0 && n2 == 0;
+        }
+        return false;
+    }
+
     /**
      * Checks if two references point to a same object/value.
      *
@@ -65,6 +108,14 @@ export const runtime = new Runtime();
 
 export function __runtimeEquals(o1: NullishType, o2: NullishType): boolean {
     return runtime.equals(o1, o2)
+}
+
+export function __runtimeSameValueZero(o1: NullishType, o2: NullishType): boolean {
+    return runtime.sameValueZero(o1, o2)
+}
+
+export function __runtimeSameValue(o1: NullishType, o2: NullishType): boolean {
+    return runtime.sameValue(o1, o2)
 }
 
 export function __runtimeIsSameReference(o1: NullishType, o2: NullishType): boolean {

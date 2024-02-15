@@ -47,7 +47,7 @@ class ArrayValuesIterator<T> implements IterableIterator<T> {
         if (this.idx >= this.parent.length) {
             return new IteratorResult<T>()
         }
-        return new IteratorResult<T>(this.parent.at(this.idx++)!)
+        return new IteratorResult<T>(this.parent.at(this.idx++) as T)
     }
 
     override iterator(): IterableIterator<T> {

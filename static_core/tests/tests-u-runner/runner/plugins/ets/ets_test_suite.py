@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,7 +34,7 @@ from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_dir import EtsTestDir
 from runner.plugins.ets.ets_utils import ETSUtils
 from runner.plugins.ets.preparation_step import TestPreparationStep, CtsTestPreparationStep, \
-    FuncTestPreparationStep, JitStep, CopyStep
+    FuncTestPreparationStep, ESCheckedTestPreparationStep, JitStep, CopyStep
 from runner.plugins.ets.runtime_default_ets_test_dir import RuntimeDefaultEtsTestDir
 from runner.plugins.work_dir import WorkDir
 
@@ -61,6 +61,7 @@ class EtsTestSuite(ABC):
             EtsSuites.CTS.value: CtsEtsTestSuite,
             EtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
             EtsSuites.GCSTRESS.value: GCStressEtsTestSuite,
+            EtsSuites.ESCHECKED.value: ESCheckedEtsTestSuite,
         }
         return name_to_class[ets_suite_name]
 
@@ -185,6 +186,30 @@ class FuncEtsTestSuite(EtsTestSuite):
         ))
         self._preparation_steps.append(CopyStep(
             test_source_path=self._ets_test_dir.ets_func_tests,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        if self._is_jit:
+            self._preparation_steps.append(JitStep(
+                test_source_path=self.test_root,
+                test_gen_path=self.test_root,
+                config=self.config,
+                num_repeats=self._jit.num_repeats
+            ))
+
+class ESCheckedEtsTestSuite(EtsTestSuite):
+    def __init__(self, config: Config, work_dir: WorkDir, default_list_root: str):
+        super().__init__(config, work_dir, EtsSuites.ESCHECKED.value, default_list_root)
+        self._ets_test_dir = EtsTestDir(config.general.static_core_root, config.general.test_root)
+        self.set_preparation_steps()
+    def set_preparation_steps(self) -> None:
+        self._preparation_steps.append(ESCheckedTestPreparationStep(
+            test_source_path=self._ets_test_dir.ets_es_checked,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        self._preparation_steps.append(CopyStep(
+            test_source_path=self._ets_test_dir.ets_es_checked,
             test_gen_path=self.test_root,
             config=self.config
         ))

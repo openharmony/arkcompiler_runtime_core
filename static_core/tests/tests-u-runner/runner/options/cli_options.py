@@ -100,6 +100,9 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
     ets_mutex_group.add_argument(
         '--ets-cts', action='store_true', dest='ets_cts',
         default=None, help='run ets-templates tests')
+    ets_mutex_group.add_argument(
+        '--ets-es-checked', action='store_true', dest='ets_es_checked',
+        default=None, help='run es checked templates tests')
 
 
 def add_ets_args(parser: argparse.ArgumentParser) -> None:
