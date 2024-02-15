@@ -426,7 +426,7 @@ bool LLVMIrConstructor::TryEmitIntrinsic(Inst *inst, RuntimeInterface::Intrinsic
                                                   LLVMArkInterface::RuntimeCallType::INTRINSIC,
                                                   static_cast<LLVMArkInterface::EntrypointId>(arkId));
 
-    auto args = GetIntrinsicArguments(llvmId->getFunctionType(), inst);
+    auto args = GetIntrinsicArguments(llvmId->getFunctionType(), inst->CastToIntrinsic());
     auto llvmIntrinsicCall = llvm::CallInst::Create(llvmId, args, "", GetCurrentBasicBlock());
     ValueMapAdd(inst, llvmIntrinsicCall);
     return true;
@@ -1016,7 +1016,7 @@ llvm::CallInst *LLVMIrConstructor::CreateIntrinsicCall(Inst *inst)
     auto rtFunctionTy = arkInterface_->GetOrCreateRuntimeFunctionType(
         func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::INTRINSIC,
         static_cast<LLVMArkInterface::EntrypointId>(entryId));
-    auto arguments = GetIntrinsicArguments(rtFunctionTy, inst);
+    auto arguments = GetIntrinsicArguments(rtFunctionTy, inst->CastToIntrinsic());
     return CreateIntrinsicCall(inst, entryId, arguments);
 }
 
@@ -2269,19 +2269,31 @@ ArenaVector<llvm::Value *> LLVMIrConstructor::GetArgumentsForCall(llvm::Value *c
 }
 
 ArenaVector<llvm::Value *> LLVMIrConstructor::GetIntrinsicArguments(llvm::FunctionType *intrinsicFunctionType,
-                                                                    Inst *inst)
+                                                                    IntrinsicInst *inst)
 {
     ASSERT(intrinsicFunctionType != nullptr);
     ASSERT(inst != nullptr);
 
     ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
-    for (size_t i = 0; i < intrinsicFunctionType->getNumParams(); i++) {
+
+    if (inst->IsMethodFirstInput()) {
+        args.push_back(GetMethodArgument());
+    }
+    if (inst->HasImms()) {
+        for (uint64_t imm : inst->GetImms()) {
+            size_t index = args.size();
+            auto type = intrinsicFunctionType->getParamType(index);
+            args.push_back(llvm::ConstantInt::get(type, imm));
+        }
+    }
+    for (size_t i = 0; i < inst->GetInputsCount(); i++) {
         // Skip SaveState
         if (inst->GetInput(i).GetInst()->IsSaveState()) {
             continue;
         }
         args.push_back(GetInputValue(inst, i));
     }
+    ASSERT(intrinsicFunctionType->getNumParams() == args.size());
     return args;
 }
 

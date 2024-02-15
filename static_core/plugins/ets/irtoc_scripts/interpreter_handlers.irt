@@ -14,6 +14,64 @@
 
 include_relative '../../plugins/ets/irtoc_scripts/common.irt'
 
+macro(:lookup_field_by_name) do |v, id|
+  res := cache_entry(id, false, false, :ptr, nil).ptr
+  res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
+  method_flag = AndI(res_u64).Imm(0x1).u64
+  If(res, 0).NE.Likely {
+    If(method_flag, 0x1).NE.Likely {
+      field_class := LoadI(res).Imm(Constants::FIELD_CLASS_OFFSET).ref
+      If(field_class, v).EQ.Likely {
+        field_0 := res
+        Goto(:Exit_0)
+      }
+    }
+  }
+  field_1 := call_runtime("LookupFieldByNameEntrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
+  Label(:Exit_0)
+  Phi(field_0.ptr, field_1.ptr).ptr
+end
+
+['short', 'long', 'obj'].each do |flavor|
+  macro(:"lookup_getter_by_name_#{flavor}") do |v, id|
+    res := cache_entry(id, false, false, :ptr, nil)
+    res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
+    method_flag = AndI(res_u64).Imm(0x1).u64
+    If(res, 0).NE.Likely {
+      If(method_flag, 0x1).EQ.Likely {
+        method_class := LoadI(res).Imm(Constants::METHOD_CLASS_OFFSET).ref
+        If(method_class, v).EQ.Likely {
+          method_0 := res
+          Goto(:Exit_1)
+        }
+      }
+    }
+    method_1 := call_runtime("LookupGetterByName#{flavor.capitalize}Entrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
+    Label(:Exit_1)
+    Phi(method_0, method_1).ptr
+  end
+end
+
+['short', 'long', 'obj'].each do |flavor|
+  macro(:"lookup_setter_by_name_#{flavor}") do |v, id|
+    res := cache_entry(id, false, false, :ptr, nil)
+    res_u64 := Bitcast(res).SrcType("DataType::POINTER").u64
+    method_flag = AndI(res_u64).Imm(0x1).u64
+    If(res, 0).NE.Likely {
+      If(method_flag, 0x1).EQ.Likely {
+        method_class := LoadI(res).Imm(Constants::METHOD_CLASS_OFFSET).ref
+        If(method_class, v).EQ.Likely {
+          method_0 := res
+          Goto(:Exit_1)
+        }
+      }
+    }
+    method_1 := call_runtime("LookupSetterByName#{flavor.capitalize}Entrypoint", get_cache_entry_ptr(), v, id, get_method_ptr(), %pc).ptr
+    Label(:Exit_1)
+    Phi(method_0, method_1).ptr
+  end
+end
+
 ['static', 'virt'].each do |dispatch|
   ['short', 'long', 'range'].each do |flavor|
     macro(:"handle_ets_launch_#{dispatch}_#{flavor}") do |v, id|
@@ -38,4 +96,148 @@ end
 
 macro(:handle_ets_isundefined) do
   set_acc_primitive(btou32(Compare(acc.ref, ets_undefined).b))
+end
+
+macro(:"load_field_short") do |field, klass|
+  acc_field := acc
+  offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
+  field_access_flags := LoadI(field).Imm(Constants::FIELD_ACCESS_FLAGS_OFFSET).u32
+  field_type_id := ShrI(AndI(field_access_flags).Imm("ACC_TYPE").u32).Imm("ACC_TYPE_SHIFT").u32
+  If(field_type_id, 0x7).LT {
+    [[0x2, "u8"], [0x3, "i8"], [0x4, "u8"], [0x5, "i16"], [0x6, "u16"]].each do |typeid, field_type|
+      If(field_type_id, typeid).EQ {
+        store_type = field_type[0] + "32"
+        value_0 := Load(klass, offset).send(:"#{field_type}")
+        acc_fast_value_0 := send(:"#{field_type}to#{store_type}", value_0.send(:"#{field_type}"))
+      }
+      acc_field := Phi(acc_field.u64, acc_fast_value_0.u64).u64
+    end
+    acc_fast_0 := acc_field
+  } Else {
+    value_1 := Load(klass, offset).u32
+    acc_fast_1 := u32tou64(value_1.u32)
+  }
+  Phi(acc_fast_0.u64, acc_fast_1.u64).u64
+end
+
+macro(:"load_field_long") do |field, klass|
+  offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
+  Load(klass, offset).u64
+end
+
+macro(:"load_field_obj") do |field, klass|
+  offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
+  Load(klass, offset).ref
+end
+
+['short', 'long', 'obj'].each do |flavor|
+  macro(:"handle_ets_ldobj_name_#{flavor}") do |v, id, size|
+    klass := vreg_value(v).ref
+    If(klass, 0).EQ.Unlikely {
+      call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+      move_to_exception
+    }
+    field := lookup_field_by_name(klass, id)
+    if flavor != 'obj'
+      acc := acc.u64
+    else
+      acc := acc.ref
+    end
+    If(field, 0).NE.Likely {
+      acc_fast := send(:"load_field_#{flavor}", field, klass)
+    } Else {
+      method := send(:"lookup_getter_by_name_#{flavor}", klass, id)
+      If(method, 0).EQ.Unlikely {
+        call_runtime("ThrowEtsExceptionNoSuchGetterEntrypoint", klass, id, get_method_ptr()).void
+        move_to_exception
+      }
+      method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
+      nargs := u32toword(LoadI(method).Imm(Constants::METHOD_NUM_ARGS_OFFSET).u32)
+      generic_call(id, size, false, method, nargs, lambda do |new_frame, num_vregs, _, new_moffset|
+        copy_reg(new_frame, num_vregs, v, new_moffset)
+      end)
+      dec_pc := SubI(pc).Imm(size).ptr
+    }
+    if flavor != 'obj'
+      set_acc_primitive(Phi(acc_fast.u64, acc.u64).u64)
+    else
+      set_acc_object(Phi(acc_fast.ref, acc.ref).ref)
+    end
+    frame := Phi(%frame, frame).ptr
+    if Options.arm64?
+      moffset := Phi(%moffset, moffset).word
+      method_ptr := Phi(%method_ptr, method_ptr).ptr
+    end
+    pc := Phi(%pc, dec_pc).ptr
+  end
+end
+
+macro(:"store_field_short") do |field, klass|
+  acc_field := acc
+  offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
+  field_access_flags := LoadI(field).Imm(Constants::FIELD_ACCESS_FLAGS_OFFSET).u32
+  field_type_id := ShrI(AndI(field_access_flags).Imm("ACC_TYPE").u32).Imm("ACC_TYPE_SHIFT").u32
+  If(field_type_id, 0x7).LT {
+    [[0x2, "u8"], [0x3, "i8"], [0x4, "u8"], [0x5, "i16"], [0x6, "u16"]].each do |typeid, field_type|
+      If(field_type_id, typeid).EQ {
+        acc_type = field_type[0] + "32"
+        Store(klass, offset, acc_field.send(:"#{acc_type}")).send(:"#{field_type}")
+      }
+    end
+  } Else {
+    Store(klass, offset, acc_field.u32).u32
+  }
+end
+
+macro(:"store_field_long") do |field, klass|
+  offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
+  Store(klass, offset, acc.u64).u64
+end
+
+macro(:"store_field_obj") do |field, klass|
+  offset := LoadI(field).Imm(Constants::FIELD_OFFSET_OFFSET).u32
+  Store(klass, offset, acc).SetNeedBarrier(true).ref
+end
+
+['short', 'long', 'obj'].each do |flavor|
+  macro(:"handle_ets_stobj_name_#{flavor}") do |v, id, size|
+    klass := vreg_value(v).ref
+    If(klass, 0).EQ.Unlikely {
+      call_runtime("ThrowNullPointerExceptionFromInterpreter").void
+      move_to_exception
+    }
+    field := lookup_field_by_name(klass, id)
+    If(field, 0).NE.Likely {
+      send(:"store_field_#{flavor}", field, klass)
+      Goto(:Exit_)
+    } Else {
+      method := send(:"lookup_setter_by_name_#{flavor}", klass, id)
+      If(method, 0).EQ.Unlikely {
+        call_runtime("ThrowEtsExceptionNoSuchSetterEntrypoint", klass, id, get_method_ptr()).void
+        move_to_exception
+      }
+      method_flags := LoadI(method).Imm(Constants::METHOD_ACCESS_FLAGS_OFFSET).u32
+      nargs := u32toword(LoadI(method).Imm(Constants::METHOD_NUM_ARGS_OFFSET).u32)
+      generic_call(id, size, false, method, nargs, lambda do |new_frame, num_vregs, _, new_moffset|
+        copy_reg(new_frame, num_vregs, v, new_moffset)
+        copy_acc_to_reg(new_frame, frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(1).word), new_moffset)
+      end)
+      dec_pc := SubI(pc).Imm(size).ptr
+    }
+    Label(:Exit_)
+    if flavor == 'short'
+      acc := Phi(%acc, %acc, acc).u32
+    elsif flavor == 'long'
+      acc := Phi(%acc, %acc, acc).u64
+    elsif flavor == 'obj'
+      acc := Phi(%acc, %acc, acc).ref
+    end
+    acc_tag := Phi(%acc_tag, %acc_tag, acc_tag).u64
+    frame := Phi(%frame, %frame, frame).ptr
+    if Options.arm64?
+      moffset := Phi(%moffset, %moffset, moffset).word
+      method_ptr := Phi(%method_ptr, %method_ptr, method_ptr).ptr
+    end
+    pc := Phi(%pc, %pc, dec_pc).ptr
+  end
 end

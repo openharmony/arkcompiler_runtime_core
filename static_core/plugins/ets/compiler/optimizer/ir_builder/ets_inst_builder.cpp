@@ -145,6 +145,7 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::
         case DataType::UINT64:
         case DataType::INT64:
             id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I64;
+            type = DataType::INT64;
             break;
         case DataType::UINT8:
         case DataType::INT8:
@@ -153,12 +154,13 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::
         case DataType::UINT32:
         case DataType::INT32:
             id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32;
+            type = DataType::INT32;
             break;
         default:
             UNREACHABLE();
             break;
     }
-    auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, id);
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::VOID, pc, id);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3_I);
 
     intrinsic->AppendInput(nullCheck);

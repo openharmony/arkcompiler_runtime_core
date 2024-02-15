@@ -22,10 +22,13 @@
 using namespace std::literals::string_view_literals;  // Enables 'sv' suffix
 
 constexpr std::array NOALIAS_IRTOC_FUNC = {
-    "CreateObjectByIdEntrypoint"sv,      "CreateObjectByClassInterpreter"sv, "CreateArrayByIdEntrypoint"sv,
+    "CreateObjectByIdEntrypoint"sv,        "CreateObjectByClassInterpreter"sv,   "CreateArrayByIdEntrypoint"sv,
     "CreateMultiDimensionalArrayById"sv,
 #ifdef PANDA_WITH_ETS
-    "LaunchFromInterpreterShort"sv,      "LaunchFromInterpreterLong"sv,      "LaunchFromInterpreterRange"sv,
+    "LaunchFromInterpreterShort"sv,        "LaunchFromInterpreterLong"sv,        "LaunchFromInterpreterRange"sv,
+    "LookupGetterByNameShortEntrypoint"sv, "LookupGetterByNameLongEntrypoint"sv, "LookupGetterByNameObjEntrypoint"sv,
+    "LookupSetterByNameShortEntrypoint"sv, "LookupSetterByNameLongEntrypoint"sv, "LookupSetterByNameObjEntrypoint"sv,
+    "LookupFieldByNameEntrypoint"sv,
 #endif
 };
 
