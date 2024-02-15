@@ -34,8 +34,7 @@ inline StackLikeAllocator<ALIGNMENT, MAX_SIZE>::StackLikeAllocator(bool usePoolM
     if (usePoolManager_) {
         // clang-format off
         startAddr_ = PoolManager::GetMmapMemPool()
-                        ->AllocPool(MAX_SIZE, spaceType, AllocatorType::STACK_LIKE_ALLOCATOR, this)
-                        .GetMem();
+            ->AllocPool(MAX_SIZE, spaceType, AllocatorType::STACK_LIKE_ALLOCATOR, this).GetMem();
         // clang-format on
     } else {
         startAddr_ = ark::os::mem::MapRWAnonymousWithAlignmentRaw(

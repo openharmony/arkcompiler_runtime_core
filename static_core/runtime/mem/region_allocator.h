@@ -424,17 +424,12 @@ private:
             return GetCurrentRegion<atomic, REGION_TYPE>() == region;
         }
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
-            // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-            if constexpr (atomic) {
-                os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
-                for (auto i : *GetRegionQueuePointer<REGION_TYPE>()) {
-                    if (i == region) {
-                        return true;
-                    }
-                }
-                return false;
-            }
+        if constexpr (REGION_TYPE != RegionFlag::IS_OLD) {
+            LOG(FATAL, ALLOC) << "Region type is neither eden nor old";
+        }
+        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
+        if constexpr (atomic) {
+            os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
             for (auto i : *GetRegionQueuePointer<REGION_TYPE>()) {
                 if (i == region) {
                     return true;
@@ -442,7 +437,11 @@ private:
             }
             return false;
         }
-        UNREACHABLE();
+        for (auto i : *GetRegionQueuePointer<REGION_TYPE>()) {
+            if (i == region) {
+                return true;
+            }
+        }
         return false;
     }
 

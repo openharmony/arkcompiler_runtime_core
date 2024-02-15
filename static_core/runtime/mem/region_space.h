@@ -259,26 +259,9 @@ public:
         return reinterpret_cast<ObjectHeader *>(Begin());
     }
 
-    bool IsInRange(const ObjectHeader *object) const
-    {
-        return ToUintPtr(object) >= begin_ && ToUintPtr(object) < end_;
-    }
+    bool IsInRange(const ObjectHeader *object) const;
 
-    [[nodiscard]] bool IsInAllocRange(const ObjectHeader *object) const
-    {
-        bool inRange = false;
-        if (!IsTLAB()) {
-            inRange = (ToUintPtr(object) >= begin_ && ToUintPtr(object) < top_);
-        } else {
-            for (auto i : *tlabVector_) {
-                inRange = i->ContainObject(object);
-                if (inRange) {
-                    break;
-                }
-            }
-        }
-        return inRange;
-    }
+    [[nodiscard]] bool IsInAllocRange(const ObjectHeader *object) const;
 
     static bool IsAlignment(uintptr_t regionAddr, size_t regionSize)
     {
@@ -315,19 +298,9 @@ public:
     MarkBitmap *CreateMarkBitmap();
     MarkBitmap *CreateLiveBitmap();
 
-    void SwapMarkBitmap()
-    {
-        ASSERT(liveBitmap_ != nullptr);
-        ASSERT(markBitmap_ != nullptr);
-        std::swap(liveBitmap_, markBitmap_);
-    }
+    void SwapMarkBitmap();
 
-    void CloneMarkBitmapToLiveBitmap()
-    {
-        ASSERT(liveBitmap_ != nullptr);
-        ASSERT(markBitmap_ != nullptr);
-        markBitmap_->CopyTo(liveBitmap_);
-    }
+    void CloneMarkBitmapToLiveBitmap();
 
     void SetMarkBit(ObjectHeader *object);
 

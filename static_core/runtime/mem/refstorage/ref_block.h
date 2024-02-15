@@ -19,7 +19,7 @@
 #include <limits>
 
 #include "include/object_header.h"
-#include <libpandabase/mem/object_pointer.h>
+#include "libpandabase/mem/object_pointer.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "runtime/mem/object_helpers.h"
 #include "runtime/mem/gc/gc_root.h"

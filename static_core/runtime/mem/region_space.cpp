@@ -39,6 +39,27 @@ double Region::GetFragmentation() const
     return static_cast<double>(Size() - GetAllocatedBytes()) / Size();
 }
 
+bool Region::IsInRange(const ObjectHeader *object) const
+{
+    return ToUintPtr(object) >= begin_ && ToUintPtr(object) < end_;
+}
+
+bool Region::IsInAllocRange(const ObjectHeader *object) const
+{
+    bool inRange = false;
+    if (!IsTLAB()) {
+        inRange = (ToUintPtr(object) >= begin_ && ToUintPtr(object) < top_);
+    } else {
+        for (auto i : *tlabVector_) {
+            inRange = i->ContainObject(object);
+            if (inRange) {
+                break;
+            }
+        }
+    }
+    return inRange;
+}
+
 InternalAllocatorPtr Region::GetInternalAllocator()
 {
     return space_->GetPool()->GetInternalAllocator();
@@ -108,6 +129,20 @@ MarkBitmap *Region::CreateLiveBitmap()
     ASSERT(liveBitmap_ != nullptr);
     liveBitmap_->ClearAllBits();
     return liveBitmap_;
+}
+
+void Region::SwapMarkBitmap()
+{
+    ASSERT(liveBitmap_ != nullptr);
+    ASSERT(markBitmap_ != nullptr);
+    std::swap(liveBitmap_, markBitmap_);
+}
+
+void Region::CloneMarkBitmapToLiveBitmap()
+{
+    ASSERT(liveBitmap_ != nullptr);
+    ASSERT(markBitmap_ != nullptr);
+    markBitmap_->CopyTo(liveBitmap_);
 }
 
 void Region::SetMarkBit(ObjectHeader *object)

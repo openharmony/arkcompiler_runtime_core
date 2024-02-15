@@ -58,30 +58,29 @@ inline void PygoteSpaceAllocator<AllocConfigT>::SetState(PygoteSpaceState newSta
     ASSERT(newState > state_);
     state_ = newState;
 
-    if (state_ == STATE_PYGOTE_FORKED) {
-        // build bitmaps for used pools
-        runslotsAlloc_.memoryPool_.VisitAllPoolsWithOccupiedSize(
-            [this](void *mem, size_t usedSize, size_t /* size */) { CreateLiveBitmap(mem, usedSize); });
-        runslotsAlloc_.IterateOverObjects([this](ObjectHeader *object) {
-            if (!liveBitmaps_.empty()) {
-                for (auto bitmap : liveBitmaps_) {
-                    if (bitmap->IsAddrInRange(object)) {
-                        bitmap->Set(object);
-                        return;
-                    }
-                }
+    if (state_ != STATE_PYGOTE_FORKED) {
+        return;
+    }
+    // build bitmaps for used pools
+    runslotsAlloc_.memoryPool_.VisitAllPoolsWithOccupiedSize(
+        [this](void *mem, size_t usedSize, size_t) { CreateLiveBitmap(mem, usedSize); });
+    runslotsAlloc_.IterateOverObjects([this](ObjectHeader *object) {
+        for (auto bitmap : liveBitmaps_) {
+            if (bitmap->IsAddrInRange(object)) {
+                bitmap->Set(object);
+                return;
             }
-        });
-
-        // trim unused pages in runslots allocator
-        runslotsAlloc_.TrimUnsafe();
-
-        // only trim the last arena
-        if (arena_ != nullptr && arena_->GetFreeSize() >= ark::os::mem::GetPageSize()) {
-            uintptr_t start = AlignUp(ToUintPtr(arena_->GetAllocatedEnd()), ark::os::mem::GetPageSize());
-            uintptr_t end = ToUintPtr(arena_->GetArenaEnd());
-            os::mem::ReleasePages(start, end);
         }
+    });
+
+    // trim unused pages in runslots allocator
+    runslotsAlloc_.TrimUnsafe();
+
+    // only trim the last arena
+    if (arena_ != nullptr && arena_->GetFreeSize() >= ark::os::mem::GetPageSize()) {
+        uintptr_t start = AlignUp(ToUintPtr(arena_->GetAllocatedEnd()), ark::os::mem::GetPageSize());
+        uintptr_t end = ToUintPtr(arena_->GetArenaEnd());
+        os::mem::ReleasePages(start, end);
     }
 }
 
@@ -94,45 +93,46 @@ inline void *PygoteSpaceAllocator<AllocConfigT>::Alloc(size_t size, Alignment al
     // NOTE(yxr) : will optimzie this later, currently we use runslots as much as possible before we have crossing map
     // or mark card table with object header, also it will reduce the bitmap count which will reduce the gc mark time.
     void *obj = runslotsAlloc_.template Alloc<true, false>(size, align);
-    if (obj == nullptr) {
-        if (state_ == STATE_PYGOTE_INIT) {
-            // try again in lock
-            static os::memory::Mutex poolLock;
-            os::memory::LockHolder lock(poolLock);
-            obj = runslotsAlloc_.Alloc(size, align);
-            if (obj != nullptr) {
-                return obj;
-            }
+    if (obj != nullptr) {
+        return obj;
+    }
+    if (state_ == STATE_PYGOTE_INIT) {
+        // try again in lock
+        static os::memory::Mutex poolLock;
+        os::memory::LockHolder lock(poolLock);
+        obj = runslotsAlloc_.Alloc(size, align);
+        if (obj != nullptr) {
+            return obj;
+        }
 
-            auto pool = heapSpace_->TryAllocPool(RunSlotsAllocator<AllocConfigT>::GetMinPoolSize(), spaceType_,
-                                                 AllocatorType::RUNSLOTS_ALLOCATOR, this);
-            if (UNLIKELY(pool.GetMem() == nullptr)) {
+        auto pool = heapSpace_->TryAllocPool(RunSlotsAllocator<AllocConfigT>::GetMinPoolSize(), spaceType_,
+                                             AllocatorType::RUNSLOTS_ALLOCATOR, this);
+        if (UNLIKELY(pool.GetMem() == nullptr)) {
+            return nullptr;
+        }
+        if (!runslotsAlloc_.AddMemoryPool(pool.GetMem(), pool.GetSize())) {
+            LOG(FATAL, ALLOC) << "PygoteSpaceAllocator: couldn't add memory pool to object allocator";
+        }
+        // alloc object again
+        obj = runslotsAlloc_.Alloc(size, align);
+    } else {
+        if (arena_ != nullptr) {
+            obj = arena_->Alloc(size, align);
+        }
+        if (obj == nullptr) {
+            auto newArena =
+                heapSpace_->TryAllocArena(DEFAULT_ARENA_SIZE, spaceType_, AllocatorType::ARENA_ALLOCATOR, this);
+            if (newArena == nullptr) {
                 return nullptr;
             }
-            if (!runslotsAlloc_.AddMemoryPool(pool.GetMem(), pool.GetSize())) {
-                LOG(FATAL, ALLOC) << "PygoteSpaceAllocator: couldn't add memory pool to object allocator";
-            }
-            // alloc object again
-            obj = runslotsAlloc_.Alloc(size, align);
-        } else {
-            if (arena_ != nullptr) {
-                obj = arena_->Alloc(size, align);
-            }
-            if (obj == nullptr) {
-                auto newArena =
-                    heapSpace_->TryAllocArena(DEFAULT_ARENA_SIZE, spaceType_, AllocatorType::ARENA_ALLOCATOR, this);
-                if (newArena == nullptr) {
-                    return nullptr;
-                }
-                CreateLiveBitmap(newArena, DEFAULT_ARENA_SIZE);
-                newArena->LinkTo(arena_);
-                arena_ = newArena;
-                obj = arena_->Alloc(size, align);
-            }
-            liveBitmaps_.back()->Set(obj);  // mark live in bitmap
-            AllocConfigT::OnAlloc(size, spaceType_, memStats_);
-            AllocConfigT::MemoryInit(obj);
+            CreateLiveBitmap(newArena, DEFAULT_ARENA_SIZE);
+            newArena->LinkTo(arena_);
+            arena_ = newArena;
+            obj = arena_->Alloc(size, align);
         }
+        liveBitmaps_.back()->Set(obj);  // mark live in bitmap
+        AllocConfigT::OnAlloc(size, spaceType_, memStats_);
+        AllocConfigT::MemoryInit(obj);
     }
     return obj;
 }
@@ -221,20 +221,20 @@ template <typename Visitor>
 inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjectsInRange(const Visitor &visitor, void *start,
                                                                           void *end)
 {
-    if (!liveBitmaps_.empty()) {
-        for (auto bitmap : liveBitmaps_) {
-            auto [left, right] = bitmap->GetHeapRange();
-            left = std::max(ToUintPtr(start), left);
-            right = std::min(ToUintPtr(end), right);
-            if (left < right) {
-                bitmap->IterateOverMarkedChunkInRange(ToVoidPtr(left), ToVoidPtr(right), [&visitor](void *mem) {
-                    visitor(reinterpret_cast<ObjectHeader *>(mem));
-                });
-            }
-        }
-    } else {
+    if (liveBitmaps_.empty()) {
         ASSERT(arena_ == nullptr);
         runslotsAlloc_.IterateOverObjectsInRange(visitor, start, end);
+        return;
+    }
+    for (auto bitmap : liveBitmaps_) {
+        auto [left, right] = bitmap->GetHeapRange();
+        left = std::max(ToUintPtr(start), left);
+        right = std::min(ToUintPtr(end), right);
+        if (left < right) {
+            bitmap->IterateOverMarkedChunkInRange(ToVoidPtr(left), ToVoidPtr(right), [&visitor](void *mem) {
+                visitor(reinterpret_cast<ObjectHeader *>(mem));
+            });
+        }
     }
 }
 
