@@ -808,3 +808,7 @@ spec/09.classes/constructor-inheritance/issue14720_6.ets
 ## Issue 15553
 spec/functions/Issue-14273_0.ets
 spec/functions/Issue-14273_3.ets
+
+### Issue 15763
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
+### Issue 15763 end
