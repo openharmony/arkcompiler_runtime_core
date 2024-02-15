@@ -22,14 +22,14 @@
 namespace ark::tooling {
 class VRegValue {
 public:
-    explicit VRegValue(int64_t value = 0) : value_(value) {}
+    constexpr explicit VRegValue(int64_t value = 0) : value_(value) {}
 
-    int64_t GetValue() const
+    constexpr int64_t GetValue() const
     {
         return value_;
     }
 
-    void SetValue(int64_t value)
+    constexpr void SetValue(int64_t value)
     {
         value_ = value;
     }

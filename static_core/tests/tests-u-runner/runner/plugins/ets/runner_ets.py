@@ -19,7 +19,7 @@ import json
 import logging
 from os import path
 from pathlib import Path
-from typing import Set, List, Any
+from typing import List, Any
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.logger import Log
@@ -42,7 +42,7 @@ class RunnerETSException(Exception):
 
 class RunnerETS(RunnerFileBased):
     def __init__(self, config: Config):
-        self.__ets_suite_name = self.get_ets_suite_name(config.test_suites)
+        self.__ets_suite_name = self.get_ets_suite_name(config)
         RunnerFileBased.__init__(self, config, self.__ets_suite_name)
         self.stdlib_path = path.join(self.build_dir, "plugins/ets/etsstdlib.abc")
         if not path.exists(self.stdlib_path):
@@ -93,7 +93,8 @@ class RunnerETS(RunnerFileBased):
         test.ignored = is_ignored
         return test
 
-    def get_ets_suite_name(self, test_suites: Set[str]) -> str:
+    def get_ets_suite_name(self, config: Config) -> str:
+        test_suites = config.test_suites
         name = ""
         if "ets_func_tests" in test_suites:
             name = EtsSuites.FUNC.value
@@ -110,7 +111,7 @@ class RunnerETS(RunnerFileBased):
         elif 'sts_ts_subset' in test_suites:
             name = EtsSuites.TS_SUBSET.value
         else:
-            Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
+            Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {config.test_suites}")
         return name
 
     def _check_binary_artifacts(self) -> None:

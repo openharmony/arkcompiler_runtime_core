@@ -21,6 +21,7 @@ set(ARKINSPECTOR_ROOTS
     connection/endpoint_base.cpp
     connection/event_loop.cpp
     connection/server_endpoint_base.cpp
+    evaluation/helpers.cpp
     debug_info_cache.cpp
     debuggable_thread.cpp
     error.cpp
@@ -31,6 +32,7 @@ set(ARKINSPECTOR_ROOTS
     session_manager.cpp
     source_manager.cpp
     thread_state.cpp
+    types/exception_details.cpp
     types/location.cpp
     types/remote_object.cpp
     types/scope.cpp

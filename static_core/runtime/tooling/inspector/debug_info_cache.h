@@ -18,7 +18,7 @@
 
 #include "disassembler/disasm_backed_debug_info_extractor.h"
 
-#include "method.h"
+#include "runtime/include/method.h"
 #include "tooling/debugger.h"
 #include "runtime/include/typed_value.h"
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2019-2024 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef RUNTIME_TOOLING_PT_METHOD_PRIVATE_H
-#define RUNTIME_TOOLING_PT_METHOD_PRIVATE_H
-
-#include "runtime/include/tooling/debug_interface.h"
-
-// NOTE(maksenov): remove this file after refactoring js_runtime
-namespace ark {
-class Method;
-}  // namespace ark
-
-namespace ark::tooling {
-inline PtMethod MethodToPtMethod([[maybe_unused]] Method *method)
-{
-    return PtMethod();
-}
-}  // namespace ark::tooling
-
-#endif  // RUNTIME_TOOLING_PT_METHOD_PRIVATE_H
+const localVar = new S();
+// Result won't be returned due to non-primitive type.
+a.s.str = a.s.str + localVar.s.str + '2';

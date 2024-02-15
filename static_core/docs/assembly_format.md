@@ -11,7 +11,7 @@ Panda as a platform is multilingual and flexible by design:
 * Panda assembly should not "favor" by any means any existing programming language that is (or intended to be) supported by the platform. Instead, Panda assembly can be thought as a separate close-to-byte-code language with a minimal feature set. All language-specific "traits" that should be supported to generate valid executable binaries with respect to the higher-level semantics should be implemented via metadata annotations (see below).
 * Panda assembly should not focus on a certain programming paradigm. E.g. we should not enforce concepts of "class", "object", "method" at the assembly language level because we might support a language which does not implement classic OOP at all.
 * When Panda assembler generates a binary executable file, it is not expected to check for language semantics. This responsibility is delegate to "source to binaries" compilers and runtime.
-* Panda assembler should not impose any limitation of quantity and internal structure of source code files writtebn in Panda assembly language. Assembler should process as many input source code files as the developer specifies.
+* Panda assembler should not impose any limitation of quantity and internal structure of source code files written in Panda assembly language. Assembler should process as many input source code files as the developer specifies.
 * Panda assembler should not follow any implicit conventions about the name of the entry point.
 
 ## Comments
@@ -213,7 +213,7 @@ Whenever a record should incorporate another record, the name of the nested reco
 
 #### Informal Notice
 
-`.record`s are like `struct`s in C, but without support for "by instance" nesting. This is because the result of a field load should be valid for any member, hence a record member should fit the virtusal register. Constraints on register are defined in [Bytecode ISA Specification](isa/isa.yaml).
+`.record`s are like `struct`s in C, but without support for "by instance" nesting. This is because the result of a field load should be valid for any member, hence a record member should fit the virtual register. Constraints on register are defined in [Bytecode ISA Specification](isa/isa.yaml).
 
 ### Builtin Aggregate Data Types
 

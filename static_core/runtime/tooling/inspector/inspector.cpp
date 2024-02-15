@@ -83,6 +83,7 @@ Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart
     inspectorServer_.OnCallRuntimeEnable(std::bind(&Inspector::RuntimeEnable, this, _1));
     inspectorServer_.OnCallRuntimeGetProperties(std::bind(&Inspector::GetProperties, this, _1, _2, _3));
     inspectorServer_.OnCallRuntimeRunIfWaitingForDebugger(std::bind(&Inspector::RunIfWaitingForDebugger, this, _1));
+    inspectorServer_.OnCallRuntimeEvaluate(std::bind(&Inspector::Evaluate, this, _1, _2));
     // NOLINTEND(modernize-avoid-bind)
 
     serverThread_ = std::thread(&InspectorServer::Run, &inspectorServer_);
@@ -200,13 +201,31 @@ void Inspector::ThreadEnd(PtThread thread)
     threads_.erase(thread);
 }
 
+void Inspector::VmDeath()
+{
+    os::memory::WriteLockHolder lock(vmDeathLock_);
+
+    ASSERT(!isVmDead_);
+    isVmDead_ = true;
+}
+
 void Inspector::RuntimeEnable(PtThread thread)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     inspectorServer_.CallRuntimeExecutionContextCreated(thread);
 }
 
 void Inspector::RunIfWaitingForDebugger(PtThread thread)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
         it->second.Touch();
@@ -215,6 +234,11 @@ void Inspector::RunIfWaitingForDebugger(PtThread thread)
 
 void Inspector::Pause(PtThread thread)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
         it->second.Pause();
@@ -223,6 +247,11 @@ void Inspector::Pause(PtThread thread)
 
 void Inspector::Continue(PtThread thread)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
         it->second.Continue();
@@ -231,6 +260,11 @@ void Inspector::Continue(PtThread thread)
 
 void Inspector::SetBreakpointsActive(PtThread thread, bool active)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
         it->second.SetBreakpointsActive(active);
@@ -240,6 +274,11 @@ void Inspector::SetBreakpointsActive(PtThread thread, bool active)
 std::set<size_t> Inspector::GetPossibleBreakpoints(std::string_view sourceFile, size_t startLine, size_t endLine,
                                                    bool restrictToFunction)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return {};
+    }
+
     return debugInfoCache_.GetValidLineNumbers(sourceFile, startLine, endLine, restrictToFunction);
 }
 
@@ -247,6 +286,11 @@ std::optional<BreakpointId> Inspector::SetBreakpoint(PtThread thread,
                                                      const std::function<bool(std::string_view)> &sourceFilesFilter,
                                                      size_t lineNumber, std::set<std::string_view> &sourceFiles)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return {};
+    }
+
     if (auto it = threads_.find(thread); it != threads_.end()) {
         auto locations = debugInfoCache_.GetBreakpointLocations(sourceFilesFilter, lineNumber, sourceFiles);
         return it->second.SetBreakpoint(locations);
@@ -257,6 +301,11 @@ std::optional<BreakpointId> Inspector::SetBreakpoint(PtThread thread,
 
 void Inspector::RemoveBreakpoint(PtThread thread, BreakpointId id)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
         it->second.RemoveBreakpoint(id);
@@ -265,6 +314,11 @@ void Inspector::RemoveBreakpoint(PtThread thread, BreakpointId id)
 
 void Inspector::SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
         it->second.SetPauseOnExceptions(state);
@@ -273,8 +327,18 @@ void Inspector::SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState sta
 
 void Inspector::StepInto(PtThread thread)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
+        if (UNLIKELY(!it->second.IsPaused())) {
+            LogDebuggerNotPaused("stepInto");
+            return;
+        }
+
         auto frame = debugger_.GetCurrentFrame(thread);
         if (!frame) {
             HandleError(frame.Error());
@@ -287,8 +351,18 @@ void Inspector::StepInto(PtThread thread)
 
 void Inspector::StepOver(PtThread thread)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
+        if (UNLIKELY(!it->second.IsPaused())) {
+            LogDebuggerNotPaused("stepOver");
+            return;
+        }
+
         auto frame = debugger_.GetCurrentFrame(thread);
         if (!frame) {
             HandleError(frame.Error());
@@ -301,8 +375,18 @@ void Inspector::StepOver(PtThread thread)
 
 void Inspector::StepOut(PtThread thread)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
+        if (UNLIKELY(!it->second.IsPaused())) {
+            LogDebuggerNotPaused("stepOut");
+            return;
+        }
+
         HandleError(debugger_.NotifyFramePop(thread, 0));
         it->second.StepOut();
     }
@@ -310,16 +394,36 @@ void Inspector::StepOut(PtThread thread)
 
 void Inspector::ContinueToLocation(PtThread thread, std::string_view sourceFile, size_t lineNumber)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
+        if (UNLIKELY(!it->second.IsPaused())) {
+            LogDebuggerNotPaused("continueToLocation");
+            return;
+        }
+
         it->second.ContinueTo(debugInfoCache_.GetContinueToLocations(sourceFile, lineNumber));
     }
 }
 
 void Inspector::RestartFrame(PtThread thread, FrameId frameId)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return;
+    }
+
     auto it = threads_.find(thread);
     if (it != threads_.end()) {
+        if (UNLIKELY(!it->second.IsPaused())) {
+            LogDebuggerNotPaused("restartFrame");
+            return;
+        }
+
         if (auto error = debugger_.RestartFrame(thread, frameId)) {
             HandleError(*error);
             return;
@@ -331,6 +435,11 @@ void Inspector::RestartFrame(PtThread thread, FrameId frameId)
 
 std::vector<PropertyDescriptor> Inspector::GetProperties(PtThread thread, RemoteObjectId objectId, bool generatePreview)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return {};
+    }
+
     std::optional<std::vector<PropertyDescriptor>> properties;
 
     auto it = threads_.find(thread);
@@ -350,6 +459,11 @@ std::vector<PropertyDescriptor> Inspector::GetProperties(PtThread thread, Remote
 
 std::string Inspector::GetSourceCode(std::string_view sourceFile)
 {
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return {};
+    }
+
     return debugInfoCache_.GetSourceCode(sourceFile);
 }
 
@@ -384,5 +498,30 @@ void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &o
 void Inspector::NotifyExecutionEnded()
 {
     inspectorServer_.CallRuntimeExecutionContextsCleared();
+}
+
+EvaluationResult Inspector::Evaluate(PtThread thread, const std::string &bcFragment)
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return EvaluationResult({}, {});
+    }
+
+    auto it = threads_.find(thread);
+    if (it == threads_.end()) {
+        return EvaluationResult({}, {});
+    }
+
+    if (UNLIKELY(!it->second.IsPaused())) {
+        LogDebuggerNotPaused("evaluate");
+        return EvaluationResult({}, {});
+    }
+
+    return it->second.Evaluate(bcFragment);
+}
+
+void Inspector::LogDebuggerNotPaused(const char *methodName) const
+{
+    LOG(WARNING, DEBUGGER) << "Inspector method '" << methodName << "' must be called on pause";
 }
 }  // namespace ark::tooling::inspector

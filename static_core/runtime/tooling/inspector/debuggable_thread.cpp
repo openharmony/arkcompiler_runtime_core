@@ -69,6 +69,12 @@ void DebuggableThread::StepOut()
     Resume();
 }
 
+bool DebuggableThread::IsPaused()
+{
+    os::memory::LockHolder lock(mutex_);
+    return suspended_;
+}
+
 void DebuggableThread::Touch()
 {
     os::memory::LockHolder lock(mutex_);
@@ -130,8 +136,63 @@ bool DebuggableThread::RequestToObjectRepository(std::function<void(ObjectReposi
     return true;
 }
 
+EvaluationResult DebuggableThread::Evaluate(const std::string &bcFragment)
+{
+    std::optional<RemoteObject> optResult;
+    std::optional<ExceptionDetails> optException;
+
+    // TODO: ensure that evaluation is done in proper context.
+    RequestToObjectRepository([this, bcFragment, &optResult, &optException](ObjectRepository &objectRepo) {
+        ASSERT(thread_->GetCurrentFrame());
+        auto *ctx = thread_->GetCurrentFrame()->GetMethod()->GetClass()->GetLoadContext();
+
+        auto *method = LoadEvaluationPatch(ctx, bcFragment);
+        if (method == nullptr) {
+            return;
+        }
+
+        auto [result, exception] = InvokeEvaluationMethod(method);
+
+        if (exception != nullptr) {
+            optException.emplace(CreateExceptionDetails(objectRepo, exception));
+        }
+
+        auto resultTypeId = method->GetReturnType().GetId();
+        optResult.emplace(objectRepo.CreateObject(result, resultTypeId));
+    });
+
+    return std::make_pair(optResult, optException);
+}
+
+std::pair<Value, ObjectHeader *> DebuggableThread::InvokeEvaluationMethod(Method *method)
+{
+    ASSERT(method);
+
+    auto *prevException = thread_->GetException();
+
+    // Some debugger functionality must be disabled in evaluation mode.
+    evaluationMode_ = true;
+    // Evaluation patch should not accept any arguments.
+    Value result = method->Invoke(thread_, nullptr);
+    evaluationMode_ = false;
+
+    ObjectHeader *newException = nullptr;
+    if (thread_->HasPendingException() && thread_->GetException() != prevException) {
+        newException = thread_->GetException();
+        LOG(WARNING, DEBUGGER) << "Evaluation has completed with a exception "
+                               << thread_->GetException()->ClassAddr<Class>()->GetName();
+    }
+    // Restore the previous exception.
+    thread_->SetException(prevException);
+
+    return std::make_pair(result, newException);
+}
+
 void DebuggableThread::OnException(bool uncaught)
 {
+    if (evaluationMode_) {
+        return;
+    }
     os::memory::LockHolder lock(mutex_);
     state_.OnException(uncaught);
     while (state_.IsPaused()) {
@@ -142,18 +203,27 @@ void DebuggableThread::OnException(bool uncaught)
 
 void DebuggableThread::OnFramePop()
 {
+    if (evaluationMode_) {
+        return;
+    }
     os::memory::LockHolder lock(mutex_);
     state_.OnFramePop();
 }
 
 bool DebuggableThread::OnMethodEntry()
 {
+    if (evaluationMode_) {
+        return false;
+    }
     os::memory::LockHolder lock(mutex_);
     return state_.OnMethodEntry();
 }
 
 void DebuggableThread::OnSingleStep(const PtLocation &location)
 {
+    if (evaluationMode_) {
+        return;
+    }
     os::memory::LockHolder lock(mutex_);
     state_.OnSingleStep(location);
     while (state_.IsPaused()) {
@@ -239,5 +309,36 @@ void DebuggableThread::Resume()
     thread_->Resume();
 
     callbacks_.postResume();
+}
+
+ExceptionDetails DebuggableThread::CreateExceptionDetails(ObjectRepository &objectRepo, ObjectHeader *exception)
+{
+    ASSERT(exception);
+
+    const char *source = nullptr;
+    size_t lineNum = 0;
+    auto walker = StackWalker::Create(thread_);
+    if (walker.HasFrame()) {
+        auto *method = walker.GetMethod();
+        source = utf::Mutf8AsCString(method->GetClassSourceFile().data);
+        lineNum = method->GetLineNumFromBytecodeOffset(walker.GetBytecodePc());
+    }
+
+    // Yet unable to retrieve column number by bytecode, so pass 0.
+    // NOTE(dslynko): must retrieve exception message in language agnostic manner.
+    ExceptionDetails exceptionDetails(GetNewExceptionId(), "", lineNum, 0);
+    if (source != nullptr) {
+        exceptionDetails.SetUrl(source);
+    }
+
+    auto exceptionRemoteObject = objectRepo.CreateObject(TypedValue::Reference(exception));
+    exceptionDetails.SetExceptionObject(exceptionRemoteObject);
+
+    return exceptionDetails;
+}
+
+size_t DebuggableThread::GetNewExceptionId()
+{
+    return currentExceptionId_++;
 }
 }  // namespace ark::tooling::inspector

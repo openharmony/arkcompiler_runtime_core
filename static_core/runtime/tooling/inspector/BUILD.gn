@@ -19,6 +19,7 @@ libarkinspector_sources = [
   "connection/ohos_ws/ohos_ws_server.cpp",
   "connection/ohos_ws/ohos_ws_server_endpoint.cpp",
   "connection/server_endpoint_base.cpp",
+  "evaluation/helpers.cpp",
   "debug_info_cache.cpp",
   "debuggable_thread.cpp",
   "error.cpp",
@@ -29,6 +30,7 @@ libarkinspector_sources = [
   "session_manager.cpp",
   "source_manager.cpp",
   "thread_state.cpp",
+  "types/exception_details.cpp",
   "types/location.cpp",
   "types/remote_object.cpp",
   "types/scope.cpp",
@@ -63,6 +65,7 @@ ohos_shared_library("libarkinspector") {
     sdk_libc_secshared_ext_dep,
   ]
   deps = [
+    "$ark_root/assembler:libarktsassembler",
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/disassembler:arktsdisassembler",
     "$ark_root/libpandabase:libarktsbase",

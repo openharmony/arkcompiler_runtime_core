@@ -32,7 +32,6 @@ _LOGGER = logging.getLogger("runner.test_file_based")
 
 ResultValidator = Callable[[str, str, int], bool]
 
-
 class TestFileBased(Test):
     SEGFAULT_RETURN_CODE = 139
     ABORT_RETURN_CODE = 134

@@ -41,6 +41,7 @@ public:
     RemoteObject CreateFrameObject(const PtFrame &frame, const std::map<std::string, TypedValue> &locals,
                                    std::optional<RemoteObject> &objThis);
     RemoteObject CreateObject(TypedValue value);
+    RemoteObject CreateObject(Value value, panda_file::Type::TypeId type);
 
     std::vector<PropertyDescriptor> GetProperties(RemoteObjectId id, bool generatePreview);
 

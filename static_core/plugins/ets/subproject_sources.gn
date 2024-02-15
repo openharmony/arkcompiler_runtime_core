@@ -99,6 +99,7 @@ srcs_runtime = [
   "runtime/ets_vtable_builder.cpp",
   "runtime/intrinsics/escompat_ArrayBuffer.cpp",
   "runtime/intrinsics/compiler_intrinsics.cpp",
+  "runtime/intrinsics/debugger_api.cpp",
   "runtime/intrinsics/escompat_Date.cpp",
   "runtime/intrinsics/escompat_RegExp.cpp",
   "runtime/intrinsics/escompat_taskpool.cpp",

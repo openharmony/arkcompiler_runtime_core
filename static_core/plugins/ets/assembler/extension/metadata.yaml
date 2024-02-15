@@ -155,3 +155,15 @@ attributes:
     - field
     - function
     - param
+
+- name: debug.import
+  type: string
+  multiple: true
+  applicable_to:
+    - record
+
+- name: debug.export
+  type: string
+  multiple: true
+  applicable_to:
+    - record

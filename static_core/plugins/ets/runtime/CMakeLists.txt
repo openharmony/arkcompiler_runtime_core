@@ -34,6 +34,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/debugger_api.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Runtime.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
