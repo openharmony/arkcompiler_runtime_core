@@ -273,6 +273,9 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     ark::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
     auto graph = allocator.New<compiler::Graph>(&allocator, &localAllocator, Arch::NONE, methodPtr, &adapter, false,
                                                 nullptr, isDynamic, true);
+    if (graph == nullptr) {
+        return false;
+    }
     graph->SetLanguage(lang);
 
     ark::pandasm::Function &function = it->second;
@@ -284,7 +287,7 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     // build map from pc to pandasm::ins (to re-build line-number info in BytecodeGen)
     BuildMapFromPcToIns(function, irInterface, graph, methodPtr);
 
-    if ((graph == nullptr) || !graph->RunPass<ark::compiler::IrBuilder>()) {
+    if (!graph->RunPass<ark::compiler::IrBuilder>()) {
         LOG(ERROR, BYTECODE_OPTIMIZER) << "Optimizing " << funcName << ": IR builder failed!";
         return false;
     }

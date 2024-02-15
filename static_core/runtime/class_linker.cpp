@@ -807,8 +807,8 @@ public:
     NO_MOVE_SEMANTIC(ClassScopeStaticSetAutoCleaner);
 
 private:
-    ClassLoadingSet *setPtr_;
-    ClassLoadingSet **tlSetPtr_;
+    ClassLoadingSet *setPtr_ {nullptr};
+    ClassLoadingSet **tlSetPtr_ {nullptr};
 };
 
 static uint64_t GetClassUniqueHash(uint32_t pandaFileHash, uint32_t classId)

@@ -925,11 +925,9 @@ static void FillRegisters(Frame *interpreterFrame, PandaVector<uint64_t> &vregs,
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-PtDebugFrame::PtDebugFrame(Method *method, Frame *interpreterFrame) : method_(method)
+PtDebugFrame::PtDebugFrame(Method *method, Frame *interpreterFrame)
+    : method_(method), methodId_(method->GetFileId()), pandaFile_(method->GetPandaFile()->GetFilename())
 {
-    pandaFile_ = method->GetPandaFile()->GetFilename();
-    methodId_ = method->GetFileId();
-
     isInterpreterFrame_ = interpreterFrame != nullptr;
     if (!isInterpreterFrame_) {
         return;

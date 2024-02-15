@@ -387,7 +387,7 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
             if (pcInCompiled) {
                 // Currently in compiled method so get it from fp
                 frame = reinterpret_cast<Frame *>(fp);
-            } else if (!pcInCompiled && pfsQueue.FindValue(pfId)) {
+            } else if (pfsQueue.FindValue(pfId)) {
                 sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
                 sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
                 ++stackCounter;

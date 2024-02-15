@@ -54,7 +54,7 @@ InternalAllocator<CONFIG>::InternalAllocator(MemStatsType *memStats)
     }
 
 #if defined(TRACK_INTERNAL_ALLOCATIONS)
-    mem_stats_ = mem_stats;
+    memStats_ = memStats;
     tracker_ = CreateAllocTracker();
 #endif  // TRACK_INTERNAL_ALLOCATIONS
     LOG_INTERNAL_ALLOCATOR(DEBUG) << "Initializing InternalAllocator finished";
@@ -117,7 +117,7 @@ template <InternalAllocatorConfig CONFIG>
 InternalAllocator<CONFIG>::~InternalAllocator()
 {
 #ifdef TRACK_INTERNAL_ALLOCATIONS
-    if (mem_stats_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) != 0) {
+    if (memStats_->GetFootprint(SpaceType::SPACE_TYPE_INTERNAL) != 0) {
         // Memory leaks are detected.
         LOG(ERROR, RUNTIME) << "Memory leaks detected.";
         tracker_->DumpMemLeaks(std::cerr);

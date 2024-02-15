@@ -394,7 +394,7 @@ void *CompilerResolveQualifiedJSCall(void *val, EtsString *qnameStr)
     napi_env env = ctx->GetJSEnv();
 
     auto jsVal = ToLocal(val);
-    napi_value jsThis = jsVal;
+    napi_value jsThis;
     auto qname = std::string_view(utf::Mutf8AsCString(qnameStr->GetDataMUtf8()), qnameStr->GetMUtf8Length());
     auto resolveName = [&jsThis, &jsVal, &env, &ctx, &coro](const std::string &name) -> bool {
         jsThis = jsVal;

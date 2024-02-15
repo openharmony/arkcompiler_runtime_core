@@ -49,7 +49,7 @@ public:
         resolveWoInline_ = resolveWoInline;
     }
 
-    Inlining(Graph *graph, uint32_t instructionsCount, uint32_t inlineDepth, uint32_t methodsInlined);
+    Inlining(Graph *graph, uint32_t instructionsCount, uint32_t depth, uint32_t methodsInlined);
 
     NO_MOVE_SEMANTIC(Inlining);
     NO_COPY_SEMANTIC(Inlining);

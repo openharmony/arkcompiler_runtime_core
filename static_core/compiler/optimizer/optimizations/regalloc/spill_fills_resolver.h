@@ -75,7 +75,7 @@ public:
     Graph *GetGraph() const;
 
 protected:
-    static void VisitSpillFill(GraphVisitor *v, Inst *inst);
+    static void VisitSpillFill(GraphVisitor *visitor, Inst *inst);
 
 private:
     bool NeedToResolve(const ArenaVector<SpillFillData> &spillFills);

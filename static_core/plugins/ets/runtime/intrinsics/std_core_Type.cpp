@@ -57,7 +57,7 @@ EtsString *TypeAPIGetTypeDescriptor(EtsObject *object)
 
 static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
 {
-    auto result = static_cast<EtsByte>(EtsTypeAPIKind::NONE);
+    EtsByte result;
     if (td == ark::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::BOOLEAN);
     } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_BYTE) {

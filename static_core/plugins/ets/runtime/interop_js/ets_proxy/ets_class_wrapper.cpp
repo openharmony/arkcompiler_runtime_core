@@ -181,6 +181,7 @@ public:
     EtsObject *UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
     {
         ctx->Fatal("Unwrap called on JSProxy class");
+        return nullptr;
     }
 };
 

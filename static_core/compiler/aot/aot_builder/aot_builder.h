@@ -140,7 +140,7 @@ public:
 
 protected:
     template <Arch ARCH>
-    int PrepareElfBuilder(ElfBuilder<ARCH> &elfBuilder, const std::string &cmdline, const std::string &fileName);
+    int PrepareElfBuilder(ElfBuilder<ARCH> &builder, const std::string &cmdline, const std::string &fileName);
 
 private:
     template <Arch ARCH>

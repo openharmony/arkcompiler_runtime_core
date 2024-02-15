@@ -44,16 +44,16 @@ public:
     bool RunImpl() override;
 
 protected:
-    static void VisitNewObject(GraphVisitor *v, Inst *inst);
-    static void VisitParameter(GraphVisitor *v, Inst *inst);
-    static void VisitNewArray(GraphVisitor *v, Inst *inst);
-    static void VisitLoadArray(GraphVisitor *v, Inst *inst);
-    static void VisitLoadString(GraphVisitor *v, Inst *inst);
-    static void VisitLoadObject(GraphVisitor *v, Inst *inst);
-    static void VisitCallStatic(GraphVisitor *v, Inst *inst);
-    static void VisitCallVirtual(GraphVisitor *v, Inst *inst);
-    static void VisitNullCheck(GraphVisitor *v, Inst *inst);
-    static void VisitRefTypeCheck(GraphVisitor *v, Inst *inst);
+    static void VisitNewObject(GraphVisitor *v, Inst *i);
+    static void VisitParameter(GraphVisitor *v, Inst *i);
+    static void VisitNewArray(GraphVisitor *v, Inst *i);
+    static void VisitLoadArray(GraphVisitor *v, Inst *i);
+    static void VisitLoadString(GraphVisitor *v, Inst *i);
+    static void VisitLoadObject(GraphVisitor *v, Inst *i);
+    static void VisitCallStatic(GraphVisitor *v, Inst *i);
+    static void VisitCallVirtual(GraphVisitor *v, Inst *i);
+    static void VisitNullCheck(GraphVisitor *v, Inst *i);
+    static void VisitRefTypeCheck(GraphVisitor *v, Inst *i);
 
 #include "optimizer/ir/visitor.inc"
 

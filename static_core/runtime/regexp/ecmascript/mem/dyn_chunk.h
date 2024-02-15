@@ -61,9 +61,9 @@ public:
 
     int Insert(uint32_t position, size_t len);
 
-    int Emit(const uint8_t *data, size_t len);
+    int Emit(const uint8_t *data, size_t length);
 
-    int EmitSelf(size_t offset, size_t len);
+    int EmitSelf(size_t offset, size_t length);
 
     int EmitChar(uint8_t c);
 

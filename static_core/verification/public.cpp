@@ -64,7 +64,6 @@ Service *CreateService(Config const *config, ark::mem::InternalAllocatorPtr allo
     res->config = config;
     res->classLinker = linker;
     res->allocator = allocator;
-    res->config = config;
     res->verifierService = allocator->New<VerifierService>(allocator, linker);
     res->verifierService->Init();
     res->debugCtx.SetConfig(&config->debugCfg);

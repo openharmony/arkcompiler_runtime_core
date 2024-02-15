@@ -34,7 +34,7 @@ public:
     {
         const size_t codeOffset = CodeInfo::GetCodeOffset(aotBuilder_->GetArch());
         CodePrefix prefix;
-        size_t currPos = streamBegin;
+        size_t currPos;
         for (size_t i = 0; i < aotBuilder_->methods_.size(); i++) {
             auto &method = aotBuilder_->methods_[i];
             auto &methodHeader = aotBuilder_->methodHeaders_[i];

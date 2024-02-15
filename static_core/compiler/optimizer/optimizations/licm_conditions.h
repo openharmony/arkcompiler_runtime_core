@@ -104,12 +104,12 @@ private:
     bool IsHoistable(const ConditionChain *chain);
     bool AllInputsDominate(const Inst *inst, const Loop *loop);
     void FindHoistableConditionChains(Loop *loop);
-    bool AllPhiAllowConditionChainHoisting(const ConditionChain *chain, const BasicBlock *multiplePredsSuccessor,
+    bool AllPhiAllowConditionChainHoisting(const ConditionChain *chain, const BasicBlock *multiplePredsSucc,
                                            bool hoistPhiAvailable);
     Inst *SamePhiInputFromChain(Inst *phi, const ConditionChain *chain);
     void HoistConditionChains(Loop *loop);
     void SplitChainFirstBasicBlock(ConditionChain *chain);
-    BasicBlock *ReplaceChainWithSingleBlock(BasicBlock *appendBb, const ConditionChainContext &chain);
+    BasicBlock *ReplaceChainWithSingleBlock(BasicBlock *appendBb, const ConditionChainContext &chainCtx);
     void SaveMulitplePredecessorsSuccessorPreds(const BasicBlock *bb);
     PhiInst *AddPhiInst(BasicBlock *bb, const ConditionChain *chain);
     void AddSingleIfImmInst(BasicBlock *bb, const ConditionChain *chain, Inst *input);

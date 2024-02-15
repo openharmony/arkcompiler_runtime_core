@@ -100,7 +100,7 @@ public:
         bool GetNum();
         bool GetBool();
         bool GetArray();
-        bool InsertKeyValuePairIn(JsonObject *emptyObj);
+        bool InsertKeyValuePairIn(JsonObject *obj);
 
         char GetSymbol();
         char PeekSymbol();

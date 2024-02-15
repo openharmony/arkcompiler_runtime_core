@@ -78,7 +78,7 @@ private:
     std::optional<BreakpointId> SetBreakpoint(PtThread thread,
                                               const std::function<bool(std::string_view)> &sourceFilesFilter,
                                               size_t lineNumber, std::set<std::string_view> &sourceFiles);
-    void RemoveBreakpoint(PtThread thread, BreakpointId breakpointId);
+    void RemoveBreakpoint(PtThread thread, BreakpointId id);
 
     void SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state);
 

@@ -2617,7 +2617,7 @@ void Aarch64Encoder::LoadStoreRegisters(RegMask registers, ssize_t slot, size_t 
         }
     }
     // Construct single add for big offset
-    size_t spOffset = 0;
+    size_t spOffset;
     auto lastOffset = (slot + lastReg - startReg) * DOUBLE_WORD_SIZE_BYTES;
 
     if (!vixl::aarch64::Assembler::IsImmLSPair(lastOffset, vixl::aarch64::kXRegSizeInBytesLog2)) {

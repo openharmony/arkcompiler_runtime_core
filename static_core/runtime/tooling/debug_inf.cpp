@@ -45,8 +45,6 @@ struct PCodeMetaInfo {
     std::atomic<PCodeItem *> head {nullptr};
 
     // Panda-specific fields
-    // NOLINTNEXTLINE(readability-magic-numbers)
-    uint8_t magic[8] = {'P', 'a', 'n', 'd', 'a', 'r', 't', '1'};
     uint32_t flags = 0;
     uint32_t sizeMetaInfo = sizeof(PCodeMetaInfo);
     uint32_t sizeCodeitem = sizeof(PCodeItem);

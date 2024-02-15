@@ -176,7 +176,7 @@ DumpType AsptConverter::GetDumpTypeFromOptions(const Options &cliOptions)
 {
     const std::string dumpTypeStr = cliOptions.GetCsvTidSeparation();
 
-    DumpType dumpType = DumpType::WITHOUT_THREAD_SEPARATION;
+    DumpType dumpType;
     if (dumpTypeStr == "single-csv-single-tid") {
         dumpType = DumpType::WITHOUT_THREAD_SEPARATION;
     } else if (dumpTypeStr == "single-csv-multi-tid") {
