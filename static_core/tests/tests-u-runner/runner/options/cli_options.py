@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -362,14 +362,6 @@ def add_test_lists_args(parser: argparse.ArgumentParser) -> None:
         help='load specified sanitizer specific test lists. '
              'One of asan (on running against build with ASAN and UBSAN sanitizers), '
              'tsan (on running against build with TSAN sanitizers).')
-    parser.add_argument(
-        '--test-list-os', action='store', dest='test_list_os', default=None,
-        help='load specified operating system specific test lists. '
-             'One of LIN, WIN or MAC')
-    parser.add_argument(
-        '--test-list-build', action='store', dest='test_list_build', default=None,
-        help='load specified build type specific test lists. '
-             'One of FAST-VERIFY, DEBUG or RELEASE')
     parser.add_argument(
         '--skip-test-lists', action='store_true', dest='skip_test_lists', default=None,
         help='do not use ignored or excluded lists, run all available tests, report all found failures')

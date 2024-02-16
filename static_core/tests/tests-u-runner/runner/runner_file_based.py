@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,7 +27,7 @@ from functools import cached_property
 from glob import glob
 from os import path, environ
 from pathlib import Path
-from typing import List, Dict, Optional, Type, Tuple
+from typing import List, Dict, Optional, Type
 
 from runner.utils import get_platform_binary_name
 from runner.enum_types.configuration_kind import ConfigurationKind, SanitizerKind
@@ -119,15 +119,47 @@ class RunnerFileBased(Runner):
 
         self.coverage = LlvmCov(self.build_dir, self.work_dir)
 
-        self.__set_test_list_options()
+        for san in ["ASAN_OPTIONS", "TSAN_OPTIONS", "MSAN_OPTIONS", "LSAN_OPTIONS"]:
+            # we don't want to interpret asan failures as SyntaxErrors
+            self.cmd_env[san] = ":exitcode=255"
+
+        self.sanitizer = self.config.test_lists.sanitizer
+        self.architecture = self.config.test_lists.architecture
+
         self.binaries = panda_binaries(name, self.build_dir, self.config, self.conf_kind)
 
         self.verifier_args: List[str] = []
         self.cmd_prefix = self._set_cmd_prefix(config)
         self.quick_args: List[str] = []
 
-        self.runtime_args = self.__fill_up_runtime_args()
-        self.ark_aot, self.aot_args = self.__fill_up_aot_args()
+        self.runtime_args = self.config.ark.ark_args[:]
+        self.runtime_args.extend([
+            f'--gc-type={self.config.general.gc_type}',
+            f'--heap-verifier={self.config.general.heap_verifier}',
+            f'--full-gc-bombing-frequency={self.config.general.full_gc_bombing_frequency}',
+        ])
+
+        if self.config.general.run_gc_in_place:
+            self.runtime_args += ['--run-gc-in-place']
+
+        self.ark_aot: Optional[str] = None
+        self.aot_args: List[str] = []
+        if self.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
+            self.ark_aot = self.binaries.ark_aot
+
+            self.aot_args = [
+                f'--gc-type={self.config.general.gc_type}',
+                f'--heap-verifier={self.config.general.heap_verifier}',
+                f'--full-gc-bombing-frequency={self.config.general.full_gc_bombing_frequency}',
+            ]
+
+            if self.config.general.run_gc_in_place:
+                self.aot_args += ['--run-gc-in-place']
+
+            self.aot_args += self.config.ark_aot.aot_args
+        else:
+            self.ark_aot = None
+            self.aot_args = []
 
         self.test_env = TestEnv(
             config=config,
@@ -298,7 +330,6 @@ class RunnerFileBased(Runner):
             if self.conf_kind != ConfigurationKind.OTHER_INT \
             else self.config.ark.interpreter_type
         full_template_name = f"{test_name}.*-{kind}" + \
-                             f"(-{self.operating_system.value})?" \
                              f"(-{self.architecture.value})?" \
                              f"(-{conf_kind.upper()})?"
         if self.sanitizer != SanitizerKind.NONE:
@@ -306,7 +337,6 @@ class RunnerFileBased(Runner):
         full_template_name += f"(-OL{self.config.es2panda.opt_level})?"
         if self.conf_kind == ConfigurationKind.JIT and self.config.ark.jit.num_repeats > 1:
             full_template_name += "(-(repeats|REPEATS))?"
-        full_template_name += f"(-{self.build_type.value})?"
         full_template_name += ".txt"
         full_pattern = re.compile(full_template_name)
 
@@ -335,45 +365,3 @@ class RunnerFileBased(Runner):
                 error_message = error_message[last_bracket + 1:].strip()
             return error_message
         return ""
-
-    def __set_test_list_options(self) -> None:
-        for san in ["ASAN_OPTIONS", "TSAN_OPTIONS", "MSAN_OPTIONS", "LSAN_OPTIONS"]:
-            # we don't want to interpret asan failures as SyntaxErrors
-            self.cmd_env[san] = ":exitcode=255"
-
-        self.sanitizer = self.config.test_lists.sanitizer
-        self.architecture = self.config.test_lists.architecture
-        self.operating_system = self.config.test_lists.operating_system
-        self.build_type = self.config.test_lists.build_type
-
-    def __fill_up_runtime_args(self) -> List[str]:
-        runtime_args: List[str] = self.config.ark.ark_args[:]
-        runtime_args.extend([
-            f'--gc-type={self.config.general.gc_type}',
-            f'--heap-verifier={self.config.general.heap_verifier}',
-            f'--full-gc-bombing-frequency={self.config.general.full_gc_bombing_frequency}',
-        ])
-
-        if self.config.general.run_gc_in_place:
-            runtime_args += ['--run-gc-in-place']
-
-        return runtime_args
-
-    def __fill_up_aot_args(self) -> Tuple[Optional[str], List[str]]:
-        ark_aot = None
-        aot_args = []
-        if self.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
-            ark_aot = self.binaries.ark_aot
-
-            aot_args = [
-                f'--gc-type={self.config.general.gc_type}',
-                f'--heap-verifier={self.config.general.heap_verifier}',
-                f'--full-gc-bombing-frequency={self.config.general.full_gc_bombing_frequency}',
-            ]
-
-            if self.config.general.run_gc_in_place:
-                aot_args += ['--run-gc-in-place']
-
-            aot_args += self.config.ark_aot.aot_args
-
-        return ark_aot, aot_args

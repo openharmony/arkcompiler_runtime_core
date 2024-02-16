@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 from functools import cached_property
 from typing import Dict, Optional
 
-from runner.enum_types.configuration_kind import ArchitectureKind, SanitizerKind, OSKind, BuildTypeKind
+from runner.enum_types.configuration_kind import ArchitectureKind, SanitizerKind
 from runner.options.decorator_value import value, _to_bool, _to_enum, _to_str
 from runner.options.options_groups import GroupsOptions
 
@@ -29,8 +29,6 @@ from runner.options.options_groups import GroupsOptions
 class TestListsOptions:
     __DEFAULT_ARCH = ArchitectureKind.AMD64
     __DEFAULT_SAN = SanitizerKind.NONE
-    __DEFAULT_OS = OSKind.LIN
-    __DEFAULT_BUILD_TYPE = BuildTypeKind.FAST_VERIFY
     __DEFAULT_FILTER = "*"
 
     def __str__(self) -> str:
@@ -68,24 +66,6 @@ class TestListsOptions:
     )
     def sanitizer(self) -> SanitizerKind:
         return TestListsOptions.__DEFAULT_SAN
-
-    @cached_property
-    @value(
-        yaml_path="test-lists.os",
-        cli_name="test_list_os",
-        cast_to_type=lambda x: _to_enum(x, OSKind)
-    )
-    def operating_system(self) -> OSKind:
-        return TestListsOptions.__DEFAULT_OS
-
-    @cached_property
-    @value(
-        yaml_path="test-lists.build-type",
-        cli_name="test_list_build",
-        cast_to_type=lambda x: _to_enum(x, BuildTypeKind)
-    )
-    def build_type(self) -> BuildTypeKind:
-        return TestListsOptions.__DEFAULT_BUILD_TYPE
 
     @cached_property
     @value(yaml_path="test-lists.explicit-file", cli_name="test_file")
