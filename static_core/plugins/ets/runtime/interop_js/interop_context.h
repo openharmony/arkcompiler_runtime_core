@@ -16,7 +16,6 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_CONTEXT_H_
 
-#include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
@@ -24,6 +23,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_storage.h"
 #include "plugins/ets/runtime/interop_js/js_job_queue.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
+#include "plugins/ets/runtime/interop_js/interop_stacks.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/intrinsics/std_js_jsruntime.h"
 #include "runtime/include/value.h"
@@ -107,59 +107,6 @@ private:
     Class *lastLoadedClass_ {};
 };
 
-using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
-
-class LocalScopesStorage {
-public:
-    LocalScopesStorage() = default;
-
-    ~LocalScopesStorage()
-    {
-        ASSERT(localScopesStorage_.empty());
-    }
-
-    NO_COPY_SEMANTIC(LocalScopesStorage);
-    NO_MOVE_SEMANTIC(LocalScopesStorage);
-
-    void CreateLocalScope(napi_env env, Frame *frame)
-    {
-        napi_handle_scope scope;
-        [[maybe_unused]] auto status = napi_open_handle_scope(env, &scope);
-        ASSERT(status == napi_ok);
-        localScopesStorage_.emplace_back(frame, scope);
-    }
-
-    void DestroyTopLocalScope(napi_env env, [[maybe_unused]] Frame *currFrame)
-    {
-        ASSERT(!localScopesStorage_.empty());
-        auto &[frame, scope] = localScopesStorage_.back();
-        ASSERT(currFrame == frame);
-        localScopesStorage_.pop_back();
-        [[maybe_unused]] auto status = napi_close_handle_scope(env, scope);
-        ASSERT(status == napi_ok);
-    }
-
-    void DestroyLocalScopeForTopFrame(napi_env env, Frame *currFrame)
-    {
-        if (localScopesStorage_.empty()) {
-            return;
-        }
-        auto &[frame, scope] = localScopesStorage_.back();
-        while (frame == currFrame) {
-            localScopesStorage_.pop_back();
-            [[maybe_unused]] auto status = napi_close_handle_scope(env, scope);
-            ASSERT(status == napi_ok);
-            if (localScopesStorage_.empty()) {
-                return;
-            }
-            std::tie(frame, scope) = localScopesStorage_.back();
-        }
-    }
-
-private:
-    std::vector<std::pair<const Frame *, napi_handle_scope>> localScopesStorage_ {};
-};
-
 class InteropCtx {
 public:
     static void Init(EtsCoroutine *coro, napi_env env)
@@ -211,6 +158,11 @@ public:
         return refstor_;
     }
 
+    ClassLinker *GetClassLinker() const
+    {
+        return classLinker_;
+    }
+
     ClassLinkerContext *LinkerCtx() const
     {
         return linkerCtx_;
@@ -251,6 +203,7 @@ public:
         return !coro->HasPendingException();
     }
 
+    // NOTE(vpukhov): replace with stack-like allocator
     template <typename T, size_t OPT_SZ>
     struct TempArgs {
     public:
@@ -309,15 +262,9 @@ public:
         return TempArgs<T, OPT_SZ>(sz);
     }
 
-    // NOTE(vpukhov): implement as flags in IFrame
-    struct InteropFrameRecord {
-        void *etsFrame {};
-        bool toJs {};
-    };
-
-    std::vector<InteropFrameRecord> &GetInteropFrames()
+    InteropCallStack &CallStack()
     {
-        return interopFrames_;
+        return interopStk_;
     }
 
     JSRefConvertCache *GetRefConvertCache()
@@ -494,6 +441,7 @@ private:
     napi_env jsEnv_ {};
 
     mem::GlobalObjectStorage *refstor_ {};
+    ClassLinker *classLinker_ {};
     ClassLinkerContext *linkerCtx_ {};
     JSValueStringStorage jsValueStringStor_ {};
     ConstStringStorage constStringStorage_ {};
@@ -501,7 +449,7 @@ private:
     LocalScopesStorage localScopesStorage_ {};
     mem::Reference *jsvalueFregistryRef_ {};
 
-    std::vector<InteropFrameRecord> interopFrames_ {};
+    InteropCallStack interopStk_ {};
 
     JSRefConvertCache refconvertCache_;
 
@@ -515,12 +463,11 @@ private:
     Class *errorClass_ {};
     Class *exceptionClass_ {};
     Class *typeClass_ {};
+    Class *arrayClass_ {};
+    Class *arraybufClass_ {};
 
     Class *boxIntClass_ {};
     Class *boxLongClass_ {};
-
-    Class *arrayClass_ {};
-    Class *arraybufClass_ {};
 
     std::set<Class *> functionalInterfaces_ {};
 
@@ -535,7 +482,7 @@ private:
     // should be one per VM when we will have multiple InteropContexts
     std::atomic_uint32_t qnameBufferSize_ {};
 
-    friend class EtsJSNapiEnvScope;
+    friend class JSNapiEnvScope;
 };
 
 inline JSRefConvertCache *RefConvertCacheFromInteropCtx(InteropCtx *ctx)

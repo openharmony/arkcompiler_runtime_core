@@ -14,8 +14,33 @@
  */
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 
 namespace ark::ets::interop::js {
+
+napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_JS(coro, env);
+
+    size_t argc;
+    napi_value athis;
+    void *data;
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, nullptr, &athis, &data));
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cbinfo, &argc, jsArgs->data(), &athis, &data));
+
+    auto sharedRef = static_cast<ets_proxy::SharedReference *>(data);
+    ASSERT(sharedRef != nullptr);
+
+    auto etsThis = sharedRef->GetEtsObject(ctx);
+    ASSERT(etsThis != nullptr);
+    auto method = etsThis->GetClass()->GetMethod("invoke");
+    ASSERT(method != nullptr);
+
+    return CallETSInstance(coro, ctx, method->GetPandaMethod(), *jsArgs, etsThis);
+}
 
 napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
 {

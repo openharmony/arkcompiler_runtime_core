@@ -18,7 +18,7 @@
 
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
-#include "plugins/ets/runtime/interop_js/js_value_call.h"
+#include "plugins/ets/runtime/interop_js/call/call.h"
 
 namespace ark::ets::interop::js {
 

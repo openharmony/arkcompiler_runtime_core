@@ -19,8 +19,8 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
-#include "plugins/ets/runtime/interop_js/js_value_call.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/call/call.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "runtime/mem/local_object_handle.h"
 
 namespace ark::ets::interop::js::ets_proxy {
@@ -480,7 +480,7 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    [[maybe_unused]] EtsJSNapiEnvScope envscope(ctx, env);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     napi_value jsThis;
     size_t argc;
@@ -521,8 +521,6 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-
-    ScopedManagedCodeThread managedScope(coro);
 
     if (UNLIKELY(!CheckClassInitialized<true>(etsClass_->GetRuntimeClass()))) {
         ctx->ForwardEtsException(coro);
@@ -573,7 +571,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     EtsMethod *ctorMethod = ctorWrapper->GetEtsMethod();
     ASSERT(ctorMethod->IsInstanceConstructor());
 
-    napi_value callRes = EtsCallImplInstance(coro, ctx, ctorMethod->GetPandaMethod(), jsArgs, etsObject.GetPtr());
+    napi_value callRes = CallETSInstance(coro, ctx, ctorMethod->GetPandaMethod(), jsArgs, etsObject.GetPtr());
     return callRes != nullptr;
 }
 

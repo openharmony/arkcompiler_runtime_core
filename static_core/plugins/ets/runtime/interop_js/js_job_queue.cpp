@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "intrinsics.h"
 
@@ -35,15 +35,13 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
-    auto ctx = InteropCtx::Current(coro);
-    [[maybe_unused]] EtsJSNapiEnvScope napiScope(ctx, env);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     mem::Reference *callbackRef = nullptr;
     [[maybe_unused]] napi_status status =
         napi_get_cb_info(env, info, nullptr, nullptr, nullptr, reinterpret_cast<void **>(&callbackRef));
     ASSERT(status == napi_ok);
 
-    ScopedManagedCodeThread scope(coro);
     [[maybe_unused]] HandleScope<ObjectHeader *> handleScope(ManagedThread::GetCurrent());
     VMHandle<EtsObject> callback(coro, vm->GetGlobalObjectStorage()->Get(callbackRef));
     vm->GetGlobalObjectStorage()->Remove(callbackRef);
@@ -99,7 +97,7 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
     auto ctx = InteropCtx::Current(coro);
-    [[maybe_unused]] EtsJSNapiEnvScope napiScope(ctx, env);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     mem::Reference *promiseRef = nullptr;
     size_t argc = 1;
@@ -109,7 +107,6 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
         InteropCtx::Fatal("Cannot call napi_get_cb_info!");
     }
 
-    ScopedManagedCodeThread scope(coro);
     EtsHandleScope hScope(coro);
     EtsHandle<EtsPromise> promiseHandle(coro, EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
     vm->GetGlobalObjectStorage()->Remove(promiseRef);

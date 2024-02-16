@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,7 +117,7 @@ TEST_F(EtsInteropJsIntrinsTest, test_typechecks)
 {
     ASSERT_EQ(true, CallEtsMethod<bool>("test_typecheck_getprop"));
     ASSERT_EQ(true, CallEtsMethod<bool>("test_typecheck_jscall"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_typecheck_etscall"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("test_typecheck_callets"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_accessor_throws)

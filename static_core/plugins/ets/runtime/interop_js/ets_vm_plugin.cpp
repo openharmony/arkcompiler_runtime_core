@@ -18,9 +18,10 @@
 #include "plugins/ets/runtime/ets_vm_api.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_proxy.h"
-#include "plugins/ets/runtime/interop_js/js_value_call.h"
+#include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "generated/base_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -40,6 +41,7 @@ static napi_value Version(napi_env env, [[maybe_unused]] napi_callback_info info
 
 static napi_value Fatal([[maybe_unused]] napi_env env, [[maybe_unused]] napi_callback_info info)
 {
+    [[maybe_unused]] JSNapiEnvScope napiScope(InteropCtx::Current(), env);
     InteropCtx::Fatal("etsVm.Fatal");
 }
 
@@ -92,20 +94,47 @@ static napi_value GetEtsClass(napi_env env, napi_callback_info info)
     return ets_proxy::GetETSClass(env, classDescriptor);
 }
 
+static napi_value CallEtsFunctionImpl(EtsCoroutine *coro, InteropCtx *ctx, Span<napi_value> jsargv)
+{
+    auto env = ctx->GetJSEnv();
+
+    if (UNLIKELY(jsargv.Empty())) {
+        InteropCtx::ThrowJSError(env, "CallEtsFunction: method name required");
+        return nullptr;
+    }
+    if (UNLIKELY(GetValueType(env, jsargv[0]) != napi_string)) {
+        InteropCtx::ThrowJSError(env, "CallEtsFunction: method name is not a string");
+        return nullptr;
+    }
+
+    auto callTarget = GetString(env, jsargv[0]);
+    INTEROP_LOG(DEBUG) << "CallEtsFunction: method name: " << callTarget;
+
+    auto methodRes = ResolveEntryPoint(ctx, callTarget);
+    if (UNLIKELY(!methodRes)) {
+        InteropCtx::ThrowJSError(env, "CallEtsFunction: " + callTarget + " " + methodRes.Error());
+        return nullptr;
+    }
+    return CallETSStatic(coro, ctx, methodRes.Value(), jsargv.SubSpan(1));
+}
+
 static napi_value Call(napi_env env, napi_callback_info info)
 {
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_JS(coro, env);
+
     size_t argc = 0;
     [[maybe_unused]] napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     ASSERT(status == napi_ok);
 
-    auto coro = EtsCoroutine::GetCurrent();
-    auto argv = InteropCtx::Current(coro)->GetTempArgs<napi_value>(argc);
+    auto argv = ctx->GetTempArgs<napi_value>(argc);
     napi_value thisArg {};
     void *data = nullptr;
     status = napi_get_cb_info(env, info, &argc, argv->data(), &thisArg, &data);
     ASSERT(status == napi_ok);
 
-    return CallEtsFunctionImpl(env, *argv);
+    return CallEtsFunctionImpl(coro, ctx, *argv);
 }
 
 static napi_value CallWithCopy(napi_env env, napi_callback_info info)

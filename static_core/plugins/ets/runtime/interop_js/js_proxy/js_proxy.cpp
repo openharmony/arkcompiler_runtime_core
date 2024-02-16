@@ -20,7 +20,7 @@
 
 namespace ark::ets::interop::js::js_proxy {
 
-extern "C" void JSProxyCallBridge(Method *method, ...);
+extern "C" void CallJSProxyBridge(Method *method, ...);
 
 // Create JSProxy class descriptor that will respond to IsProxyClass
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
@@ -61,7 +61,7 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> prox
     for (size_t i = 0; i < proxyMethods.size(); ++i) {
         auto *m = proxyMethods[i];
         auto newMethod = new (&implMethods[i]) Method(m);
-        newMethod->SetCompiledEntryPoint(reinterpret_cast<void *>(JSProxyCallBridge));
+        newMethod->SetCompiledEntryPoint(reinterpret_cast<void *>(CallJSProxyBridge));
     }
 
     auto descriptor = MakeProxyDescriptor(cls->GetDescriptor());

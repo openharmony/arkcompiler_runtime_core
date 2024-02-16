@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_wrapper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 
 namespace ark::ets::interop::js::ets_proxy {
 
@@ -26,8 +26,7 @@ napi_value GetETSFunction(napi_env env, std::string_view classDescriptor, std::s
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    [[maybe_unused]] EtsJSNapiEnvScope envscope(ctx, env);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     EtsClass *etsClass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data());
     if (UNLIKELY(etsClass == nullptr)) {
@@ -55,8 +54,7 @@ napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    [[maybe_unused]] EtsJSNapiEnvScope envscope(ctx, env);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     EtsClass *etsKlass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data());
     if (UNLIKELY(etsKlass == nullptr)) {

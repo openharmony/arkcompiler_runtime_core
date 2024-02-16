@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
+#include "interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/ets_type_visitor-inl.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -620,7 +621,7 @@ private:
 napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck)
 {
     auto coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsJSNapiEnvScope scope(InteropCtx::Current(coro), env);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     if (jsargc < 1) {
         InteropCtx::ThrowJSError(env, "InvokeEtsMethod: method name required");
@@ -633,10 +634,10 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
         return nullptr;
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto methodName = std::string("ETSGLOBAL::") + GetString(env, jsargv[0]);
-    INTEROP_LOG(INFO) << "InvokeEtsMethod: method name: " << methodName.c_str();
+    auto methodName = GetString(env, jsargv[0]);
+    INTEROP_LOG(INFO) << "InvokeEtsMethod: method name: " << methodName;
 
-    auto methodRes = ark::Runtime::GetCurrent()->ResolveEntryPoint(methodName);
+    auto methodRes = ResolveEntryPoint(InteropCtx::Current(coro), methodName);
     if (!methodRes) {
         InteropCtx::ThrowJSError(env, "InvokeEtsMethod: can't resolve method " + methodName);
         return nullptr;
@@ -648,8 +649,6 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
         InteropCtx::ThrowJSError(env, std::string("InvokeEtsMethod: wrong argc"));
         return nullptr;
     }
-
-    ScopedManagedCodeThread managedScope(coro);
 
     if (doClscheck && !EtsClassesRecursionChecker::CheckClasses(method)) {
         InteropCtx::ThrowJSError(env, "InvokeEtsMethod: loops possible in args objects");

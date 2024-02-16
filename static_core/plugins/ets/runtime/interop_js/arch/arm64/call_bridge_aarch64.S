@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-#include "bridge/arch/amd64/proxy_entrypoint_amd64.S"
+#include "bridge/arch/aarch64/proxy_entrypoint_aarch64.S"
 
 
-PROXY_ENTRYPOINT JSRuntimeJSCallBridge JSRuntimeJSCall
-PROXY_ENTRYPOINT JSRuntimeJSCallQnameBridge JSRuntimeJSCallQname
-PROXY_ENTRYPOINT JSRuntimeJSCallByValueBridge JSRuntimeJSCallByValue
-PROXY_ENTRYPOINT JSRuntimeJSNewBridge JSRuntimeJSNew
-PROXY_ENTRYPOINT JSRuntimeJSNewQnameBridge JSRuntimeJSNewQname
+PROXY_ENTRYPOINT JSRuntimeCallJSBridge JSRuntimeCallJS
+PROXY_ENTRYPOINT JSRuntimeCallJSByValueBridge JSRuntimeCallJSByValue
+PROXY_ENTRYPOINT JSRuntimeNewCallJSBridge JSRuntimeNewCallJS
 
-PROXY_ENTRYPOINT TSTypeCallStaticBridge TSTypeCallStatic
-PROXY_ENTRYPOINT TSTypeCallThisBridge TSTypeCallThis
-PROXY_ENTRYPOINT TSTypeCallCtorBridge TSTypeCallCtor
+PROXY_ENTRYPOINT JSRuntimeCallJSQNameBridge JSRuntimeCallJSQName
+PROXY_ENTRYPOINT JSRuntimeNewCallJSQNameBridge JSRuntimeNewCallJSQName
 
-PROXY_ENTRYPOINT JSProxyCallBridge JSProxyCall
+PROXY_ENTRYPOINT CallJSProxyBridge CallJSProxy

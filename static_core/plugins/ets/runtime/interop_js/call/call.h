@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CALL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CALL_H
 
 #include <node_api.h>
+#include "utils/expected.h"
 #include "utils/span.h"
 #include "libpandabase/mem/mem.h"
+
 namespace ark {
 class Method;
 }  // namespace ark
@@ -36,27 +38,32 @@ class EtsCoroutine;
 namespace ark::ets::interop::js {
 class InteropCtx;
 
-napi_value CallEtsFunctionImpl(napi_env env, Span<napi_value> jsargv);
-napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo);
+napi_value CallETSInstance(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
+                           EtsObject *thisObj);
+napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv);
 
+Expected<Method *, char const *> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint);
 uint8_t JSRuntimeInitJSCallClass(EtsString *clsStr);
 uint8_t JSRuntimeInitJSNewClass(EtsString *clsStr);
 
-template <bool IS_STATIC>
-napi_value EtsCallImpl(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                       EtsObject *thisObj);
-
-inline napi_value EtsCallImplInstance(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                                      EtsObject *thisObj)
+template <char DELIM = '.', typename F>
+static bool WalkQualifiedName(std::string_view name, F const &f)
 {
-    return EtsCallImpl<false>(coro, ctx, method, jsargv, thisObj);
-}
-
-inline napi_value EtsCallImplStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv)
-{
-    return EtsCallImpl<true>(coro, ctx, method, jsargv, nullptr);
+    for (const char *p = name.data(); *p == DELIM;) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto e = ++p;
+        while (*e != '\0' && *e != DELIM) {
+            e++;
+        }
+        std::string substr(p, ToUintPtr(e) - ToUintPtr(p));
+        if (UNLIKELY(!f(substr))) {
+            return false;
+        }
+        p = e;
+    }
+    return true;
 }
 
 }  // namespace ark::ets::interop::js
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CALL_H
