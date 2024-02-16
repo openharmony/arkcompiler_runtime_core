@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,7 +90,7 @@ inline T InvokeEntryPoint(Method *method)
     PandaVector<uint8_t> fprData(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
     Span<uint8_t> fprs(fprData.data(), fprData.size());
     PandaVector<uint8_t> stack;
-    arch::ArgWriter<RUNTIME_ARCH> writer(&gprs, &fprs, stack.data());
+    arch::ArgWriter<RUNTIME_ARCH> writer(gprs, fprs, stack.data());
     writer.Write(method);
 
     ManagedThread *thread = ManagedThread::GetCurrent();
@@ -145,7 +145,7 @@ inline T InvokeEntryPoint(Method *method, Args... args)
     PandaVector<uint8_t> fprData(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
     Span<uint8_t> fprs(fprData.data(), fprData.size());
     PandaVector<uint8_t> stack(counter.GetStackSpaceSize());
-    arch::ArgWriter<RUNTIME_ARCH> writer(&gprs, &fprs, stack.data());
+    arch::ArgWriter<RUNTIME_ARCH> writer(gprs, fprs, stack.data());
     writer.Write(method);
     WriteArg(&writer, args...);
 
@@ -168,7 +168,7 @@ coretypes::TaggedValue InvokeDynEntryPoint(Method *method, uint32_t numArgs, Arg
     PandaVector<uint8_t> fprData(arch::ExtArchTraits<RUNTIME_ARCH>::FP_ARG_NUM_BYTES);
     Span<uint8_t> fprs(fprData.data(), fprData.size());
     PandaVector<uint8_t> stack(counter.GetStackSpaceSize());
-    arch::ArgWriter<RUNTIME_ARCH> writer(&gprs, &fprs, stack.data());
+    arch::ArgWriter<RUNTIME_ARCH> writer(gprs, fprs, stack.data());
     writer.Write(method);
     writer.Write(numArgs);
     WriteArg(&writer, args...);
