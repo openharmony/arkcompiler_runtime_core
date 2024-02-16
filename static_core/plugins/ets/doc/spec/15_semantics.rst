@@ -114,50 +114,6 @@ constraint of that type parameter.
 
 |
 
-.. _Least Upper Bound:
-
-Least Upper Bound
-*****************
-
-.. meta:
-    frontend_status: Done
-
-The notion of the *least upper bound* (*LUB*) is used where a single type
-must be found that is a common supertype for a set of reference types.
-
-The word *least* means that the most specific supertype must be found, and
-there is no other shared supertype that is a subtype of LUB.
-
-A single type is LUB for itself.
-
-In a set that contains at least two types  (*T*:sub:`1`,..., *T*:sub:`k`),
-LUB is determined as follows:
-
--  The set of supertypes *ST*:sub:`i` is determined for each type in the set;
-
--  The intersection of the *ST*:sub:`i` sets is calculated. The intersection
-   always contains the *Object* and thus cannot be empty.
-
--  The most specific type is selected from the intersection.
-
-
-A compile-time error occurs if in the original set any types
-(*T*:sub:`1`,..., *T*:sub:`k`) are not reference types.
-
-.. index::
-   least upper bound (LUB)
-   common supertype
-   subtype
-   compile-time error
-   supertype
-   intersection
-   Object
-   common supertype
-   most specific type
-   reference type
-
-|
-
 .. _Override-Equivalent Signatures:
 
 Override-Equivalent Signatures
@@ -171,17 +127,30 @@ if their names, type parameters (if any, see :ref:`Generic Declarations`), and
 formal parameter types are the same---after the formal parameter types of
 *N* are adapted to type parameters of *M*.
 
-Formal defintion for *the same signatures* is given below:
+Formal definition for *the same signatures* is given below:
 
 M < *T*:sub:`1`, ... *T*:sub:`Mm` > ( *U*:sub:`1` , ... *U*:sub:`Mn` ): *R*:sub:`M`
 
 N < *T*:sub:`1`, ... *T*:sub:`Nm` > ( *U*:sub:`1` , ... *U*:sub:`Nn` ): *R*:sub:`N`
 
-- Mm = Nm, and for any i in 1 .. Mm => Constraint ( *T*:sub:`Mi` ) = Constraint ( *T*:sub:`Ni` );
-- Mn = Nn, and for any i in 1 .. Mn => Constraint ( *U*:sub:`Mi` ) = Constraint ( *U*:sub:`Ni` ).
+- Mm = Nm and for any i in 1 .. Mm => Constraint ( *T*:sub:`Mi` ) fits Constraint ( *T*:sub:`Ni` )
+- Mn = Nn and for any i in 1 .. Mn => Constraint ( *U*:sub:`Mi` ) fits Constraint ( *U*:sub:`Ni` )
+
+  * where Constraint of any type except type parameter returns the type itself, and
+  * *fits* means the following:
+
+    - The types are identical;
+    - The data value sets of the first and the second ones have an intersection
+      that leads to potential call ambiguities; or
+    - Type T and rest parameters of T[] have a potential ambiguity.
 
 
-Constraint of any type except type parameter returns the type itself.
+.. code-block:: typescript
+
+    type T1 = A | B
+    type T2 = A | C
+    // Types T1 and T2 fit each other as their data values have intersection with data values of type A
+
 
 Signatures *S*:sub:`1` and *S*:sub:`2` are *override-equivalent* only if
 *S*:sub:`1` and *S*:sub:`2` are the same.
@@ -216,14 +185,33 @@ The examples below illustrate the concept:
    foo (q1: U1, q2: U2): R2
    // The same number of parameters and their types are identical
 
-   // Different signatures
-
    class Base {}
    class Derived extends Base {}
 
    foo (p: Base)
    foo (p: Derived)
-   // The same number of parameters, but their types are different
+   /* The same number of parameters and intersection of data values of Derived
+      and Base produce data set of Derived values */
+
+   foo (p: A | B)
+   foo (p: A | C)
+   /* The same number of parameters and intersection of data values of A | B
+      and A | C produce data set of A values */
+
+   foo (p1: String)
+   foo (...p2: String[])
+   // The same due to ambiguity of the type String and rest parameter String[]
+   // foo("some string") fits both signatures
+
+
+   // Different signatures
+
+   foo (p1: String)
+   foo (p2: String[])
+   // As signatures String and String[] do not lead to call ambiguities
+   // foo ("some string") fits the first signature
+   // foo (["some string"]) fits the second one
+
 
 .. index::
    override-equivalent signature
@@ -312,29 +300,6 @@ It is illustrated by the example below:
    function foo (p1: Base, p2?: SomeClass): Derived3 // // signature #3: implementation signature
        { return p }
 
-|
-
-.. _Overload Resolution:
-
-Overload Resolution
-*******************
-
-Overload resolution process allows defining a list of matching candidates as
-part of the function or method selection process. The algorithm is as follows:
-
-- An empty list of matching candidates is created.
-- There are n expressions that represent n arguments passed to the call of
-  function or method. As a result, there is a list n types per expression
-  ( *T*:sub:`1` , *T*:sub:`2` , ... *T*:sub:`n` ).
-- There are N candidates (functions or methods overloaded by name) with their
-  signatures. The following checks are performed for every candidate:
-
-    - If n is equal to the number of parameters the candidate has, and
-    - If *T*:sub:`i` is compatible with the type of the i-th parameter of the
-      candidate (see :ref:`Type Compatibility`), then add the candidate to
-      the list of matching candidates.
-
-- The list of matching candidates is ready.
 
 |
 
@@ -395,7 +360,7 @@ logic to operands of non-Boolean types, while the result of an operation (see
 :ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`,
 :ref:`Logical Complement`) is kept boolean.
 Depending on the kind of the value type, the value of any valid expression can
-be handled as *true* or *false* as descibed in the table below:
+be handled as *true* or *false* as described in the table below:
 
 .. index::
    extended conditional expression

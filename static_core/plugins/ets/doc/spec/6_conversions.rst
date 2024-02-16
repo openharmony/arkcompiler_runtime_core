@@ -125,7 +125,7 @@ Assignment-like Contexts
   expression value to a variable;
   
 - *Call contexts* that allow assigning an argument value to a corresponding
-  formal parameter of a function, method, constructor or lamdda call (see
+  formal parameter of a function, method, constructor or lambda call (see
   :ref:`Function Call Expression`, :ref:`Method Call Expression`,
   :ref:`Explicit Constructor Call`, and :ref:`New Expressions`);
   
@@ -192,7 +192,11 @@ Assignment-like contexts allow using of one of the following:
 
 - :ref:`Constant String to Character Conversions`;
 
-- :ref:`Function Types Conversions`.
+- :ref:`Function Types Conversions`;
+
+- :ref:`Enumeration to Int Conversions`;
+
+- :ref:`Enumeration to String Conversions`.
 
 If there is no applicable conversion, then a compile-time error occurs.
 
@@ -262,7 +266,7 @@ Numeric Operator Contexts
 *************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 *Numeric contexts* apply to the operands of an arithmetic operator.
 *Numeric contexts* use combinations of predefined numeric types conversions
@@ -407,6 +411,10 @@ target types *long* or *int* is performed by the following rules:
 - Otherwise, the result is the value that rounds toward zero by using IEEE 754
   '*round-toward-zero*' mode.
 
+.. index::
+   IEEE 754
+
+
 |
 
 .. _Narrowing Reference Casting Conversions:
@@ -482,12 +490,12 @@ and not derived from one of *T*:sub:`i`.
     let animal: Animal = new Spitz()
     if (animal instanceof Frog) {
         let frog: Frog = animal as Frog // Use 'as' conversion here
-        frog.leap() // Perform an action specific for the particluar union type
+        frog.leap() // Perform an action specific for the particular union type
     }
     if (animal instanceof Spitz) {
         let dog = animal as Spitz // Use 'as' conversion here
         dog.sleep() 
-          // Perform an action specific for the particluar union type derivative
+          // Perform an action specific for the particular union type derivative
     }
 
 
@@ -556,26 +564,32 @@ Widening Primitive Conversions
 
 - Values of type *byte* to type *char* (see :ref:`Character Type and Operations`);
 
-- Values of type *char* to types  *int*, *long*, *float*, and *double*.
+- Values of type *char* to types  *int*, *long*, *float*, and *double*;
 
-+----------+------------------------------+
-| From     | To                           |
-+==========+==============================+
-| *byte*   | *short*, *int*, *long*,      |
-|          | *float*, *double*, or *char* |
-+----------+------------------------------+
-| *short*  | *int*, *long*, *float*, or   |
-|          | *double*                     |
-+----------+------------------------------+
-| *int*    | *long*, *float*, or *double* |
-+----------+------------------------------+
-| *long*   | *float* or *double*          |
-+----------+------------------------------+
-| *float*  | *double*                     |
-+----------+------------------------------+
-| *char*   | *int*, *long*, *float*,      |
-|          | or *double*                  |
-+----------+------------------------------+
+- Values of an *enumeration* type to types  *int*, *long*, *float*, and
+  *double* (if enumeration constants of this type are of type *int*).
+
++------------------+------------------------------+
+| From             | To                           |
++==================+==============================+
+| *byte*           | *short*, *int*, *long*,      |
+|                  | *float*, *double*, or *char* |
++------------------+------------------------------+
+| *short*          | *int*, *long*, *float*, or   |
+|                  | *double*                     |
++------------------+------------------------------+
+| *int*            | *long*, *float*, or *double* |
++------------------+------------------------------+
+| *long*           | *float* or *double*          |
++------------------+------------------------------+
+| *float*          | *double*                     |
++------------------+------------------------------+
+| *char*           | *int*, *long*, *float*,      |
+|                  | or *double*                  |
++------------------+------------------------------+
+| *enumeration*    | *int*, *long*, *float*,      |
+|                  | or *double*                  |
++------------------+------------------------------+
 
 These conversions cause no loss of information about the overall magnitude of
 a numeric value. Some least significant bits of the value can be lost only in
@@ -595,6 +609,7 @@ is properly rounded to the integer value.
    conversion
    round-to-nearest mode
    runtime error
+   IEEE 754
 
 |
 
@@ -603,8 +618,8 @@ is properly rounded to the integer value.
 Constant Narrowing Integer Conversions
 ======================================
 
-*Constant narrowing integer conversion* converts an expression of *integer*
-type to a value of a smaller *integer* type provided that:
+*Constant narrowing integer conversion* converts an expression of an *integer*
+type or of type *char* to a value of a smaller *integer* type provided that:
 
 - The expression is a constant expression (see :ref:`Constant Expressions`);
 - The value of the expression fits into the range of the smaller type.
@@ -613,6 +628,7 @@ type to a value of a smaller *integer* type provided that:
    :linenos:
 
     let b: byte = 127 // ok, int -> byte conversion
+    let c: char = 0x42E // ok, int -> char conversion
     b = 128 // compile-time-error, value is out of range
     b = 1.0 // compile-time-error, floating-point value cannot be converted
 
@@ -970,8 +986,50 @@ A compile-time error occurs if a *throwing function* value is assigned to a
 
 |
 
+.. _Enumeration to Int Conversions:
+
+Enumeration to Int Conversions
+==============================
+
+.. meta:
+    frontend_status: None
+
+A value of an *enumeration* type is converted to type *int*
+if enumeration constants of this type are of type *int*.
+
+This conversion never causes runtime errors.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum IntegerEnum {a, b, c}
+    let ie: IntegerEnum = IntegerEnum.a
+    let n: number = ie // n will get the value of 0
+
+|
+
+.. _Enumeration to String Conversions:
+
+Enumeration to String Conversions
+=================================
+
+.. meta:
+    frontend_status: None
+
+A value of *enumeration* type is converted to type *string*
+if enumeration constants of this type are of type *string*.
+
+This conversion never causes runtime errors.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum StringEnum {a = "a", b = "b", c = "c"}
+    let se: StringEnum = StringEnum.a
+    let s: string = se // n will get the value of "a"
+
+|
+
 .. raw:: pdf
 
    PageBreak
-
-

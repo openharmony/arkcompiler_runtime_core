@@ -70,6 +70,11 @@ is set implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
 A compile-time error occurs if ``integer`` and ``string`` type enumeration
 constants are combined in one enumeration.
 
+Any enumeration constant is of the *enumeration* type. The implicit conversion
+(see :ref:`Enumeration to Int Conversions`, :ref:`Enumeration to String Conversions`)
+of the enumeration constant to types *integer* or *string* depends on the type
+of enumeration.
+
 In addition, all enumeration constant names must be unique. Otherwise,
 a compile-time error occurs.
 

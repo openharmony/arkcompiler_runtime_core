@@ -179,7 +179,7 @@ An import declaration has the following two parts:
 -  Import path that determines a compilation unit to import from;
 
 -  Import binding that defines what entities, and in what form---qualified
-   or unqualified---can be used by the imported compilation unit.
+   or unqualified---can be used by the current module.
 
 .. index::
    import directive
@@ -202,7 +202,7 @@ An import declaration has the following two parts:
         ;
 
     fileBinding:
-        '*' importAlias?
+        '*' importAlias
         | qualifiedName '.' '*'
         ;
 
@@ -211,7 +211,7 @@ An import declaration has the following two parts:
         ;
 
     defaultBinding:
-        'default' Identifier
+        Identifier
         ;
 
     typeBinding:
@@ -246,42 +246,6 @@ chapter Experimental Features (see :ref:`Packages`).
    package
    declaration scope
    import construction
-
-|
-
-.. _Bind All with Unqualified Access:
-
-Bind All with Unqualified Access
-================================
-
-.. meta:
-    frontend_status: Partly
-
-If an alias is not set, then the import binding '\*' binds all entities,
-exported from the compilation unit as defined by the *import path*, to the
-declaration scope of the current module, as simple names.
-
-+-------------------------------+--+-------------------------------+
-| Import                        |  |  Usage                        |
-+===============================+==+===============================+
-|                                                                  |
-+-------------------------------+--+-------------------------------+
-| .. code-block:: typescript    |  | .. code-block:: typescript    |
-|                               |  |                               |
-|     import * from "..."       |  |     let x = sin(1.0)          |
-+-------------------------------+--+-------------------------------+
-
-.. index::
-   import binding
-   alias
-   entity
-   export
-   compilation unit
-   import path
-   declaration scope
-   simple name
-   module
-
 
 .. _Bind All with Qualified Access:
 
@@ -476,11 +440,8 @@ applied to a single name:
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
 | A name is used explicitly   |                            | Ok. No warning.              |
-| without alias in one binding|     import {sin}           |                              |
-| and implicitly without an   |        from "..."          |                              |
-| alias in another binding.   |                            |                              |
-|                             |     import * from "..."    |                              |
-|                             |                            |                              |
+| without alias in one        |     import {sin}           |                              |
+| binding.                    |        from "..."          |                              |
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | Ok. Both the name and        |
@@ -492,11 +453,10 @@ applied to a single name:
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | Ok. Only alias is accessible |
-| with alias and implicitly   |                            | for the name, but not the    |
-| without alias.              |     import {sin as Sine}   | original one:                |
+| with alias.                 |                            | for the name, but not the    |
+|                             |     import {sin as Sine}   | original one:                |
 |                             |       from "..."           |                              |
 |                             |                            | - Sine is accessible;        |
-|                             |     import * from "..."    |                              |
 |                             |                            | - sin is not accessible.     |
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
@@ -511,9 +471,8 @@ applied to a single name:
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | Compile-time error.          |
 | with alias several times.   |                            | Or warning?                  |
-|                             |     import                 |                              |
-|                             |        {sin as Sine},      |                              |
-|                             |        sin as SIN          |                              |
+|                             |     import {sin as Sine,   |                              |
+|                             |        sin as SIN}         |                              |
 |                             |        from "..."          |                              |
 +-----------------------------+----------------------------+------------------------------+
 
@@ -749,16 +708,6 @@ All entities from this package can be accessed as simple names.
 
 |
 
-.. _Dynamic Import:
-
-Dynamic Import
-**************
-
-TBD
-
-
-|
-
 .. _Top-Level Declarations:
 
 Top-Level Declarations
@@ -767,8 +716,8 @@ Top-Level Declarations
 .. meta:
     frontend_status: Done
 
-*Top-level type declarations* declare top-level types (*class*, *interface*,
-or *enum*), top-level variables, constants, or functions. Top-level type
+*Top-level declarations* declare top-level types (*class*, *interface*,
+or *enum*), top-level variables, constants, or functions. Top-level
 declarations can be exported.
 
 .. code-block:: abnf
@@ -810,9 +759,10 @@ Exported Declarations
 .. meta:
     frontend_status: Done
 
-Top-level declarations can use export modifiers to 'export' declared names.
-A declared name is considered *private* if not exported. A name declared
-*private* can be used only inside the compilation unit it is declared in.
+Top-level declarations can use export modifiers that make the declarations
+accessible in other compilation units by using import (see :ref:`Import Directives`).
+The declarations not marked as exported can be used only inside the compilation
+unit they are declared in.
 
 .. code-block:: typescript
    :linenos:
@@ -839,7 +789,6 @@ occurs if more than one top-level declaration is marked as *default*.
    export modifier
    export
    declared name
-   private
    compilation unit
    default export scheme
    import
@@ -1057,7 +1006,7 @@ The sequence above is equal to the following:
       }
 
       // Source file B
-      import * from "Source file A "
+      import * as A from "Source file A "
       function main () {
          console.log ("B.main")
       }

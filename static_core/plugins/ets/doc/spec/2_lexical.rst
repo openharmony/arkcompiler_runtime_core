@@ -627,9 +627,8 @@ Strings that represent numbers or any integer values can be converted to
    integer
    BigInt literal
    underscore character
-   static function
 
-Two other static functions allow taking *bitsCount* lower bits of a
+Two other static methods allow taking *bitsCount* lower bits of a
 BigInt number and return them as a result. Signed and unsigned versions
 are both possible:
 
@@ -638,6 +637,8 @@ are both possible:
     BigInt.asIntN(bitsCount: long, bigIntToCut: bigint): bigint
     BigInt.asUintN(bitsCount: long, bigIntToCut: bigint): bigint
 
+.. index::
+   static method
 
 
 .. _Boolean Literals:

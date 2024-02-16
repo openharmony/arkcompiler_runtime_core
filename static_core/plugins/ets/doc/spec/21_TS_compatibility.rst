@@ -18,7 +18,7 @@
 .. meta:
     frontend_status: None
 
-This section discusses all issues related to different compatibiliuty aspects
+This section discusses all issues related to different compatibility aspects
 between |LANG| and |TS|.
 
 
@@ -71,7 +71,7 @@ Covariant Overriding
 ********************
 
 |TS| if non-existing property is accessed from some object during program
-     execution |TS| runtime may handle such situtions due to its object
+     execution |TS| runtime may handle such situations due to its object
      runtime model.
 |LANG| allows to generate high efficient code which relies on objects'
      layout known at compile-time. Thus type-safety violations are prevented
@@ -103,5 +103,25 @@ Covariant Overriding
     base.foo (new Base)
 
 
+.. _Differences in Math.pow:
+
+Differences in Math.pow
+***********************
+
+The function *Math.pow* in |LANG| conforms to the latest IEEE 754-2019 standard,
+and the following calls:
+
+- *Math.pow(1, Infinity)*
+- *Math.pow(-1, Infinity)*
+- *Math.pow(1, -Infinity)*
+- *Math.pow(-1, -Infinity)*
+
+---produce the result *1* (one).
+
+The function *Math.pow* in |TS| conforms to the outdated 2008 version of the
+standard, and the same calls produce *NaN*.
+
+.. index::
+   IEEE 754
 
 

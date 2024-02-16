@@ -566,13 +566,17 @@ Floating-Point Types and Operations
 +-----------+-------------------------------------+--------------------------+
 | Type      | Type's Set of Values                | Corresponding Class Type |
 +===========+=====================================+==========================+
-| *float*   | The set of all IEEE-754 32-bit      | *Float*                  |
+| *float*   | The set of all IEEE 754 [3]_ 32-bit | *Float*                  |
 |           | floating-point numbers              |                          |
 |           | floating-point numbers              |                          |
 +-----------+-------------------------------------+--------------------------+
-| *number*, | The set of all IEEE-754 64-bit      | *Number*                 |
+| *number*, | The set of all IEEE 754 64-bit      | *Number*                 |
 | *double*  | floating-point numbers              | *Double*                 |
 +-----------+-------------------------------------+--------------------------+
+
+.. index::
+   IEEE 754
+   floating-point number
 
 |LANG| provides a number of operators to act on floating-point type values as
 discussed below.
@@ -700,7 +704,7 @@ denormalized number.
 result of every floating-point operator is rounded to the result precision. An
 *inexact* result is rounded to the representable value nearest to the infinitely
 precise result. |LANG| uses the '*round to nearest*' principle (the default
-rounding mode in IEEE-754), and prefers the representable value with the least
+rounding mode in IEEE 754), and prefers the representable value with the least
 significant bit zero out of any two equally near representable values.
 
 .. index::
@@ -719,6 +723,7 @@ significant bit zero out of any two equally near representable values.
    round to nearest
    rounding mode
    denormalized number
+   IEEE 754
 
 |LANG| uses '*round toward zero*' to convert a *floating-point* value to an
 *integer* (see :ref:`Primitive Types Conversions`). In this case it acts as
@@ -1081,11 +1086,11 @@ also refers to type *string*).
 .. meta:
     frontend_status: Done
 
-The class *never* is a subclass (see :ref:`Subtyping`) of any other class.
+The type *never* is a subtype (see :ref:`Subtyping`) of any other type.
 
-The *never* class has no instances. It is used to represent values that do
-not exist (a function with this return type never returns a value, but only
-throws an error or exception).
+Type *never* type has no instances. It is used to represent values that do
+not exist (for example a function with this return type never returns a value,
+but finishes its work throwing an error or exception).
 
 .. index::
    subtyping
@@ -1190,9 +1195,16 @@ Array Types
 Two basic operations with array elements take elements out of, and put
 elements into an array by using the operator ``[]`` and index expression.
 
-Another important operation is the read-only field *length*. It allows
-knowing the number of elements in the array. An example of syntax for
-the built-in array type is presented below:
+The number of elements in an array can be obtained by accessing the field
+*length*. Setting a new value of this field allows shrinking the array by
+reducing the number of its elements.
+
+Attempting to increase the length of the array causes a compile-time error
+(if the compiler has the information sufficient to determine this), or to
+a run-time error.
+
+An example of syntax for the built-in array type is presented below:
+
 
 .. index::
    array element
@@ -1233,6 +1245,9 @@ The examples are presented below:
     a[1] = 7 /* put 7 as the 2nd element of the array, index of this element is 1 */
     let y = a[4] /* get the last element of array 'a' */
     let count = a.length // get the number of array elements
+    a.length = 3
+    y = a[2] // OK, 2 is the index of the last element now
+    y = a[3] // Will lead to runtime error - attempt to access non-existing array element
 
     let b: Number[] = new Array<Number>
        /* That is a valid code as type used in the 'b' declaration is identical
@@ -1355,6 +1370,9 @@ and conversions in :ref:`Function Types Conversions`.
 *null* Type
 ===========
 
+.. meta:
+    frontend_status: Done
+
 The only value of type *null* is represented by the keyword ``null``
 (see :ref:`Null Literal`).
 
@@ -1376,7 +1394,7 @@ nullish types (see :ref:`Nullish Types`).
 ================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The only value of type *undefined* is represented by the keyword
 ``undefined`` (see :ref:`Undefined Literal`).
@@ -1440,7 +1458,7 @@ the access to tuple elements.
    tuple[0] = 666
    console.log (tuple[0], tuple[4]) // `666 666` be printed
 
-*Object* (see :ref:`Object Class Type`) is the super type for any tuple type.
+*Object* (see :ref:`Object Class Type`) is the supertype for any tuple type.
 
 An empty tuple is a corner case. It is only added to support compatibility
 with |TS|:
@@ -1478,7 +1496,7 @@ If a *union* uses a primitive type (see *Primitive types* in
 :ref:`Types by Category`), then automatic boxing occurs to keep the reference
 nature of the type.
 
-The reduced form of *union* types allows defining a type which has only
+The reduced form of *union* types allows defining a type which has only 
 one value:
 
 .. index::
@@ -1531,7 +1549,7 @@ Different mechanisms can be used to get values of particular types from a
     class Dog { sleep () {}; bark () {} }
     class Frog { sleep () {}; leap () {} }
 
-    type Animal = Cat | Dog | Frog | number
+    type Animal = Cat | Dog | Frog
 
     let animal: Animal = new Cat()
     if (animal instanceof Frog) { 
@@ -1569,8 +1587,9 @@ The following example is for values:
        // pension :-)
     }
 
-**Note**: A compile-time error occurs if a variable of union type is compared
-to a value that does not belong to the values of that union type:
+**Note**: A compile-time error occurs if an expression of union type is
+compared to a literal value that does not belong to the values of that union
+type:
 
 .. code-block:: typescript
    :linenos:
@@ -1582,6 +1601,11 @@ to a value that does not belong to the values of that union type:
        compile-time error as 666 does not belong to
        values of type BMW_ModelCode
     */
+
+    function model_code_test (code: number) {
+       if (car_code == code) { ... }
+       // This test is to be resolved during program execution
+    }
 
 |
 
@@ -1611,21 +1635,20 @@ another:
 #. All nested union types are linearized.
 #. Identical types within the union type are replaced for a single type.
 #. Identical literals within the union type are replaced for a single literal.
-
-   - if list of union types contains a primitve numeric type or a literal and a
-     boxed version of the same or different primitve numeric type then it is
-     compile-time error - invalid union type and normalization process is
-     aborted.
-
-#. If at least one type in the union is *Object*, then the entire union type is
-   reduced to type *Object*.
+#. If at least one type in the union is *Object*, then all other non-nullish
+   types are removed.
 #. If there is type *never* among union types, then it is removed.
 #. If there is a non-empty group of numeric types in a union, then the largest
    (see :ref:`Numeric Types Hierarchy`) numeric type is to stay in the union
    while the others are removed. All numeric literals (if any) that fit into
    the largest numeric type in a union are removed.
+#. If a primitive type after widening (see :ref:`Widening Primitive Conversions`)
+   and boxing (see :ref:`Boxing Conversions`) is equal to another union type,
+   then the intial type is removed.
 #. If a literal of union type belongs to the values of a type that is part
    of the union, then the literal is removed.
+#. If a numeric literal fits into the unboxed type of one of union numeric class
+   type, then the literal is removed.
 #. This step is performed recursively until no mutually compatible types remain
    (see :ref:`Type Compatibility`), or the union type is reduced to a single type:
 
@@ -1661,9 +1684,9 @@ is presented in the examples below:
 
     number | number => number                    // Identical types elimination
 
-    number | Number                              // Compile-time error
-    Int | float                                  // Compile-time error
-    Int | 3.14                                   // Compile-time error
+    number | Number => Number                    // The same after boxing
+    Int | float => Float                         // tbd
+    Int | 3.14  => Int | 3.14                    // Values fits into unboxed version of type Int 
 
     int|short|float|2 => float                   // the largest numeric type stays
     int|long|2.71828 => long|2.71828             // the largest numeric type stays and the literal
@@ -1677,7 +1700,7 @@ is presented in the examples below:
     1 | string | number => string | number       // Union value elimination
 
     1 | Object => Object                         // Object wins
-    AnyType | Object | AnyType => Object
+    AnyNonNullishType | Object => Object         
 
     class Base {}
     class Derived1 extends Base {}
@@ -1748,7 +1771,7 @@ Nullish Types
 =============
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 |LANG| has nullish types that are in fact a special form of union types (see
 :ref:`Union Types`):
@@ -1849,7 +1872,7 @@ DynamicObject Type
 
 The interface *DynamicObject* is used to provide seamless interoperability
 with dynamic languages (e.g., |JS| and |TS|), and to support advanced
-language features such as *dynamic import* (see :ref:`Dynamic Import`).
+language features such as *dynamic import* (see :ref:`Dynamic Import Expression`).
 This interface is defined in :ref:`Standard Library`.
 
 This interface (defined in :ref:`Standard Library`) is common for a set of
@@ -2124,8 +2147,6 @@ Default values of primitive types are as follows:
    reference type
    enumeration type
 
-|
-
 +--------------+------------------+
 |   Data Type  |   Default Value  |
 +==============+==================+
@@ -2188,6 +2209,14 @@ The default values of nullish union types are as follows:
    double
    char
    boolean
+
+
+-------------
+
+.. [3]
+   Wherever IEEE 754 is used in this Specification, the reference is to the
+   latest revision of "754-2019 - IEEE Standard for Floating-Point Arithmetic".
+
 
 .. raw:: pdf
 

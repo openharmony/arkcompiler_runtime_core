@@ -111,7 +111,7 @@ An *interface declaration* specifies a new named reference type:
 
     interfaceDeclaration:
         'interface' identifier typeParameters?
-        interfaceExtendsClause? '{' interfaceBody '}'
+        interfaceExtendsClause? '{' interfaceMember* '}'
         ;
 
     interfaceExtendsClause:
@@ -120,10 +120,6 @@ An *interface declaration* specifies a new named reference type:
 
     interfaceTypeList:
         typeReference (',' typeReference)*
-        ;
-
-    interfaceBody:
-        interfaceMember*
         ;
 
 The *identifier* in an interface declaration specifies the interface name.
@@ -370,23 +366,19 @@ A compile-time error occurs if the interface explicitly declares:
    override-equivalent signature
 
 An interface normally inherits all members of the interfaces it extends.
-However, an interface does not inherit:
+However, an interface does not inherit the following:
 
 -  Fields it hides;
 -  Methods it overrides (see :ref:`Inheritance and Overriding`).
 
-
 A name in a declaration scope must be unique, i.e., the names of fields and
-methods of an interface type must not be the same (see
-:ref:`Interface Declarations`).
+methods of an interface type must not be the same (see :ref:`Interface Declarations`).
 
 .. index::
    inheritance
    interface
    field
    method
-   private method
-   static method
    overriding
    declaration scope
    interface type
@@ -408,7 +400,7 @@ An interface property can be defined in the form of a field or an accessor
 .. code-block:: abnf
 
     interfaceProperty:
-        readonly? identifier ':' type
+        readonly? identifier '?'? ':' type
         | 'get' identifier '(' ')' returnType
         | 'set' identifier '(' parameter ')'
         ;
@@ -418,6 +410,10 @@ the following:
 
 -  A getter, if a field is marked as *readonly*;
 -  Otherwise, both a getter and a setter with the same name.
+
+If *'?'* is used after the name of the property, then its actual type is
+*type* | *undefined*.
+
 
 .. index::
    field
@@ -542,7 +538,7 @@ two have one parameter each:
        c.foo(undefined)  // ok, call fits the 3rd signature
     }
 
-If a class implements an interafce that has a method with an overload
+If a class implements an interface that has a method with an overload
 signature, then the class must also provide a method that has an overload
 signature.
 
@@ -573,7 +569,6 @@ signature.
    call
    overload signature
    optional parameter
-   least upper bound
    overload signature compatibility
 
 |
@@ -609,7 +604,7 @@ direct superinterfaces if **all** of the following is true:
    overriding
    method declaration
 
-An interface cannot inherit *private* or *static* methods from its
+An interface does not inherit *private* or *static* methods from its
 superinterfaces.
 
 A compile-time error occurs if:

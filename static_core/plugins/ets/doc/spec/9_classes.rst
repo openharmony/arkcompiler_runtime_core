@@ -627,8 +627,8 @@ Class members are as follows:
 -  Members declared in the class body (see :ref:`Class Body`).
 
 
-The class members declared *private* are not inherited by subclasses of
-that class.
+Class members declared *private* are not accessible to all subclasses of
+the class.
 
 .. index::
    inheritance
@@ -662,6 +662,14 @@ A *method* is defined by the following:
 #. *Return type*, i.e., the return type of the method member.
 #. A *throws*/*rethrows* clause, i.e., an indication of the ability of a
    member method to raise exceptions.
+
+Members can be as follows:
+
+-  Static members that are not part of class instances, and can be accessed
+   by using a qualified name notation (see :ref:`Names`) anywhere the class
+   name or the interface name is accessible; and
+-  Non-static, or instance members that belong to any instance of the class.
+
 
 All names in both static and non-static class declaration scopes (see
 :ref:`Scopes`) must be unique, i.e., fields and methods cannot have the
@@ -892,20 +900,15 @@ superinterfaces of the class.
    class declaration body
    
 If a hidden field is static, then it can be accessed with the qualification
-of a superclass or superinterface. Otherwise, a field access expression with
-the keyword ``super`` (see :ref:`Field Access Expressions`), or a cast to a
-superclass type can be used.
+of a superclass or of a superinterface, or with a field access expression with
+the keyword ``super`` (see :ref:`Field Access Expressions`).
 
-A class inherits all non-private fields of superclass and superinterfaces
+A class can access all non-private fields of a superclass and superinterfaces
 from its direct superclass and direct superinterfaces if such non-private
 fields are both:
 
 -  Accessible (see :ref:`Scopes`) to code in the class; and
 -  Not hidden by a declaration in the class.
-
-
-A subclass can access a private field of a superclass if both classes are
-members of the same class. However, a subclass cannot inherit a private field.
 
 A class can inherit more than one field or property with the same name from
 its superinterfaces, or from both its superclass and superinterfaces. However,
@@ -943,14 +946,24 @@ Static Fields
 .. meta:
     frontend_status: Done
 
-A class field declared with the modifier ``static`` is considered *static*.
-A static field is instantiated when the class is initialized. A static
-field can have only one instantiation, irrespective of how many instances
-of that class (even if zero) are eventually created.
+There are two categories of class or interface fields:
+ 
+- Class, or static fields
 
-A field declared without the modifier ``static`` is called *non-static*.
-A non-static field is created for, and associated with
-a newly-created instance of a class or its superclasses.
+Static fields are declared with the ``static`` modifier. They are not parts 
+of class instances. There is one copy of a static field, irrespective of how 
+many instances of that class (even if zero) are eventually created.
+
+Static fields are accessed using a qualified name notation (where the class 
+or interface name is used as a qualifier, see :ref:`Names`) in any place 
+where the class or interface name is accessible.
+
+- Instance, or non-static fields.
+
+Instance fields belong to each instance of the class. An instance field 
+is created for, and associated with a newly-created instance of a class 
+or its superclass. Instance fields are accessible via the name
+of the instance.
 
 .. index::
    static field
@@ -1029,8 +1042,9 @@ In a non-static field declaration, an initializer is evaluated at runtime.
 Its assignment is performed each time an instance of the class is created.
 The initializer can use the following keywords:
 
--  ``this`` to access or refer to the current object;
--  ``super`` to access to a superclass object;
+-  ``this`` to access the current object methods or fields, or to refer to the
+   current object;
+-  ``super`` to access the methods declared in a superclass;
 
 .. index::
    initializer
@@ -1289,7 +1303,8 @@ The ``override`` modifier indicates that an instance method in a superclass is
 overridden by the corresponding instance method from a subclass (see
 :ref:`Overriding by Instance Methods`).
 
-The use of the modifier ``override`` is optional.
+The usage of the modifier ``override`` is optional but strongly recommended as
+it makes the overriding explicit.
 
 A :index:`compile-time error` occurs if:
 
@@ -1428,7 +1443,6 @@ following requirements are met:
    non-final implementation method
    static implementation method
    non-static implementation method
-   least upper bound
 
 |
 
@@ -1593,10 +1607,7 @@ overrides another method *m*:sub:`I` (declared in interface *I*) from *C* if
 
 
 A method call expression (see :ref:`Method Call Expression`) containing the
-keyword ``super`` can be used to access to an overridden method.
-
-Accessing an overridden method with a qualified name, or a cast to a superclass
-type is not effective.
+keyword ``super`` can be used to call an overridden method.
 
 Among the methods that override each other, return types can vary if they are
 reference types.
@@ -1925,10 +1936,12 @@ Class Initializer
 .. meta:
     frontend_status: Done
 
-When a class is initialized, the *class initializer* declared in the class
-is executed. Class initializers (along with field initializers for static
-fields as described in :ref:`Field Initialization`) ensure that all static
-fields receive their initial values before the first use.
+When a class is initialized, the *class initializer* declared in the class is
+executed along with all *class initializers* of all superclasses. The order of
+execution is from the top superclass to the current class. Class initializers
+(along with field initializers for static fields as described in
+:ref:`Field Initialization`) ensure that all static fields receive their
+initial values before the first use.
 
 .. code-block:: typescript
    :linenos:
@@ -1940,8 +1953,8 @@ fields receive their initial values before the first use.
 A compile-time error occurs if a class initializer contains:
 
 -  A ``return <expression>`` statement (see :ref:`Return Statements`).
--  A throw statement (see :ref:`Throw Statements`) with no try
-   statement (see :ref:`Try Statements`) to handle the surrounding context.
+-  A ``throw`` statement (see :ref:`Throw Statements`) with no surrounding
+   ``try`` statement (see :ref:`Try Statements`) to handle the error or exception.
 -  Keywords ``this`` (see :ref:`this Expression`) or ``super`` (see
    :ref:`Method Call Expression` and :ref:`Field Access Expressions`), or any
    type of a variable declared outside the class initializer.
@@ -2057,28 +2070,6 @@ Formal Parameters
 
 The syntax and semantics of a constructor’s formal parameters are identical
 to those of a method.
-
-|
-
-.. _The Type of a Constructor:
-
-The Type of a Constructor
-=========================
-
-.. meta:
-    frontend_status: Done
-
-Constructor type consists of its signature and optional '*throw*' or
-'*rethrow*' clauses.
-
-.. index::
-   constructor parameter
-   constructor type
-   signature
-   throws clause
-   rethrows clause
-
-|
 
 .. _Constructors Overload Signatures:
 
@@ -2384,10 +2375,7 @@ Default Constructor
     frontend_status: Done
 
 If a class contains no constructor declaration, then a default constructor
-is implicitly declared.
-Such a constructor provides default values to class fields with default values.
-The default constructor for a top-level class or a local class has the
-following form:
+is implicitly declared. The default constructor has the following form:
 
 -  The access modifier of the default constructor and of the class is the same
    (if the class has no access modifier, then the default constructor has the
@@ -2395,9 +2383,9 @@ following form:
 
 -  The default constructor has no '``throws``' or '``rethrows``' clauses.
 
--  If the primordial class ``Object`` is being declared, then the body of the
-   default constructor is empty. Otherwise, the default constructor only
-   calls the superclass constructor with no arguments.
+-  The body of the default constructor contains a call to the the superclass
+   constructor with no arguments except the primordial class ``Object``. The
+   body of the default constructor for the primordial class ``Object`` is empty.
 
 A compile-time error occurs if a default constructor is implicit, but
 the superclass:
@@ -2405,6 +2393,43 @@ the superclass:
 -  Has no accessible constructor without parameters; and
 -  Has a constructor without parameters but with '``throws``' or '``rethrows``'
    clauses.
+
+.. code-block:: typescript
+   :linenos:
+    
+   // Class declarations without constructors
+   class Object {}
+   class Base {}
+   class Derived extends Base {}
+
+
+   // Class declarations with default constructors declared implicitly
+   class Object {
+     constructor () {} // Empty body - as there is no supercalss
+   }
+   // Default constructors added
+   class Base { constructor () { super () } }
+   class Derived extends Base { constructor () { super () } }
+
+   // Example of an error case #1
+   class A {
+       private constructor () {}
+   }
+   class B extends A {} // No constructor in B
+   // During compialtion of B 
+   class B extends A { constructor () { super () } } // Default constructor added
+   // And it leads to conpile-time error as default constructor calls super()
+   // which is private and inaccessible
+
+   // Example of an error case #2
+   class A {
+       constructor () throws {}
+   }
+   class B extends A {} // No constructor in B
+   // During compialtion of B 
+   class B extends A { constructor () { super () } } // Default constructor added
+   // And it leads to conpile-time error as default constructor is not marked as throws
+   // but it call super() which throws
 
 
 .. index::
