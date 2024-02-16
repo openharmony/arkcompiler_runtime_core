@@ -110,7 +110,8 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     some(predicate: (value: T, index: number) => boolean): boolean;
     some(predicate: (value: T) => boolean): boolean;
 
-    toLocaleString(): string;
+    // toLocaleString(): string;
+    // All objects in ArkTS have such method, no need to define it here
 
     // toString(): string;
     // All objects in ArkTS have such method, no need to define it here

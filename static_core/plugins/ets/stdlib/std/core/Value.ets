@@ -254,7 +254,7 @@ export abstract class Value extends Object {
         } else if (t instanceof TupleType) {
             throw new Error("Not implemented")
         }
-        // TODO(shumilov-petr): throw `unknown type` exception
+        // NOTE(shumilov-petr): throw `unknown type` exception
         assert(false)
     }
 
@@ -295,6 +295,8 @@ export abstract class Value extends Object {
     public abstract getType(): Type
 
     public abstract getData(): NullishType
+
+    public abstract toPrint(depth: int): string
 }
 
 
@@ -487,21 +489,47 @@ export final class ClassValue extends Value {
         }
     }
 
-    public override toString(): string {
+    public override toPrint(depth: int): string {
+        if (depth == 0) {
+            return this.typ.getName() + " {...}"
+        }
+        // If class has user-overrided `toString`
+        const mnum = this.typ.getMethodsNum()
+        for (let i = 0; i < mnum; i++) {
+            const m = this.typ.getMethod(i)
+            if (m.getName() == OBJECT_TO_STRING_MEMBER_NAME && !m.getType().getReceiverType().equals(ObjectType)) {
+                return this.data.toString()
+            }
+        }
         const fnum = this.getFieldsNum()
-        let res = new StringBuilder("{")
+        if (fnum == 0) {
+            return this.typ.getName() + " {}"
+        }
+        let res = new StringBuilder(this.typ.getName())
+        res.append(" {")
         for (let i = 0; i < fnum; i++) {
             const f = this.typ.getField(i)
+            if (f.isStatic()) {
+                continue
+            }
             const fv = this.getField(i)
             res.append(f.getName())
             res.append(": ")
-            res.append(fv.toString())
+            res.append(fv.toPrint(depth - 1))
             if (i != fnum - 1) {
                 res.append(", ")
             }
         }
         res.append("}")
         return res.toString()
+    }
+
+    public override toString(): string {
+        return "[object Object]"
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -596,16 +624,52 @@ export final class ArrayValue extends Value {
         }
     }
 
-    public override toString(): string {
+    public override toPrint(depth: int): string {
+        if (depth == 0) {
+            return "[...]"
+        }
         const len = this.getLength()
+        if (len == 0) {
+            return "[]"
+        }
         let res = new StringBuilder("[")
         for (let i = 0; i < len; i++) {
-            res.append(this.getElement(i).toString())
+            res.append(this.getElement(i).toPrint(depth - 1))
             if (i != len - 1) {
                 res.append(", ")
             }
         }
         res.append("]")
+        return res.toString()
+    }
+
+    public override toString(): string {
+        const len = this.getLength()
+        if (len == 0) {
+            return ""
+        }
+        let res = new StringBuilder()
+        for (let i = 0; i < len; i++) {
+            res.append(this.getElement(i).toString())
+            if (i != len - 1) {
+                res.append(",")
+            }
+        }
+        return res.toString()
+    }
+
+    public override toLocaleString(): string {
+        const len = this.getLength()
+        if (len == 0) {
+            return ""
+        }
+        let res = new StringBuilder()
+        for (let i = 0; i < len; i++) {
+            res.append(this.getElement(i).toLocaleString())
+            if (i != len - 1) {
+                res.append(",")
+            }
+        }
         return res.toString()
     }
 }
@@ -628,12 +692,20 @@ export final class LambdaValue extends Value {
     }
 
     public invoke(...args: Object[]): Object {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("Not implemented")
+    }
+
+    public override toPrint(depth: int): string {
+        return "[object Function]"
     }
 
     public override toString(): string {
         return this.typ.toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -665,8 +737,16 @@ export final class BooleanValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder().append(this.data).toString()
+    }
+
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -698,8 +778,16 @@ export final class ByteValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder().append(this.data).toString()
+    }
+
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -731,8 +819,16 @@ export final class ShortValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder().append(this.data).toString()
+    }
+
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -764,8 +860,16 @@ export final class CharValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder("\"").append(this.data).append("\"").toString()
+    }
+
     public override toString(): string {
         return new StringBuilder("\"").append(this.data).append("\"").toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -797,8 +901,16 @@ export final class IntValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder().append(this.data).toString()
+    }
+
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -830,8 +942,16 @@ export final class FloatValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder().append(this.data).toString()
+    }
+
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -863,8 +983,16 @@ export final class DoubleValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder().append(this.data).toString()
+    }
+
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -896,8 +1024,16 @@ export final class LongValue extends Value {
         this(typ, data.unboxed())
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder().append(this.data).toString()
+    }
+
     public override toString(): string {
         return new StringBuilder().append(this.data).toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -921,8 +1057,16 @@ export final class StringValue extends Value {
         this.data = data
     }
 
+    public override toPrint(depth: int): string {
+        return new StringBuilder("\"").append(this.data).append("\"").toString()
+    }
+
     public override toString(): string {
         return new StringBuilder("\"").append(this.data).append("\"").toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -942,8 +1086,16 @@ export final class NullValue extends Value {
 
     internal constructor() {}
 
+    public override toPrint(depth: int): string {
+        return NullType.REF.toString()
+    }
+
     public override toString(): string {
         return NullType.REF.toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }
 
@@ -963,7 +1115,15 @@ export final class UndefinedValue extends Value {
 
     internal constructor() {}
 
+    public override toPrint(depth: int): string {
+        return UndefinedType.REF.toString()
+    }
+
     public override toString(): string {
         return UndefinedType.REF.toString()
+    }
+
+    public override toLocaleString(): string {
+        return this.toString()
     }
 }

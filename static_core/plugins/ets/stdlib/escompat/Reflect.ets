@@ -43,27 +43,27 @@ export class Reflect {
         if (!Reflect.has(target, key)) {
             return undefined
         }
-        let t = Type.of(target)
+        const t = Type.of(target)
         if (t instanceof ClassType) {
             return (Value.of(target) as ClassValue).getFieldByName(key).getData()!
         } else if (t instanceof ArrayType) {
-            if (key == "length") {
+            if (key == ARRAY_LENGTH_MEMBER_NAME) {
                 return new Number((Value.of(target) as ArrayValue).getLength())
             }
         } else if (t instanceof LambdaType) {
-            if (key == "length") {
+            if (key == FUNCTION_LENGTH_MEMBER_NAME) {
                 return new Number((t as FunctionType).getParametersNum())
-            } else if (key == "name") {
+            } else if (key == FUNCTION_NAME_MEMBER_NAME) {
                 return ""
             }
         } else if (t instanceof EnumType) {
-            // TODO(shumilov-petr): Not implemented
+            // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         } else if (t instanceof UnionType) {
-            // TODO(shumilov-petr): Not implemented
+            // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         } else if (t instanceof TupleType) {
-            // TODO(shumilov-petr): Not implemented
+            // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
         return undefined
@@ -98,13 +98,13 @@ export class Reflect {
             let av = Value.of(target) as ArrayValue
             return av.getElement(index as long).getData()!
         } else if (t instanceof EnumType) {
-            // TODO(shumilov-petr): Not implemented
+            // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         } else if (t instanceof UnionType) {
-            // TODO(shumilov-petr): Not implemented
+            // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         } else if (t instanceof TupleType) {
-            // TODO(shumilov-petr): Not implemented
+            // NOTE(shumilov-petr): Not implemented
             throw new Error("Not implemented")
         }
         return undefined
@@ -180,20 +180,50 @@ export class Reflect {
     }
 
     /**
-    * Determines whether an object has a field with the specified name
+    * Determines whether an object has a member with the specified name
     *
     * @param target an object
     *
-    * @param key a field name
+    * @param key a member name
     *
     * @returns a boolean indicating whether or not the target has the field
     */
     public static has(target: Object, key: string): boolean {
-        return Object.hasOwn(target, key)
+        if (!Object.hasOwn(target, key)) {
+            const t = Type.of(target)
+            if (t instanceof ClassType) {
+                const ct = t as ClassType
+                const mnum = ct.getMethodsNum()
+                for (let i = 0; i < mnum; ++i) {
+                    const m = ct.getMethod(i)
+                    if (m.isStatic()) {
+                        continue
+                    }
+                    if (m.getName() == key) {
+                        return true
+                    }
+                }
+            } else if (t instanceof StringType || t instanceof ArrayType || t instanceof LambdaType) {
+                return (key == OBJECT_TO_STRING_MEMBER_NAME ||
+                    key == OBJECT_TO_LOCALE_STRING_MEMBER_NAME ||
+                    key == OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME)
+            } else if (t instanceof EnumType) {
+                // NOTE(shumilov-petr): Not implemented
+                throw new Error("Not implemented")
+            } else if (t instanceof UnionType) {
+                // NOTE(shumilov-petr): Not implemented
+                throw new Error("Not implemented")
+            } else if (t instanceof TupleType) {
+                // NOTE(shumilov-petr): Not implemented
+                throw new Error("Not implemented")
+            }
+            return false
+        }
+        return true
     }
 
     /**
-    * Determines whether an object has a field with the specified name
+    * Determines whether an object has a field with the specified number
     *
     * @param target an object
     *
