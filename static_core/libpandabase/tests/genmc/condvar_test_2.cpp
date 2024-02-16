@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "common.h"
-#include "libpandabase/utils/utils.h"
 
 // The test checks the work of Wait-SignalAll
 // There are two waiters (Thread1) and one waker (Thread2)
@@ -28,6 +27,8 @@ extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
 static struct fmutex g_x;
 static struct CondVar g_c;
 constexpr int N = 2;
+constexpr int G_SHARED_VAL_2 = 2;
+constexpr int G_SHARED_VAL_5 = 5;
 
 static void *Thread1(void *arg)
 {
@@ -45,7 +46,7 @@ static void *Thread2(void *arg)
     // To be sure, the first thread is stopped on wait
     MutexLock(&g_x, false);
     // GenMC reports a race here without locks
-    __VERIFIER_assume(g_shared == 2_I);
+    __VERIFIER_assume(g_shared == G_SHARED_VAL_2);
     MutexUnlock(&g_x);
 
     MutexLock(&g_x, false);
@@ -73,7 +74,7 @@ int main()
     pthread_join(t3, nullptr);
 
     // Check that the threads were really waken
-    ASSERT(g_shared == 5_I);
+    ASSERT(g_shared == G_SHARED_VAL_5);
 
     ConditionVariableDestroy(&g_c);
     MutexDestroy(&g_x);

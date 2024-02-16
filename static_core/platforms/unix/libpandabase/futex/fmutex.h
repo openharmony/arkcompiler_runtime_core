@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,7 +110,7 @@ __attribute__((visibility("default"))) void MutexIgnoreChecksOnTerminationLoop()
 
 struct CondVar {
 #ifdef MC_ON
-    alignas(alignof(uint64_t)) struct fmutex *ATOMIC(mutex_ptr);
+    alignas(alignof(uint64_t)) struct fmutex *ATOMIC(mutexPtr);
 #else
     alignas(alignof(uint64_t)) ATOMIC(struct fmutex *) mutexPtr;
 #endif
