@@ -1,0 +1,2 @@
+# #14647
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_01.ets
