@@ -144,6 +144,7 @@ config("ark_config") {
     defines += [
       "PANDA_LLVM_IRTOC",
       "PANDA_LLVM_INTERPRETER",
+      "PANDA_LLVM_FASTPATH",
     ]
   }
 

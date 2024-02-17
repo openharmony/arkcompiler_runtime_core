@@ -21,6 +21,7 @@
 
 #include "created_object_file.h"
 
+#include <llvm/Object/FaultMapParser.h>
 #include <llvm/Object/StackMapParser.h>
 
 namespace ark {
@@ -58,8 +59,10 @@ public:
     explicit CodeInfoProducer(Arch arch, LLVMArkInterface *compilation);
 
     void SetStackMap(const uint8_t *section, uintptr_t size);
+    void SetFaultMaps(const uint8_t *section, uintptr_t size);
 
     void AddSymbol(Method *method, StackMapSymbol symbol);
+    void AddFaultMapSymbol(Method *method, uint32_t symbol);
 
     void Produce(Method *method, ark::compiler::CodeInfoBuilder *builder) const;
 
@@ -77,16 +80,18 @@ private:
 
     void BuildSingleRegMap(CodeInfoBuilder *builder, const Record &record, int32_t methodIdIndex, int32_t vregsCount,
                            uint64_t stackSize) const;
-
     void BuildRegMap(CodeInfoBuilder *builder, const Record &record, uint64_t stackSize) const;
 
     void ConvertStackMaps(Method *method, CodeInfoBuilder *builder) const;
+    void EncodeNullChecks(Method *method, CodeInfoBuilder *builder) const;
 
 private:
     const Arch arch_;
     LLVMArkInterface *compilation_;
     std::unique_ptr<const LLVMStackMap> stackmap_;
     std::unordered_map<Method *, StackMapSymbol> symbols_;
+    std::unordered_map<Method *, uint32_t> faultMapSymbols_;
+    std::unique_ptr<llvm::FaultMapParser> faultMapParser_;
 };
 }  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_OBJECT_CODE_CODE_INFO_PRODUCER_H

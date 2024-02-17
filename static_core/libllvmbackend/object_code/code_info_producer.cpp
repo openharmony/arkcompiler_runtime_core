@@ -42,9 +42,20 @@ void CodeInfoProducer::SetStackMap(const uint8_t *section, uintptr_t size)
     }
 }
 
+void CodeInfoProducer::SetFaultMaps(const uint8_t *section, uintptr_t size)
+{
+    Span span {section, size};
+    faultMapParser_ = std::make_unique<llvm::FaultMapParser>(span.begin(), span.end());
+}
+
 void CodeInfoProducer::AddSymbol(Method *method, StackMapSymbol symbol)
 {
     symbols_.insert({method, symbol});
+}
+
+void CodeInfoProducer::AddFaultMapSymbol(Method *method, uint32_t symbol)
+{
+    faultMapSymbols_.insert({method, symbol});
 }
 
 /// Fill a CodeInfoBuilder with proper data for the passed METHOD.
@@ -57,6 +68,7 @@ void CodeInfoProducer::Produce(Method *method, ark::compiler::CodeInfoBuilder *b
     builder->EndStackMap();
 
     ConvertStackMaps(method, builder);
+    EncodeNullChecks(method, builder);
 
     auto xregsMask = GetCalleeRegsMask(arch_, false).GetValue();
     auto vregsMask = GetCalleeRegsMask(arch_, true).GetValue();
@@ -296,6 +308,36 @@ void CodeInfoProducer::ConvertStackMaps(Method *method, CodeInfoBuilder *builder
         BuildRegMap(builder, record, stackSize);
 
         builder->EndStackMap();
+    }
+}
+
+void CodeInfoProducer::EncodeNullChecks(Method *method, CodeInfoBuilder *builder) const
+{
+    if (faultMapParser_ == nullptr) {
+        return;
+    }
+    auto methodName = compilation_->GetUniqMethodName(method);
+
+    auto symbol = faultMapSymbols_.find(method);
+    if (symbol == faultMapSymbols_.end()) {
+        return;
+    }
+
+    // FunctionInfos are stored in a list, 'symbol->second' is an index in that list
+    ASSERT(faultMapParser_->getNumFunctions() > 0);
+    llvm::FaultMapParser::FunctionInfoAccessor functionInfo = faultMapParser_->getFirstFunctionInfo();
+    for (uint32_t i = 0; i < symbol->second; i++) {
+        functionInfo = functionInfo.getNextFunctionInfo();
+    }
+    // Process selected functionInfo
+    auto faultingPcs = functionInfo.getNumFaultingPCs();
+    for (size_t i = 0; i < faultingPcs; i++) {
+        auto faultInfo = functionInfo.getFunctionFaultInfoAt(i);
+        unsigned instructionNativePc = faultInfo.getFaultingPCOffset();
+        LLVM_LOG(DEBUG, STACKMAPS) << "Encoded implicit null check for '" << methodName << "', instructionNativePc = '"
+                                   << instructionNativePc << "'";
+        static constexpr uint32_t LLVM_HANDLER_TAG = 1U << 31U;
+        builder->AddImplicitNullCheck(instructionNativePc, LLVM_HANDLER_TAG | faultInfo.getHandlerPCOffset());
     }
 }
 }  // namespace ark::llvmbackend

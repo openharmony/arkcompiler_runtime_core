@@ -1946,7 +1946,7 @@ void LLVMIrConstructor::CreateDeoptimizationBranch(Inst *inst, llvm::Value *deop
     auto branchWeights = llvm::MDBuilder(ctx).createBranchWeights(
         llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT,  // if unlikely(deoptimize) then throw
         llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT);   // else continue
-    builder_.CreateCondBr(deoptimize, throwPath, continuation, branchWeights);
+    auto branch = builder_.CreateCondBr(deoptimize, throwPath, continuation, branchWeights);
 
     /* Creating throw block */
     SetCurrentBasicBlock(throwPath);
@@ -1959,6 +1959,12 @@ void LLVMIrConstructor::CreateDeoptimizationBranch(Inst *inst, llvm::Value *deop
         auto call = CreateEntrypointCall(exception, inst, {builder_.getInt64(type)});
         call->addFnAttr(llvm::Attribute::get(call->getContext(), "may-deoptimize"));
     } else {
+        if (exception == RuntimeInterface::EntrypointId::NULL_POINTER_EXCEPTION &&
+            ark::compiler::g_options.IsCompilerImplicitNullCheck()) {
+            ASSERT(inst->IsNullCheck());
+            auto *metadata = llvm::MDNode::get(ctx, {});
+            branch->setMetadata(llvm::LLVMContext::MD_make_implicit, metadata);
+        }
         CreateEntrypointCall(exception, inst, arguments);
     }
     builder_.CreateUnreachable();
@@ -2600,25 +2606,17 @@ void LLVMIrConstructor::ValueMapAdd(Inst *inst, llvm::Value *value, bool setName
     ASSERT(it.second);
     ArenaUnorderedMap<DataType::Type, llvm::Value *> &typeMap = it.first->second;
 
-    if (value != nullptr && setName) {
+    if (value == nullptr) {
+        typeMap.insert({type, nullptr});
+        return;
+    }
+    if (setName) {
         value->setName(CreateNameForInst(inst));
     }
-    if (value == nullptr || inst->GetOpcode() == Opcode::LiveOut || !ltype->isIntegerTy()) {
+    if (inst->GetOpcode() == Opcode::LiveOut || !ltype->isIntegerTy()) {
         typeMap.insert({type, value});
         if (type == DataType::POINTER) {
-            ASSERT(value != nullptr);
-            /*
-             * Ark compiler implicitly converts:
-             * 1. POINTER to REFERENCE
-             * 2. POINTER to UINT64
-             * 3. POINTER to INT64
-             * Add value against those types, so we get pointer when requesting it in GetMappedValue.
-             */
-            typeMap.insert({DataType::REFERENCE, value});
-            typeMap.insert({DataType::UINT64, value});
-            if (inst->GetOpcode() == Opcode::LiveOut) {
-                typeMap.insert({DataType::INT64, value});
-            }
+            FillValueMapForUsers(&typeMap, inst, value);
         }
         return;
     }
@@ -2629,31 +2627,48 @@ void LLVMIrConstructor::ValueMapAdd(Inst *inst, llvm::Value *value, bool setName
         value = builder_.CreateZExt(value, ltype);
     }
     typeMap.insert({type, value});
-    FillValueMapForUsers(inst, value, type, &typeMap);
+    FillValueMapForUsers(&typeMap, inst, value);
 }
 
-void LLVMIrConstructor::FillValueMapForUsers(Inst *inst, llvm::Value *value, DataType::Type type,
-                                             ArenaUnorderedMap<DataType::Type, llvm::Value *> *typeMap)
+void LLVMIrConstructor::FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, llvm::Value *> *map, Inst *inst,
+                                             llvm::Value *value)
 {
-    auto liveIn = inst->GetOpcode() == Opcode::LiveIn ? value : nullptr;
+    auto type = inst->GetType();
+    ASSERT(type != DataType::REFERENCE);
     for (auto &userItem : inst->GetUsers()) {
         auto user = userItem.GetInst();
         for (unsigned i = 0; i < user->GetInputsCount(); i++) {
             auto itype = user->GetInputType(i);
             auto input = user->GetInput(i).GetInst();
-            if (input != inst || itype == type || typeMap->count(itype) != 0) {
+            if (input != inst || itype == type || map->count(itype) != 0) {
                 continue;
             }
+            /*
+             * When Ark Compiler implicitly converts something -> LLVM side:
+             * 1. POINTER to REFERENCE (user is LiveOut)       -> AddrSpaceCast
+             * 2. POINTER to UINT64 (user is LiveOut)          -> no conversion necessary
+             * 3. LiveIn to REFERENCE                          -> no conversion necessary
+             * 4. INT64/UINT64 to REFERENCE (user is LiveOut)  -> IntToPtr
+             * 5. Integers                                     -> use coercing
+             */
             llvm::Value *cvalue;
-            if (liveIn != nullptr && itype == DataType::REFERENCE) {
-                cvalue = liveIn;
+            if (type == DataType::POINTER && itype == DataType::REFERENCE) {
+                ASSERT(user->GetOpcode() == Opcode::LiveOut);
+                cvalue = builder_.CreateAddrSpaceCast(value, builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
+            } else if (type == DataType::POINTER && itype == DataType::UINT64) {
+                ASSERT(user->GetOpcode() == Opcode::LiveOut);
+                cvalue = value;
+            } else if (type == DataType::POINTER) {
+                continue;
+            } else if (inst->GetOpcode() == Opcode::LiveIn && itype == DataType::REFERENCE) {
+                cvalue = value;
             } else if ((type == DataType::INT64 || type == DataType::UINT64) && itype == DataType::REFERENCE) {
                 ASSERT(user->GetOpcode() == Opcode::LiveOut);
                 cvalue = builder_.CreateIntToPtr(value, builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
             } else {
                 cvalue = CoerceValue(value, type, itype);
             }
-            typeMap->insert({itype, cvalue});
+            map->insert({itype, cvalue});
         }
     }
 }
@@ -2852,8 +2867,15 @@ void LLVMIrConstructor::VisitNullCheck(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto obj = ctor->GetInputValue(inst, 0);
+    auto obj64 = obj;
 
-    auto deoptimize = ctor->builder_.CreateIsNull(obj);
+    if (ark::compiler::g_options.IsCompilerImplicitNullCheck()) {
+        // LLVM's ImplicitNullChecks pass can't operate with 32-bit pointers, but it is enough
+        // to create address space cast to an usual 64-bit pointer before comparing with null.
+        obj64 = ctor->builder_.CreateAddrSpaceCast(obj, ctor->builder_.getPtrTy());
+    }
+
+    auto deoptimize = ctor->builder_.CreateIsNull(obj64);
     auto exception = RuntimeInterface::EntrypointId::NULL_POINTER_EXCEPTION;
     ctor->CreateDeoptimizationBranch(inst, deoptimize, exception);
 

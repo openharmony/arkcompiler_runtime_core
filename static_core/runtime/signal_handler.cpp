@@ -344,16 +344,29 @@ bool DetectSEGVFromNullCheck(int sig, siginfo_t *siginfo, void *context)
     uintptr_t entrypoint = FindCompilerEntrypoint(signalContext.GetFP());
     compiler::CodeInfo codeinfo(compiler::CodeInfo::GetCodeOriginFromEntryPoint(ToVoidPtr(entrypoint)));
     uintptr_t newPc = 0;
+    static constexpr uint32_t LLVM_HANDLER_TAG = 1U << 31U;
+    auto handlerPc = reinterpret_cast<uintptr_t>(NullPointerExceptionBridge);
+    bool llvm = false;
     for (auto icheck : codeinfo.GetImplicitNullChecksTable()) {
         uintptr_t nullCheckAddr = entrypoint + icheck.GetInstNativePc();
         auto offset = icheck.GetOffset();
-        // We inserts information about implicit nullcheck after mem instruction,
-        // because encoder can insert emory calculation before the instruction and we don't know real address:
+        if (pc == nullCheckAddr && (LLVM_HANDLER_TAG & offset) != 0) {
+            // Code was compiled by LLVM.
+            // We jump to the handler pc, which will call NullPointerException on its own.
+            // We do not jump to NullPointerExceptionBridge directly here because LLVM code does not have stackmap on
+            // memory instructions
+            handlerPc = (~LLVM_HANDLER_TAG & offset) + entrypoint;
+            newPc = nullCheckAddr;
+            llvm = true;
+            break;
+        }
+        // We insert information about implicit nullcheck after mem instruction,
+        // because encoder can insert memory calculation before the instruction, and we don't know real address:
         //   addr |               |
-        //    |   +---------------+  <--- null_check_addr - offset
+        //    |   +---------------+  <--- nullCheckAddr - offset
         //    |   | address calc  |
         //    |   | memory inst   |  <--- pc
-        //    V   +---------------+  <--- null_check_addr
+        //    V   +---------------+  <--- nullCheckAddr
         //        |               |
         if (pc < nullCheckAddr && pc + offset >= nullCheckAddr) {
             newPc = nullCheckAddr;
@@ -372,8 +385,10 @@ bool DetectSEGVFromNullCheck(int sig, siginfo_t *siginfo, void *context)
     }
     LOG(DEBUG, RUNTIME) << "PC fixup: " << std::hex << newPc;
 
-    UpdateReturnAddress(signalContext, newPc);
-    signalContext.SetPC(reinterpret_cast<uintptr_t>(NullPointerExceptionBridge));
+    if (!llvm) {
+        UpdateReturnAddress(signalContext, newPc);
+    }
+    signalContext.SetPC(handlerPc);
     EVENT_IMPLICIT_NULLCHECK(newPc);
 
     return false;

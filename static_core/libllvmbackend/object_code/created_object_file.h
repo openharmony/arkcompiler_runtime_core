@@ -90,6 +90,7 @@ public:
     std::vector<SectionReference> GetRoDataSections() const;
 
     std::unordered_map<std::string, StackMapSymbol> GetStackMapInfo() const;
+    std::unordered_map<std::string, uint32_t> GetFaultMapInfo() const;
 
     void WriteTo(std::string_view output) const;
 

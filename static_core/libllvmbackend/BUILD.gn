@@ -11,6 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("//build/ohos.gni")
+
 if (is_llvmbackend) {
   assert(target_cpu == "amd64" || target_cpu == "arm64" ||
          target_cpu == "x64" || target_cpu == "x86_64")
@@ -20,12 +23,10 @@ if (is_llvmbackend) {
   copy("llvm_lib") {
     sources = [ "$llvm_lib_file" ]
     basename = get_path_info("$llvm_lib_file", "file")
-    outputs = [ "$root_build_dir/lib/$basename" ]
+    outputs = [ "$root_out_dir/$ark_subsystem_name/$ark_part_name/$basename" ]
   }
 
   ### LLVM Backend
-  import("//ark/runtime_core/ark_config.gni")
-  import("//build/ohos.gni")
   config("libllvmbackend_public_config") {
     include_dirs = [
       "$ark_root/libllvmbackend",
@@ -37,12 +38,10 @@ if (is_llvmbackend) {
   }
 
   libllvmbackend_sources = [
-    "llvm_aot_compiler.cpp",
     "llvm_ark_interface.cpp",
     "llvm_compiler.cpp",
     "llvm_irtoc_compiler.cpp",
     "llvm_logger.cpp",
-    "llvm_optimizer.cpp",
     "llvm_options.cpp",
     "lowering/debug_data_builder.cpp",
     "lowering/gc_barriers.cpp",
@@ -82,7 +81,7 @@ if (is_llvmbackend) {
   ]
 
   ohos_shared_library("libllvmbackend") {
-    defines = [ "REQUIRED_LLVM_VERSION=$llvm_version-$llvm_ark_suffix" ]
+    defines = [ "REQUIRED_LLVM_VERSION=$llvm_version" ]
 
     sources = libllvmbackend_sources
 
@@ -113,12 +112,17 @@ if (is_llvmbackend) {
       ":libllvmbackend_llvm_passes_inl",
       ":libllvmbackend_pipeline_gen_inc",
       ":libllvmbackend_pipeline_irtoc_gen_inc",
-      "$ark_root/compiler:libarkcompiler",
-      "$ark_root/libpandabase:libarkbase",
+      ":llvm_lib",
+      "$ark_root/compiler:libarktscompiler",
+      "$ark_root/libpandabase:libarktsbase",
     ]
 
     # TODO: don't exclude these targets from OHOS build
     if (ark_standalone_build) {
+      libllvmbackend_aot_sources = [ "llvm_aot_compiler.cpp" ]
+
+      sources += libllvmbackend_aot_sources
+
       deps += [ "$ark_root/compiler/aot/aot_builder:aotbuilder" ]
     }
 
@@ -157,7 +161,7 @@ if (is_llvmbackend) {
   }
 
   ark_gen_file("libllvmbackend_intrinsics_llvm_codegen_inl") {
-    template_file = "$llvmbackend_templates_dir/intrinsic_llvm_codegen.inl.erb"
+    template_file = "$llvmbackend_templates_dir/intrinsics_llvm_codegen.inl.erb"
     data_file = "$intrinsics_yaml"
     requires = [ "$llvmbackend_templates_dir/intrinsics.rb" ]
     output_file = "$target_gen_dir/intrinsics_llvm_codegen.inl"
@@ -297,15 +301,15 @@ if (is_llvmbackend) {
     outputs = [ "$target_gen_dir/interpreter_inline.bc" ]
     deps = [ ":bitcode" ]
     args = [
-      rebase_path("$root_build_dir/obj/runtime/bitcode/runtime.o"),
+      rebase_path("$target_out_dir/../runtime/bitcode/runtime.o"),
       rebase_path(
-          "$root_build_dir/obj/runtime/entrypoints/bitcode/entrypoints.o"),
+          "$target_out_dir/../runtime/entrypoints/bitcode/entrypoints.o"),
       rebase_path(
-          "$root_build_dir/obj/runtime/interpreter/bitcode/runtime_interface.o"),
-      rebase_path("$root_build_dir/obj/runtime/bitcode/object_header.o"),
-      rebase_path("$root_build_dir/obj/runtime/mem/bitcode/heap_manager.o"),
-      rebase_path("$root_build_dir/obj/runtime/mem/bitcode/tlab.o"),
-      rebase_path("$root_build_dir/obj/runtime/bitcode/class_linker.o"),
+          "$target_out_dir/../runtime/interpreter/bitcode/runtime_interface.o"),
+      rebase_path("$target_out_dir/../runtime/bitcode/object_header.o"),
+      rebase_path("$target_out_dir/../runtime/mem/bitcode/heap_manager.o"),
+      rebase_path("$target_out_dir/../runtime/mem/bitcode/tlab.o"),
+      rebase_path("$target_out_dir/../runtime/bitcode/class_linker.o"),
       "-o",
       rebase_path("$target_gen_dir/interpreter_inline.bc"),
     ]

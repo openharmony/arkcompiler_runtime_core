@@ -60,11 +60,9 @@ void PandaSectionMemoryManager::RememberAllocation(llvm::StringRef sectionName, 
                                                    size_t alignment)
 {
     static constexpr std::array SECTIONS_PREFIXES_TO_REMEMBER = {
-        LLVM_STACKMAPS_SECTION,       //
-        RELA_LLVM_STACKMAPS_SECTION,  //
-        TEXT_SECTION_PREFIX,          //
-        RO_DATA_SECTION_PREFIX,       //
-        AOT_GOT_SECTION,              //
+        TEXT_SECTION_PREFIX,     // .text.
+        RO_DATA_SECTION_PREFIX,  // .ro
+        AOT_GOT_SECTION,         // .aot_got
     };
 
     if (!llvm::any_of(SECTIONS_PREFIXES_TO_REMEMBER,
