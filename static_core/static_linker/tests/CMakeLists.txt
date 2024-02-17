@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -79,3 +79,15 @@ set(test_asm_files
 
 add_custom_target(static_linker_tests_gen_abc DEPENDS ${test_asm_files})
 add_dependencies(static_linker_tests static_linker_tests_gen_abc arkruntime)
+
+# internal issue #15674
+if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSCOMPILING)
+    add_custom_target(static_linker_tests_field_value
+        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/a.abc" --ets-module "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.ets"
+        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/b.abc" --ets-module "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/b.ets"
+        COMMAND $<TARGET_FILE:ark_link> --output "${CMAKE_CURRENT_BINARY_DIR}/l.abc" -- "${CMAKE_CURRENT_BINARY_DIR}/a.abc" "${CMAKE_CURRENT_BINARY_DIR}/b.abc"
+        COMMAND $<TARGET_FILE:ark> --load-runtimes ets --boot-panda-files $<TARGET_PROPERTY:etsstdlib,FILE> "${CMAKE_CURRENT_BINARY_DIR}/l.abc" b/ETSGLOBAL::main
+        DEPENDS  es2panda ark ark_link etsstdlib "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.ets" "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/b.ets"
+    )
+    add_dependencies(static_linker_tests static_linker_tests_field_value)
+endif()

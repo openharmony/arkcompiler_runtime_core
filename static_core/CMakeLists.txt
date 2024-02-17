@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -250,7 +250,6 @@ if(PANDA_WITH_TOOLCHAIN)
 
     add_subdirectory(assembler)
     add_subdirectory(disassembler)
-    add_subdirectory(static_linker)
 
     if(PANDA_WITH_RUNTIME)
         add_subdirectory(verification)
@@ -385,6 +384,12 @@ add_subdirectory(extras)
 # ----- Quickening tool --------------------------------------------------------
 
 add_subdirectory(quickener)
+
+# ----- Abc linker tool --------------------------------------------------------
+
+if(PANDA_WITH_TOOLCHAIN)
+    add_subdirectory(static_linker)
+endif()
 
 # ----- Collecting core gtests paths for CI stash ---------------------------------
 # NB! This must be the last section!
