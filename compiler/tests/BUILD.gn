@@ -89,6 +89,26 @@ host_unittest_action("GraphInterfaceTest") {
   }
 }
 
+host_unittest_action("DrawCfgToolTest") {
+  module_out_path = module_output_path
+  sources = [ "draw_cfg_test.cpp" ]
+  configs = compiler_test_configs
+  deps = compiler_test_deps
+
+  test_abc_dir = rebase_path(target_out_dir)
+  tools_dir = rebase_path("$ark_root/compiler/tools")
+
+  defines = [
+    "DRAW_CFG_TEST_ABC_DIR=\"${test_abc_dir}/\"",
+    "DRAW_CFG_TEST_OUT_DIR=\"${test_abc_dir}/cfg_out/\"",
+    "DRAW_CFG_TEST_TOOLS_DIR=\"${tools_dir}\"",
+  ]
+
+  foreach(file, graph_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+}
+
 group("host_unittest") {
   testonly = true
   deps = [ ":GraphInterfaceTestAction" ]
