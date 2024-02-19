@@ -128,6 +128,8 @@ end
 class Generator
     attr_reader :test_count, :tests_failed, :test_files, :tests_ignored
 
+    NODE_RETRIES = 5
+
     def initialize(filter_pattern)
         @filter_pattern = filter_pattern
 
@@ -254,7 +256,6 @@ class Generator
     def get_command_output(*args)
         stdout_str, status = Open3.capture2e(*args)
         if status != 0
-            puts stdout_str
             raise "invalid status #{status}\ncommand: #{args.join(' ')}\n\n#{stdout_str}"
         end
         stdout_str
@@ -271,7 +272,19 @@ class Generator
             buf = $template_ts.result(binding)
             File.write ts_path, buf
             puts "run  ts for #{k} #{chunk_id}"
-            stdout_str = get_command_output(*$options[:'ts-node'], ts_path)
+            # NOTE retries are a workaround for https://github.com/nodejs/node/issues/51555
+            stdout_str = ""
+            errors = []
+            NODE_RETRIES.times do |i|
+                stdout_str = get_command_output(*$options[:'ts-node'], ts_path)
+                break
+            rescue => e
+                puts "NOTE: node failed for #{k}, retry: #{i + 1}/#{NODE_RETRIES}"
+                errors.push e
+            end
+            if errors.size == NODE_RETRIES
+                raise "ts-node failed too many times for #{k}\n#{errors.map.with_index { |x, i| "=== retry #{i} ===\n#{x}\n" }.join}"
+            end
             File.write(File.join($options[:tmp], "#{k}#{chunk_id}.json"), stdout_str)
 
             # ets part
