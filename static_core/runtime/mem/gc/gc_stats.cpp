@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,7 +86,7 @@ PandaString GCStats::GetFinalStatistics(HeapManager *heapManager)
               << "\n";
     statistic << "Free memory until GC " << helpers::MemoryConverter(heapManager->GetFreeMemory()) << "\n";
     statistic << "Free memory until OOME "
-              << helpers::MemoryConverter(helpers::UnsignedDifference(maxMemory, totalMemory)) << "\n";
+              << helpers::MemoryConverter(helpers::UnsignedDifference(maxMemory, currentMemory)) << "\n";
     statistic << "Total memory " << helpers::MemoryConverter(totalMemory) << "\n";
 
     {

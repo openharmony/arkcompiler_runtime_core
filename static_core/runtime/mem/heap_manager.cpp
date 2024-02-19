@@ -317,7 +317,7 @@ InternalAllocatorPtr HeapManager::GetInternalAllocator()
     return internalAllocator_;
 }
 
-ObjectAllocatorPtr HeapManager::GetObjectAllocator()
+ObjectAllocatorPtr HeapManager::GetObjectAllocator() const
 {
     return objectAllocator_;
 }
@@ -345,7 +345,7 @@ void HeapManager::SetTargetHeapUtilization(float target)
 
 size_t HeapManager::GetTotalMemory() const
 {
-    return vm_->GetMemStats()->GetFootprintHeap();
+    return GetObjectAllocator().AsObjectAllocator()->GetHeapSpace()->GetHeapSize();
 }
 
 size_t HeapManager::GetFreeMemory() const
