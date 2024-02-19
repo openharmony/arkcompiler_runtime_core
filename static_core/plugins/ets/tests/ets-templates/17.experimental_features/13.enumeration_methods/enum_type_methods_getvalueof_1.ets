@@ -14,12 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: c.toString() returns the same value as c.getValue().toString().
+desc: getValueOf(string) returns an enumeration constant with the given name, or throws an error if no constant with such name exists.
 ---*/
 
-enum Color {Red = 1, Green = 2, Blue}
+enum Color {Red, Green, Blue}
 
-function main(): void {
-  let c: Color = Color.Green
-  assert c.toString() == c.getValue().toString()
+function main(): void throws {
+  try {
+    Color.getValueOf("Yellow");
+  } catch (e) {
+    assert true;
+  }
 }

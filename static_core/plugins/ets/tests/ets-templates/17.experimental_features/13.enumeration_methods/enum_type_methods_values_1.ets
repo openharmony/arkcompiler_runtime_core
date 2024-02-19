@@ -14,12 +14,23 @@ limitations under the License.
 ---*/
 
 /*---
-desc: c.toString() returns the same value as c.getValue().toString().
+desc: values() returns an array of enumeration constants in the order of declaration.
 ---*/
 
-enum Color {Red = 1, Green = 2, Blue}
+enum Color {Red = "r1", Blue = "b1", Green = "g1"}
+
+function f(a: Color[]): int {
+  return a.length;
+}
+
+function f(a: Object): int {
+  return 2;
+}
 
 function main(): void {
-  let c: Color = Color.Green
-  assert c.toString() == c.getValue().toString()
+  let colors = Color.values();
+  assert colors[0] == Color.Red;
+  assert colors[1] == Color.Blue;
+  assert colors[2] == Color.Green;
+  assert f(colors) == 3;
 }

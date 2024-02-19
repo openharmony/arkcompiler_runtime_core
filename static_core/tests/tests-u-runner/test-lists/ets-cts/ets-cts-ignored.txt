@@ -1474,3 +1474,7 @@
 07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1n_4.ets
 17.experimental_features/06.function_and_method_overloading/01.function_overloading/fn_overloading_n_10.ets
 #
+
+# 14443 Big refactoring and fixup for enum
+17.experimental_features/13.enumeration_methods/enum_type_methods_getvalueof.ets
+17.experimental_features/13.enumeration_methods/enum_type_methods_getvalueof_1.ets

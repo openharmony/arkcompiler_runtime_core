@@ -14,12 +14,17 @@ limitations under the License.
 ---*/
 
 /*---
-desc: c.toString() returns the same value as c.getValue().toString().
+desc: getValue() returns a value of enumeration constant which is either of int or string type. Int enum used.
 ---*/
 
-enum Color {Red = 1, Green = 2, Blue}
+enum GeneratedEnum {
+  {% for length in range(1, 10) -%}
+  {% for _ in range(length)%}A{% endfor %}{%if length is lt(9)%},{% endif %}
+  {% endfor %}
+}
 
 function main(): void {
-  let c: Color = Color.Green
-  assert c.toString() == c.getValue().toString()
+  {% for i in range(0, 9) %}
+  assert(GeneratedEnum.{% for _ in range(i + 1)%}A{% endfor %}.getValue() == {{i}});
+  {%- endfor %}
 }

@@ -17,7 +17,7 @@ limitations under the License.
 desc: c.toString() returns the same value as c.getValue().toString().
 ---*/
 
-enum Color {Red = 1, Green = 2, Blue}
+enum Color {Red = "r1", Green = "g1", Blue = "b1"}
 
 function main(): void {
   let c: Color = Color.Green

@@ -14,12 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: c.toString() returns the same value as c.getValue().toString().
+desc: getName() returns a name of enumeration constant which is of string type.
 ---*/
 
-enum Color {Red = 1, Green = 2, Blue}
+enum Color {Red, Green, blue}
 
 function main(): void {
-  let c: Color = Color.Green
-  assert c.toString() == c.getValue().toString()
+  assert Color.Red.getName() === "Red"
+  assert Color.Green.getName() === "Green"
+  assert Color.blue.getName() === "blue"
 }

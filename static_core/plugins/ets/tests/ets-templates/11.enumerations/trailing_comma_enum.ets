@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Trailing commas are not allowed in enum constant lists
-tags: [compile-only]
 ---*/
 
 enum Color {
@@ -23,3 +22,8 @@ enum Color {
     Green,
     Blue,
 }
+
+function main(): void {
+  assert Color.values().length == 3;
+}
+
