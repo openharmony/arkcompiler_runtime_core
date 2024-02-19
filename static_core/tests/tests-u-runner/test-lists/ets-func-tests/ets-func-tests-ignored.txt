@@ -21,6 +21,8 @@ std/core/std_core_typeduarrays__Uint8Array.ets
 std/core/std_core_typeduarrays__Uint16Array.ets
 std/core/std_core_typeduarrays__Uint32Array.ets
 ### Issue I8PRJS end
+# #14724
+std/core/std_core_typedarrays__BigInt64Array.ets
 ### Issue 11474 ###
 ### Issue 11544 begin
 std/math/std_math_tan_double.ets
@@ -482,6 +484,8 @@ spec/import_export/07.export_directives/02.export_type_directives/to_export_for_
 ### Issue 14675, 14769, 14841
 escompat/ArrayBufferTest2.ets
 ### End of 14675, 14769, 14841
+# #15177
+escompat/ReflectGetBadCases.ets
 ### issue 14836 begin
 spec/indexable/idx-s01-0030.ets
 spec/indexable/idx-s01-0080.ets
