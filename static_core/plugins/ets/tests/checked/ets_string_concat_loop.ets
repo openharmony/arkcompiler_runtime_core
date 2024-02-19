@@ -1490,6 +1490,22 @@ function args_concat_loop0(x: double, y: boolean, ...p: char[]): string
     return res;
 }
 
+function bugfix_concat_loop0(): String {
+    let res = ""
+    for (let i = 0; i < 1; ++i)
+    {
+        if (i < 0) {
+            res += "0"
+        }
+        else
+        {
+            res += "12345"
+            res += "678"
+        }
+    }
+    return res
+}
+
 function main() {
     assert concat_loop0("a", 4) == "aaaa": "Wrong result at concat_loop0";
     assert concat_loop1("a", 4) == "aaaa": "Wrong result at concat_loop1";
@@ -1528,4 +1544,5 @@ function main() {
     assert reuse_concat_loop4("a", 4) == "a1a3a5a7": "Wrong result at reuse_concat_loop4";
     assert reuse_concat_loop5("a", 4) == "a1a3a5a7": "Wrong result at reuse_concat_loop5";
     assert args_concat_loop0(1.5, false, c'A', c'B') == "1.5false2AB": "Wrong result at args_concat_loop0";
+    assert bugfix_concat_loop0() == "12345678": "Wrong result at bugfix_concat_loop0";
 }
