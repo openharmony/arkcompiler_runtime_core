@@ -836,7 +836,33 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns new trimmed string
      */
     public trim(): String {
-        return this.trimLeft().trimRight();
+        if (this.isEmpty()) {
+            return this;
+        }
+        let right: int = this.getLength() - 1;
+        let left: int = 0;
+        if (Char.isWhiteSpace(this.charAt(right))) {
+            right--;
+            while (left <= right && Char.isWhiteSpace(this.charAt(right))) {
+                right--;
+            }
+        } else {
+            if (right != 0) {
+                if (!Char.isWhiteSpace(this.charAt(left))) {
+                    return this;
+                } else {
+                    left++;
+                }
+            } else {
+                return this;
+            }
+        }
+
+        while (left <= right && Char.isWhiteSpace(this.charAt(left))) {
+            left++;
+        }
+
+        return this.substring(left, right + 1);
     }
 
     /**
@@ -845,8 +871,11 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns new left trimmed string
      */
     public trimLeft(): String {
+        if (this.isEmpty() || !Char.isWhiteSpace(this.charAt(0))) {
+            return this;
+        }
         let firstNotWhiteSpaceIdx: int = this.getLength();
-        for (let i: int = 0; i < this.getLength(); i++) {
+        for (let i: int = 1; i < this.getLength(); i++) {
             if (!Char.isWhiteSpace(this.charAt(i))) {
                 firstNotWhiteSpaceIdx = i;
                 break;
@@ -861,8 +890,12 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns new right trimmed string
      */
     public trimRight(): String {
+        let last: int = this.getLength() - 1;
+        if (this.isEmpty() || !Char.isWhiteSpace(this.charAt(last))) {
+            return this;
+        }
         let lastNotWhiteSpaceIdx: int = -1;
-        for (let i: int = this.getLength() - 1; i >= 0; i--) {
+        for (let i: int = last - 1; i >= 0; i--) {
             if (!Char.isWhiteSpace(this.charAt(i))) {
                 lastNotWhiteSpaceIdx = i;
                 break;
@@ -902,7 +935,33 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns new trimmed string
      */
     public trim(remove: char[]): String {
-        return this.trimLeft(remove).trimRight(remove);
+        if (this.isEmpty()) {
+            return this;
+        }
+        let right: int = this.getLength() - 1;
+        let left: int = 0;
+        if (String.isCharOneOf(this.charAt(right), remove)) {
+            right--;
+            while (left <= right && String.isCharOneOf(this.charAt(right), remove)) {
+                right--;
+            }
+        } else {
+            if (right != 0) {
+                if (!String.isCharOneOf(this.charAt(left), remove)) {
+                    return this;
+                } else {
+                    left++;
+                }
+            } else {
+                return this;
+            }
+        }
+
+        while (left <= right && String.isCharOneOf(this.charAt(left), remove)) {
+            left++;
+        }
+
+        return this.substring(left, right + 1);
     }
 
     /**
@@ -915,14 +974,17 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns new left trimmed string
      */
     public trimLeft(remove: char[]): String {
+        if (this.isEmpty() || !String.isCharOneOf(this.charAt(0), remove)) {
+            return this;
+        }
         let firstNotSpecCharIdx: int = 0;
-        for (let i: int = 0; i < this.getLength(); i++) {
+        for (let i: int = 1; i < this.getLength(); i++) {
             if (!String.isCharOneOf(this.charAt(i), remove)) {
                 firstNotSpecCharIdx = i;
                 break;
             }
         }
-        return new String(this.getChars(firstNotSpecCharIdx, this.getLength()));
+        return this.substring(firstNotSpecCharIdx, this.getLength());
     }
 
     /**
@@ -935,14 +997,18 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns new right trimmed string
      */
     public trimRight(remove: char[]): String {
+        let last: int = this.getLength() - 1;
+        if (this.isEmpty() || !String.isCharOneOf(this.charAt(last), remove)) {
+            return this;
+        }
         let lastNotSpecCharIdx: int = 0;
-        for (let i: int = this.getLength() - 1; i >= 0; i--) {
+        for (let i: int = last - 1; i >= 0; i--) {
             if (!String.isCharOneOf(this.charAt(i), remove)) {
                 lastNotSpecCharIdx = i;
                 break;
             }
         }
-        return new String(this.getChars(0, lastNotSpecCharIdx + 1));
+        return this.substring(0, lastNotSpecCharIdx + 1);
     }
 
     /**
