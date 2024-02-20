@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -385,6 +385,52 @@ TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, RepeatedLoadStores)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+
+        BASIC_BLOCK(2U, -1)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(10U, Opcode::NullCheck).ref().Inputs(4U, 2U);
+            INST(11U, Opcode::StoreObject).ref().Inputs(10U, 5U).ObjField(OBJ_FIELD);
+            INST(12U, Opcode::LoadObject).ref().Inputs(10U).ObjField(OBJ_FIELD);
+            INST(13U, Opcode::StoreObject).ref().Inputs(10U, 12U).ObjField(OBJ_FIELD);
+            INST(14U, Opcode::LoadObject).ref().Inputs(10U).ObjField(OBJ_FIELD);
+            INST(15U, Opcode::SaveState).SrcVregs({0U, 2U}).Inputs(0U, 14U);
+            INST(16U, Opcode::Deoptimize).Inputs(15U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+
+        BASIC_BLOCK(2U, -1)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(17U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(5U, Opcode::NewObject).ref().Inputs(3U, 17U);
+            INST(15U, Opcode::SaveState).SrcVregs({0U, 2U}).Inputs(0U, 5U);
+            INST(16U, Opcode::Deoptimize).Inputs(15U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1681,11 +1727,11 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjects)
         BASIC_BLOCK(3U, 4U)
         {
             INST(16U, Opcode::SaveState);
-            INST(4U, Opcode::NewObject).ref().Inputs(3U, 16U);
-            INST(17U, Opcode::SaveState).Inputs(4U).SrcVregs({1U});
-            INST(7U, Opcode::NewObject).ref().Inputs(6U, 17U);
-            INST(10U, Opcode::StoreObject).ref().Inputs(7U, 4U).ObjField(OBJ_FIELD);
-            INST(12U, Opcode::StoreObject).ref().Inputs(4U, 7U).ObjField(OBJ_FIELD);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 16U);
+            INST(17U, Opcode::SaveState).Inputs(7U).SrcVregs({2U});
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 17U);
+            INST(10U, Opcode::StoreObject).ref().Inputs(4U, 7U).ObjField(OBJ_FIELD);
+            INST(12U, Opcode::StoreObject).ref().Inputs(7U, 4U).ObjField(OBJ_FIELD);
             INST(14U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({1U, 2U});
             INST(15U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U, 14U);
         }
@@ -1707,8 +1753,8 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).ref();
 
-        // obj.4 field0 = obj.7
         // obj.7 field0 = obj.4
+        // obj.4 field0 = obj.7
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
@@ -1769,8 +1815,8 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
             INST(7U, Opcode::NewObject).ref().Inputs(6U, 16U);
             INST(17U, Opcode::SaveState).Inputs(7U).SrcVregs({VirtualRegister::BRIDGE});
             INST(4U, Opcode::NewObject).ref().Inputs(3U, 17U);
-            INST(12U, Opcode::StoreObject).ref().Inputs(4U, 7U).ObjField(OBJ_FIELD);
-            INST(10U, Opcode::StoreObject).ref().Inputs(7U, 4U).ObjField(OBJ_FIELD);
+            INST(10U, Opcode::StoreObject).ref().Inputs(4U, 7U).ObjField(OBJ_FIELD);
+            INST(12U, Opcode::StoreObject).ref().Inputs(7U, 4U).ObjField(OBJ_FIELD);
             INST(22U, Opcode::Return).ref().Inputs(7U);
         }
         // NOLINTEND(readability-magic-numbers)
@@ -2112,9 +2158,9 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
         BASIC_BLOCK(3U, 4U)
         {
             INST(17U, Opcode::SaveState);
-            INST(4U, Opcode::NewObject).ref().Inputs(3U, 17U);
-            INST(18U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
-            INST(7U, Opcode::NewObject).ref().Inputs(6U, 18U);
+            INST(7U, Opcode::NewObject).ref().Inputs(6U, 17U);
+            INST(18U, Opcode::SaveState).Inputs(7U).SrcVregs({1U});
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 18U);
 
             INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
             INST(10U, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();

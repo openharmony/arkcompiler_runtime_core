@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -233,7 +233,7 @@ private:
     private:
         Graph *graph_;
         // Live ins evaluation requires union of successor's live ins,
-        // bit vector's union works faster than unordered set's union.
+        // bit vector's union works faster than set's union.
         ArenaVector<ArenaBitVector> liveIn_;
         ArenaVector<Inst *> allInsts_;
 
@@ -250,13 +250,13 @@ private:
 
     Marker visited_ {UNDEF_MARKER};
     ArenaVector<BasicBlockState *> blockStates_;
-    ArenaUnorderedMap<Inst *, StateOwner> aliases_;
+    ArenaMap<Inst *, StateOwner> aliases_;
     // list of instructions with corresponding virtual state values bound
     // to a save state or an allocation site
-    ArenaUnorderedMap<MaterializationSite, ArenaUnorderedMap<Inst *, VirtualState *>> materializationInfo_;
-    ArenaVector<ArenaUnorderedMap<FieldPtr, PhiState *>> phis_;
+    ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> materializationInfo_;
+    ArenaVector<ArenaMap<FieldPtr, PhiState *>> phis_;
     ArenaUnorderedMap<Inst *, ArenaBitVector> saveStateInfo_;
-    ArenaUnorderedSet<Inst *> virtualizableAllocations_;
+    ArenaSet<Inst *> virtualizableAllocations_;
     MergeProcessor mergeProcessor_;
     LiveInAnalysis liveIns_;
     // 0 is materialized state
@@ -307,7 +307,7 @@ private:
     void RegisterMaterialization(MaterializationSite site, Inst *inst);
     void RegisterVirtualObjectFieldsForMaterialization(Inst *ss);
     bool RegisterFieldsMaterialization(Inst *site, VirtualState *state, BasicBlockState *blockState,
-                                       const ArenaUnorderedMap<Inst *, VirtualState *> &states);
+                                       const ArenaMap<Inst *, VirtualState *> &states);
 
     bool ProcessBlock(BasicBlock *block, size_t depth = 0);
     bool ProcessLoop(BasicBlock *header, size_t depth = 0);
@@ -330,11 +330,10 @@ private:
 
 class ScalarReplacement {
 public:
-    ScalarReplacement(
-        Graph *graph, ArenaUnorderedMap<Inst *, StateOwner> &aliases,
-        ArenaVector<ArenaUnorderedMap<FieldPtr, PhiState *>> &phis,
-        ArenaUnorderedMap<MaterializationSite, ArenaUnorderedMap<Inst *, VirtualState *>> &materializationSites,
-        ArenaUnorderedMap<Inst *, ArenaBitVector> &saveStateLiveness)
+    ScalarReplacement(Graph *graph, ArenaMap<Inst *, StateOwner> &aliases,
+                      ArenaVector<ArenaMap<FieldPtr, PhiState *>> &phis,
+                      ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> &materializationSites,
+                      ArenaUnorderedMap<Inst *, ArenaBitVector> &saveStateLiveness)
         : graph_(graph),
           aliases_(aliases),
           phis_(phis),
@@ -350,17 +349,17 @@ public:
     NO_COPY_SEMANTIC(ScalarReplacement);
     NO_MOVE_SEMANTIC(ScalarReplacement);
 
-    void Apply(ArenaUnorderedSet<Inst *> &candidates);
+    void Apply(ArenaSet<Inst *> &candidates);
 
 private:
     Graph *graph_;
-    ArenaUnorderedMap<Inst *, StateOwner> &aliases_;
-    ArenaVector<ArenaUnorderedMap<FieldPtr, PhiState *>> &phis_;
-    ArenaUnorderedMap<MaterializationSite, ArenaUnorderedMap<Inst *, VirtualState *>> &materializationSites_;
+    ArenaMap<Inst *, StateOwner> &aliases_;
+    ArenaVector<ArenaMap<FieldPtr, PhiState *>> &phis_;
+    ArenaUnorderedMap<MaterializationSite, ArenaMap<Inst *, VirtualState *>> &materializationSites_;
     ArenaUnorderedMap<Inst *, ArenaBitVector> &saveStateLiveness_;
 
-    ArenaUnorderedMap<PhiState *, PhiInst *> allocatedPhis_;
-    ArenaUnorderedMap<Inst *, ArenaVector<Inst *>> materializedObjects_;
+    ArenaMap<PhiState *, PhiInst *> allocatedPhis_;
+    ArenaMap<Inst *, ArenaVector<Inst *>> materializedObjects_;
 
     ArenaVector<Inst *> removalQueue_;
     Marker removeInstMarker_ {UNDEF_MARKER};
@@ -377,19 +376,17 @@ private:
     Inst *CreateNewObject(Inst *originalInst, Inst *saveState);
     void InitializeObject(Inst *alloc, Inst *instBefore, VirtualState *state);
     void MaterializeObjects();
-    void MaterializeAtNewSaveState(Inst *site, ArenaUnorderedMap<Inst *, VirtualState *> &state);
-    void MaterializeInEmptyBlock(BasicBlock *block, ArenaUnorderedMap<Inst *, VirtualState *> &state);
-    void MaterializeAtExistingSaveState(SaveStateInst *saveState, ArenaUnorderedMap<Inst *, VirtualState *> &state);
+    void MaterializeAtNewSaveState(Inst *site, ArenaMap<Inst *, VirtualState *> &state);
+    void MaterializeInEmptyBlock(BasicBlock *block, ArenaMap<Inst *, VirtualState *> &state);
+    void MaterializeAtExistingSaveState(SaveStateInst *saveState, ArenaMap<Inst *, VirtualState *> &state);
     void CreatePhis();
-    SaveStateInst *CopySaveState(Inst *inst, Inst *except);
+    SaveStateInst *CopySaveState(Inst *inst, VirtualState *except);
     void PatchSaveStates();
-    void PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaUnorderedSet<Inst *>> &liveness);
-    void PatchSaveStatesInLoop(Loop *loop, ArenaUnorderedSet<Inst *> &loopLiveIns,
-                               ArenaVector<ArenaUnorderedSet<Inst *>> &liveness);
-    void FillLiveInsts(BasicBlock *block, ArenaUnorderedSet<Inst *> &liveIns,
-                       ArenaVector<ArenaUnorderedSet<Inst *>> &liveness);
-    void PatchSaveState(SaveStateInst *saveState, ArenaUnorderedSet<Inst *> &liveInstructions);
-    void AddLiveInputs(Inst *inst, ArenaUnorderedSet<Inst *> &liveIns);
+    void PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaSet<Inst *>> &liveness);
+    void PatchSaveStatesInLoop(Loop *loop, ArenaSet<Inst *> &loopLiveIns, ArenaVector<ArenaSet<Inst *>> &liveness);
+    void FillLiveInsts(BasicBlock *block, ArenaSet<Inst *> &liveIns, ArenaVector<ArenaSet<Inst *>> &liveness);
+    void PatchSaveState(SaveStateInst *saveState, ArenaSet<Inst *> &liveInstructions);
+    void AddLiveInputs(Inst *inst, ArenaSet<Inst *> &liveIns);
     CallInst *FindCallerInst(BasicBlock *target, Inst *start = nullptr);
     void FixPhiInputTypes();
 };

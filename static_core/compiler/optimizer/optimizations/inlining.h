@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,16 +40,17 @@ struct InlinedGraph {
 };
 
 class Inlining : public Optimization {
-    static constexpr size_t SMALL_METHOD_MAX_SIZE = 5;
-
 public:
-    explicit Inlining(Graph *graph) : Inlining(graph, 0, 0, 0) {}
+    static constexpr auto MAX_CALL_DEPTH = 20U;
+
+    explicit Inlining(Graph *graph) : Inlining(graph, 0, 0, nullptr) {}
     Inlining(Graph *graph, bool resolveWoInline) : Inlining(graph)
     {
         resolveWoInline_ = resolveWoInline;
     }
 
-    Inlining(Graph *graph, uint32_t instructionsCount, uint32_t depth, uint32_t methodsInlined);
+    Inlining(Graph *graph, uint32_t instructionsCount, uint32_t methodsInlined,
+             const ArenaVector<RuntimeInterface::MethodPtr> *inlinedStack);
 
     NO_MOVE_SEMANTIC(Inlining);
     NO_COPY_SEMANTIC(Inlining);
@@ -65,6 +66,11 @@ public:
     const char *GetPassName() const override
     {
         return "Inline";
+    }
+    auto GetCurrentDepth() const
+    {
+        ASSERT(!inlinedStack_.empty());
+        return inlinedStack_.size() - 1;
     }
 
     void InvalidateAnalyses() override;
@@ -100,15 +106,17 @@ protected:
 
     template <bool CHECK_EXTERNAL, bool CHECK_INTRINSICS = false>
     bool CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx);
+    bool CheckDepthLimit(const CallInst *callInst, InlineContext *ctx);
     template <bool CHECK_EXTERNAL>
     bool CheckTooBigMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx, bool methodIsTooBig);
+    template <bool CHECK_EXTERNAL>
+    bool CheckMethodSize(const CallInst *callInst, InlineContext *ctx);
     bool ResolveTarget(CallInst *callInst, InlineContext *ctx);
     bool CanUseTypeInfo(ObjectTypeInfo typeInfo, RuntimeInterface::MethodPtr method);
     void InsertChaGuard(CallInst *callInst);
 
     InlinedGraph BuildGraph(InlineContext *ctx, CallInst *callInst, CallInst *polyCallInst = nullptr);
     bool CheckBytecode(CallInst *callInst, const InlineContext &ctx, bool *calleeCallRuntime);
-    bool CheckInstructionLimit(CallInst *callInst, InlineContext *ctx, size_t inlinedInstsCount);
     bool TryBuildGraph(const InlineContext &ctx, Graph *graphInl, CallInst *callInst, CallInst *polyCallInst);
     bool CheckLoops(bool *calleeCallRuntime, Graph *graphInl);
     static void PropagateObjectInfo(Graph *graphInl, CallInst *callInst);
@@ -126,7 +134,7 @@ protected:
 
     std::string GetLogIndent() const
     {
-        return std::string(depth_ * 2U, ' ');
+        return std::string(GetCurrentDepth() * 2U, ' ');
     }
 
     bool IsIntrinsic(const InlineContext *ctx) const
@@ -138,12 +146,12 @@ protected:
 
 protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    uint32_t depth_ {0};
     uint32_t methodsInlined_ {0};
     uint32_t instructionsCount_ {0};
     uint32_t instructionsLimit_ {0};
     ArenaVector<BasicBlock *> returnBlocks_;
     ArenaUnorderedSet<std::string> blacklist_;
+    ArenaVector<RuntimeInterface::MethodPtr> inlinedStack_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:

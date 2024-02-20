@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -388,7 +388,6 @@ options:
   description: Dump JIT compilation statistics in csv file
   tags: [debug]
 
-
 - name: compiler-use-safepoint
   type: bool
   default: true
@@ -422,23 +421,44 @@ options:
 
 - name: compiler-inlining-max-insts
   type: uint32_t
-  default: 1024
+  default: 1250
   description: Maximum number of the IR instructions to be inlined, including instructions of the current graph.
   recommended_values: [50,2000]
   tags: [perf]
 
 - name: compiler-inlining-max-depth
   type: uint32_t
-  default: 4
+  default: 5
   description: Maximum depth of the inlining.
+  recommended_values: [1,20]
+  tags: [perf]
+
+- name: compiler-inlining-recursive-calls-limit
+  type: uint32_t
+  default: 4
+  description: Maximum count of recursive calls in inlined call stack.
   recommended_values: [1,10]
   tags: [perf]
 
-- name: compiler-inlining-max-size
+- name: compiler-inlining-insts-bc-ratio
+  type: double
+  default: 0.4
+  description: Ratio of IR insts count to 1 byte of bytecode. Used for inlining heuristic
+  recommended_values: [0.1,5]
+  tags: [perf]
+
+- name: compiler-inlining-max-bc-size
   type: uint32_t
   default: 200
-  description: Maximum bytecode size for inlined functions, in bytes. Avarage bytecode instruction size is 2.8 bytes.
+  description: Maximum bytecode size for inlined functions, in bytes. Average bytecode instruction size is 2.8 bytes.
   recommended_values: [10,1000]
+  tags: [perf]
+
+- name: compiler-inlining-always-inline-bc-size
+  type: uint32_t
+  default: 12
+  description: Always inline methods with bytecode size less or equal than this limit.
+  recommended_values: [0,50]
   tags: [perf]
 
 - name: compiler-inline-simple-only

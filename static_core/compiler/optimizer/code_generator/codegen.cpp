@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -310,13 +310,12 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
 bool Codegen::BeginMethod()
 {
     // Do not try to encode too large graph
-    auto instSize = GetGraph()->GetCurrentInstructionId();
-    auto instsPerByte = GetEncoder()->MaxArchInstPerEncoded();
-    auto maxBitsInInst = GetInstructionSizeBits(GetArch());
-    instSize += slowPaths_.size() * INST_IN_SLOW_PATH;
-    if ((instSize * instsPerByte * maxBitsInInst) > g_options.GetCompilerMaxGenCodeSize()) {
+    auto estimatedCodeSize = GetGraph()->EstimateCodeSize();
+    if (estimatedCodeSize > g_options.GetCompilerMaxGenCodeSize()) {
+        COMPILER_LOG(WARNING, CODEGEN) << "Code is too large - estimated code size: " << estimatedCodeSize;
         return false;
     }
+    // Limit encoder to match estimated to actual code size.
     // After this - encoder aborted, if allocated too much size.
     GetEncoder()->SetMaxAllocatedBytes(g_options.GetCompilerMaxGenCodeSize());
 
@@ -426,10 +425,11 @@ bool Codegen::VisitGraph()
         }
     }
 
-    auto instsPerByte = GetEncoder()->MaxArchInstPerEncoded();
-    auto maxBitsInInst = GetInstructionSizeBits(GetArch());
-    auto instSize = GetGraph()->GetCurrentInstructionId() + slowPaths_.size() * INST_IN_SLOW_PATH;
-    if ((instSize * instsPerByte * maxBitsInInst) > g_options.GetCompilerMaxGenCodeSize()) {
+    auto estimatedSlowPathsSize = slowPaths_.size() * SLOW_PATH_SIZE;
+    auto estimatedCodeSize = GetGraph()->EstimateCodeSize<true>() + estimatedSlowPathsSize;
+    if (estimatedCodeSize > g_options.GetCompilerMaxGenCodeSize()) {
+        COMPILER_LOG(WARNING, CODEGEN) << "Code is too large - code size: " << GetGraph()->EstimateCodeSize<true>()
+                                       << ", slow paths' code estimation: " << estimatedSlowPathsSize;
         return false;
     }
 
