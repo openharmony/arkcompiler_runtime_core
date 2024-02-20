@@ -402,7 +402,8 @@ JSCONVERT_WRAP(ArrayBuffer)
     napi_value buf;
     void *data;
     NAPI_CHECK_FATAL(napi_create_arraybuffer(env, etsVal->GetByteLength(), &data, &buf));
-    memcpy(data, etsVal->GetData()->GetData<const void *>(), etsVal->GetByteLength());
+    std::copy_n(reinterpret_cast<const uint8_t *>(etsVal->GetData()->GetData<const void *>()), etsVal->GetByteLength(),
+                reinterpret_cast<uint8_t *>(data));
     return buf;
 }
 
@@ -424,7 +425,7 @@ JSCONVERT_UNWRAP(ArrayBuffer)
                                   reinterpret_cast<EtsArrayBuffer *>(EtsObject::Create(currentCoro, arraybufKlass)));
     buf->SetByteLength(static_cast<EtsInt>(byteLength));
     buf->SetData(currentCoro, EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byteLength));
-    memcpy(buf->GetData()->GetData<EtsByte>(), data, byteLength);
+    std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, buf->GetData()->GetData<EtsByte>());
     return buf.GetPtr();
 }
 

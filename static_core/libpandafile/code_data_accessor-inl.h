@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
 #define LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
 
+#include <algorithm>
 #include "code_data_accessor.h"
 
 namespace ark::panda_file {
@@ -85,7 +86,7 @@ inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::En
     uint32_t dataPrefix;
     // with reading *reinterpret_cast<const uint32_t *>(sp.Data()) unaligned read occurs
     // according to decompiler memcpy is optimized to a single load
-    memcpy(&dataPrefix, sp.Data(), 4U);
+    std::copy_n(sp.Data(), 4U, reinterpret_cast<uint8_t *>(&dataPrefix));
     if (UNLIKELY(dataPrefix & 0x80808080)) {
         helpers::SkipULeb128(&sp);  // num_vregs
         helpers::SkipULeb128(&sp);  // num_args
