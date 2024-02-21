@@ -192,9 +192,20 @@ export function decodeURIComponent(uriComponent: string): string {
  * surrogate characters). Compared to encodeURI(), this function
  * encodes more characters, including those that are part of the URI
  * syntax.
+ *
+ * @param uriComponent a string to be encoded as a URI component
+ * (a path, query string, fragment, etc.). Other values are converted to strings.
+ *
+ * @returns A new string representing the provided uriComponent encoded as a URI component.
  */
-export function encodeURIComponent(uriComponent: string): string {
-    return encodeURIImpl(uriComponent, uriArrayComponent)
+export function encodeURIComponent(uriComponent: String | Number | Boolean): string {
+    if (uriComponent instanceof String) {
+        return encodeURIImpl(uriComponent as String, uriArrayComponent);
+    } else if (uriComponent instanceof Number) {
+        return encodeURIImpl((uriComponent as Number).toString(), uriArrayComponent)
+    } else {
+        return encodeURIImpl((uriComponent as Boolean).toString(), uriArrayComponent)
+    }
 }
 
 /**
