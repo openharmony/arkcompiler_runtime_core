@@ -20,6 +20,9 @@
 
 class A {
   str: String = "hello"
+  toString(): string {
+    return "{str: \"" + this.str + "\"}"
+  }
 }
 
 type ANullish = A | null | undefined

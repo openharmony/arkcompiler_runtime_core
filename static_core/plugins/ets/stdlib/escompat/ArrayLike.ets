@@ -31,15 +31,12 @@ class ArrayLikeIterator<T> implements Iterator<T> {
     }
 }
 
-export interface ArrayLike<T> /* extends Iterable<T> */ {
+export interface ArrayLike<T> extends Iterable<T> {
     $_get(index: number): T;
 
     get length(): number
 
-    // NOTE(kprokopenko) blocked by #15308
-    /*
     iterator(): Iterator<T> {
         return new ArrayLikeIterator<T>(this)
     }
-    */
 }

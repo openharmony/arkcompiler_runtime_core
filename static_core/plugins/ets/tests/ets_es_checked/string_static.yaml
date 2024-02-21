@@ -30,9 +30,8 @@ sub:
           - |
             Proc.new { [[134071], [0x1d306, 0x61, 0x1d307]] }
       - expr: new String(pars).valueOf()
-        ignored: true
         params:
-          - paramOf("123".inspect, '"123" as Object | null | undefined', "undefined", "null", 11, 12.0, "Infinity", "NaN", "-Infinity", " a ".inspect, "0xff", "new Object()")
+          - paramOf "123".inspect, '"123" as Object | null | undefined', "undefined", "null", 11, 12.0, "Infinity", "NaN", "-Infinity", " a ".inspect, "0xff", '0.0', '-0.0' #, "new Object()"
         mandatory: 0
       - expr: pars.length
         params:

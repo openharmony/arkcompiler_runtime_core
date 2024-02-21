@@ -49,6 +49,10 @@ module ScriptModule
     def NaN
         "NaN"
     end
+
+    def undefined
+        "undefined"
+    end
 end
 
 class Vars < OpenStruct

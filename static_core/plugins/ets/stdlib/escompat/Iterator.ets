@@ -44,7 +44,9 @@ export interface Iterable<out T> {
 }
 
 export interface IterableIterator<out T> extends Iterator<T>, Iterable<T> {
-    iterator(): IterableIterator<T>;
+    iterator(): IterableIterator<T> {
+        return this;
+    }
 }
 
 function iteratorForEach<V>(x: Iterator<V>, fn: (x: V) => void): void {

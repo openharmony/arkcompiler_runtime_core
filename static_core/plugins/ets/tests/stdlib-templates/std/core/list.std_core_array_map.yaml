@@ -122,12 +122,12 @@
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:number,self:int[]): int =>  {return (value + index)}',
+            fn: '(value:int,index:number,self:int[]): int =>  {return (value + index) as int}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:int,index:number,self:int[]): int =>  {return (value + index)}',
+            fn: '(value:int,index:number,self:int[]): int =>  {return (value + index) as int}',
           },
 
       },
@@ -156,12 +156,12 @@
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:long,index:number,self:long[]): long =>  {return (value + index)}',
+            fn: '(value:long,index:number,self:long[]): long =>  {return (value + index) as long}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:long,index:number,self:long[]): long =>  {return (value + index)}',
+            fn: '(value:long,index:number,self:long[]): long =>  {return (value + index) as long}',
           },
 
       },
@@ -190,12 +190,12 @@
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:number,self:float[]): float =>  {return (value + index)}',
+            fn: '(value:float,index:number,self:float[]): float =>  {return (value + index) as float}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:float,index:number,self:float[]): float =>  {return (value + index)}',
+            fn: '(value:float,index:number,self:float[]): float =>  {return (value + index) as float}',
           },
 
       },

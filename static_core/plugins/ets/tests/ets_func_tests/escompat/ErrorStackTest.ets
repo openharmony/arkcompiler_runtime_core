@@ -40,7 +40,7 @@ function testTrace(name: String, fun: () => void, expected: string[]): int {
 
 function testArrayNative() {
     let array = Array.of<number>(1, 2, 3)
-    array.map<void>((v: number): void => { throw new Error("FAIL") })
+    array.forEach((v: number): void => { throw new Error("FAIL") })
 }
 
 class Nirk {
@@ -92,7 +92,7 @@ function testRecursion() {
 
 function main(): int {
     let failures = 0;
-    failures += testTrace("testArrayNative", testArrayNative, ["Array.map"])
+    failures += testTrace("testArrayNative", testArrayNative, ["Array.forEach"])
     failures += testTrace("testImplicitConversion", testImplicitConversion, ["Nirk.toString"])
     failures += testTrace("testConstructor", testConstructor, ["Plonk.<ctor>"])
     failures += testTrace("testNestedFunc", testNestedFunc, ["foo", "outerFoo"])

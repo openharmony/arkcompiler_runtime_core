@@ -1415,6 +1415,7 @@ intrinsics:
       ret: std.core.Object[]
       args:
         - i32
+        - std.core.Object
     impl: ark::ets::intrinsics::StdCoreAllocGenericArray
 
   - name: StdCoreBoolCopyTo

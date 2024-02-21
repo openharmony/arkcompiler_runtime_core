@@ -215,7 +215,7 @@ private:
             {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
             {utf::CStringAsMutf8("flatMap"), "Lstd/core/Function2;:Lescompat/Array;"},
             {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
-            {utf::CStringAsMutf8("from"), "Lstd/core/Object;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("from"), "Lescompat/Iterable;:Lescompat/Array;"},
         };
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
 

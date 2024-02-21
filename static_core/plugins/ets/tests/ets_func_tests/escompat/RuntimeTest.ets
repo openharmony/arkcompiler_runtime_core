@@ -13,33 +13,13 @@
  * limitations under the License.
  */
 
-/*---
- desc: String constructor with nullish 03.types.References_Types.string
- tags: []
- ---*/
 
-class A {
-  str: String = "hello"
+function main(): void {
+    assert runtime.sameValue(0.0, 0.0) == true
+    assert runtime.sameValue(0.0, -0.0) == false
+    assert runtime.sameValue(-0.0, 0.0) == false
+    assert runtime.sameValue(-0.0, -0.0) == true
 
-  toString(): string {
-    return "{str: \"" + this.str + "\"}"
-  }
-}
-
-class A1 {
-  str: String = "world"
-
-  toString(): string {
-    return "{str: \"" + this.str + "\"}"
-  }
-}
-
-type ANullish = A | undefined | null
-type ANullish1 = A1 | undefined | null
-
-function main() {
-  let obj: ANullish = new A();
-  let obj1: ANullish1 = new A1();
-  let testStr = new string(new string(obj) + new string(obj1));
-  assert testStr == "{str: \"hello\"}{str: \"world\"}";
+    assert runtime.sameValueZero(0.0, -0.0) == true
+    assert runtime.sameValueZero(-0.0, 0.0) == true
 }

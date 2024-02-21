@@ -604,9 +604,12 @@ EtsString *TypeAPIGetBaseType(EtsString *td)
 EtsBoolean TypeAPIIsInheritedFrom(EtsString *ltd, EtsString *rtd)
 {
     auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto l = classLinker->GetClass(ltd->GetMutf8().c_str());
-    auto r = classLinker->GetClass(rtd->GetMutf8().c_str());
-    return static_cast<EtsBoolean>(l->GetRuntimeClass()->Implements(r->GetRuntimeClass()));
+    auto coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope {coro};
+    EtsHandle rtdHandle {coro, rtd};
+    EtsHandle lHandle {coro, classLinker->GetClass(ltd->GetMutf8().c_str())};
+    auto r = classLinker->GetClass(rtdHandle->GetMutf8().c_str());
+    return static_cast<EtsBoolean>(lHandle->GetRuntimeClass()->Implements(r->GetRuntimeClass()));
 }
 
 }  // namespace ark::ets::intrinsics

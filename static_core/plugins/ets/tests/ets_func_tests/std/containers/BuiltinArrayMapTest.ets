@@ -15,10 +15,10 @@
 
 function main(): void {
     const arr: int[] = [1, 2];
-    const res: Object[] = map<Object>(arr, (x: int): Object => {
+    const res: string[] = map<string>(arr, (x: int): string => {
         return x.toString()
     })
     assert res.length == 2
-    assert res[0] as String == "1"
-    assert res[1] as String == "2"
+    assert res[0] == "1"
+    assert res[1] == "2"
 }

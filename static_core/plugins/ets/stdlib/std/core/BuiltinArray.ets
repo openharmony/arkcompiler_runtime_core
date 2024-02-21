@@ -44,7 +44,7 @@ function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
     return ((0 <= startIndex) && (startIndex <= endIndex) && (endIndex <= arrLen));
 }
 
-native function __alloc_array<T>(len: int): T[]
+native function __alloc_array<T>(len: int, ofType: Object | null): T[]
 
 class BuiltinArrayKeysIterator implements IterableIterator<number> {
     private len: int
@@ -372,7 +372,7 @@ export function filter(self: boolean[], fn: (v: boolean, i: number, self: boolea
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: boolean[], fn: (element: boolean, i: number, self: boolean[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -396,7 +396,7 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number, 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -417,7 +417,7 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number, 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean, i: number, self: boolean[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -439,7 +439,7 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: num
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -460,7 +460,7 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: num
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number, self: boolean[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -473,7 +473,8 @@ export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: boolean[], fn: (a: boolean, i: number, self: boolean[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -566,7 +567,7 @@ export function some(self: boolean[], fn: (v: boolean, i: number) => boolean): b
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: boolean[], fn: (element: boolean, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -590,7 +591,7 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number) 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -611,7 +612,7 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number) 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -633,7 +634,7 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: num
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -654,7 +655,7 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: num
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -667,7 +668,8 @@ export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: boolean[], fn: (a: boolean, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -774,7 +776,7 @@ export function filter(self: boolean[], fn: (v: boolean) => boolean): boolean[] 
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: boolean[], fn: (element: boolean) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -798,7 +800,7 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean) => boolean)
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -819,7 +821,7 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean) => boolean)
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -841,7 +843,7 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean) => boo
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -862,7 +864,7 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean) => boo
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -875,7 +877,8 @@ export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean) => U, ini
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: boolean[], fn: (a: boolean) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -1010,7 +1013,7 @@ export function join(self: boolean[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: boolean[]): string {
+export function toString(self: boolean[], ): string {
     return join(self, ",");
 }
 
@@ -1039,12 +1042,23 @@ export function toLocaleString(self: boolean[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: boolean[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: boolean[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -1180,9 +1194,9 @@ export function indexOf(self: boolean[], val: boolean, fromIndex?: Number): numb
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: boolean[]): boolean[] {
+export function toSorted(self: boolean[], ): boolean[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -1206,7 +1220,7 @@ export function toSorted(self: boolean[], comparator: (a: boolean, b: boolean) =
  *
  * @note Mutating method
  */
-export function reverse(self: boolean[]): boolean[] {
+export function reverse(self: boolean[], ): boolean[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -1223,9 +1237,9 @@ export function reverse(self: boolean[]): boolean[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: boolean[]): boolean[] {
+export function toReversed(self: boolean[], ): boolean[] {
     let arr = new boolean[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -1270,14 +1284,14 @@ export function with(self: boolean[], index: int, value: boolean): boolean[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: boolean[]): IterableIterator<boolean> {
+export function values(self: boolean[], ): IterableIterator<boolean> {
     return new ArrayValuesIterator_boolean(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: boolean[]): IterableIterator<[number, boolean]> {
+export function entries(self: boolean[], ): IterableIterator<[number, boolean]> {
     return new ArrayEntriesIterator_boolean(self);
 }
 
@@ -1289,9 +1303,9 @@ export function entries(self: boolean[]): IterableIterator<[number, boolean]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: boolean[], fn: (value: boolean, i: number, self: boolean[]) => U): U[] {
+export function map(self: boolean[], fn: (value: boolean, i: number, self: boolean[]) => boolean): boolean[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new boolean[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -1305,9 +1319,9 @@ export function map<U>(self: boolean[], fn: (value: boolean, i: number, self: bo
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: boolean[], fn: (value: boolean, i: number) => U): U[] {
+export function map(self: boolean[], fn: (value: boolean, i: number) => boolean): boolean[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new boolean[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -1321,9 +1335,9 @@ export function map<U>(self: boolean[], fn: (value: boolean, i: number) => U): U
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: boolean[], fn: (value: boolean) => U): U[] {
+export function map(self: boolean[], fn: (value: boolean) => boolean): boolean[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new boolean[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -1387,12 +1401,10 @@ export function concat(self: boolean[], fst: boolean[], ...more: boolean[][]): b
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: boolean[], comparator: (a: boolean, b: boolean) => number): boolean[] {
     sort_subarray(self, 0, self.length, (l: boolean, r: boolean): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -1761,7 +1773,7 @@ export function filter(self: byte[], fn: (v: byte, i: number, self: byte[]) => b
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: byte[], fn: (element: byte, i: number, self: byte[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -1785,7 +1797,7 @@ export function reduce(self: byte[], fn: (a: byte, b: byte, i: number, self: byt
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -1806,7 +1818,7 @@ export function reduce(self: byte[], fn: (a: byte, b: byte, i: number, self: byt
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte, i: number, self: byte[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -1828,7 +1840,7 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number, self
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -1849,7 +1861,7 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number, self
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number, self: byte[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -1862,7 +1874,8 @@ export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number, self
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: byte[], fn: (a: byte, i: number, self: byte[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -1955,7 +1968,7 @@ export function some(self: byte[], fn: (v: byte, i: number) => boolean): boolean
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: byte[], fn: (element: byte, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -1979,7 +1992,7 @@ export function reduce(self: byte[], fn: (a: byte, b: byte, i: number) => byte):
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -2000,7 +2013,7 @@ export function reduce(self: byte[], fn: (a: byte, b: byte, i: number) => byte):
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -2022,7 +2035,7 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number) => b
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -2043,7 +2056,7 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number) => b
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -2056,7 +2069,8 @@ export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number) => U
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: byte[], fn: (a: byte, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -2163,7 +2177,7 @@ export function filter(self: byte[], fn: (v: byte) => boolean): byte[] {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: byte[], fn: (element: byte) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -2187,7 +2201,7 @@ export function reduce(self: byte[], fn: (a: byte, b: byte) => byte): byte {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -2208,7 +2222,7 @@ export function reduce(self: byte[], fn: (a: byte, b: byte) => byte): byte {
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -2230,7 +2244,7 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte) => byte): byte 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -2251,7 +2265,7 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte) => byte): byte 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: byte[], fn: (a: U, b: byte) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -2264,7 +2278,8 @@ export function reduceRight<U>(self: byte[], fn: (a: U, b: byte) => U, initVal: 
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: byte[], fn: (a: byte) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -2399,7 +2414,7 @@ export function join(self: byte[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: byte[]): string {
+export function toString(self: byte[], ): string {
     return join(self, ",");
 }
 
@@ -2428,12 +2443,23 @@ export function toLocaleString(self: byte[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: byte[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: byte[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -2569,9 +2595,9 @@ export function indexOf(self: byte[], val: byte, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: byte[]): byte[] {
+export function toSorted(self: byte[], ): byte[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -2595,7 +2621,7 @@ export function toSorted(self: byte[], comparator: (a: byte, b: byte) => number)
  *
  * @note Mutating method
  */
-export function reverse(self: byte[]): byte[] {
+export function reverse(self: byte[], ): byte[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -2612,9 +2638,9 @@ export function reverse(self: byte[]): byte[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: byte[]): byte[] {
+export function toReversed(self: byte[], ): byte[] {
     let arr = new byte[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -2659,14 +2685,14 @@ export function with(self: byte[], index: int, value: byte): byte[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: byte[]): IterableIterator<byte> {
+export function values(self: byte[], ): IterableIterator<byte> {
     return new ArrayValuesIterator_byte(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: byte[]): IterableIterator<[number, byte]> {
+export function entries(self: byte[], ): IterableIterator<[number, byte]> {
     return new ArrayEntriesIterator_byte(self);
 }
 
@@ -2678,9 +2704,9 @@ export function entries(self: byte[]): IterableIterator<[number, byte]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: byte[], fn: (value: byte, i: number, self: byte[]) => U): U[] {
+export function map(self: byte[], fn: (value: byte, i: number, self: byte[]) => byte): byte[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new byte[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -2694,9 +2720,9 @@ export function map<U>(self: byte[], fn: (value: byte, i: number, self: byte[]) 
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: byte[], fn: (value: byte, i: number) => U): U[] {
+export function map(self: byte[], fn: (value: byte, i: number) => byte): byte[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new byte[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -2710,9 +2736,9 @@ export function map<U>(self: byte[], fn: (value: byte, i: number) => U): U[] {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: byte[], fn: (value: byte) => U): U[] {
+export function map(self: byte[], fn: (value: byte) => byte): byte[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new byte[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -2776,12 +2802,10 @@ export function concat(self: byte[], fst: byte[], ...more: byte[][]): byte[] {
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: byte[], comparator: (a: byte, b: byte) => number): byte[] {
     sort_subarray(self, 0, self.length, (l: byte, r: byte): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -3150,7 +3174,7 @@ export function filter(self: short[], fn: (v: short, i: number, self: short[]) =
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: short[], fn: (element: short, i: number, self: short[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -3174,7 +3198,7 @@ export function reduce(self: short[], fn: (a: short, b: short, i: number, self: 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -3195,7 +3219,7 @@ export function reduce(self: short[], fn: (a: short, b: short, i: number, self: 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short, i: number, self: short[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -3217,7 +3241,7 @@ export function reduceRight(self: short[], fn: (a: short, b: short, i: number, s
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -3238,7 +3262,7 @@ export function reduceRight(self: short[], fn: (a: short, b: short, i: number, s
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number, self: short[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -3251,7 +3275,8 @@ export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number, se
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: short[], fn: (a: short, i: number, self: short[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -3344,7 +3369,7 @@ export function some(self: short[], fn: (v: short, i: number) => boolean): boole
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: short[], fn: (element: short, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -3368,7 +3393,7 @@ export function reduce(self: short[], fn: (a: short, b: short, i: number) => sho
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -3389,7 +3414,7 @@ export function reduce(self: short[], fn: (a: short, b: short, i: number) => sho
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -3411,7 +3436,7 @@ export function reduceRight(self: short[], fn: (a: short, b: short, i: number) =
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -3432,7 +3457,7 @@ export function reduceRight(self: short[], fn: (a: short, b: short, i: number) =
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -3445,7 +3470,8 @@ export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number) =>
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: short[], fn: (a: short, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -3552,7 +3578,7 @@ export function filter(self: short[], fn: (v: short) => boolean): short[] {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: short[], fn: (element: short) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -3576,7 +3602,7 @@ export function reduce(self: short[], fn: (a: short, b: short) => short): short 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -3597,7 +3623,7 @@ export function reduce(self: short[], fn: (a: short, b: short) => short): short 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -3619,7 +3645,7 @@ export function reduceRight(self: short[], fn: (a: short, b: short) => short): s
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -3640,7 +3666,7 @@ export function reduceRight(self: short[], fn: (a: short, b: short) => short): s
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: short[], fn: (a: U, b: short) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -3653,7 +3679,8 @@ export function reduceRight<U>(self: short[], fn: (a: U, b: short) => U, initVal
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: short[], fn: (a: short) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -3788,7 +3815,7 @@ export function join(self: short[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: short[]): string {
+export function toString(self: short[], ): string {
     return join(self, ",");
 }
 
@@ -3817,12 +3844,23 @@ export function toLocaleString(self: short[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: short[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: short[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -3958,9 +3996,9 @@ export function indexOf(self: short[], val: short, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: short[]): short[] {
+export function toSorted(self: short[], ): short[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -3984,7 +4022,7 @@ export function toSorted(self: short[], comparator: (a: short, b: short) => numb
  *
  * @note Mutating method
  */
-export function reverse(self: short[]): short[] {
+export function reverse(self: short[], ): short[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -4001,9 +4039,9 @@ export function reverse(self: short[]): short[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: short[]): short[] {
+export function toReversed(self: short[], ): short[] {
     let arr = new short[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -4048,14 +4086,14 @@ export function with(self: short[], index: int, value: short): short[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: short[]): IterableIterator<short> {
+export function values(self: short[], ): IterableIterator<short> {
     return new ArrayValuesIterator_short(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: short[]): IterableIterator<[number, short]> {
+export function entries(self: short[], ): IterableIterator<[number, short]> {
     return new ArrayEntriesIterator_short(self);
 }
 
@@ -4067,9 +4105,9 @@ export function entries(self: short[]): IterableIterator<[number, short]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: short[], fn: (value: short, i: number, self: short[]) => U): U[] {
+export function map(self: short[], fn: (value: short, i: number, self: short[]) => short): short[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new short[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -4083,9 +4121,9 @@ export function map<U>(self: short[], fn: (value: short, i: number, self: short[
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: short[], fn: (value: short, i: number) => U): U[] {
+export function map(self: short[], fn: (value: short, i: number) => short): short[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new short[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -4099,9 +4137,9 @@ export function map<U>(self: short[], fn: (value: short, i: number) => U): U[] {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: short[], fn: (value: short) => U): U[] {
+export function map(self: short[], fn: (value: short) => short): short[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new short[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -4165,12 +4203,10 @@ export function concat(self: short[], fst: short[], ...more: short[][]): short[]
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: short[], comparator: (a: short, b: short) => number): short[] {
     sort_subarray(self, 0, self.length, (l: short, r: short): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -4539,7 +4575,7 @@ export function filter(self: int[], fn: (v: int, i: number, self: int[]) => bool
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: int[], fn: (element: int, i: number, self: int[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -4563,7 +4599,7 @@ export function reduce(self: int[], fn: (a: int, b: int, i: number, self: int[])
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -4584,7 +4620,7 @@ export function reduce(self: int[], fn: (a: int, b: int, i: number, self: int[])
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int, i: number, self: int[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -4606,7 +4642,7 @@ export function reduceRight(self: int[], fn: (a: int, b: int, i: number, self: i
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -4627,7 +4663,7 @@ export function reduceRight(self: int[], fn: (a: int, b: int, i: number, self: i
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number, self: int[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -4640,7 +4676,8 @@ export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number, self: 
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: int[], fn: (a: int, i: number, self: int[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -4733,7 +4770,7 @@ export function some(self: int[], fn: (v: int, i: number) => boolean): boolean {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: int[], fn: (element: int, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -4757,7 +4794,7 @@ export function reduce(self: int[], fn: (a: int, b: int, i: number) => int): int
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -4778,7 +4815,7 @@ export function reduce(self: int[], fn: (a: int, b: int, i: number) => int): int
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -4800,7 +4837,7 @@ export function reduceRight(self: int[], fn: (a: int, b: int, i: number) => int)
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -4821,7 +4858,7 @@ export function reduceRight(self: int[], fn: (a: int, b: int, i: number) => int)
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -4834,7 +4871,8 @@ export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number) => U, 
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: int[], fn: (a: int, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -4941,7 +4979,7 @@ export function filter(self: int[], fn: (v: int) => boolean): int[] {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: int[], fn: (element: int) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -4965,7 +5003,7 @@ export function reduce(self: int[], fn: (a: int, b: int) => int): int {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -4986,7 +5024,7 @@ export function reduce(self: int[], fn: (a: int, b: int) => int): int {
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -5008,7 +5046,7 @@ export function reduceRight(self: int[], fn: (a: int, b: int) => int): int {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -5029,7 +5067,7 @@ export function reduceRight(self: int[], fn: (a: int, b: int) => int): int {
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: int[], fn: (a: U, b: int) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -5042,7 +5080,8 @@ export function reduceRight<U>(self: int[], fn: (a: U, b: int) => U, initVal: U)
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: int[], fn: (a: int) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -5177,7 +5216,7 @@ export function join(self: int[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: int[]): string {
+export function toString(self: int[], ): string {
     return join(self, ",");
 }
 
@@ -5206,12 +5245,23 @@ export function toLocaleString(self: int[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: int[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: int[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -5347,9 +5397,9 @@ export function indexOf(self: int[], val: int, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: int[]): int[] {
+export function toSorted(self: int[], ): int[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -5373,7 +5423,7 @@ export function toSorted(self: int[], comparator: (a: int, b: int) => number): i
  *
  * @note Mutating method
  */
-export function reverse(self: int[]): int[] {
+export function reverse(self: int[], ): int[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -5390,9 +5440,9 @@ export function reverse(self: int[]): int[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: int[]): int[] {
+export function toReversed(self: int[], ): int[] {
     let arr = new int[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -5437,14 +5487,14 @@ export function with(self: int[], index: int, value: int): int[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: int[]): IterableIterator<int> {
+export function values(self: int[], ): IterableIterator<int> {
     return new ArrayValuesIterator_int(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: int[]): IterableIterator<[number, int]> {
+export function entries(self: int[], ): IterableIterator<[number, int]> {
     return new ArrayEntriesIterator_int(self);
 }
 
@@ -5456,9 +5506,9 @@ export function entries(self: int[]): IterableIterator<[number, int]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: int[], fn: (value: int, i: number, self: int[]) => U): U[] {
+export function map(self: int[], fn: (value: int, i: number, self: int[]) => int): int[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new int[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -5472,9 +5522,9 @@ export function map<U>(self: int[], fn: (value: int, i: number, self: int[]) => 
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: int[], fn: (value: int, i: number) => U): U[] {
+export function map(self: int[], fn: (value: int, i: number) => int): int[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new int[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -5488,9 +5538,9 @@ export function map<U>(self: int[], fn: (value: int, i: number) => U): U[] {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: int[], fn: (value: int) => U): U[] {
+export function map(self: int[], fn: (value: int) => int): int[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new int[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -5554,12 +5604,10 @@ export function concat(self: int[], fst: int[], ...more: int[][]): int[] {
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: int[], comparator: (a: int, b: int) => number): int[] {
     sort_subarray(self, 0, self.length, (l: int, r: int): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -5928,7 +5976,7 @@ export function filter(self: long[], fn: (v: long, i: number, self: long[]) => b
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: long[], fn: (element: long, i: number, self: long[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -5952,7 +6000,7 @@ export function reduce(self: long[], fn: (a: long, b: long, i: number, self: lon
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -5973,7 +6021,7 @@ export function reduce(self: long[], fn: (a: long, b: long, i: number, self: lon
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long, i: number, self: long[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -5995,7 +6043,7 @@ export function reduceRight(self: long[], fn: (a: long, b: long, i: number, self
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -6016,7 +6064,7 @@ export function reduceRight(self: long[], fn: (a: long, b: long, i: number, self
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number, self: long[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -6029,7 +6077,8 @@ export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number, self
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: long[], fn: (a: long, i: number, self: long[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -6122,7 +6171,7 @@ export function some(self: long[], fn: (v: long, i: number) => boolean): boolean
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: long[], fn: (element: long, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -6146,7 +6195,7 @@ export function reduce(self: long[], fn: (a: long, b: long, i: number) => long):
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -6167,7 +6216,7 @@ export function reduce(self: long[], fn: (a: long, b: long, i: number) => long):
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -6189,7 +6238,7 @@ export function reduceRight(self: long[], fn: (a: long, b: long, i: number) => l
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -6210,7 +6259,7 @@ export function reduceRight(self: long[], fn: (a: long, b: long, i: number) => l
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -6223,7 +6272,8 @@ export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number) => U
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: long[], fn: (a: long, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -6330,7 +6380,7 @@ export function filter(self: long[], fn: (v: long) => boolean): long[] {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: long[], fn: (element: long) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -6354,7 +6404,7 @@ export function reduce(self: long[], fn: (a: long, b: long) => long): long {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -6375,7 +6425,7 @@ export function reduce(self: long[], fn: (a: long, b: long) => long): long {
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -6397,7 +6447,7 @@ export function reduceRight(self: long[], fn: (a: long, b: long) => long): long 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -6418,7 +6468,7 @@ export function reduceRight(self: long[], fn: (a: long, b: long) => long): long 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: long[], fn: (a: U, b: long) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -6431,7 +6481,8 @@ export function reduceRight<U>(self: long[], fn: (a: U, b: long) => U, initVal: 
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: long[], fn: (a: long) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -6566,7 +6617,7 @@ export function join(self: long[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: long[]): string {
+export function toString(self: long[], ): string {
     return join(self, ",");
 }
 
@@ -6595,12 +6646,23 @@ export function toLocaleString(self: long[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: long[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: long[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -6736,9 +6798,9 @@ export function indexOf(self: long[], val: long, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: long[]): long[] {
+export function toSorted(self: long[], ): long[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -6762,7 +6824,7 @@ export function toSorted(self: long[], comparator: (a: long, b: long) => number)
  *
  * @note Mutating method
  */
-export function reverse(self: long[]): long[] {
+export function reverse(self: long[], ): long[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -6779,9 +6841,9 @@ export function reverse(self: long[]): long[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: long[]): long[] {
+export function toReversed(self: long[], ): long[] {
     let arr = new long[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -6826,14 +6888,14 @@ export function with(self: long[], index: int, value: long): long[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: long[]): IterableIterator<long> {
+export function values(self: long[], ): IterableIterator<long> {
     return new ArrayValuesIterator_long(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: long[]): IterableIterator<[number, long]> {
+export function entries(self: long[], ): IterableIterator<[number, long]> {
     return new ArrayEntriesIterator_long(self);
 }
 
@@ -6845,9 +6907,9 @@ export function entries(self: long[]): IterableIterator<[number, long]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: long[], fn: (value: long, i: number, self: long[]) => U): U[] {
+export function map(self: long[], fn: (value: long, i: number, self: long[]) => long): long[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new long[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -6861,9 +6923,9 @@ export function map<U>(self: long[], fn: (value: long, i: number, self: long[]) 
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: long[], fn: (value: long, i: number) => U): U[] {
+export function map(self: long[], fn: (value: long, i: number) => long): long[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new long[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -6877,9 +6939,9 @@ export function map<U>(self: long[], fn: (value: long, i: number) => U): U[] {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: long[], fn: (value: long) => U): U[] {
+export function map(self: long[], fn: (value: long) => long): long[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new long[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -6943,12 +7005,10 @@ export function concat(self: long[], fst: long[], ...more: long[][]): long[] {
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: long[], comparator: (a: long, b: long) => number): long[] {
     sort_subarray(self, 0, self.length, (l: long, r: long): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -7317,7 +7377,7 @@ export function filter(self: float[], fn: (v: float, i: number, self: float[]) =
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: float[], fn: (element: float, i: number, self: float[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -7341,7 +7401,7 @@ export function reduce(self: float[], fn: (a: float, b: float, i: number, self: 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -7362,7 +7422,7 @@ export function reduce(self: float[], fn: (a: float, b: float, i: number, self: 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float, i: number, self: float[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -7384,7 +7444,7 @@ export function reduceRight(self: float[], fn: (a: float, b: float, i: number, s
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -7405,7 +7465,7 @@ export function reduceRight(self: float[], fn: (a: float, b: float, i: number, s
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number, self: float[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -7418,7 +7478,8 @@ export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number, se
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: float[], fn: (a: float, i: number, self: float[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -7511,7 +7572,7 @@ export function some(self: float[], fn: (v: float, i: number) => boolean): boole
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: float[], fn: (element: float, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -7535,7 +7596,7 @@ export function reduce(self: float[], fn: (a: float, b: float, i: number) => flo
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -7556,7 +7617,7 @@ export function reduce(self: float[], fn: (a: float, b: float, i: number) => flo
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -7578,7 +7639,7 @@ export function reduceRight(self: float[], fn: (a: float, b: float, i: number) =
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -7599,7 +7660,7 @@ export function reduceRight(self: float[], fn: (a: float, b: float, i: number) =
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -7612,7 +7673,8 @@ export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number) =>
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: float[], fn: (a: float, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -7719,7 +7781,7 @@ export function filter(self: float[], fn: (v: float) => boolean): float[] {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: float[], fn: (element: float) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -7743,7 +7805,7 @@ export function reduce(self: float[], fn: (a: float, b: float) => float): float 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -7764,7 +7826,7 @@ export function reduce(self: float[], fn: (a: float, b: float) => float): float 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -7786,7 +7848,7 @@ export function reduceRight(self: float[], fn: (a: float, b: float) => float): f
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -7807,7 +7869,7 @@ export function reduceRight(self: float[], fn: (a: float, b: float) => float): f
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: float[], fn: (a: U, b: float) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -7820,7 +7882,8 @@ export function reduceRight<U>(self: float[], fn: (a: U, b: float) => U, initVal
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: float[], fn: (a: float) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -7955,7 +8018,7 @@ export function join(self: float[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: float[]): string {
+export function toString(self: float[], ): string {
     return join(self, ",");
 }
 
@@ -7984,12 +8047,23 @@ export function toLocaleString(self: float[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: float[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: float[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -8133,9 +8207,9 @@ export function indexOf(self: float[], val: float, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: float[]): float[] {
+export function toSorted(self: float[], ): float[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -8159,7 +8233,7 @@ export function toSorted(self: float[], comparator: (a: float, b: float) => numb
  *
  * @note Mutating method
  */
-export function reverse(self: float[]): float[] {
+export function reverse(self: float[], ): float[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -8176,9 +8250,9 @@ export function reverse(self: float[]): float[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: float[]): float[] {
+export function toReversed(self: float[], ): float[] {
     let arr = new float[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -8223,14 +8297,14 @@ export function with(self: float[], index: int, value: float): float[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: float[]): IterableIterator<float> {
+export function values(self: float[], ): IterableIterator<float> {
     return new ArrayValuesIterator_float(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: float[]): IterableIterator<[number, float]> {
+export function entries(self: float[], ): IterableIterator<[number, float]> {
     return new ArrayEntriesIterator_float(self);
 }
 
@@ -8242,9 +8316,9 @@ export function entries(self: float[]): IterableIterator<[number, float]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: float[], fn: (value: float, i: number, self: float[]) => U): U[] {
+export function map(self: float[], fn: (value: float, i: number, self: float[]) => float): float[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new float[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -8258,9 +8332,9 @@ export function map<U>(self: float[], fn: (value: float, i: number, self: float[
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: float[], fn: (value: float, i: number) => U): U[] {
+export function map(self: float[], fn: (value: float, i: number) => float): float[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new float[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -8274,9 +8348,9 @@ export function map<U>(self: float[], fn: (value: float, i: number) => U): U[] {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: float[], fn: (value: float) => U): U[] {
+export function map(self: float[], fn: (value: float) => float): float[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new float[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -8340,12 +8414,10 @@ export function concat(self: float[], fst: float[], ...more: float[][]): float[]
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: float[], comparator: (a: float, b: float) => number): float[] {
     sort_subarray(self, 0, self.length, (l: float, r: float): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -8714,7 +8786,7 @@ export function filter(self: double[], fn: (v: double, i: number, self: double[]
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: double[], fn: (element: double, i: number, self: double[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -8738,7 +8810,7 @@ export function reduce(self: double[], fn: (a: double, b: double, i: number, sel
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -8759,7 +8831,7 @@ export function reduce(self: double[], fn: (a: double, b: double, i: number, sel
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double, i: number, self: double[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -8781,7 +8853,7 @@ export function reduceRight(self: double[], fn: (a: double, b: double, i: number
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -8802,7 +8874,7 @@ export function reduceRight(self: double[], fn: (a: double, b: double, i: number
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number, self: double[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -8815,7 +8887,8 @@ export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number, 
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: double[], fn: (a: double, i: number, self: double[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -8908,7 +8981,7 @@ export function some(self: double[], fn: (v: double, i: number) => boolean): boo
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: double[], fn: (element: double, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -8932,7 +9005,7 @@ export function reduce(self: double[], fn: (a: double, b: double, i: number) => 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -8953,7 +9026,7 @@ export function reduce(self: double[], fn: (a: double, b: double, i: number) => 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -8975,7 +9048,7 @@ export function reduceRight(self: double[], fn: (a: double, b: double, i: number
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -8996,7 +9069,7 @@ export function reduceRight(self: double[], fn: (a: double, b: double, i: number
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -9009,7 +9082,8 @@ export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number) 
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: double[], fn: (a: double, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -9116,7 +9190,7 @@ export function filter(self: double[], fn: (v: double) => boolean): double[] {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: double[], fn: (element: double) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -9140,7 +9214,7 @@ export function reduce(self: double[], fn: (a: double, b: double) => double): do
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -9161,7 +9235,7 @@ export function reduce(self: double[], fn: (a: double, b: double) => double): do
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -9183,7 +9257,7 @@ export function reduceRight(self: double[], fn: (a: double, b: double) => double
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -9204,7 +9278,7 @@ export function reduceRight(self: double[], fn: (a: double, b: double) => double
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: double[], fn: (a: U, b: double) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -9217,7 +9291,8 @@ export function reduceRight<U>(self: double[], fn: (a: U, b: double) => U, initV
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: double[], fn: (a: double) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -9352,7 +9427,7 @@ export function join(self: double[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: double[]): string {
+export function toString(self: double[], ): string {
     return join(self, ",");
 }
 
@@ -9381,12 +9456,23 @@ export function toLocaleString(self: double[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: double[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: double[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -9530,9 +9616,9 @@ export function indexOf(self: double[], val: double, fromIndex?: Number): number
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: double[]): double[] {
+export function toSorted(self: double[], ): double[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -9556,7 +9642,7 @@ export function toSorted(self: double[], comparator: (a: double, b: double) => n
  *
  * @note Mutating method
  */
-export function reverse(self: double[]): double[] {
+export function reverse(self: double[], ): double[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -9573,9 +9659,9 @@ export function reverse(self: double[]): double[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: double[]): double[] {
+export function toReversed(self: double[], ): double[] {
     let arr = new double[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -9620,14 +9706,14 @@ export function with(self: double[], index: int, value: double): double[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: double[]): IterableIterator<double> {
+export function values(self: double[], ): IterableIterator<double> {
     return new ArrayValuesIterator_double(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: double[]): IterableIterator<[number, double]> {
+export function entries(self: double[], ): IterableIterator<[number, double]> {
     return new ArrayEntriesIterator_double(self);
 }
 
@@ -9639,9 +9725,9 @@ export function entries(self: double[]): IterableIterator<[number, double]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: double[], fn: (value: double, i: number, self: double[]) => U): U[] {
+export function map(self: double[], fn: (value: double, i: number, self: double[]) => double): double[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new double[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -9655,9 +9741,9 @@ export function map<U>(self: double[], fn: (value: double, i: number, self: doub
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: double[], fn: (value: double, i: number) => U): U[] {
+export function map(self: double[], fn: (value: double, i: number) => double): double[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new double[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -9671,9 +9757,9 @@ export function map<U>(self: double[], fn: (value: double, i: number) => U): U[]
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: double[], fn: (value: double) => U): U[] {
+export function map(self: double[], fn: (value: double) => double): double[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new double[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -9737,12 +9823,10 @@ export function concat(self: double[], fst: double[], ...more: double[][]): doub
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: double[], comparator: (a: double, b: double) => number): double[] {
     sort_subarray(self, 0, self.length, (l: double, r: double): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -10111,7 +10195,7 @@ export function filter(self: char[], fn: (v: char, i: number, self: char[]) => b
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: char[], fn: (element: char, i: number, self: char[]) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number, self)) {
             return i
         }
@@ -10135,7 +10219,7 @@ export function reduce(self: char[], fn: (a: char, b: char, i: number, self: cha
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -10156,7 +10240,7 @@ export function reduce(self: char[], fn: (a: char, b: char, i: number, self: cha
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char, i: number, self: char[]) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -10178,7 +10262,7 @@ export function reduceRight(self: char[], fn: (a: char, b: char, i: number, self
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -10199,7 +10283,7 @@ export function reduceRight(self: char[], fn: (a: char, b: char, i: number, self
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number, self: char[]) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number, self)
     }
     return acc
@@ -10212,7 +10296,8 @@ export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number, self
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: char[], fn: (a: char, i: number, self: char[]) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number, self)
     }
 }
@@ -10305,7 +10390,7 @@ export function some(self: char[], fn: (v: char, i: number) => boolean): boolean
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: char[], fn: (element: char, i: number) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i], i as number)) {
             return i
         }
@@ -10329,7 +10414,7 @@ export function reduce(self: char[], fn: (a: char, b: char, i: number) => char):
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -10350,7 +10435,7 @@ export function reduce(self: char[], fn: (a: char, b: char, i: number) => char):
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char, i: number) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -10372,7 +10457,7 @@ export function reduceRight(self: char[], fn: (a: char, b: char, i: number) => c
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -10393,7 +10478,7 @@ export function reduceRight(self: char[], fn: (a: char, b: char, i: number) => c
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i], i as number)
     }
     return acc
@@ -10406,7 +10491,8 @@ export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number) => U
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: char[], fn: (a: char, i: number) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i], i as number)
     }
 }
@@ -10513,7 +10599,7 @@ export function filter(self: char[], fn: (v: char) => boolean): char[] {
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 export function findLastIndex(self: char[], fn: (element: char) => boolean): number {
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         if (fn(self[i])) {
             return i
         }
@@ -10537,7 +10623,7 @@ export function reduce(self: char[], fn: (a: char, b: char) => char): char {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[0];
-    for(let i = 1; i < self.length; i++) {
+    for (let i = 1; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -10558,7 +10644,7 @@ export function reduce(self: char[], fn: (a: char, b: char) => char): char {
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -10580,7 +10666,7 @@ export function reduceRight(self: char[], fn: (a: char, b: char) => char): char 
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
-    for(let i = self.length - 2; i >= 0; i--) {
+    for (let i = self.length - 2; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -10601,7 +10687,7 @@ export function reduceRight(self: char[], fn: (a: char, b: char) => char): char 
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: char[], fn: (a: U, b: char) => U, initVal: U): U {
     let acc = initVal
-    for(let i = self.length - 1; i >= 0; i--) {
+    for (let i = self.length - 1; i >= 0; i--) {
         acc = fn(acc, self[i])
     }
     return acc
@@ -10614,7 +10700,8 @@ export function reduceRight<U>(self: char[], fn: (a: U, b: char) => U, initVal: 
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: char[], fn: (a: char) => void): void {
-    for(let i = 0; i < self.length; i++) {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
         fn(self[i])
     }
 }
@@ -10749,7 +10836,7 @@ export function join(self: char[], sep?: String): string {
  *
  * @returns string representation
  */
-export function toString(self: char[]): string {
+export function toString(self: char[], ): string {
     return join(self, ",");
 }
 
@@ -10778,12 +10865,23 @@ export function toLocaleString(self: char[], locales: Object): string {
 }
 
 /**
- * Returns a locale string representing the specified array and its elements.
+ * Returns a string representing the specified array and its elements.
  *
  * @returns string representation
  */
-export function toLocaleString(self: char[]): string {
-    return toLocaleString(self, new Object(), new Object())
+export function toLocaleString(self: char[], ): string {
+    const sb = new StringBuilder()
+    const len = self.length;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = self[i]
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -10919,9 +11017,9 @@ export function indexOf(self: char[], val: char, fromIndex?: Number): number {
  *
  * @returns sorted copy of hte current instance using default comparator
  */
-export function toSorted(self: char[]): char[] {
+export function toSorted(self: char[], ): char[] {
     let arr = cloneArray(self);
-    sort(arr)
+    sort(arr, )
     return arr
 }
 
@@ -10945,7 +11043,7 @@ export function toSorted(self: char[], comparator: (a: char, b: char) => number)
  *
  * @note Mutating method
  */
-export function reverse(self: char[]): char[] {
+export function reverse(self: char[], ): char[] {
     for (let i = 0; i < self.length / 2; i++) {
         const tmp = self[i];
         const idx_r = self.length - 1 - i;
@@ -10962,9 +11060,9 @@ export function reverse(self: char[]): char[] {
  *
  * @returns reversed copy of the current Array
  */
-export function toReversed(self: char[]): char[] {
+export function toReversed(self: char[], ): char[] {
     let arr = new char[self.length]
-    for(let i = 0; i < self.length; i++) {
+    for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
     return arr
@@ -11009,14 +11107,14 @@ export function with(self: char[], index: int, value: char): char[] {
 /**
  * Returns an iterator over all values
  */
-export function values(self: char[]): IterableIterator<char> {
+export function values(self: char[], ): IterableIterator<char> {
     return new ArrayValuesIterator_char(self);
 }
 
 /**
  * Returns an iterator over all entries
  */
-export function entries(self: char[]): IterableIterator<[number, char]> {
+export function entries(self: char[], ): IterableIterator<[number, char]> {
     return new ArrayEntriesIterator_char(self);
 }
 
@@ -11028,9 +11126,9 @@ export function entries(self: char[]): IterableIterator<[number, char]> {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: char[], fn: (value: char, i: number, self: char[]) => U): U[] {
+export function map(self: char[], fn: (value: char, i: number, self: char[]) => char): char[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new char[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number, self);
     }
@@ -11044,9 +11142,9 @@ export function map<U>(self: char[], fn: (value: char, i: number, self: char[]) 
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: char[], fn: (value: char, i: number) => U): U[] {
+export function map(self: char[], fn: (value: char, i: number) => char): char[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new char[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i], i as number);
     }
@@ -11060,9 +11158,9 @@ export function map<U>(self: char[], fn: (value: char, i: number) => U): U[] {
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map<U>(self: char[], fn: (value: char) => U): U[] {
+export function map(self: char[], fn: (value: char) => char): char[] {
     const len = self.length;
-    let res = __alloc_array<U>(len);
+    let res = new char[len];
     for (let i = 0; i < len; i++) {
         res[i] = fn(self[i]);
     }
@@ -11126,12 +11224,10 @@ export function concat(self: char[], fst: char[], ...more: char[][]): char[] {
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort(self: char[], comparator: (a: char, b: char) => number): char[] {
     sort_subarray(self, 0, self.length, (l: char, r: char): boolean => {
-        return comparator(l, r) < 0;
+        return comparator(l, r ) < 0;
     });
     return self;
 }
@@ -11194,3 +11290,81 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
     }
 }
 
+function builtin_insertion_sort<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (comp(tmp, arr[startIndex]) as int < 0) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (comp(tmp, arr[pos - 1]) as int < 0) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+
+function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: int, to: T[], toStart: int, comp: (lhs: T, rhs: T) => number): void {
+    let startIndex2 = midIndex
+    while (startIndex < midIndex && startIndex2 < endIndex) {
+        if (comp(arr[startIndex], arr[startIndex2]) as int <= 0) {
+            to[toStart++] = arr[startIndex++]
+        } else {
+            to[toStart++] = arr[startIndex2++]
+        }
+    }
+
+    while (startIndex < midIndex) {
+        to[toStart++] = arr[startIndex++]
+    }
+    while (startIndex2 < endIndex) {
+        to[toStart++] = arr[startIndex2++]
+    }
+}
+
+export function sort_stable<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+    if (endIndex <= startIndex) {
+        return;
+    }
+    const INS_SORT_DELTA = 16
+    for (let i = startIndex; i < endIndex; i += INS_SORT_DELTA ) {
+        builtin_insertion_sort<T>(arr, i, min(i + INS_SORT_DELTA , endIndex), comp)
+    }
+
+    let prevSize = INS_SORT_DELTA
+
+    const delta = endIndex - startIndex
+    const initialArr = arr
+    let buf = __alloc_array<T>(delta, arr)
+    let buf0 = 0
+    let arr0 = startIndex
+    while (prevSize < delta) {
+        for (let strt = 0; strt < delta; strt += 2 * prevSize) {
+            const mid = strt + prevSize
+            if (mid >= delta) {
+                break
+            }
+            const end = min(mid + prevSize, delta)
+            perform_merge(arr, strt + arr0, mid + arr0, end + arr0, buf, strt + buf0, comp)
+        }
+        const tmp = arr
+        arr = buf
+        buf = tmp
+        const buf0Tmp = buf0
+        buf0 = arr0
+        arr0 = buf0Tmp
+
+        prevSize *= 2
+    }
+
+    if (!runtime.isSameReference(arr, initialArr)) {
+        for (let i = 0; i < delta; i++) {
+            initialArr[startIndex + i] = arr[i + arr0]
+        }
+    }
+}

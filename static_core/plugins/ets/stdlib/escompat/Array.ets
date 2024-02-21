@@ -166,21 +166,15 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns `Array` intance constructed from `Object[]` primitive array and given function.
      */
     public static from<T, U>(arr: ArrayLike<T> | Iterable<T>, fn: (v: T, k: number) => U): Array<U> {
-        if (arr instanceof ArrayLike && !(arr instanceof String)) {
-            const arrLike = arr as ArrayLike<T>
-            const len = arrLike.length as int
-            assert len >= 0
-            const ret = new NullishType[len]
-            for (let i = 0; i < len; i++) {
-                ret[i] = fn(arrLike.$_get(i) as T, i as number);
-            }
-            return new Array<U>(FROM_BUFFER, ret)
-        }
-        const ret = new Array<U>();
+        const ret = new Array<U>()
         const idx = new int[1]
         idx[0] = 0
-        // NOTE(kprokopenko): see #15523
+        // NOTE(kprokopenko): see #15523 #15096 can't call .iterator()
+        const verifyCompiles: Iterable<T> = arr
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
+            if (a instanceof String) {
+                return (a as String).iterator() as Iterator<T>
+            }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
@@ -226,9 +220,50 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns Returns one of values -1, 0, 1 (_less_, _equal_, _greater_ respectively).
      */
     private static defaultComparator(a: NullishType, b: NullishType): number {
+        if (a instanceof Number && b instanceof Number) {
+            const x = (a as Number).valueOf()
+            const y = (b as Number).valueOf()
+            if (Number.isInteger(x) && Number.isInteger(y) &&
+                x <= Int.MAX_VALUE / 128 && x >= Int.MIN_VALUE / 128 &&
+                y <= Int.MAX_VALUE / 128 && y >= Int.MIN_VALUE / 128) {
+                let z = x as int
+                let w = y as int
+                return Array.defaultComparatorInts(z, w)
+            }
+        }
         let sa = new String(a);
         let sb = new String(b);
         return sa.compareTo(sb);
+    }
+
+    private static defaultComparatorInts(a: int, b: int): number {
+        if (a < 0) {
+            if (b >= 0) {
+                return -1;
+            }
+            a *= -1;
+            b *= -1;
+        } else if (b < 0) {
+            return 1;
+        }
+        let aDigs = 1;
+        while (10 * aDigs <= a) {
+            aDigs *= 10
+        }
+        let bDigs = 1;
+        while (10 * bDigs <= b) {
+            bDigs *= 10
+        }
+
+        while (aDigs > 0 && bDigs > 0) {
+            let r = (a / aDigs) - (b / bDigs)
+            if (r != 0) {
+                return r
+            }
+            aDigs /= 10
+            bDigs /= 10
+        }
+        return (aDigs - bDigs)
     }
 
     /**
@@ -255,15 +290,31 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * NOTE clarify UTF-16 or UTF-8
      */
     public sort(comparator?: (a: T, b: T) => number): this {
-        let cmp: (l: NullishType, r: NullishType) => boolean = (l: NullishType, r: NullishType): boolean => {
-            return Array.defaultComparator(l, r) < 0;
+        let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
+            return Array.defaultComparator(l, r);
         };
+        let sortTo = this.actualLength
         if (!__runtimeIsSameReference(comparator, undefined)) {
-            cmp = (l: NullishType, r: NullishType): boolean => {
-                return comparator!(l as T, r as T) < 0;
+            cmp = (l: NullishType, r: NullishType): number => {
+                return comparator!(l as T, r as T);
             };
+        } else {
+            let idxNonUndef = 0
+            let undefCount = 0
+            for (let i = 0; i < this.actualLength; i++) {
+                const vl = this.$_get_unsafe(i)
+                if (__runtimeIsSameReference(vl, undefined)) {
+                    undefCount++
+                } else {
+                    this.$_set_unsafe(idxNonUndef++, vl)
+                }
+            }
+            sortTo = idxNonUndef
+            for (let i = idxNonUndef; i < this.actualLength; i++) {
+                this.$_set_unsafe(i, undefined as T)
+            }
         }
-        sort_subarray(this.buffer, 0, this.actualLength, cmp);
+        sort_stable<NullishType>(this.buffer, 0, sortTo, cmp);
         return this;
     }
 
@@ -430,14 +481,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (o instanceof Array) {
             return true
         }
-        /// TODO(kprokopenko) remove null checks
-        if (__runtimeIsSameReference(o, null)) {
-            return false
-        }
-        if (__runtimeIsSameReference(o, undefined)) {
-            return false
-        }
-        return (Type.of(o!) instanceof ArrayType)
+        return (Type.of(o) instanceof ArrayType)
     }
 
     /**
@@ -895,7 +939,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns index of first element satisfying to fn, -1 if no such element
      */
     public findLastIndex(fn: (element: T, i: number, self: Array<T>) => boolean): number {
-        for(let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
             if (fn(this.$_get_unsafe(i), i as number, this)) {
                 return i
             }
@@ -919,7 +963,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
-        for(let i = 1; i < this.actualLength; i++) {
+        for (let i = 1; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
@@ -940,7 +984,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number, self: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
-        for(let i = 0; i < this.actualLength; i++) {
+        for (let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
@@ -962,7 +1006,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
-        for(let i = this.actualLength - 2; i >= 0; i--) {
+        for (let i = this.actualLength - 2; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
@@ -983,7 +1027,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public reduceRight<U>(fn: (a: U, b: T, i: number, self: Array<T>) => U, initVal: U): U {
         let acc = initVal
-        for(let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
@@ -996,7 +1040,8 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public forEach(fn: (a: T, i: number, self: Array<T>) => void): void {
-        for(let i = 0; i < this.actualLength; i++) {
+        const len0 = this.actualLength;
+        for (let i = 0; i < len0; i++) {
             fn(this.$_get_unsafe(i), i as number, this)
         }
     }
@@ -1089,7 +1134,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns index of first element satisfying to fn, -1 if no such element
      */
     public findLastIndex(fn: (element: T, i: number) => boolean): number {
-        for(let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
             if (fn(this.$_get_unsafe(i), i as number)) {
                 return i
             }
@@ -1113,7 +1158,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
-        for(let i = 1; i < this.actualLength; i++) {
+        for (let i = 1; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
@@ -1134,7 +1179,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number) => U, initialValue: U): U {
         let acc = initialValue
-        for(let i = 0; i < this.actualLength; i++) {
+        for (let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
@@ -1156,7 +1201,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
-        for(let i = this.actualLength - 2; i >= 0; i--) {
+        for (let i = this.actualLength - 2; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
@@ -1177,7 +1222,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public reduceRight<U>(fn: (a: U, b: T, i: number) => U, initVal: U): U {
         let acc = initVal
-        for(let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
@@ -1190,7 +1235,8 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public forEach(fn: (a: T, i: number) => void): void {
-        for(let i = 0; i < this.actualLength; i++) {
+        const len0 = this.actualLength;
+        for (let i = 0; i < len0; i++) {
             fn(this.$_get_unsafe(i), i as number)
         }
     }
@@ -1297,7 +1343,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns index of first element satisfying to fn, -1 if no such element
      */
     public findLastIndex(fn: (element: T) => boolean): number {
-        for(let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
             if (fn(this.$_get_unsafe(i))) {
                 return i
             }
@@ -1321,7 +1367,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
-        for(let i = 1; i < this.actualLength; i++) {
+        for (let i = 1; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
@@ -1342,7 +1388,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public reduce<U = T>(fn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
         let acc = initialValue
-        for(let i = 0; i < this.actualLength; i++) {
+        for (let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
@@ -1364,7 +1410,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
-        for(let i = this.actualLength - 2; i >= 0; i--) {
+        for (let i = this.actualLength - 2; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
@@ -1385,7 +1431,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public reduceRight<U>(fn: (a: U, b: T) => U, initVal: U): U {
         let acc = initVal
-        for(let i = this.actualLength - 1; i >= 0; i--) {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i))
         }
         return acc
@@ -1398,7 +1444,8 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
     public forEach(fn: (a: T) => void): void {
-        for(let i = 0; i < this.actualLength; i++) {
+        const len0 = this.actualLength;
+        for (let i = 0; i < len0; i++) {
             fn(this.$_get_unsafe(i))
         }
     }
@@ -1562,12 +1609,23 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Returns a locale string representing the specified array and its elements.
+     * Returns a string representing the specified array and its elements.
      *
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        const sb = new StringBuilder()
+        const len = this.actualLength;
+        for (let i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(",")
+            }
+            let x: NullishType = this.$_get_unsafe(i)
+            if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+                sb.append(x!.toLocaleString())
+            }
+        }
+        return sb.toString()
     }
 
     /**
@@ -1748,7 +1806,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public toReversed(): Array<T> {
         let arr = new NullishType[this.actualLength]
-        for(let i = 0; i < this.actualLength; i++) {
+        for (let i = 0; i < this.actualLength; i++) {
             arr[this.actualLength - 1 - i] = this.$_get_unsafe(i)
         }
         return new Array<T>(FROM_BUFFER, arr)

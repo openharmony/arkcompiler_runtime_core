@@ -14,7 +14,7 @@
 sub:
   - category: Math
     vars:
-      tricky: ["0.0", "-0.0", "NaN", "-NaN", "Infinity", "-Infinity", "1e18", "0.0078125", -5.0, -1.0]
+      tricky: ["0.0", "-0.0", "NaN", "-NaN", "Infinity", "-Infinity", "1e18", "0.0078125", -5.0, -1.0, +1.0]
     sub:
       - method: Math.abs
         params:
@@ -38,12 +38,18 @@ sub:
         params:
           - paramOf(*tricky)
           - paramOf(*tricky)
+        special:
+          - match: 1e18, (-5\.0|-1\.0)
+            action: silence warn
       - method: Math.atanh
         params:
           - paramOf(*tricky)
       - method: Math.cbrt
         params:
           - paramOf(*tricky)
+        special:
+          - match: -5\.0
+            action: silence warn
       - method: Math.ceil
         params:
           - paramOf(*tricky)
@@ -100,14 +106,21 @@ sub:
           - combinationRest "NaN", "-Infinity", "Infinity", "1.1", "NaN"
           - combinationRest "-0.0", "0.0", "-1.0", "20.1"
       - method: Math.pow
-        ignored: true
         params:
           - paramOf(*tricky)
           - paramOf(*tricky)
+        special:
+          - match: (\+|-)?1(\.0), (\+|-)?(Infinity|NaN)
+            action: exclude
+          - match: -5\.0, -5\.0
+            action: silence warn
       - method: Math.pow
         params:
           - paramOf(2.7, 3.14, -1, 2, -3, -0.5)
           - paramOf(11, 12, 0.5, 0.1, 1, 0, 2, 5, -8, 1e10, -1e10, 1000000000000000.1)
+        special:
+          - match: 3\.14, 0\.1
+            action: silence warn
       - method: Math.round
         params:
           - paramOf(*tricky)

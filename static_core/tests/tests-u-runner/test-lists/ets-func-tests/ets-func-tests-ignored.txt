@@ -749,3 +749,5 @@ std/core/TypeCreateInterfaceTest.ets
 std/core/TypeCreatePrimitiveNameTest.ets
 ### End StdLib is not testing corectly after the void revert
 ### End of Related to (reverted) builtin void type
+### Type Erasure
+std/containers/BuiltinArrayMapTest.ets
