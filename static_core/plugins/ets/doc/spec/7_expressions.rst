@@ -768,8 +768,6 @@ Array Type Inference from Types of Elements
 
 .. meta:
     frontend_status: Done
-    line 771 initial ``[`` *expr*:sub:`1`, ... , *expr*:sub:`N` ``]``
-    line 787-788 initial *T*:sub:`1` | ... | *T*:sub:`N`
 
 If the type of an array literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`N` ``]``
 cannot be inferred from the context, then the following algorithm is to be

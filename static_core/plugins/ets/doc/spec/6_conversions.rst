@@ -561,7 +561,7 @@ Widening Primitive Conversions
 .. meta:
     frontend_status: Partly
 
-*Widening primitive conversions* converts the following:
+*Widening primitive conversions* convert the following:
 
 - Values of a smaller numeric type to a larger type (see
   :ref:`Numeric Types Hierarchy`);
@@ -997,8 +997,7 @@ Tuple Types Conversions
 
 .. meta:
     frontend_status: None
-    line 1000 initially T = [*T*:sub:`1`, *T*:sub:`2`, ..., *T*:sub:`n`] line 1001 initially U = [*U*:sub:`1`, *U*:sub:`2`, ..., *U*:sub:`m`]
-    
+
 *Tuple types conversion* is the conversion of one tuple type to another.
 
 Tuple type ``T`` = [``T``:sub:`1`, ``T``:sub:`2`, ``...``, ``T``:sub:`n`] can be
