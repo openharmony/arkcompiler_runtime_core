@@ -41,7 +41,7 @@ HWTEST_F(DisasmTest, disassembler_line_number_test_001, TestSize.Level1)
     disasm.Disassemble(file_name, false, false);
     disasm.CollectInfo();
     // The known line number in the abc file
-    std::vector<size_t> expectedLineNumber = {-1, 15, -1, 15};
+    std::vector<size_t> expectedLineNumber = {-1, 15, -1, 15, -1};
     std::vector<size_t> lineNumber = disasm.GetLineNumber();
     EXPECT_TRUE(expectedLineNumber.size() == lineNumber.size());
     bool res = true;
@@ -53,4 +53,110 @@ HWTEST_F(DisasmTest, disassembler_line_number_test_001, TestSize.Level1)
     }
     EXPECT_TRUE(res);
 }
+
+/**
+* @tc.name: disassembler_line_number_test_002
+* @tc.desc: Check abc file line number function.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(DisasmTest, disassembler_line_number_test_002, TestSize.Level1)
+{
+    const std::string file_name = GRAPH_TEST_ABC_DIR "line-number2.abc";
+    panda::disasm::Disassembler disasm {};
+    disasm.Disassemble(file_name, false, false);
+    disasm.CollectInfo();
+    // The known line number in the abc file
+    std::vector<size_t> expectedLineNumber = {-1, 17, 18, 19, -1, 21, -1, 15,
+                                              -1, -1, 25, 26, 27, -1, 29};
+    std::vector<size_t> lineNumber = disasm.GetLineNumber();
+    EXPECT_TRUE(expectedLineNumber.size() == lineNumber.size());
+    bool res = true;
+    for (size_t i = 0; i < lineNumber.size(); ++i) {
+        if (expectedLineNumber[i] != lineNumber[i]) {
+            res = false;
+            break;
+        }
+    }
+    EXPECT_TRUE(res);
+}
+
+/**
+* @tc.name: disassembler_line_number_test_003
+* @tc.desc: Check abc file line number function.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(DisasmTest, disassembler_line_number_test_003, TestSize.Level1)
+{
+    const std::string file_name = GRAPH_TEST_ABC_DIR "line-number3.abc";
+    panda::disasm::Disassembler disasm {};
+    disasm.Disassemble(file_name, false, false);
+    disasm.CollectInfo();
+    // The known line number in the abc file
+    std::vector<size_t> expectedLineNumber = {-1, 16, -1, 17, 15, 17, -1};
+    std::vector<size_t> lineNumber = disasm.GetLineNumber();
+    EXPECT_TRUE(expectedLineNumber.size() == lineNumber.size());
+    bool res = true;
+    for (size_t i = 0; i < lineNumber.size(); ++i) {
+        if (expectedLineNumber[i] != lineNumber[i]) {
+            res = false;
+            break;
+        }
+    }
+    EXPECT_TRUE(res);
+}
+
+/**
+* @tc.name: disassembler_line_number_test_004
+* @tc.desc: Check abc file line number function.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(DisasmTest, disassembler_line_number_test_004, TestSize.Level1)
+{
+    const std::string file_name = GRAPH_TEST_ABC_DIR "line-number4.abc";
+    panda::disasm::Disassembler disasm {};
+    disasm.Disassemble(file_name, false, false);
+    disasm.CollectInfo();
+    // The known line number in the abc file
+    std::vector<size_t> expectedLineNumber = {-1, -1, 16, 17, 18, 20, 18, -1, 20, 15};
+    std::vector<size_t> lineNumber = disasm.GetLineNumber();
+    EXPECT_TRUE(expectedLineNumber.size() == lineNumber.size());
+    bool res = true;
+    for (size_t i = 0; i < lineNumber.size(); ++i) {
+        if (expectedLineNumber[i] != lineNumber[i]) {
+            res = false;
+            break;
+        }
+    }
+    EXPECT_TRUE(res);
+}
+
+/**
+* @tc.name: disassembler_line_number_test_005
+* @tc.desc: Check abc file line number function.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(DisasmTest, disassembler_line_number_test_005, TestSize.Level1)
+{
+    const std::string file_name = GRAPH_TEST_ABC_DIR "line-number5.abc";
+    panda::disasm::Disassembler disasm {};
+    disasm.Disassemble(file_name, false, false);
+    disasm.CollectInfo();
+    // The known line number in the abc file
+    std::vector<size_t> expectedLineNumber = {-1, 16, 17, 18, 19, 21, 19, -1, 21, 15, 21, -1};
+    std::vector<size_t> lineNumber = disasm.GetLineNumber();
+    EXPECT_TRUE(expectedLineNumber.size() == lineNumber.size());
+    bool res = true;
+    for (size_t i = 0; i < lineNumber.size(); ++i) {
+        if (expectedLineNumber[i] != lineNumber[i]) {
+            res = false;
+            break;
+        }
+    }
+    EXPECT_TRUE(res);
+}
+
 }

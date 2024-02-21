@@ -41,10 +41,11 @@ HWTEST_F(DisasmTest, disassembler_column_number_test_001, TestSize.Level1)
     disasm.Disassemble(file_name, false, false);
     disasm.CollectInfo();
     // The known column number in the abc file
-    std::vector<size_t> expectedColumnNumber = {10, 14, 6, 8, 4, 8, 4, 0};
+    std::vector<size_t> expectedColumnNumber = {10, 14, 6, -1, 1, 8, 4, 8, 4, -1};
     std::vector<size_t> columnNumber = disasm.GetColumnNumber();
     EXPECT_TRUE(expectedColumnNumber.size() == columnNumber.size());
     bool res = true;
+    
     for (size_t i = 0; i < expectedColumnNumber.size(); ++i) {
         if (expectedColumnNumber[i] != columnNumber[i]) {
             res = false;
@@ -67,7 +68,7 @@ HWTEST_F(DisasmTest, disassembler_column_number_test_002, TestSize.Level1)
     disasm.Disassemble(file_name, false, false);
     disasm.CollectInfo();
     // The known column number in the abc file
-    std::vector<size_t> expectedColumnNumber = {10, 6, 10, 6, 10, 6, 0};
+    std::vector<size_t> expectedColumnNumber = {10, 6, 10, 6, 10, 6, -1, 1};
     std::vector<size_t> columnNumber = disasm.GetColumnNumber();
     EXPECT_TRUE(expectedColumnNumber.size() == columnNumber.size());
     bool res = true;
@@ -93,7 +94,7 @@ HWTEST_F(DisasmTest, disassembler_column_number_test_003, TestSize.Level1)
     disasm.Disassemble(file_name, false, false);
     disasm.CollectInfo();
     // The known column number in the abc file
-    std::vector<size_t> expectedColumnNumber = {4, 16, 4, 15, 4, 14, 6, 14, 6, 0};
+    std::vector<size_t> expectedColumnNumber = {4, 16, 4, 15, 4, -1, 3, 14, 6, 14, 6, -1};
     std::vector<size_t> columnNumber = disasm.GetColumnNumber();
     EXPECT_TRUE(expectedColumnNumber.size() == columnNumber.size());
     bool res = true;
@@ -118,7 +119,7 @@ HWTEST_F(DisasmTest, disassembler_column_number_test_004, TestSize.Level1)
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(file_name, false, false);
     disasm.CollectInfo();
-    std::vector<size_t> expectedColumnNumber = {10, 14, 6, 10, 6, 10, 14, 6, 9, 2, 2, 4, 8, 4, 8, 4, 0};
+    std::vector<size_t> expectedColumnNumber = {10, 14, 6, 10, 6, 10, 14, 6, 9, 1, 1, 4, -1, 3, 8, 4, 8, 4, -1};
     std::vector<size_t> columnNumber = disasm.GetColumnNumber();
     EXPECT_TRUE(expectedColumnNumber.size() == columnNumber.size());
     bool res = true;
@@ -144,8 +145,37 @@ HWTEST_F(DisasmTest, disassembler_column_number_test_005, TestSize.Level1)
     disasm.Disassemble(file_name, false, false);
     disasm.CollectInfo();
     // The known column number in the abc file
-    std::vector<size_t> expectedColumnNumber = {4, 16, 4, 15, 4, 10, 6, 10, 6, 10, 14, 6, 10,
-                                                14, 6, 9, 2, 2, 14, 6, 14, 6, 8, 4, 0};
+    std::vector<size_t> expectedColumnNumber = {4, 16, 4, 15, 4, -1, 3, 10, 6, 10, 6, 10, 14, 6, 10,
+                                                14, 6, 9, 1, 2, -1, 1, 14, 6, 14, 6, 8, 4, -1};
+    std::vector<size_t> columnNumber = disasm.GetColumnNumber();
+    EXPECT_TRUE(expectedColumnNumber.size() == columnNumber.size());
+    bool res = true;
+    for (size_t i = 0; i < expectedColumnNumber.size(); ++i) {
+        if (expectedColumnNumber[i] != columnNumber[i]) {
+            res = false;
+            break;
+        }
+    }
+    EXPECT_TRUE(res);
+}
+
+/**
+* @tc.name: disassembler_column_number_test_006
+* @tc.desc: Check abc file column number function.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(DisasmTest, disassembler_column_number_test_006, TestSize.Level1)
+{
+    const std::string file_name = GRAPH_TEST_ABC_DIR "column-number6.abc";
+    panda::disasm::Disassembler disasm {};
+    disasm.Disassemble(file_name, false, false);
+    disasm.CollectInfo();
+    // The known column number in the abc file
+    std::vector<size_t> expectedColumnNumber = {15, 8, 16, 15, 8, -1, 3, 13, 6, 21, 37, 21, 15, 8, 10,
+                                                4, 1, 4, -1, 1, 6, 1, 13, 6, 10, 26, 10, 4, -1, 1, 6, 1,
+                                                14, 6, 14, 6, -1, 13, 6, 10, 4, 1, 4, -1, 1, 0, 13, 6, 12,
+                                                11, 4, -1, 1};
     std::vector<size_t> columnNumber = disasm.GetColumnNumber();
     EXPECT_TRUE(expectedColumnNumber.size() == columnNumber.size());
     bool res = true;

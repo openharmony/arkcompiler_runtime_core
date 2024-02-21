@@ -34,7 +34,12 @@ disasm_column_test_js_files = [
   "column-number3",
   "column-number4",
   "column-number5",
+  "column-number6",
   "line-number1",
+  "line-number2",
+  "line-number3",
+  "line-number4",
+  "line-number5",
 ]
 
 disasm_test_js_files = [
