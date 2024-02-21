@@ -21,6 +21,12 @@ panda_ets_interop_js_gtest(ets_interop_js_scenarios_js_to_ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
+panda_ets_interop_js_gtest(ets_interop_js_symbol_test_js_to_sts
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbol.sts
+    ETS_CONFIG ${ETS_CONFIG}
+)
+
 panda_ets_interop_js_gtest(ets_interop_js_scenarios_js_to_ets_conflict_types
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.cpp
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.sts
