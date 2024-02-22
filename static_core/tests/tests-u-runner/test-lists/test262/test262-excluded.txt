@@ -13223,3 +13223,12 @@ built-ins/Array/prototype/some/15.4.4.17-8-8.js
 language/expressions/object/literal-property-name-bigint.js
 language/global-code/decl-func.js
 language/global-code/decl-var.js
+
+# 14414 - the test fail in Ubuntu 22 but pass in Ubuntu 20
+
+intl402/DateTimeFormat/prototype/format/dayPeriod-long-en.js
+intl402/DateTimeFormat/prototype/format/dayPeriod-narrow-en.js
+intl402/DateTimeFormat/prototype/format/dayPeriod-short-en.js
+intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-long-en.js
+intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-narrow-en.js
+intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-short-en.js

@@ -748,3 +748,9 @@ spec/tuples/tuple_as_param_default_1.ets
 ### VariableHasEnclosingScopeForAll, VariableHasScopeForAll
 spec/generic/callFromAsyncLambda.ets
 ###
+
+### Issue 15751
+spec/rest-params/Issue14187.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
+spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
+### Issue 15751 end
