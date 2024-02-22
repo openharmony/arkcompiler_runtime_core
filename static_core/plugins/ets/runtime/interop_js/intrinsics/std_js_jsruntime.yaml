@@ -44,7 +44,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.core.Object ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeFinalizationRegistryCallbackIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeNewJSValueDouble
     space: ets
@@ -55,7 +55,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ f64 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueDoubleIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeNewJSValueString
     space: ets
@@ -66,7 +66,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueStringIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeNewJSValueObject
     space: ets
@@ -77,7 +77,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.core.Object ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeNewJSValueObjectIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetValueDouble
     space: ets
@@ -88,7 +88,7 @@ intrinsics:
       ret: f64
       args: [ std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueDoubleIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetValueBoolean
     space: ets
@@ -99,7 +99,7 @@ intrinsics:
       ret: u1
       args: [ std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueBooleanIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetValueString
     space: ets
@@ -110,7 +110,7 @@ intrinsics:
       ret: std.core.String
       args: [ std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueStringIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetValueObject
     space: ets
@@ -121,7 +121,7 @@ intrinsics:
       ret: std.core.Object
       args: [ std.interop.js.JSValue, std.core.Object ] # 2nd argument is ClassClass
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetPropertyJSValue
     space: ets
@@ -132,7 +132,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.interop.js.JSValue, std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyJSValueIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetPropertyDouble
     space: ets
@@ -143,7 +143,7 @@ intrinsics:
       ret: f64
       args: [ std.interop.js.JSValue, std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyDoubleIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetPropertyString
     space: ets
@@ -154,7 +154,7 @@ intrinsics:
       ret: std.core.String
       args: [ std.interop.js.JSValue, std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetPropertyStringIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeSetPropertyJSValue
     space: ets
@@ -165,7 +165,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.interop.js.JSValue, std.core.String, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyJSValueIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeSetPropertyDouble
     space: ets
@@ -176,7 +176,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.interop.js.JSValue, std.core.String, f64 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyDoubleIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeSetPropertyString
     space: ets
@@ -187,7 +187,7 @@ intrinsics:
       ret: std.core.void
       args: [ std.interop.js.JSValue, std.core.String, std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyStringIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetElementJSValue
     space: ets
@@ -198,7 +198,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.interop.js.JSValue, i32 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetElementJSValueIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetElementDouble
     space: ets
@@ -209,7 +209,7 @@ intrinsics:
       ret: f64
       args: [ std.interop.js.JSValue, i32 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetElementDoubleIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetUndefined
     space: ets
@@ -220,7 +220,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetUndefinedIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetNull
     space: ets
@@ -231,7 +231,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetNullIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeGetGlobal
     space: ets
@@ -242,7 +242,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetGlobalIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeCreateObject
     space: ets
@@ -253,7 +253,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateObjectIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeInstanceOf
     space: ets
@@ -264,7 +264,7 @@ intrinsics:
       ret: u1
       args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeInitJSCallClass
     space: ets
@@ -275,7 +275,7 @@ intrinsics:
       ret: u1
       args: [ std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSCallClassIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeInitJSNewClass
     space: ets
@@ -286,7 +286,7 @@ intrinsics:
       ret: u1
       args: [ std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSNewClassIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeLoadModule
     space: ets
@@ -297,7 +297,7 @@ intrinsics:
       ret: std.interop.js.JSValue
       args: [ std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeLoadModuleIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: JSRuntimeStrictEqual
     space: ets
@@ -308,7 +308,7 @@ intrinsics:
       ret: u1
       args: [ std.interop.js.JSValue, std.interop.js.JSValue ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeStrictEqualIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
 #######################
 # Internal intrinsics #
@@ -321,7 +321,7 @@ intrinsics:
       args: [ptr, ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerGetJSNamedPropertyIntrinsic
     interop_intrinsic_kind: creates_local
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: CompilerResolveQualifiedJSCall
     space: ets
@@ -331,7 +331,7 @@ intrinsics:
       args: [ptr, std.core.String]
     impl: ark::ets::interop::js::intrinsics::CompilerResolveQualifiedJSCallIntrinsic
     interop_intrinsic_kind: creates_local
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: CompilerJSCallCheck
     space: ets
@@ -341,7 +341,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerJSCallCheckIntrinsic
     interop_intrinsic_kind: need_scope
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: CompilerJSCallFunction
     space: ets
@@ -352,7 +352,7 @@ intrinsics:
       stackrange: true
     impl: ark::ets::interop::js::intrinsics::CompilerJSCallFunctionIntrinsic
     interop_intrinsic_kind: creates_local
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: CompilerJSCallVoidFunction
     space: ets
@@ -363,7 +363,7 @@ intrinsics:
       stackrange: true
     impl: ark::ets::interop::js::intrinsics::CompilerJSCallVoidFunctionIntrinsic
     interop_intrinsic_kind: need_scope
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: CompilerJSNewInstance
     space: ets
@@ -374,7 +374,7 @@ intrinsics:
       stackrange: true
     impl: ark::ets::interop::js::intrinsics::CompilerJSNewInstanceIntrinsic
     interop_intrinsic_kind: creates_local
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: CompilerCreateLocalScope
     space: ets
@@ -383,7 +383,7 @@ intrinsics:
       ret: void
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::CompilerCreateLocalScopeIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
   - name: CompilerDestroyLocalScope
     space: ets
@@ -392,7 +392,7 @@ intrinsics:
       ret: void
       args: [ ]
     impl: ark::ets::interop::js::intrinsics::CompilerDestroyLocalScopeIntrinsic
-    clear_flags: [ ]
+    clear_flags: [can_throw, heap_inv]
 
 ########################################################
 # Internal intrinsics, convert ets value to napi_value #
@@ -405,7 +405,7 @@ intrinsics:
       args: []
     impl: ark::ets::interop::js::intrinsics::CompilerConvertVoidToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertU1ToLocal
     space: ets
@@ -415,7 +415,7 @@ intrinsics:
       args: [u1]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertU1ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertU8ToLocal
     space: ets
@@ -425,7 +425,7 @@ intrinsics:
       args: [u8]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertU8ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertI8ToLocal
     space: ets
@@ -435,7 +435,7 @@ intrinsics:
       args: [i8]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertI8ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertU16ToLocal
     space: ets
@@ -445,7 +445,7 @@ intrinsics:
       args: [u16]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertU16ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertI16ToLocal
     space: ets
@@ -455,7 +455,7 @@ intrinsics:
       args: [i16]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertI16ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertU32ToLocal
     space: ets
@@ -465,7 +465,7 @@ intrinsics:
       args: [u32]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertU32ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertI32ToLocal
     space: ets
@@ -475,7 +475,7 @@ intrinsics:
       args: [i32]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertI32ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertU64ToLocal
     space: ets
@@ -485,7 +485,7 @@ intrinsics:
       args: [u64]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertU64ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertI64ToLocal
     space: ets
@@ -495,7 +495,7 @@ intrinsics:
       args: [i64]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertI64ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertF32ToLocal
     space: ets
@@ -505,7 +505,7 @@ intrinsics:
       args: [f32]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertF32ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertF64ToLocal
     space: ets
@@ -515,7 +515,7 @@ intrinsics:
       args: [f64]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertF64ToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertRefTypeToLocal
     space: ets
@@ -525,7 +525,7 @@ intrinsics:
       args: [std.core.Object]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertRefTypeToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
   - name: CompilerConvertJSValueToLocal
     space: ets
@@ -535,7 +535,7 @@ intrinsics:
       args: [std.interop.js.JSValue]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertJSValueToLocalIntrinsic
     interop_intrinsic_kind: wrap
-    clear_flags: [no_dce]
+    clear_flags: [no_dce, can_throw, heap_inv]
 
 ########################################################
 # Internal intrinsics, convert napi_value to ets value #
@@ -548,8 +548,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU1Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToU8
     space: ets
@@ -559,8 +558,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU8Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToI8
     space: ets
@@ -570,8 +568,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI8Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToU16
     space: ets
@@ -581,8 +578,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU16Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToI16
     space: ets
@@ -592,8 +588,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI16Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToU32
     space: ets
@@ -603,8 +598,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU32Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToI32
     space: ets
@@ -614,8 +608,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI32Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToU64
     space: ets
@@ -625,8 +618,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToU64Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToI64
     space: ets
@@ -636,8 +628,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToI64Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToF32
     space: ets
@@ -647,8 +638,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToF32Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToF64
     space: ets
@@ -658,8 +648,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToF64Intrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToJSValue
     space: ets
@@ -669,8 +658,8 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToJSValueIntrinsic
     interop_intrinsic_kind: unwrap
-    clear_flags: [no_dce]
-
+    clear_flags: [no_dce, can_throw, heap_inv]
+  
   - name: CompilerConvertLocalToString
     space: ets
     compiler_only: true
@@ -679,8 +668,7 @@ intrinsics:
       args: [ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToStringIntrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]
 
   - name: CompilerConvertLocalToRefType
     space: ets
@@ -690,5 +678,4 @@ intrinsics:
       args: [ptr, ptr]
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToRefTypeIntrinsic
     interop_intrinsic_kind: unwrap
-    set_flags: [can_throw]
-    clear_flags: [ ]
+    clear_flags: [heap_inv]

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -31,7 +31,6 @@ intrinsics:
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameObj
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameI32
@@ -43,7 +42,6 @@ intrinsics:
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameI32
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameI64
@@ -55,7 +53,6 @@ intrinsics:
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameI64
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameF32
@@ -67,7 +64,6 @@ intrinsics:
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameF32
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameF64
@@ -79,7 +75,6 @@ intrinsics:
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameF64
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsStObjByNameObj
@@ -91,7 +86,6 @@ intrinsics:
       args: [ method, i32, u32, ref, ref ]
     impl: ark::ets::intrinsics::CompilerEtsStObjByNameObj
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameI32
@@ -103,7 +97,6 @@ intrinsics:
       args: [ method, i32, u32, ref, i32 ]
     impl: ark::ets::intrinsics::CompilerEtsStObjByNameI32
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameI64
@@ -115,7 +108,6 @@ intrinsics:
       args: [ method, i32, u32, ref, i64 ]
     impl: ark::ets::intrinsics::CompilerEtsStObjByNameI64
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameF32
@@ -127,7 +119,6 @@ intrinsics:
       args: [ method, i32, u32, ref, f32 ]
     impl: ark::ets::intrinsics::CompilerEtsStObjByNameF32
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
 
   - name: CompilerEtsStObjByNameF64
@@ -139,6 +130,5 @@ intrinsics:
       args: [ method, i32, u32, ref, f64 ]
     impl: ark::ets::intrinsics::CompilerEtsStObjByNameF64
     clear_flags: [  ]
-    set_flags: [ can_throw, heap_inv]
     peephole_func: PeepholeStObjByName
 

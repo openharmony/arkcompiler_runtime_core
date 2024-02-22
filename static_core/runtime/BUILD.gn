@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -523,6 +523,12 @@ template("gen_intrinsics_yaml") {
 
   data_files = string_join(",", rebase_path(invoker.data_files, root_build_dir))
   template_file = "templates/intrinsics.yaml.erb"
+  requires = string_join(",",
+                         [
+                           rebase_path("templates/runtime.rb", root_build_dir),
+                           rebase_path("$ark_root/libpandabase/utils.rb",
+                                       root_build_dir),
+                         ])
 
   action("$target_name") {
     script = "$ark_root/runtime/templates/gen_intrinsics_data.rb"
@@ -540,6 +546,8 @@ template("gen_intrinsics_yaml") {
       rebase_path(template_file, root_build_dir),
       "-o",
       rebase_path(outputs[0]),
+      "-r",
+      requires,
     ]
   }
 }
@@ -663,7 +671,10 @@ ark_gen("arkruntime_gen_intrinsics") {
     "intrinsics_enum.h.erb",
     "unimplemented_intrinsics-inl.cpp.erb",
   ]
-  requires = [ "templates/intrinsics.rb" ]
+  requires = [
+    "templates/intrinsics.rb",
+    "$ark_root/libpandabase/utils.rb",
+  ]
   sources = "templates"
   destination = "$target_gen_dir"
   extra_dependencies = [ ":arkruntime_gen_intrinsics_yaml" ]

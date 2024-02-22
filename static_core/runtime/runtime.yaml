@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,7 +43,7 @@ intrinsics:
     args:
       - i32
   impl: ark::intrinsics::AbsI32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathAbsI64
   space: core
@@ -55,7 +55,7 @@ intrinsics:
     args:
       - i64
   impl: ark::intrinsics::AbsI64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathAbsF32
   space: core
@@ -67,7 +67,7 @@ intrinsics:
     args:
       - f32
   impl: ark::intrinsics::AbsF32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathAbsF64
   space: core
@@ -79,7 +79,7 @@ intrinsics:
     args:
       - f64
   impl: ark::intrinsics::AbsF64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMinI32
   space: core
@@ -90,7 +90,7 @@ intrinsics:
     ret: i32
     args: [i32, i32]
   impl: ark::intrinsics::MinI32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMinI64
   space: core
@@ -101,7 +101,7 @@ intrinsics:
     ret: i64
     args: [i64, i64]
   impl: ark::intrinsics::MinI64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMinF32
   space: core
@@ -112,7 +112,7 @@ intrinsics:
     ret: f32
     args: [f32, f32]
   impl: ark::intrinsics::MinF32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMinF64
   space: core
@@ -123,7 +123,7 @@ intrinsics:
     ret: f64
     args: [f64, f64]
   impl: ark::intrinsics::MinF64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMaxI32
   space: core
@@ -134,7 +134,7 @@ intrinsics:
     ret: i32
     args: [i32, i32]
   impl: ark::intrinsics::MaxI32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMaxI64
   space: core
@@ -145,7 +145,7 @@ intrinsics:
     ret: i64
     args: [i64, i64]
   impl: ark::intrinsics::MaxI64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMaxF32
   space: core
@@ -156,7 +156,7 @@ intrinsics:
     ret: f32
     args: [f32, f32]
   impl: ark::intrinsics::MaxF32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathMaxF64
   space: core
@@ -167,7 +167,7 @@ intrinsics:
     ret: f64
     args: [f64, f64]
   impl: ark::intrinsics::MaxF64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: DoubleIsInf
   space: core
@@ -181,7 +181,7 @@ intrinsics:
   impl: ark::intrinsics::IsInfF64
   codegen_func: CreateFloatIsInf
   llvm_codegen_func: EmitIsInf
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: FloatIsInf
   space: core
@@ -195,7 +195,7 @@ intrinsics:
   impl: ark::intrinsics::IsInfF32
   codegen_func: CreateFloatIsInf
   llvm_codegen_func: EmitIsInf
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathSinF32
   space: core
@@ -208,7 +208,7 @@ intrinsics:
       - f32
   impl: ark::intrinsics::SinF32
   llvm_impl: sin
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathSinF64
   space: core
@@ -221,7 +221,7 @@ intrinsics:
       - f64
   impl: ark::intrinsics::SinF64
   llvm_impl: sin
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathCosF32
   space: core
@@ -234,7 +234,7 @@ intrinsics:
       - f32
   impl: ark::intrinsics::CosF32
   llvm_impl: cos
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathCosF64
   space: core
@@ -247,7 +247,7 @@ intrinsics:
       - f64
   impl: ark::intrinsics::CosF64
   llvm_impl: cos
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathPowF32
   space: core
@@ -261,7 +261,7 @@ intrinsics:
       - f32
   impl: ark::intrinsics::PowF32
   llvm_impl: pow
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathPowF64
   space: core
@@ -275,7 +275,7 @@ intrinsics:
       - f64
   impl: ark::intrinsics::PowF64
   llvm_impl: pow
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathSqrtF32
   space: core
@@ -287,7 +287,7 @@ intrinsics:
     args:
       - f32
   impl: ark::intrinsics::SqrtF32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathSqrtF64
   space: core
@@ -299,7 +299,7 @@ intrinsics:
     args:
       - f64
   impl: ark::intrinsics::SqrtF64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: MathCalculateDouble
   space: core
@@ -311,6 +311,7 @@ intrinsics:
     ret: f64
     args: [u32, f64]
   impl: ark::intrinsics::CalculateDouble
+  clear_flags: [ can_throw, heap_inv ]
 
 - name: MathCalculateFloat
   space: core
@@ -322,6 +323,7 @@ intrinsics:
     ret: f32
     args: [u32, f32]
   impl: ark::intrinsics::CalculateFloat
+  clear_flags: [ can_throw, heap_inv ]
 
 - name: IOPrintString
   space: core
@@ -333,7 +335,7 @@ intrinsics:
     args:
       - panda.String
   impl: ark::intrinsics::PrintString
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: IOPrintF32
   space: core
@@ -345,7 +347,7 @@ intrinsics:
     args:
       - f32
   impl: ark::intrinsics::PrintF32
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: IOPrintF64
   space: core
@@ -357,7 +359,7 @@ intrinsics:
     args:
       - f64
   impl: ark::intrinsics::PrintF64
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: IOPrintI32
   space: core
@@ -369,7 +371,7 @@ intrinsics:
     args:
       - i32
   impl: ark::intrinsics::PrintI32
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: IOPrintU32
   space: core
@@ -381,7 +383,7 @@ intrinsics:
     args:
       - u32
   impl: ark::intrinsics::PrintU32
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: IOPrintI64
   space: core
@@ -393,7 +395,7 @@ intrinsics:
     args:
       - i64
   impl: ark::intrinsics::PrintI64
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: IOPrintU64
   space: core
@@ -405,7 +407,7 @@ intrinsics:
     args:
       - u64
   impl: ark::intrinsics::PrintU64
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: SystemCompileMethod
   space: core
@@ -428,7 +430,7 @@ intrinsics:
     args:
       - i32
   impl: ark::intrinsics::SystemExit
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: SystemNanoTime
   space: core
@@ -439,7 +441,7 @@ intrinsics:
     ret: i64
     args: []
   impl: ark::intrinsics::NanoTime
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: SystemAssert
   space: core
@@ -450,7 +452,7 @@ intrinsics:
     ret: void
     args: [u1]
   impl: ark::intrinsics::Assert
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: SystemAssertPrint
   space: core
@@ -461,7 +463,7 @@ intrinsics:
     ret: void
     args: [u1, panda.String]
   impl: ark::intrinsics::AssertPrint
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
 - name: SystemScheduleCoroutine
   space: core
@@ -492,7 +494,7 @@ intrinsics:
     ret: void
     args: [i64, i64]
   impl: ark::intrinsics::CheckTag
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv ]
 
 - name: ConvertStringToI32
   space: core
@@ -503,7 +505,7 @@ intrinsics:
     ret: i32
     args: [panda.String]
   impl: ark::intrinsics::ConvertStringToI32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: ConvertStringToU32
   space: core
@@ -514,7 +516,7 @@ intrinsics:
     ret: u32
     args: [panda.String]
   impl: ark::intrinsics::ConvertStringToU32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: ConvertStringToI64
   space: core
@@ -525,7 +527,7 @@ intrinsics:
     ret: i64
     args: [panda.String]
   impl: ark::intrinsics::ConvertStringToI64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: ConvertStringToU64
   space: core
@@ -536,7 +538,7 @@ intrinsics:
     ret: u64
     args: [panda.String]
   impl: ark::intrinsics::ConvertStringToU64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: ConvertStringToF32
   space: core
@@ -547,7 +549,7 @@ intrinsics:
     ret: f32
     args: [panda.String]
   impl: ark::intrinsics::ConvertStringToF32
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: ConvertStringToF64
   space: core
@@ -558,7 +560,7 @@ intrinsics:
     ret: f64
     args: [panda.String]
   impl: ark::intrinsics::ConvertStringToF64
-  clear_flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+  safe_intrinsic: true
 
 - name: ObjectCreateNonMovable
   space: core
@@ -569,7 +571,7 @@ intrinsics:
     ret: panda.Object
     args: [panda.Class]
   impl: ark::intrinsics::ObjectCreateNonMovable
-  set_flags: [can_throw]
+  clear_flags: [ heap_inv ]
 
 - name: ObjectMonitorEnter
   space: core
@@ -600,7 +602,6 @@ intrinsics:
     ret: void
     args: [panda.Object]
   impl: ark::intrinsics::ObjectWait
-  set_flags: [heap_inv]
 
 - name: ObjectTimedWait
   space: core
@@ -611,7 +612,6 @@ intrinsics:
     ret: void
     args: [panda.Object, u64]
   impl: ark::intrinsics::ObjectTimedWait
-  set_flags: [heap_inv]
 
 - name: ObjectTimedWaitNanos
   space: core
@@ -622,7 +622,6 @@ intrinsics:
     ret: void
     args: [panda.Object, u64, u64]
   impl: ark::intrinsics::ObjectTimedWaitNanos
-  set_flags: [heap_inv]
 
 - name: ObjectNotify
   space: core
@@ -633,7 +632,7 @@ intrinsics:
     ret: void
     args: [panda.Object]
   impl: ark::intrinsics::ObjectNotify
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv ]
 
 - name: ObjectNotifyAll
   space: core
@@ -644,4 +643,4 @@ intrinsics:
     ret: void
     args: [panda.Object]
   impl: ark::intrinsics::ObjectNotifyAll
-  clear_flags: [require_state, runtime_call]
+  clear_flags: [require_state, runtime_call, can_throw, heap_inv ]

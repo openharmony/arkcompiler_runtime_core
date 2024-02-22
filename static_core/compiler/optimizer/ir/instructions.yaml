@@ -837,7 +837,7 @@ instructions:
   - opcode: Intrinsic
     base: IntrinsicInst
     signature: [d-real-void-any, real-dyn]
-    flags: [no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
+    flags: [can_throw, heap_inv, no_dce, no_hoist, no_cse, barrier, require_state, runtime_call]
     description: Call runtime intrinsics directly.
 
   - opcode: Builtin

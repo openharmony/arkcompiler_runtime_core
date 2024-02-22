@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -97,7 +97,9 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
             intrinsics_peephole.inl.erb
         SOURCE ${COMPILER_TEMPLATES_DIR}/intrinsics
         DESTINATION ${GENERATED_DIR}
-        REQUIRES ${COMPILER_TEMPLATES_DIR}/intrinsics/compiler_intrinsics.rb
+        REQUIRES
+            ${COMPILER_TEMPLATES_DIR}/intrinsics/compiler_intrinsics.rb
+            ${PANDA_ROOT}/libpandabase/utils.rb
         EXTRA_DEPENDENCIES arkruntime_gen_intrinsics_yaml
         )
 

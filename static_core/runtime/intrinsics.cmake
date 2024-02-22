@@ -21,8 +21,9 @@ function(gen_intrinsics_yaml)
             "${singleValues}"
             "${multiValues}"
             ${ARGN})
-    set(GENERATOR ${CMAKE_CURRENT_SOURCE_DIR}/templates/gen_intrinsics_data.rb ${CMAKE_CURRENT_SOURCE_DIR}/templates/runtime.rb)
+    set(GENERATOR ${CMAKE_CURRENT_SOURCE_DIR}/templates/gen_intrinsics_data.rb)
     set(TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/templates/intrinsics.yaml.erb)
+    set(REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/templates/runtime.rb ${PANDA_ROOT}/libpandabase/utils.rb)
     set(DEPENDS_LIST ${GENERATOR} ${TEMPLATE} ${ARG_DEPENDS})
     string(REPLACE ";" "," DATAFILES_STR "${ARG_DATAFILES}")
     foreach(d ${ARG_DATAFILES})
@@ -30,7 +31,7 @@ function(gen_intrinsics_yaml)
     endforeach()
     add_custom_command(OUTPUT ${ARG_OUTPUTFILE}
             COMMENT "Generate intrinsics.yaml"
-            COMMAND ${GENERATOR} -d ${DATAFILES_STR} -t ${TEMPLATE} -o ${ARG_OUTPUTFILE}
+            COMMAND ${GENERATOR} -d ${DATAFILES_STR} -t ${TEMPLATE} -o ${ARG_OUTPUTFILE} -r ${REQUIRES}
             DEPENDS ${DEPENDS_LIST})
     add_custom_target(${ARG_TARGET} ALL DEPENDS ${ARG_OUTPUTFILE})
 endfunction()
@@ -73,7 +74,9 @@ panda_gen(
     DATA ${INTRINSICS_YAML}
     TARGET_NAME intrinsics_gen_arkruntime
     TEMPLATES ${RUNTIME_TEMPLATES}
-    REQUIRES ${CMAKE_CURRENT_SOURCE_DIR}/templates/intrinsics.rb
+    REQUIRES
+        ${CMAKE_CURRENT_SOURCE_DIR}/templates/intrinsics.rb
+        ${PANDA_ROOT}/libpandabase/utils.rb
     SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/templates
     DESTINATION ${GEN_INCLUDE_DIR}
     EXTRA_DEPENDENCIES ${INTRINSICS_TARGET}
