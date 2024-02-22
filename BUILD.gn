@@ -47,6 +47,7 @@ group("ark_host_linux_tools_packages") {
   deps = []
   if (host_os != "mac") {
     deps += [
+      "$ark_root/abc2program:abc2prog(${host_toolchain})",
       "$ark_root/assembler:ark_asm(${host_toolchain})",
       "$ark_root/disassembler:ark_disasm(${host_toolchain})",
       "$ark_root/libpandabase:libarkbase(${host_toolchain})",
@@ -64,6 +65,7 @@ group("ark_host_windows_tools_packages") {
   deps = []
   if (host_os != "mac") {
     deps += [
+      "$ark_root/abc2program:abc2prog($build_root/toolchain/mingw:mingw_x86_64)",
       "$ark_root/assembler:ark_asm($build_root/toolchain/mingw:mingw_x86_64)",
       "$ark_root/disassembler:ark_disasm($build_root/toolchain/mingw:mingw_x86_64)",
       "$ark_root/verifier:ark_verifier($build_root/toolchain/mingw:mingw_x86_64)",
@@ -80,6 +82,7 @@ group("ark_host_mac_tools_packages") {
   if (host_os == "mac") {
     if (host_cpu == "arm64") {
       deps += [
+        "$ark_root/abc2program:abc2prog($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/assembler:ark_asm($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/disassembler:ark_disasm($build_root/toolchain/mac:clang_arm64)",
         "$ark_root/libpandabase:libarkbase($build_root/toolchain/mac:clang_arm64)",
@@ -89,6 +92,7 @@ group("ark_host_mac_tools_packages") {
       ]
     } else {
       deps += [
+        "$ark_root/abc2program:abc2prog($build_root/toolchain/mac:clang_x64)",
         "$ark_root/assembler:ark_asm($build_root/toolchain/mac:clang_x64)",
         "$ark_root/disassembler:ark_disasm($build_root/toolchain/mac:clang_x64)",
         "$ark_root/libpandabase:libarkbase($build_root/toolchain/mac:clang_x64)",
