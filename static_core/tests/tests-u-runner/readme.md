@@ -93,6 +93,7 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
 -   `--ets-func-tests` - tests for ArkTS: standard library and ets func tests
 -   `--ets-runtime` - ETS runtime tests
 -   `--ets-cts` - CTS language specification tests
+-   `--ets-gc-stress` - GC stress tests 
 -   `--ets-es-checked` - ETS tests that cross validate results with ts
 
 Additionally, a test suite can be specified with the option `--test-suite`: for example, for test262 `--test-suite test262`,
@@ -201,6 +202,12 @@ All test lists are loaded automatically from the specified `LIST_ROOT` and based
 -   `--filter FILTER`/`test-lists.filter: FILTER` - test filter regexp
 -   `--show-progress`/`general.show-progress: True` - show progress bar during test execution
 -   `--time-report`/`time-report.enable: True` - generates report with grouping tests by execution time.
+
+## Detailed report
+
+Detailed report shows test statistics for every folder
+- `--detailed-report`/`general.detailed-report: True` - if it's specified the report is generated
+- `--detailed-report-file FILE`/`general.detailed-report-file: FILE` - specifies file/path where the report should be saved to
 
 ## Verbose and logging options:
 

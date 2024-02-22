@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,10 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 from dataclasses import dataclass
 
@@ -24,10 +20,10 @@ from dataclasses import dataclass
 @dataclass
 class Summary:
     name: str
-    total: int
-    passed: int
-    failed: int
-    ignored: int
-    ignored_but_passed: int
-    excluded: int
-    excluded_after: int
+    total: int = 0
+    passed: int = 0
+    failed: int = 0
+    ignored: int = 0
+    ignored_but_passed: int = 0
+    excluded: int = 0
+    excluded_after: int = 0
