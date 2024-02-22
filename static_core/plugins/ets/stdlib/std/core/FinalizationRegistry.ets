@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,7 +132,7 @@ export final class FinalizationRegistry {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
             let refToken = this.getToken(i);
-            if (refToken != null && refToken.deref() == token) {
+            if (refToken != null && refToken!.deref() == token) {
                 this.freeNextTrimplet(prev);
                 i = prev; // iterator rollback
             }
@@ -142,7 +142,7 @@ export final class FinalizationRegistry {
     private cleanup(): void {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
-            if (this.getObject(i).deref() == null) {
+            if (this.getObject(i)!.deref() == null) {
                 // Remove from trimplet first to prevent
                 // calling it again in separate thread
                 let arg: Object | null = this.getCallbackArg(i);

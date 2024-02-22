@@ -1001,7 +1001,7 @@
     method_return_type: String,
     expected_test_data_item_type: String,
     expected_data_type: "String[]",
-    expected_test_data: '["<bold></bold>", "<bold>Click me</bold>"]',
+    expected_test_data: '["<b></b>", "<b>Click me</b>"]',
     verify_test_result_function: compareStringTrivial
   }
 
@@ -1904,6 +1904,30 @@
     verify_test_result_function: compareStringTrivial
   }
 
+
+- {
+    method_name: replace,
+    object_type: String,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx", "xaxbxcx"]',
+
+    param_types: {w1: String, w2: String},
+    param_nature: {w1: primitive, w2: primitive},
+    param_init_data_types: {w1: "String[]", w2: "String[]"},
+
+    param_list: {
+                 w1: '["x", "b", "x", "b", "x", "b", "x", "b", "x", "b", "x", "b", "x", "x()", "b", "b()"]',
+                 w2: '["", "", "[]", "[]", "[$$]", "[$$]", "[$`]", "[$`]", "[$&]", "[$&]", "[$'']", "[$'']", "[$1]", "[$1]", "[$1]", "[$1]"]'
+                },
+
+    method_return_type: String,
+    expected_test_data_item_type: String,
+    expected_data_type: "String[]",
+    expected_test_data: '["axbxcx", "xaxxcx", "[]axbxcx", "xax[]xcx", "[$]axbxcx", "xax[$]xcx", "[]axbxcx", "xax[xax]xcx", "[x]axbxcx", "xax[b]xcx", "[axbxcx]axbxcx", "xax[xcx]xcx","[$1]axbxcx","xaxbxcx","xax[$1]xcx", "xaxbxcx"]',
+    verify_test_result_function: compareStringTrivial
+}
+
 - {
     method_name: replaceAll,
     object_type: String,
@@ -1961,6 +1985,119 @@
     expected_test_data_item_type: String,
     expected_data_type: "String[]",
     expected_test_data: '["It\u0027s a Fun Fun Fun Fun World", "Этот сумасшедший, сумасшедший, сумасшедший, сумасшедший мир"]',
+    verify_test_result_function: compareStringTrivial
+  }
+
+- {
+    method_name: replaceAll,
+    object_type: String,
+
+    init_object_data_type: "String[]",
+    init_object_data: '[
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "aaaaaaaaaaaaaaaa aaaaaaaa aaaaaaaaaaaaaaaa",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                        "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+                      ]',
+
+    param_types: {w1: String, w2: String},
+    param_nature: {w1: primitive, w2: primitive},
+    param_init_data_types: {w1: "String[]", w2: "String[]"},
+    param_list: { w1:[
+                      "ninguém",
+                      "é",
+                      "é",
+                      "é",
+                      "é",
+                      "é",
+                      "ninguém",
+                      "ninguém",
+                      "é",
+                      "é",
+                      "ninguém",
+                      ".",
+                      "é",
+                      "é",
+                      "a",
+                      "ninguém",
+                      "Ninguém",
+                      "ninguém",
+                      "é",
+                      "é",
+                    ],
+                  w2:[
+                      "$$",
+                      "$$",
+                      "$$ -",
+                      "$$&",
+                      "$$$",
+                      "$$$$",
+                      "$&",
+                      "($&)",
+                      "($&)",
+                      "($&) $&",
+                      "$'",
+                      "--- $'",
+                      "($')",
+                      "($') $'",
+                      "$<",
+                      "$`",
+                      "$`",
+                      "($`)",
+                      "($`)",
+                      "($`) $`",
+                    ]},
+
+
+    method_return_type: String,
+    expected_test_data_item_type: String,
+    expected_data_type: "String[]",
+    expected_test_data: '[
+      "Ninguém é igual a $. Todo o ser humano é um estranho ímpar.",
+      "Ningu$m $ igual a ningu$m. Todo o ser humano $ um estranho ímpar.",
+      "Ningu$ -m $ - igual a ningu$ -m. Todo o ser humano $ - um estranho ímpar.",
+      "Ningu$&m $& igual a ningu$&m. Todo o ser humano $& um estranho ímpar.",
+
+      "Ningu$$m $$ igual a ningu$$m. Todo o ser humano $$ um estranho ímpar.",
+      "Ningu$$m $$ igual a ningu$$m. Todo o ser humano $$ um estranho ímpar.",
+      "Ninguém é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+      "Ninguém é igual a (ninguém). Todo o ser humano é um estranho ímpar.",
+
+      "Ningu(é)m (é) igual a ningu(é)m. Todo o ser humano (é) um estranho ímpar.",
+      "Ningu(é) ém (é) é igual a ningu(é) ém. Todo o ser humano (é) é um estranho ímpar.",
+      "Ninguém é igual a . Todo o ser humano é um estranho ímpar.. Todo o ser humano é um estranho ímpar.",
+      "Ninguém é igual a ninguém---  Todo o ser humano é um estranho ímpar. Todo o ser humano é um estranho ímpar--- ",
+
+      "Ningu(m é igual a ninguém. Todo o ser humano é um estranho ímpar.)m ( igual a ninguém. Todo o ser humano é um estranho ímpar.) igual a ningu(m. Todo o ser humano é um estranho ímpar.)m. Todo o ser humano ( um estranho ímpar.) um estranho ímpar.",
+      "Ningu(m é igual a ninguém. Todo o ser humano é um estranho ímpar.) m é igual a ninguém. Todo o ser humano é um estranho ímpar.m ( igual a ninguém. Todo o ser humano é um estranho ímpar.)  igual a ninguém. Todo o ser humano é um estranho ímpar. igual a ningu(m. Todo o ser humano é um estranho ímpar.) m. Todo o ser humano é um estranho ímpar.m. Todo o ser humano ( um estranho ímpar.)  um estranho ímpar. um estranho ímpar.",
+      "$<$<$<$<$<$<$<$<$<$<$<$<$<$<$<$< $<$<$<$<$<$<$<$< $<$<$<$<$<$<$<$<$<$<$<$<$<$<$<$<",
+      "Ninguém é igual a Ninguém é igual a . Todo o ser humano é um estranho ímpar.",
+      " é igual a ninguém. Todo o ser humano é um estranho ímpar.",
+      "Ninguém é igual a (Ninguém é igual a ). Todo o ser humano é um estranho ímpar.",
+      "Ningu(Ningu)m (Ninguém ) igual a ningu(Ninguém é igual a ningu)m. Todo o ser humano (Ninguém é igual a ninguém. Todo o ser humano ) um estranho ímpar.",
+      "Ningu(Ningu) Ningum (Ninguém ) Ninguém  igual a ningu(Ninguém é igual a ningu) Ninguém é igual a ningum. Todo o ser humano (Ninguém é igual a ninguém. Todo o ser humano ) Ninguém é igual a ninguém. Todo o ser humano  um estranho ímpar."
+
+    ]',
     verify_test_result_function: compareStringTrivial
   }
 
@@ -2061,6 +2198,26 @@
     expected_test_data_item_type: "String[]",
     expected_data_type: "String[][]",
     expected_test_data: '[[], [""], ["", "value0"], ["", "value0", "value1", "value2", "value3", "value4", ""], ["value0"], ["value0"], ["e", "m", "p"], ["e", "m", "p", "t", "y"]]',
+    verify_test_result_function: comparePrimitiveArray
+  }
+
+- {
+    method_name: split,
+    object_type: String,
+
+    init_object_data_type: "String[]",
+    init_object_data: '["ab", "ab", "ab", "ab", "asdfasdfasdf", "axxb", "axxb", "axxb", "", "", "", ""]',
+
+    param_types: {separator: RegExp},
+    param_nature: {separator: object},
+    param_init_data_types: {separator: "RegExp[]"},
+    param_list: {separator: '[ new RegExp("a*?"), new RegExp("a*"), new RegExp("((?=.))"), new RegExp("(?=.)"), new RegExp("d"), new RegExp("x*"), new RegExp("x+"), new RegExp("x"), new RegExp("."), new RegExp(".?"), new RegExp(".??"), new RegExp("()()")]'},
+
+    method_return_type: "String[]",
+    result_nature: "array",
+    expected_test_data_item_type: "String[]",
+    expected_data_type: "String[][]",
+    expected_test_data: '[["a", "b"], ["", "b"], ["a", "", "b"], ["a", "b"], ["as","fas","fas","f"], ["a", "b"], ["a", "b"], ["a","","b"], [""], [], [], []]',
     verify_test_result_function: comparePrimitiveArray
   }
 

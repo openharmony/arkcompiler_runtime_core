@@ -58,9 +58,9 @@ function createMapAddAndCheckEntriesOrder(): int {
     map.set(c'a', 3.0);
     let entries = map.entries();
 
-    if (entries.next().value.key == c'c' &&
-        entries.next().value.key == c'x' &&
-        entries.next().value.key == c'a') {
+    if (entries.next().value!.key == c'c' &&
+        entries.next().value!.key == c'x' &&
+        entries.next().value!.key == c'a') {
         return 0;
     }
 
@@ -100,7 +100,7 @@ function createEmptyMap(): int {
 function createMapAddAndGet(): int {
     let map: Map<char, double> = new Map<char, double>();
     map.set(c'a', 1.0);
-    let expected: double = map.get(c'a');
+    let expected: double = map.get(c'a')!;
 
     let result = expected == 1.0 ? 0 : 1;
     return result;
@@ -122,7 +122,7 @@ function createMapAddReplaceAndGet(): int {
     let map: Map<char, double> = new Map<char, double>();
     map.set(c'a', 1.0);
     map.set(c'a', 5.0);
-    let expected: double = map.get(c'a');
+    let expected: double = map.get(c'a')!;
     let result = expected == 5.0 ? 0 : 1;
     return result;
 }

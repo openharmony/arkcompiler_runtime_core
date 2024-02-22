@@ -15,7 +15,7 @@
 
 package escompat;
 
-export interface ReadonlyArray<T> extends ConcatArray<T> {
+export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // concat(...items: (T | ConcatArray<T>)[]): T[];
     // concat(...items: (T | ConcatArray<T>)[]): Array<T>;
     // concat(...items: ConcatArray<T>[]): T[];
@@ -78,26 +78,17 @@ export interface ReadonlyArray<T> extends ConcatArray<T> {
     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T;
     reduce(callbackfn: (previousValue: T, currentValue: T) => T): T;
-    reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T, initialValue: T): T;
-    reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T, initialValue: T): T;
-    reduce(callbackfn: (previousValue: T, currentValue: T) => T, initialValue: T): T;
-
-    // TODO(ivan-tyulyandin): blocked by internal issue 13952
-    //reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
-    //reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
-    //reduce<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
+    reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
+    reduce<U>(callbackfn: (previousValue: U, currentValue: T) => T, initialValue: U): U;
 
     reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
     reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T;
     reduceRight(callbackfn: (previousValue: T, currentValue: T) => T): T;
-    reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T, initialValue: T): T;
-    reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T, initialValue: T): T;
-    reduceRight(callbackfn: (previousValue: T, currentValue: T) => T, initialValue: T): T;
 
-    // TODO(ivan-tyulyandin): blocked by internal issue 13952
-    //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
-    //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
-    //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
+    reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
+    reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
 
     // some(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): boolean;
     some(predicate: (value: T, index: number) => boolean): boolean;

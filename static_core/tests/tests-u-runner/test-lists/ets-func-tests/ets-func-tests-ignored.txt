@@ -42,24 +42,6 @@ std/math/std_math_imul_float_float.ets
 std/time/DateChangeTest.ets
 ### Issue 10874
 std/math/std_math_clz64_long.ets
-### Issue 11712 begin
-std/math/std_math_abs_double.ets
-std/math/std_math_acos_double.ets
-std/math/std_math_atan_double.ets
-std/math/std_math_ceil_double.ets
-std/math/std_math_cos_double.ets
-std/math/std_math_exp_double.ets
-std/math/std_math_expm1_double.ets
-std/math/std_math_log_double.ets
-std/math/std_math_log10_double.ets
-std/math/std_math_log1p_double.ets
-std/math/std_math_log2_double.ets
-std/math/std_math_sign_double.ets
-std/math/std_math_signbit_double.ets
-std/math/std_math_sin_double.ets
-std/math/std_math_sqrt_double.ets
-std/math/std_math_trunc_double.ets
-### Issue 11712 end
 ### Issue 12782 begin
 
 std/core/std_core_array_exception_copyOf_ArrayIndexOutOfBoundsException_byte_array_int_int.ets
@@ -288,12 +270,6 @@ spec/undefined-type/define/define-class-member-as-question.ets
 spec/undefined-type/array-of-type_0.ets
 spec/undefined-type/array-of-type_1.ets
 ###### End Issue 13874
-###### Issue 14602
-spec/undefined-type/issue14602.ets
-###### End Issue 14602
-###### Issue 14610
-spec/undefined-type/issue14610.ets
-###### End Issue 14610
 ###### EOF Undefined type
 ### Feature: Callable classes
 ### issue 14539
@@ -347,8 +323,6 @@ spec/nullables/eval-lazy_1.ets
 spec/nullables/nullable-method-result_0.ets
 spec/nullables/nullable-method-result_1.ets
 spec/nullables/nullable-function-result_0.ets
-spec/nullables/issue13991.ets
-spec/nullables/issue14113.ets
 ### End Issue 14495
 ### Issue 14301
 spec/nullables/defined-primitive-type-nullable-union_0.ets
@@ -444,9 +418,17 @@ spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
 ### Issue 15312
+std/core/std_core_string_String_fromCharCode_008.ets
+std/core/std_core_string_String_search_String_005.ets
 std/core/std_core_string_String_localeCompare_string.ets
 std/core/std_core_string_String_localeCompare_string_001.ets
 std/core/std_core_string_String_localeCompare_string_002.ets
+std/core/std_core_string_String_localeCompare_string_004.ets
+### Issue 15693
+std/core/std_core_string_String_localeCompare_string_005.ets
+std/core/std_core_string_String_match_RegExp.ets
+std/core/std_core_string_String_match_String.ets
+std/core/std_core_string_String_fromCharCode_009.ets
 ### Issue 15119
 std/core/std_core_string_String_fromCharCode_006.ets
 ### Issue 15274
@@ -738,3 +720,31 @@ spec/types/float_to_string_2.ets
 spec/types/double_to_string_1.ets
 spec/types/double_to_string_2.ets
 ### Issue 15281 end
+### BigInt64Array
+std/core/std_core_typedarrays__BigInt64Array.ets
+### BigInt64Array end
+
+### Failures #15642
+# Type violation in type erasure
+regression/12581_box_type_array_Boolean_array.ets
+regression/12581_box_type_array_Byte_array.ets
+regression/12581_box_type_array_Int_array.ets
+regression/12581_box_type_array_Short_array.ets
+regression/12581_box_type_array_Long_array.ets
+# undefined|number assigned to number
+std/core/std_core_string_String_codePointAt_number.ets
+###
+
+### 15577
+spec/nullables/defined-type-nullable-union_2.ets
+spec/nullables/defined-type-nullable-union_3.ets
+###
+
+## Tuples overloading issue(s)
+### Issue (gitee) I909BB
+spec/tuples/tuple_as_param_default_1.ets
+### Issue I909BB end
+
+### VariableHasEnclosingScopeForAll, VariableHasScopeForAll
+spec/generic/callFromAsyncLambda.ets
+###

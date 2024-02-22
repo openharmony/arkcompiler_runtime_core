@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,26 @@ static constexpr std::string_view BOX_DOUBLE                           = "Lstd/c
 // Arrays of base classes
 static constexpr std::string_view CLASS_ARRAY                          = "[Lstd/core/Class;";
 static constexpr std::string_view STRING_ARRAY                         = "[Lstd/core/String;";
+
+// Functional interfaces
+static constexpr std::string_view FUNCTION0                            = "Lstd/core/Function0;";
+static constexpr std::string_view FUNCTION1                            = "Lstd/core/Function1;";
+static constexpr std::string_view FUNCTION2                            = "Lstd/core/Function2;";
+static constexpr std::string_view FUNCTION3                            = "Lstd/core/Function3;";
+static constexpr std::string_view FUNCTION4                            = "Lstd/core/Function4;";
+static constexpr std::string_view FUNCTION5                            = "Lstd/core/Function5;";
+static constexpr std::string_view FUNCTION6                            = "Lstd/core/Function6;";
+static constexpr std::string_view FUNCTION7                            = "Lstd/core/Function7;";
+static constexpr std::string_view FUNCTION8                            = "Lstd/core/Function8;";
+static constexpr std::string_view FUNCTION9                            = "Lstd/core/Function9;";
+static constexpr std::string_view FUNCTION10                           = "Lstd/core/Function10;";
+static constexpr std::string_view FUNCTION11                           = "Lstd/core/Function11;";
+static constexpr std::string_view FUNCTION12                           = "Lstd/core/Function12;";
+static constexpr std::string_view FUNCTION13                           = "Lstd/core/Function13;";
+static constexpr std::string_view FUNCTION14                           = "Lstd/core/Function14;";
+static constexpr std::string_view FUNCTION15                           = "Lstd/core/Function15;";
+static constexpr std::string_view FUNCTION16                           = "Lstd/core/Function16;";
+static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
 
 // Exception classes
 static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_EXCEPTION      = "Lstd/core/ArgumentOutOfRangeException;";

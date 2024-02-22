@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,26 +63,26 @@ class Test {
 let globalTest: Test | null = null;
 
 function check(): int {
-    globalTest.check();
+    globalTest!.check();
     return 0;
 }
 
 function testPendingPromise(): int {
     globalTest = new Test();
     let p = new Promise<Object>((resolve: (value: Object) => void): void => {
-        globalTest.success()
+        globalTest!.success()
     });
-    globalTest.check();
-    p.then<Object>((): Object | null => {
-        globalTest.fail();
+    globalTest!.check();
+    p.then<Object | null>((): Object | null => {
+        globalTest!.fail();
         return null;
     });
-    p.catch<Object>((error: Object | null): Object | null => {
-        globalTest.fail();
+    p.catch<Object | null>((error: Object | null): Object | null => {
+        globalTest!.fail();
         return null;
     });
     // Check callback are not called inside 'then' and 'catch'
-    globalTest.check();
+    globalTest!.check();
     return 0;
 }
 
@@ -92,16 +92,16 @@ function testResolvedPromise(): int {
         resolve(obj);
     });
     globalTest = new Test();
-    p.then<Object>((value: Object): Object | null => {
+    p.then<Object | null>((value: Object): Object | null => {
         if (value == obj) {
-            globalTest.success();
+            globalTest!.success();
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
-    p.catch<Object>((err: Object | null): Object | null => {
-        globalTest.fail();
+    p.catch<Object | null>((err: Object | null): Object | null => {
+        globalTest!.fail();
         return null;
     });
     return 0;
@@ -109,24 +109,24 @@ function testResolvedPromise(): int {
 
 function testRejectedPromise(): int {
     globalTest = new Test();
-    let error = new Exception();
+    let error = new Error();
     try {
-        let p = new Promise<Object>((resolve: (value: Object) => void): void throws => {
+        let p = new Promise<Object>((resolve: (value: Object) => void): void => {
             throw error;
         });
-        p.then<Object>((value: Object): Object | null => {
-            globalTest.fail();
+        p.then<Object | null>((value: Object): Object | null => {
+            globalTest!.fail();
             return null;
         });
-        p.catch<Object>((err: Object | null): Object => {
+        p.catch<Object | null>((err: Object | null): Object => {
             if (err == error) {
-                globalTest.success();
+                globalTest!.success();
             } else {
-                globalTest.fail();
+                globalTest!.fail();
             }
         });
     } catch (e: Exception) {
-        globalTest.fail();
+        globalTest!.fail();
     }
     return 0;
 }
@@ -143,31 +143,31 @@ function testThenBeforeResolve(): int {
         fixture.fn = resolve;
     });
     let obj = new Object();
-    p.then<Object>((value: Object): Object | null => {
+    p.then<Object | null>((value: Object): Object | null => {
         if (value == obj) {
             if (fixture.state == 0) {
                 fixture.state = 1;
             } else {
                 console.println("Wrong 'then' call order");
-                globalTest.fail();
+                globalTest!.fail();
             }
         } else {
             console.println("Then is called with wrong object");
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
-    p.then<Object>((value: Object): Object | null => {
+    p.then<Object | null>((value: Object): Object | null => {
         if (value == obj) {
             if (fixture.state == 1) {
-                globalTest.success();
+                globalTest!.success();
             } else {
                 console.println("Wrong 'then' call order");
-                globalTest.fail();
+                globalTest!.fail();
             }
         } else {
             console.println("Then is called with wrong object");
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
@@ -181,7 +181,7 @@ function testPromiseEmptyThen(): int {
         resolve(new Object());
     });
     let nextP = p.then<Object>((): Object => {
-        globalTest.success();
+        globalTest!.success();
     });
     return 0;
 }
@@ -197,27 +197,27 @@ function testPromiseChain(): int {
         resolve(new Object());
     });
     // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object> = p.then<Object>((): Object | null => {
+    let p1: Promise<Object | null> = p.then<Object | null>((): Object | null => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
-    let p2: Promise<Object> = p1.then<Object>((): Object | null => {
+    let p2: Promise<Object | null> = p1.then<Object | null>((): Object | null => {
         if (fixture.state == 1) {
             fixture.state = 2;
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
-    p2.then<Object>((): Object | null => {
+    p2.then<Object | null>((): Object | null => {
         if (fixture.state == 2) {
-            globalTest.success();
+            globalTest!.success();
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
@@ -229,23 +229,23 @@ function testPromiseCatchFinallyChain(): int {
     let fixture = new PromiseChainFixture();
     let p = Promise.reject<Object>(new Object());
     // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object> = p.then<Object>((): Object | null => {
-        globalTest.fail();
+    let p1: Promise<Object | null> = p.then<Object | null>((): Object | null => {
+        globalTest!.fail();
         return null;
     });
-    let p2: Promise<Object> = p1.catch<Object>((value): Object | null => {
+    let p2: Promise<Object | null> = p1.catch<Object | null>((value): Object | null => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
     p2.finally(() => {
         if (fixture.state == 1) {
-            globalTest.success();
+            globalTest!.success();
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
     });
     return 0;
@@ -256,22 +256,22 @@ function testResolvePromiseThenFinally(): int {
     let fixture = new PromiseChainFixture();
     let p = Promise.resolve<Object>(new Object());
     // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object> = p.then<Object>((value: Object): Object | null => {
+    let p1: Promise<Object | null> = p.then<Object | null>((value: Object): Object | null => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     }, (error: Object | null): Object | null => {
-        globalTest.fail();
+        globalTest!.fail();
         return null;
     });
     p1.finally(() => {
         if (fixture.state == 1) {
-            globalTest.success();
+            globalTest!.success();
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
     });
     return 0;
@@ -282,22 +282,22 @@ function testRejectPromiseThenFinally(): int {
     let fixture = new PromiseChainFixture();
     let p = Promise.reject<Object>(new Object());
     // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object> = p.then<Object>((value: Object): Object | null => {
-        globalTest.fail();
+    let p1: Promise<Object | null> = p.then<Object | null>((value: Object): Object | null => {
+        globalTest!.fail();
         return null;
     }, (error: Object | null): Object | null => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
         return null;
     });
     p1.finally(() => {
         if (fixture.state == 1) {
-            globalTest.success();
+            globalTest!.success();
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
     });
     return 0;
@@ -327,14 +327,14 @@ function resolvePendingPromise(): boolean {
     if (resolvePromiseFn == null) {
         return false;
     }
-    resolvePromiseFn("Panda");
+    resolvePromiseFn!("Panda");
     return true;
 }
 
 let unresolved1: Object | null = null;
 let unresolved2: Object | null = null;
 
-async function asyncFuncAwait(): Promise<Object> | null {
+async function asyncFuncAwait(): Promise<Object | null> {
     let promise: Promise<Object> = new Promise<Object>((resolve: (obj: Object) => void): void => {
         resolve("resolved");
     });
@@ -342,7 +342,7 @@ async function asyncFuncAwait(): Promise<Object> | null {
     return null;
 }
 
-let asyncLambdaAwait: () => Promise<Object> = async (): Promise<Object> | null => {
+let asyncLambdaAwait: () => Promise<Object | null> = async (): Promise<Object | null> => {
     let promise: Promise<Object> = new Promise<Object>((resolve: (obj: Object) => void): void => {
         resolve("resolved");
     });
@@ -352,12 +352,12 @@ let asyncLambdaAwait: () => Promise<Object> = async (): Promise<Object> | null =
 
 function testAwaitPromise(): int {
     globalTest = new Test();
-    let p1: Promise<Object> | null = asyncFuncAwait();
-    let p2: Promise<Object> = asyncLambdaAwait();
+    let p1: Promise<Object | null> = asyncFuncAwait();
+    let p2: Promise<Object | null> = asyncLambdaAwait();
     if (unresolved1 != "resolved" || unresolved2 != "resolved") {
-        globalTest.fail();
+        globalTest!.fail();
     }
-    globalTest.success();
+    globalTest!.success();
     return 0;
 }
 
@@ -370,20 +370,20 @@ function makeResolvedPromise(v: String): Promise<Object> {
 async function testAwaitJsPromise(pendingP: Promise<Object>): Promise<Object> {
     globalTest = new Test();
 
-    globalTest.msg("testAwaitJsPromise: start", Test.INFO);
+    globalTest!.msg("testAwaitJsPromise: start", Test.INFO);
     let res: String = (await pendingP) as String;
 
-    globalTest.msg("testAwaitJsPromise: await result is: " + res, Test.INFO);
+    globalTest!.msg("testAwaitJsPromise: await result is: " + res, Test.INFO);
     
     if (res != "JS_PROMISE_RESULT") {
-        globalTest.msg("testAwaitJsPromise: await result is wrong!", Test.FATAL);
-        globalTest.fail();
+        globalTest!.msg("testAwaitJsPromise: await result is wrong!", Test.FATAL);
+        globalTest!.fail();
     } else {
-        globalTest.msg("testAwaitJsPromise: await result is CORRECT!", Test.INFO);
-        globalTest.success();
+        globalTest!.msg("testAwaitJsPromise: await result is CORRECT!", Test.INFO);
+        globalTest!.success();
     }
     
-    globalTest.msg("testAwaitJsPromise: done", Test.INFO);
+    globalTest!.msg("testAwaitJsPromise: done", Test.INFO);
     /**
      * TODO(konstanting, #I67QXC): add a test where we would return here a PENDING promise.
      * Currently this leads to a crash, because:
@@ -442,177 +442,177 @@ async function testAsyncVoid(): Promise<void> { return Void }
 async function testAsyncVoidEmpty(): Promise<void> {}
 async function testAsyncVoidNothing() {}
 
-function testPromiseAllEmpty(): Promise<Object> {
+function testPromiseAllEmpty(): Promise<Object | null> {
     globalTest = new Test();
     let promises: Promise<Object>[] = [];
-    return Promise.all(promises).then<Object>((v: Object): Object|null => {
+    return Promise.all(promises).then<Object | null>((v: Object): Object|null => {
         let values: Object[] = v as Object[];
         if (values == null || values.length != 0) {
-            globalTest.fail();
+            globalTest!.fail();
         } else {
-            globalTest.success();
+            globalTest!.success();
         }
     });
 }
 
-function testPromiseAllResolved(): Promise<Object> {
+function testPromiseAllResolved(): Promise<Object|null> {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.resolve<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     return Promise.all([
         p1, p2, p3
-    ]).then<Object>((v: Object): Object|null => {
+    ]).then<Object | null>((v: Object): Object|null => {
         let values: Object[] = v as Object[];
         if (values == null || values.length != 3) {
-            globalTest.fail();
+            globalTest!.fail();
         }
         if (values[0] != "abc") {
-            globalTest.fail();
+            globalTest!.fail();
         }
         if (values[1] != "def") {
-            globalTest.fail();
+            globalTest!.fail();
         }
         if (values[2] != "xyz") {
-            globalTest.fail();
+            globalTest!.fail();
         }
-        globalTest.success();
+        globalTest!.success();
         return null;
     });
 }
 
-function testPromiseAllRejected(): Promise<Object> {
+function testPromiseAllRejected(): Promise<Object|null> {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     return Promise.all([
         p1, p2, p3
-    ]).then<Object>((v: Object): Object|null => {
-        globalTest.fail();
+    ]).then<Object|null>((v: Object): Object|null => {
+        globalTest!.fail();
         return null;
     }, (err: Object|null): Object|null => {
         if (err != "def") {
-            globalTest.fail();
+            globalTest!.fail();
         } else {
-            globalTest.success();
+            globalTest!.success();
         }
         return null;
     });
 }
 
-function testPromiseAllSettled(): Promise<Object> {
+function testPromiseAllSettled(): Promise<Object|null> {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     return Promise.allSettled([
         p1, p2, p3
-    ]).then<Object>((v: Object): Object|null => {
+    ]).then<Object|null>((v: Object): Object|null => {
         let values = v as Object[];
         if (values == null || values.length != 3) {
-            globalTest.fail();
+            globalTest!.fail();
         }
         if (values[0] != "abc") {
-            globalTest.fail();
+            globalTest!.fail();
         }
         if (values[1] != "def") {
-            globalTest.fail();
+            globalTest!.fail();
         }
         if (values[2] != "xyz") {
-            globalTest.fail();
+            globalTest!.fail();
         }
-        globalTest.success();
+        globalTest!.success();
         return null;
     }, (err: Object|null): Object|null => {
-        globalTest.fail();
+        globalTest!.fail();
         return null;
     });
 }
 
-function testPromiseAnyEmpty(): Promise<Object> {
+function testPromiseAnyEmpty(): Promise<Object|null> {
     globalTest = new Test();
     let promises: Promise<Object>[] = [];
-    return Promise.any(promises).then<Object>((v: Object): Object|null => {
-        globalTest.fail();
+    return Promise.any(promises).then<Object|null>((v: Object): Object|null => {
+        globalTest!.fail();
     }, (err: Object|null): Object|null => {
         if (err != null && err instanceof AggregateError) {
-            globalTest.success();
+            globalTest!.success();
         } else {
-            globalTest.fail();
+            globalTest!.fail();
         }
     });
 }
 
-function testPromiseAnyResolved(): Promise<Object> {
+function testPromiseAnyResolved(): Promise<Object|null> {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     return Promise.any([
         p1, p2, p3
-    ]).then<Object>((value: Object): Object|null => {
+    ]).then<Object|null>((value: Object): Object|null => {
         if (value != "xyz") {
-            globalTest.fail();
+            globalTest!.fail();
         }
-        globalTest.success();
+        globalTest!.success();
         return null;
     });
 }
 
-function testPromiseAnyRejected(): Promise<Object> {
+function testPromiseAnyRejected(): Promise<Object|null> {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.reject<Object>("xyz");
     return Promise.any([
         p1, p2, p3
-    ]).then<Object>((v: Object): Object|null => {
-        globalTest.fail();
+    ]).then<Object|null>((v: Object): Object|null => {
+        globalTest!.fail();
         return null;
     }, (err: Object|null): Object|null => {
         if (err == null || !(err instanceof AggregateError)) { 
-            globalTest.fail();
+            globalTest!.fail();
         } else {
-            globalTest.success();
+            globalTest!.success();
         }
         return null;
     });
 }
 
-function testPromiseRaceResolved(): Promise<Object> {
+function testPromiseRaceResolved(): Promise<Object|null> {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     return Promise.race([
         p1, p2
-    ]).then<Object>((value: Object): Object|null => {
+    ]).then<Object|null>((value: Object): Object|null => {
         if (value != "abc") {
-            globalTest.fail();
+            globalTest!.fail();
         }
-        globalTest.success();
+        globalTest!.success();
         return null;
     }, (value: Object|null): Object|null => {
-        globalTest.fail();
+        globalTest!.fail();
         return null;
     });
 }
 
-function testPromiseRaceRejected(): Promise<Object> {
+function testPromiseRaceRejected(): Promise<Object|null> {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.resolve<Object>("def");
     return Promise.race([
         p1, p2
-    ]).then<Object>((value: Object): Object|null => {
-        globalTest.fail();
+    ]).then<Object|null>((value: Object): Object|null => {
+        globalTest!.fail();
         return null;
     }, (value: Object|null): Object|null => {
         console.println("UDAV: here " + value);
         if (value != "abc") {
-            globalTest.fail();
+            globalTest!.fail();
         }
-        globalTest.success();
+        globalTest!.success();
         return null;
     });
 }

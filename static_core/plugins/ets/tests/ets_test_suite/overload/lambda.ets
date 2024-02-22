@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,21 +14,15 @@
  */
 
 let void_called: boolean = false;
-let object_called = false;
 let int_called = false;
 
 function reset(): void {
     void_called = false;
-    object_called = false;
     int_called = false;
 }
 
 function foo(callback: () => void): void {
     void_called = true;
-}
-
-function foo(callback: (x: Object) => void): void {
-    object_called = true;
 }
 
 function foo(callback: (x: int) => void): void {
@@ -40,20 +34,11 @@ function main(): void {
     foo((): void => {
     });
     assert(void_called == true);
-    assert(object_called == false);
-    assert(int_called == false);
-
-    reset();
-    foo((x: Object): void => {
-    });
-    assert(void_called == false);
-    assert(object_called == true);
     assert(int_called == false);
 
     reset();
     foo((x: int): void => {
     });
     assert(void_called == false);
-    assert(object_called == false);
     assert(int_called == true);
 }

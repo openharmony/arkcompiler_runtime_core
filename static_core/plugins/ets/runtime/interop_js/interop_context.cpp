@@ -27,6 +27,24 @@
 
 namespace ark::ets::interop::js {
 
+namespace descriptors = panda_file_items::class_descriptors;
+
+// NOLINTNEXTLINE(modernize-avoid-c-arrays)
+static constexpr std::string_view const FUNCTION_INTERFACE_DESCRIPTORS[] = {
+    descriptors::FUNCTION0,  descriptors::FUNCTION1,  descriptors::FUNCTION2,  descriptors::FUNCTION3,
+    descriptors::FUNCTION4,  descriptors::FUNCTION5,  descriptors::FUNCTION6,  descriptors::FUNCTION7,
+    descriptors::FUNCTION8,  descriptors::FUNCTION9,  descriptors::FUNCTION10, descriptors::FUNCTION11,
+    descriptors::FUNCTION12, descriptors::FUNCTION13, descriptors::FUNCTION14, descriptors::FUNCTION15,
+    descriptors::FUNCTION16, descriptors::FUNCTIONN,
+};
+
+static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descriptor)
+{
+    auto klass = etsClassLinker->GetClass(descriptor.data())->GetRuntimeClass();
+    ASSERT(klass != nullptr);
+    return klass;
+}
+
 InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
 {
     EtsJSNapiEnvScope envscope(this, env);
@@ -40,31 +58,27 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     auto *jobQueue = Runtime::GetCurrent()->GetInternalAllocator()->New<JsJobQueue>();
     vm->InitJobQueue(jobQueue);
 
-    auto cacheClass = [&etsClassLinker](std::string_view descriptor) {
-        auto klass = etsClassLinker->GetClass(descriptor.data())->GetRuntimeClass();
-        ASSERT(klass != nullptr);
-        return klass;
-    };
+    jsRuntimeClass_ = CacheClass(etsClassLinker, descriptors::JS_RUNTIME);
+    jsValueClass_ = CacheClass(etsClassLinker, descriptors::JS_VALUE);
+    jsErrorClass_ = CacheClass(etsClassLinker, descriptors::JS_ERROR);
+    objectClass_ = CacheClass(etsClassLinker, descriptors::OBJECT);
+    stringClass_ = CacheClass(etsClassLinker, descriptors::STRING);
+    voidClass_ = CacheClass(etsClassLinker, descriptors::VOID);
+    undefinedClass_ = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
+    promiseClass_ = CacheClass(etsClassLinker, descriptors::PROMISE);
+    errorClass_ = CacheClass(etsClassLinker, descriptors::ERROR);
+    exceptionClass_ = CacheClass(etsClassLinker, descriptors::EXCEPTION);
+    typeClass_ = CacheClass(etsClassLinker, descriptors::TYPE);
 
-    namespace descriptors = panda_file_items::class_descriptors;
+    boxIntClass_ = CacheClass(etsClassLinker, descriptors::BOX_INT);
+    boxLongClass_ = CacheClass(etsClassLinker, descriptors::BOX_LONG);
 
-    jsRuntimeClass_ = cacheClass(descriptors::JS_RUNTIME);
-    jsValueClass_ = cacheClass(descriptors::JS_VALUE);
-    jsErrorClass_ = cacheClass(descriptors::JS_ERROR);
-    objectClass_ = cacheClass(descriptors::OBJECT);
-    stringClass_ = cacheClass(descriptors::STRING);
-    voidClass_ = cacheClass(descriptors::VOID);
-    undefinedClass_ = cacheClass(descriptors::INTERNAL_UNDEFINED);
-    promiseClass_ = cacheClass(descriptors::PROMISE);
-    errorClass_ = cacheClass(descriptors::ERROR);
-    exceptionClass_ = cacheClass(descriptors::EXCEPTION);
-    typeClass_ = cacheClass(descriptors::TYPE);
+    arrayClass_ = CacheClass(etsClassLinker, descriptors::ARRAY);
+    arraybufClass_ = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
 
-    boxIntClass_ = cacheClass(descriptors::BOX_INT);
-    boxLongClass_ = cacheClass(descriptors::BOX_LONG);
-
-    arrayClass_ = cacheClass(descriptors::ARRAY);
-    arraybufClass_ = cacheClass(descriptors::ARRAY_BUFFER);
+    for (auto descr : FUNCTION_INTERFACE_DESCRIPTORS) {
+        functionalInterfaces_.insert(CacheClass(etsClassLinker, descr));
+    }
 
     RegisterBuiltinJSRefConvertors(this);
 

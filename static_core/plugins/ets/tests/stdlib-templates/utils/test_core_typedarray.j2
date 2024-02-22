@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -310,7 +310,7 @@ function createFilteredArrayFromGiven(): int {
 
     let target: {{.item.objectType}};
     try {
-        target = origin.filter((val: {{.item.primitiveType}}, index: int): boolean => { return val > 0});
+        target = origin.filter((val: {{.item.type}}, index: number): boolean => { return (val{{.item.cast2primitive}}) > 0});
     } catch(e) {
         return 1;
     }
@@ -420,7 +420,7 @@ function testMap(): int {
     let target: {{.item.objectType}};
 
     try {
-        target = origin.map((val: {{.item.primitiveType}}, index: int): {{.item.primitiveType}} => { return -val as {{.item.primitiveType}} });
+        target = origin.map((val: {{.item.type}}, index: number): {{.item.type}} => { return {{.item.create}}(-val{{.item.cast2primitive}}) });
     } catch(e) {
         console.println(e);
         return 1;

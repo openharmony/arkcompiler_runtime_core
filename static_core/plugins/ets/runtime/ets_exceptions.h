@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,9 @@
 namespace ark::ets {
 
 class EtsCoroutine;
+class EtsObject;
+
+PANDA_PUBLIC_API EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
 
 PANDA_PUBLIC_API void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
 

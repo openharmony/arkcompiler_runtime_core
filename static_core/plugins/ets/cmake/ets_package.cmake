@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +25,8 @@
 #       path/to/output_director
 #     ETS_CONFIG
 #       path/to/arktsconfig.json
+#     ETS_VERIFICATOR_ERRORS
+#       ForLoopCorrectlyInitializedForAll,VariableHasScopeForAll,IdentifierHasVariableForAll
 #   )
 function(do_panda_ets_package TARGET)
     add_custom_target(${TARGET})
@@ -34,7 +36,7 @@ function(do_panda_ets_package TARGET)
         ARG
         ""
         "OUTPUT_DIRECTORY;ETS_CONFIG;VERIFY_SOURCES"
-        "ABC_FILE;ETS_SOURCES"
+        "ABC_FILE;ETS_SOURCES;ETS_VERIFICATOR_ERRORS"
         ${ARGN}
     )
 
@@ -58,6 +60,10 @@ function(do_panda_ets_package TARGET)
         --thread=0
         --extension=ets
     )
+    if(DEFINED ARG_ETS_VERIFICATOR_ERRORS)
+       list(APPEND ES2PANDA_ARGUMENTS --verifier-errors=${ETS_VERIFICATOR_ERRORS})
+    endif()
+
     set(VERIFIER_ARGUMENTS
         --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
         --load-runtimes=ets

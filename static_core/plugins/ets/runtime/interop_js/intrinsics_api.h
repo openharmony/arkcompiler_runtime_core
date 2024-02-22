@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,9 +52,8 @@ struct IntrinsicsAPI {
     JSValue *(*JSRuntimeGetGlobal)();
     JSValue *(*JSRuntimeCreateObject)();
     uint8_t (*JSRuntimeInstanceOf)(JSValue *object, JSValue *ctor);
-    uint8_t (*JSRuntimeInitJSCallClass)(EtsString *clsName);
-    uint8_t (*JSRuntimeInitJSNewClass)(EtsString *clsName);
-    JSValue *(*JSRuntimeCreateLambdaProxy)(EtsObject *lambda);
+    uint8_t (*JSRuntimeInitJSCallClass)(EtsString *cls_name);
+    uint8_t (*JSRuntimeInitJSNewClass)(EtsString *cls_name);
     JSValue *(*JSRuntimeLoadModule)(EtsString *module);
     uint8_t (*JSRuntimeStrictEqual)(JSValue *lhs, JSValue *rhs);
     void *(*CompilerGetJSNamedProperty)(void *val, char *propName);

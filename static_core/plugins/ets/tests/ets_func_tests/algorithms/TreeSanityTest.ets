@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ class TreeNode {
             if (this.left == null) {
                 this.left = new TreeNode(item);
             } else {
-                this.left.push(item);
+                this.left!.push(item);
             }
         } else if (item == this.item) {
             return;
@@ -64,7 +64,7 @@ class TreeNode {
             if (this.right == null) {
                 this.right = new TreeNode(item);
             } else {
-                this.right.push(item);
+                this.right!.push(item);
             }
         }
     }
@@ -73,10 +73,10 @@ class TreeNode {
         let l: int[] = [];
         let r: int[] = [];
         if (this.left != null) {
-            l = this.left.traverse();
+            l = this.left!.traverse();
         }
         if (this.right != null) {
-            r = this.right.traverse();
+            r = this.right!.traverse();
         }
         let items: int[] = concat(l, [this.item]);
         return concat(items, r);

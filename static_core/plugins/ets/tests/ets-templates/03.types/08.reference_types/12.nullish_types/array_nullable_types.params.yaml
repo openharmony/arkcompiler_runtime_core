@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,10 +13,10 @@
 
 --- # List of declarations
 nullables:
-    - { type: '(Int|null)[]', vals: '[null]', val: 'new Int(1)', assert: 'x[0].unboxed() == 1' }
+    - { type: '(Int|null)[]', vals: '[null]', val: 'new Int(1)', assert: 'x[0]!.unboxed() == 1' }
     - { type: '(Int|null|null)[]', vals: '[new Int(1)]', val: 'null', assert: 'x[0] == null' }
 
-    - { type: '(Int|null)[][]', vals: '[[null]]', val: 'new Int[1]; x[0][0] = new Int(42)', assert: 'x[0][0].unboxed() == 42' }
+    - { type: '(Int|null)[][]', vals: '[[null]]', val: 'new Int[1]; x[0][0] = new Int(42)', assert: 'x[0][0]!.unboxed() == 42' }
     - { type: '(Int|null|null)[][]', vals: '[[new Int(42)]]', val: 'new Int[1]; x[0][0] = null', assert: 'x[0][0] == null' }
 
     - decl: |-
@@ -31,7 +31,7 @@ nullables:
       type: 'Z[]'
       vals: '[null]'
       val: 'new Int(66)'
-      assert: 'x[0].unboxed() == 66'
+      assert: 'x[0]!.unboxed() == 66'
 
     - decl: |-
         type Z = (Int | null)[]
@@ -45,4 +45,4 @@ nullables:
       type: 'Z'
       vals: '[null]'
       val: 'new Int(66)'
-      assert: 'x[0].unboxed() == 66'
+      assert: 'x[0]!.unboxed() == 66'

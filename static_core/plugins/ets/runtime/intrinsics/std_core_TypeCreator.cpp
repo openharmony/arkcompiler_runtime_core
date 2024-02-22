@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -388,7 +388,7 @@ static LambdaTypeCreator PrepareLambdaTypeCreator(TypeCreatorCtx *ctx)
 {
     LambdaTypeCreator lambda {ctx};
     lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
-    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 1});
+    lambda.AddParameter(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
     lambda.AddResult(pandasm::Type {typeapi_create_consts::TYPE_OBJECT, 0});
     lambda.Create();
     return lambda;

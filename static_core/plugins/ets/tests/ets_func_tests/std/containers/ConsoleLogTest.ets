@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,6 @@
  * limitations under the License.
  */
 
-{% for item in std_math_trigonometry %}
-
-/*---
-desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
----*/
-
-{% include 'utils/test_escompat_math_lib.j2' %}
-{% endfor %}
-
-{% for item in std_math_arithmetic %}
-/*---
-desc:  {function: {{.item.method_name}}_{{.item.method_signature.values()|join("_")}}}
----*/
-
-{% include 'utils/test_escompat_math_lib.j2' %}
-{% endfor %}
+function main(): void {
+    console.log(null, undefined, 11, "123", new Object())
+}

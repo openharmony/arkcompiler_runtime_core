@@ -29,6 +29,8 @@ public:
 
 private:
     std::pair<uint32_t, uint32_t> GetIndices(CaptureState *captureState) const;
+    void HandleCaptures(PandaVector<std::pair<bool, PandaString>> &captures,
+                        PandaVector<std::pair<uint32_t, uint32_t>> &indices, CaptureState *captureState) const;
 };
 }  // namespace ark::ets
 

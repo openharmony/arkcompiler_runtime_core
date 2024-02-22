@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,6 @@ static R NotImplementedAdapter([[maybe_unused]] Args... args)
 
 static const IntrinsicsAPI S_INTRINSICS_API = {
     // clang-format off
-    NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
@@ -230,11 +229,6 @@ uint8_t JSRuntimeInitJSCallClassIntrinsic(EtsString *clsName)
 uint8_t JSRuntimeInitJSNewClassIntrinsic(EtsString *clsName)
 {
     return S_INTRINSICS_API->JSRuntimeInitJSNewClass(clsName);
-}
-
-JSValue *JSRuntimeCreateLambdaProxyIntrinsic(EtsObject *lambda)
-{
-    return S_INTRINSICS_API->JSRuntimeCreateLambdaProxy(lambda);
 }
 
 JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)

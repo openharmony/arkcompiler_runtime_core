@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,13 +212,16 @@ export final class Console {
     //----------------------------------------
 
     /**
-     * Prints an object to the console and puts newline
+     * Prints an nullish object to the console and puts newline
      *
      * @param i value to print
      */
-    public log(i: Object): void {
-        let s: String = i.toString()
-        this.println(s)
+    public log(...vals: NullishType[]): void {
+        const arr = new Array<NullishType>()
+        for (let i = 0; i < vals.length; i++) {
+            arr.push(vals[i])
+        }
+        this.println(arr.join(' '))
     }
 
     /**

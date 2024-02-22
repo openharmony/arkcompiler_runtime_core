@@ -24,6 +24,7 @@ template <class T>
 struct RegExpMatchResult {
     uint32_t endIndex = 0;
     uint32_t index = 0;
+    // NOTE(kirill-mitkin): Change ecmascript API to PandaVector<T>
     // first value is true if result is undefined
     PandaVector<std::pair<bool, T>> captures;
     PandaVector<std::pair<uint32_t, uint32_t>> indices;

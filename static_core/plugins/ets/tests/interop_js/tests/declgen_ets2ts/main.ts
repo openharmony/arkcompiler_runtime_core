@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,9 +132,10 @@ function testMethods() {
   AssertEq(o.OptionalString('Optional string'), 'Optional string');
 
   // NOTE(ivagin): enable when supported by runtime #12808
+  // NOTE(vpukhov): optional methods produce overload sets
   if (false) {
-    AssertEq(o.OptionalString(undefined), undefined);
-    AssertEq(o.OptionalString(), undefined);
+    // AssertEq(o.OptionalString(undefined), undefined);
+    // AssertEq(o.OptionalString(), undefined);
   }
 
   // NOTE(ivagin): enable when supported by interop #12808

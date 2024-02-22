@@ -371,6 +371,11 @@ public:
         return arraybufClass_;
     }
 
+    bool IsFunctionalInterface(Class *klass) const
+    {
+        return functionalInterfaces_.count(klass) > 0;
+    }
+
     EtsObject *CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue);
 
     static void ThrowETSError(EtsCoroutine *coro, napi_value val);
@@ -472,6 +477,8 @@ private:
 
     Class *arrayClass_ {};
     Class *arraybufClass_ {};
+
+    std::set<Class *> functionalInterfaces_ {};
 
     Method *jsvalueFregistryRegister_ {};
 

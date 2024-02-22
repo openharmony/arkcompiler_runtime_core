@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -151,9 +151,7 @@ export native function atan(v: double): double;
  * @remark
  * 𝚌uberoot(𝚡) = ∛x = the unique y such that y³ = x.
 */
-export function cbrt(v: double): double {
-    return power(v, 1.0 / 3.0);
-}
+export native function cbrt(v: double): double;
 
 /**
  * Smallest integer greater or equal to `v`
@@ -204,6 +202,23 @@ export native function clz64(v: long): int;
 
 
 export native function clz32(v: int): int;
+
+/**
+ * Leading zero bits count in 32-bit representation of `v`
+ *
+ * @param v 64-bit double
+ *
+ * @returns Number of leading zero bits count in bit representation of `v`
+ *
+ * @example
+ * ```
+ * clz32(0xFFFFFFFF) == 0
+ * clz32(0x0000FFFF) == 16
+ * clz32(0x0) == 32
+ */
+
+
+export native function clz32Double(v: double): double;
 
 /**
  * Hyperbolic cosine of an angle `v`
@@ -265,9 +280,7 @@ export function power2(v: double): double {
  * expm1(doubleInf) = inf
  * expm1(doubleNegInf) = -1
  */
-export function expm1(v: double): double {
-    return power(E, v) - 1;
-}
+export native function expm1(v: double): double;
 
 /**
  * e raised to power `v`
@@ -282,9 +295,7 @@ export function expm1(v: double): double {
  * exp(doubleInf) = inf
  * exp(doubleNegInf) = 0
  */
-export function exp(v: double): double {
-    return power(E, v);
-}
+export native function exp(v: double): double;
 
 /**
  * Largest integer less or equal to `v`
@@ -329,9 +340,7 @@ export function hypot(u: double, v: double): double {
  * log10(doubleInf) = inf
  * log10(doubleNegInf) = -nan
  */
-export function log10(v: double): double {
-    return log(v) / log(10);
-}
+export native function log10(v: double): double;
 
 /**
  * Natural logarithm of (1 + `v`)
@@ -745,14 +754,10 @@ export native function sin(v: double): double;
 export native function sqrt(v: double): double;
 
 // Hyperbolic tangent of `v`
-export function tanh(v: double): double {
-    return sinh(v) / cosh(v);
-}
+export native function tanh(v: double): double;
 
 // Tangent of `v`
-export function tan(v: double): double {
-    return sin(v) / cos(v);
-}
+export native function tan(v: double): double;
 
 /**
  * Integer part of `v`
@@ -811,7 +816,7 @@ export function log10(v: int): int throws {
  * @remark
  * Implemented as native function,  @see `imul()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L327).
  */
-export native function imul(a: float, b: float): int;
+export native function imul(a: double, b: double): int;
 
 /**
  * "fround" returns nearest 32-bit single fp representation of a number

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,7 +146,7 @@ class TestGCOld {
         while (partial > TestGCOld.INSIGNIFICANT) {
             let h : int = TestGCOld.bytesToHeight(partial);
             let newTree : TreeNode | null = TestGCOld.getTree(h);
-            TestGCOld.replaceTree(TestGCOld.trees[TestGCOld.where++]!, newTree);
+            TestGCOld.replaceTree(TestGCOld.trees[TestGCOld.where++]!, newTree!);
             if (TestGCOld.where == TestGCOld.trees.length) TestGCOld.where = 0;
             partial = partial - TestGCOld.getBytesHeight(h);
         }
@@ -167,35 +167,35 @@ class TestGCOld {
         let tn2 : TreeNode | null = TestGCOld.trees[index2];
         for (let i = 0; i < depth; i++) {
             if ((path & 1) == 0) {
-                tn1 = tn1.left;
-                tn2 = tn2.left;
+                tn1 = tn1!.left;
+                tn2 = tn2!.left;
             } else {
-                tn1 = tn1.right;
-                tn2 = tn2.right;
+                tn1 = tn1!.right;
+                tn2 = tn2!.right;
             }
             path >>= 1;
         }
         let tmp : TreeNode | null;
         if ((path & 1) == 0) {
-            tmp = tn1.left;
-            tn1.left = tn2.left;
-            tn2.left = tmp;
+            tmp = tn1!.left;
+            tn1!.left = tn2!.left;
+            tn2!.left = tmp;
         } else {
-            tmp = tn1.right;
-            tn1.right = tn2.right;
-            tn2.right = tmp;
+            tmp = tn1!.right;
+            tn1!.right = tn2!.right;
+            tn2!.right = tmp;
         }
         TestGCOld.actuallyMut += 2;
     }
 
-    private static doReplaceTreeWork(full : TreeNode | null, partial : TreeNode | null, dir : boolean) : void {
-        let canGoLeft : boolean = full.left != null && full.left.value > partial.value;
-        let canGoRight : boolean = full.right != null && full.right.value > partial.value;
+    private static doReplaceTreeWork(full : TreeNode, partial : TreeNode, dir : boolean) : void {
+        let canGoLeft : boolean = full.left != null && full.left!.value > partial.value;
+        let canGoRight : boolean = full.right != null && full.right!.value > partial.value;
         if (canGoLeft && canGoRight) {
             if (dir)
-                TestGCOld.doReplaceTreeWork(full.left, partial, !dir);
+                TestGCOld.doReplaceTreeWork(full.left!, partial, !dir);
             else
-                TestGCOld.doReplaceTreeWork(full.right, partial, !dir);
+                TestGCOld.doReplaceTreeWork(full.right!, partial, !dir);
         } else if (!canGoLeft && !canGoRight) {
             if (dir)
                 full.left = partial;
@@ -208,7 +208,7 @@ class TestGCOld {
                     }
     }
 
-    private static replaceTree(full : TreeNode | null, partial : TreeNode | null) : void {
+    private static replaceTree(full : TreeNode, partial : TreeNode) : void {
         let dir : boolean = (partial.value % 2) == 0;
         TestGCOld.actuallyMut++;
         TestGCOld.doReplaceTreeWork(full, partial, dir);

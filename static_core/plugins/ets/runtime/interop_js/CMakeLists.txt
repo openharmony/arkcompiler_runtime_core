@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -40,6 +40,7 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         js_value.cpp
         js_refconvert.cpp
         js_refconvert_builtin.cpp
+        js_refconvert_function.cpp
         js_value_call.cpp
         interop_common.cpp
         ts2ets_copy.cpp

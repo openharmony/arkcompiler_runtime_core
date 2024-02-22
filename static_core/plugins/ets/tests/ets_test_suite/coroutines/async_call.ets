@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,13 +47,13 @@ function prepare(): void {
 }
 
 // check no-args static function call
-async function foo(): Promise<Object> | null {
+async function foo(): Promise<Object | null> {
     called = true;
     return null;
 }
 
 // check function call when all arguments are in registers on x86-64
-async function amd64_small(i1: int, i2: int, i3: int, i4: int, i5: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double): Promise<Object> | null {
+async function amd64_small(i1: int, i2: int, i3: int, i4: int, i5: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);
@@ -72,7 +72,7 @@ async function amd64_small(i1: int, i2: int, i3: int, i4: int, i5: int, f1: doub
 }
 
 // check function call when some arguments are passed via the stack on x86-64
-async function amd64_large(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double, f9: double): Promise<Object> | null {
+async function amd64_large(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double, f9: double): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);
@@ -93,7 +93,7 @@ async function amd64_large(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int,
 }
 
 // check function call when all arguments are in registers on arm32
-async function arm32_small(i1: int, i2: int, i3: int): Promise<Object> | null {
+async function arm32_small(i1: int, i2: int, i3: int): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);
@@ -102,7 +102,7 @@ async function arm32_small(i1: int, i2: int, i3: int): Promise<Object> | null {
 }
 
 // check function call when some arguments are passed via the stack on arm32
-async function arm32_large(i1: int, i2: int, i3: int, i4: int, i5: int): Promise<Object> | null {
+async function arm32_large(i1: int, i2: int, i3: int, i4: int, i5: int): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);
@@ -113,7 +113,7 @@ async function arm32_large(i1: int, i2: int, i3: int, i4: int, i5: int): Promise
 }
 
 // check function call when all arguments are in registers on arm32hf
-async function arm32hf_small(i1: int, i2: int, i3: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double): Promise<Object> | null {
+async function arm32hf_small(i1: int, i2: int, i3: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);
@@ -130,7 +130,7 @@ async function arm32hf_small(i1: int, i2: int, i3: int, f1: double, f2: double, 
 }
 
 // check function call when some arguments are passed via the stack on arm32hf
-async function arm32hf_large(i1: int, i2: int, i3: int, i4: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double, f9: double): Promise<Object> | null {
+async function arm32hf_large(i1: int, i2: int, i3: int, i4: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double, f9: double): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);
@@ -149,7 +149,7 @@ async function arm32hf_large(i1: int, i2: int, i3: int, i4: int, f1: double, f2:
 }
 
 // check function call when all arguments are in registers on arm64
-async function arm64_small(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double): Promise<Object> | null {
+async function arm64_small(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);
@@ -170,7 +170,7 @@ async function arm64_small(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int,
 }
 
 // check function call when some arguments are passed via the stack on arm64
-async function arm64_large(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, i8: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double, f9: double): Promise<Object> | null {
+async function arm64_large(i1: int, i2: int, i3: int, i4: int, i5: int, i6: int, i7: int, i8: int, f1: double, f2: double, f3: double, f4: double, f5: double, f6: double, f7: double, f8: double, f9: double): Promise<Object | null> {
     called = true;
     assert_eq(i1, 1);
     assert_eq(i2, 2);

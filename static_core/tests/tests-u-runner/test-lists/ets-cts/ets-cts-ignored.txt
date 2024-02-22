@@ -76,6 +76,7 @@
 03.types/09.default_values_for_types/default_value_for_primitive_types_8.ets
 03.types/09.default_values_for_types/default_value_for_primitive_types_9.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_8.ets
+04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_1.ets
 05.generics/02.generic_parameters/generic_classes/generic_class_self_dependency_0.ets
 05.generics/02.generic_parameters/generic_classes/generic_class_self_dependency_1.ets
 05.generics/02.generic_parameters/generic_classes/generic_class_self_dependency_2.ets
@@ -1845,7 +1846,6 @@
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_7.ets
 14.semantic_rules/03.override_equivalent_signatures/pos_1.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_0.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_1.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_10.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_11.ets
 04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_12.ets
@@ -1900,7 +1900,6 @@
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_4.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_5.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_6.ets
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_7.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_8.ets
 03.types/08.reference_types/11.union_types/ut_0.ets
 03.types/08.reference_types/11.union_types/ut_1.ets
@@ -2135,11 +2134,6 @@
 07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex2.ets
 # end of es2panda fails
 
-# es2panda fails:#12570
-07.expressions/12.indexing_expression/01.array_indexing_expression/safe_array_access2.ets
-# end of es2panda fails
-
-
 # es2panda fails: panda#14140
 03.types/07.value_types/05.character_types_and_operations/ch_n_0.ets
 03.types/07.value_types/05.character_types_and_operations/ch_n_1.ets
@@ -2311,40 +2305,8 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14299 new Int(), zero-length arrays, Long.MIN_VALUE should be truthy
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_61.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_61.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_61.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_61.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_56.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_58.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_59.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_60.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_61.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_58.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14293 Float.NaN and Double.NaN must be falsy
@@ -2353,18 +2315,6 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14295 SegFault on char and enum in condition
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f1_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f1_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t2_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_50.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_26.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_35.ets
 # end of es2panda fails
 
@@ -2380,13 +2330,9 @@
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_69.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_67.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_69.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_32.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_64.ets
 15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_32.ets
@@ -2460,39 +2406,6 @@
 # es2panda fails: panda:14542 Verification fails on a method call in a chaining operator
 07.expressions/01.chaining_operator/chop0.ets
 07.expressions/01.chaining_operator/chop1.ets
-# end of es2panda fails
-
-# es2panda fails: panda:14543 SegFault on unboxing conversion in assignment
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_21.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14368 Expected CTE on casting to never
@@ -2585,15 +2498,12 @@
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_11.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_12.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_13.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_3.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_5.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_6.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_7.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_8.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_9.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_neg_4.ets
-07.expressions/13.function_call_expression/fcall_1.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14383 CTE cases with the chaining operator
@@ -2690,10 +2600,6 @@
 09.classes/06.method_declarations/10.hiding_by_class_methods/hiding_instance_static_method.ets
 09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.ets
 # end 15095
-# 14595
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_2.ets
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_1.ets
-# end 14595
 
 # es2panda: panda#13442 Reworking the equality expression so it aligns with the specification changes
 07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_11.ets
@@ -2708,3 +2614,157 @@
 07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_38.ets
 07.expressions/24.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_39.ets
 # end of es2panda fails
+
+# Throwing function types
+17.experimental_features/06.native_functions_and_methods/01.native_functions/nat8.ets
+17.experimental_features/10.exceptions/01.throwing_functions/lambda.ets
+
+# Cast sequence
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_100.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_101.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_108.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_109.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_110.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_111.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_112.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_113.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_120.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_121.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_122.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_123.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_124.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_125.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_48.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_49.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_50.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_51.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_52.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_53.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_60.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_61.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_62.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_63.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_64.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_65.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_72.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_73.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_74.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_75.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_76.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_77.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_84.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_85.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_86.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_87.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_88.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_89.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_96.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_97.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_98.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_99.ets
+
+# Leftovers from bit operations on floats
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets
+
+# New failures according to nullablity changes #15642
+# not recommended, yet allowed
+03.types/08.reference_types/08.null_type/null12.ets
+03.types/08.reference_types/08.null_type/null13.ets
+# these must be negative - null is not allowed in arithmetics, nullable is not assignable to non-nullable
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_10.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_14.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_15.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_16.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_3.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_4.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_5.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_6.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_7.ets
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_9.ets
+# inferred type is null
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/null_initializer.ets
+# nullable in arithmetics
+04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_16.ets
+04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_8.ets
+# primitive allowed in union
+04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_n_0.ets
+# positive
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.ets
+# positive
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_2.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args2_neg_3.ets
+# non-compatible operands, null and non-nullable
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_7.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_10.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_11.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_12.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_13.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_5.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_6.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_7.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_8.ets
+06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_9.ets
+# no reason to fail
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_4.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_5.ets
+# non-compatible operands
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/boxing2.ets
+06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/widening_refs.ets
+# assign nullable to non-nullable
+07.expressions/13.function_call_expression/optional_chaining_value_result.ets
+# should be allowed
+07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/type_of_numeric_condition_expression_type_0.ets
+07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/type_of_numeric_condition_expression_type_1.ets
+# legal
+07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_0.ets
+# nullability violation
+07.expressions/15.cast_expressions/nullable_cast_1.ets
+# array is always truthy
+08.statements/05.if_statements/if2_19.ets
+# end
+
+# #15577 union type inference
+06.contexts_and_conversions/02.kinds_of_conversion/identity_5.ets
+07.expressions/07.object_literal/01.object_literal_of_class_type/cl_2.ets
+07.expressions/13.function_call_expression/fcall_7.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_1.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_11.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_12.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_14.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_5.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_7.ets
+17.experimental_features/10.trailing_lambda/trlambda_func_3.ets
+04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
+07.expressions/13.function_call_expression/fcall_9.ets
+03.types/08.reference_types/11.union_types/ut_22.ets
+# end
+
+# 15276
+17.experimental_features/05.statements/05.function_overloading/fn_overloading_n_10.ets
+#end
+
+# #15610 undefined default array value
+17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_15.ets
+#
+
+#15642
+04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_14.ets
+03.types/08.reference_types/11.union_types/union_types_normalization/norm_7.ets
+#

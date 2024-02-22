@@ -50,7 +50,7 @@ function check_sync_id_nonmain(number_of_coros: int): int {
     continue_execution.set(true);
     let result: int = 0;
     for (let i = 0; i < number_of_coros; ++i) {
-        result += await promises[i];
+        result += await promises[i]!;
     }
     return result == 0 ? result : 1;
 }

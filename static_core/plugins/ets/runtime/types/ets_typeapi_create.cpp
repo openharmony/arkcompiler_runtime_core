@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,20 +212,12 @@ const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(cons
 void LambdaTypeCreator::AddParameter(pandasm::Type param)
 {
     ASSERT(!param.IsVoid());
-    auto paramName = param.GetName();
     fn_.params.emplace_back(std::move(param), SourceLanguage::ETS);
-    name_ += '-';
-    std::replace(paramName.begin(), paramName.end(), '.', '-');
-    name_ += paramName;
 }
 
 void LambdaTypeCreator::AddResult(const pandasm::Type &type)
 {
     fn_.returnType = type;
-    name_ += '-';
-    auto appendName = type.GetName();
-    std::replace(appendName.begin(), appendName.end(), '.', '-');
-    name_ += appendName;
 }
 
 void LambdaTypeCreator::Create()
@@ -233,12 +225,19 @@ void LambdaTypeCreator::Create()
     ASSERT(!finished_);
     finished_ = true;
     // IMPORTANT: must be synchronized with
-    // tools/es2panda/binder/ETSBinder.cpp
+    // tools/es2panda/varbinder/ETSBinder.cpp
     // ETSBinder::FormLambdaName
-    name_ += "-0";
+
+    static constexpr size_t MAX_NUMBER_OF_PARAMS_FOR_FUNCTIONAL_INTERFACE = 16;
+
+    if (fn_.params.size() > MAX_NUMBER_OF_PARAMS_FOR_FUNCTIONAL_INTERFACE) {
+        GetCtx()->AddError("Function types with more than 16 parameters are not supported");
+        return;
+    }
+    name_ += std::to_string(fn_.params.size());
 
     rec_.name = name_;
-    fnName_ = fn_.name = name_ + ".invoke";
+    fnName_ = fn_.name = name_ + ".invoke0";
     fn_.params.insert(fn_.params.begin(), pandasm::Function::Parameter(pandasm::Type(name_, 0), SourceLanguage::ETS));
     for (const auto &attr : typeapi_create_consts::ATTR_ABSTRACT_METHOD) {
         fn_.metadata->SetAttribute(attr);

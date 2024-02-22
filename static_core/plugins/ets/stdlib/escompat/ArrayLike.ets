@@ -15,12 +15,33 @@
 
 package escompat;
 
-export interface ArrayLike<T> {
-    at(index: number): T | undefined;
+class ArrayLikeIterator<T> implements Iterator<T> {
+    private base: ArrayLike<T>
+    private index: number = 0
 
+    constructor(base: ArrayLike<T>) {
+        this.base = base
+    }
+
+    override next(): IteratorResult<T> {
+        if (this.index >= this.base.lengthMakeProp()) {
+            return new IteratorResult<T>()
+        }
+        return new IteratorResult<T>(this.base.$_get(this.index++))
+    }
+}
+
+export interface ArrayLike<T> /* extends Iterable<T> */ {
     $_get(index: number): T;
 
-    // TODO(ivan-tyulyandin): blocked by internal issue #11979
+    // TODO(kprokopenko): blocked by internal issue #15201
     // readonly length: number
     lengthMakeProp(): number
+
+    // NOTE(kprokopenko) blocked by #15308
+    /*
+    iterator(): Iterator<T> {
+        return new ArrayLikeIterator<T>(this)
+    }
+    */
 }

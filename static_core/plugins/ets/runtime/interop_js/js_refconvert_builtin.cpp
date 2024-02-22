@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <type_traits>
-#include "macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
@@ -23,7 +21,6 @@
 #include "runtime/mem/local_object_handle.h"
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
-#include "types/ets_object.h"
 
 namespace ark::ets::interop::js {
 
@@ -183,41 +180,39 @@ private:
             {utf::CStringAsMutf8("$_get"), "D:Lstd/core/Object;"},
             {utf::CStringAsMutf8("$_set"), "DLstd/core/Object;:Lstd/core/void;"},
             {utf::CStringAsMutf8("with"), "DLstd/core/Object;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("map"), "LFunctionalInterface-std-core-Object-std-core-Object-0;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("forEach"), "LFunctionalInterface-std-core-Object-std-core-void-0;:Lstd/core/void;"},
+            {utf::CStringAsMutf8("map"), "Lstd/core/Function1;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("forEach"), "Lstd/core/Function1;:Lstd/core/void;"},
             {utf::CStringAsMutf8("pop"), ":Lstd/core/Object;"},
             {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
             {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
             {utf::CStringAsMutf8("join"), "Lstd/core/Object;:Lstd/core/String;"},
             // NOTE(kprokopenko) make [Lstd/core/Object;:D when #14756 is fixed
             {utf::CStringAsMutf8("push"), "Lstd/core/Object;:D"},
-            {utf::CStringAsMutf8("some"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
+            {utf::CStringAsMutf8("some"), "Lstd/core/Function1;:Z"},
             {utf::CStringAsMutf8("sort"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("every"), "LFunctionalInterface-std-core-Object-u1-0;:Z"},
+            {utf::CStringAsMutf8("every"), "Lstd/core/Function1;:Z"},
             {utf::CStringAsMutf8("shift"), ":Lstd/core/Object;"},
             {utf::CStringAsMutf8("slice"), "Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
             {utf::CStringAsMutf8("<ctor>"), ":V"},
-            {utf::CStringAsMutf8("filter"), "LFunctionalInterface-std-core-Object-u1-0;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("filter"), "Lstd/core/Function1;:Lescompat/Array;"},
             {utf::CStringAsMutf8("<get>length"), ":D"},
-            {utf::CStringAsMutf8("reduce"),
-             "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("reduce"), "Lstd/core/Function2;:Lstd/core/Object;"},
             {utf::CStringAsMutf8("splice"), "DLstd/core/Object;[Lstd/core/Object;:Lescompat/Array;"},
-            {utf::CStringAsMutf8("findLast"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("findLast"), "Lstd/core/Function1;:Lstd/core/Object;"},
             {utf::CStringAsMutf8("toSorted"), ":Lescompat/Array;"},
-            {utf::CStringAsMutf8("findIndex"), "LFunctionalInterface-std-core-Object-u1-0;:D"},
+            {utf::CStringAsMutf8("findIndex"), "Lstd/core/Function1;:D"},
             {utf::CStringAsMutf8("toSpliced"), "II:Lescompat/Array;"},
             {utf::CStringAsMutf8("copyWithin"), "II:Lescompat/Array;"},
             {utf::CStringAsMutf8("toReversed"), ":Lescompat/Array;"},
             {utf::CStringAsMutf8("indexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
             {utf::CStringAsMutf8("includes"), "Lstd/core/Object;Lstd/core/Object;:Z"},
             {utf::CStringAsMutf8("lastIndexOf"), "Lstd/core/Object;Lstd/core/Object;:D"},
-            {utf::CStringAsMutf8("reduceRight"),
-             "LFunctionalInterface-std-core-Object-std-core-Object-std-core-Object-0;:Lstd/core/Object;"},
-            {utf::CStringAsMutf8("find"), "LFunctionalInterface-std-core-Object-u1-0;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("reduceRight"), "Lstd/core/Function2;:Lstd/core/Object;"},
+            {utf::CStringAsMutf8("find"), "Lstd/core/Function1;:Lstd/core/Object;"},
             {utf::CStringAsMutf8("isArray"), "Lstd/core/Object;:Z"},
-            {utf::CStringAsMutf8("flatMap"),
-             "LFunctionalInterface-std-core-Object-f64-std-core-Object-0;:Lescompat/Array;"},
+            {utf::CStringAsMutf8("flatMap"), "Lstd/core/Function2;:Lescompat/Array;"},
             {utf::CStringAsMutf8("toLocaleString"), ":Lstd/core/String;"},
+            {utf::CStringAsMutf8("from"), "Lstd/core/Object;:Lescompat/Array;"},
         };
         wArray_ = RegisterClass(descriptors::ARRAY, "Array", &W_ARRAY_OVERLOADS);
 

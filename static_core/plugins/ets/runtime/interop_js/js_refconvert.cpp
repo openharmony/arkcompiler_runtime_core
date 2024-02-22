@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,22 @@
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 
 #include "plugins/ets/runtime/interop_js/js_refconvert_array.h"
+#include "plugins/ets/runtime/interop_js/js_refconvert_function.h"
 
 namespace ark::ets::interop::js {
+
+static bool IsFunctionClass(InteropCtx *ctx, Class *klass)
+{
+    if (ctx->IsFunctionalInterface(klass)) {
+        return true;
+    }
+    for (auto *itf : klass->GetInterfaces()) {
+        if (ctx->IsFunctionalInterface(itf)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Class *klass)
 {
@@ -35,6 +49,11 @@ static std::unique_ptr<JSRefConvert> JSRefConvertCreateImpl(InteropCtx *ctx, Cla
     if (js_proxy::JSProxy::IsProxyClass(klass)) {
         return ets_proxy::EtsClassWrapper::CreateJSRefConvertJSProxy(ctx, klass);
     }
+
+    if (IsFunctionClass(ctx, klass)) {
+        return std::make_unique<JSRefConvertFunction>(klass);
+    }
+
     return ets_proxy::EtsClassWrapper::CreateJSRefConvertEtsProxy(ctx, klass);
 }
 

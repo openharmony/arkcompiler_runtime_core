@@ -21,19 +21,37 @@ function main(): int {
     failure += test(new RegExp(".", "g"), "ab", [new RegExpMatchArray(0, "ab", ["a"]), new RegExpMatchArray(1, "ab", ["b"])])
     failure += test(new RegExp("(?:)", "g"), "d", [new RegExpMatchArray(0, "d", [""]), new RegExpMatchArray(1, "d", [""])])
     failure += test(new RegExp("", "g"), "d", [new RegExpMatchArray(0, "d", [""]), new RegExpMatchArray(1, "d", [""])])
+
+    failure += test(new RegExp("c"), "c", [new RegExpMatchArray(0, "c", ["c"])])
+    failure += test(new RegExp("b"), "a", emptyArray)
+    failure += test(new RegExp("."), "ab", [new RegExpMatchArray(0, "ab", ["a"])])
+    failure += test(new RegExp("(?:)"), "d", [new RegExpMatchArray(0, "d", [""])])
+    failure += test(new RegExp(""), "d", [new RegExpMatchArray(0, "d", [""])])
+
+    let regexp = new RegExp(".", "g")
+    let s = "abc"
+    regexp.exec(s)
+    failure += checkTestResult(regexp.lastIndex as int, 1)
+    let iter = s.matchAll(regexp)
+    regexp.exec(s)
+    failure += checkTestResult(regexp.lastIndex as int, 2)
+    let next_result = iter.next()
+    failure += checkTestResult(next_result.value!, new RegExpMatchArray(1, "abc", ["b"]))
+    failure += checkTestResult(next_result.done, false)
+    failure += checkTestResult(regexp.lastIndex as int, 2)
+
     return failure
 }
 
 function test(r: RegExp, str: String, expected: RegExpMatchArray[]) {
-    let iter = str.matchAll(r)
+    let iter = r.matchAll(str)
     let failure = 0
-    //NOTE(kirill-mitkin): Blocked due to verifier error
-    /*let v = iter.next();
+    let v = iter.next();
     for (let i = 0; i < expected.length; ++i) {
         failure += checkTestResult(v.value!, expected[i]);
         v = iter.next()
     }
-    failure += checkTestResult(v.done, true);*/
+    failure += checkTestResult(v.done, true);
     return failure
 }
 
@@ -41,6 +59,13 @@ function checkTestResult(actual: boolean, expected: boolean) : int {
     if (actual != expected) return 1;
     return 0;
 }
+
+function checkTestResult(actual: int, expected: int) : int {
+    if (actual != expected) return 1;
+    return 0;
+}
+
+
 
 function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecArray | null) : int {
     if (actual == null && expected == null) {

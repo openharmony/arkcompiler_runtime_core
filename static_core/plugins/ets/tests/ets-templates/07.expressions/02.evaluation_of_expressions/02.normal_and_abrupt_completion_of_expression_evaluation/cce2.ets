@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -24,7 +24,7 @@ function main(): int {
   let t: Long|null = null;
 
   try {
-    let v: long = (a = 2) + (t === null ? 0 : t.unboxed()) + (b = 2);
+    let v: long = (a = 2) + (t === null ? 0 : t!.unboxed()) + (b = 2);
     if (a != 2 || b != 2) return 1;
     return 0;
   } catch (e: ClassCastException) {

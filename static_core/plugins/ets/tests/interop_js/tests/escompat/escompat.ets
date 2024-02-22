@@ -141,7 +141,7 @@ function Array_TestJSFilterArray(arr: Array<FooClass>): void {
 function Array_TestJSShift(arr: Array<FooClass>): void {
     let shifted: FooClass = arr.shift() as FooClass;
     assert shifted.toString() == "{Foo named zero}";
-    assert arr.at(0).toString() == "{Foo named one}";
+    assert arr.at(0)!.toString() == "{Foo named one}";
 }
 
 function Array_TestJSWith(arr: Array<FooClass>): void {
@@ -253,8 +253,8 @@ function Array_TestJSFindLast(arr: Array<FooClass>): void {
     let last: FooClass = arr.findLast(fnTrue) as FooClass;
     assert last.toString() == "{Foo named one}";
 
-    let last_null: FooClass = arr.findLast(fnFalse) as FooClass;
-    assert last_null === null;
+    let last_null = arr.findLast(fnFalse);
+    assert last_null === undefined;
 }
 
 function Array_TestJSFindIndex(arr: Array<FooClass>): void {
@@ -275,8 +275,8 @@ function Array_TestJSFind(arr: Array<FooClass>): void {
     let found: FooClass = arr.find(fnTrue) as FooClass;
     assert found.toString() == "{Foo named zero}";
 
-    let found_null: FooClass = arr.find(fnFalse) as FooClass;
-    assert found_null === null;
+    let found_null = arr.find(fnFalse);
+    assert found_null === undefined;
 }
 
 function Array_TestJSIsArray(arr: Array<FooClass>): void {

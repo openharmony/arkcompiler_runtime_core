@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,12 @@
 #include "intrinsics.h"
 
 namespace ark::ets::intrinsics {
+
+namespace {
+constexpr const char *NAN_LITERAL = "NaN";
+constexpr const char *INF_LITERAL = "Infinity";
+constexpr const char *NEGINF_LITERAL = "-Infinity";
+}  // namespace
 
 extern "C" EtsVoid *StdConsolePrintln(ObjectHeader *header [[maybe_unused]])
 {
@@ -74,6 +80,48 @@ extern "C" EtsVoid *StdConsolePrintI8([[maybe_unused]] ObjectHeader *header, int
 extern "C" EtsVoid *StdConsolePrintI64([[maybe_unused]] ObjectHeader *header, int64_t v)
 {
     ark::intrinsics::PrintI64(v);
+    return EtsVoid::GetInstance();
+}
+
+extern "C" EtsVoid *StdConsolePrintF32([[maybe_unused]] ObjectHeader *header, float v)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    if (std::isnan(v)) {
+        StdConsolePrintString(header,
+                              EtsHandle<EtsString>(coroutine, EtsString::CreateFromMUtf8(NAN_LITERAL)).GetPtr());
+    } else if (!std::isfinite(v)) {
+        if (v < 0) {
+            StdConsolePrintString(header,
+                                  EtsHandle<EtsString>(coroutine, EtsString::CreateFromMUtf8(NEGINF_LITERAL)).GetPtr());
+        } else {
+            StdConsolePrintString(header,
+                                  EtsHandle<EtsString>(coroutine, EtsString::CreateFromMUtf8(INF_LITERAL)).GetPtr());
+        }
+    } else {
+        ark::intrinsics::PrintF32(v);
+    }
+    return EtsVoid::GetInstance();
+}
+
+extern "C" EtsVoid *StdConsolePrintF64([[maybe_unused]] ObjectHeader *header, double v)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope(coroutine);
+    if (std::isnan(v)) {
+        StdConsolePrintString(header,
+                              EtsHandle<EtsString>(coroutine, EtsString::CreateFromMUtf8(NAN_LITERAL)).GetPtr());
+    } else if (!std::isfinite(v)) {
+        if (v < 0) {
+            StdConsolePrintString(header,
+                                  EtsHandle<EtsString>(coroutine, EtsString::CreateFromMUtf8(NEGINF_LITERAL)).GetPtr());
+        } else {
+            StdConsolePrintString(header,
+                                  EtsHandle<EtsString>(coroutine, EtsString::CreateFromMUtf8(INF_LITERAL)).GetPtr());
+        }
+    } else {
+        ark::intrinsics::PrintF64(v);
+    }
     return EtsVoid::GetInstance();
 }
 

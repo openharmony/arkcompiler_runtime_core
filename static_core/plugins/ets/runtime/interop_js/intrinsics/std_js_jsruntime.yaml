@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -286,17 +286,6 @@ intrinsics:
       ret: u1
       args: [ std.core.String ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSNewClassIntrinsic
-    clear_flags: [ ]
-
-  - name: JSRuntimeCreateLambdaProxy
-    space: ets
-    class_name: std.interop.js.JSRuntime
-    method_name: __createLambdaProxy
-    static: true
-    signature:
-      ret: std.interop.js.JSValue
-      args: [ std.core.Object ]
-    impl: ark::ets::interop::js::intrinsics::JSRuntimeCreateLambdaProxyIntrinsic
     clear_flags: [ ]
 
   - name: JSRuntimeLoadModule
@@ -681,7 +670,7 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToJSValueIntrinsic
     interop_intrinsic_kind: unwrap
     clear_flags: [no_dce]
-  
+
   - name: CompilerConvertLocalToString
     space: ets
     compiler_only: true

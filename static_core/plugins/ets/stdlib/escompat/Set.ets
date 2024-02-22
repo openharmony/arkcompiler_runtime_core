@@ -125,9 +125,9 @@ export final class Set<K> implements ReadonlySet<K> {
      * Constructs a Set with same elements
      * @param iterable collection of elements to add to a set
      */
-    constructor(iterable: Array<K>) {
+    constructor(iterable: Iterable<K>) {
         this()
-        iteratorForEach<K>(iterable.values(), (x: K): void => {
+        iteratorForEach<K>(iterable.iterator(), (x: K): void => {
             this.add(x)
         })
     }
@@ -141,7 +141,7 @@ export final class Set<K> implements ReadonlySet<K> {
     }
 
     private rehash(): void {
-        const iter = new SetIterator<ListNode>(this.listRoot.next, this.listRoot, (x: ListNode): Object => x)
+        const iter = new SetIterator<ListNode>(this.listRoot.next, this.listRoot, (x: ListNode): ListNode => x)
         const oldSize = this.buckets.length
         for (let i = 0; i < oldSize; i++) {
             const a = this.buckets.at(i)!
@@ -171,7 +171,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val.equals(v as Object)) {
+            if (node.val!.equals(v as Object)) {
                 node.val = v as Object
                 return this
             }
@@ -201,7 +201,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val.equals(v)) {
+            if (node.val!.equals(v)) {
                 return node.val as K
             }
         }
@@ -242,7 +242,7 @@ export final class Set<K> implements ReadonlySet<K> {
         const buckSize = buck.length
         for (let i = 0; i < buckSize; i++) {
             const node = buck.$_get(i)
-            if (node.val.equals(v)) {
+            if (node.val!.equals(v)) {
                 node.prev.next = node.next
                 node.next.prev = node.prev
                 buck.fill(buck.pop()!, i, i + 1)
@@ -291,10 +291,10 @@ export final class Set<K> implements ReadonlySet<K> {
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
     /* override */ entries(): IterableIterator<Entry<K, K>> {
-        return this.mappedIterator<Entry<K, K>>((x: ListNode): Object => {
+        return this.mappedIterator<Object>((x: ListNode): Object => {
             const v = x.val as K;
             return new Entry<K, K>(v, v)
-        })
+        }) as IterableIterator<Entry<K, K>>
     }
 
     /**
@@ -320,16 +320,8 @@ export final class Set<K> implements ReadonlySet<K> {
      *
      * @param fn to apply
      */
+    // fn should take Set instead of ReadonlySet, but blocked by #15096
     override forEach(fn: (k: K, v: K, set: ReadonlySet<K>) => void): void {
-        iteratorForEach<K>(this.keys(), (x: K): void => fn(x, x, this))
-    }
-
-    /**
-     * Applies a function over all elements of the Set
-     *
-     * @param fn to apply
-     */
-    forEach(fn: (k: K, v: K, set: Set<K>) => void): void {
         iteratorForEach<K>(this.keys(), (x: K): void => fn(x, x, this))
     }
 }

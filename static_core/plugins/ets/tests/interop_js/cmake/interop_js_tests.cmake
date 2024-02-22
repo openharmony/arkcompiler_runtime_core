@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -60,6 +60,7 @@ function(panda_ets_interop_js_gtest TARGET)
     panda_ets_package_gtest(${TARGET_GTEST_PACKAGE}
         ETS_SOURCES ${ARG_ETS_SOURCES}
         ETS_CONFIG ${ARG_ETS_CONFIG}
+        ETS_VERIFICATOR_ERRORS "ForLoopCorrectlyInitializedForAll"
     )
     add_dependencies(${TARGET} ${TARGET_GTEST_PACKAGE})
 

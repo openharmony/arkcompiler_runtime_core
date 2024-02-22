@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 declare const exports: any;
 
-import { Lib2Class, Lib2Class2, DoubleAlias } from ".//lib2";
+import { Lib2Class, Lib2Class2, DoubleAlias } from "./lib2";
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
@@ -47,7 +47,7 @@ export {Identity};
 exports.Identity = Identity;
 
 
-function ForEach<T extends Object>(a: T[], cb: (e: T, idx: number) => void): void { return {} as any; };
+function ForEach<T extends Object>(a: T[], cb: (p1: T, p2: number) => void): void { return {} as any; };
 (ForEach as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'ForEach');
 export {ForEach};
 exports.ForEach = ForEach;
@@ -95,7 +95,7 @@ class Methods {
     public SumString(a: string, b: string): string { return {} as any; };
     public static StaticSumDouble(a: number, b: number): number { return {} as any; };
     public SumIntArray(a: number[]): number { return {} as any; };
-    public OptionalString(a?: string | null): string | null { return {} as any; };
+    public OptionalString(a: string | null): string | null { return {} as any; };
     public SumIntVariadic(a: number, ...b: number[]): number { return {} as any; };
     constructor() {};
 };
