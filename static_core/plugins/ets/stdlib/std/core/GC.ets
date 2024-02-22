@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ export final class GC {
      * @throws IllegalArgumentException if cause of GC is invalid or
      *         current GC does not support requested cause
      *
-     * @throws RuntimeException if VM is running with incorrect GC trigger
+     * @throws UnsupportedOperationException if VM is running with incorrect GC trigger
      */
     public static native scheduleGcAfterNthAlloc(counter: int, cause: int): void throws;
 

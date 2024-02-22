@@ -102,6 +102,7 @@ add_ets_gc_test(FILE concurrent_start_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-tri
 add_ets_gc_test(FILE register_native_allocation_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "--run-gc-in-place" "--gc-trigger-type=debug-never" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
+add_ets_gc_test(FILE scheduled_gc_trigger_exception.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 
 if (NOT PANDA_ENABLE_THREAD_SANITIZER)
     #flaky fail: ThreadSanitizer: data race #12611
