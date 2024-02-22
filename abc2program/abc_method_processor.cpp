@@ -18,25 +18,24 @@
 
 namespace panda::abc2program {
 
-AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                                       AbcStringTable &abc_string_table)
-    : AbcFileEntityProcessor(entity_id, abc_file, abc_string_table),
+AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
+    : AbcFileEntityProcessor(entity_id, key_data),
       function_(pandasm::Function("", panda_file::SourceLang::PANDA_ASSEMBLY))
 {
-    method_data_accessor_ = std::make_unique<panda_file::MethodDataAccessor>(abc_file_, entity_id_);
-    FillUpProgramData();
+    method_data_accessor_ = std::make_unique<panda_file::MethodDataAccessor>(*file_, entity_id_);
+    FillProgramData();
 }
 
-void AbcMethodProcessor::FillUpProgramData()
+void AbcMethodProcessor::FillProgramData()
 {
-    FillUpFunction();
+    FillFunction();
 }
 
-void AbcMethodProcessor::FillUpFunction()
+void AbcMethodProcessor::FillFunction()
 {
     std::optional<panda_file::File::EntityId> code_id = method_data_accessor_->GetCodeId();
     if (code_id.has_value()) {
-        AbcCodeProcessor codeProcessor(code_id.value(), abc_file_, abc_string_table_, entity_id_);
+        AbcCodeProcessor codeProcessor(code_id.value(), key_data_, entity_id_);
     }
 }
 

@@ -16,33 +16,185 @@
 #include "program_dump.h"
 #include "method_data_accessor-inl.h"
 #include "abc2program_log.h"
+#include "abc_file_utils.h"
 
 namespace panda::abc2program {
 
-void PandasmProgramDumper::Dump(std::ostream &os, pandasm::Program &program)
+void PandasmProgramDumper::Dump(std::ostream &os, const pandasm::Program &program) const
 {
-    os << "# source binary: " << abc_file_.GetFilename() << "\n";
-    os << ".language ";
+    os << std::flush;
+    DumpAbcFilePath(os);
+    DumpProgramLanguage(os, program);
+    DumpRecordTable(os, program);
+}
+
+bool PandasmProgramDumper::HasNoAbcInput() const
+{
+    return ((file_ == nullptr) || (string_table_ == nullptr));
+}
+
+void PandasmProgramDumper::DumpAbcFilePath(std::ostream &os) const
+{
+    if (HasNoAbcInput()) {
+        return;
+    }
+    os << DUMP_TITLE_SOURCE_BINARY << file_->GetFilename() << DUMP_CONTENT_DOUBLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpProgramLanguage(std::ostream &os, const pandasm::Program &program) const
+{
+    os << DUMP_TITLE_LANGUAGE;
     if (program.lang == panda::panda_file::SourceLang::ECMASCRIPT) {
-        os << "ECMAScript";
+        os << DUMP_CONTENT_ECMA_SCRIPT;
     } else {
-        os << "PandaAssembly";
+        os << DUMP_CONTENT_PANDA_ASSEMBLY;
+    }
+    os << DUMP_CONTENT_DOUBLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpLiteralArrayTable(std::ostream &os, const pandasm::Program &program) const
+{
+    if (HasNoAbcInput()) {
+        DumpLiteralArrayTableWithoutKey(os, program);
+    } else {
+        DumpLiteralArrayTableWithKey(os, program);
     }
 }
 
-void PandasmProgramDumper::Dump(std::ostream &os, pandasm::Record &record)
+void PandasmProgramDumper::DumpLiteralArrayTableWithKey(std::ostream &os, const pandasm::Program &program) const
+{
+    os << DUMP_TITLE_SEPARATOR;
+    os << DUMP_TITLE_LITERALS << DUMP_CONTENT_SINGLE_ENDL;
+    auto it = program.literalarray_table.begin();
+    auto end = program.literalarray_table.end();
+    for (; it != end; ++it) {
+        DumpLiteralArrayWithKey(os, it->first, it->second);
+    }
+    os << DUMP_CONTENT_DOUBLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpLiteralArrayWithKey(std::ostream &os, const std::string &key,
+                                                   const pandasm::LiteralArray &lit_array) const
+{
+    os << key << " ";
+    os << SerializeLiteralArray(lit_array);
+    os << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpLiteralArrayTableWithoutKey(std::ostream &os, const pandasm::Program &program) const
+{
+    std::vector<std::string> literal_array_contents;
+    auto it = program.literalarray_table.begin();
+    auto end = program.literalarray_table.end();
+    for (; it != end; ++it) {
+        literal_array_contents.emplace_back(SerializeLiteralArray(it->second));
+    }
+    for (const std::string &str : literal_array_contents) {
+        os << str << DUMP_CONTENT_SINGLE_ENDL;
+    }
+    os << DUMP_CONTENT_DOUBLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpRecordTable(std::ostream &os, const pandasm::Program &program) const
+{
+    os << DUMP_TITLE_SEPARATOR;
+    os << DUMP_TITLE_RECORDS;
+    os << DUMP_CONTENT_DOUBLE_ENDL;
+    for (const auto &it : program.record_table) {
+        DumpRecord(os, it.second);
+    }
+    os << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpRecord(std::ostream &os, const pandasm::Record &record) const
+{
+    if (AbcFileUtils::IsSystemTypeName(record.name)) {
+        return;
+    }
+    os << DUMP_TITLE_RECORD << record.name;
+    if (DumpRecordMetaData(os, record)) {
+        DumpFieldList(os, record);
+    }
+    DumpRecordSourceFile(os, record);
+}
+
+bool PandasmProgramDumper::DumpRecordMetaData(std::ostream &os, const pandasm::Record &record) const
+{
+    if (record.metadata->IsForeign()) {
+        os << " " << DUMP_CONTENT_ATTR_EXTERNAL;
+        os << DUMP_CONTENT_SINGLE_ENDL;
+        return false;
+    }
+    return true;
+}
+
+void PandasmProgramDumper::DumpFieldList(std::ostream &os, const pandasm::Record &record) const
+{
+    os << " {" << DUMP_CONTENT_SINGLE_ENDL;
+    for (const auto &it : record.field_list) {
+        DumpField(os, it);
+    }
+    os << DUMP_CONTENT_SINGLE_ENDL << "}" << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpField(std::ostream &os, const pandasm::Field &field) const
+{
+    std::string file_name = AbcFileUtils::GetFileNameByAbsolutePath(field.name);
+    os << "\t" << field.type.GetPandasmName() << " " << file_name;
+    DumpFieldMetaData(os, field);
+}
+
+void PandasmProgramDumper::DumpFieldMetaData(std::ostream &os, const pandasm::Field &field) const
 {
     log::Unimplemented(__PRETTY_FUNCTION__);
 }
 
-void PandasmProgramDumper::Dump(std::ostream &os, pandasm::Function &function)
+void PandasmProgramDumper::DumpRecordSourceFile(std::ostream &os, const pandasm::Record &record) const
+{
+    os << DUMP_TITLE_RECORD_SOURCE_FILE << record.source_file << DUMP_CONTENT_DOUBLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpFunctionTable(std::ostream &os, const pandasm::Program &program) const
+{
+    os << DUMP_TITLE_SEPARATOR;
+    os << DUMP_TITLE_METHODS;
+    os << DUMP_CONTENT_DOUBLE_ENDL;
+    for (const auto &it : program.function_table) {
+        DumpFunction(os, it.second);
+    }
+}
+
+void PandasmProgramDumper::DumpFunction(std::ostream &os, const pandasm::Function &function) const
 {
     log::Unimplemented(__PRETTY_FUNCTION__);
 }
 
-void PandasmProgramDumper::Dump(std::ostream &os, pandasm::Field &field)
+void PandasmProgramDumper::DumpStrings(std::ostream &os, const pandasm::Program &program) const
 {
-    log::Unimplemented(__PRETTY_FUNCTION__);
+    if (HasNoAbcInput()) {
+        DumpStringsByProgram(os, program);
+    } else {
+        DumpStringsByStringTable(os, *string_table_);
+    }
+}
+
+void PandasmProgramDumper::DumpStringsByStringTable(std::ostream &os, const AbcStringTable &string_table) const
+{
+    os << DUMP_TITLE_SEPARATOR;
+    os << DUMP_TITLE_STRING;
+    string_table.Dump(os);
+    os << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpStringsByProgram(std::ostream &os, const pandasm::Program &program) const
+{
+    os << DUMP_TITLE_SEPARATOR;
+    os << DUMP_TITLE_STRING;
+    os << DUMP_CONTENT_SINGLE_ENDL;
+    for (const std::string &str : program.strings) {
+        os << str << DUMP_CONTENT_SINGLE_ENDL;
+    }
+    os << DUMP_CONTENT_SINGLE_ENDL;
 }
 
 std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const
@@ -66,7 +218,7 @@ std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralAr
 void PandasmProgramDumper::GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array,
                                                    panda_file::File::EntityId offset) const
 {
-    panda_file::LiteralDataAccessor lit_array_accessor(abc_file_, abc_file_.GetLiteralArraysId());
+    panda_file::LiteralDataAccessor lit_array_accessor(*file_, file_->GetLiteralArraysId());
     lit_array_accessor.EnumerateLiteralVals(
         offset, [this, lit_array](
                     const panda_file::LiteralDataAccessor::LiteralValue &value,
@@ -112,7 +264,7 @@ void PandasmProgramDumper::FillLiteralArrayData(pandasm::LiteralArray *lit_array
                                                 const panda_file::LiteralDataAccessor::LiteralValue &value) const
 {
     panda_file::File::EntityId id(std::get<uint32_t>(value));
-    auto sp = abc_file_.GetSpanFromId(id);
+    auto sp = file_->GetSpanFromId(id);
     auto len = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
     if (tag != panda_file::LiteralTag::ARRAY_STRING) {
         for (size_t i = 0; i < len; i++) {
@@ -127,7 +279,7 @@ void PandasmProgramDumper::FillLiteralArrayData(pandasm::LiteralArray *lit_array
         auto str_id = panda_file::helpers::Read<sizeof(T)>(&sp);
         pandasm::LiteralArray::Literal lit;
         lit.tag_ = tag;
-        lit.value_ = abc_string_table_.GetStringById(str_id);
+        lit.value_ = string_table_->GetStringById(str_id);
         lit_array->literals_.emplace_back(lit);
     }
 }
@@ -180,8 +332,8 @@ void PandasmProgramDumper::FillLiteralData(pandasm::LiteralArray *lit_array,
 void PandasmProgramDumper::FillLiteralData4Method(const panda_file::LiteralDataAccessor::LiteralValue &value,
                                                   pandasm::LiteralArray::Literal &lit) const
 {
-    panda_file::MethodDataAccessor mda(abc_file_, panda_file::File::EntityId(std::get<uint32_t>(value)));
-    lit.value_ = abc_string_table_.GetStringById(mda.GetNameId());
+    panda_file::MethodDataAccessor mda(*file_, panda_file::File::EntityId(std::get<uint32_t>(value)));
+    lit.value_ = string_table_->GetStringById(mda.GetNameId());
 }
 
 void PandasmProgramDumper::FillLiteralData4LiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,

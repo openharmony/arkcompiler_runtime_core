@@ -19,25 +19,22 @@
 #include <assembly-ins.h>
 #include "bytecode_instruction-inl.h"
 #include "bytecode_instruction.h"
-#include "code_data_accessor-inl.h"
-#include "code_data_accessor.h"
-#include "method_data_accessor-inl.h"
-#include "proto_data_accessor-inl.h"
 #include "abc_string_table.h"
+#include "abc2program_key_data.h"
 
 namespace panda::abc2program {
 
 class AbcCodeConverter {
 public:
-    AbcCodeConverter(const panda_file::File *abc_file, AbcStringTable &abc_string_table)
-        : abc_file_(abc_file), abc_string_table_(abc_string_table) {}
+    explicit AbcCodeConverter(Abc2ProgramKeyData &key_data);
     pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode opcode) const;
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
 private:
-    const panda_file::File *abc_file_;
-    AbcStringTable &abc_string_table_;
+    Abc2ProgramKeyData &key_data_;
+    const panda_file::File *file_ = nullptr;
+    AbcStringTable *string_table_ = nullptr;
 };  // class AbcCodeConverter
 
 }  // namespace panda::abc2program

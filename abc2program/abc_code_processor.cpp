@@ -18,28 +18,25 @@
 
 namespace panda::abc2program {
 
-AbcCodeProcessor::AbcCodeProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                                   AbcStringTable &abc_string_table, panda_file::File::EntityId method_id)
-    : AbcFileEntityProcessor(entity_id, abc_file, abc_string_table), method_id_(method_id)
+AbcCodeProcessor::AbcCodeProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data,
+                                   panda_file::File::EntityId method_id)
+    : AbcFileEntityProcessor(entity_id, key_data), method_id_(method_id)
 {
-    code_data_accessor_ = std::make_unique<panda_file::CodeDataAccessor>(abc_file_, entity_id_);
-    abc_code_converter_ = std::make_unique<AbcCodeConverter>(&abc_file_, abc_string_table);
-    FillUpProgramData();
+    code_data_accessor_ = std::make_unique<panda_file::CodeDataAccessor>(*file_, entity_id_);
+    code_converter_ = std::make_unique<AbcCodeConverter>(key_data);
+    FillProgramData();
 }
 
-void AbcCodeProcessor::FillUpProgramData()
+void AbcCodeProcessor::FillProgramData()
 {
     const auto ins_size = code_data_accessor_->GetCodeSize();
     const auto ins_arr = code_data_accessor_->GetInstructions();
     auto bc_ins = BytecodeInstruction(ins_arr);
     const auto bc_ins_last = bc_ins.JumpTo(ins_size);
-    size_t reg_nums = code_data_accessor_->GetNumVregs();
     while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
-        pandasm::Ins pa_ins = abc_code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
+        pandasm::Ins pa_ins = code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
         ins.emplace_back(pa_ins);
         bc_ins = bc_ins.GetNext();
-        std::string ins_str = pa_ins.ToString("", true, reg_nums);
-        std::cout << ins_str << std::endl;
     }
 }
 

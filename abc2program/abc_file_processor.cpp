@@ -17,38 +17,45 @@
 #include <iostream>
 #include "abc_class_processor.h"
 #include "abc2program_log.h"
+#include "abc_file_utils.h"
 
 namespace panda::abc2program {
 
+AbcFileProcessor::AbcFileProcessor(Abc2ProgramKeyData &key_data) : key_data_(key_data)
+{
+    file_ = &(key_data_.GetAbcFile());
+    string_table_ = &(key_data_.GetAbcStringTable());
+    program_ = &(key_data_.GetProgram());
+}
+
 bool AbcFileProcessor::ProcessFile()
 {
-    program_.lang = panda_file::SourceLang::ECMASCRIPT;
+    program_->lang = panda_file::SourceLang::ECMASCRIPT;
     ProcessClasses();
-    FillUpProgramStrings();
-    FillUpProgramArrayTypes();
+    FillProgramStrings();
     return true;
 }
 
 void AbcFileProcessor::ProcessClasses()
 {
-    const auto classes = abc_file_.GetClasses();
-    for (const uint32_t class_idx : classes) {
-        panda_file::File::EntityId class_id(class_idx);
-        if (abc_file_.IsExternal(class_id)) {
-            continue;
+    const auto classes = file_->GetClasses();
+    for (size_t i = 0; i < classes.size(); i++) {
+        uint32_t class_idx = classes[i];
+        auto class_off = file_->GetHeader()->class_idx_off + sizeof(uint32_t) * i;
+        if (class_idx > file_->GetHeader()->file_size) {
+            LOG(FATAL, ABC2PROGRAM)  << "> error encountered in record at " << class_off << " (0x" << std::hex
+                                     << class_off << "). binary file corrupted. record offset (0x" << class_idx
+                                     << ") out of bounds (0x" << file_->GetHeader()->file_size << ")!";
+            break;
         }
-        AbcClassProcessor classProcessor(class_id, abc_file_, abc_string_table_);
+        panda_file::File::EntityId record_id(class_idx);
+        AbcClassProcessor classProcessor(record_id, key_data_);
     }
 }
 
-void AbcFileProcessor::FillUpProgramStrings()
+void AbcFileProcessor::FillProgramStrings()
 {
-    log::Unimplemented(__PRETTY_FUNCTION__);
-}
-
-void AbcFileProcessor::FillUpProgramArrayTypes()
-{
-    log::Unimplemented(__PRETTY_FUNCTION__);
+    program_->strings = string_table_->GetStringSet();
 }
 
 } // namespace panda::abc2program

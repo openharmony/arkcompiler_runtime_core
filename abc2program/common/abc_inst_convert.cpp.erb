@@ -15,6 +15,7 @@
 
 #include "common/abc_code_converter.h"
 #include "proto_data_accessor-inl.h"
+#include "method_data_accessor-inl.h"
 
 namespace panda::abc2program {
 
@@ -65,13 +66,13 @@ pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeI
 
         if (bc_ins.HasId(format, 0)) {
             auto idx = bc_ins.GetId().AsIndex();
-            id = abc_file_->ResolveMethodIndex(method_id, idx);
+            id = file_->ResolveMethodIndex(method_id, idx);
         } else {
             id = method_id;
         }
         
-        panda_file::MethodDataAccessor mda(*abc_file_, id);
-        panda_file::ProtoDataAccessor pda(*abc_file_, mda.GetProtoId());
+        panda_file::MethodDataAccessor mda(*file_, id);
+        panda_file::ProtoDataAccessor pda(*file_, mda.GetProtoId());
 
         int overhead;
 

@@ -16,28 +16,94 @@
 #include "abc_class_processor.h"
 #include <iostream>
 #include "abc_method_processor.h"
+#include "abc_field_processor.h"
 #include "mangling.h"
 
 namespace panda::abc2program {
 
-AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                                     AbcStringTable &abc_string_table)
-    : AbcFileEntityProcessor(entity_id, abc_file, abc_string_table)
+AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
+    : AbcFileEntityProcessor(entity_id, key_data)
 {
-    class_data_accessor_ = std::make_unique<panda_file::ClassDataAccessor>(abc_file_, entity_id_);
-    FillUpProgramData();
+    class_data_accessor_ = std::make_unique<panda_file::ClassDataAccessor>(*file_, entity_id_);
+    FillProgramData();
 }
 
-void AbcClassProcessor::FillUpProgramData()
+void AbcClassProcessor::FillProgramData()
 {
-    FillUpFunctionTable();
+    FillRecord();
+    FillFunctions();
 }
 
-void AbcClassProcessor::FillUpFunctionTable()
+void AbcClassProcessor::FillRecord()
 {
+    const pandasm::Record *record_ptr = GetRecordById(entity_id_);
+    if (record_ptr != nullptr) {
+        return;
+    }
+    pandasm::Record record("", panda_file::SourceLang::ECMASCRIPT);
+    record.name = key_data_.GetFullRecordNameById(entity_id_);
+    ASSERT(program_->record_table.find(record.name) == program_->record_table.end());
+    FillRecordData(record);
+    program_->record_table.emplace(record.name, std::move(record));
+    const auto it = program_->record_table.find(record.name);
+    const pandasm::Record &recordRef = it->second;
+    AddRecord(entity_id_, recordRef);
+}
+
+void AbcClassProcessor::FillRecordData(pandasm::Record &record)
+{
+    FillRecordMetaData(record);
+    FillFields(record);
+    FillRecordSourceFile(record);
+}
+
+void AbcClassProcessor::FillRecordMetaData(pandasm::Record &record)
+{
+    FillRecordAttributes(record);
+    FillRecordAnnotations(record);
+}
+
+void AbcClassProcessor::FillRecordAttributes(pandasm::Record &record)
+{
+    if (file_->IsExternal(entity_id_)) {
+        record.metadata->SetAttribute(ABC_ATTR_EXTERNAL);
+    }
+}
+
+void AbcClassProcessor::FillRecordAnnotations(pandasm::Record &record)
+{
+    log::Unimplemented(__PRETTY_FUNCTION__);
+}
+
+void AbcClassProcessor::FillFields(pandasm::Record &record)
+{
+    if (file_->IsExternal(entity_id_)) {
+        return;
+    }
+    class_data_accessor_->EnumerateFields([&](panda_file::FieldDataAccessor &fda) -> void {
+        panda_file::File::EntityId field_id = fda.GetFieldId();
+        AbcFieldProcessor field_processor(field_id, key_data_, record);
+    });
+}
+
+void AbcClassProcessor::FillRecordSourceFile(pandasm::Record &record)
+{
+    std::optional<panda_file::File::EntityId> source_file_id = class_data_accessor_->GetSourceFileId();
+    if (source_file_id.has_value()) {
+        record.source_file = string_table_->GetStringById(source_file_id.value());
+    } else {
+        record.source_file = "";
+    }
+}
+
+void AbcClassProcessor::FillFunctions()
+{
+    if (file_->IsExternal(entity_id_)) {
+        return;
+    }
     class_data_accessor_->EnumerateMethods([&](panda_file::MethodDataAccessor &mda) -> void {
         panda_file::File::EntityId method_id = mda.GetMethodId();
-        AbcMethodProcessor method_processor(method_id, abc_file_, abc_string_table_);
+        AbcMethodProcessor method_processor(method_id, key_data_);
     });
 }
 

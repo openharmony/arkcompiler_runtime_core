@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef ABC2PROGRAM_ABC2PROGRAM_COMPILER_H
-#define ABC2PROGRAM_ABC2PROGRAM_COMPILER_H
+#ifndef ABC2PROGRAM_COMMON_ABC_TYPE_CONVERTER_H
+#define ABC2PROGRAM_COMMON_ABC_TYPE_CONVERTER_H
 
-#include <string>
-#include <assembly-program.h>
+#include <assembly-ins.h>
+#include "proto_data_accessor-inl.h"
 #include "abc_string_table.h"
-#include "abc2program_key_data.h"
 
 namespace panda::abc2program {
 
-class Abc2ProgramCompiler {
+class AbcTypeConverter {
 public:
-    bool OpenAbcFile(const std::string &file_path);
-    const panda_file::File &GetAbcFile() const;
-    AbcStringTable &GetAbcStringTable() const;
-    bool FillProgramData(pandasm::Program &program);
+    explicit AbcTypeConverter(AbcStringTable &string_table) : string_table_(string_table) {}
+    pandasm::Type PandaFileTypeToPandasmType(const panda_file::Type &type, panda_file::ProtoDataAccessor &pda,
+                                             size_t &ref_idx) const;
+    pandasm::Type FieldTypeToPandasmType(const uint32_t &type) const;
+
 private:
-    std::unique_ptr<const panda_file::File> file_;
-    std::unique_ptr<AbcStringTable> string_table_;
-    std::unique_ptr<Abc2ProgramKeyData> key_data_;
-}; // class Abc2ProgramCompiler
+    AbcStringTable &string_table_;
+};  // class AbcTypeConverter
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC2PROGRAM_COMPILER_H
+#endif // ABC2PROGRAM_COMMON_ABC_TYPE_CONVERTER_H

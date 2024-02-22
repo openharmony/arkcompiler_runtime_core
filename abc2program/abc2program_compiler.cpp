@@ -19,30 +19,31 @@
 
 namespace panda::abc2program {
 
-bool Abc2ProgramCompiler::OpenAbcFile(const std::string &abc_file_path)
+bool Abc2ProgramCompiler::OpenAbcFile(const std::string &file_path)
 {
-    abc_file_ = panda_file::File::Open(abc_file_path);
-    if (abc_file_ == nullptr) {
-        std::cerr << "Unable to open specified abc file " << abc_file_path << std::endl;
+    file_ = panda_file::File::Open(file_path);
+    if (file_ == nullptr) {
+        std::cerr << "Unable to open specified abc file " << file_path << std::endl;
         return false;
     }
-    abc_string_table_ = std::make_unique<AbcStringTable>(*abc_file_);
+    string_table_ = std::make_unique<AbcStringTable>(*file_);
     return true;
 }
 
 const panda_file::File &Abc2ProgramCompiler::GetAbcFile() const
 {
-    return *abc_file_;
+    return *file_;
 }
 
 AbcStringTable &Abc2ProgramCompiler::GetAbcStringTable() const
 {
-    return *abc_string_table_;
+    return *string_table_;
 }
 
-bool Abc2ProgramCompiler::FillUpProgramData(pandasm::Program &program)
+bool Abc2ProgramCompiler::FillProgramData(pandasm::Program &program)
 {
-    AbcFileProcessor file_processor(*abc_file_, *abc_string_table_, program);
+    key_data_ = std::make_unique<Abc2ProgramKeyData>(*file_, *string_table_, program);
+    AbcFileProcessor file_processor(*key_data_);
     bool success = file_processor.ProcessFile();
     return success;
 }

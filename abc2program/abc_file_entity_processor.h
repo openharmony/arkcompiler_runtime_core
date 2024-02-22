@@ -16,22 +16,53 @@
 #ifndef ABC2PROGRAM_ABC_FILE_ENTITY_PROCESSOR_H
 #define ABC2PROGRAM_ABC_FILE_ENTITY_PROCESSOR_H
 
-#include "abc_string_table.h"
-#include "file.h"
+#include "abc2program_key_data.h"
+#include "abc2program_log.h"
+#include "abc_file_utils.h"
 
 namespace panda::abc2program {
 
 class AbcFileEntityProcessor {
 public:
-    AbcFileEntityProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                           AbcStringTable &abc_string_table)
-        : entity_id_(entity_id), abc_file_(abc_file), abc_string_table_(abc_string_table) {}
+    AbcFileEntityProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+
+    bool AddRecord(panda_file::File::EntityId class_id, const pandasm::Record &record)
+    {
+        return key_data_.AddRecord(class_id, record);
+    }
+
+    bool AddFunction(panda_file::File::EntityId method_id, const pandasm::Function &function)
+    {
+        return key_data_.AddFunction(method_id, function);
+    }
+
+    bool AddField(panda_file::File::EntityId field_id, const pandasm::Field &field)
+    {
+        return key_data_.AddField(field_id, field);
+    }
+
+    const pandasm::Record *GetRecordById(panda_file::File::EntityId class_id) const
+    {
+        return key_data_.GetRecordById(class_id);
+    }
+
+    const pandasm::Function *GetFunctionById(panda_file::File::EntityId method_id) const
+    {
+        return key_data_.GetFunctionById(method_id);
+    }
+
+    const pandasm::Field *GetFieldById(panda_file::File::EntityId field_id) const
+    {
+        return key_data_.GetFieldById(field_id);
+    }
 
 protected:
-    virtual void FillUpProgramData();
+    virtual void FillProgramData() = 0;
     panda_file::File::EntityId entity_id_;
-    const panda_file::File &abc_file_;
-    AbcStringTable &abc_string_table_;
+    Abc2ProgramKeyData &key_data_;
+    const panda_file::File *file_ = nullptr;
+    AbcStringTable *string_table_ = nullptr;
+    pandasm::Program *program_ = nullptr;
 }; // class AbcFileEntityProcessor
 
 } // namespace panda::abc2program

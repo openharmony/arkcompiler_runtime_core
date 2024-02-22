@@ -23,13 +23,12 @@ namespace panda::abc2program {
 
 class AbcMethodProcessor : public AbcFileEntityProcessor {
   public:
-    AbcMethodProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                       AbcStringTable &abc_string_table);
-    void FillUpProgramData() override;
+    AbcMethodProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+    void FillProgramData() override;
     pandasm::Function function_;
 
   private:
-    void FillUpFunction();
+    void FillFunction();
     std::unique_ptr<panda_file::MethodDataAccessor> method_data_accessor_;
 };
 

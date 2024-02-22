@@ -18,17 +18,25 @@
 
 #include "abc_file_entity_processor.h"
 #include "field_data_accessor-inl.h"
+#include "common/abc_type_converter.h"
 
 namespace panda::abc2program {
 
 class AbcFieldProcessor : public AbcFileEntityProcessor {
 public:
-    AbcFieldProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                      AbcStringTable &abc_string_table);
-    void FillUpProgramData() override;
+    AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data, pandasm::Record &record);
+    void FillProgramData() override;
 
 private:
+    void FillFieldData(pandasm::Field &field);
+    void FillFieldName(pandasm::Field &field);
+    void FillFieldType(pandasm::Field &field);
+    void FillFieldMetaData(pandasm::Field &field);
+    void FillFieldAttributes(pandasm::Field &field);
+    void FillFieldAnnotations(pandasm::Field &field);
+    pandasm::Record &record_;
     std::unique_ptr<panda_file::FieldDataAccessor> field_data_accessor_;
+    std::unique_ptr<AbcTypeConverter> type_converter_;
 };
 
 } // namespace panda::abc2program

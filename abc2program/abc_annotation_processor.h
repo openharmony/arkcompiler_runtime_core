@@ -23,9 +23,8 @@ namespace panda::abc2program {
 
 class AbcAnnotationProcessor : public AbcFileEntityProcessor {
 public:
-    AbcAnnotationProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                           AbcStringTable &abc_string_table);
-    void FillUpProgramData() override;
+    AbcAnnotationProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+    void FillProgramData() override;
 
 private:
     std::unique_ptr<panda_file::AnnotationDataAccessor> annotation_data_accessor_;

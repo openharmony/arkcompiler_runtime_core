@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#include "abc_annotation_processor.h"
-#include "abc2program_log.h"
+#include "abc_file_entity_processor.h"
 
 namespace panda::abc2program {
 
-AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
-    : AbcFileEntityProcessor(entity_id, key_data)
+AbcFileEntityProcessor::AbcFileEntityProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
+    : entity_id_(entity_id), key_data_(key_data)
 {
-    annotation_data_accessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entity_id_);
-    FillProgramData();
+    file_ = &(key_data_.GetAbcFile());
+    string_table_ = &(key_data_.GetAbcStringTable());
+    program_ = &(key_data_.GetProgram());
 }
 
-void AbcAnnotationProcessor::FillProgramData()
-{
-    log::Unimplemented(__PRETTY_FUNCTION__);
-}
-
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
