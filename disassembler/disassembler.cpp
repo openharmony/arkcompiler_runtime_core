@@ -74,7 +74,7 @@ void Disassembler::Serialize(std::ostream &os, bool add_separators, bool print_i
     }
 
     if (file_ != nullptr) {
-        std::string abc_file = GetFileNameByAbsolutePath(file_->GetFilename());
+        std::string abc_file = GetFileNameByPath(file_->GetFilename());
         os << "# source binary: " << abc_file << "\n\n";
     }
 
@@ -1526,7 +1526,7 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
 
     std::stringstream ss;
     for (const auto &f : record.field_list) {
-        std::string file = GetFileNameByAbsolutePath(f.name);
+        std::string file = GetFileNameByPath(f.name);
         ss << "\t" << f.type.GetPandasmName() << " " << file;
         if (f.metadata->GetValue().has_value()) {
             if (f.type.GetId() == panda_file::Type::TypeId::U32) {

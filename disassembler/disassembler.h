@@ -194,12 +194,14 @@ private:
         return panda_file::File::EntityId(offset).IsValid() && offset < file_->GetHeader()->file_size;
     }
 
-    inline std::string GetFileNameByAbsolutePath(const std::string &absolute_path) const
+    inline std::string GetFileNameByPath(const std::string &file_path) const
     {
-        size_t pos = absolute_path.find_last_of(panda::os::file::File::GetPathDelim());
-        ASSERT(pos != std::string::npos);
-        std::string file_name = absolute_path.substr(pos + 1);
-        return file_name;
+        size_t pos = file_path.find_last_of(panda::os::file::File::GetPathDelim());
+        if (pos == std::string::npos) {
+            return file_path;
+        }
+
+        return file_path.substr(pos + 1);
     }
 
     panda::panda_file::SourceLang file_language_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
