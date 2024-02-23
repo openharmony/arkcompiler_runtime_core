@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,15 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 # This file provides functions thar are responsible for loading test parameters
 # that are used in templates (yaml lists).
 
-import yaml 
 import os.path as ospath
+import yaml 
 
 from utils.exceptions import InvalidFileFormatException
 from utils.fsutils import iter_files, read_file
@@ -59,6 +56,6 @@ def __parse_yaml_list(path: str) -> Params:
     except Exception as e:
         raise InvalidFileFormatException(message=f"Could not load YAML: {str(e)}", filepath=path)
     
-    if type(params) != list:
+    if not isinstance(params, list):
         raise InvalidFileFormatException(message="Parameters list must be YAML array", filepath=path)
     return params

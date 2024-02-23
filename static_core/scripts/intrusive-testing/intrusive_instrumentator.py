@@ -14,15 +14,15 @@
 # limitations under the License.
 
 import argparse
+import os
+import re
+import sys
+import traceback
 from clade import Clade
 from clang.cindex import Index
 from clang.cindex import TokenKind
 from clang.cindex import CursorKind
 from clang.cindex import TranslationUnitLoadError
-import os
-import re
-import sys
-import traceback
 import yamale
 import yaml
 
@@ -423,7 +423,7 @@ class Instrumentator:
         cladeCmdsFile = self.__argsParser.getCladeFile()
         c = Clade(work_dir=os.path.dirname(cladeCmdsFile), cmds_file=cladeCmdsFile)
         fList = list(self.__fileToSyncPointSet.keys())
-        fList.sort(key = lambda f : f.includingSourceFilePath if(type(f) is HeaderFile) else f.path)
+        fList.sort(key = lambda f : f.includingSourceFilePath if isinstance(f, HeaderFile) else f.path)
         # go over types of compilation commands
         # (emitted by C and C++ compilers, 2 items in the list)
         for cmdType in ["CXX", "CC"]:
@@ -435,14 +435,14 @@ class Instrumentator:
                     # go over sorted file List
                     while(i < len(fList)):
                         f = fList[i]
-                        if(type(f) is HeaderFile):
+                        if isinstance(f, HeaderFile):
                             srcFilePath = f.includingSourceFilePath
                         else:
                             srcFilePath = f.path
                         if(compiledFilePath == srcFilePath):
                             compileOptionList = c.get_cmd_opts(cmd["id"])
                             compileOptionList.append('%s=%s' % (CLANG_CUR_WORKING_DIR_OPT, cmd["cwd"]))
-                            if(type(f) is HeaderFile):
+                            if isinstance(f,  HeaderFile):
                                 compileOptionList.extend(CPP_HEADER_COMPILE_OPTION_LIST)
                             self.__fileToCompileOptionList[f] = compileOptionList
                             fList.pop(i)
@@ -453,7 +453,7 @@ class Instrumentator:
         if(len(fList) > 0):
             errMsg = ["Failed to find compilation command for source code modules:"]
             for f in fList:
-                if(type(f) is HeaderFile):
+                if isinstance(f, HeaderFile):
                     srcFilePath = f.includingSourceFilePath
                 else:
                     srcFilePath = f.path

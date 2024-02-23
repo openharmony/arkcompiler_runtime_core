@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,12 +27,12 @@ from utils.file_structure import TestDirectory, walk_test_subdirs, build_directo
 from utils.file_structure import print_tree, denormalize_section_name
 from utils.spec import build_spec_tree
 
-def count_tests(dir: TestDirectory):
+def count_tests(folder: TestDirectory):
     pos_tests = 0
     neg_tests = 0
     templates = set()
 
-    for testfile in dir.iter_files(allowed_ext=[TEMPLATE_EXTENSION]):
+    for testfile in folder.iter_files(allowed_ext=[TEMPLATE_EXTENSION]):
         if is_negative(testfile):
             neg_tests += 1
         else: 
@@ -118,7 +118,7 @@ def find_diffs(test: TestDirectory, ethalon: TestDirectory, strict: bool = False
                               f"from spec.")
             continue
 
-        find_diffs(tsd, esd)          
+        find_diffs(tsd, esd)
 
     return diff_detected
 

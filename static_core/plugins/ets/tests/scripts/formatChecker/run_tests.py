@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,14 +18,15 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from utils.file_structure import walk_test_subdirs
-from utils.metainformation import InvalidMetaException, find_all_metas
-from utils.exceptions import InvalidFileFormatException, InvalidFileStructureException
-from utils.constants import JAR_EXTENSION, TEMPLATE_EXTENSION, NEGATIVE_PREFIX, NEGATIVE_EXECUTION_PREFIX
 import subprocess
 import argparse
 import os.path as ospath
 from typing import List
+
+from utils.file_structure import walk_test_subdirs
+from utils.metainformation import InvalidMetaException, find_all_metas
+from utils.exceptions import InvalidFileFormatException, InvalidFileStructureException
+from utils.constants import JAR_EXTENSION, TEMPLATE_EXTENSION, NEGATIVE_PREFIX, NEGATIVE_EXECUTION_PREFIX
 
 
 # =======================================================
@@ -112,11 +113,11 @@ def run_tests(root: Path, runnerpath: Path) -> bool:
     """
     stats = RunStats()
 
-    for dir in list(walk_test_subdirs(root)):
-        for filepath in dir.iter_files():
+    for directory in list(walk_test_subdirs(root)):
+        for filepath in directory.iter_files():
             if ospath.isdir(filepath):
                 continue
-            if run_test(filepath, runnerpath) == True:
+            if run_test(filepath, runnerpath):
                 stats.record_success(filepath)
             else:
                 stats.record_failure(filepath)
@@ -131,7 +132,8 @@ def run_tests(root: Path, runnerpath: Path) -> bool:
 
 parser = argparse.ArgumentParser(description='Run CTS tests.')
 parser.add_argument('tests_dir', help='Path to directory that contains the tests')
-parser.add_argument('runner_tool_path', help='Path to runner tool. Available runners: 1) migration tool, specify path to jar')
+parser.add_argument('runner_tool_path',
+                     help='Path to runner tool. Available runners: 1) migration tool, specify path to jar')
 
 
 def main():

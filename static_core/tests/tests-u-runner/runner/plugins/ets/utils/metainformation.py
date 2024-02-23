@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,9 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 # This file defines the CTS test metadata format
 # The entrypoint is the 'find_all_metas' function
@@ -83,7 +80,7 @@ def __parse_meta(meta: str) -> Dict:
 
     yaml_string = meta[len(META_START_STRING):-len(META_END_STRING)]
     try:
-        data = yaml.load(yaml_string, Loader=yaml.Loader)
+        data = yaml.safe_load(yaml_string)
         assert isinstance(data, dict), "Invalid data format"
         return data
     except Exception as common_exp:

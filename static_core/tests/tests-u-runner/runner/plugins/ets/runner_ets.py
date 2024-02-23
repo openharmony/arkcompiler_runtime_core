@@ -14,9 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 import json
 import logging
@@ -125,6 +122,8 @@ class RunnerETS(RunnerFileBased):
                 "please set the correct eTS stdlib root!",
                 FileNotFoundError)
 
+    # We use Log.exception_and_raise which throws exception. no need in return
+    # pylint: disable=inconsistent-return-statements
     def _get_std_from_arktsconfig(self) -> Any:
         with open(self.arktsconfig, encoding="utf-8") as file:
             arkconfig = json.load(file)

@@ -14,10 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
-
 # This file defines the CTS file structure
 # The entrypoint is the function 'walk_test_subdirs'
 from __future__ import annotations
