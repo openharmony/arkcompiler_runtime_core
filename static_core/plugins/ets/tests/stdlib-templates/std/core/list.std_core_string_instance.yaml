@@ -95,9 +95,9 @@
     param_types: {},
     param_list: {},
     method_return_type: String,
-    init_object_data: '["", "abcd", " abcd ", "abcd  ", "  abcd"]',
+    init_object_data: '["", "abcd", " abcd ", "abcd  ", "  abcd", "x", " y", "z ", " t ", " "]',
     expected_data_type: "String[]",
-    expected_test_data: '["", "abcd", "abcd", "abcd", "abcd"]',
+    expected_test_data: '["", "abcd", "abcd", "abcd", "abcd", "x", "y", "z", "t", ""]',
     verify_test_result_function: compareStringTrivial
   }
 - {
