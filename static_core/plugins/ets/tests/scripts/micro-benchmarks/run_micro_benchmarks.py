@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -92,11 +92,11 @@ class EtsBenchmarksRunner:
         dumpfile.write(pipe.decode('ascii'))
         dumpfile.close()
 
-    def dump_stdout(self, pipe, type):
-        self.dump_output_to_file(pipe, f"{type}_out")
+    def dump_stdout(self, pipe, tp):
+        self.dump_output_to_file(pipe, f"{tp}_out")
 
-    def dump_stderr(self, pipe, type):
-        self.dump_output_to_file(pipe, f"{type}_err")
+    def dump_stderr(self, pipe, tp):
+        self.dump_output_to_file(pipe, f"{tp}_err")
 
     def compile_test(self, asm_filepath, bin_filepath):
         cmd = self.prefix + [self.ark_asm, str(asm_filepath), str(bin_filepath)]
@@ -133,7 +133,9 @@ class EtsBenchmarksRunner:
         if self.mode == "aot":
             additional_opts += ["--aot-file", bin_filepath.replace(".abc", ".an")]
         # NOTE(ipetrov, #14164): return limit standard allocation after fix in taskmanager
-        cmd = self.prefix + [self.ark, f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets", "--compiler-ignore-failures=false"] + self.ark_opts + additional_opts + [bin_filepath,  "_GLOBAL::main"]
+        cmd = self.prefix + [self.ark, f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets",
+                                        "--compiler-ignore-failures=false"] \
+                                        + self.ark_opts + additional_opts + [bin_filepath,  "_GLOBAL::main"]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate(timeout=5400)
         self.dump_stdout(stdout, "ark")
@@ -167,20 +169,20 @@ class EtsBenchmarksRunner:
 
         bin_file_path = tmp_asm_file_path.replace(".pa", ".abc")
         res = self.compile_test(tmp_asm_file_path, bin_file_path)
-        if res == False:
+        if not res:
             stats.record_time(bench_name, 0)
             stats.record_failure_compile(bench_name)
             return
         if self.mode == "aot":
             aot_file_path = tmp_asm_file_path.replace(".pa", ".an")
             res = self.compile_aot_test(bin_file_path, aot_file_path)
-            if res == False:
+            if not res:
                 stats.record_time(bench_name, 0)
                 stats.record_failure_aot_compile(bench_name)
                 return
         res, exec_time = self.run_test(bin_file_path)
         stats.record_time(bench_name, exec_time)
-        if res == True:
+        if res:
             stats.record_success(bench_name)
         else:
             stats.record_failure_exec(bench_name)
@@ -193,11 +195,11 @@ class EtsBenchmarksRunner:
         else:
             os.system(f"mkdir -p {self.host_output_dir}")
     
-        if args.test_name != None:
+        if args.test_name is not None:
             self.run_separate_bench(args.test_name + ".pa", stats)
             return stats
 
-        if args.test_list != None:
+        if args.test_list is not None:
             testlist_file = open(args.test_list, "r")
             testlist = [line.strip() for line in testlist_file]
             testlist_file.close()
@@ -228,7 +230,7 @@ def dump_time_stats(logger, stats):
 
 
 def dump_pass_rate(logger, skiplist_name, passed_tests, failed_tests):
-    if os.path.isfile(skiplist_name) == True:
+    if os.path.isfile(skiplist_name):
         skiplist = open(skiplist_name, "r")
         skipset = set([line.strip() for line in skiplist])
         skiplist.close()
@@ -357,7 +359,7 @@ def main():
                     f"FAILED (exec) {len(stats.failed_exec)}\n")
     dump_time_stats(logger, stats)
 
-    if parse_results(logger, stats, args.mode, args.interpreter_type) == False:
+    if not parse_results(logger, stats, args.mode, args.interpreter_type):
         logger.info("\nFAIL!")
         exit(1)
     else:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,16 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
+
+from pathlib import Path
 
 import yaml 
 from utils.file_structure import TestDirectory, normalize_section_name
 from utils.exceptions import InvalidFileFormatException
 from utils.constants import SPEC_SECTION_TITLE_FIELD_NAME, SPEC_SUBSECTIONS_FIELD_NAME
 from utils.fsutils import read_file
-from pathlib import Path
 
 Spec = dict
 
@@ -33,11 +31,11 @@ def build_spec_tree(specpath: str, root: TestDirectory):
 
 
 def walk_spec(spec: list, parent: TestDirectory, specpath: str): 
-    if type(spec) != list:
+    if not isinstance(spec, list):
         raise InvalidFileFormatException(message="Spec sections list must be a YAML list", filepath=specpath)
 
     for s in spec:
-        if type(s) != dict:
+        if not isinstance(spec, dict):
             raise InvalidFileFormatException(message="Spec section must be a YAML dict", filepath=specpath)
         
         s = dict(s)

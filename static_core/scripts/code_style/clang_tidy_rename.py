@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,11 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
-
-#!/usr/bin/env python3
 
 import argparse
 import json
@@ -196,7 +191,8 @@ if __name__ == "__main__":
         arguments.panda_dir, arguments.build_dir, arguments.filename_filter)
 
     if not files_list:
-        sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json` and correcting of parameter `--filename-filter` if you use it.")
+        sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json` "
+                 "and correcting of parameter `--filename-filter` if you use it.")
 
     check_file_list(files_list, arguments.panda_dir, arguments.build_dir,
                     arguments.fix_dir, arguments.clang_rules_autofix)

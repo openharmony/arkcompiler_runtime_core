@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,8 +23,8 @@ import os.path as ospath
 from pathlib import Path
 from re import T
 from unittest import loader
-from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateSyntaxError 
 from typing import List
+from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateSyntaxError 
 from utils.file_structure import walk_test_subdirs
 from utils.metainformation import InvalidMetaException, find_all_metas 
 from utils.fsutils import iter_files, write_file
@@ -110,9 +110,9 @@ def process_tests(root: Path, outpath: Path):
     """
     Renders all templates and saves them.
     """
-    for dir in walk_test_subdirs(root):
-        dir_outpath = outpath / dir.path.relative_to(root)
-        render_and_write_templates(str(dir.path), str(dir_outpath))
+    for folder in walk_test_subdirs(root):
+        dir_outpath = outpath / folder.path.relative_to(root)
+        render_and_write_templates(str(folder.path), str(dir_outpath))
 
 
 # ============================================

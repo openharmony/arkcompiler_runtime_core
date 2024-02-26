@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,9 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
 
 import logging
 from typing import Dict, Optional, List, Union, Any
@@ -53,6 +50,8 @@ class YamlDocument:
         data_to_save = yaml.dump(data, indent=4)
         utils.write_2_file(config_path, data_to_save)
 
+    # We use Log.exception_and_raise which throws exception. no need in return
+    # pylint: disable=inconsistent-return-statements
     @staticmethod
     def get_value_by_path(yaml_path: str) -> Optional[Union[int, bool, str, List[str]]]:
         yaml_parts = yaml_path.split(".")

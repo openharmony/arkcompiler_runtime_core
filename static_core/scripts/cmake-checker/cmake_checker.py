@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -81,7 +81,7 @@ def run_cmake_checker(directory):
             for line in lines:
                 for function_name in function_list:
                     if re.search(r'\b{}\b'.format(function_name[0]), line.split('#')[0]):
-                        if error == False:
+                        if not error:
                             print(errorMessage)
                         error = True
                         print("  {} instead of {} at {}:{}".format(function_name[0], function_name[1],
