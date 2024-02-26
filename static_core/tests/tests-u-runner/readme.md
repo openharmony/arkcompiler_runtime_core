@@ -20,7 +20,7 @@ After install script finishes you can run
 export PROJECT=/path/to/panda
 export BUILD=/path/to/panda/build
 
-$PROJECT/tests/tests-u-runner/runner.sh $PROJECT <test-suite-name> --build-dir $BUILD
+$PROJECT/tests/tests-u-runner/runner.sh <test-suite-name> --build-dir $BUILD
 ```
 
 List of possible values for `<test-suite-name>` is below.
@@ -103,7 +103,7 @@ for ets-func-tests `--test-suite ets_func_tests`
 
 The full command for running all stdlib tests and ets_func_tests would be:
 
-`$PROJECT/tests/tests-u-runner/runner.sh $PROJECT --ets-func-tests --build-dir $BUILD`
+`$PROJECT/tests/tests-u-runner/runner.sh --ets-func-tests --build-dir $BUILD`
 
 or
 
@@ -118,7 +118,7 @@ In case of fail on CI runner will show its options - use it to run test locally.
 
 For example, to run the test262 test suite with AOT FULL INLINE the build options could be following:
 
-`$PROJECT/tests/tests-u-runner/runner.sh $PROJECT --test262 --gc-type=g1-gc --aot --aot-args='--compiler-inline-full-intrinsics=true' --aot-args='--compiler-memory-size-limit=4294967296' --build-dir $BUILD`
+`$PROJECT/tests/tests-u-runner/runner.sh --test262 --gc-type=g1-gc --aot --aot-args='--compiler-inline-full-intrinsics=true' --aot-args='--compiler-memory-size-limit=4294967296' --build-dir $BUILD`
 
 ## Yaml configuration files
 
@@ -128,7 +128,7 @@ and any custom paths.
 tests/tests-u-runner/readme.md
 To see full list of supported options use option `--generate-config $YAML_CONFIG_FILE`:
 
-`$PROJECT/tests/tests-u-runner/runner.sh $PROJECT --generate-config $YAML_CONFIG_FILE <test-suite-name> --build-dir $BUILD`
+`$PROJECT/tests/tests-u-runner/runner.sh --generate-config $YAML_CONFIG_FILE <test-suite-name> --build-dir $BUILD`
 
 The generated file will contain all supported options with default values.
 
@@ -250,7 +250,7 @@ All timeouts are set in seconds
 
 ## Other options:
 
-To get runner all options use: `main.py --help` or `runner.sh $PROJECT --help`
+To get runner all options use: `main.py --help` or `runner.sh --help`
 
 ```
   --no-run-gc-in-place  enable --run-gc-in-place mode
@@ -281,7 +281,7 @@ or in yaml config file `time-report.time-edges: [1, 5, 10]` in the list of integ
 
 A script running linter and type checks starts as:
 
-`$PROJECT/tests/tests-u-runner/linter.sh $PROJECT`
+`$PROJECT/tests/tests-u-runner/linter.sh`
 
 It performs checks by running `pylint` and `mypy`.
 

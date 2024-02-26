@@ -14,20 +14,15 @@
 
 set -e
 
-if [[ -z $1 ]]; then
-    echo "Usage: linter.sh <sources>"
-    echo "    <sources> path where the top-project sources are located"
-    exit 1
-fi
-
-ROOT_DIR=$(realpath $1)
+SCRIPT_DIR=$(realpath "$(dirname "${0}")")
+ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
 
 
 function save_exit_code() {
     EXIT_CODE=$(($1 + $2))
 }
 
-source ${ROOT_DIR}/scripts/python/venv-utils.sh
+source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 activate_venv
 
 set +e
@@ -35,7 +30,7 @@ set +e
 EXIT_CODE=0
 RUNNER_DIR=${ROOT_DIR}/tests/tests-u-runner
 
-cd ${RUNNER_DIR}
+cd "${RUNNER_DIR}"
 
 pylint --rcfile .pylintrc runner main.py runner_test.py
 save_exit_code ${EXIT_CODE} $?
