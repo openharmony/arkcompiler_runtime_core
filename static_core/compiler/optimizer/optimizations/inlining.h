@@ -106,7 +106,7 @@ protected:
 
     template <bool CHECK_EXTERNAL, bool CHECK_INTRINSICS = false>
     bool CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx);
-    bool CheckDepthLimit(const CallInst *callInst, InlineContext *ctx);
+    bool CheckDepthLimit(InlineContext *ctx);
     template <bool CHECK_EXTERNAL>
     bool CheckTooBigMethodCanBeInlined(const CallInst *callInst, InlineContext *ctx, bool methodIsTooBig);
     template <bool CHECK_EXTERNAL>
