@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -288,7 +288,7 @@ std::optional<Error> UnmapRaw(void *mem, size_t size)
     return {};
 }
 
-#ifdef PANDA_TARGET_MOBILE
+#ifdef PANDA_TARGET_OHOS
 #include <sys/prctl.h>
 
 #ifndef PR_SET_VMA
@@ -298,12 +298,12 @@ constexpr int PR_SET_VMA = 0x53564d41;
 #ifndef PR_SET_VMA_ANON_NAME
 constexpr unsigned long PR_SET_VMA_ANON_NAME = 0;
 #endif
-#endif  // PANDA_TARGET_MOBILE
+#endif  // PANDA_TARGET_OHOS
 
 std::optional<Error> TagAnonymousMemory([[maybe_unused]] const void *mem, [[maybe_unused]] size_t size,
                                         [[maybe_unused]] const char *tag)
 {
-#ifdef PANDA_TARGET_MOBILE
+#ifdef PANDA_TARGET_OHOS
     ASSERT(size % GetPageSize() == 0);
     ASSERT(reinterpret_cast<uintptr_t>(mem) % GetPageSize() == 0);
 
@@ -316,7 +316,7 @@ std::optional<Error> TagAnonymousMemory([[maybe_unused]] const void *mem, [[mayb
     if (UNLIKELY(res == -1)) {
         return Error(errno);
     }
-#endif  // PANDA_TARGET_MOBILE
+#endif  // PANDA_TARGET_OHOS
     return {};
 }
 
