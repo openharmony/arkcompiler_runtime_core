@@ -19,7 +19,6 @@ import logging
 from typing import Dict, Optional, List, Union, Any
 
 import yaml
-
 from runner import utils
 from runner.logger import Log
 
@@ -27,21 +26,30 @@ _LOGGER = logging.getLogger("runner.options.yaml_document")
 
 
 class YamlDocument:
-    _document: Optional[Dict[str, Any]] = None
 
-    @staticmethod
-    def document() -> Optional[Dict[str, Any]]:
-        return YamlDocument._document
+    def __init__(self) -> None:
+        super().__init__()
+        self._document: Optional[Dict[str, Any]] = None
+        self._warnings: List[str] = []
 
-    @staticmethod
-    def load(config_path: Optional[str]) -> None:
-        YamlDocument._document = {}
-        if config_path is None:
+    def load_configs(self, config_paths: Optional[List[str]]) -> None:
+        if config_paths is None:
             return
+        for config_path in config_paths:
+            self.merge(config_path, self.load(config_path))
 
+    def document(self) -> Optional[Dict[str, Any]]:
+        return self._document
+
+    def warnings(self) -> List[str]:
+        return self._warnings
+
+    @staticmethod
+    def load(config_path: str) -> Dict[str, Any]:
         with open(config_path, "r", encoding="utf-8") as stream:
             try:
-                YamlDocument._document = yaml.safe_load(stream)
+                data: Dict[str, Any] = yaml.safe_load(stream)
+                return data
             except yaml.YAMLError as exc:
                 Log.exception_and_raise(_LOGGER, str(exc), yaml.YAMLError)
 
@@ -52,10 +60,9 @@ class YamlDocument:
 
     # We use Log.exception_and_raise which throws exception. no need in return
     # pylint: disable=inconsistent-return-statements
-    @staticmethod
-    def get_value_by_path(yaml_path: str) -> Optional[Union[int, bool, str, List[str]]]:
+    def get_value_by_path(self, yaml_path: str) -> Optional[Union[int, bool, str, List[str]]]:
         yaml_parts = yaml_path.split(".")
-        current: Any = YamlDocument._document
+        current: Any = self._document
         for part in yaml_parts:
             if current and isinstance(current, dict) and part in current.keys():
                 current = current.get(part)
@@ -65,3 +72,42 @@ class YamlDocument:
             return current
 
         Log.exception_and_raise(_LOGGER, f"Unsupported value type '{type(current)}' for '{yaml_path}'")
+
+    def merge(self, config_path: str, data: Dict[str, Any]) -> None:
+        if self._document is None:
+            self._document = data
+            return
+        self.__merge_level(config_path, "", data, self._document)
+
+    def __merge_level(self, config_path: str, parent_key: str, current_data: Dict[str, Any],
+                      parent_data: Dict[str, Any]) -> \
+            None:
+        for key in current_data:
+            if key not in parent_data:
+                parent_data[key] = current_data[key]
+                continue
+            current_value = current_data[key]
+            parent_value = parent_data[key]
+            new_parent_key = f"{parent_key}.{key}" if parent_key else key
+            if current_value and isinstance(current_value, dict) and parent_value and isinstance(parent_value, dict):
+                self.__merge_level(config_path, new_parent_key, current_value, parent_value)
+                continue
+            if current_value and isinstance(current_value, list) and parent_value and isinstance(parent_value, list):
+                self._warnings.append(f"Attention: config file '{config_path}' merges value "
+                                      f"`{new_parent_key}:{current_value}` with `{parent_value}` ")
+                parent_value.extend(current_value)
+                parent_data[key] = list(set(parent_value))
+                continue
+            current_type = type(current_value)
+            parent_type = type(parent_value)
+            if current_type != parent_type:
+                self._warnings.append(
+                    f"Attention: config file '{config_path}' for key '{new_parent_key}' provides "
+                    f"different type {current_type}. Before: {parent_type}")
+                continue
+            if current_value == parent_value:
+                continue
+            self._warnings.append(
+                f"Attention: config file '{config_path}' replaces value '{new_parent_key}:{parent_value}' "
+                f"with '{current_value}'")
+            parent_data[key] = current_value

@@ -153,10 +153,12 @@ def add_test_group_args(parser: argparse.ArgumentParser) -> None:
 def add_config_args(parser: argparse.ArgumentParser) -> None:
     # Configuration
     parser.add_argument(
-        '--config', action='store', dest='config',
+        '--config', action='append', dest='configs',
         default=None,
         type=is_file,
-        help='config with runner options')
+        help='config with runner options. Can be specified several config files, they will be merged. '
+             'Values from the latest config file override values of the '
+             'similar options from earlier config files.')
     parser.add_argument(
         '--generate-config', action='store', dest='generate_config',
         default=None,

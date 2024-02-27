@@ -83,8 +83,7 @@ class Chapters:
     @staticmethod
     def __parse(chapters_file: str) -> Dict[str, Chapter]:
         result: Dict[str, Chapter] = {}
-        YamlDocument.load(chapters_file)
-        yaml_header: Optional[Dict[str, Any]] = YamlDocument.document()
+        yaml_header: Dict[str, Any] = YamlDocument.load(chapters_file)
         if not yaml_header or not isinstance(yaml_header, dict):
             Log.exception_and_raise(_LOGGER, chapters_file, IncorrectFileFormatChapterException)
         yaml_chapters: Optional[List[Any]] = yaml_header.get('chapters')

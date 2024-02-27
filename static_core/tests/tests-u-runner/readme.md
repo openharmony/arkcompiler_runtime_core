@@ -122,10 +122,15 @@ For example, to run the test262 test suite with AOT FULL INLINE the build option
 
 ## Yaml configuration files
 
-Any option can be set through yaml configuration file as `--config $YAML_CONFIG_FILE`.
+Any option can be set through yaml configuration file as `--config $YAML_CONFIG_FILE`. It can be mentioned several times
+and the data are merged according to following rules:
+- If some keys are repeated the latest value is taken (from the last specified config file)
+- If for a key different types are specified the first-met type is taken
+- If for a key different lists are specified they are merged and repeated values are excluded.
+
 The folder `cfg` contains several example config files which should be edited to set the real `$panda` and `$panda_build` paths,
 and any custom paths.
-tests/tests-u-runner/readme.md
+
 To see full list of supported options use option `--generate-config $YAML_CONFIG_FILE`:
 
 `$PROJECT/tests/tests-u-runner/runner.sh $PROJECT --generate-config $YAML_CONFIG_FILE <test-suite-name> --build-dir $BUILD`

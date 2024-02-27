@@ -21,11 +21,11 @@ import os
 from os import path
 from typing import Union, List, Tuple, Any, Callable, Optional, Set, Type
 
-from runner.utils import enum_from_str, is_type_of, EnumT
 from runner.enum_types.qemu import QemuKind
 from runner.logger import Log
 from runner.options.cli_args_wrapper import CliArgsWrapper
-from runner.options.yaml_document import YamlDocument
+from runner.options.config_keeper import ConfigKeeper
+from runner.utils import enum_from_str, is_type_of, EnumT
 
 CliOptionType = Union[str, List[str]]
 CastToTypeFunction = Callable[[Any], Any]
@@ -45,7 +45,7 @@ def value(
             cli = _process_cli_option(cli_name, cast_to_type)
             if cli is not None:
                 return cli
-            yaml = YamlDocument.get_value_by_path(yaml_path)
+            yaml = ConfigKeeper.get().get_value_by_path(yaml_path)
             yaml = cast_to_type(yaml) if cast_to_type is not None and yaml is not None else yaml
             if yaml is not None:
                 return yaml
