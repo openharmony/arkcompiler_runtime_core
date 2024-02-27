@@ -2396,9 +2396,6 @@
 07.expressions/24.equality_expressions/eq_8.ets
 # end of es2panda fails
 
-# #15416
-07.expressions/24.equality_expressions/04.value_equality_operators_for_boolean_types/boolean_equality_operator_8.ets
-
 # es2panda fails: panda:14397 Cannot convert int to Number using cast operator
 07.expressions/15.cast_expressions/cast_1.ets
 # end of es2panda fails
