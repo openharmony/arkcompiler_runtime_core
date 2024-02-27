@@ -655,4 +655,10 @@ spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/
 spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_04.ets
 spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_05.ets
 
+### Issue 14609
+spec/07.expressions/nullish-coalescing_expressions/issue14609_02.ets
+### Issue 14609 end
 
+### Issue 1654
+spec/07.expressions/nullish-coalescing_expressions/issue14609_01.ets
+### Issue 1654 end
