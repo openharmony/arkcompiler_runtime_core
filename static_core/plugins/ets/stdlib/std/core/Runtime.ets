@@ -118,6 +118,15 @@ export final class Runtime {
                 TypeAPIGetTypeDescriptor(src));
         return new ClassCastException(srcStr + " cannot be cast to " + dstStr);
     }
+
+    /**
+     * Return a string with the name of the type kind of the object
+     *
+     * @param o an object
+     *
+     * @returns a string with the name of the type kind of the object
+     */
+    internal native static typeOf(o: Object): String;
 }
 
 export const runtime = new Runtime();
