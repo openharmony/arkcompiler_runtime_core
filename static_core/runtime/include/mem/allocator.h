@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -414,7 +414,7 @@ public:
 
     virtual void ResetYoungAllocator() = 0;
 
-    virtual TLAB *CreateNewTLAB(ark::ManagedThread *thread) = 0;
+    virtual TLAB *CreateNewTLAB(size_t tlabSize) = 0;
 
     virtual size_t GetTLABMaxAllocSize() = 0;
 
@@ -707,7 +707,7 @@ public:
         LOG(FATAL, ALLOC) << "ObjectAllocatorNoGen: ResetYoungAllocator not applicable";
     }
 
-    TLAB *CreateNewTLAB(ark::ManagedThread *thread) final;
+    TLAB *CreateNewTLAB(size_t tlabSize) final;
 
     size_t GetTLABMaxAllocSize() final;
 
@@ -780,8 +780,6 @@ public:
     virtual void InvalidateSpaceData() final;
 
 protected:
-    static constexpr size_t YOUNG_ALLOC_MAX_SIZE = PANDA_TLAB_MAX_ALLOC_SIZE;  // max size of allocation in young space
-
     ALWAYS_INLINE std::vector<MemRange> &GetYoungRanges()
     {
         return ranges_;
@@ -800,9 +798,6 @@ private:
 
 template <MTModeT MT_MODE = MT_MODE_MULTI>
 class ObjectAllocatorGen final : public ObjectAllocatorGenBase {
-    // NOTE(dtrubenkov): create a command line argument for this
-    static constexpr size_t DEFAULT_YOUNG_TLAB_SIZE = 4_KB;  // TLAB size for young gen
-
     using YoungGenAllocator = BumpPointerAllocator<ObjectAllocConfigWithCrossingMap,
                                                    BumpPointerAllocatorLockConfig::ParameterizedLock<MT_MODE>, true>;
     using ObjectAllocator =
@@ -884,7 +879,7 @@ public:
 
     void ResetYoungAllocator() final;
 
-    TLAB *CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread) final;
+    TLAB *CreateNewTLAB(size_t tlabSize) final;
 
     size_t GetTLABMaxAllocSize() final;
 
@@ -913,10 +908,7 @@ public:
         return nullptr;
     }
 
-    static constexpr size_t GetYoungAllocMaxSize()
-    {
-        return YOUNG_ALLOC_MAX_SIZE;
-    }
+    static size_t GetYoungAllocMaxSize();
 
     void UpdateSpaceData() final;
 
@@ -930,7 +922,6 @@ private:
     MemStatsType *memStats_ = nullptr;
     ObjectAllocator *nonMovableObjectAllocator_ = nullptr;
     LargeObjectAllocator *largeNonMovableObjectAllocator_ = nullptr;
-    size_t tlabSize_ = DEFAULT_YOUNG_TLAB_SIZE;
 
     template <bool NEED_LOCK = true>
     void *AllocateTenuredImpl(size_t size);

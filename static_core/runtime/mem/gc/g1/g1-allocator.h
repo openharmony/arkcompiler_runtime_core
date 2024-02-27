@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,6 @@ class TLAB;
 
 template <MTModeT MT_MODE = MT_MODE_MULTI>
 class ObjectAllocatorG1 final : public ObjectAllocatorGenBase {
-    static constexpr size_t TLAB_SIZE = 4_KB;  // TLAB size for young gen
-
     using ObjectAllocator = RegionAllocator<ObjectAllocConfig>;
     using NonMovableAllocator = RegionNonmovableAllocator<ObjectAllocConfig, RegionAllocatorLockConfig::CommonLock,
                                                           FreeListAllocator<ObjectAllocConfig>>;
@@ -143,7 +141,7 @@ public:
             regions);
     }
 
-    TLAB *CreateNewTLAB(ark::ManagedThread *thread) final;
+    TLAB *CreateNewTLAB(size_t tlabSize) final;
 
     size_t GetTLABMaxAllocSize() final;
 

@@ -503,6 +503,21 @@ options:
   default: true
   description: Use absolute path to panda files in Aot verification
 
+- name: adaptive-tlab-size
+  type: bool
+  default: true
+  description: Enable/disable adaptive TLAB size according to runtime allocation statistics
+
+- name: init-tlab-size
+  type: uint64_t
+  default: 4096
+  description: Initial TLAB size and maximum size of object to be allocated in TLAB. TLAB size remains constant unless adaptive-tlab-size is enabled. Also, this value is used for YoungAllocMaxSize
+
+- name: max-tlab-size
+  type: uint64_t
+  default: 16384
+  description: Max TLAB size. Used when adaptive-tlab-size is enabled
+
 - name: use-tlab-for-allocations
   type: bool
   default: true

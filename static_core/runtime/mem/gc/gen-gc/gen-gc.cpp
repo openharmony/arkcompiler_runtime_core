@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -288,7 +288,6 @@ void GenGC<LanguageConfig>::CollectYoungAndMove()
     size_t youngMoveCount = 0;
     size_t youngDeleteSize = 0;
     size_t youngDeleteCount = 0;
-    size_t bytesInHeapBeforeMove = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
 
     auto *objectAllocator = this->GetObjectGenAllocator();
     ASSERT(this->GetObjectAllocator()->GetYoungSpaceMemRanges().size() == 1);
@@ -299,7 +298,7 @@ void GenGC<LanguageConfig>::CollectYoungAndMove()
         [this, &objectAllocator, &movedObjects, &youngMoveSize, &youngMoveCount, &youngDeleteSize,
          &youngDeleteCount](ObjectHeader *objectHeader) -> void {
             size_t size = GetObjectSize(objectHeader);
-            ASSERT(size <= ObjectAllocatorGen<>::GetYoungAllocMaxSize());
+            ASSERT(size <= Runtime::GetOptions().GetMaxTlabSize());
             // Use aligned size here, because we need to proceed MemStats correctly.
             size_t alignedSize = GetAlignedObjectSize(size);
             if (objectHeader->IsMarkedForGC<false>()) {
@@ -325,17 +324,14 @@ void GenGC<LanguageConfig>::CollectYoungAndMove()
         ScopedTiming moveTiming("MoveAndSweep", *this->GetTiming());
         objectAllocator->IterateOverYoungObjects(moveVisitor);
     }
-    this->memStats_.RecordSizeMovedYoung(youngMoveSize);
-    this->memStats_.RecordCountMovedYoung(youngMoveCount);
-    this->memStats_.RecordSizeFreedYoung(youngDeleteSize);
-    this->memStats_.RecordCountFreedYoung(youngDeleteCount);
+    this->memStats_.RecordYoungStats(youngMoveSize, youngMoveCount, youngDeleteSize, youngDeleteCount);
     UpdateRefsToMovedObjects(&movedObjects);
     this->VerifyCollectAndMove(std::move(youngVerifier));
     SweepYoungVmRefs();
     // Remove young
     objectAllocator->ResetYoungAllocator();
 
-    this->UpdateMemStats(bytesInHeapBeforeMove, false);
+    this->UpdateMemStats(this->GetPandaVm()->GetMemStats()->GetFootprintHeap(), false);
 
     LOG_DEBUG_GC << "== GenGC CollectYoungAndMove end ==";
 }

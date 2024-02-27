@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,6 +70,9 @@ bool HeapManager::Initialize(GCType gcType, bool singleThreaded, bool useTlab, M
         useTlab = false;
     }
     useTlabForAllocations_ = useTlab;
+    if (useTlabForAllocations_ && Runtime::GetOptions().IsAdaptiveTlabSize()) {
+        isAdaptiveTlabSize_ = true;
+    }
     // Now, USE_TLAB_FOR_ALLOCATIONS option is supported only for Generational GCs
     ASSERT(IsGenerationalGCType(gcType) || (!useTlabForAllocations_));
     return ret;
@@ -267,7 +270,20 @@ bool HeapManager::CreateNewTLAB(ManagedThread *thread)
 {
     ASSERT(GetGC()->IsMutatorAllowed());
     ASSERT(thread != nullptr);
-    TLAB *newTlab = objectAllocator_.AsObjectAllocator()->CreateNewTLAB(thread);
+    size_t newTlabSize = 0;
+    TLAB *oldTlab = thread->GetTLAB();
+    ASSERT(oldTlab != nullptr);
+    if (!isAdaptiveTlabSize_) {
+        // Using initial tlab size
+        newTlabSize = Runtime::GetOptions().GetInitTlabSize();
+    } else {
+        thread->GetWeightedTlabAverage()->StoreNewSampleAndIncreaseIfNeeded(oldTlab->GetOccupiedSize(),
+                                                                            oldTlab->GetSize());
+        newTlabSize = AlignUp(thread->GetWeightedTlabAverage()->GetLastCountedSumInSizeT(), DEFAULT_ALIGNMENT_IN_BYTES);
+    }
+    LOG(DEBUG, ALLOC) << "Allocating new tlab with size: " << newTlabSize;
+    ASSERT(newTlabSize != 0);
+    TLAB *newTlab = objectAllocator_.AsObjectAllocator()->CreateNewTLAB(newTlabSize);
     if (newTlab != nullptr) {
         RegisterTLAB(thread->GetTLAB());
         thread->UpdateTLAB(newTlab);

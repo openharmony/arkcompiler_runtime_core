@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -270,7 +270,7 @@ void *ObjectAllocatorGen<MT_MODE>::Allocate(size_t size, Alignment align, [[mayb
 {
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
-    if (LIKELY(alignedSize <= YOUNG_ALLOC_MAX_SIZE)) {
+    if (LIKELY(alignedSize <= GetYoungAllocMaxSize())) {
         mem = youngGenAllocator_->Alloc(size, align);
     } else {
         mem = AllocateTenured(size);
@@ -449,7 +449,7 @@ size_t ObjectAllocatorNoGen<MT_MODE>::GetLargeObjectMaxSize()
 }
 
 template <MTModeT MT_MODE>
-TLAB *ObjectAllocatorNoGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread)
+TLAB *ObjectAllocatorNoGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t tlabSize)
 {
     LOG(FATAL, ALLOC) << "TLAB is not supported for this allocator";
     return nullptr;
@@ -484,26 +484,26 @@ ObjectAllocatorGen<MT_MODE>::ObjectAllocatorGen(MemStatsType *memStats, bool cre
     // For Gen-GC we use alone pool for young space, so we will use full such pool
     heapSpaces_.UseFullYoungSpace();
     size_t youngSpaceSize = heapSpaces_.GetCurrentYoungSize();
+    size_t initTlabSize = Runtime::GetOptions().GetInitTlabSize();
     auto youngSharedSpaceSize = Runtime::GetOptions().GetYoungSharedSpaceSize();
     ASSERT(youngSpaceSize >= youngSharedSpaceSize);
-    size_t tlabsCountInYoungGen;
+    ASSERT(initTlabSize != 0);
+    size_t maxTlabsCountInYoungGen;
     if constexpr (MT_MODE == MT_MODE_SINGLE) {
         // For single-threaded VMs allocate whole private young space for TLAB
-        tlabSize_ = youngSpaceSize - youngSharedSpaceSize;
-        tlabsCountInYoungGen = 1;
+        maxTlabsCountInYoungGen = 1;
     } else {
-        tlabsCountInYoungGen = (youngSpaceSize - youngSharedSpaceSize) / DEFAULT_YOUNG_TLAB_SIZE;
-        ASSERT(((youngSpaceSize - youngSharedSpaceSize) % DEFAULT_YOUNG_TLAB_SIZE) == 0);
+        maxTlabsCountInYoungGen = (youngSpaceSize - youngSharedSpaceSize) / initTlabSize;
+        ASSERT(((youngSpaceSize - youngSharedSpaceSize) % initTlabSize) == 0);
     }
-    ASSERT(YOUNG_ALLOC_MAX_SIZE <= tlabSize_);
-    ASSERT(tlabsCountInYoungGen * tlabSize_ <= youngSpaceSize);
+    ASSERT(maxTlabsCountInYoungGen * initTlabSize <= youngSpaceSize);
 
     // NOTE(aemelenko): Missed an allocator pointer
     // because we construct BumpPointer Allocator after calling AllocArena method
     auto youngPool = heapSpaces_.AllocAlonePoolForYoung(SpaceType::SPACE_TYPE_OBJECT,
                                                         YoungGenAllocator::GetAllocatorType(), &youngGenAllocator_);
     youngGenAllocator_ = new (std::nothrow)
-        YoungGenAllocator(std::move(youngPool), SpaceType::SPACE_TYPE_OBJECT, memStats, tlabsCountInYoungGen);
+        YoungGenAllocator(std::move(youngPool), SpaceType::SPACE_TYPE_OBJECT, memStats, maxTlabsCountInYoungGen);
     objectAllocator_ = new (std::nothrow) ObjectAllocator(memStats);
     largeObjectAllocator_ = new (std::nothrow) LargeObjectAllocator(memStats);
     humongousObjectAllocator_ = new (std::nothrow) HumongousObjectAllocator(memStats);
@@ -588,6 +588,11 @@ void ObjectAllocatorGen<MT_MODE>::ResetYoungAllocator()
         if (!PANDA_TRACK_TLAB_ALLOCATIONS && (thread->GetTLAB()->GetOccupiedSize() != 0)) {
             memStats->RecordAllocateObject(thread->GetTLAB()->GetOccupiedSize(), SpaceType::SPACE_TYPE_OBJECT);
         }
+        if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
+            thread->GetWeightedTlabAverage()->ComputeNewSumAndResetSamples();
+        }
+        // Here we should not collect current TLAB fill statistics for adaptive size
+        // since it may not be completely filled before resetting
         thread->ClearTLAB();
         return true;
     };
@@ -596,9 +601,9 @@ void ObjectAllocatorGen<MT_MODE>::ResetYoungAllocator()
 }
 
 template <MTModeT MT_MODE>
-TLAB *ObjectAllocatorGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] ark::ManagedThread *thread)
+TLAB *ObjectAllocatorGen<MT_MODE>::CreateNewTLAB(size_t tlabSize)
 {
-    TLAB *newTlab = youngGenAllocator_->CreateNewTLAB(tlabSize_);
+    TLAB *newTlab = youngGenAllocator_->CreateNewTLAB(tlabSize);
     if (newTlab != nullptr) {
         ASAN_UNPOISON_MEMORY_REGION(newTlab->GetStartAddr(), newTlab->GetSize());
         MemoryInitialize(newTlab->GetStartAddr(), newTlab->GetSize());
@@ -610,7 +615,20 @@ TLAB *ObjectAllocatorGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] ark::ManagedTh
 template <MTModeT MT_MODE>
 size_t ObjectAllocatorGen<MT_MODE>::GetTLABMaxAllocSize()
 {
-    return YOUNG_ALLOC_MAX_SIZE;
+    // Should be equal to the initial TLAB size since
+    // 1) Such max size prevents big objects from
+    //    allocation in growing TLABs
+    // 2) Threads change their TLAB sizes independently,
+    //    so tracking optimal object size over all
+    //    threads should be avoided
+    return Runtime::GetOptions().GetInitTlabSize();
+}
+
+/* static */
+template <MTModeT MT_MODE>
+size_t ObjectAllocatorGen<MT_MODE>::GetYoungAllocMaxSize()
+{
+    return Runtime::GetOptions().GetInitTlabSize();
 }
 
 template <MTModeT MT_MODE>
