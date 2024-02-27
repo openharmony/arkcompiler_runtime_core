@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@ cases:
     - use: |-
         // no catch blocks
         try {
-            if (t1 != t2) throw new Ex()
+            if (t1 != t2) throw new Er()
             return 1;
         } finally {
             return 0;
@@ -24,11 +24,9 @@ cases:
 
     - use: |-
         let ret:int = 1
-        // finally block with no exception thrown
+        // finally block with no error thrown
         try {
-            if (t1 == t2) throw new Ex()
-            ret = 1
-        } catch (e: Ex) {
+            if (t1 == t2) throw new Er()
             ret = 1
         } catch (e) {
             ret = 1
@@ -38,11 +36,9 @@ cases:
         return ret;
 
     - use: |-
-        // return from finally block with no exception thrown
+        // return from finally block with no error thrown
         try {
-            if (t1 == t2) throw new Ex()
-            return 1;
-        } catch (e: Ex) {
+            if (t1 == t2) throw new Er()
             return 1;
         } catch (e) {
             return 1;
@@ -51,41 +47,15 @@ cases:
         }
 
     - use: |-
-        // return from finally block with exception thrown
+        // return from finally block with error thrown
         try {
-            if (t1 != t2) throw new Ex()
+            if (t1 != t2) throw new Er()
             return 1;
-        } catch (e: Ex) {
+        } catch (e) {
             return 1;
         } finally {
             return 0;
         }
-
-    - defs: |-
-        let ret: int;  // global var, safe for jit warmup.
-        function foo(): int throws {
-            // exception thrown, no suitable catch, propagates outside
-            try {
-                if (t1 != t2) throw new Ex()
-                ret += 1
-            } catch (e: Er) {
-                ret += 10
-            } finally {
-                ret += 100
-            }
-            return ret;
-        }
-      use: |-
-        ret = 0;
-        let ok = false;
-        try {
-            foo()
-        } catch (e) {
-            ret += 1000;
-        } finally {
-            ok = ret == 1100;
-        }
-        return ok ? 0 : 1;
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
@@ -94,8 +64,6 @@ cases:
             try {
                 if (t1 != t2) throw new Er()
                 ret += 1
-            } catch (e: Ex) {
-                ret += 10
             } finally {
                 ret += 100
             }
@@ -116,43 +84,13 @@ cases:
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
-        function foo(): int throws {
-            // exception thrown, with suitable catch, no propagation outside
-            try {
-                if (t1 != t2) throw new Ex()
-                ret += 1
-            } catch (e: Er) {
-                ret += 10
-            } catch (e: Ex) {
-                ret += 100
-            } finally {
-                ret += 1000
-            }
-            return ret;
-        }
-      use: |-
-        ret = 0;
-        let ok = false;
-        try {
-            foo()
-        } catch (e) {
-            ret += 10000;
-        } finally {
-            ok = ret == 1100;
-        }
-        return ok ? 0 : 1;
-
-    - defs: |-
-        let ret: int;  // global var, safe for jit warmup.
         function foo(): int {
             // error thrown, with suitable catch, no propagation outside
             try {
                 if (t1 != t2) throw new Er2()
                 ret += 1
-            } catch (e: Er) {
+            } catch (e) {
                 ret += 10
-            } catch (e: Ex) {
-                ret += 100
             } finally {
                 ret += 1000
             }
@@ -173,45 +111,14 @@ cases:
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
-        function foo(): int throws {
-            // exception thrown, with suitable catch, re-thrown from catch
-            try {
-                if (t1 != t2) throw new Ex()
-                ret += 1
-            } catch (e: Er) {
-                ret += 10
-            } catch (e: Ex) {
-                ret += 100
-                throw e
-            } finally {
-                ret += 1000
-            }
-            return ret;
-        }
-      use: |-
-        ret = 0;
-        let ok = false;
-        try {
-            foo()
-        } catch (e) {
-            ret += 10000;
-        } finally {
-            ok = ret == 11100;
-        }
-        return ok ? 0 : 1;
-
-    - defs: |-
-        let ret: int;  // global var, safe for jit warmup.
         function foo(): int {
             // error thrown, with suitable catch, re-thrown from catch
             try {
                 if (t1 != t2) throw new Er2()
                 ret += 1
-            } catch (e: Er) {
+            } catch (e) {
                 ret += 10
-                throw e
-            } catch (e: Ex) {
-                ret += 100
+                throw e as Error
             } finally {
                 ret += 1000
             }
@@ -232,48 +139,18 @@ cases:
 
     - defs: |-
         let ret: int;  // global var, safe for jit warmup.
-        function foo(): int throws {
-            // exception thrown, with suitable catch, re-thrown from finally
-            try {
-                if (t1 != t2) throw new Ex()
-                ret += 1
-            } catch (e: Er) {
-                ret += 10
-            } catch (e: Ex) {
-                ret += 100
-            } finally {
-                ret += 1000
-                throw new Ex()
-            }
-        }
-      use: |-
-        ret = 0;
-        let ok = false;
-        try {
-            foo()
-        } catch (e) {
-            ret += 10000;
-        } finally {
-            ok = ret == 11100;
-        }
-        return ok ? 0 : 1;
-
-    - defs: |-
-        let ret: int;  // global var, safe for jit warmup.
         function foo(): int {
-            let er:Error;
+            let er: Error|null = null;
             // error thrown, with suitable catch, re-thrown from finally
             try {
                 if (t1 != t2) throw new Er()
                 ret += 1
-            } catch (e: Er) {
+            } catch (e) {
                 ret += 10
-                er = e;
-            } catch (e: Ex) {
-                ret += 100
+                er = e as Error;
             } finally {
                 ret += 1000
-                throw er
+                throw er! as Error
             }
         }
       use: |-

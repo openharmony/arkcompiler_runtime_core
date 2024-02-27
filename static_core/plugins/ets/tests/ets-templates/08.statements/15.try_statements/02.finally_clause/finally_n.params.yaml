@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,9 +15,7 @@
 cases:
     - use: |-
         try {
-            if (t1 == t2) throw new Ex()
-            return 1;
-        } catch (e: Ex) {
+            if (t1 == t2) throw new Er()
             return 1;
         } finally {  // not the last block
             return 0;
@@ -27,9 +25,7 @@ cases:
 
     - use: |-
         try {
-            if (t1 == t2) throw new Ex()
-            return 1;
-        } catch (e: Ex) {
+            if (t1 == t2) throw new Er()
             return 1;
         } catch (e) {
             return 1;
@@ -41,7 +37,7 @@ cases:
 
     - use: |-
         try {
-            if (t1 == t2) throw new Ex()
+            if (t1 == t2) throw new Er()
             return 1;
         } finally
             // not a block

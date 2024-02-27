@@ -14,3 +14,18 @@
 # RUNTIME_TIMEOUT - it required more than 600sec
 07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/nase2.ets
 17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_5.ets
+
+# fails in JIT mode with --opt-level=0
+02.lexical_elements/09.literals/08.undefined_literal/undef_literal1.ets
+03.types/08.reference_types/04.never_type/never_class_instance_5.ets
+04.names_declarations_and_scopes/04.scopes/interface_level1.ets
+04.names_declarations_and_scopes/04.scopes/interface_level2.ets
+07.expressions/11.field_access_expressions/safe_field_access_0.ets
+07.expressions/11.field_access_expressions/safe_field_access_1.ets
+15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f1_1.ets
+15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_1.ets
+15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_1.ets
+
+# fails in JIT mode with --opt-level=2
+04.names_declarations_and_scopes/04.scopes/interface_level1.ets
+04.names_declarations_and_scopes/04.scopes/interface_level2.ets

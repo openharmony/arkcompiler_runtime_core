@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,22 +14,6 @@
 ---
 cases:
     - use: |-
-        try {
-              if (t1 != t2) throw new F();
-              return 1;
-          } catch (e: Ex) {
-              return 1;
-          } catch (x: X) {
-              return 1;
-          } catch (f: F) {
-              return 0;  // expected
-          } catch (y: Y) {
-              return 1;
-          } catch (e) {
-              return 1;
-          }
-
-    - use: |-
           // empty try block
           try {} catch (e) { return 1; }
           return 0;
@@ -37,7 +21,7 @@ cases:
     - use: |-
           // empty catch block
           try {
-              if (t1 != t2) throw new Ex()
+              if (t1 != t2) throw new Er()
           } catch (e) {
           } finally {
               return 0;
@@ -46,31 +30,33 @@ cases:
     - use: |-
           // empty finally block
           try {
-              if (t1 != t2) throw new Ex()
+              if (t1 != t2) throw new Er()
               return 1;
           } catch (e) {
               return 0;
           } finally {
           }
 
-    - defs: |-
-        function catch(e: Exception) throws { // catch is a soft keyword
-            throw e;
-        }
-      use: |-
-        let e: Exception = new Exception();
-        try {
-            try {
-                  if (t1 == t2) throw new F();
-              } catch (f: F) {
-                  return 1;
-              } catch (y: Y) {
-                  return 1;
-              } catch (e)   // function call
-              {
-                  // empty block
+    - use: |-
+          let res = 0
+          try {
+              // no catch block, Error thrown
+              try {
+                  if (t1 != t2) throw new Er()
+              } finally {
+                  res = 1
               }
-        } catch (e1) {
-            return e1 === e ? 0 : 1;
-        }
-        return 1;
+          } catch (e) {
+              if (e instanceof Error && res == 1) return 0
+          }
+          return 1
+
+    - use: |-
+          let obj: Object|null = null
+          // no finally block, Error thrown
+          try {
+            if (t1 != t2) throw new Er();
+          } catch (e) {
+            obj = e
+          }
+          return obj instanceof Er ? 0 : 1;

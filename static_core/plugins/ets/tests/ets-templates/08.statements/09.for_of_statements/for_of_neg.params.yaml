@@ -14,7 +14,7 @@
 ---
 cases:
     - use: |-
-          for (const v: int of [1,2,3,4]) {
+          for (const v of [1,2,3,4]) {
               res += v
               v = 0   // shouldn't be allowed
               res += v
@@ -27,7 +27,7 @@ cases:
           if (res == "1234") return 0;
 
     - use: |-
-          for (let v: int of []) res += v  // shouldn't be allowed
+          for (let v of []) res += v  // shouldn't be allowed
           if (res == "") return 0;
 
     - use: |-
@@ -45,13 +45,13 @@ cases:
 
     - use: |-
           // wrong expr type
-          for (const ch: char of 123) res += ch
+          for (const ch of 123) res += ch
           if (res == "123") return 0;
 
     - use: |-
           let obj: Object = new Object()
           // wrong expr type
-          for (const v: Object of obj) res += v
+          for (const v of obj) res += v
           if (res == "") return 0;
 
     - use: |-
@@ -70,6 +70,21 @@ cases:
           for let v of arr res += v
 
     - use: |-
-          let arr: int[] = new int[0]
-          // missing semicolon separating type
-          for (let v int of arr) res += v
+          let s: string|null = null
+          // nullable string should not be allowed
+          for (let v of s) res += v
+
+    - use: |-
+          let s: string|undefined = undefined
+          // nullable string should not be allowed
+          for (let v of s) res += v
+
+    - use: |-
+          let s: number[]|null = null
+          // nullable array should not be allowed
+          for (let v of s) res += v
+
+    - use: |-
+          let s: number[]|undefined = undefined
+          // nullable array should not be allowed
+          for (let v of s) res += v

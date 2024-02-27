@@ -24,7 +24,7 @@ class InnerNativeTest {
             native static innerNative(): int;
         }
 
-        native static innerNative(): int;
+        native innerNative(): int;
 
         public getInnerNative(): int {
             let inner2: InnerInner = new InnerInner;

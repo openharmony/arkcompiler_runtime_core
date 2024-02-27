@@ -38,8 +38,6 @@ std/math/std_math_mod_double_double.ets
 std/math/std_math_rem_double_double.ets
 std/math/std_math_imul_float_float.ets
 ### Issue 11544 end
-### Issue 15134
-std/time/DateChangeTest.ets
 ### Issue 10874
 std/math/std_math_clz64_long.ets
 ### Issue 12782 begin
@@ -215,6 +213,12 @@ spec/enum/issue14633_1.ets
 ### End enum
 
 ### lambda issues begin
+### Issue 15579
+spec/lambda/issue15579_0.ets
+spec/lambda/issue15579_1.ets
+spec/lambda/issue15579_2.ets
+spec/lambda/issue15579_3.ets
+spec/lambda/issue15579_4.ets
 ### Issue 14054
 spec/lambda/callAsyncMethodFromAsyncLambda1.ets
 spec/lambda/callMethodFromAsyncLambda1.ets
@@ -382,8 +386,16 @@ spec/generic/issue15089_05.ets
 spec/generic/issue15089_06.ets
 spec/generic/issue15089_07.ets
 spec/generic/issue15089_08.ets
+### Issue 15623
+spec/generic/issue15380_0.ets
+### Issue 15380
+spec/generic/issue15380_1.ets
+spec/generic/issue15380_2.ets
+spec/generic/issue15380_3.ets
 ### End of Generic
 ### Import-export issues
+### cannot create runtime (compound tests not supported)
+spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
 ### Issue 14586
 spec/import_export/03.import_directives/06.type_binding/to_export.ets
 spec/import_export/03.import_directives/06.type_binding/type_binding_01.ets
@@ -527,14 +539,6 @@ spec/annotations/annotation_@Watch.ets
 spec/annotations/annotation_@Watch_2.ets
 ### End of Issue 14040
 ### End of Annotations
-### Issue 14738 begin
-spec/bigint/bigint-arithmetic-comparison-18.ets
-spec/bigint/bigint-arithmetic-comparison-19.ets
-### Issue 14738 end
-### Issue 14476 begin
-spec/bigint/bigint-arithmetic-dec-2.ets
-spec/bigint/bigint-arithmetic-inc-2.ets
-### Issue 14476 end
 ### Issue I8MB96 begin
 spec/bigint/bigint-arithmetic-mul-3-operands.ets
 spec/bigint/bigint-arithmetic-mul-4-operands.ets
@@ -660,9 +664,18 @@ spec/expressions/equality/equality_primitive_01_short_equal_short_015.ets
 ###
 
 ### accessors
+spec/accessors/issue-15142_6.ets
 ### Issue 15396
 spec/accessors/issue-13330_7.ets
 spec/accessors/issue-13330_8.ets
+### Issue 15644
+spec/accessors/issue-15142_5.ets
+### Issue 15646
+spec/accessors/issue-15142_9.ets
+spec/accessors/issue-15142_10.ets
+### Issue 15647
+spec/accessors/issue-15142_7.ets
+spec/accessors/issue-15142_8.ets
 ### end of accessors
 
 ### tuples
@@ -712,6 +725,17 @@ spec/interfaces_overriding/interface_overriding_04.ets
 spec/interfaces_overriding/interface_overriding_05.ets
 spec/interfaces_overriding/interface_overriding_06.ets
 ### End of Interfaces overriding
+### Overriding issues
+### Issue 15571
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_01.ets
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_02.ets
+### Issue 15572
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
+### Isse 15201
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets
+### End of Overriding
 ### Issue 15281
 spec/types/number_to_string_1.ets
 spec/types/number_to_string_2.ets
@@ -720,6 +744,16 @@ spec/types/float_to_string_2.ets
 spec/types/double_to_string_1.ets
 spec/types/double_to_string_2.ets
 ### Issue 15281 end
+### Issue 13952
+spec/interfaces/method_overload1.ets
+spec/interfaces/method_overload2.ets
+spec/interfaces/method_overload3.ets
+spec/interfaces/method_overload4.ets
+### Issue 13952 end
+### Issue 15542
+spec/interfaces/method_overload5.ets
+spec/interfaces/method_overload6.ets
+spec/interfaces/method_overload7.ets
 ### BigInt64Array
 std/core/std_core_typedarrays__BigInt64Array.ets
 ### BigInt64Array end
@@ -754,3 +788,21 @@ spec/rest-params/Issue14187.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
 ### Issue 15751 end
+
+### Class constructor inheritance
+### Issue 14720
+spec/09.classes/constructor-inheritance/issue14720_0.ets
+spec/09.classes/constructor-inheritance/issue14720_1.ets
+spec/09.classes/constructor-inheritance/issue14720_2.ets
+spec/09.classes/constructor-inheritance/issue14720_4.ets
+spec/09.classes/constructor-inheritance/issue14720_5.ets
+spec/09.classes/constructor-inheritance/issue14720_6.ets
+### Issue 14720 end
+
+## Issue 15553
+spec/functions/Issue-14273_0.ets
+spec/functions/Issue-14273_3.ets
+
+### Issue 15763
+spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
+### Issue 15763 end

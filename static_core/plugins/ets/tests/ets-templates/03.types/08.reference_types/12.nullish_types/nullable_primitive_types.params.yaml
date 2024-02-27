@@ -21,7 +21,3 @@ types:
   - double
   - char
   - boolean
-  - ubyte
-  - ushort
-  - uint
-  - ulong

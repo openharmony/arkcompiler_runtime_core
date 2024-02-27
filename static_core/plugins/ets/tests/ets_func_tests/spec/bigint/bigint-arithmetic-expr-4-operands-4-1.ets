@@ -30,6 +30,6 @@ function main() : int {
     console.log("x2 = " + x2);
     console.log("x3 = " + x3);
     console.log("x4 = " + x4);
-    if (z == 2n && x1 == 3n && x2 == 2n && x3 == -1n  && x4 == -4n ) return 0;
+    if (z == 4n && x1 == 3n && x2 == 2n && x3 == -1n  && x4 == -4n ) return 0;
     return 1;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,14 @@
 
 function main(): int {
     let failures = 0;
-    
+
     failures += test(testDateChangeYear(), "Try to change date's year");
     failures += test(testDateChangeMonth(), "Try to change date's month");
     failures += test(testDateChangeDay(), "Try to set date's new day");
     failures += test(testDateChangeHour(), "Try to set new hour");
     failures += test(testDateChangeMinutes(), "Try to set new minutes");
     failures += test(testDateChangeSeconds(), "Try to set new seconds");
+
 
     // next test raises assert "Invalid year/month pair"
     //failures += test(testDateChangeMonthBad(), "Try to change month to bad value");
@@ -47,20 +48,32 @@ function testDateChangeYear():int {
 
 }
 
+function daysInMonth(year: number, month: number): number {
+    let tmp = new Date(year, month + 1, 0);
+    return tmp.getDate();
+}
 
-function testDateChangeMonth():int {
-
-    let date: Date = new Date();
-    let month = date.getMonth() as int;
-    let newMonth = 0;
-    if(month == 0) newMonth = month + 1;
-    if(month == 11) newMonth = month -1;
-
+function testDateChangeMonthImpl(date: Date, change: int) {
+    let month = date.getMonth();
+    let dmo = daysInMonth(date.getFullYear(), month);
+    let newMonth = month + change;
+    let dmc = daysInMonth(date.getFullYear(), newMonth);
+    if(dmc < dmo) newMonth++;
     date.setMonth(newMonth);
+    assert date.getMonth() == newMonth
+}
 
-
-    if(date.getMonth() == newMonth) return 0;
-    return 1;
+function testDateChangeMonth(): int {
+    try {
+        let date = new Date();
+        let month = date.getMonth();
+        let change: int = 1;
+        if(month == 11) change = -change;
+        testDateChangeMonthImpl(date, change);
+    } catch(ae: AssertionError) {
+        return 1;
+    }
+    return 0;
 
 }
 

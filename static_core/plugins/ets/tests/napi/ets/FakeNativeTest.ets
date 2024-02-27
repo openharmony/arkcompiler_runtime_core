@@ -23,7 +23,7 @@ class FakeNativeTest {
     // @CriticalNative
     public native static nativeFakeCritical(): void;
 
-    public static run(): void {
+    public run(): void {
         let isNativeFakeCalled: boolean = true;
 
         try {
