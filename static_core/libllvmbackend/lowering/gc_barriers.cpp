@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,8 @@ void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offs
     auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, ptrTy);
     auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
     auto callee = builder->CreateLoad(ptrTy, addr, "post_wrb_one_object_addr");
+    ASSERT(value->getType()->isPointerTy() &&
+           value->getType()->getPointerAddressSpace() == LLVMArkInterface::GC_ADDR_SPACE);
 
     if (!arkInterface->IsIrtocMode()) {
         // LLVM AOT, only 3 parameters

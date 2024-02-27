@@ -54,6 +54,7 @@ entrypoints_yaml_path = "runtime/ets_entrypoints.yaml"
 irtoc_plugins = [
   "irtoc_scripts/interpreter_handlers.irt",
   "irtoc_scripts/interpreter_main_loop.irt",
+  "irtoc_scripts/string_builder.irt",
 ]
 
 arkbytecodeopt_deps =

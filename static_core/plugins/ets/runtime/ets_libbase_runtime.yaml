@@ -967,6 +967,26 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdCoreToStringLong
 
+  - name: StdCoreSbAppendFloat
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    signature:
+      ret: std.core.StringBuilder
+      args: [ f32 ]
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendFloat
+
+  - name: StdCoreSbAppendDouble
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    signature:
+      ret: std.core.StringBuilder
+      args: [ f64 ]
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendDouble
+
   - name: StdCoreSbAppendLong
     space: ets
     class_name: std.core.StringBuilder
@@ -976,6 +996,9 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [i64]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendLong
+    codegen_func: CreateStringBuilderAppendNumber
+    llvm_codegen_func: EmitStringBuilderAppendLong
+    codegen_arch: [arm64, amd64]
 
   - name: StdCoreSbAppendInt
     space: ets
@@ -986,17 +1009,9 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [i32]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendInt
-
-  - name: StdCoreSbAppendByte
-    space: ets
-    class_name: std.core.StringBuilder
-    method_name: append
-    static: false
-    set_flags: []
-    signature:
-      ret: std.core.StringBuilder
-      args: [i8]
-    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendByte
+    codegen_func: CreateStringBuilderAppendNumber
+    llvm_codegen_func: EmitStringBuilderAppendInt
+    codegen_arch: [arm64, amd64]
 
   - name: StdCoreSbAppendShort
     space: ets
@@ -1008,6 +1023,23 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [i16]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendShort
+    codegen_func: CreateStringBuilderAppendNumber
+    llvm_codegen_func: EmitStringBuilderAppendShort
+    codegen_arch: [arm64, amd64]
+
+  - name: StdCoreSbAppendByte
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    set_flags: []
+    signature:
+      ret: std.core.StringBuilder
+      args: [i8]
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendByte
+    codegen_func: CreateStringBuilderAppendNumber
+    llvm_codegen_func: EmitStringBuilderAppendByte
+    codegen_arch: [arm64, amd64]
 
   - name: StdCoreSbAppendChar
     space: ets
@@ -1018,6 +1050,9 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [u16]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendChar
+    codegen_func: CreateStringBuilderAppendChar
+    llvm_codegen_func: EmitStringBuilderAppendChar
+    codegen_arch: [arm64, amd64]
 
   - name: StdCoreSbAppendBool
     space: ets
@@ -1028,6 +1063,9 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [u1]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendBool
+    codegen_func: CreateStringBuilderAppendBool
+    llvm_codegen_func: EmitStringBuilderAppendBool
+    codegen_arch: [arm64, amd64]
 
   - name: StdCoreSbAppendString
     space: ets

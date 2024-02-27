@@ -23,6 +23,7 @@
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "runtime/arch/helpers.h"
 #include "runtime/interpreter/vregister_iterator.h"
 
@@ -244,6 +245,27 @@ extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint3
         utf::Mutf8AsCString(
             Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS).GetNoSuchFieldErrorDescriptor()),
         errorMsg);
+}
+
+extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v,
+                                                           [[maybe_unused]] ObjectHeader *arrayKlass)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendLong(sb, v);
+}
+
+extern "C" ObjectHeader *StringBuilderAppendCharEntrypoint(ObjectHeader *sb, uint16_t ch,
+                                                           [[maybe_unused]] ObjectHeader *arrayKlass)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendChar(sb, ch);
+}
+
+extern "C" ObjectHeader *StringBuilderAppendBoolEntrypoint(ObjectHeader *sb, uint8_t v,
+                                                           [[maybe_unused]] ObjectHeader *arrayKlass)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendBool(sb, ToEtsBoolean(static_cast<bool>(v)));
 }
 
 }  // namespace ark::ets

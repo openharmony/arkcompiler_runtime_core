@@ -436,12 +436,12 @@ bool LLVMIrConstructor::EmitStringEquals(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_EQUALS_COMPRESSED, 2U);
 }
 
-bool LLVMIrConstructor::EmitStringBuilderAppendBool(Inst *inst)
+bool LLVMIrConstructor::EmitStringBuilderBool(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_BOOL, 2U);
 }
 
-bool LLVMIrConstructor::EmitStringBuilderAppendChar(Inst *inst)
+bool LLVMIrConstructor::EmitStringBuilderChar(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_CHAR, 2U);
 }
@@ -2054,7 +2054,6 @@ void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value 
         builder_.CreateCall(builtin, {mem, offset, value});
         return;
     }
-    ASSERT(!llvmbackend::g_options.IsLlvmBuiltinWrb() || GetGraph()->GetMode().IsInterpreter());
     llvm::Value *frameRegValue = nullptr;
     if (arkInterface_->IsIrtocMode() && GetGraph()->GetArch() == Arch::X86_64) {
         frameRegValue = GetRealFrameRegValue();
@@ -2636,7 +2635,7 @@ void LLVMIrConstructor::FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, l
             }
             /*
              * When Ark Compiler implicitly converts something -> LLVM side:
-             * 1. POINTER to REFERENCE (user is LiveOut)       -> AddrSpaceCast
+             * 1. POINTER to REFERENCE (user LiveOut or Store) -> AddrSpaceCast
              * 2. POINTER to UINT64 (user is LiveOut)          -> no conversion necessary
              * 3. LiveIn to REFERENCE                          -> no conversion necessary
              * 4. INT64/UINT64 to REFERENCE (user is LiveOut)  -> IntToPtr
@@ -2644,7 +2643,7 @@ void LLVMIrConstructor::FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, l
              */
             llvm::Value *cvalue;
             if (type == DataType::POINTER && itype == DataType::REFERENCE) {
-                ASSERT(user->GetOpcode() == Opcode::LiveOut);
+                ASSERT(user->GetOpcode() == Opcode::LiveOut || user->GetOpcode() == Opcode::Store);
                 cvalue = builder_.CreateAddrSpaceCast(value, builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
             } else if (type == DataType::POINTER && itype == DataType::UINT64) {
                 ASSERT(user->GetOpcode() == Opcode::LiveOut);

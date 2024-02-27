@@ -458,12 +458,12 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
 //!
@@ -496,12 +496,12 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
 //!
@@ -525,7 +525,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
@@ -533,7 +533,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 
 //! CHECKER       JIT IR Builder, check String concatenation loop
@@ -980,12 +980,12 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
 //!
@@ -1018,12 +1018,12 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,1
 //!
@@ -1047,7 +1047,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
@@ -1055,7 +1055,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendInt/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendBool/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendChar/,1
-//! INST_COUNT    /std.core.StringBuilder::append/,1
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 
 function concat_loop0(a: String, n: int): String {

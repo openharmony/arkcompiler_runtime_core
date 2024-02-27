@@ -65,6 +65,9 @@ end
 
 def raise_error(msg)
   log.error "Test failed: #{$checker_name}"
+  if !@current_method.nil?
+    log.error "Method \"#{@current_method}\""
+  end
   log.error msg
   log.error "Command to reproduce: #{$curr_cmd}"
   raise msg

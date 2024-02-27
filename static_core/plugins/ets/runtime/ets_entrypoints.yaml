@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -137,3 +137,103 @@
       - int32_t
       - int32_t
       - int32_t
+
+- name: StringBuilderAppendLong
+  entrypoint: StringBuilderAppendLong
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - int64_t             # long value
+    - void*               # array class pointer
+
+- name: StringBuilderAppendLongSlowPath
+  entrypoint: StringBuilderAppendLongEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - int64_t             # long value
+    - ark::ObjectHeader*  # array class pointer
+
+- name: StringBuilderAppendLongOddSaved
+  entrypoint: StringBuilderAppendLongEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - int64_t             # long value
+    - ark::ObjectHeader*  # array class pointer
+
+- name: StringBuilderAppendChar
+  entrypoint: StringBuilderAppendChar
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - uint16_t            # char
+    - void*               # array class pointer
+
+- name: StringBuilderAppendCharCompressed
+  entrypoint: StringBuilderAppendCharCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - uint16_t            # char
+    - void*               # array class pointer
+
+- name: StringBuilderAppendCharSlowPath
+  entrypoint: StringBuilderAppendCharEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - uint16_t            # char
+    - ark::ObjectHeader*  # array class pointer
+
+- name: StringBuilderAppendCharOddSaved
+  entrypoint: StringBuilderAppendCharEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - uint16_t            # char
+    - ark::ObjectHeader*  # array class pointer
+
+- name: StringBuilderAppendBool
+  entrypoint: StringBuilderAppendBool
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - uint8_t             # boolean
+    - void*               # array class pointer
+
+- name: StringBuilderAppendBoolSlowPath
+  entrypoint: StringBuilderAppendBoolEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # array class pointer
+
+- name: StringBuilderAppendBoolOddSaved
+  entrypoint: StringBuilderAppendBoolEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - uint8_t             # boolean
+    - ark::ObjectHeader*  # array class pointer

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "libpandabase/utils/utils.h"
 #include "libpandabase/utils/utf.h"
 #include "runtime/arch/memory_helpers.h"
+#include "runtime/include/runtime.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -23,7 +24,9 @@
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include <cstdint>
+#include <cmath>
 
 namespace ark::ets {
 
@@ -55,10 +58,12 @@ static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle)
     return newBuf;
 }
 
-static ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArray *arr)
+// A string representations of nullptr, bool, short, int, long, float and double
+// do not contain uncompressable chars. So we may skip 'compress' check in these cases.
+template <bool CHECK_IF_COMPRESSABLE = true>
+ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArray *arr)
 {
     auto *sb = sbHandle.GetPtr();
-    auto compress = sb->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET);
     auto length = sb->GetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET);
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
     auto *buf = reinterpret_cast<EtsObjectArray *>(sb->GetFieldObject(SB_BUFFER_OFFSET));
@@ -86,8 +91,14 @@ static ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsC
     // Increase the length
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
     sb->SetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET, length + arr->GetLength());
-    // Set the compress field to false if the array contains not compressable chars
-    if (compress) {
+    // If string compression is disabled in the runtime, then set 'StringBuilder.compress' to 'false',
+    // as by default 'StringBuilder.compress' is 'true'.
+    if (!Runtime::GetCurrent()->GetOptions().IsRuntimeCompressedStringsEnabled()) {
+        if (sb->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET)) {
+            sb->SetFieldPrimitive<bool>(SB_COMPRESS_OFFSET, false);
+        }
+    } else if (CHECK_IF_COMPRESSABLE && sb->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET)) {
+        // Set the compress field to false if the array contains not compressable chars
         auto n = arr->GetLength();
         for (uint32_t i = 0; i < n; ++i) {
             if (!ark::coretypes::String::IsASCIICharacter(arr->Get(i))) {
@@ -222,7 +233,7 @@ ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str)
         VMHandle<EtsObject> sbHandle(coroutine, sb);
         // May trigger GC
         EtsCharArray *arr = NullToCharArray();
-        return AppendCharArrayToBuffer(sbHandle, arr);
+        return AppendCharArrayToBuffer<false>(sbHandle, arr);
     }
     if (str->GetLength() == 0) {
         return sb;
@@ -261,19 +272,6 @@ ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str)
     return sb;
 }
 
-ObjectHeader *StringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v)
-{
-    ASSERT(sb != nullptr);
-
-    auto *coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsObject> sbHandle(coroutine, sb);
-
-    // May trigger GC
-    auto *arr = BoolToCharArray(v);
-    return AppendCharArrayToBuffer(sbHandle, arr);
-}
-
 ObjectHeader *StringBuilderAppendChar(ObjectHeader *sb, EtsChar v)
 {
     ASSERT(sb != nullptr);
@@ -287,6 +285,19 @@ ObjectHeader *StringBuilderAppendChar(ObjectHeader *sb, EtsChar v)
     return AppendCharArrayToBuffer(sbHandle, arr);
 }
 
+ObjectHeader *StringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v)
+{
+    ASSERT(sb != nullptr);
+
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+
+    // May trigger GC
+    auto *arr = BoolToCharArray(v);
+    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+}
+
 ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
 {
     ASSERT(sb != nullptr);
@@ -297,7 +308,46 @@ ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
 
     // May trigger GC
     auto *arr = LongToCharArray(v);
-    return AppendCharArrayToBuffer(sbHandle, arr);
+    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+}
+
+template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
+static inline EtsCharArray *FloatingPointToCharArray(FpType number)
+{
+    PandaString str;
+    intrinsics::helpers::FpToStringDecimalRadix(number, str);
+    auto len = str.length();
+    EtsCharArray *arr = EtsCharArray::Create(len);
+    Span<uint16_t> data(reinterpret_cast<uint16_t *>(arr->GetData<EtsChar>()), len);
+    for (size_t i = 0; i < len; ++i) {
+        ASSERT(ark::coretypes::String::IsASCIICharacter(str[i]));
+        data[i] = static_cast<uint16_t>(str[i]);
+    }
+    return arr;
+}
+
+ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
+{
+    ASSERT(sb != nullptr);
+
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+
+    auto *arr = FloatingPointToCharArray(v);
+    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+}
+
+ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
+{
+    ASSERT(sb != nullptr);
+
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+
+    auto *arr = FloatingPointToCharArray(v);
+    return AppendCharArrayToBuffer<false>(sbHandle, arr);
 }
 
 EtsString *StringBuilderToString(ObjectHeader *sb)

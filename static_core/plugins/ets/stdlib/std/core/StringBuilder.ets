@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -151,10 +151,7 @@ export final class StringBuilder {
      *
      * @returns builder with updated internal buffer
      */
-    public append(i: float): StringBuilder {
-        this.append(StringBuilder.toString(i));
-        return this;
-    }
+    public native append(i: float): StringBuilder;
 
     /**
      * Appends a double as string to the builder's internal buffer
@@ -163,10 +160,7 @@ export final class StringBuilder {
      *
      * @returns builder with updated internal buffer
      */
-    public append(i: double): StringBuilder {
-        this.append(StringBuilder.toString(i));
-        return this;
-    }
+    public native append(i: double): StringBuilder;
 
     /**
      * Returns the string that was formed as a result of all append operations

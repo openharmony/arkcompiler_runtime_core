@@ -1,0 +1,256 @@
+# plugin string_builder
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+include_relative 'string_helpers.irt'
+
+module Constants
+    ETS_SB_BUFFER_OFFSET = "ark::ObjectHeader::ObjectHeaderSize()"
+    ETS_SB_INDEX_OFFSET = "ark::ObjectHeader::ObjectHeaderSize() + ark::OBJECT_POINTER_SIZE"
+    ETS_SB_LENGTH_OFFSET = "ark::ObjectHeader::ObjectHeaderSize() + ark::OBJECT_POINTER_SIZE + sizeof(int32_t)"
+    ETS_SB_COMPRESS_OFFSET = "ark::ObjectHeader::ObjectHeaderSize() + ark::OBJECT_POINTER_SIZE + 2*sizeof(int32_t)"
+end
+
+#
+# Counts a number of digits in the long v (+1 for the sign if v is negative)
+#
+scoped_macro(:count_digits) do |v|
+  negative := Compare(v, 0).SrcType("DataType::INT64").LT.b
+  n_digits1 := Add(Cast(1).u64, Cast(negative).u64).u64
+  val := Cast(Abs(v).i64).u64
+  pow10_4 := Cast(10000).u64
+Label(:Loop)
+  val1 := Phi(val, val2).u64
+  n_digits := Phi(n_digits1, n_digits5).u32
+  If(val1, 10).AE.Likely.b {
+    If(val1, 100).B.b {
+      n_digits2 := AddI(n_digits).Imm(1).u32
+      Goto(:Done)
+    }
+    If(val1,1000).B.b {
+      n_digits3 := AddI(n_digits).Imm(2).u32
+      Goto(:Done)
+    }
+    If(val1, 10000).B.b {
+      n_digits4 := AddI(n_digits).Imm(3).u32
+      Goto(:Done)
+    }
+    n_digits5 := AddI(n_digits).Imm(4).u32
+    val2 := Div(val1, pow10_4).u64
+    Goto(:Loop)
+  }
+Label(:Done)
+  result := Phi(n_digits, n_digits2, n_digits3, n_digits4).u32
+end
+
+
+# Converts long to array of chars
+# Ex: '-123' is converted to array of chars as follows:
+#   chars[0] = 0x002D // '-'
+#   chars[1] = 0x0031 // '1'
+#   chars[2] = 0x0032 // '2'
+#   chars[3] = 0x0033 // '3'
+scoped_macro(:convert_long_to_char_array) do |v, chars, n_digits|
+  ten := Cast(10).u64
+  uv := Cast(Abs(v).i64).u64
+  offs := SubI(ShlI(n_digits).Imm(1).u32).Imm(2).u32
+Label(:NextDigit)
+  uv1 := Phi(uv, uv2).u64
+  dig := Mod(uv1, ten).u64         # get least significant digit as 'uv1 % 10'
+  c := AddI(dig).Imm(0x0030).u16   # convert it to utf16 char
+  offs1 := Phi(offs, offs2).u32    # select its offset
+  Store(chars, offs1, c).u16       # store char to array
+  offs2 := SubI(offs1).Imm(2).u32  # decrease offset
+  uv2 := Div(uv1, ten).u64         # prepare for the next decimal digit
+  If(uv2, 0).NE.Likely.b {
+    Goto(:NextDigit)
+  }
+  # Convert sign if any
+  If(v, 0).LT.b {
+    minus := Cast(0x002D).u16
+    StoreI(chars, minus).Imm(0).u16
+  }
+end
+
+
+scoped_macro(:convert_bool_to_char_array) do |v, chars|
+  If(v, 0).EQ.b {
+    Goto(:BoolFalse)
+  }
+  true_code := Cast(0x0065007500720074).u64
+  StoreI(chars, true_code).Imm(0).u64
+  Goto(:Done)
+Label(:BoolFalse)
+  fals_code := Cast(0x0073006c00610066).u64
+  StoreI(chars, fals_code).Imm(0).u64
+  e_code := Cast(0x0065).u16
+  StoreI(chars, e_code).Imm(8).u16
+Label(:Done)
+end
+
+
+function(:StringBuilderAppendLong,
+         params: {sb: 'ref', v: 'i64', array_klass: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:FastPath]) {
+
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  # 1. Check if there is a free slot in the buffer
+  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  # 2. CountDigits
+  n_digits := count_digits(v)
+  # 3. Allocate array of chars in TLAB
+  char_array := allocate_array_of_chars_tlab(array_klass, Cast(n_digits).word)
+  # Let the memory writes (TLAB) be visible to other threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  # 4. Convert Long to utf16 chars
+  chars := Add(char_array, Constants::ARRAY_DATA_OFFSET).ptr
+  convert_long_to_char_array(v, chars, n_digits)
+  # 5. Remember array in the buffer
+  slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+  Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
+  # 6. Increment 'index' field
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  # 7. Update 'length' field
+  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  length := Add(length, n_digits).i32
+  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  # Do not update 'compress' field, as a string representation of a number is always compressable
+  Return(sb).ref
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_LONG_SLOW_PATH")
+  entrypoint_llvm = get_entrypoint_offset("STRING_BUILDER_APPEND_LONG_ODD_SAVED")
+  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ref
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+
+function(:StringBuilderAppendBool,
+         params: {sb: 'ref', v: 'u8', array_klass: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:FastPath]) {
+
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  # 1. Check if there is a free slot in the buffer
+  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  # 2. Allocate array of chars in TLAB
+  If(v, 0).EQ.b {
+    n_digits1 := Cast(5).word  # false
+  } Else {
+    n_digits2 := Cast(4).word  # true
+  }
+  n_digits := Phi(n_digits1, n_digits2).word
+  char_array := allocate_array_of_chars_tlab(array_klass, n_digits)
+  # Let the memory writes (TLAB) be visible to other threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  # 3. Store 'true' or 'false' to array
+  chars := Add(char_array, Constants::ARRAY_DATA_OFFSET).ptr
+  convert_bool_to_char_array(v, chars)
+  # 4. Remember array in the buffer
+  slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+  Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
+  # 5. Increment 'index' field
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  # 6. Update 'length' field
+  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  length := Add(length, Cast(n_digits).i32).i32
+  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  # Do not update 'compress' field, as 'true' and 'false' are always compressable
+  Return(sb).ref
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_BOOL_SLOW_PATH")
+  entrypoint_llvm = get_entrypoint_offset("STRING_BUILDER_APPEND_BOOL_ODD_SAVED")
+  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ref
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+
+def GenerateStringBuilderAppendChar(string_compression_enabled)
+    suffix = (string_compression_enabled ? "Compressed" : "")
+    function("StringBuilderAppendChar#{suffix}".to_sym,
+          params: {sb: 'ref', ch: 'u16', array_klass: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  # 1. Check if there is a free slot in the buffer
+  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  # 2. Allocate array of chars in TLAB
+  char_array := allocate_array_of_chars_tlab(array_klass, Cast(1).word)
+  # Let the memory writes (TLAB) be visible to other threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  # 3. Store char to array
+  chars := Add(char_array, Constants::ARRAY_DATA_OFFSET).ptr
+  StoreI(chars, ch).Imm(0).u16
+  # 4. Remember array in the buffer
+  slot_offs := AddI(ShlI(index).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+  Store(buffer, slot_offs, char_array).SetNeedBarrier(true).ref
+  # 5. Increment 'index' field
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  # 6. Update 'length' field
+  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  length := AddI(length).Imm(1).i32
+  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  # 7. Update 'compress' field
+  compress := LoadI(sb).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+  If(compress, 0).NE.Likely.b {
+    if string_compression_enabled
+      compressable := Compare(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).B.b
+      If(compressable, 0).EQ.Unlikely.b {
+        StoreI(sb, 0).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+      }
+    else
+      StoreI(sb, 0).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+    end
+  }
+  Return(sb).ref
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_CHAR_SLOW_PATH")
+  entrypoint_llvm = get_entrypoint_offset("STRING_BUILDER_APPEND_CHAR_ODD_SAVED")
+  Intrinsic(:SLOW_PATH_ENTRY, sb, ch, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ref
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+end
+
+GenerateStringBuilderAppendChar(true)
+GenerateStringBuilderAppendChar(false)
