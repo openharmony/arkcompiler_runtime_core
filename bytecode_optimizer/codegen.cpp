@@ -68,6 +68,10 @@ bool BytecodeGen::RunImpl()
 {
     Reserve(function_->ins.size());
     int32_t insn_order = 0;
+    if (!GetGraph()->GetTryBeginBlocks().empty()) {
+        // Workaround for AOT and JIT
+        result_.emplace_back(pandasm::Create_NOP());
+    }
     for (auto *bb : GetGraph()->GetBlocksLinearOrder()) {
         EmitLabel(BytecodeGen::LabelName(bb->GetId()));
         if (bb->IsTryEnd() || bb->IsCatchEnd()) {
@@ -486,11 +490,19 @@ void BytecodeGen::VisitIntrinsic(GraphVisitor *visitor, Inst *inst_base)
 
 void BytecodeGen::VisitCatchPhi(GraphVisitor *visitor, Inst *inst)
 {
+    // The Acc register stores the exception object.
+    // Create an STA instruction if the exception is used later in virtual registers.
     if (inst->CastToCatchPhi()->IsAcc()) {
+        bool hasRealUsers = false;
         for (auto &user : inst->GetUsers()) {
             if (!user.GetInst()->IsSaveState()) {
-                UNREACHABLE();
+                hasRealUsers = true;
+                break;
             }
+        }
+        if (hasRealUsers) {
+            auto enc = static_cast<BytecodeGen *>(visitor);
+            DoSta(inst->GetDstReg(), enc->result_);
         }
     }
 }

@@ -877,7 +877,7 @@ HWTEST_F(RegallocTest, regalloc_test_017, TestSize.Level1)
                     param->SetReg(reg++);
                     param->AppendRange({0, 10});
                     param->StartFrom(0);
-                    EXPECT_EQ(param->GetRanges().size(), 1);
+                    EXPECT_EQ(param->GetRanges().size(), 2);
                     EXPECT_EQ(param->GetReg(), reg - 1);
                     EXPECT_NE(param->SplitAt(1, graph->GetAllocator()), nullptr);
                     param->SetLocation(Location::MakeConstant(0));

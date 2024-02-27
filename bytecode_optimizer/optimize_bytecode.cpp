@@ -217,7 +217,7 @@ static void SetCompilerOptions(bool is_dynamic)
     if (!compiler::options.WasSetCompilerMaxBytecodeSize()) {
         compiler::options.SetCompilerMaxBytecodeSize(MAX_BYTECODE_SIZE);
     }
-    if (is_dynamic) {
+    if (is_dynamic && !compiler::options.IsCompilerOptTryCatchFunc()) {
         panda::bytecodeopt::options.SetSkipMethodsWithEh(true);
     }
 }
