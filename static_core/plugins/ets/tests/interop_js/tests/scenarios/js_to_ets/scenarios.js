@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 'use strict';
+
+const STRING_VALUE = '1';
+const INT_VALUE = 1;
+const INT_VALUE2 = 2;
+const INT_VALUE3 = 3;
+const FLOAT_VALUE = 1.0;
 
 function standaloneFunctionJs() {
   return 1;
@@ -71,6 +77,15 @@ function genericFunction(arg) {
   return arg;
 }
 
+function genericTypeParameter(arg) {
+  return arg.toString();
+}
+
+function genericTypeReturnValue(arg) {
+  return arg;
+}
+
+
 class ClassToExtend {
   value() {
     return 1;
@@ -115,12 +130,36 @@ function functionArgTypeCallable(functionToCall) {
   // transpiled from Typescript code: unctionArgTypeCallable(functionToCall: () => number): number
 }
 
+function functionDefaultParameterFunction(arg1 = INT_VALUE, arg2 = INT_VALUE2, arg3 = INT_VALUE3) {
+  let value = 1;
+  return value;
+  // transpiled from Typescript code:
+  // function default_parameter_function(arg1: JSValue = INT_VALUE, arg2: JSValue = INT_VALUE2, arg3: JSValue = INT_VALUE3): int
+}
+
+function functionDefaultIntParameterFunction(arg = INT_VALUE) {
+  return arg;
+  // transpiled from Typescript code: function default_float_parameter_function(arg: JSValue = INT_VALUE): JSValue
+}
+
+function functionDefaultStringParameterFunction(arg = STRING_VALUE) {
+  return arg;
+  // transpiled from Typescript code: function default_string_parameter_function(arg: JSValue = STRING_VALUE): JSValue{
+}
+
+function functionDefaultFloatParameterFunction(arg = FLOAT_VALUE) {
+  return arg;
+  // transpiled from Typescript code: function default_float_parameter_function(arg: JSValue = FLOAT_VALUE): JSValue{
+}
+
 exports.standaloneFunctionJs = standaloneFunctionJs;
 exports.ClassWithMethodJs = ClassWithMethodJs;
 exports.newInterfaceWithMethod = newInterfaceWithMethod;
 exports.ClassWithGetterSetter = ClassWithGetterSetter;
 exports.lambdaFunction = lambdaFunction;
 exports.genericFunction = genericFunction;
+exports.genericTypeParameter = genericTypeParameter;
+exports.genericTypeReturnValue = genericTypeReturnValue;
 exports.ClassToExtend = ClassToExtend;
 exports.functionArgTypeAny = functionArgTypeAny;
 exports.functionArgTypeUnknown = functionArgTypeUnknown;
@@ -130,3 +169,7 @@ exports.functionReturnTypeAny = functionReturnTypeAny;
 exports.functionReturnTypeUnknown = functionReturnTypeUnknown;
 exports.functionReturnTypeUndefined = functionReturnTypeUndefined;
 exports.functionArgTypeCallable = functionArgTypeCallable;
+exports.functionDefaultParameterFunction = functionDefaultParameterFunction;
+exports.functionDefaultIntParameterFunction = functionDefaultIntParameterFunction;
+exports.functionDefaultStringParameterFunction = functionDefaultStringParameterFunction;
+exports.functionDefaultFloatParameterFunction = functionDefaultFloatParameterFunction;

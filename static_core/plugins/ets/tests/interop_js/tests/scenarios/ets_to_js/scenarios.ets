@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,12 @@
  */
 
 package scenarios_test
+
+const STRING_VALUE = '1';
+const INT_VALUE = 1;
+const INT_VALUE2 = 2;
+const INT_VALUE3 = 3;
+const FLOAT_VALUE = 1.0;
 
 function standalone_function_ets(): int {
     return 1;
@@ -83,12 +89,29 @@ function function_arg_type_undefined_ets(arg: JSValue): JSValue {
     return arg;
 }
 
-function function_arg_type_tuple(arg: [number, string]): number {
+function function_arg_type_tuple_ets(arg: [number, string]): number {
     return arg[0];
 }
 
 function function_arg_type_callable_ets(function_to_call: () => JSValue): JSValue {
     return function_to_call();
+}
+
+function generic_type_parameter_ets<T>(arg: T): String {
+    return arg!.toString();
+}
+
+function generic_type_return_value_ets<T>(arg: int, value: T): T {
+   let arr: T[] = [value, value, value];
+   return arr[arg];
+}
+
+function default_int_parameter_function(arg: int = 1): int {
+    return arg;
+}
+
+function default_undefined_parameter_function(arg: JSValue|undefined = undefined): JSValue|undefined {
+    return arg;
 }
 
 function GCJSRuntimeCleanup(): void {
