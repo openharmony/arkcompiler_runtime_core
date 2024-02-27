@@ -55,41 +55,41 @@ public:
     struct IntWrapper {
         IntWrapper() = default;
         ~IntWrapper() = default;
-        explicit IntWrapper(int newElement) : element_(newElement) {}
+        explicit IntWrapper(int newElement) : element(newElement) {}
         IntWrapper(const IntWrapper &newWrapper) = default;
         IntWrapper &operator=(const IntWrapper &newWrapper) = default;
         bool operator<(const IntWrapper &otherWrapper) const
         {
-            return element_ < otherWrapper.element_;
+            return element < otherWrapper.element;
         }
         bool operator==(const IntWrapper &otherWrapper) const
         {
-            return element_ == otherWrapper.element_;
+            return element == otherWrapper.element;
         }
         double operator/(double divider) const
         {
-            return element_ / divider;
+            return element / divider;
         }
         IntWrapper operator+(const IntWrapper &otherWrapper) const
         {
-            return IntWrapper(element_ + otherWrapper.element_);
+            return IntWrapper(element + otherWrapper.element);
         }
         void operator+=(const IntWrapper &otherWrapper)
         {
-            element_ += otherWrapper.element_;
+            element += otherWrapper.element;
         }
         IntWrapper operator*(const IntWrapper &otherWrapper) const
         {
-            return IntWrapper(element_ * otherWrapper.element_);
+            return IntWrapper(element * otherWrapper.element);
         }
 
         std::ostream &operator<<(std::ostream &os)
         {
-            return os << element_;
+            return os << element;
         }
 
     private:
-        int element_ {};
+        int element {};
     };
 
 private:

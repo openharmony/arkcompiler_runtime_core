@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H
+#define PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H
 
 #include <cstdlib>
 #include <memory>
@@ -51,14 +53,14 @@ private:
     void *end_;
 };
 
-static inline size_t FnRounddown(size_t val, size_t alignment)
+inline size_t FnRounddown(size_t val, size_t alignment)
 {
     size_t mask = ~((static_cast<size_t>(1) * alignment) - 1);
     return val & mask;
 }
 
 template <size_t K_ALIGNMENT, typename TestFn>
-static void RunTest(TestFn &&fn)
+void RunTest(TestFn &&fn)
 {
     auto heapBegin = BitmapTest::HEAP_STARTING_ADDRESS;
     const size_t heapCapacity = 16_MB;
@@ -83,7 +85,6 @@ static void RunTest(TestFn &&fn)
             size_t offset = FnRounddown(std::rand() % heapCapacity, K_ALIGNMENT);
             // NOLINTNEXTLINE(cert-msc50-cpp)
             bool set = std::rand() % 2 == 1;
-
             if (set) {
                 bm.Set(ToVoidPtr(heapBegin + offset));
             } else {
@@ -112,7 +113,7 @@ static void RunTest(TestFn &&fn)
 }
 
 template <size_t K_ALIGNMENT>
-static void RunTestCount()
+void RunTestCount()
 {
     auto countTestFn = [](MemBitmap<K_ALIGNMENT> *bitmap, ObjectPointerType begin, ObjectPointerType end,
                           size_t manualCount) {
@@ -176,3 +177,5 @@ TEST_F(BitmapTest, AtomicClearSetTest)
 }
 
 }  // namespace panda::mem
+
+#endif  // PANDA_RUNTIME_TESTS_BITMAP_TEST_BASE_H

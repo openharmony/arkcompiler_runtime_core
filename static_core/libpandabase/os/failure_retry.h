@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_UNIX_FAILURE_RETRY_H_
-#define PANDA_LIBPANDABASE_OS_UNIX_FAILURE_RETRY_H_
+#ifndef PANDA_LIBPANDABASE_OS_UNIX_FAILURE_RETRY_H
+#define PANDA_LIBPANDABASE_OS_UNIX_FAILURE_RETRY_H
 
 #ifdef PANDA_TARGET_UNIX
 // Mac Os' libc doesn't have this macro
@@ -39,4 +39,4 @@
 #error "Unsupported platform"
 #endif  // PANDA_TARGET_UNIX
 
-#endif  // PANDA_LIBPANDABASE_OS_UNIX_FAILURE_RETRY_H_
+#endif  // PANDA_LIBPANDABASE_OS_UNIX_FAILURE_RETRY_H

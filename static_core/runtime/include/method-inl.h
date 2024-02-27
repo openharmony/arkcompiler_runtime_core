@@ -489,30 +489,30 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
         if (!IsProfiling()) {
             SetProfiled();
         }
-    } else {
-        CompilationStage status = GetCompilationStatus();
-        if (!(status == FAILED || status == WAITING || status == COMPILATION)) {
-            ASSERT((!osr) == (acc == nullptr));
-            SetAcc<AccVRegisterPtrT>(thread, acc);
+        return false;
+    }
+    CompilationStage status = GetCompilationStatus();
+    if (!(status == FAILED || status == WAITING || status == COMPILATION)) {
+        ASSERT((!osr) == (acc == nullptr));
+        SetAcc<AccVRegisterPtrT>(thread, acc);
 
-            if (func.IsHeapObject()) {
-                [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-                VMHandle<ObjectHeader> handleFunc(thread, func.GetHeapObject());
-                if (!TryVerify<IS_CALL>()) {
-                    return false;
-                }
-                return runtime->GetPandaVM()->GetCompiler()->CompileMethod(this, bytecodeOffset, osr,
-                                                                           TaggedValue(handleFunc.GetPtr()));
-            }
+        if (func.IsHeapObject()) {
+            [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+            VMHandle<ObjectHeader> handleFunc(thread, func.GetHeapObject());
             if (!TryVerify<IS_CALL>()) {
                 return false;
             }
-            return runtime->GetPandaVM()->GetCompiler()->CompileMethod(
-                this, bytecodeOffset, osr, func);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+            return runtime->GetPandaVM()->GetCompiler()->CompileMethod(this, bytecodeOffset, osr,
+                                                                       TaggedValue(handleFunc.GetPtr()));
         }
-        if (status == WAITING) {
-            DecrementHotnessCounter();
+        if (!TryVerify<IS_CALL>()) {
+            return false;
         }
+        return runtime->GetPandaVM()->GetCompiler()->CompileMethod(this, bytecodeOffset, osr,
+                                                                   func);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+    }
+    if (status == WAITING) {
+        DecrementHotnessCounter();
     }
     return false;
 }

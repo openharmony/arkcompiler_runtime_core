@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_UTF_H_
-#define PANDA_LIBPANDABASE_UTILS_UTF_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_UTF_H
+#define PANDA_LIBPANDABASE_UTILS_UTF_H
 
 #include <cstdint>
 #include <cstddef>
@@ -190,7 +190,7 @@ struct Mutf8Less {
     }
 };
 
-static inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
+inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 {
     constexpr size_t P1_MASK = 0xffff;
     constexpr size_t P2_SHIFT = 16;
@@ -199,4 +199,4 @@ static inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 
 }  // namespace panda::utf
 
-#endif  // PANDA_LIBPANDABASE_UTILS_UTF_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_UTF_H

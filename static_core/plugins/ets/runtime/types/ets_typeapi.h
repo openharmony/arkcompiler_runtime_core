@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_TYPEAPI_H_
-#define PANDA_PLUGINS_ETS_TYPEAPI_H_
+#ifndef PANDA_PLUGINS_ETS_TYPEAPI_H
+#define PANDA_PLUGINS_ETS_TYPEAPI_H
 
 #include <string>
 #include "type.h"
@@ -88,4 +88,4 @@ enum class EtsTypeAPIAccessModifier : EtsByte { PUBLIC = 0, PRIVATE = 1, PROTECT
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_TYPEAPI_H_
+#endif  // PANDA_PLUGINS_ETS_TYPEAPI_H

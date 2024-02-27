@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP_
-#define PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP
+#define PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP
 // This file is included by interpreter to inline methods that defined in it.
 // We don't move them to object_accessor-inl.h because including runtime.h
 // will lead to circular header dependences.
@@ -25,7 +25,7 @@
 namespace panda {
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP
 inline
 #endif
     mem::GCBarrierSet *
@@ -35,7 +35,7 @@ inline
 }
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP
 inline
 #endif
     mem::GCBarrierSet *
@@ -45,7 +45,7 @@ inline
 }
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP
 inline
 #endif
     mem::BarrierType
@@ -55,7 +55,7 @@ inline
 }
 
 /* static */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP
 inline
 #endif
     mem::BarrierType
@@ -66,4 +66,4 @@ inline
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP_
+#endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_IMPL_CPP

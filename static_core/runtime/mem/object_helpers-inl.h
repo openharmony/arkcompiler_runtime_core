@@ -36,25 +36,26 @@ bool GCStaticObjectHelpers::TraverseClass(Class *cls, Handler &handler)
 {
     // Iterate over static fields
     uint32_t refNum = cls->GetRefFieldsNum<true>();
-    if (refNum > 0) {
-        uint32_t offset = cls->GetRefFieldsOffset<true>();
-        ObjectHeader *object = cls->GetManagedObject();
-        ASSERT(ToUintPtr(cls) + offset >= ToUintPtr(object));
-        // The offset is relative to the class. Adjust it to make relative to the managed object
-        uint32_t objOffset = ToUintPtr(cls) + offset - ToUintPtr(object);
-        uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<true>();
-        for (uint32_t i = 0; i < refNum;
-             i++, offset += ClassHelper::OBJECT_POINTER_SIZE, objOffset += ClassHelper::OBJECT_POINTER_SIZE) {
-            bool isVolatile = (i < refVolatileNum);
-            auto *fieldObject = isVolatile ? cls->GetFieldObject<true>(offset) : cls->GetFieldObject<false>(offset);
-            if (fieldObject == nullptr) {
-                continue;
-            }
-            [[maybe_unused]] bool res = handler(object, fieldObject, objOffset, isVolatile);
-            if constexpr (INTERRUPTIBLE) {
-                if (!res) {
-                    return false;
-                }
+    if (refNum == 0) {
+        return true;
+    }
+    uint32_t offset = cls->GetRefFieldsOffset<true>();
+    ObjectHeader *object = cls->GetManagedObject();
+    ASSERT(ToUintPtr(cls) + offset >= ToUintPtr(object));
+    // The offset is relative to the class. Adjust it to make relative to the managed object
+    uint32_t objOffset = ToUintPtr(cls) + offset - ToUintPtr(object);
+    uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<true>();
+    for (uint32_t i = 0; i < refNum;
+         i++, offset += ClassHelper::OBJECT_POINTER_SIZE, objOffset += ClassHelper::OBJECT_POINTER_SIZE) {
+        bool isVolatile = (i < refVolatileNum);
+        auto *fieldObject = isVolatile ? cls->GetFieldObject<true>(offset) : cls->GetFieldObject<false>(offset);
+        if (fieldObject == nullptr) {
+            continue;
+        }
+        [[maybe_unused]] bool res = handler(object, fieldObject, objOffset, isVolatile);
+        if constexpr (INTERRUPTIBLE) {
+            if (!res) {
+                return false;
             }
         }
     }

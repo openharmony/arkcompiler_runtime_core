@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H
+#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H
 
 #include "runtime/include/runtime.h"
 #include "runtime/include/coretypes/string-inl.h"
@@ -337,4 +337,4 @@ private:
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_STRING_H

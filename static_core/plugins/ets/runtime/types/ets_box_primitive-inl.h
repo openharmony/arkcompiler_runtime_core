@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_INL_H
+#define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_INL_H
+
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 
@@ -44,3 +47,5 @@ EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
     return instance;
 }
 }  // namespace panda::ets
+
+#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_INL_H

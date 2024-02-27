@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_ETS_PLUGIN_H__
-#define PANDA_VERIFICATION_ETS_PLUGIN_H__
+#ifndef PANDA_VERIFICATION_ETS_PLUGIN_H
+#define PANDA_VERIFICATION_ETS_PLUGIN_H
 
 #include "abs_int_inl_compat_checks.h"
 #include "verification/plugins.h"
@@ -61,4 +61,4 @@ private:
 
 }  // namespace panda::verifier::plugin
 
-#endif
+#endif  // PANDA_VERIFICATION_ETS_PLUGIN_H

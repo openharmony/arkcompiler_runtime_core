@@ -128,7 +128,7 @@ inline void ObjectAccessor::SetFieldPrimitive(void *obj, const Field &field, T v
 }
 
 /* static */
-template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, const Field &field)
 {
     if (UNLIKELY(field.IsVolatile())) {
@@ -138,7 +138,7 @@ inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, const Field
 }
 
 /* static */
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectAccessor::SetFieldObject(void *obj, const Field &field, ObjectHeader *value)
 {
     ASSERT(IsAddressInObjectsHeapOrNull(value));
@@ -150,7 +150,7 @@ inline void ObjectAccessor::SetFieldObject(void *obj, const Field &field, Object
 }
 
 /* static */
-template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectAccessor::GetFieldObject(const ManagedThread *thread, const void *obj, const Field &field)
 {
     if (UNLIKELY(field.IsVolatile())) {
@@ -160,7 +160,7 @@ inline ObjectHeader *ObjectAccessor::GetFieldObject(const ManagedThread *thread,
 }
 
 /* static */
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectAccessor::SetFieldObject(const ManagedThread *thread, void *obj, const Field &field,
                                            ObjectHeader *value)
 {
@@ -186,7 +186,7 @@ inline void ObjectAccessor::SetFieldPrimitive(void *obj, size_t offset, T value,
 }
 
 /* static */
-template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectAccessor::GetFieldObject(const void *obj, int offset, std::memory_order memoryOrder)
 {
     if (!IS_DYN) {
@@ -206,7 +206,7 @@ static inline std::memory_order GetComplementMemoryOrder(std::memory_order memor
 }
 
 /* static */
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectAccessor::SetFieldObject(void *obj, size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     if (NEED_WRITE_BARRIER) {
@@ -253,7 +253,7 @@ inline std::pair<bool, T> ObjectAccessor::CompareAndSetFieldPrimitive(void *obj,
 }
 
 /* static */
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(void *obj, size_t offset,
                                                                                 ObjectHeader *oldValue,
                                                                                 ObjectHeader *newValue,
@@ -305,7 +305,7 @@ inline T ObjectAccessor::GetAndSetFieldPrimitive(void *obj, size_t offset, T val
 }
 
 /* static */
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectAccessor::GetAndSetFieldObject(void *obj, size_t offset, ObjectHeader *value,
                                                           std::memory_order memoryOrder)
 {

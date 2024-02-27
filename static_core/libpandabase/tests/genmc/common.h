@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_LIBPANDABASE_TESTS_GENMC_COMMON_H
+#define PANDA_LIBPANDABASE_TESTS_GENMC_COMMON_H
+
 #include <pthread.h>
-#include <stdlib.h>
+#include <cstdlib>
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
 
-thread_local pthread_t current_tid;
+thread_local pthread_t g_currentTid;
 
 static int g_shared;
 
@@ -31,3 +34,5 @@ inline void CheckGlobalVar(int index)
     int r = g_shared;
     ASSERT(r == index);
 }
+
+#endif  // PANDA_LIBPANDABASE_TESTS_GENMC_COMMON_H

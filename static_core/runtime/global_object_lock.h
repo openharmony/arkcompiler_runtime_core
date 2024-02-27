@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_GLOBAL_OBJECT_LOCK_H_
-#define PANDA_RUNTIME_GLOBAL_OBJECT_LOCK_H_
+#ifndef PANDA_RUNTIME_GLOBAL_OBJECT_LOCK_H
+#define PANDA_RUNTIME_GLOBAL_OBJECT_LOCK_H
 
 #include "runtime/include/object_header.h"
 
@@ -38,4 +38,4 @@ public:
 };
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_GLOBAL_OBJECT_LOCK_H_
+#endif  // PANDA_RUNTIME_GLOBAL_OBJECT_LOCK_H

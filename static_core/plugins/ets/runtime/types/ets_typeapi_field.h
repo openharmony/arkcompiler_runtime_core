@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_TYPEAPI_FIELD_H_
-#define PANDA_PLUGINS_ETS_TYPEAPI_FIELD_H_
+#ifndef PANDA_PLUGINS_ETS_TYPEAPI_FIELD_H
+#define PANDA_PLUGINS_ETS_TYPEAPI_FIELD_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
@@ -85,4 +85,4 @@ private:
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_TYPEAPI_FIELD_H_
+#endif  // PANDA_PLUGINS_ETS_TYPEAPI_FIELD_H

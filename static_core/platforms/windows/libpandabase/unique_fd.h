@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_WINDOWS_UNIQUE_FD_H_
-#define PANDA_LIBPANDABASE_OS_WINDOWS_UNIQUE_FD_H_
+#ifndef PANDA_LIBPANDABASE_OS_WINDOWS_UNIQUE_FD_H
+#define PANDA_LIBPANDABASE_OS_WINDOWS_UNIQUE_FD_H
 
 #include "libpandabase/macros.h"
 
@@ -28,4 +28,4 @@ inline int DupCloexec([[maybe_unused]] int fd)
 
 }  // namespace panda::os::unique_fd
 
-#endif  // PANDA_LIBPANDABASE_OS_WINDOWS_UNIQUE_FD_H_
+#endif  // PANDA_LIBPANDABASE_OS_WINDOWS_UNIQUE_FD_H

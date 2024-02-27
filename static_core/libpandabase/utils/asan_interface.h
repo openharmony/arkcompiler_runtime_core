@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
-#define LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
+#ifndef LIBPANDABASE_UTILS_ASAN_INTERFACE_H
+#define LIBPANDABASE_UTILS_ASAN_INTERFACE_H
 
 // for clang
 #if defined(__has_feature)
@@ -54,4 +54,4 @@ void __asan_unpoison_memory_region(void const volatile *addr, size_t size) __att
 #define ATTRIBUTE_NO_SANITIZE_ADDRESS
 #endif  // PANDA_ASAN_ON
 
-#endif  // LIBPANDABASE_UTILS_ASAN_INTERFACE_H_
+#endif  // LIBPANDABASE_UTILS_ASAN_INTERFACE_H

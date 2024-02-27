@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_BIT_FIELD_H_
-#define LIBPANDABASE_UTILS_BIT_FIELD_H_
+#ifndef LIBPANDABASE_UTILS_BIT_FIELD_H
+#define LIBPANDABASE_UTILS_BIT_FIELD_H
 
 #include <limits>
 #include "macros.h"
@@ -140,4 +140,4 @@ public:
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_BIT_FIELD_H_
+#endif  // LIBPANDABASE_UTILS_BIT_FIELD_H

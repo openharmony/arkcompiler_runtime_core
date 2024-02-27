@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H
+#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H
 
 namespace panda::os::mem {
 
@@ -34,4 +34,4 @@ int munmap(void *addr, [[maybe_unused]] size_t len);
 
 }  // namespace panda::os::mem
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_UNIX_MEM_H

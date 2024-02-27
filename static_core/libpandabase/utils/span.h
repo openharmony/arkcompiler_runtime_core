@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_SPAN_H_
-#define LIBPANDABASE_UTILS_SPAN_H_
+#ifndef LIBPANDABASE_UTILS_SPAN_H
+#define LIBPANDABASE_UTILS_SPAN_H
 
 #include "macros.h"
 
@@ -259,4 +259,4 @@ Span<std::byte> AsWritableBytes(Span<T> s) noexcept
 }
 
 }  // namespace panda
-#endif  // LIBPANDABASE_UTILS_SPAN_H_
+#endif  // LIBPANDABASE_UTILS_SPAN_H

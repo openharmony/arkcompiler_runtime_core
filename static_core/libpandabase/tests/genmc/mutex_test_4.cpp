@@ -14,14 +14,14 @@
  */
 
 #include <pthread.h>
-#include <stdlib.h>
+#include <cstdlib>
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
 
 // The tests checks work with two mutexes
 
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
-thread_local pthread_t current_tid;
+thread_local pthread_t g_currentTid;
 
 static struct fmutex g_x;
 static struct fmutex g_y;
@@ -39,7 +39,7 @@ static void *Thread1(void *arg)
     ASSERT(r == index);
     MutexUnlock(&g_y);
     MutexUnlock(&g_x);
-    return 0;
+    return nullptr;
 }
 
 static void *Thread2(void *arg)
@@ -52,7 +52,7 @@ static void *Thread2(void *arg)
     int r = g_shared;
     ASSERT(r == index);
     MutexUnlock(&g_x);
-    return 0;
+    return nullptr;
 }
 
 static void *Thread3(void *arg)
@@ -65,7 +65,7 @@ static void *Thread3(void *arg)
     int r = g_shared;
     ASSERT(r == index);
     MutexUnlock(&g_y);
-    return 0;
+    return nullptr;
 }
 
 int main()

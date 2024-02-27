@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "libpandafile/file.h"
@@ -125,4 +125,4 @@ inline std::string ConvertEtsPrimitiveTypeToString(const EtsType type)
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_TYPE_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H_
-#define PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H
+#define PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H
 
 #include <securec.h>
 
@@ -109,4 +109,4 @@ bool ParseInt(const std::string &str, T *num, T min = std::numeric_limits<T>::mi
 
 }  // namespace panda::helpers::string
 
-#endif  // PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_STRING_HELPERS_H

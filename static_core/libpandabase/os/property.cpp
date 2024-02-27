@@ -18,7 +18,7 @@
 namespace panda::os::property {
 
 #if !defined(PANDA_TARGET_UNIX)
-bool GetPropertyBuffer(const char * /* ark_prop */, std::string & /* out */)
+bool GetPropertyBuffer(const char *, std::string &)
 {
     return false;
 }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_FIBERS_FIBER_CONTEXT_H_
-#define PANDA_RUNTIME_FIBERS_FIBER_CONTEXT_H_
+#ifndef PANDA_RUNTIME_FIBERS_FIBER_CONTEXT_H
+#define PANDA_RUNTIME_FIBERS_FIBER_CONTEXT_H
 
 #if defined(PANDA_TARGET_ARM64)
 #include "runtime/fibers/arch/aarch64/context_layout.h"
@@ -86,4 +86,4 @@ extern "C" PANDA_PUBLIC_API void CopyContext(FiberContext *dst, const FiberConte
 
 }  // namespace panda::fibers
 
-#endif /* PANDA_RUNTIME_FIBERS_FIBER_CONTEXT_H_ */
+#endif /* PANDA_RUNTIME_FIBERS_FIBER_CONTEXT_H */

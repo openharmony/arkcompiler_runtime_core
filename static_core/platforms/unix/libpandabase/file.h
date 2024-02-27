@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H
+#define PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H
 
 #include "os/error.h"
 #include "utils/expected.h"
@@ -236,4 +236,4 @@ private:
 
 }  // namespace panda::os::unix::file
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_UNIX_FILE_H

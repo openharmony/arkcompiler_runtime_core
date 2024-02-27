@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
-#define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
+#ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H
+#define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -53,4 +53,4 @@ private:
 };
 }  // namespace panda::ets
 
-#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
+#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H

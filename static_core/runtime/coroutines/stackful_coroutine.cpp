@@ -92,7 +92,8 @@ void StackfulCoroutineContext::CleanUp()
 #endif  // PANDA_ASAN_ON
 }
 
-/*static*/ void StackfulCoroutineContext::CoroThreadProc(void *ctx)
+/* static */
+void StackfulCoroutineContext::CoroThreadProc(void *ctx)
 {
     static_cast<StackfulCoroutineContext *>(ctx)->ThreadProcImpl();
 }

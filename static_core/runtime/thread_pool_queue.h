@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_THREAD_POOL_QUEUE_H_
-#define PANDA_RUNTIME_THREAD_POOL_QUEUE_H_
+#ifndef PANDA_RUNTIME_THREAD_POOL_QUEUE_H
+#define PANDA_RUNTIME_THREAD_POOL_QUEUE_H
 
 #include "libpandabase/macros.h"
 
@@ -71,4 +71,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_THREAD_POOL_QUEUE_H_
+#endif  // PANDA_RUNTIME_THREAD_POOL_QUEUE_H

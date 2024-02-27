@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H
+#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H
 
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/space.h"
@@ -247,4 +247,4 @@ using EtsDoubleArray = EtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>;
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H

@@ -240,7 +240,7 @@ MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t m
             auto free =
                 reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
             // NOLINTNEXTLINE(readability-magic-numbers)
-            if (size + 5000000 > free) {
+            if (size + 5000000U > free) {
                 return result;
             }
         }
@@ -616,7 +616,7 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make a trivial allocation of unaligned size and make it garbage
                 auto r = MakeAllocations<TargetSpace::YOUNG, false, true>();
                 gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-                ASSERT_EQ(2, gccnt->count);
+                ASSERT_EQ(2U, gccnt->count);
                 if (NeedToCheckYoungFreedCount()) {
                     ASSERT_EQ(*loc.youngFreedObjectsCount, r.allocatedCount);
                 }
@@ -637,7 +637,7 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make a trivial allocation of unaligned size and make it alive
                 r = MakeAllocations<TargetSpace::YOUNG, true, true>();
                 gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-                ASSERT_EQ(3, gccnt->count);
+                ASSERT_EQ(3U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, r.savedCount);
@@ -649,7 +649,7 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make them garbage
                 MakeObjectsGarbage(0, rootSize);
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(4, gccnt->count);
+                ASSERT_EQ(4U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
@@ -660,7 +660,7 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make a trivial allocation of unaligned size in tenured space and make it garbage
                 r = MakeAllocations<TargetSpace::TENURED_REGULAR, false, true>();
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(5, gccnt->count);
+                ASSERT_EQ(5U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
@@ -671,7 +671,7 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make a trivial allocation of unaligned size large object and make it garbage
                 r = MakeAllocations<TargetSpace::TENURED_LARGE, false, true>();
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(6, gccnt->count);
+                ASSERT_EQ(6U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
