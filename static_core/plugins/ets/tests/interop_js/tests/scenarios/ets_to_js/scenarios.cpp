@@ -35,20 +35,19 @@ TEST_F(EtsInteropScenariosEtsToJs, test_interface_method_call)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_interface_method_call.js"));
 }
 
-// NOTE(oignatenko) enable this after interop is implemented for eTS getter use in JS
+// NOTE #15888 enable this after interop is implemented for eTS getter use in JS
 TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_class_getter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_getter.js"));
 }
 
-// NOTE(oignatenko) enable this after interop is implemented for eTS setter use in JS
+// NOTE #15889 enable this after interop is implemented for eTS setter use in JS
 TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_class_setter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_setter.js"));
 }
 
-// NOTE(oignatenko) enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_lambda_function_call)
+TEST_F(EtsInteropScenariosEtsToJs, test_lambda_function_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_lambda_function_call.js"));
 }
@@ -58,8 +57,7 @@ TEST_F(EtsInteropScenariosEtsToJs, test_generic_function_call)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_generic_function_call.js"));
 }
 
-// NOTE(oignatenko) enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_extend_class)
+TEST_F(EtsInteropScenariosEtsToJs, test_extend_class)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_extend_class.js"));
 }
@@ -84,16 +82,37 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_undefined_call)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_undefined_call.js"));
 }
 
-// NOTE(oignatenko) enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_tuple_call)
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_tuple_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_tuple_call.js"));
 }
 
-// NOTE(oignatenko) enable this after interop is implemented in this direction
+// NOTE #15890 enable this after interop is implemented in this direction
 TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_callable_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_callable_call.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_generic_type_as_parameter)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_generic_type_as_parameter.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_generic_type_as_return_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_generic_type_as_return_value.js"));
+}
+
+// NOTE #15925 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_defined_for_parameter)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_parameter.js"));
+}
+
+// NOTE #15925 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_define_for_parameter_undefine)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_parameter_undefine.js"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 import { standaloneFunctionJs, ClassWithMethodJs, newInterfaceWithMethod, ClassWithGetterSetter, lambdaFunction,
     genericFunction, ClassToExtend, functionArgTypeAny, functionArgTypeUnknown, functionArgTypeUndefined,
     functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
-    functionArgTypeCallable } from "/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js"
+    functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
+    functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
+    genericTypeReturnValue } from "/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js"
 
 function Test_standalone_function_call(): boolean {
     return standaloneFunctionJs() as int == 1;
@@ -79,10 +81,8 @@ function Test_function_arg_type_undefined(): boolean {
 }
 
 function Test_function_arg_type_tuple(): boolean {
-    // NOTE(oignatenko) uncomment below after interop is implemented in this direction
-    // let arg: [int, String] = [1, "one"];
-    // return functionArgTypeTuple(arg) as int == 1;
-    return false;
+    let arg: [int, String] = [1, "one"];
+    return functionArgTypeTuple(arg) as int == 1;
 }
 
 function Test_function_return_type_any(): boolean {
@@ -97,12 +97,29 @@ function Test_function_return_type_undefined(): boolean {
     return functionReturnTypeUndefined() as int == 1;
 }
 
-// NOTE(oignatenko) uncomment below after interop is implemented in this direction
-// class Child extends ClassToExtend {}
-// function function_to_call(): int {
-//     return 1;
-// }
+function callable(): int {
+    return 1;
+}
+
 function Test_function_arg_type_callable(): boolean {
-    // return functionArgTypeCallable(function_to_call) as int == 1;
     return false;
+    // NOTE #1646 extract this to separate ets file
+    // NOTE #15891 uncomment below after interop is implemented in this direction
+    // return functionArgTypeCallable(callable) as int == 1;
+}
+
+function Test_default_value_int_define_for_parameter(): boolean {
+    return functionDefaultIntParameterFunction() as int == 1;
+}
+
+function Test_default_value_define_for_parameter(): boolean {
+    return functionDefaultParameterFunction() as int == 1;
+}
+
+function Test_generic_type_as_parameter(): boolean {
+    return genericTypeParameter(1) as String == "1";
+}
+
+function Test_generic_type_as_return_value(): boolean {
+    return genericTypeReturnValue(1) as int == 1;
 }

@@ -83,8 +83,7 @@ TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_undefined)
     ASSERT_EQ(ret, true);
 }
 
-// NOTE(oignatenko) enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_arg_type_tuple)
+TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_tuple)
 {
     auto ret = CallEtsMethod<bool>("Test_function_arg_type_tuple");
     ASSERT_EQ(ret, true);
@@ -108,10 +107,34 @@ TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_undefined)
     ASSERT_EQ(ret, true);
 }
 
-// NOTE(oignatenko) enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_return_type_callable)
+// NOTE #15891 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_arg_type_callable)
 {
-    auto ret = CallEtsMethod<bool>("Test_function_return_type_callable");
+    auto ret = CallEtsMethod<bool>("Test_function_arg_type_callable");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_default_value_define_for_parameter)
+{
+    auto ret = CallEtsMethod<bool>("Test_default_value_define_for_parameter");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_default_value_int_define_for_parameter)
+{
+    auto ret = CallEtsMethod<bool>("Test_default_value_int_define_for_parameter");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_generic_type_as_parameter)
+{
+    auto ret = CallEtsMethod<bool>("Test_generic_type_as_parameter");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_generic_type_as_return_value)
+{
+    auto ret = CallEtsMethod<bool>("Test_generic_type_as_return_value");
     ASSERT_EQ(ret, true);
 }
 
