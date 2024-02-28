@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 Object.defineProperty(exports, '__esModule', { value: true });
-exports.callableTestClassInstance = exports.CallableTestClass = exports.callBoundFunction =
-    exports.callConstructedFunction = exports.callArrowFunction = exports.callAnonymousFunction =
-    exports.callNamedFunction = void 0;
+exports.callableTestClassInstance =
+	exports.CallableTestClass =
+	exports.callBoundFunction =
+	exports.callConstructedFunction =
+	exports.callArrowFunction =
+	exports.callAnonymousFunction =
+	exports.callNamedFunction =
+		void 0;
 function callNamedFunction(x, y) {
-    return x + y;
+	return x + y;
 }
 exports.callNamedFunction = callNamedFunction;
 let callAnonymousFunction = function (x, y) {
-    return x + y;
+	return x + y;
 };
 exports.callAnonymousFunction = callAnonymousFunction;
 let callArrowFunction = (x, y) => x + y;
@@ -30,23 +35,21 @@ exports.callArrowFunction = callArrowFunction;
 exports.callConstructedFunction = new Function('a', 'b', 'return a + b');
 exports.callBoundFunction = callNamedFunction.bind(null);
 class CallableTestClass {
-    constructor() {
-        this.callNamedFunction = callNamedFunction.bind(this);
-        this.callAnonymousFunction = exports.callAnonymousFunction.bind(this);
-        this.callArrowFunction = exports.callArrowFunction.bind(this);
-        this.callConstructedFunction = exports.callConstructedFunction.bind(this);
-        this.callBoundFunction = exports.callBoundFunction.bind(this);
-    }
+	constructor() {
+		this.callNamedFunction = callNamedFunction.bind(this);
+		this.callAnonymousFunction = exports.callAnonymousFunction.bind(this);
+		this.callArrowFunction = exports.callArrowFunction.bind(this);
+		this.callConstructedFunction = exports.callConstructedFunction.bind(this);
+		this.callBoundFunction = exports.callBoundFunction.bind(this);
+	}
 }
 exports.CallableTestClass = CallableTestClass;
 exports.callableTestClassInstance = new CallableTestClass();
 const test = () => {
-    console.log([
-        callNamedFunction,
-        exports.callAnonymousFunction,
-        exports.callArrowFunction,
-        exports.callConstructedFunction,
-        exports.callBoundFunction
-    ].map(x => x(10, 5)));
+	console.log(
+		[callNamedFunction, exports.callAnonymousFunction, exports.callArrowFunction, exports.callConstructedFunction, exports.callBoundFunction].map((x) =>
+			x(10, 5)
+		)
+	);
 };
 test();

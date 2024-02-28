@@ -19,14 +19,14 @@ const functionIntersectionTypePrimitiveEts = etsMod.getFunction('functionInterse
 const functionIntersectionTypeObjectEts = etsMod.getFunction('functionIntersectionTypeObject');
 
 {
-  const VALUE1 = '1';
+	const VALUE1 = '1';
 
-  let ret = functionIntersectionTypePrimitiveEts(1);
-  ASSERT_EQ(ret, 1);
+	let ret = functionIntersectionTypePrimitiveEts(1);
+	ASSERT_EQ(ret, 1);
 
-  let res = functionIntersectionTypeObjectEts();
-  ASSERT_EQ(res.a, 1);
-  ASSERT_EQ(res.b, VALUE1);
-  ASSERT_TRUE(typeof res.a === 'number');
-  ASSERT_TRUE(typeof res.b === 'string');
+	let res = functionIntersectionTypeObjectEts();
+	ASSERT_EQ(res.a, 1);
+	ASSERT_EQ(res.b, VALUE1);
+	ASSERT_TRUE(typeof res.a === 'number');
+	ASSERT_TRUE(typeof res.b === 'string');
 }

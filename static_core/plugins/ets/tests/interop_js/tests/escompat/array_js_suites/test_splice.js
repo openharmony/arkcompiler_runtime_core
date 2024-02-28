@@ -57,7 +57,6 @@ const etsArrLen = (x) => x['<get>length'].call(x);
 		ASSERT_EQ(arr1.at(0), 123);
 		ASSERT_EQ(arr1.length, 1);
 	}
-
 }
 
 GCJSRuntimeCleanup();

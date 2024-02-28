@@ -30,92 +30,85 @@ export type TReturnsRecord = TFunctionReturningValue<TRecord>;
 type AnyType = {};
 
 export const isTTupleTS = (testedVar: AnyType): testedVar is TTuple => {
-    return Array.isArray(<AnyType>testedVar) &&
-        testedVar.length === 3 &&
-        typeof testedVar[0] === 'string' &&
-        typeof testedVar[1] === 'number' &&
-        typeof testedVar[2] === 'boolean';
+	return (
+		Array.isArray(<AnyType>testedVar) &&
+		testedVar.length === 3 &&
+		typeof testedVar[0] === 'string' &&
+		typeof testedVar[1] === 'number' &&
+		typeof testedVar[2] === 'boolean'
+	);
 };
 
 const testTuple: TTuple = [TEST_STRING, TEST_INT, TEST_BOOLEAN];
 export const returnTuple: TReturnsTuple = function returnTuple(): Object {
-    return testTuple;
+	return testTuple;
 };
 
 export const returnStrArray: TReturnsStrArray = function returnArray(): Object {
-    const testArray: string[] = ['One', 'Two', 'Three'];
-    return testArray;
+	const testArray: string[] = ['One', 'Two', 'Three'];
+	return testArray;
 };
 
 export const returnNumArray: TReturnsNumArray = function returnArrayNum(): Object {
-    const testArray: number[] = [1, 2, 3];
-    return testArray;
+	const testArray: number[] = [1, 2, 3];
+	return testArray;
 };
 
 export const returnRecord: TReturnsRecord = function returnRecord(): Object {
-    const testRecord: TRecord = {
-        one: 1,
-        two: 2,
-        three: 3
-    };
-    return testRecord;
+	const testRecord: TRecord = {
+		one: 1,
+		two: 2,
+		three: 3,
+	};
+	return testRecord;
 };
 
 interface Shape {
-    width: number;
+	width: number;
 }
 
 interface TwoDimensioned extends Shape {
-    length: number;
+	length: number;
 }
 
 interface ThreeDimensioned extends Shape {
-    length: number;
-    height: number;
+	length: number;
+	height: number;
 }
 
-export const returnInterface = function returnInterface(returnThreeDimensioned: boolean):
-    TwoDimensioned | ThreeDimensioned {
-    const testTwoDimensioned: TwoDimensioned = {
-        width: 100,
-        length: 40,
-    };
-    const testThreeDimensioned: ThreeDimensioned = {
-        width: 100,
-        length: 50,
-        height: 25,
-    };
-    if (returnThreeDimensioned) {
-        return testThreeDimensioned;
-    }
-    return testTwoDimensioned;
+export const returnInterface = function returnInterface(returnThreeDimensioned: boolean): TwoDimensioned | ThreeDimensioned {
+	const testTwoDimensioned: TwoDimensioned = {
+		width: 100,
+		length: 40,
+	};
+	const testThreeDimensioned: ThreeDimensioned = {
+		width: 100,
+		length: 50,
+		height: 25,
+	};
+	if (returnThreeDimensioned) {
+		return testThreeDimensioned;
+	}
+	return testTwoDimensioned;
 };
 
 export class CompositeTypesTestClass {
-    public returnTuple = returnTuple.bind(this);
-    public returnStrArray = returnStrArray.bind(this);
-    public returnNumArray = returnNumArray.bind(this);
-    public returnRecord = returnRecord.bind(this);
-    public returnInterface = returnInterface.bind(this);
-};
+	public returnTuple = returnTuple.bind(this);
+	public returnStrArray = returnStrArray.bind(this);
+	public returnNumArray = returnNumArray.bind(this);
+	public returnRecord = returnRecord.bind(this);
+	public returnInterface = returnInterface.bind(this);
+}
 
 export type TCompositeTypesTestClass = CompositeTypesTestClass;
 export const compositeTypesTestClassInstance = new CompositeTypesTestClass();
 
 const test = (): void => {
-    console.log([
-        returnTuple,
-        returnStrArray,
-        returnNumArray,
-        returnRecord
-    ].map(x => x()));
+	console.log([returnTuple, returnStrArray, returnNumArray, returnRecord].map((x) => x()));
 };
 
 const testInterface = (): void => {
-    console.log(
-        returnInterface(true),
-        returnInterface(false)
-    );
+	console.log(returnInterface(true), returnInterface(false));
 };
 
 test();

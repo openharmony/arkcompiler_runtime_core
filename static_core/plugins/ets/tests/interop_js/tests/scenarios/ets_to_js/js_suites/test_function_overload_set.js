@@ -18,6 +18,6 @@ const etsMod = getTestModule('scenarios_test');
 const overloadFunctionEts = etsMod.getFunction('functionOverload');
 
 {
-  let ret = overloadFunctionEts();
-  ASSERT_EQ(ret, 1);
+	let ret = overloadFunctionEts();
+	ASSERT_EQ(ret, 1);
 }

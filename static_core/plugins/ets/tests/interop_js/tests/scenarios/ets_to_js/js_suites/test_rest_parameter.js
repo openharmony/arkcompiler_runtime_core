@@ -18,10 +18,10 @@ const etsMod = getTestModule('scenarios_test');
 const restParameterFunctionEts = etsMod.getFunction('functionRestParameter');
 
 {
-  const VALUE = 1;
-  let ret = restParameterFunctionEts(VALUE, VALUE);
-  ASSERT_EQ(ret, VALUE);
+	const VALUE = 1;
+	let ret = restParameterFunctionEts(VALUE, VALUE);
+	ASSERT_EQ(ret, VALUE);
 
-  ret = restParameterFunctionEts(VALUE, VALUE, VALUE);
-  ASSERT_EQ(ret, VALUE);
+	ret = restParameterFunctionEts(VALUE, VALUE, VALUE);
+	ASSERT_EQ(ret, VALUE);
 }
