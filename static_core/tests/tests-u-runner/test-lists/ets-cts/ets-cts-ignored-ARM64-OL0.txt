@@ -1,2 +1,2 @@
-05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/func_args1_neg_12.ets
-05.generics/05.parameterized_declarations/type_arguments_of_parameterized_declarations/method_args1_neg_14.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_12.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_14.ets

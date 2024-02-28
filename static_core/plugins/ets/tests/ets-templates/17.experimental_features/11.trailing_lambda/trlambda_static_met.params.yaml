@@ -1,0 +1,173 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # regular lambda cases as baseline for trailing lambda
+    - decl: |-
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f: () => void) {
+                  f()
+                  A.globl += n
+              }
+          }
+      use: |-
+          // regular lambda
+          A.foo(10.0, () => {
+              A.globl = 3.0
+          })
+          assert A.globl == 13.0
+
+    - decl: |-
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f?: () => void) { // optional
+                  f?.()
+                  A.globl += n
+              }
+          }
+      use: |-
+          // regular lambda
+          A.foo(10.0, () => {
+              A.globl = 3.0
+          })
+          assert A.globl == 13.0
+
+          A.foo(10.0)
+          assert A.global == 23.0
+
+    # trailing lambda cases
+    - decl: |-
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f: () => void) {
+                  f()
+                  A.globl += n
+              }
+          }
+      use: |-
+          A.foo(10.0)  // trailing lambda
+          {
+              A.globl = 3.0
+          }
+          assert A.globl == 13.0
+
+    - decl: |-
+          type FF = () => void
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f?: FF) { // optional
+                  f?.()
+                  A.globl += n
+              }
+          }
+      use: |-
+          A.foo(10.0)  // trailing lambda
+          {
+              A.globl = 3.0
+          }
+          assert A.globl == 13.0
+
+          A.foo(10.0)
+          assert A.global == 23.0
+
+    # regular lambda cases with extra block afterwards
+    - decl: |-
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f: () => void) {
+                  f()
+                  A.globl += n
+              }
+          }
+      use: |-
+          // regular lambda
+          A.foo(10.0, () => { A.globl = 3.0 })
+          {
+              A.globl = 4.0
+          }
+          assert A.globl == 4.0
+
+    - decl: |-
+          type FF = () => void
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f?: FF) { // optional
+                  f?.()
+                  A.globl += n
+              }
+          }
+      use: |-
+          // regular lambda
+          A.foo(10.0, () => { A.globl = 3.0 })
+          {
+              A.globl = 4.0
+          }
+          assert A.globl == 4.0
+
+          A.foo(10.0) // trailing lambda
+          {
+              A.globl = 5.0
+          }
+          assert A.globl == 15.0
+
+          A.foo(10.0)  // no trailing lambda
+          assert A.globl == 25.0
+
+    # regular lambda cases with extra block afterwards separated by a semicolon
+    - decl: |-
+          type FF = () => void
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f: FF) {
+                  f()
+                  A.globl += n
+              }
+          }
+      use: |-
+          // not a trailing lambda, block separated by semicolon
+          A.foo(10.0, () => { A.globl = 3.0 }); { A.globl = 4.0 }
+          assert A.globl == 4.0
+
+    - decl: |-
+          class A {
+              static globl: number = 0.0
+              static foo(n: number, f?: () => void) { // optional
+                  f?.()
+                  A.globl += n
+              }
+          }
+      use: |-
+          // not a trailing lambda, block separated by semicolon
+          A.foo(10.0, () => { A.globl = 3.0 }); { A.globl = 4.0 }
+          assert A.globl == 4.0
+
+          A.foo(10.0) { A.globl = 4.0 } // trailing lambda
+          assert A.globl == 14.0
+
+          A.foo(10.0); { A.globl = 4.0 } // not a trailing lambda
+          assert A.globl == 4.0
+
+    # cases without last function parameter
+    - decl: |-
+          class A {
+              static globl: number = 0.0
+              static foo(n: number) {
+                  A.globl += n
+              }
+          }
+      use: |-
+          A.globl = 1.0
+          A.foo(10.0) { A.globl = 4.0 } // no last function parameter
+          assert A.globl == 4.0

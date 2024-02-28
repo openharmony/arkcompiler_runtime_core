@@ -1,0 +1,30 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - types:
+      - { type: boolean, expr: 'false', op: '!=' }
+      - { type: byte, expr: '127 as byte', op: '!=' }
+      - { type: short, expr: '32_767 as short', op: '!=' }
+      - { type: int, expr: 2_147_483_647, op: '!=' }
+      - { type: long, expr: '9_223_372_036_854_775_807 as long', op: '!=' }
+      - { type: float, expr: '3.40282346e38 as float', op: '!=' }
+      - { type: double, expr: 1.7976931348623157e308, op: '!=' }
+      - { type: char, expr: "c'A'", op: '!=' }
+      - { type: 'Boolean|null', expr: new Boolean(false), op: '!==' }
+      - { type: 'Byte|null', expr: new Byte(new Int(1).byteValue()), op: '!==' }
+      - { type: 'Char|null', expr: new Char(c'A'), op: '!==' }
+      - { type: 'Error|null', expr: new Error("msg"), op: '!==' }
+      - { type: 'Barfunc|null', expr: bar, op: '!==' }
+      - { type: 'Barfunc[]|null', expr: '[bar]', op: '!==' }

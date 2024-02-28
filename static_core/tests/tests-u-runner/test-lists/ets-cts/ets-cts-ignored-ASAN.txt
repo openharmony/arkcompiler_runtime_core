@@ -1,2 +1,2 @@
 # panda#11533
-06.conversions_and_contexts/02.assignment_contexts/unboxing_6.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unboxing_6.ets

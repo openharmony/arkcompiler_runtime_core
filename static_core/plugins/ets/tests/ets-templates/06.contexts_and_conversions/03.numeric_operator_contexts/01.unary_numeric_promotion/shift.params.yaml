@@ -1,0 +1,37 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - { type: byte, val: 1 as byte, res: 3 }
+  - { type: short, val: 1 as short, res: 3 }
+  - { type: char, val: "c'1'", res: 3 }
+  - { type: int, val: 1, res: 3 }
+  - { type: long, val: 1 as long, res: 4 }
+  - { type: Byte, val: new Byte(1 as byte), res: 3 }
+  - { type: Short, val: new Short(1 as short), res: 3 }
+  - { type: Char, val: new Char(c'1'), res: 3 }
+  - { type: Int, val: new Int(1), res: 3 }
+  - { type: Long, val: new Long(1 as long), res: 4 }
+
+rside:
+  - { type: byte, val: 1 as byte }
+  - { type: short, val: 1 as short }
+  - { type: char, val: "c'1'" }
+  - { type: int, val: 1 }
+  - { type: long, val: 1 as long }
+  - { type: Byte, val: new Byte(1 as byte) }
+  - { type: Short, val: new Short(1 as short) }
+  - { type: Char, val: new Char(c'1') }
+  - { type: Int, val: new Int(1) }
+  - { type: Long, val: new Long(1 as long) }

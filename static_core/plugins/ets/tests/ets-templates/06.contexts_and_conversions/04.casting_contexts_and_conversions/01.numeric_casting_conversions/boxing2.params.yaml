@@ -1,0 +1,31 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - types:
+      - { ptype: boolean, expr: 'true', rtype: Object }
+      - { ptype: boolean, expr: 'false', rtype: Object }
+      - { ptype: byte, expr: 0x55 as byte, rtype: Object }
+      - { ptype: byte, expr: 0x55 as byte, rtype: Integral }
+      - { ptype: char, expr: "c'W'", rtype: Object }
+      - { ptype: short, expr: 0x5555 as short, rtype: Object }
+      - { ptype: short, expr: 0x5555 as short, rtype: Integral }
+      - { ptype: int, expr: 0x12121212 as int, rtype: Object }
+      - { ptype: int, expr: 0x12121212 as int, rtype: Integral }
+      - { ptype: long, expr: 0x3434343456565656 as long, rtype: Object }
+      - { ptype: long, expr: 0x3434343456565656 as long, rtype: Integral }
+      - { ptype: float, expr: 0.00001 as float, rtype: Object }
+      - { ptype: float, expr: 0.00001 as float, rtype: Floating }
+      - { ptype: double, expr: 0.00000000001 as double, rtype: Object }
+      - { ptype: double, expr: 0.00000000001 as double, rtype: Floating }

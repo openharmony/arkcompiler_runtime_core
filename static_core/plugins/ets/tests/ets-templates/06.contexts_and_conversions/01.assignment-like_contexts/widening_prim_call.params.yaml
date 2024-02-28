@@ -1,0 +1,88 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - ctype: short
+    values:
+      - { type: byte, val: 0, val2: (0 as short) }
+      - { type: byte, val: 127, val2: (127 as short) }
+      - { type: byte, val: -128, val2: (-128 as short) }
+
+  - ctype: int
+    values:
+      - { type: byte, val: 0, val2: 0 }
+      - { type: byte, val: 127, val2: 127 }
+      - { type: byte, val: -128, val2: -128 }
+      - { type: char, val: 0, val2: 0 }
+      - { type: char, val: "c'\\uFFFF'", val2: 0x0000FFFF }
+      - { type: short, val: 0, val2: 0 }
+      - { type: short, val: 32_767, val2: 32_767 }
+      - { type: short, val: -32_768, val2: -32_768 }
+
+  - ctype: long
+    values:
+      - { type: byte, val: 0, val2: (0 as long)}
+      - { type: byte, val: 127, val2: (127 as long) }
+      - { type: byte, val: -128, val2: (-128 as long) }
+      - { type: char, val: 0, val2: (0 as long) }
+      - { type: char, val: "c'\\uFFFF'", val2: (0x000000000000FFFF as long) }
+      - { type: short, val: 0, val2: (0 as long) }
+      - { type: short, val: 32_767, val2: (32_767 as long) }
+      - { type: short, val: -32_768, val2: (-32_768 as long) }
+      - { type: int, val: 0, val2: (0 as long) }
+      - { type: int, val: 2147483647, val2: (2147483647 as long) }
+      - { type: int, val: -2147483648, val2: (-2147483648 as long) }
+
+  - ctype: float
+    values:
+      - { type: byte, val: 0, val2: (0.0 as float) }
+      - { type: byte, val: 127, val2: (127.0 as float) }
+      - { type: byte, val: -128, val2: (-128.0 as float) }
+      - { type: char, val: 0, val2: (0.0 as float) }
+      - { type: char, val: "c'\\uFFFF'", val2: (65535.0 as float)}
+      - { type: short, val: 0, val2: (0.0 as float) }
+      - { type: short, val: 32_767, val2: (32_767.0 as float) }
+      - { type: short, val: -32_768, val2: (-32_768.0 as float) }
+      - { type: int, val: 0, val2: (0.0 as float) }
+      - { type: int, val: 2147483647, val2: (2.147483648e9 as float)}
+      - { type: int, val: -2147483648, val2: (-2.147483648e9 as float) }
+      - { type: long, val: 0, val2: (0.0 as float)}
+      - { type: long, val: 9223372036854775807, val2: (9.223372036854776e18 as float)}
+      - { type: long, val: -9223372036854775808, val2: (-9.223372036854776e18 as float)}
+
+  - ctype: double
+    values:
+      - { type: byte, val: 0, val2: 0.0 }
+      - { type: byte, val: 127, val2: 127.0 }
+      - { type: byte, val: -128, val2: -128.0 }
+      - { type: char, val: 0, val2: 0.0 }
+      - { type: char, val: "c'\\uFAFF'", val2: 64255.0 }
+      - { type: short, val: 0, val2: 0.0 }
+      - { type: short, val: 32_767, val2: 32_767.0 }
+      - { type: short, val: -32_768, val2: -32_768.0 }
+      - { type: int, val: 0, val2: 0.0 }
+      - { type: int, val: 2147483647, val2: 2.147483647e9 }
+      - { type: int, val: -2147483648, val2: -2.147483648e9 }
+      - { type: long, val: 0, val2: 0.0 }
+      - { type: long, val: 9223372036854775807, val2: 9.223372036854776e18 }
+      - { type: long, val: -9223372036854775808, val2: -9.223372036854776e18 }
+      - { type: float, val: 0.0, val2: 0.0 }
+        # +max
+      - { type: float, val: 3.4028234663852886e38, val2: 3.4028234663852886e38 }
+        # +min
+      - { type: float, val: 1.401298464324817e-45, val2: 1.401298464324817e-45 }
+        # -max
+      - { type: float, val: -3.4028234663852886e38, val2: -3.4028234663852886e38 }
+        # -min
+      - { type: float, val: -1.401298464324817e-45, val2: -1.401298464324817e-45 }

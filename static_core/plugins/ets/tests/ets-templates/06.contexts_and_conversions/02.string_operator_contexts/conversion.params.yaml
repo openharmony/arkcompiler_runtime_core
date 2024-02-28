@@ -1,0 +1,102 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - val:
+      - [byte,    42 as byte,   "\"42\""]
+      - [short,   42 as short,  "\"42\""]
+      - [int,     42 as int,    "\"42\""]
+      - [long,    42 as long,   "\"42\""]
+      - [char,    "c'\\u0020'", "\" \""]
+      - [boolean, "true",       "\"true\""]
+      - [boolean, "false",      "\"false\""]
+
+  - val:
+      - [Byte,    new Byte(42 as byte),   "\"42\""]
+      - [Short,   new Short(42 as short), "\"42\""]
+      - [Int,     new Int(42 as int),     "\"42\""]
+      - [Long,    new Long(42 as long),   "\"42\""]
+      - [Boolean, new Boolean(true),      "\"true\""]
+      - [Boolean, new Boolean(false),     "\"false\""]
+
+  - val:
+      - [Integral,  new Byte(42 as byte),   "\"42\""]
+      - [Integral,  new Short(42 as short), "\"42\""]
+      - [Integral,  new Int(42 as int),     "\"42\""]
+      - [Integral,  new Long(42 as long),   "\"42\""]
+
+  - val:
+      - [float,   3.14,      new Float(3.14 as float).toString()]
+      - [double,  3.14,      new Double(3.14 as double).toString()]
+      - [float,   0.0/0.0,   "\"NaN\""]
+      - [double,  0.0/0.0,   "\"NaN\""]
+      - [float,   1.0/0.0,   "\"Infinity\""]
+      - [double,  1.0/0.0,   "\"Infinity\""]
+      - [float,   -1.0/0.0,  "\"-Infinity\""]
+      - [double,  -1.0/0.0,  "\"-Infinity\""]
+
+  - val:
+      - [Float,   new Float(3.14 as float),       p1.toString()]
+      - [Double,  new Double(3.14 as double),     p2.toString()]
+      - [Float,   new Float((0.0/0.0) as float),  "\"NaN\""]
+      - [Double,  new Double(0.0/0.0),            "\"NaN\""]
+      - [Float,   new Float((1.0/0.0) as float),  "\"Infinity\""]
+      - [Double,  new Double(1.0/0.0),            "\"Infinity\""]
+      - [Float,   new Float((-1.0/0.0) as float), "\"-Infinity\""]
+      - [Double,  new Double(-1.0/0.0),           "\"-Infinity\""]
+
+  - val:
+      - [Floating,  new Float(3.14 as float),    p1.toString()]
+      - [Floating,  new Double(3.14 as double),  p2.toString()]
+
+  - val:
+      - ["Object|null",              "null",       "\"null\""]
+      - ["Char|undefined",           "undefined",  "\"undefined\""]
+      - ["Boolean|null",             "null",       "\"null\""]
+      - ["StringBuilder|undefined",  "undefined",  "\"undefined\""]
+      - ["Error|null",               "null",       "\"null\""]
+
+  - val:
+      - ["Object",         "new Object()",         p1.toString()]
+      - ["Char",           "new Char()",           p2.toString()]
+      - ["Boolean",        "new Boolean()",        p3.toString()]
+      - ["StringBuilder",  "new StringBuilder()",  p4.toString()]
+
+  - val:
+      - ["boolean[]",  "[true, false]",       p1.toString()]
+      - ["byte[]",     "[1, 2]",              p2.toString()]
+      - ["char[]",     "[c'A', c'\\uFAFA']",  p3.toString()]
+      - ["short[]",    "[5, 6]",              p4.toString()]
+      - ["int[]",      "[1431655765]",        p5.toString()]
+      - ["long[]",     "[6148914691236517]",  p6.toString()]
+      - ["float[]",    "[0.1, 0.2, 0.3]",     p7.toString()]
+      - ["double[]",   "[1.0, 2.0, 3.0]",     p8.toString()]
+
+  - val:
+      - ["Color",  "Color.Red",   "\"0\""]
+      - ["Color",  "Color.Blue",  "\"2\""]
+      - ["Color",  "Color.Green", "\"1\""]
+    defs: |-
+      enum Color { Red, Green, Blue };
+
+  - val:
+      - ["Foo",    "foo",   p1.toString()]
+    defs: |-
+      type Foo = () => int;
+      function foo(): int {
+        return 42;
+      };
+
+  - val:
+      - ["(p: number) => number",    "(x: number): number => { return 2.0 * x; }",   p1.toString()]

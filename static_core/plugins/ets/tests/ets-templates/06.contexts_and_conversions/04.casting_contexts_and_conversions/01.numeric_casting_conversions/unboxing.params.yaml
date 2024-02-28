@@ -1,0 +1,25 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - types:
+      - { type: Boolean, val: 'true' }
+      - { type: Boolean, val: 'false' }
+      - { type: Byte, val: 0x77 as byte }
+      - { type: Char, val: "c'\\n'" }
+      - { type: Short, val: 0x5555 as short }
+      - { type: Int, val: 0x12121212 as int }
+      - { type: Long, val: 0x3434343456565656 as long }
+      - { type: Float, val: 0.00001 as float }
+      - { type: Double, val: 0.00000000001 as double }

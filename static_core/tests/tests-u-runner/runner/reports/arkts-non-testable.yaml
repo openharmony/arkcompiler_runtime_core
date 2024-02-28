@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- # chapters and sections without testable assertions:
+- '1'
 - '1.1'
 - '1.2'
 - '1.3'
@@ -19,9 +20,9 @@
 - '2.2'
 - '2.5'
 - '2.8'
-- '2.9'
 - '3.2'
 - '3.3'
-- '3.5'
-- '3.6'
+- '4.2'
 - '4.8.1'
+- '7.2'
+- '8.1'

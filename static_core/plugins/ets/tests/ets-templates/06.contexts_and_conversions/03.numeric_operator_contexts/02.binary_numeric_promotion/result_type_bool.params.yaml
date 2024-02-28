@@ -1,0 +1,126 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - { type: byte, val: 1 as byte, rt: byte, rv: 1 as byte, op: '==' }
+  - { type: byte, val: 1 as byte, rt: short, rv: 1 as short, op: '!=' }
+  - { type: byte, val: 1 as byte, rt: char, rv: "c'0'", op: '>' }
+  - { type: byte, val: 1 as byte, rt: int, rv: 1, op: '>=' }
+  - { type: byte, val: 1 as byte, rt: long, rv: 1 as long, op: '<' }
+  - { type: byte, val: 1 as byte, rt: float, rv: 1.0 as float, op: '<=' }
+  - { type: byte, val: 1 as byte, rt: double, rv: 1.0, op: '==' }
+
+  - { type: byte, val: 1 as byte, rt: Byte, rv: new Byte(1 as byte), op: '!=' }
+  - { type: byte, val: 1 as byte, rt: Short, rv: new Short(1 as short), op: '>' }
+  - { type: byte, val: 1 as byte, rt: Char, rv: new Char(c'0'), op: '>=' }
+  - { type: byte, val: 1 as byte, rt: Int, rv: new Int(1), op: '<' }
+  - { type: byte, val: 1 as byte, rt: Long, rv: new Long(1 as long), op: '<=' }
+  - { type: byte, val: 1 as byte, rt: Float, rv: new Float(1.0 as float), op: '==' }
+  - { type: byte, val: 1 as byte, rt: Double, rv: new Double(1.0), op: '!=' }
+
+  - { type: short, val: 1 as short, rt: byte, rv: 1 as byte, op: '>' }
+  - { type: short, val: 1 as short, rt: short, rv: 1 as short, op: '>=' }
+  - { type: short, val: 1 as short, rt: char, rv: "c'0'", op: '<' }
+  - { type: short, val: 1 as short, rt: int, rv: 1, op: '<=' }
+  - { type: short, val: 1 as short, rt: long, rv: 1 as long, op: '==' }
+  - { type: short, val: 1 as short, rt: float, rv: 1.0 as float, op: '!=' }
+  - { type: short, val: 1 as short, rt: double, rv: 1.0, op: '>' }
+
+  - { type: short, val: 1 as short, rt: Byte, rv: new Byte(1 as byte), op: '>=' }
+  - { type: short, val: 1 as short, rt: Short, rv: new Short(1 as short), op: '<' }
+  - { type: short, val: 1 as short, rt: Char, rv: new Char(c'0'), op: '<=' }
+  - { type: short, val: 1 as short, rt: Int, rv: new Int(1), op: '==' }
+  - { type: short, val: 1 as short, rt: Long, rv: new Long(1 as long), op: '!=' }
+  - { type: short, val: 1 as short, rt: Float, rv: new Float(1.0 as float), op: '>' }
+  - { type: short, val: 1 as short, rt: Double, rv: new Double(1.0), op: '>=' }
+
+  - { type: char, val: "c'2'", rt: byte, rv: 1 as byte, op: '<' }
+  - { type: char, val: "c'2'", rt: short, rv: 1 as short, op: '<=' }
+  - { type: char, val: "c'2'", rt: char, rv: "c'0'", op: '==' }
+  - { type: char, val: "c'2'", rt: int, rv: 1, op: '!=' }
+  - { type: char, val: "c'2'", rt: long, rv: 1 as long, op: '>' }
+  - { type: char, val: "c'2'", rt: float, rv: 1.0 as float, op: '>=' }
+  - { type: char, val: "c'2'", rt: double, rv: 1.0, op: '<' }
+
+  - { type: char, val: "c'2'", rt: Byte, rv: new Byte(1 as byte), op: '<=' }
+  - { type: char, val: "c'2'", rt: Short, rv: new Short(1 as short), op: '==' }
+  - { type: char, val: "c'2'", rt: Char, rv: new Char(c'0'), op: '!=' }
+  - { type: char, val: "c'2'", rt: Int, rv: new Int(1), op: '>' }
+  - { type: char, val: "c'2'", rt: Long, rv: new Long(1 as long), op: '>=' }
+  - { type: char, val: "c'2'", rt: Float, rv: new Float(1.0 as float), op: '<' }
+  - { type: char, val: "c'2'", rt: Double, rv: new Double(1.0), op: '<=' }
+
+  - { type: int, val: 1, rt: byte, rv: 1 as byte, op: '==' }
+  - { type: int, val: 1, rt: short, rv: 1 as short, op: '!=' }
+  - { type: int, val: 1, rt: char, rv: "c'0'", op: '>' }
+  - { type: int, val: 1, rt: int, rv: 1, op: '>=' }
+  - { type: int, val: 1, rt: long, rv: 1 as long, op: '<' }
+  - { type: int, val: 1, rt: float, rv: 1.0 as float, op: '<=' }
+  - { type: int, val: 1, rt: double, rv: 1.0, op: '==' }
+
+  - { type: int, val: 1, rt: Byte, rv: new Byte(1 as byte), op: '!=' }
+  - { type: int, val: 1, rt: Short, rv: new Short(1 as short), op: '>' }
+  - { type: int, val: 1, rt: Char, rv: new Char(c'0'), op: '>=' }
+  - { type: int, val: 1, rt: Int, rv: new Int(1), op: '<' }
+  - { type: int, val: 1, rt: Long, rv: new Long(1 as long), op: '<=' }
+  - { type: int, val: 1, rt: Float, rv: new Float(1.0 as float), op: '==' }
+  - { type: int, val: 1, rt: Double, rv: new Double(1.0), op: '!=' }
+
+  - { type: long, val: 1 as long, rt: byte, rv: 1 as byte, op: '>' }
+  - { type: long, val: 1 as long, rt: short, rv: 1 as short, op: '>=' }
+  - { type: long, val: 1 as long, rt: char, rv: "c'0'", op: '<' }
+  - { type: long, val: 1 as long, rt: int, rv: 1, op: '<=' }
+  - { type: long, val: 1 as long, rt: long, rv: 1 as long, op: '==' }
+  - { type: long, val: 1 as long, rt: float, rv: 1.0 as float, op: '!=' }
+  - { type: long, val: 1 as long, rt: double, rv: 1.0, op: '>' }
+
+  - { type: long, val: 1 as long, rt: Byte, rv: new Byte(1 as byte), op: '>=' }
+  - { type: long, val: 1 as long, rt: Short, rv: new Short(1 as short), op: '<' }
+  - { type: long, val: 1 as long, rt: Char, rv: new Char(c'0'), op: '<=' }
+  - { type: long, val: 1 as long, rt: Int, rv: new Int(1), op: '==' }
+  - { type: long, val: 1 as long, rt: Long, rv: new Long(1 as long), op: '!=' }
+  - { type: long, val: 1 as long, rt: Float, rv: new Float(1.0 as float), op: '>' }
+  - { type: long, val: 1 as long, rt: Double, rv: new Double(1.0), op: '>=' }
+
+  - { type: float, val: 1 as float, rt: byte, rv: 1 as byte, op: '<' }
+  - { type: float, val: 1 as float, rt: short, rv: 1 as short, op: '<=' }
+  - { type: float, val: 1 as float, rt: char, rv: "c'0'", op: '==' }
+  - { type: float, val: 1 as float, rt: int, rv: 1, op: '!=' }
+  - { type: float, val: 1 as float, rt: long, rv: 1 as long, op: '>' }
+  - { type: float, val: 1 as float, rt: float, rv: 1.0 as float, op: '>=' }
+  - { type: float, val: 1 as float, rt: double, rv: 1.0, op: '<' }
+
+  - { type: float, val: 1 as float, rt: Byte, rv: new Byte(1 as byte), op: '<=' }
+  - { type: float, val: 1 as float, rt: Short, rv: new Short(1 as short), op: '==' }
+  - { type: float, val: 1 as float, rt: Char, rv: new Char(c'0'), op: '!=' }
+  - { type: float, val: 1 as float, rt: Int, rv: new Int(1), op: '>' }
+  - { type: float, val: 1 as float, rt: Long, rv: new Long(1 as long), op: '>=' }
+  - { type: float, val: 1 as float, rt: Float, rv: new Float(1.0 as float), op: '<' }
+  - { type: float, val: 1 as float, rt: Double, rv: new Double(1.0), op: '<=' }
+
+  - { type: double, val: 1 as double, rt: byte, rv: 1 as byte, op: '==' }
+  - { type: double, val: 1 as double, rt: short, rv: 1 as short, op: '!=' }
+  - { type: double, val: 1 as double, rt: char, rv: "c'0'", op: '>' }
+  - { type: double, val: 1 as double, rt: int, rv: 1, op: '>=' }
+  - { type: double, val: 1 as double, rt: long, rv: 1 as long, op: '<' }
+  - { type: double, val: 1 as double, rt: float, rv: 1.0 as float, op: '<=' }
+  - { type: double, val: 1 as double, rt: double, rv: 1.0, op: '==' }
+
+  - { type: double, val: 1 as double, rt: Byte, rv: new Byte(1 as byte), op: '!=' }
+  - { type: double, val: 1 as double, rt: Short, rv: new Short(1 as short), op: '>' }
+  - { type: double, val: 1 as double, rt: Char, rv: new Char(c'0'), op: '>=' }
+  - { type: double, val: 1 as double, rt: Int, rv: new Int(1), op: '<' }
+  - { type: double, val: 1 as double, rt: Long, rv: new Long(1 as long), op: '<=' }
+  - { type: double, val: 1 as double, rt: Float, rv: new Float(1.0 as float), op: '==' }
+  - { type: double, val: 1 as double, rt: Double, rv: new Double(1.0), op: '!=' }
