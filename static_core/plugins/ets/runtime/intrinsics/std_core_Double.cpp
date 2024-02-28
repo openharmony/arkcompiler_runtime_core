@@ -96,7 +96,6 @@ double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
 EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 {
     double objValue = helpers::GetStdDoubleArgument(obj);
-
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -116,7 +115,6 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
     // truncate the arg val
     double digitAbs = std::isnan(d) ? 0 : d;
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -131,7 +129,6 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 {
     double objValue = helpers::GetStdDoubleArgument(obj);
-
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -151,7 +148,6 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
     // truncate the arg val
     double digitAbs = std::isnan(d) ? 0 : d;
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION + 1)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),
@@ -166,7 +162,6 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
 {
     double objValue = helpers::GetStdDoubleArgument(obj);
-
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -186,7 +181,6 @@ EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
     // truncate the arg val
     double digitAbs = std::isnan(d) ? 0 : d;
     digitAbs = std::abs((digitAbs >= 0) ? std::floor(digitAbs) : std::ceil(digitAbs));
-
     // Check range
     if (UNLIKELY(digitAbs > helpers::MAX_FRACTION || digitAbs < helpers::MIN_FRACTION)) {
         ThrowEtsException(EtsCoroutine::GetCurrent(),

@@ -24,7 +24,7 @@
 #include "unicode/uchar.h"
 #include "unicode/uniset.h"
 
-#define _NO_DEBUG_
+#define NO_DEBUG
 namespace {
 constexpr int INVALID_UNICODE_FROM_UTF8 = -1;
 
@@ -173,7 +173,7 @@ void RegExpParser::Parse()
     buffer_.PutU32(NUM_CAPTURE__OFFSET, captureCount_);
     buffer_.PutU32(NUM_STACK_OFFSET, stackCount_);
     buffer_.PutU32(FLAGS_OFFSET, flags_);
-#ifndef _NO_DEBUG_
+#ifndef NO_DEBUG
     RegExpOpCode::DumpRegExpOpCode(std::cout, buffer_);
 #endif
 }
@@ -1491,7 +1491,7 @@ void RegExpParser::ParseUnicodePropertyValueCharacters(bool *isValue)
 // NOLINTNEXTLINE(cert-dcl50-cpp)
 void RegExpParser::PrintF(const char *fmt, ...)
 {
-#ifndef _NO_DEBUG_
+#ifndef NO_DEBUG
     va_list args;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,)
     va_start(args, fmt);

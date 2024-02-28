@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H
 
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_declaration.h"
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H

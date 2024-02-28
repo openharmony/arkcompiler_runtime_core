@@ -72,7 +72,6 @@ bool RuntimeController::CanLoadPandaFile(const std::string &path) const
         }
         std::string_view realPath = buffer.data();
         bool allow = CanLoadPandaFileInternal(realPath);
-
         if (!allow) {
             LOG(WARNING, RUNTIME) << "Disallow loading panda file in data directory : " << path;
         }

@@ -982,7 +982,6 @@ Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view e
     ManagedThread *thread = ManagedThread::GetCurrent();
     ScopedManagedCodeThread sa(thread);
     cls = classLinker_->GetClass(classNameBytes, true, context);
-
     if (cls == nullptr) {
         LOG(ERROR, RUNTIME) << "Cannot find class '" << className << "'";
         return Unexpected(Runtime::Error::CLASS_NOT_FOUND);
@@ -1090,13 +1089,11 @@ std::optional<Runtime::Error> Runtime::CreateApplicationClassLinkerContext(std::
     }
 
     auto pf = panda_file::OpenPandaFileOrZip(filename);
-
     if (pf == nullptr) {
         return Runtime::Error::PANDA_FILE_LOAD_ERROR;
     }
 
     auto res = ExtractLanguageContext(pf.get(), entryPoint);
-
     if (!res) {
         return res.Error();
     }
@@ -1141,7 +1138,6 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
     }
 
     auto ctxErr = CreateApplicationClassLinkerContext(filename, entryPoint);
-
     if (ctxErr) {
         return Unexpected(ctxErr.value());
     }
@@ -1180,7 +1176,6 @@ Expected<int, Runtime::Error> Runtime::ExecutePandaFile(std::string_view filenam
 Expected<int, Runtime::Error> Runtime::Execute(std::string_view entryPoint, const std::vector<std::string> &args)
 {
     auto resolveRes = ResolveEntryPoint(entryPoint);
-
     if (!resolveRes) {
         return Unexpected(resolveRes.Error());
     }

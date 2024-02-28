@@ -88,7 +88,6 @@ uint16_t StdCoreStringCharAt(EtsString *s, int32_t index)
     ASSERT(s != nullptr);
 
     int32_t length = s->GetLength();
-
     if (UNLIKELY(index >= length || index < 0)) {
         panda::ThrowStringIndexOutOfBoundsException(index, length);
         return 0;

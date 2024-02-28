@@ -18,7 +18,6 @@
 
 namespace panda {
 
-// check max-specific method or not according to JVM specs chap5.4.3.3
 // we have to guarantee that while we are iterating itable, the child interface has to be accessed before father
 // interface. interface without inheritance has no limit.
 bool IsMaxSpecificMethod(const Class *iface, const Method &method, size_t startindex, const ITable &itable)

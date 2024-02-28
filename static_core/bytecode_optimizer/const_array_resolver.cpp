@@ -322,7 +322,6 @@ bool ConstArrayResolver::FillLiteral(compiler::StoreInst *storeArrayInst, pandas
         pandasm::Type::FromName(irInterface_->GetTypeIdByOffset(newArrayInst->CastToNewArray()->GetTypeId()));
     auto componentType = arrayType.GetComponentType();
     auto componentTypeName = arrayType.GetComponentName();
-
     if (pandasm::Type::IsPandaPrimitiveType(componentTypeName)) {
         auto valueInst = GetConstantIfPossible(rawElemInst);
         if (valueInst == std::nullopt) {
