@@ -15,18 +15,12 @@ package "Task Queues" {
 package "Worker threads pool" {
   component "Worker thread 1" {
     [TaskManager] --> [local queue 1]
-'    [GC queue(ArkTS)] --> [local queue 1]
-'    [JIT queue] --> [local queue 1]
   }
   component "Worker thread 2" {
     [TaskManager] --> [local queue 2]
-'    [GC queue(ArkTS)] --> [local queue 2]
-'    [JIT queue] --> [local queue 2]
   }
   component "Worker thread 3" {
     [TaskManager] --> [local queue 3]
-'    [GC queue(ArkTS)] --> [local queue 3]
-'    [JIT queue] --> [local queue 3]
   } 
 }
 
