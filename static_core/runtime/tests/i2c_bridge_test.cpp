@@ -1087,6 +1087,24 @@ static void Void8Int9Double(Method *method, int32_t a0, int32_t a1, int32_t a2, 
         PrintFunc("void", __FUNCTION__, method, a0, a1, a2, a3, a4, a5, a6, a7, d0, d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
+static const int64_t argsInvoke8Int9Double[] = {1L,
+                                                2L,
+                                                3L,
+                                                4L,
+                                                5L,
+                                                6L,
+                                                7L,
+                                                8L,
+                                                bit_cast<int64_t>(9.0_D),
+                                                bit_cast<int64_t>(10.0_D),
+                                                bit_cast<int64_t>(11.0_D),
+                                                bit_cast<int64_t>(12.0_D),
+                                                bit_cast<int64_t>(13.0_D),
+                                                bit_cast<int64_t>(14.0_D),
+                                                bit_cast<int64_t>(15.0_D),
+                                                bit_cast<int64_t>(16.0_D),
+                                                bit_cast<int64_t>(17.0_D)};
+
 TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int9Double)
 {
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,
@@ -1120,25 +1138,8 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int9Double)
     ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int9Double", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9.0_D,
                                        10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D, 15.0_D, 16.0_D, 17.0_D));
 
-    int64_t args[] = {1L,
-                      2L,
-                      3L,
-                      4L,
-                      5L,
-                      6L,
-                      7L,
-                      8L,
-                      bit_cast<int64_t>(9.0_D),
-                      bit_cast<int64_t>(10.0_D),
-                      bit_cast<int64_t>(11.0_D),
-                      bit_cast<int64_t>(12.0_D),
-                      bit_cast<int64_t>(13.0_D),
-                      bit_cast<int64_t>(14.0_D),
-                      bit_cast<int64_t>(15.0_D),
-                      bit_cast<int64_t>(16.0_D),
-                      bit_cast<int64_t>(17.0_D)};
     g_gCallResult = "";
-    InvokeCompiledCodeWithArgArray(args, frame, &callee, thread_);
+    InvokeCompiledCodeWithArgArray(argsInvoke8Int9Double, frame, &callee, thread_);
     ASSERT_EQ(g_gCallResult, PrintFunc("void", "Void8Int9Double", &callee, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9.0_D,
                                        10.0_D, 11.0_D, 12.0_D, 13.0_D, 14.0_D, 15.0_D, 16.0_D, 17.0_D));
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,9 +66,6 @@ public:
         options.SetShouldLoadBootPandaFiles(false);
         options.SetShouldInitializeIntrinsics(false);
         options.SetGcType("epsilon");
-#if 0
-        options.SetNoAsyncJit(true);
-#endif
 
         Runtime::Create(options);
         thread_ = MTManagedThread::GetCurrent();
@@ -149,7 +146,6 @@ public:
 
         pandasm::Parser p;
         auto res = p.Parse(out.str());
-        // ASSERT_TRUE(res.HasValue());
         std::unique_ptr<const panda_file::File> pf = pandasm::AsmEmitter::Emit(res.Value());
         classLinker->AddPandaFile(std::move(pf));
 
@@ -183,50 +179,9 @@ public:
         }
         auto shortyIt = shorty.begin();
         TypeId retType = *shortyIt++;
-        auto argsIt = args.begin();
-        while (shortyIt != shorty.end()) {
-            if (argsIt == args.end()) {
-                // only dynamic methods could be called with less arguments than declared
-                ASSERT(*shortyIt == TypeId::TAGGED);
-            }
-            if (argNum > 0) {
-                signature << ", ";
-            }
-            if ((TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::U64) || *shortyIt == TypeId::REFERENCE ||
-                *shortyIt == TypeId::TAGGED) {
-                signature << panda_file::Type(*shortyIt) << " a" << argNum;
-                if (TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::F64) {
-                    body << "fldai.64 " << bit_cast<double>(*argsIt) << '\n';
-                    body << "fcmpg.64 a" << argNum << '\n';
-                    body << "jnez fail\n";
-                } else if (TypeId::I64 <= *shortyIt && *shortyIt <= TypeId::U64) {
-                    body << "ldai.64 " << *argsIt << '\n';
-                    body << "cmp.64 a" << argNum << '\n';
-                    body << "jnez fail\n";
-                } else if (*shortyIt == TypeId::TAGGED) {
-                    if (argsIt == args.end()) {
-                        body << "call.short TestUtils.ldundefined\n";
-                    } else {
-                        body << "ldai.dyn " << *argsIt << '\n';
-                    }
-                    body << "sta.dyn v0\n";
-                    body << "call.short TestUtils.cmpDyn, v0, a" << argNum << '\n';
-                    body << "jnez fail\n";
-                } else {
-                    body << "lda.null\n";
-                    body << "jne.obj a" << argNum << ", fail\n";
-                }
-            } else {
-                signature << "i32 a" << argNum;
-                body << "ldai " << *argsIt << '\n';
-                body << "jne a" << argNum << ", fail\n";
-            }
-            ++shortyIt;
-            if (argsIt != args.end()) {
-                ++argsIt;
-            }
-            ++argNum;
-        }
+
+        MakeCheckArgsMethodBody(shortyIt, shorty, args, body, argNum, signature);
+
         if (retType == TypeId::TAGGED) {
             body << "ldai.dyn 1\n";
             body << "return.dyn\n";
@@ -248,8 +203,7 @@ public:
         out << ".record reference {}\n";
         out << ".record Test {}\n";
         out << ".function " << panda_file::Type(retType) << " Test.main(" << signature.str() << ") {\n";
-        out << body.str();
-        out << "}";
+        out << body.str() << "}";
 
         pandasm::Parser p;
         auto res = p.Parse(out.str());
@@ -266,6 +220,54 @@ public:
     }
 
 private:
+    void MakeCheckArgsMethodBody(std::initializer_list<TypeId>::iterator &shortyIt,
+                                 const std::initializer_list<TypeId> &shorty,
+                                 const std::initializer_list<int64_t> &args, std::ostringstream &body, uint32_t &argNum,
+                                 std::ostringstream &signature)
+    {
+        auto argsIt = args.begin();
+
+        while (shortyIt != shorty.end()) {
+            if (argsIt == args.end()) {
+                // only dynamic methods could be called with less arguments than declared
+                ASSERT(*shortyIt == TypeId::TAGGED);
+            }
+            if (argNum > 0) {
+                signature << ", ";
+            }
+            if ((TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::U64) || *shortyIt == TypeId::REFERENCE ||
+                *shortyIt == TypeId::TAGGED) {
+                signature << panda_file::Type(*shortyIt) << " a" << argNum;
+                if (TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::F64) {
+                    body << "fldai.64 " << bit_cast<double>(*argsIt) << '\n';
+                    body << "fcmpg.64 a" << argNum << '\n';
+                    body << "jnez fail\n";
+                } else if (TypeId::I64 <= *shortyIt && *shortyIt <= TypeId::U64) {
+                    body << "ldai.64 " << *argsIt << '\n';
+                    body << "cmp.64 a" << argNum << '\n';
+                    body << "jnez fail\n";
+                } else if (*shortyIt == TypeId::TAGGED) {
+                    argsIt == args.end() ? body << "call.short TestUtils.ldundefined\n"
+                                         : body << "ldai.dyn " << *argsIt << '\n';
+                    body << "sta.dyn v0\n";
+                    body << "call.short TestUtils.cmpDyn, v0, a" << argNum << '\n';
+                    body << "jnez fail\n";
+                } else {
+                    body << "lda.null\n";
+                    body << "jne.obj a" << argNum << ", fail\n";
+                }
+            } else {
+                signature << "i32 a" << argNum;
+                body << "ldai " << *argsIt << '\n';
+                body << "jne a" << argNum << ", fail\n";
+            }
+            ++shortyIt;
+            if (argsIt != args.end()) {
+                ++argsIt;
+            }
+            ++argNum;
+        }
+    }
     MTManagedThread *thread_ {nullptr};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
@@ -280,7 +282,8 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeIntNoArg)
 {
     auto method = MakeNoArgsMethod(TypeId::I32, 5L);
     auto res = InvokeEntryPoint<int32_t>(method);
-    ASSERT_EQ(res, 5);
+    constexpr int RES_INVOKE = 5;
+    ASSERT_EQ(res, RES_INVOKE);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
@@ -288,7 +291,8 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
     auto method = MakeNoArgsMethod(TypeId::I64, 7L);
 
     auto res = InvokeEntryPoint<int64_t>(method);
-    ASSERT_EQ(res, 7);
+    constexpr int RES_INVOKE = 7;
+    ASSERT_EQ(res, RES_INVOKE);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeDoubleNoArg)
@@ -308,7 +312,6 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeObjNoArg)
     ASSERT_EQ(res, nullptr);
 }
 
-/// Args tests:
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeInt)
 {
     auto method = MakeCheckArgsMethod({TypeId::I32, TypeId::I32}, {5L});

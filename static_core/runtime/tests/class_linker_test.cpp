@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,37 @@ static std::unique_ptr<ClassLinker> CreateClassLinker(ManagedThread *thread)
     return classLinker;
 }
 
+static std::set<std::string> setClasses {"panda.Object",
+                                         "panda.String",
+                                         "panda.Class",
+                                         "[Lpanda/String;",
+                                         "u1",
+                                         "i8",
+                                         "u8",
+                                         "i16",
+                                         "u16",
+                                         "i32",
+                                         "u32",
+                                         "i64",
+                                         "u64",
+                                         "f32",
+                                         "f64",
+                                         "any",
+                                         "[Z",
+                                         "[B",
+                                         "[H",
+                                         "[S",
+                                         "[C",
+                                         "[I",
+                                         "[U",
+                                         "[J",
+                                         "[Q",
+                                         "[F",
+                                         "[D",
+                                         "[A",
+                                         "[Lpanda/Class;",
+                                         "_GLOBAL"};
+
 TEST_F(ClassLinkerTest, TestGetClass)
 {
     pandasm::Parser p;
@@ -142,37 +173,6 @@ TEST_F(ClassLinkerTest, TestEnumerateClasses)
     auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
     ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
 
-    std::set<std::string> classes {"panda.Object",
-                                   "panda.String",
-                                   "panda.Class",
-                                   "[Lpanda/String;",
-                                   "u1",
-                                   "i8",
-                                   "u8",
-                                   "i16",
-                                   "u16",
-                                   "i32",
-                                   "u32",
-                                   "i64",
-                                   "u64",
-                                   "f32",
-                                   "f64",
-                                   "any",
-                                   "[Z",
-                                   "[B",
-                                   "[H",
-                                   "[S",
-                                   "[C",
-                                   "[I",
-                                   "[U",
-                                   "[J",
-                                   "[Q",
-                                   "[F",
-                                   "[D",
-                                   "[A",
-                                   "[Lpanda/Class;",
-                                   "_GLOBAL"};
-
     std::set<std::string> loadedClasses;
 
     classLinker->EnumerateClasses([&loadedClasses](Class *k) {
@@ -180,7 +180,7 @@ TEST_F(ClassLinkerTest, TestEnumerateClasses)
         return true;
     });
 
-    EXPECT_EQ(loadedClasses, classes);
+    EXPECT_EQ(loadedClasses, setClasses);
 }
 
 static void TestPrimitiveClassRoot(const ClassLinkerExtension &classLinkerExt, ClassRoot classRoot,
@@ -343,19 +343,22 @@ size_t GetSize(const Field &field)
         }
         case panda_file::Type::TypeId::I16:
         case panda_file::Type::TypeId::U16: {
-            size = 2;
+            constexpr int SIZE_2 = 2;
+            size = SIZE_2;
             break;
         }
         case panda_file::Type::TypeId::I32:
         case panda_file::Type::TypeId::U32:
         case panda_file::Type::TypeId::F32: {
-            size = 4;
+            constexpr int SIZE_4 = 4;
+            size = SIZE_4;
             break;
         }
         case panda_file::Type::TypeId::I64:
         case panda_file::Type::TypeId::U64:
         case panda_file::Type::TypeId::F64: {
-            size = 8;
+            constexpr int SIZE_8 = 8;
+            size = SIZE_8;
             break;
         }
         case panda_file::Type::TypeId::REFERENCE: {
@@ -384,11 +387,7 @@ void UpdateOffsets(std::vector<FieldData> *fields, size_t offset)
     }
 }
 
-TEST_F(ClassLinkerTest, FieldLayout)
-{
-    pandasm::Parser p;
-
-    auto source = R"(
+static const char *sourceFieldLayout = R"(
         .record R1 {}
 
         .record R2 {
@@ -426,7 +425,39 @@ TEST_F(ClassLinkerTest, FieldLayout)
         }
     )";
 
-    auto res = p.Parse(source);
+static std::vector<FieldData> sortedSfields {{"sf_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
+                                             {"sf_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
+                                             {"sf_f64", sizeof(double), 0},
+                                             {"sf_i64", sizeof(int64_t), 0},
+                                             {"sf_u64", sizeof(uint64_t), 0},
+                                             {"sf_i32", sizeof(int32_t), 0},
+                                             {"sf_u32", sizeof(uint32_t), 0},
+                                             {"sf_f32", sizeof(float), 0},
+                                             {"sf_i16", sizeof(int16_t), 0},
+                                             {"sf_u16", sizeof(uint16_t), 0},
+                                             {"sf_u1", sizeof(uint8_t), 0},
+                                             {"sf_i8", sizeof(int8_t), 0},
+                                             {"sf_u8", sizeof(uint8_t), 0}};
+
+static std::vector<FieldData> sortedIfields {{"if_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
+                                             {"if_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
+                                             {"if_f64", sizeof(double), 0},
+                                             {"if_i64", sizeof(int64_t), 0},
+                                             {"if_u64", sizeof(uint64_t), 0},
+                                             {"if_i32", sizeof(int32_t), 0},
+                                             {"if_u32", sizeof(uint32_t), 0},
+                                             {"if_f32", sizeof(float), 0},
+                                             {"if_i16", sizeof(int16_t), 0},
+                                             {"if_u16", sizeof(uint16_t), 0},
+                                             {"if_u1", sizeof(uint8_t), 0},
+                                             {"if_i8", sizeof(int8_t), 0},
+                                             {"if_u8", sizeof(uint8_t), 0}};
+
+TEST_F(ClassLinkerTest, FieldLayout)
+{
+    pandasm::Parser p;
+
+    auto res = p.Parse(sourceFieldLayout);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
 
     auto classLinker = CreateClassLinker(thread_);
@@ -439,36 +470,7 @@ TEST_F(ClassLinkerTest, FieldLayout)
     Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R2"), &descriptor));
     ASSERT_NE(klass, nullptr);
 
-    std::vector<FieldData> sortedSfields {{"sf_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
-                                          {"sf_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
-                                          {"sf_f64", sizeof(double), 0},
-                                          {"sf_i64", sizeof(int64_t), 0},
-                                          {"sf_u64", sizeof(uint64_t), 0},
-                                          {"sf_i32", sizeof(int32_t), 0},
-                                          {"sf_u32", sizeof(uint32_t), 0},
-                                          {"sf_f32", sizeof(float), 0},
-                                          {"sf_i16", sizeof(int16_t), 0},
-                                          {"sf_u16", sizeof(uint16_t), 0},
-                                          {"sf_u1", sizeof(uint8_t), 0},
-                                          {"sf_i8", sizeof(int8_t), 0},
-                                          {"sf_u8", sizeof(uint8_t), 0}};
-
-    std::vector<FieldData> sortedIfields {{"if_ref", ClassHelper::OBJECT_POINTER_SIZE, 0},
-                                          {"if_any", coretypes::TaggedValue::TaggedTypeSize(), 0},
-                                          {"if_f64", sizeof(double), 0},
-                                          {"if_i64", sizeof(int64_t), 0},
-                                          {"if_u64", sizeof(uint64_t), 0},
-                                          {"if_i32", sizeof(int32_t), 0},
-                                          {"if_u32", sizeof(uint32_t), 0},
-                                          {"if_f32", sizeof(float), 0},
-                                          {"if_i16", sizeof(int16_t), 0},
-                                          {"if_u16", sizeof(uint16_t), 0},
-                                          {"if_u1", sizeof(uint8_t), 0},
-                                          {"if_i8", sizeof(int8_t), 0},
-                                          {"if_u8", sizeof(uint8_t), 0}};
-
     size_t offset = klass->GetStaticFieldsOffset();
-
     if (!IsAligned<sizeof(double)>(offset + ClassHelper::OBJECT_POINTER_SIZE)) {
         FieldData data {"sf_i32", sizeof(int32_t), 0};
         // NOLINTNEXTLINE(bugprone-inaccurate-erase)
@@ -477,9 +479,7 @@ TEST_F(ClassLinkerTest, FieldLayout)
     }
 
     UpdateOffsets(&sortedSfields, offset);
-
     offset = ObjectHeader::ObjectHeaderSize();
-
     if (!IsAligned<sizeof(double)>(offset + ClassHelper::OBJECT_POINTER_SIZE)) {
         FieldData data {"if_i32", sizeof(int32_t), 0};
         // NOLINTNEXTLINE(bugprone-inaccurate-erase)
@@ -766,10 +766,11 @@ TEST_F(ClassLinkerTest, PrimitiveClasses)
     EXPECT_STREQ(utf::Mutf8AsCString(primitiveArrayClass1->GetDescriptor()),
                  utf::Mutf8AsCString(ClassHelper::GetPrimitiveArrayDescriptor(type, 1, &descriptor)));
 
-    auto *primitiveArrayClass2 = ext->GetClass(ClassHelper::GetPrimitiveArrayDescriptor(type, 2, &descriptor));
+    static constexpr int size2 = 2;
+    auto *primitiveArrayClass2 = ext->GetClass(ClassHelper::GetPrimitiveArrayDescriptor(type, size2, &descriptor));
     ASSERT_NE(primitiveArrayClass2, nullptr);
     EXPECT_STREQ(utf::Mutf8AsCString(primitiveArrayClass2->GetDescriptor()),
-                 utf::Mutf8AsCString(ClassHelper::GetPrimitiveArrayDescriptor(type, 2, &descriptor)));
+                 utf::Mutf8AsCString(ClassHelper::GetPrimitiveArrayDescriptor(type, size2, &descriptor)));
 }
 
 class TestClassLinkerContext : public ClassLinkerContext {
@@ -800,22 +801,20 @@ private:
     bool isSuccess_ {false};
 };
 
-TEST_F(ClassLinkerTest, LoadContext)
-{
-    pandasm::Parser p;
-
-    auto source = R"(
+static const char *SOURCE_LOAD_CONTEXT = R"(
         .record A {}
         .record B {}
     )";
 
-    auto res = p.Parse(source);
-    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+TEST_F(ClassLinkerTest, LoadContext)
+{
+    pandasm::Parser p;
 
     auto classLinker = CreateClassLinker(thread_);
     ASSERT_NE(classLinker, nullptr);
 
-    classLinker->AddPandaFile(std::move(pf));
+    auto parsValueEmit = pandasm::AsmEmitter::Emit(p.Parse(SOURCE_LOAD_CONTEXT).Value());
+    classLinker->AddPandaFile(std::move(parsValueEmit));
 
     PandaString descriptor;
     auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -831,10 +830,9 @@ TEST_F(ClassLinkerTest, LoadContext)
 
     auto *desc = ClassHelper::GetDescriptor(utf::CStringAsMutf8("B"), &descriptor);
     TestClassLinkerContext ctx(desc, true, classB, panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto *classBCtx = ext->GetClass(desc, true, &ctx);
 
+    ASSERT_EQ(ext->GetClass(desc, true, &ctx), classB);
     ASSERT_TRUE(ctx.IsSuccess());
-    ASSERT_EQ(classBCtx, classB);
 
     bool isMatched = false;
     ctx.EnumerateClasses([&isMatched](Class *klass) {
@@ -850,38 +848,32 @@ TEST_F(ClassLinkerTest, LoadContext)
     ASSERT_NE(classArrayB, nullptr);
     ASSERT_EQ(classArrayB->GetLoadContext(), ext->GetBootContext());
 
-    {
-        PandaUnorderedSet<Class *> expected {classB};
-        PandaUnorderedSet<Class *> classes;
-        ctx.EnumerateClasses([&](Class *klass) {
-            classes.insert(klass);
-            return true;
-        });
+    PandaUnorderedSet<Class *> expected {classB};
+    PandaUnorderedSet<Class *> classesCtx;
+    ctx.EnumerateClasses([&](Class *klass) {
+        classesCtx.insert(klass);
+        return true;
+    });
 
-        ASSERT_EQ(classes, expected);
-    }
+    ASSERT_EQ(classesCtx, expected);
 
-    {
-        PandaUnorderedSet<Class *> classes;
-        classLinker->EnumerateClasses([&](Class *klass) {
-            classes.insert(klass);
-            return true;
-        });
+    PandaUnorderedSet<Class *> classes;
+    classLinker->EnumerateClasses([&](Class *klass) {
+        classes.insert(klass);
+        return true;
+    });
 
-        ASSERT_NE(classes.find(classA), classes.cend());
-        ASSERT_EQ(*classes.find(classA), classA);
+    ASSERT_NE(classes.find(classA), classes.cend());
+    ASSERT_EQ(*classes.find(classA), classA);
 
-        ASSERT_NE(classes.find(classB), classes.cend());
-        ASSERT_EQ(*classes.find(classB), classB);
+    ASSERT_NE(classes.find(classB), classes.cend());
+    ASSERT_EQ(*classes.find(classB), classB);
 
-        ASSERT_NE(classes.find(classArrayB), classes.cend());
-        ASSERT_EQ(*classes.find(classArrayB), classArrayB);
-    }
+    ASSERT_NE(classes.find(classArrayB), classes.cend());
+    ASSERT_EQ(*classes.find(classArrayB), classArrayB);
 }
 
-TEST_F(ClassLinkerTest, Accesses)
-{
-    auto source = R"(            
+static const char *SOURCE_ACCESSES = R"(
         .record A <access.record=private> {}
 
         .record C <access.record=protected> {}
@@ -897,8 +889,9 @@ TEST_F(ClassLinkerTest, Accesses)
         .function void B.f() <access.function=private> {}
     )";
 
-    auto res = pandasm::Parser {}.Parse(source);
-    auto pf = pandasm::AsmEmitter::Emit(res.Value());
+TEST_F(ClassLinkerTest, Accesses)
+{
+    auto pf = pandasm::AsmEmitter::Emit(pandasm::Parser {}.Parse(SOURCE_ACCESSES).Value());
 
     auto classLinker = CreateClassLinker(thread_);
     ASSERT_NE(classLinker, nullptr);
@@ -960,7 +953,7 @@ TEST_F(ClassLinkerTest, Accesses)
 
 TEST_F(ClassLinkerTest, Inheritance)
 {
-    auto source = R"(            
+    auto source = R"(
         .record A {}
         .record B <extends=A> {}
     )";
@@ -992,7 +985,7 @@ TEST_F(ClassLinkerTest, Inheritance)
 
 TEST_F(ClassLinkerTest, IsSubClassOf)
 {
-    auto source = R"(            
+    auto source = R"(
         .record A {}
         .record B <extends=A> {}
         .record C <extends=B> {}
@@ -1035,7 +1028,7 @@ TEST_F(ClassLinkerTest, IsSubClassOf)
 
 TEST_F(ClassLinkerTest, Final)
 {
-    auto source = R"(            
+    auto source = R"(
         .record A <final> {}
 
         .record B {
