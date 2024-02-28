@@ -182,6 +182,22 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
+    * Creates a new `Array` instance from `Object[]` primitive array.
+    *
+    * @param arr primitive array.
+    *
+    * @returns `Array` intance constructed from `Object[]` primitive array.
+    */
+    public static from<T>(arr: T[]): Array<T> {
+        const len = arr.length;
+        const ret = new NullishType[len as int]
+        for (let i: int = 0; i < len; i++) {
+            ret[i] = arr[i] as NullishType;
+        }
+        return new Array<T>(FROM_BUFFER, ret);
+    }
+
+    /**
      * Default comparison function for sort algorithm.
      * Objects are compared as string. Both objects are convereted to string
      * using `toString()` method and compared using `compareTo() method of `string` class.

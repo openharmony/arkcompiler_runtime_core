@@ -178,3 +178,4 @@ sub:
             ret_type: Array<number>
           - expr: Array.from<number>(Array.of<number>(1, 2, 3, NaN))
           - expr: Array.from<number>(new Set<number>(Array.of<number>(1, 2, 3, NaN)))
+          - expr: Array.from<Number>([1 as Number, 2 as Number, 3 as Number])
