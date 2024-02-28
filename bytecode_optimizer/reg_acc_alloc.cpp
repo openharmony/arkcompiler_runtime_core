@@ -41,7 +41,6 @@ bool IsAccWriteBetween(compiler::Inst *src_inst, compiler::Inst *dst_inst)
 
                 ASSERT(block->GetSuccsBlocks().size() == 1);
                 block = block->GetSuccessor(0);
-
                 // TODO(rtakacs): only linear flow is supported right now.
                 if (!dst_inst->IsPhi() && block->GetPredsBlocks().size() > 1) {
                     return true;

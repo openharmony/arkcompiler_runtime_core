@@ -305,7 +305,6 @@ public:
                 if constexpr (std::is_same<double, U>::value) {
                     std::cerr << " reslt=" << bit_cast<uint64_t>(result);
                     std::cerr << " current_reslt=" << bit_cast<uint64_t>(curr_result);
-
                 } else if constexpr (std::is_same<float, U>::value) {
                     std::cerr << " result=" << bit_cast<uint32_t>(result);
                     std::cerr << " current_result=" << bit_cast<uint32_t>(curr_result);
@@ -455,7 +454,6 @@ bool TestNeg(Encoder64Test *test)
         // Second type-dependency
         T tmp = random_gen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp, -tmp)) {
@@ -465,7 +463,6 @@ bool TestNeg(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -506,9 +503,7 @@ bool TestNot(Encoder64Test *test)
     for (uint64_t i = 0; i < ITERATION; ++i) {
         // Second type-dependency
         T tmp = random_gen<T>();
-
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp, ~tmp)) {
@@ -551,7 +546,6 @@ bool TestMov(Encoder64Test *test)
         // Second type-dependency
         T tmp = random_gen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp, tmp)) {
@@ -561,7 +555,6 @@ bool TestMov(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -598,7 +591,6 @@ bool TestMov2(Encoder64Test *test)
         Src src = random_gen<Src>();
         Dst dst = bit_cast<Dst>(src);
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<Src, Dst>(src, dst)) {
@@ -609,7 +601,6 @@ bool TestMov2(Encoder64Test *test)
     if constexpr (std::is_floating_point_v<Src>) {
         Src nan = std::numeric_limits<Src>::quiet_NaN();
         Dst dst_nan = bit_cast<Dst>(nan);
-
         if (!test->CallCode<Src, Dst>(nan, dst_nan)) {
             return false;
         }
@@ -1226,7 +1217,6 @@ bool TestAbs(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -1290,7 +1280,6 @@ bool TestAdd(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, random_gen<T>(), nan)) {
             return false;
         }
@@ -1417,7 +1406,6 @@ bool TestSub(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, random_gen<T>(), nan)) {
             return false;
         }
@@ -1544,7 +1532,6 @@ bool TestMul(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, random_gen<T>(), nan)) {
             return false;
         }
@@ -1617,7 +1604,6 @@ bool TestMin(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, random_gen<T>(), nan)) {
             return false;
         }
@@ -1692,7 +1678,6 @@ bool TestMax(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T, T>(nan, random_gen<T>(), nan)) {
             return false;
         }
@@ -1932,7 +1917,6 @@ bool TestAnd(Encoder64Test *test)
         T tmp1 = random_gen<T>();
         T tmp2 = random_gen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 & tmp2)) {
@@ -1978,7 +1962,6 @@ bool TestOr(Encoder64Test *test)
         T tmp1 = random_gen<T>();
         T tmp2 = random_gen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 | tmp2)) {
@@ -2024,7 +2007,6 @@ bool TestXor(Encoder64Test *test)
         T tmp1 = random_gen<T>();
         T tmp2 = random_gen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp2, tmp1 ^ tmp2)) {
@@ -2257,7 +2239,6 @@ bool TestFcmp(Encoder64Test *test, bool is_fcmpg)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T, int32_t>(nan, 5.0, is_fcmpg ? 1 : -1)) {
             return false;
         }
@@ -2370,7 +2351,6 @@ bool TestCompare(Encoder64Test *test)
         // Deduced conflicting types for parameter
 
         auto compare = [](T a, T b) -> int32_t { return a >= b; };
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T, int32_t>(tmp1, tmp2, compare(tmp1, tmp2))) {
@@ -2681,7 +2661,6 @@ bool TestDiv(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, random_gen<T>(), nan)) {
             return false;
         }
