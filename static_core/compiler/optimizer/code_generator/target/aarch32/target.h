@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -465,20 +465,20 @@ public:
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UnaryOperation(opc) void Encode##opc(Reg dst, Reg src0) override;
+#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperationRegRegReg(opc) void Encode##opc(Reg dst, Reg src0, Reg src1) override;
+#define BINARY_OPERATION_REG_REG_REG(opc) void Encode##opc(Reg dst, Reg src0, Reg src1) override;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperationRegRegImm(opc) void Encode##opc(Reg dst, Reg src0, Imm src1) override;
+#define BINARY_OPERATION_REG_REG_IMM(opc) void Encode##opc(Reg dst, Reg src0, Imm src1) override;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperation(opc) BinaryOperationRegRegReg(opc) BinaryOperationRegRegImm(opc)
+#define BINARY_OPERATION(opc) BINARY_OPERATION_REG_REG_REG(opc) BINARY_OPERATION_REG_REG_IMM(opc)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INST_DEF(OPCODE, TYPE) TYPE(OPCODE)
 
     ENCODE_MATH_LIST(INST_DEF)
 
-#undef UnaryOperation
-#undef BinaryOperation
+#undef UNARY_OPERATION
+#undef BINARY_OPERATION
 #undef INST_DEF
 
     void EncodeNop() override;

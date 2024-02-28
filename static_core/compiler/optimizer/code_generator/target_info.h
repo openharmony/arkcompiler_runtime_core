@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ constexpr size_t ConvertRegNumberX86(size_t regId)
     REG(31)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFINE_REG(name, reg) static constexpr uint8_t name = reg
+#define DEFINE_REG(name, reg) static constexpr uint8_t name = (reg)
 
 struct ArchCallingConventionX8664 {
     // Following registers are swapped (see comment above for ConvertRegNumberX86):

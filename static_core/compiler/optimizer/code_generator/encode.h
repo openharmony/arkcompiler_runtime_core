@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,7 +140,7 @@ public:
 // Define default math operations
 // Encode (dst, src)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UnaryOperation(opc)            \
+#define UNARY_OPERATION(opc)           \
     virtual void Encode##opc(Reg, Reg) \
     {                                  \
         SetFalseResult();              \
@@ -148,7 +148,7 @@ public:
 
 // Encode (dst, src0, src1)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperation(opc)                \
+#define BINARY_OPERATION(opc)               \
     virtual void Encode##opc(Reg, Reg, Reg) \
     {                                       \
         SetFalseResult();                   \
@@ -160,10 +160,10 @@ public:
 
 // Encode (dst, src0, src1)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryShiftedRegisterOperation(opc)   \
-    virtual void Encode##opc(Reg, Reg, Shift) \
-    {                                         \
-        SetFalseResult();                     \
+#define BINARY_SHIFTED_REGISTER_OPERATION(opc) \
+    virtual void Encode##opc(Reg, Reg, Shift)  \
+    {                                          \
+        SetFalseResult();                      \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -173,9 +173,9 @@ public:
 
     ENCODE_INST_WITH_SHIFTED_OPERAND(INST_DEF)
 
-#undef UnaryOperation
-#undef BinaryOperation
-#undef BinaryShiftedRegisterOperation
+#undef UNARY_OPERATION
+#undef BINARY_OPERATION
+#undef BINARY_SHIFTED_REGISTER_OPERATION
 #undef INST_DEF
 
     virtual void EncodeNop()

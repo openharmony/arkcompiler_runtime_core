@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -190,52 +190,52 @@ public:
 
 // Define default math operations
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UnaryOperation(opc)                           \
-    void Encode##opc(Reg dst, Reg src) override       \
-    {                                                 \
-        ASSERT(str_ != nullptr);                      \
-        auto curr_cursor = GetCursorOffset();         \
-        PreWork();                                    \
-        enc_->Encode##opc(dst, src);                  \
-        PostWork();                                   \
-        auto encoded_curr_cursor = GetCursorOffset(); \
-        Disasm(curr_cursor, encoded_curr_cursor);     \
+#define UNARY_OPERATION(opc)                        \
+    void Encode##opc(Reg dst, Reg src) override     \
+    {                                               \
+        ASSERT(str_ != nullptr);                    \
+        auto currCursor = GetCursorOffset();        \
+        PreWork();                                  \
+        enc_->Encode##opc(dst, src);                \
+        PostWork();                                 \
+        auto encodedCurrCursor = GetCursorOffset(); \
+        Disasm(currCursor, encodedCurrCursor);      \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperation(opc)                                \
-    void Encode##opc(Reg dst, Reg src0, Reg src1) override  \
-    {                                                       \
-        ASSERT(str_ != nullptr);                            \
-        auto curr_cursor = enc_->GetCursorOffset();         \
-        PreWork();                                          \
-        enc_->Encode##opc(dst, src0, src1);                 \
-        PostWork();                                         \
-        auto encoded_curr_cursor = enc_->GetCursorOffset(); \
-        Disasm(curr_cursor, encoded_curr_cursor);           \
-    }                                                       \
-    void Encode##opc(Reg dst, Reg src, Imm imm) override    \
-    {                                                       \
-        ASSERT(str_ != nullptr);                            \
-        auto curr_cursor = enc_->GetCursorOffset();         \
-        PreWork();                                          \
-        enc_->Encode##opc(dst, src, imm);                   \
-        PostWork();                                         \
-        auto encoded_curr_cursor = enc_->GetCursorOffset(); \
-        Disasm(curr_cursor, encoded_curr_cursor);           \
+#define BINARY_OPERATION(opc)                              \
+    void Encode##opc(Reg dst, Reg src0, Reg src1) override \
+    {                                                      \
+        ASSERT(str_ != nullptr);                           \
+        auto currCursor = enc_->GetCursorOffset();         \
+        PreWork();                                         \
+        enc_->Encode##opc(dst, src0, src1);                \
+        PostWork();                                        \
+        auto encodedCurrCursor = enc_->GetCursorOffset();  \
+        Disasm(currCursor, encodedCurrCursor);             \
+    }                                                      \
+    void Encode##opc(Reg dst, Reg src, Imm imm) override   \
+    {                                                      \
+        ASSERT(str_ != nullptr);                           \
+        auto currCursor = enc_->GetCursorOffset();         \
+        PreWork();                                         \
+        enc_->Encode##opc(dst, src, imm);                  \
+        PostWork();                                        \
+        auto encodedCurrCursor = enc_->GetCursorOffset();  \
+        Disasm(currCursor, encodedCurrCursor);             \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryShiftedRegisterOperation(opc)                 \
-    void Encode##opc(Reg dst, Reg src, Shift sh) override   \
-    {                                                       \
-        ASSERT(str_ != nullptr);                            \
-        auto curr_cursor = enc_->GetCursorOffset();         \
-        PreWork();                                          \
-        enc_->Encode##opc(dst, src, sh);                    \
-        PostWork();                                         \
-        auto encoded_curr_cursor = enc_->GetCursorOffset(); \
-        Disasm(curr_cursor, encoded_curr_cursor);           \
+#define BINARY_SHIFTED_REGISTER_OPERATION(opc)            \
+    void Encode##opc(Reg dst, Reg src, Shift sh) override \
+    {                                                     \
+        ASSERT(str_ != nullptr);                          \
+        auto currCursor = enc_->GetCursorOffset();        \
+        PreWork();                                        \
+        enc_->Encode##opc(dst, src, sh);                  \
+        PostWork();                                       \
+        auto encodedCurrCursor = enc_->GetCursorOffset(); \
+        Disasm(currCursor, encodedCurrCursor);            \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -245,9 +245,9 @@ public:
 
     ENCODE_INST_WITH_SHIFTED_OPERAND(INST_DEF)
 
-#undef UnaryOperation
-#undef BinaryOperation
-#undef BinaryShiftedRegisterOperation
+#undef UNARY_OPERATION
+#undef BINARY_OPERATION
+#undef BINARY_SHIFTED_REGISTER_OPERATION
 #undef INST_DEF
 
 // Call by reg+offset or MemRef - default encode
@@ -257,19 +257,19 @@ public:
     DEF(EncodeAbort)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DefZeroParamOperation(opc)                          \
-    void opc() override                                     \
-    {                                                       \
-        ASSERT(str_ != nullptr);                            \
-        auto curr_cursor = enc_->GetCursorOffset();         \
-        PreWork();                                          \
-        enc_->opc();                                        \
-        PostWork();                                         \
-        auto encoded_curr_cursor = enc_->GetCursorOffset(); \
-        Disasm(curr_cursor, encoded_curr_cursor);           \
+#define DEF_ZERO_PARAM_OPERATION(opc)                     \
+    void opc() override                                   \
+    {                                                     \
+        ASSERT(str_ != nullptr);                          \
+        auto currCursor = enc_->GetCursorOffset();        \
+        PreWork();                                        \
+        enc_->opc();                                      \
+        PostWork();                                       \
+        auto encodedCurrCursor = enc_->GetCursorOffset(); \
+        Disasm(currCursor, encodedCurrCursor);            \
     }
 
-    ENCODE_INST_ADDITIONAL_ZERO_ARG(DefZeroParamOperation)
+    ENCODE_INST_ADDITIONAL_ZERO_ARG(DEF_ZERO_PARAM_OPERATION)
 
 // Call by reg+offset - no needed, because unusable:
 //     * MakeCallAot(intptr_t, offset)
@@ -279,27 +279,27 @@ public:
 #define ENCODE_INST_ADDITIONAL_ONE_ARG(DEF) DEF(MakeCall, MemRef, entryPoint)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DefOneParamOperation(opc, type, param)              \
-    void opc(type param) override                           \
-    {                                                       \
-        ASSERT(str_ != nullptr);                            \
-        auto curr_cursor = enc_->GetCursorOffset();         \
-        PreWork();                                          \
-        enc_->opc(param);                                   \
-        PostWork();                                         \
-        auto encoded_curr_cursor = enc_->GetCursorOffset(); \
-        Disasm(curr_cursor, encoded_curr_cursor);           \
+#define DEF_ONE_PARAM_OPERATION(opc, type, param)         \
+    void opc(type param) override                         \
+    {                                                     \
+        ASSERT(str_ != nullptr);                          \
+        auto currCursor = enc_->GetCursorOffset();        \
+        PreWork();                                        \
+        enc_->opc(param);                                 \
+        PostWork();                                       \
+        auto encodedCurrCursor = enc_->GetCursorOffset(); \
+        Disasm(currCursor, encodedCurrCursor);            \
     }
 
-    ENCODE_INST_ADDITIONAL_ONE_ARG(DefOneParamOperation)
+    ENCODE_INST_ADDITIONAL_ONE_ARG(DEF_ONE_PARAM_OPERATION)
 
     // Aot Table - unusable:
     //   * MakeLoadAotTable(intptr_t, offset, Reg, reg)
 
 #undef ENCODE_INST_ADDITIONAL_ZERO_ARG
-#undef DefZeroParamOperation
+#undef DEF_ZERO_PARAM_OPERATION
 #undef ENCODE_INST_ADDITIONAL_ONE_ARG
-#undef DefOneParamOperation
+#undef DEF_ONE_PARAM_OPERATION
 
     // Special cases - call read from
     void MakeCall(const void *entryPoint) override;

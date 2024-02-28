@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,32 +90,32 @@ inline bool BackendSupport([[maybe_unused]] Arch arch)
 #endif
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ENCODE_MATH_LIST(DEF)  \
-    DEF(Mov, UnaryOperation)   \
-    DEF(Neg, UnaryOperation)   \
-    DEF(Abs, UnaryOperation)   \
-    DEF(Not, UnaryOperation)   \
-    DEF(Add, BinaryOperation)  \
-    DEF(Sub, BinaryOperation)  \
-    DEF(Mul, BinaryOperation)  \
-    DEF(Shl, BinaryOperation)  \
-    DEF(Shr, BinaryOperation)  \
-    DEF(AShr, BinaryOperation) \
-    DEF(And, BinaryOperation)  \
-    DEF(Or, BinaryOperation)   \
-    DEF(Xor, BinaryOperation)  \
-    DEF(Sqrt, UnaryOperation)
+#define ENCODE_MATH_LIST(DEF)   \
+    DEF(Mov, UNARY_OPERATION)   \
+    DEF(Neg, UNARY_OPERATION)   \
+    DEF(Abs, UNARY_OPERATION)   \
+    DEF(Not, UNARY_OPERATION)   \
+    DEF(Add, BINARY_OPERATION)  \
+    DEF(Sub, BINARY_OPERATION)  \
+    DEF(Mul, BINARY_OPERATION)  \
+    DEF(Shl, BINARY_OPERATION)  \
+    DEF(Shr, BINARY_OPERATION)  \
+    DEF(AShr, BINARY_OPERATION) \
+    DEF(And, BINARY_OPERATION)  \
+    DEF(Or, BINARY_OPERATION)   \
+    DEF(Xor, BINARY_OPERATION)  \
+    DEF(Sqrt, UNARY_OPERATION)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ENCODE_INST_WITH_SHIFTED_OPERAND(DEF)   \
-    DEF(And, BinaryShiftedRegisterOperation)    \
-    DEF(Or, BinaryShiftedRegisterOperation)     \
-    DEF(Xor, BinaryShiftedRegisterOperation)    \
-    DEF(OrNot, BinaryShiftedRegisterOperation)  \
-    DEF(AndNot, BinaryShiftedRegisterOperation) \
-    DEF(XorNot, BinaryShiftedRegisterOperation) \
-    DEF(Add, BinaryShiftedRegisterOperation)    \
-    DEF(Sub, BinaryShiftedRegisterOperation)
+#define ENCODE_INST_WITH_SHIFTED_OPERAND(DEF)      \
+    DEF(And, BINARY_SHIFTED_REGISTER_OPERATION)    \
+    DEF(Or, BINARY_SHIFTED_REGISTER_OPERATION)     \
+    DEF(Xor, BINARY_SHIFTED_REGISTER_OPERATION)    \
+    DEF(OrNot, BINARY_SHIFTED_REGISTER_OPERATION)  \
+    DEF(AndNot, BINARY_SHIFTED_REGISTER_OPERATION) \
+    DEF(XorNot, BINARY_SHIFTED_REGISTER_OPERATION) \
+    DEF(Add, BINARY_SHIFTED_REGISTER_OPERATION)    \
+    DEF(Sub, BINARY_SHIFTED_REGISTER_OPERATION)
 
 //  Arch-independent access types
 

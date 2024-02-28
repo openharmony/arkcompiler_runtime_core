@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -700,7 +700,6 @@ void Lse::MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps)
 {
     ASSERT(block->IsLoopHeader());
     auto loop = block->GetLoop();
-
     // Do not eliminate anything in irreducible or osr loops
     if (loop->IsIrreducible() || loop->IsOsrLoop() || loop->IsTryCatchLoop()) {
         return;

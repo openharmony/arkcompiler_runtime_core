@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,22 +242,21 @@ bool RegAllocLinearScan::TryToAssignRegister(LifeIntervals *currentInterval)
     }
 
     // Try to assign blocked register
-    auto [blocked_reg, next_blocked_use] = GetBlockedRegister(currentInterval);
+    auto [blockedReg, nextBlockedUse] = GetBlockedRegister(currentInterval);
     auto nextUse = currentInterval->GetNextUsage(currentInterval->GetBegin());
-
     // Spill current interval if its first use later than use of blocked register
-    if (blocked_reg != INVALID_REG && next_blocked_use < nextUse && !IsNonSpillableConstInterval(currentInterval)) {
+    if (blockedReg != INVALID_REG && nextBlockedUse < nextUse && !IsNonSpillableConstInterval(currentInterval)) {
         SplitBeforeUse<IS_FP>(currentInterval, nextUse);
         AssignStackSlot(currentInterval);
         return true;
     }
 
     // Blocked register that will be used in the next position mustn't be reassigned
-    if (blocked_reg == INVALID_REG || next_blocked_use < currentInterval->GetBegin() + LIFE_NUMBER_GAP) {
+    if (blockedReg == INVALID_REG || nextBlockedUse < currentInterval->GetBegin() + LIFE_NUMBER_GAP) {
         return false;
     }
 
-    currentInterval->SetReg(blocked_reg);
+    currentInterval->SetReg(blockedReg);
     SplitAndSpill<IS_FP>(&workingIntervals_.active, currentInterval);
     SplitAndSpill<IS_FP>(&workingIntervals_.inactive, currentInterval);
     return true;

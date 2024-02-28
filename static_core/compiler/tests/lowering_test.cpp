@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ TEST_F(LoweringTest, LoweringAddSub)
         CONSTANT(1U, 12U);
         CONSTANT(2U, -1L);
         CONSTANT(3U, 100000000U);
-        CONSTANT(21U, 1.2);
+        CONSTANT(21U, 1.2_D);
         CONSTANT(22U, 0.5F);
 
         BASIC_BLOCK(2U, -1L)
@@ -304,7 +304,7 @@ TEST_F(LoweringTest, SaveStateTest)
         CONSTANT(1U, 0U);
         CONSTANT(2U, 1U);
         CONSTANT(3U, 50U);
-        CONSTANT(4U, 0.5);
+        CONSTANT(4U, 0.5_D);
         PARAMETER(5U, 1U).u64();
 
         BASIC_BLOCK(2U, -1L)
@@ -435,7 +435,7 @@ TEST_F(LoweringTest, Return)
 {
     ReturnTest<int64_t>(10U, DataType::INT64);
     ReturnTest<float>(10.0F, DataType::FLOAT32);
-    ReturnTest<double>(10.0, DataType::FLOAT64);
+    ReturnTest<double>(10.0_D, DataType::FLOAT64);
     ReturnTest<int64_t>(0U, DataType::INT64);
     ReturnTest<float>(0.0F, DataType::FLOAT32);
     ReturnTest<double>(0.0, DataType::FLOAT64);
