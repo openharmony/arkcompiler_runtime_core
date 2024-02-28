@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,37 +36,31 @@ groups:
         prefix: ets
         acc: out:top
         format: [pref_op_v1_4_v2_4_id_16]
-        intrinsic_name: INTRINSIC_LAUNCH_SHORT
 
       - sig: ets.launch method_id, v1:in:top, v2:in:top, v3:in:top, v4:in:top
         prefix: ets
         acc: out:top
         format: [pref_op_v1_4_v2_4_v3_4_v4_4_id_16]
-        intrinsic_name: INTRINSIC_LAUNCH
 
       - sig: ets.launch.range method_id, v:in:top
         prefix: ets
         acc: out:top
         format: [pref_op_v_8_id_16]
-        intrinsic_name: INTRINSIC_LAUNCH_RANGE
 
       - sig: ets.launch.virt.short method_id, v1:in:top, v2:in:top
         prefix: ets
         acc: out:top
         format: [pref_op_v1_4_v2_4_id_16]
-        intrinsic_name: INTRINSIC_LAUNCH_VIRT_SHORT
 
       - sig: ets.launch.virt method_id, v1:in:top, v2:in:top, v3:in:top, v4:in:top
         prefix: ets
         acc: out:top
         format: [pref_op_v1_4_v2_4_v3_4_v4_4_id_16]
-        intrinsic_name: INTRINSIC_LAUNCH_VIRT
 
       - sig: ets.launch.virt.range method_id, v:in:top
         prefix: ets
         acc: out:top
         format: [pref_op_v_8_id_16]
-        intrinsic_name: INTRINSIC_LAUNCH_VIRT_RANGE
 
   - title: Get field from object by name
     description: >
@@ -186,7 +180,6 @@ groups:
         prefix: ets
         acc: out:ref
         format: [pref_op_none]
-        intrinsic_name: INTRINSIC_COMPILER_ETS_LDUNDEFINED
 
   - title: Move 'undefined' reference into a register
     description: >

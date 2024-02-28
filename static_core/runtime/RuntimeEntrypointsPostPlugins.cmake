@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,6 +33,7 @@ panda_gen(DATA ${GEN_ENTRYPOINTS_YAML}
     DESTINATION ${PANDA_BINARY_ROOT}/runtime/include
     REQUIRES
         ${PANDA_ROOT}/templates/common.rb
+    API
         ${PANDA_ROOT}/runtime/entrypoints/entrypoints.rb
     EXTRA_DEPENDENCIES entrypoints_yaml_merge
 )
@@ -45,6 +46,7 @@ panda_gen(DATA ${GEN_ENTRYPOINTS_YAML}
     DESTINATION ${PANDA_BINARY_ROOT}/runtime/include
     REQUIRES
         ${PANDA_ROOT}/templates/common.rb
+    API
         ${PANDA_ROOT}/runtime/entrypoints/entrypoints.rb
     EXTRA_DEPENDENCIES cross_values_generator ${GENERATED_CROSS_VALUES_HEADERS}
     EXTRA_ARGV ${PANDA_BINARY_ROOT}/cross_values

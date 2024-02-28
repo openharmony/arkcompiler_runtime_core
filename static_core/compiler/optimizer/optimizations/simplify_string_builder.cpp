@@ -1679,6 +1679,10 @@ Inst *SimplifyStringBuilder::UpdateIntermediateValue(const StringBuilderUsage &u
             continue;
         }
 
+        if (userInst->IsPhi() && !userInst->HasUsers()) {
+            continue;
+        }
+
         if (userInst->IsPhi()) {
             ++usersCount;
             allUsersVisited &= AllUsersAreVisitedAppendIntrinsics(userInst, appendIntrinsicVisited);

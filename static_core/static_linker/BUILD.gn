@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -63,8 +63,8 @@ ohos_shared_library("arklinker") {
 
 ark_gen_file("link_options_h") {
   template_file = "$ark_root/templates/options/options.h.erb"
-  data_file = "options.yaml"
-  requires = [ "$ark_root/templates/common.rb" ]
+  data = [ "options.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
   output_file = "$target_gen_dir/panda_gen_options/generated/link_options.h"
 }
 

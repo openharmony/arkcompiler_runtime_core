@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,36 +13,36 @@
 
 set(PLUGINS_INC ${PANDA_BINARY_ROOT}/runtime/include/plugins.inc)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/runtime/templates/plugins.inc.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES plugin_options_merge
     OUTPUTFILE ${PLUGINS_INC}
 )
 
 set(PLUGINS_ENTRYPOINTS_H ${PANDA_BINARY_ROOT}/runtime/include/plugins_entrypoints_gen.h)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/runtime/entrypoints/plugins_entrypoints_gen.h.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES plugin_options_merge
     OUTPUTFILE ${PLUGINS_ENTRYPOINTS_H}
 )
 
 set(PLUGINS_INTERPRETERS_INL_H ${PANDA_BINARY_ROOT}/runtime/include/plugins_interpreters-inl.h)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/runtime/templates/plugins_interpreters-inl.h.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES plugin_options_merge
     OUTPUTFILE ${PLUGINS_INTERPRETERS_INL_H}
 )
 
 set(LANGUAGE_CONFIG_GEN_INC ${PANDA_BINARY_ROOT}/runtime/include/language_config_gen.inc)
 panda_gen_file(
-    DATAFILE ${GEN_PLUGIN_OPTIONS_YAML}
+    DATA ${GEN_PLUGIN_OPTIONS_YAML}
     TEMPLATE ${PANDA_ROOT}/runtime/templates/language_config_gen.inc.erb
-    REQUIRES ${PANDA_ROOT}/templates/plugin_options.rb
+    API ${PANDA_ROOT}/templates/plugin_options.rb
     EXTRA_DEPENDENCIES plugin_options_merge
     OUTPUTFILE ${LANGUAGE_CONFIG_GEN_INC}
 )

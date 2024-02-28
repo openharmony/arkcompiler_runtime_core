@@ -582,7 +582,7 @@ ark_isa_gen("isa_gen_libarkruntime") {
   destination = gen_include_dir
 }
 
-isa = "$ark_isa_yaml"
+isa = ark_isa_yaml
 isa_api = "$ark_root/isa/isapi.rb"
 bridge_dispatch_template = "templates/bridge_dispatch.S.erb"
 bridge_dispatch_dyn_template = "templates/bridge_dispatch_dyn.S.erb"
@@ -595,11 +595,11 @@ bridge_archs = [
 ]
 foreach(arch, bridge_archs) {
   ark_gen_file("bridge_dispatch_${arch}") {
-    data_file = isa
+    data = [ isa ]
     template_file = bridge_dispatch_template
     output_file = "$gen_include_dir/bridge_dispatch_${arch}.S"
+    api = [ isa_api ]
     requires = [
-      isa_api,
       "templates/bridge_helpers_${arch}.rb",
       "templates/bridge_helpers_common.rb",
       "templates/bridge_helpers_static.rb",
@@ -608,11 +608,11 @@ foreach(arch, bridge_archs) {
   }
 
   ark_gen_file("bridge_dispatch_dyn_${arch}") {
-    data_file = isa
+    data = [ isa ]
     template_file = bridge_dispatch_dyn_template
     output_file = "$gen_include_dir/bridge_dispatch_dyn_${arch}.S"
+    api = [ isa_api ]
     requires = [
-      isa_api,
       "templates/bridge_helpers_dynamic.rb",
       "templates/bridge_helpers_common.rb",
       "templates/bridge_helpers_${arch}.rb",
@@ -622,16 +622,14 @@ foreach(arch, bridge_archs) {
 }
 
 ark_gen("arkruntime_gen_entrypoints") {
-  data = "$target_gen_dir/entrypoints.yaml"
+  data = [ "$target_gen_dir/entrypoints.yaml" ]
   template_files = [
     "entrypoints_gen.h.erb",
     "entrypoints_gen.S.erb",
     "entrypoints_compiler.inl.erb",
   ]
-  requires = [
-    "$ark_root/templates/common.rb",
-    "entrypoints/entrypoints.rb",
-  ]
+  api = [ "entrypoints/entrypoints.rb" ]
+  requires = [ "$ark_root/templates/common.rb" ]
   sources = "entrypoints"
   destination = "$target_gen_dir/generated"
   extra_dependencies = [ "$ark_root:concat_entrypoints_yamls" ]
@@ -649,9 +647,9 @@ action("substitute_icu_path") {
 }
 
 ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
-  data = "entrypoints/entrypoints.yaml"
+  data = [ "entrypoints/entrypoints.yaml" ]
   template_files = [ "entrypoints_compiler_checksum.inl.erb" ]
-  requires = [ "entrypoints/entrypoints.rb" ]
+  api = [ "entrypoints/entrypoints.rb" ]
   sources = "entrypoints"
   destination = "$target_gen_dir/generated"
   extra_dependencies =
@@ -664,17 +662,15 @@ ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
 }
 
 ark_gen("arkruntime_gen_intrinsics") {
-  data = "$target_gen_dir/intrinsics.yaml"
+  data = [ "$target_gen_dir/intrinsics.yaml" ]
   template_files = [
     "intrinsics_gen.h.erb",
     "intrinsics.h.erb",
     "intrinsics_enum.h.erb",
     "unimplemented_intrinsics-inl.cpp.erb",
   ]
-  requires = [
-    "templates/intrinsics.rb",
-    "$ark_root/libpandabase/utils.rb",
-  ]
+  api = [ "templates/intrinsics.rb" ]
+  requires = [ "$ark_root/libpandabase/utils.rb" ]
   sources = "templates"
   destination = "$target_gen_dir"
   extra_dependencies = [ ":arkruntime_gen_intrinsics_yaml" ]
@@ -682,72 +678,72 @@ ark_gen("arkruntime_gen_intrinsics") {
 
 ark_gen_file("libarkruntime_options_gen_h") {
   template_file = "../templates/options/options.h.erb"
-  data_file = "$target_gen_dir/../runtime_options.yaml"
-  requires = [ "../templates/common.rb" ]
+  data = [ "$target_gen_dir/../runtime_options.yaml" ]
+  api = [ "../templates/common.rb" ]
   output_file = "$target_gen_dir/generated/runtime_options_gen.h"
   extra_dependencies = [ "$ark_root:merge_runtime_options_yamls" ]
 }
 
 ark_gen_file("libarkruntime_shorty_values_h") {
   template_file = "templates/shorty_values.h.erb"
-  data_file = "../libpandafile/types.yaml"
-  requires = [ "../libpandafile/types.rb" ]
+  data = [ "../libpandafile/types.yaml" ]
+  api = [ "../libpandafile/types.rb" ]
   output_file = "$target_gen_dir/generated/shorty_values.h"
 }
 
 ark_gen_file("plugins_inc") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/plugins.inc.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/plugins.inc"
 }
 
 ark_gen_file("plugins_entrypoints_gen_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "entrypoints/plugins_entrypoints_gen.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/plugins_entrypoints_gen.h"
 }
 
 ark_gen_file("plugins_interpreters_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/plugins_interpreters-inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/plugins_interpreters-inl.h"
 }
 
 ark_gen_file("language_config_gen_inc") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/language_config_gen.inc.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/language_config_gen.inc"
 }
 
 ark_gen_file("intrinsics_inl_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/intrinsics.inl.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/intrinsics.inl.h"
 }
 
 ark_gen_file("plugins_defines_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/plugins_defines.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/plugins_defines.h"
 }
 
 ark_gen_file("plugins_asm_defines_def") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/plugins_asm_defines.def.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/plugins_asm_defines.def"
 }
 

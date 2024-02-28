@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,15 @@ void DoSta64(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
     if (reg != compiler::ACC_REG_ID) {
         result.emplace_back(pandasm::Create_STA_64(reg));
+    }
+}
+
+void DoSta(compiler::DataType::Type type, compiler::Register reg, std::vector<pandasm::Ins> &result)
+{
+    if (compiler::DataType::Is64Bits(type, Arch::NONE)) {
+        DoSta64(reg, result);
+    } else {
+        DoSta(reg, result);
     }
 }
 
@@ -484,13 +493,16 @@ static ark::compiler::CallInst *CastToCall(ark::compiler::Inst *inst)
     }
 }
 
-void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
+void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string methodId)
 {
     auto op = inst->GetOpcode();
     ASSERT(op == compiler::Opcode::CallStatic || op == compiler::Opcode::CallVirtual ||
-           op == compiler::Opcode::InitObject);
+           op == compiler::Opcode::InitObject || op == compiler::Opcode::Intrinsic);
+    if (op == compiler::Opcode::Intrinsic) {
+        ASSERT(inst->IsCallOrIntrinsic());
+        op = compiler::Opcode::CallStatic;
+    }
     auto *enc = static_cast<BytecodeGen *>(visitor);
-    auto callInst = CastToCall(inst);
     auto sfCount = inst->GetInputsCount() - (inst->RequireState() ? 1U : 0U);
     size_t start = op == compiler::Opcode::InitObject ? 1U : 0U;  // exclude LoadAndInitClass
     auto nargs = sfCount - start;                                 // exclude LoadAndInitClass
@@ -513,7 +525,7 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
             auto reg = inst->GetSrcReg(i);
             ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::ACC_REG_ID);
             if (reg == compiler::ACC_REG_ID) {
-                ASSERT(inst->IsCall());
+                ASSERT(inst->IsCallOrIntrinsic());
                 ins.imms.emplace_back(static_cast<int64_t>(i));
                 ins.opcode = ChooseCallAccOpcode(ins.opcode);
             } else {
@@ -521,11 +533,18 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
             }
         }
     }
-    ins.ids.emplace_back(enc->irInterface_->GetMethodIdByOffset(callInst->GetCallMethodId()));
+    ins.ids.emplace_back(std::move(methodId));
     enc->result_.emplace_back(ins);
     if (inst->GetDstReg() != compiler::INVALID_REG && inst->GetDstReg() != compiler::ACC_REG_ID) {
-        enc->EncodeSta(inst->GetDstReg(), callInst->GetType());
+        enc->EncodeSta(inst->GetDstReg(), inst->GetType());
     }
+}
+
+void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    auto methodOffset = CastToCall(inst)->GetCallMethodId();
+    CallHandler(visitor, inst, enc->irInterface_->GetMethodIdByOffset(methodOffset));
 }
 
 void BytecodeGen::VisitCallStatic(GraphVisitor *visitor, Inst *inst)
@@ -1095,59 +1114,47 @@ void BytecodeGen::IfImm64(GraphVisitor *v, Inst *instBase)
     }
 }
 
+static void CastAccDownFromI32(compiler::DataType::Type type, std::vector<pandasm::Ins> &res)
+{
+    auto sizeBits = compiler::DataType::GetTypeSize(type, Arch::NONE);
+    if (compiler::DataType::IsTypeSigned(type)) {
+        auto shift = compiler::WORD_SIZE - sizeBits;
+        res.emplace_back(pandasm::Create_SHLI(shift));
+        res.emplace_back(pandasm::Create_ASHRI(shift));
+    } else {
+        auto andMask = (1U << sizeBits) - 1U;
+        res.emplace_back(pandasm::Create_ANDI(andMask));
+    }
+}
+
 static void VisitCastFromI32([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
                              std::vector<pandasm::Ins> &res, bool &success)
 {
     ASSERT(Is32Bits(inst->GetInputType(0U), Arch::NONE));
 
-    constexpr int64_t SHLI_ASHRI_16 = 16;
-    constexpr int64_t SHLI_ASHRI_24 = 24;
-    constexpr int64_t ANDI_16 = 0xffff;
-    constexpr int64_t ANDI_8 = 0xff;
-
-    if (inst->GetType() != compiler::DataType::UINT32) {
-        DoLda(inst->GetSrcReg(0U), res);
+    if (inst->GetType() == compiler::DataType::UINT32) {
+        return;
     }
+    DoLda(inst->GetSrcReg(0U), res);
 
     switch (inst->GetType()) {
         case compiler::DataType::FLOAT32: {
             res.emplace_back(pandasm::Create_I32TOF32());
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::FLOAT64: {
             res.emplace_back(pandasm::Create_I32TOF64());
-            DoSta64(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::INT64: {
             res.emplace_back(pandasm::Create_I32TOI64());
-            DoSta64(inst->GetDstReg(), res);
             break;
         }
-        case compiler::DataType::UINT32: {
-            break;
-        }
-        case compiler::DataType::INT16: {
-            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_16));
-            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_16));
-            DoSta(inst->GetDstReg(), res);
-            break;
-        }
-        case compiler::DataType::UINT16: {
-            res.emplace_back(pandasm::Create_ANDI(ANDI_16));
-            DoSta(inst->GetDstReg(), res);
-            break;
-        }
-        case compiler::DataType::INT8: {
-            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_24));
-            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_24));
-            DoSta(inst->GetDstReg(), res);
-            break;
-        }
+        case compiler::DataType::INT16:
+        case compiler::DataType::UINT16:
+        case compiler::DataType::INT8:
         case compiler::DataType::UINT8: {
-            res.emplace_back(pandasm::Create_ANDI(ANDI_8));
-            DoSta(inst->GetDstReg(), res);
+            CastAccDownFromI32(inst->GetType(), res);
             break;
         }
         case compiler::DataType::ANY: {
@@ -1157,18 +1164,57 @@ static void VisitCastFromI32([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
             LOG(ERROR, BYTECODE_OPTIMIZER)
                 << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
             success = false;
+            return;
     }
+    DoSta(inst->GetType(), inst->GetDstReg(), res);
+}
+
+static void VisitCastFromU32([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
+                             std::vector<pandasm::Ins> &res, bool &success)
+{
+    ASSERT(Is32Bits(inst->GetInputType(0U), Arch::NONE));
+
+    if (inst->GetType() == compiler::DataType::INT32) {
+        return;
+    }
+    DoLda(inst->GetSrcReg(0U), res);
+
+    switch (inst->GetType()) {
+        case compiler::DataType::FLOAT32: {
+            res.emplace_back(pandasm::Create_U32TOF32());
+            break;
+        }
+        case compiler::DataType::FLOAT64: {
+            res.emplace_back(pandasm::Create_U32TOF64());
+            break;
+        }
+        case compiler::DataType::INT64: {
+            res.emplace_back(pandasm::Create_U32TOI64());
+            break;
+        }
+        case compiler::DataType::INT16:
+        case compiler::DataType::UINT16:
+        case compiler::DataType::INT8:
+        case compiler::DataType::UINT8: {
+            CastAccDownFromI32(inst->GetType(), res);
+            break;
+        }
+        case compiler::DataType::ANY: {
+            UNREACHABLE();
+        }
+        default:
+            LOG(ERROR, BYTECODE_OPTIMIZER)
+                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            success = false;
+            return;
+    }
+    DoSta(inst->GetType(), inst->GetDstReg(), res);
 }
 
 static void VisitCastFromI64([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
                              std::vector<pandasm::Ins> &res, bool &success)
 {
     ASSERT(Is64Bits(inst->GetInputType(0U), Arch::NONE));
-
-    constexpr int64_t SHLI_ASHRI_16 = 16;
-    constexpr int64_t SHLI_ASHRI_24 = 24;
-    constexpr int64_t ANDI_16 = 0xffff;
-    constexpr int64_t ANDI_8 = 0xff;
     constexpr int64_t ANDI_32 = 0xffffffff;
 
     DoLda64(inst->GetSrcReg(0U), res);
@@ -1176,48 +1222,26 @@ static void VisitCastFromI64([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
     switch (inst->GetType()) {
         case compiler::DataType::INT32: {
             res.emplace_back(pandasm::Create_I64TOI32());
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::UINT32: {
             res.emplace_back(pandasm::Create_ANDI(ANDI_32));
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::FLOAT32: {
             res.emplace_back(pandasm::Create_I64TOF32());
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::FLOAT64: {
             res.emplace_back(pandasm::Create_I64TOF64());
-            DoSta64(inst->GetDstReg(), res);
             break;
         }
-        case compiler::DataType::INT16: {
-            res.emplace_back(pandasm::Create_I64TOI32());
-            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_16));
-            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_16));
-            DoSta(inst->GetDstReg(), res);
-            break;
-        }
-        case compiler::DataType::UINT16: {
-            res.emplace_back(pandasm::Create_I64TOI32());
-            res.emplace_back(pandasm::Create_ANDI(ANDI_16));
-            DoSta(inst->GetDstReg(), res);
-            break;
-        }
-        case compiler::DataType::INT8: {
-            res.emplace_back(pandasm::Create_I64TOI32());
-            res.emplace_back(pandasm::Create_SHLI(SHLI_ASHRI_24));
-            res.emplace_back(pandasm::Create_ASHRI(SHLI_ASHRI_24));
-            DoSta(inst->GetDstReg(), res);
-            break;
-        }
+        case compiler::DataType::INT16:
+        case compiler::DataType::UINT16:
+        case compiler::DataType::INT8:
         case compiler::DataType::UINT8: {
             res.emplace_back(pandasm::Create_I64TOI32());
-            res.emplace_back(pandasm::Create_ANDI(ANDI_8));
-            DoSta(inst->GetDstReg(), res);
+            CastAccDownFromI32(inst->GetType(), res);
             break;
         }
         case compiler::DataType::ANY: {
@@ -1227,7 +1251,9 @@ static void VisitCastFromI64([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
             LOG(ERROR, BYTECODE_OPTIMIZER)
                 << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
             success = false;
+            return;
     }
+    DoSta(inst->GetType(), inst->GetDstReg(), res);
 }
 
 static void VisitCastFromF32([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
@@ -1243,28 +1269,23 @@ static void VisitCastFromF32([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
     switch (inst->GetType()) {
         case compiler::DataType::FLOAT64: {
             res.emplace_back(pandasm::Create_F32TOF64());
-            DoSta64(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::INT64: {
             res.emplace_back(pandasm::Create_F32TOI64());
-            DoSta64(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::UINT64: {
             res.emplace_back(pandasm::Create_F32TOU64());
-            DoSta64(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::INT32: {
             res.emplace_back(pandasm::Create_F32TOI32());
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::UINT32: {
             res.emplace_back(pandasm::Create_F32TOU32());
             res.emplace_back(pandasm::Create_ANDI(ANDI_32));
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::ANY: {
@@ -1274,7 +1295,9 @@ static void VisitCastFromF32([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
             LOG(ERROR, BYTECODE_OPTIMIZER)
                 << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
             success = false;
+            return;
     }
+    DoSta(inst->GetType(), inst->GetDstReg(), res);
 }
 
 static void VisitCastFromF64([[maybe_unused]] BytecodeGen *enc, compiler::CastInst *inst,
@@ -1290,23 +1313,19 @@ static void VisitCastFromF64([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
     switch (inst->GetType()) {
         case compiler::DataType::FLOAT32: {
             res.emplace_back(pandasm::Create_F64TOF32());
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::INT64: {
             res.emplace_back(pandasm::Create_F64TOI64());
-            DoSta64(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::INT32: {
             res.emplace_back(pandasm::Create_F64TOI32());
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::UINT32: {
             res.emplace_back(pandasm::Create_F64TOI64());
             res.emplace_back(pandasm::Create_ANDI(ANDI_32));
-            DoSta(inst->GetDstReg(), res);
             break;
         }
         case compiler::DataType::ANY: {
@@ -1316,7 +1335,9 @@ static void VisitCastFromF64([[maybe_unused]] BytecodeGen *enc, compiler::CastIn
             LOG(ERROR, BYTECODE_OPTIMIZER)
                 << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
             success = false;
+            return;
     }
+    DoSta(inst->GetType(), inst->GetDstReg(), res);
 }
 
 // NOLINTNEXTLINE(readability-function-size)
@@ -1327,6 +1348,10 @@ void BytecodeGen::VisitCast(GraphVisitor *v, Inst *instBase)
     switch (inst->GetInputType(0U)) {
         case compiler::DataType::INT32: {
             VisitCastFromI32(enc, inst, enc->result_, enc->success_);
+            break;
+        }
+        case compiler::DataType::UINT32: {
+            VisitCastFromU32(enc, inst, enc->result_, enc->success_);
             break;
         }
         case compiler::DataType::INT64: {

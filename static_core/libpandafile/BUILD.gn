@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -131,8 +131,8 @@ ohos_static_library("libarktsfile_frontend_static") {
 
 ark_gen_file("libarkfile_type_gen_h") {
   template_file = "templates/type.h.erb"
-  data_file = "types.yaml"
-  requires = [ "types.rb" ]
+  data = [ "types.yaml" ]
+  api = [ "types.rb" ]
   output_file = "$target_gen_dir/type.h"
 }
 
@@ -153,15 +153,15 @@ ark_isa_gen("isa_gen_libarkfile") {
 ark_gen_file("libarkfile_file_items_gen_inc") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/file_items_gen.inc.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/include/file_items_gen.inc"
 }
 
 ark_gen_file("source_lang_enum_h") {
   extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
   template_file = "templates/source_lang_enum.h.erb"
-  data_file = "$ark_plugin_options_yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data = [ ark_plugin_options_yaml ]
+  api = [ "$ark_root/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/include/source_lang_enum.h"
 }

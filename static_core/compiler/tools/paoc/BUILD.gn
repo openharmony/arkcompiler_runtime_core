@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,8 +30,8 @@ config("arkaot_public_config") {
 
 ark_gen_file("arkcompiler_options_h") {
   template_file = "$ark_root/templates/options/options.h.erb"
-  data_file = "paoc.yaml"
-  requires = [ "$ark_root/templates/common.rb" ]
+  data = [ "paoc.yaml" ]
+  api = [ "$ark_root/templates/common.rb" ]
   output_file = "$target_gen_dir/generated/paoc_options.h"
 }
 

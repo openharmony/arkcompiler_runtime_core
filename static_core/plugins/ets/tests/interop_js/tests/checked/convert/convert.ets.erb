@@ -83,12 +83,11 @@ function test_deep_equal(): int {
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST         "Intrinsic.CompilerJSCallFunction"
 //! INST_NEXT    "Intrinsic.CompilerConvertLocalToJSValue"
-% if ["String","boolean"].include?(type_info.name)
+% if ["String","boolean", "double"].include?(type_info.name)
 //! INST_NEXT    "Intrinsic.JSRuntimeGetValue<%= type_info.name.capitalize %>"
 % else
-//! INST_NEXT    /CallStatic.*JSRuntime::getValue<%= type_info.name.capitalize %>/
-//! PASS_AFTER   "Inline"
 //! INST         "Intrinsic.JSRuntimeGetValueDouble"
+//! INST_NEXT    "Cast f64"
 % end
 //! PASS_AFTER   "InteropIntrinsicOptimization"
 //! INST_NOT     /Intrinsic.JSRuntimeGetValue.*/

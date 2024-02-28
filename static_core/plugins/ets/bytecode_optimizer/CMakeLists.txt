@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +20,7 @@ panda_isa_gen(
         TEMPLATES
             "ets_codegen_intrinsics_gen.inc.erb"
         SOURCE ${PANDA_ETS_PLUGIN_SOURCE}/bytecode_optimizer/templates
-        REQUIRES ${PANDA_ROOT}/assembler/asm_isapi.rb
+        API ${PANDA_ROOT}/assembler/asm_isapi.rb
         DESTINATION ${GENERATED_DIR}
         )
 

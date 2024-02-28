@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -253,7 +253,6 @@ class IRInstruction
         Output.println("auto* #{local_var_name} = graph->CreateInstIntrinsic(DataType::#{get_type_for_cpp}, pc);")
         Output.println("#{local_var_name}->SetIntrinsicId(#{intrinsic_id});")
         Output.println("#{local_var_name}->SetFlag(inst_flags::CAN_THROW);")
-        Output.println("AdjustFlags(#{intrinsic_id}, #{local_var_name});")
       else
         Output.println("auto* #{local_var_name} = graph->CreateInst#{@name}(DataType::#{get_type_for_cpp}, pc);")
       end
@@ -262,10 +261,6 @@ class IRInstruction
         Output.println("#{local_var_name}->SetOperandsType(DataType::#{@inputs.first.get_type_for_cpp});")
       end
       generate_inst_modifiers
-      if IsIntrinsic?
-        intrinsic_id = @modifiers.detect {|mod| mod[0] == :IntrinsicId}[1][0]
-        Output.println("AdjustFlags(#{intrinsic_id}, #{local_var_name});")
-      end
       if IsPhi?
         Output.println("bb_#{@bb.index}->AppendPhi(#{local_var_name});")
       else

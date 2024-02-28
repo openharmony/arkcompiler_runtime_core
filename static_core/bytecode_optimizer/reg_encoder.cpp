@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,9 +54,8 @@ static bool CanHoldRange(Inst *inst)
         case compiler::Opcode::CallLaunchStatic:
         case compiler::Opcode::CallLaunchVirtual:
         case compiler::Opcode::InitObject:
-            return true;
         case compiler::Opcode::Intrinsic:
-            return IsIntrinsicRange(inst);
+            return true;
         default:
             return false;
     }
@@ -352,7 +351,7 @@ static void AddMoveBefore(Inst *inst, const T &spContainer)
 static bool IsAccReadPosition(compiler::Inst *inst, size_t pos)
 {
     // Calls can have accumulator at any position, return false for them
-    return !inst->IsCall() && inst->IsAccRead() && pos == AccReadIndex(inst);
+    return !inst->IsCallOrIntrinsic() && inst->IsAccRead() && pos == AccReadIndex(inst);
 }
 
 void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
@@ -597,6 +596,10 @@ void RegEncoder::VisitInitObject(GraphVisitor *visitor, Inst *inst)
 
 void RegEncoder::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
 {
+    if (inst->IsCallOrIntrinsic()) {
+        CallHelper(visitor, inst);
+        return;
+    }
     auto re = static_cast<RegEncoder *>(visitor);
     if (IsIntrinsicRange(inst)) {
         re->Check4Width(inst->CastToIntrinsic());

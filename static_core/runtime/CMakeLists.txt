@@ -266,23 +266,27 @@ set(BRIDGE_DISPATCH_DYN_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/templates/bridge_dis
 set(BRIDGE_ARCHS aarch64 arm armhf amd64 x86)
 foreach(arch ${BRIDGE_ARCHS})
     panda_gen_file(
-        DATAFILE ${ISA}
+        DATA ${ISA}
         TEMPLATE ${BRIDGE_DISPATCH_TEMPLATE}
         OUTPUTFILE ${GEN_INCLUDE_DIR}/bridge_dispatch_${arch}.S
-        REQUIRES ${ISA_API} ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_${arch}.rb
-                            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_common.rb
-                            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_static.rb
+        API ${ISA_API}
+        REQUIRES
+            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_${arch}.rb
+            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_common.rb
+            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_static.rb
     )
     add_custom_target(bridge_dispatch_${arch} DEPENDS ${GEN_INCLUDE_DIR}/bridge_dispatch_${arch}.S ${ISA})
     add_dependencies(bridge_dispatch_${arch} isa_assert)
 
     panda_gen_file(
-        DATAFILE ${ISA}
+        DATA ${ISA}
         TEMPLATE ${BRIDGE_DISPATCH_DYN_TEMPLATE}
         OUTPUTFILE ${GEN_INCLUDE_DIR}/bridge_dispatch_dyn_${arch}.S
-        REQUIRES ${ISA_API} ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_${arch}.rb
-                            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_common.rb
-                            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_dynamic.rb
+        API ${ISA_API}
+        REQUIRES
+            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_${arch}.rb
+            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_common.rb
+            ${CMAKE_CURRENT_LIST_DIR}/templates/bridge_helpers_dynamic.rb
     )
     add_custom_target(bridge_dispatch_dyn_${arch} DEPENDS ${GEN_INCLUDE_DIR}/bridge_dispatch_dyn_${arch}.S ${ISA})
     add_dependencies(bridge_dispatch_dyn_${arch} isa_assert)
@@ -296,7 +300,7 @@ set(DEPENDENCIES ${GENERATOR} ${TEMPLATE} ${DATAFILE})
 set(OUTFILE "${CMAKE_CURRENT_BINARY_DIR}/include/shorty_values.h")
 add_custom_command(OUTPUT "${OUTFILE}"
                    COMMENT "Generate shorty_values.h"
-                   COMMAND ${PANDA_ROOT}/isa/gen.rb -d ${DATAFILE} -t ${TEMPLATE} -o "${OUTFILE}" -r ${GENERATOR}
+                   COMMAND ${PANDA_ROOT}/isa/gen.rb -d ${DATAFILE} -t ${TEMPLATE} -o "${OUTFILE}" -q ${GENERATOR}
                    DEPENDS ${DEPENDENCIES})
 add_custom_target(shorty_values_gen_${PROJECT_NAME} ALL DEPENDS "${OUTFILE}")
 add_dependencies(panda_gen_files shorty_values_gen_${PROJECT_NAME})

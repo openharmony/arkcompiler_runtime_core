@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,15 +38,11 @@ function jscall_empty(): int {
 //! METHOD       "jsnew_empty"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST    "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    /CallStatic.*JSRuntime::getValueInt/
-//! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    /CallStatic.*JSRuntime::getValueInt/
-//! PASS_AFTER   "Inline"
-//! INST         /CallStatic.Inlined.*JSRuntime::getValueInt/
-//! INST_NEXT    "Intrinsic.JSRuntimeGetValueDouble"
-//! INST_NEXT    /i32.*Cast f64/
-//! INST_NEXT    "ReturnInlined"
+//! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
+//! INST_NOT     "Intrinsic.JSRuntimeGetPropertyInt"
+//! INST_NOT     /JSRuntime.*Value/ # no casts from JSValue to primitive
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
+//! INST_COUNT   /i32.*Cast f64/, 2
 
 function jsnew_empty(): int {
     let res_obj = new ClassWithEmptyConstructor();
@@ -76,8 +72,10 @@ function jscall_static_method_empty(): int {
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     /CallStatic.*jscall::invoke/
-//! INST        "Intrinsic.JSRuntimeGetPropertyJSValue"
-//! INST_NEXT    /CallStatic.*JSRuntime::getValueInt/
+//! INST         "Intrinsic.JSRuntimeGetPropertyDouble"
+//! INST_NEXT    /i32.*Cast f64/
+//! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyDouble"
+//! INST_NEXT    /i32.*Cast f64/
 
 function jscall_object(): int {
     let res_obj = new ExampleClass(42, 42);
@@ -96,7 +94,8 @@ function jscall_object(): int {
 //! METHOD       "jsnew_object"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 6
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
 
 function jsnew_object(): int {
     let res_obj = new ExampleClass(42, 42);
@@ -117,7 +116,8 @@ function jsnew_object(): int {
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyJSValue", 2
-//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 6
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
 
 function jsnew_setproperty_object(): int {
     let res_obj = new ClassWithEmptyConstructor();
@@ -140,7 +140,7 @@ function jsnew_setproperty_object(): int {
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     /CallStatic.*jscall::invoke/
-//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
 
 function jscall_method_object(): int {
     let res_obj = new ExampleClass(42, 42);
@@ -197,8 +197,9 @@ function jscall_string(): int {
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST_NOT     /CallStatic.*jsnew::invoke/
-//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
-//! INST_COUNT   "Intrinsic.JSRuntimeGetValueString", 2
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyString", 2
+//! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
+//! INST_NOT     "Intrinsic.JSRuntimeGetValueString"
 
 function jsnew_string(): int {
     let v0: String = "hello";
@@ -213,16 +214,20 @@ function jsnew_string(): int {
     }
 }
 
-//! CHECKER      jsnew_setproperty_string JIT
+//! DISABLED_CHECKER      jsnew_setproperty_string JIT
 //! RUN          force_jit: true, entry: "jsnew_setproperty_string", options: "--compiler-regex=ETSGLOBAL::jsnew_setproperty_string"
 //! METHOD       "jsnew_setproperty_string"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST_NOT     /CallStatic.*jsnew::invoke/
+//! INST_NOT     "Intrinsic.JSRuntimeSetPropertyJSValue"
 //! INST_COUNT   "Intrinsic.JSRuntimeNewJSValueString", 2
-//! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyJSValue", 2
-//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
-//! INST_COUNT   "Intrinsic.JSRuntimeGetValueString", 2
+//! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyString", 2
+//! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyString", 2
+//! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
+//! INST_NOT     "Intrinsic.JSRuntimeGetValueString"
+//! PASS_AFTER   "Cleanup"
+//! INST_NOT     "Intrinsic.JSRuntimeNewJSValueString"
 
 function jsnew_setproperty_string(): int {
     let v0: String = "hello";

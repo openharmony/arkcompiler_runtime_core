@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -785,8 +785,6 @@ void InteropIntrinsicOptimization::TryRemoveUnwrapToJSValue(Inst *inst)
         return;
     }
     inst->CastToIntrinsic()->SetIntrinsicId(newId);
-    inst->SetOpcode(Opcode::Intrinsic);  // reset flags to default for intrinsic inst
-    AdjustFlags(newId, inst);
     inst->SetType(userType);
     for (auto userIt = inst->GetUsers().begin(); userIt != inst->GetUsers().end();) {
         auto userInst = userIt->GetInst();
@@ -1126,6 +1124,7 @@ void InteropIntrinsicOptimization::RedundancyElimination()
 
 bool InteropIntrinsicOptimization::RunImpl()
 {
+    ASSERT(!GetGraph()->IsBytecodeOptimizer());
     bool oneScope = TryCreateSingleScope();
     if (!hasScopes_) {
         return false;

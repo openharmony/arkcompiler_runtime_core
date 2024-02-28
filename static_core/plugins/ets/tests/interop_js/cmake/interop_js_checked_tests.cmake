@@ -25,11 +25,12 @@ function(panda_ets_interop_js_checked_test)
     set(TARGET "interop_${TARGET}.checked")
 
     set(TARGET_TEST_PACKAGE ${TARGET}_test_package)
+    # NOTE (kkonsw): temporary disabling all other checks
+    set(ETS_VERIFICATOR_ERRORS "ForLoopCorrectlyInitializedForAll")
     panda_ets_package(${TARGET_TEST_PACKAGE}
         ETS_SOURCES ${ARG_FILE}
         ETS_CONFIG ${ETS_CONFIG}
-        # NOTE (kkonsw): temporary disabling all other checks
-        ETS_VERIFICATOR_ERRORS "ForLoopCorrectlyInitializedForAll"
+        ETS_VERIFICATOR_ERRORS ${ETS_VERIFICATOR_ERRORS}
     )
 
     set(CHECKER "${PANDA_ROOT}/tests/checked/checker.rb")
@@ -54,6 +55,7 @@ function(panda_ets_interop_js_checked_test)
     file(MAKE_DIRECTORY "${TEST_DIR}")
     SET(OPTIONS "--run-gc-in-place")
     set(PAOC_OPTIONS ${OPTIONS} "--load-runtimes=ets" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
+    set(ES2PANDA_OPTIONS --thread=0 --extension=ets --arktsconfig=${ETS_CONFIG} --verifier-errors=${ETS_VERIFICATOR_ERRORS})
 
     if (PANDA_LLVM_AOT)
         set(WITH_LLVM "--with-llvm")
@@ -67,10 +69,12 @@ function(panda_ets_interop_js_checked_test)
         COMMAND ${CHECKER} --source ${ARG_FILE}
                         --panda \"${RUN_COMMAND}\"
                         --paoc $<TARGET_FILE:ark_aot>
+                        --frontend ${es2panda_bin}
                         --run-prefix \"${PANDA_RUN_PREFIX}\"
                         --test-file ${ARK_ETS_INTEROP_JS_PACKAGE_PATH}
                         --panda-options \"${OPTIONS}\"
                         --paoc-options \"${PAOC_OPTIONS}\"
+                        --frontend-options \"${ES2PANDA_OPTIONS}\"
                         --command-token \"//!\"
                         --arch ${ARCHITECTURE}
                         ${WITH_LLVM}

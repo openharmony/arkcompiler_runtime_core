@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,7 @@ set(ASSERT_MARKER "${PROJECT_BINARY_DIR}/assert.ok")
 set(ISA_GEN_RB "${PROJECT_SOURCE_DIR}/gen.rb")
 add_custom_command(OUTPUT ${ASSERT_MARKER}
     COMMENT "Check ISA content"
-    COMMAND ${ISA_GEN_RB} -d ${ISA_FILE} -r ${ISAPI} -a ${ISA_ASSERTS}
+    COMMAND ${ISA_GEN_RB} -d ${ISA_FILE} -q ${ISAPI} -a ${ISA_ASSERTS}
     COMMAND ${CMAKE_COMMAND} -E touch ${ASSERT_MARKER}
     DEPENDS ${ISA_FILE} ${ISA_GEN_RB} ${ISA_ASSERTS} ${ISAPI}
 )

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,9 +25,11 @@ end
     TypeInfo.new(name: 'boolean', value: 'true', unwrap: 'U1', wrap: 'U1'),
     TypeInfo.new(name: 'byte', value: '127', unwrap: 'F64', wrap: 'I8'),
     TypeInfo.new(name: 'short', value: '32767', unwrap: 'F64', wrap: 'I16'),
-    TypeInfo.new(name: 'int', value: '2147483647', unwrap: 'F64', wrap: 'I32'), # TODO(aefremov): replace get_value_double -> f64toi32 with get_value_int32
+    TypeInfo.new(name: 'int', value: '2147483647', unwrap: 'F64', wrap: 'I32'),
     TypeInfo.new(name: 'long', value: '9223372036854775', unwrap: 'F64', wrap: 'I64'),
     TypeInfo.new(name: 'char', value: '65535', unwrap: 'F64', wrap: 'U16'),
+    TypeInfo.new(name: 'double', value: '12.34', unwrap: 'F64', wrap: 'F64'),
+    TypeInfo.new(name: 'float', value: '12.34', unwrap: 'F64', wrap: 'F32'),
     TypeInfo.new(name: 'int_array', value: '[1, 2]', type: 'int[]'),
     TypeInfo.new(name: 'String_array', value: '["ab", "cd"]', type: 'String[]'),
     TypeInfo.new(name: 'const_object', value: 'const_obj', type: 'EtsClass'),

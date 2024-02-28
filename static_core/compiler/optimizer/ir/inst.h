@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1060,6 +1060,11 @@ public:
     }
 
     bool IsCall() const
+    {
+        return GetFlag(inst_flags::CALL) && !IsIntrinsic();
+    }
+
+    bool IsCallOrIntrinsic() const
     {
         return GetFlag(inst_flags::CALL);
     }
@@ -2927,6 +2932,11 @@ public:
     {
         ASSERT(inputTypes_ != nullptr);
         inputTypes_->push_back(type);
+    }
+    void SetInputType(unsigned index, DataType::Type type)
+    {
+        ASSERT(inputTypes_ != nullptr);
+        (*inputTypes_)[index] = type;
     }
     ArenaVector<DataType::Type> *GetInputTypes()
     {
@@ -4886,7 +4896,11 @@ public:
 
     void SetIntrinsicId(IntrinsicId intrinsicId)
     {
+        if (intrinsicId_ != RuntimeInterface::IntrinsicId::INVALID) {
+            SetField<FieldFlags>(inst_flags::GetFlagsMask(GetOpcode()));
+        }
         intrinsicId_ = intrinsicId;
+        AdjustFlags(intrinsicId, this);
     }
 
     DataType::Type GetInputType(size_t index) const override

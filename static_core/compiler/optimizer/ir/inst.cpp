@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -453,7 +453,7 @@ Inst *IntrinsicInst::Clone(const Graph *targetGraph) const
     ASSERT(targetGraph != nullptr);
     auto intrinsicClone = (GetOpcode() == Opcode::Intrinsic ? Inst::Clone(targetGraph)->CastToIntrinsic()
                                                             : Inst::Clone(targetGraph)->CastToBuiltin());
-    intrinsicClone->SetIntrinsicId(GetIntrinsicId());
+    intrinsicClone->intrinsicId_ = GetIntrinsicId();
     CloneTypes(targetGraph->GetAllocator(), intrinsicClone);
     if (HasImms()) {
         for (auto imm : GetImms()) {

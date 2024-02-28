@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,17 @@ ObjectWithPrototype.prototype.prototype_function = function() {
     return "prototype function";
 };
 
+let dyn_storage = {
+    str: "abcd",
+    dbl: 1.9,
+    integer: 6,
+    bool_true: true,
+    bool_false: false,
+    verify: function() {
+        return (this.str === "dcba") + (this.dbl === 2.4) + (this.integer === 31) + (this.bool_true === false);
+    }
+};
+
 exports.cons = cons;
 exports.car = car;
 exports.cdr = cdr;
@@ -109,4 +120,5 @@ exports.make_swappable = make_swappable;
 exports.StaticClass = StaticClass;
 exports.extract_squared_int = extract_squared_int;
 exports.ObjectWithPrototype = ObjectWithPrototype;
+exports.dyn_storage = dyn_storage;
 exports.vundefined = undefined;

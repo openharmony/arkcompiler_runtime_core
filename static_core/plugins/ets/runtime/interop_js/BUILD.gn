@@ -34,6 +34,18 @@ if (is_ohos && is_standard_system) {
   }
 }
 
+ark_gen_file("interop_intrinsic_kinds_h") {
+  template_file =
+      "$ark_root/plugins/ets/compiler/optimizer/interop_intrinsic_kinds.h.erb"
+  data = [ "$target_gen_dir/../../../../runtime/intrinsics.yaml" ]
+  api = [
+    "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
+  ]
+  output_file =
+      "$target_gen_dir/../../compiler/generated/interop_intrinsic_kinds.h"
+  extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
+}
+
 ohos_source_set("ets_interop_js_napi_static") {
   configs = [
     "$ark_root:ark_config",
@@ -74,6 +86,7 @@ ohos_source_set("ets_interop_js_napi_static") {
   }
 
   deps = [
+    ":interop_intrinsic_kinds_h",
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/runtime:libarkruntime",

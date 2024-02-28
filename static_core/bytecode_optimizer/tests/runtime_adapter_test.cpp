@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,12 +104,12 @@ TEST(RuntimeAdapter, Common)
     EXPECT_NE(adapter.GetMethodCodeSize(main), 0U);
     EXPECT_TRUE(adapter.IsMethodStatic(main));
     EXPECT_FALSE(adapter.HasNativeException(main));
-    EXPECT_EQ(adapter.GetClassNameFromMethod(main), std::string("L_GLOBAL;"));
+    EXPECT_EQ(adapter.GetClassNameFromMethod(main), std::string("_GLOBAL"));
     EXPECT_EQ(adapter.GetMethodName(main), std::string("main"));
-    EXPECT_EQ(adapter.GetMethodFullName(main, false), std::string("L_GLOBAL;::main"));
+    EXPECT_EQ(adapter.GetMethodFullName(main, false), std::string("_GLOBAL::main"));
     EXPECT_EQ(adapter.GetBytecodeString(main, 0U), std::string("ldai 1"));
 
-    EXPECT_EQ(adapter.GetClassName(global), std::string("L_GLOBAL;"));
+    EXPECT_EQ(adapter.GetClassName(global), std::string("_GLOBAL"));
     EXPECT_EQ(adapter.GetClass(main), global);
 }
 

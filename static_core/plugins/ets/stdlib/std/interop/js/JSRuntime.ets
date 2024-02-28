@@ -70,30 +70,6 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    public static getValueByte(value: JSValue): byte {
-        return JSRuntime.getValueInt(value) as byte;
-    }
-
-    public static getValueChar(value: JSValue): char {
-        return JSRuntime.getValueInt(value) as char;
-    }
-
-    public static getValueShort(value: JSValue): short {
-        return JSRuntime.getValueInt(value) as short;
-    }
-
-    public static getValueInt(value: JSValue): int {
-        return JSRuntime.getValueDouble(value) as int;
-    }
-
-    public static getValueLong(value: JSValue): long {
-        return JSRuntime.getValueDouble(value) as long;
-    }
-
-    public static getValueFloat(value: JSValue): float {
-        return JSRuntime.getValueDouble(value) as float;
-    }
-
     public static getValueDouble(value: JSValue): double {
         JSRuntime.checkIntrinsicMethod();
     }

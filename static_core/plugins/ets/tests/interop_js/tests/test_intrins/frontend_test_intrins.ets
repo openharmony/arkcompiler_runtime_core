@@ -363,7 +363,7 @@ function test_finalizers(): boolean {
             JSRuntime.newJSValueDouble(1234);
         }
 
-        assert JSRuntime.getNumSharedJSValues() == num_refs_pre + workload * 2;
+        assert JSRuntime.getNumSharedJSValues() == num_refs_pre + workload;
         gc_jsruntime_cleanup();
         assert JSRuntime.getNumSharedJSValues() == num_refs_pre;
     }
