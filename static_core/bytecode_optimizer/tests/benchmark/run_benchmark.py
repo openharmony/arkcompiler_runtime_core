@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -122,7 +122,7 @@ def run_c2p(test_dir, bin_dir, c2p_opts):
                 test_path = os.path.join(dirpath, name)
                 proc = subprocess.Popen([c2p, "--size-stat"] + c2p_opts + [
                                         test_path, fp.name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
+                stdout, stderr = proc.communicate(timeout=3600)
                 sizes.append(parse_c2p_output(test_path, stdout,
                              stderr, proc.returncode, result))
                 if proc.returncode == 0:
