@@ -41,6 +41,7 @@ def main() -> None:
     config.generate_config()
 
     registry = PluginsRegistry()
+    config.custom.validate()
     runners: List[Runner] = []
 
     if config.general.processes == 1:

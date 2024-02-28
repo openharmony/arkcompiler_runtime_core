@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import logging
 import multiprocessing
 import os
 import re
+import shutil
 import subprocess
 import sys
 from abc import ABC, abstractmethod
@@ -70,6 +71,46 @@ class CtsTestPreparationStep(TestPreparationStep):
         return f"Test Generator for '{EtsSuites.CTS.value}' test suite"
 
 
+class CustomGeneratorTestPreparationStep(TestPreparationStep):
+    def __init__(self, test_source_path: Path, test_gen_path: Path, config: Config, extension: str) -> None:
+        super().__init__(test_source_path, test_gen_path, config)
+        self.extension = extension
+
+    def transform(self, force_generated: bool) -> List[str]:
+        # call of the custom generator
+        if self.test_gen_path.exists() and force_generated:
+            shutil.rmtree(self.test_gen_path)
+        self.test_gen_path.mkdir(exist_ok=True)
+        cmd = [self.config.custom.generator,
+               "--source", self.test_source_path,
+               "--target", self.test_gen_path]
+        cmd.extend(self.config.custom.generator_options)
+        timeout = 300
+        result: List[str] = []
+        with subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding='utf-8',
+                errors='ignore',
+        ) as process:
+            try:
+                process.communicate(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                Log.exception_and_raise(_LOGGER, f"Generation failed by timeout after {timeout} sec")
+            except Exception as ex:  # pylint: disable=broad-except
+                Log.exception_and_raise(_LOGGER, f"Generation failed by unknown reason: {ex}")
+            finally:
+                glob_expression = os.path.join(self.test_gen_path, f"**/*.{self.extension}")
+                result.extend(glob(glob_expression, recursive=True))
+
+        return result
+
+    def __str__(self) -> str:
+        return f"Test Generator for '{EtsSuites.CUSTOM.value} - {self.config.custom.suite_name}' test suite"
+
+
 class FuncTestPreparationStep(TestPreparationStep):
     def transform(self, force_generated: bool) -> List[str]:
         return self.generate_template_tests(self.test_source_path, self.test_gen_path)
@@ -93,6 +134,7 @@ class FuncTestPreparationStep(TestPreparationStep):
 
     def __str__(self) -> str:
         return f"Test Generator for '{EtsSuites.FUNC.value}' test suite"
+
 
 class ESCheckedTestPreparationStep(TestPreparationStep):
     def transform(self, force_generated: bool) -> List[str]:
@@ -119,14 +161,16 @@ class ESCheckedTestPreparationStep(TestPreparationStep):
             check=False,
         )
         if res.returncode != 0:
-            Log.default(_LOGGER, 'Failed to run es cross-validator, please, make sure that' \
-                'all required tools are installed (see tests-u-runner/readme.md#ets-es-checked-dependencies)')
+            Log.default(_LOGGER,
+                        'Failed to run es cross-validator, please, make sure that' \
+                        'all required tools are installed (see tests-u-runner/readme.md#ets-es-checked-dependencies)')
             Log.exception_and_raise(_LOGGER, f"invalid return code {res.returncode}\n" + res.stdout + res.stderr)
         glob_expression = os.path.join(self.test_gen_path, "**/*.ets")
         return list(glob(glob_expression, recursive=True))
 
     def __str__(self) -> str:
         return f"Test Generator for '{EtsSuites.ESCHECKED.value}' test suite"
+
 
 class CopyStep(TestPreparationStep):
     def transform(self, force_generated: bool) -> List[str]:

@@ -31,7 +31,7 @@ from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_dir import EtsTestDir
 from runner.plugins.ets.ets_utils import ETSUtils
 from runner.plugins.ets.preparation_step import TestPreparationStep, CtsTestPreparationStep, \
-    FuncTestPreparationStep, ESCheckedTestPreparationStep, JitStep, CopyStep
+    FuncTestPreparationStep, ESCheckedTestPreparationStep, JitStep, CopyStep, CustomGeneratorTestPreparationStep
 from runner.plugins.ets.runtime_default_ets_test_dir import RuntimeDefaultEtsTestDir
 from runner.plugins.work_dir import WorkDir
 
@@ -59,6 +59,7 @@ class EtsTestSuite(ABC):
             EtsSuites.RUNTIME.value: RuntimeEtsTestSuite,
             EtsSuites.GCSTRESS.value: GCStressEtsTestSuite,
             EtsSuites.ESCHECKED.value: ESCheckedEtsTestSuite,
+            EtsSuites.CUSTOM.value: CustomEtsTestSuite,
         }
         return name_to_class[ets_suite_name]
 
@@ -136,6 +137,37 @@ class GCStressEtsTestSuite(EtsTestSuite):
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(CopyStep(
             test_source_path=self._ets_test_dir.gc_stress,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        if self._is_jit:
+            self._preparation_steps.append(JitStep(
+                test_source_path=self.test_root,
+                test_gen_path=self.test_root,
+                config=self.config,
+                num_repeats=self._jit.num_repeats
+            ))
+
+
+class CustomEtsTestSuite(EtsTestSuite):
+    def __init__(self, config: Config, work_dir: WorkDir, _: str):
+        super().__init__(config, work_dir, config.custom.suite_name, config.custom.list_root)
+        self._list_root = config.custom.list_root
+        self.set_preparation_steps()
+
+    def set_preparation_steps(self) -> None:
+        if self.config.custom.generator is not None:
+            self._preparation_steps.append(CustomGeneratorTestPreparationStep(
+                test_source_path=self.config.custom.test_root,
+                test_gen_path=self.test_root,
+                config=self.config,
+                extension="ets"
+            ))
+            copy_source_path = self.test_root
+        else:
+            copy_source_path = self.config.custom.test_root
+        self._preparation_steps.append(CopyStep(
+            test_source_path=copy_source_path,
             test_gen_path=self.test_root,
             config=self.config
         ))

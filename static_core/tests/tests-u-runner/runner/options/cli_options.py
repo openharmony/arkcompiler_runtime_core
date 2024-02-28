@@ -99,6 +99,9 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
     ets_mutex_group.add_argument(
         '--ets-es-checked', action='store_true', dest='ets_es_checked',
         default=None, help='run es checked templates tests')
+    ets_mutex_group.add_argument(
+        '--ets-custom', action='store_true', dest='ets_custom',
+        default=None, help='run custom ETS suite test')
 
 
 def add_ets_args(parser: argparse.ArgumentParser) -> None:
@@ -161,6 +164,31 @@ def add_config_args(parser: argparse.ArgumentParser) -> None:
         '--generate-config', action='store', dest='generate_config',
         default=None,
         help='generate config file with all options')
+
+
+def add_custom_suite_args(parser: argparse.ArgumentParser) -> None:
+    # Custom suite
+    parser.add_argument(
+        '--custom-suite', dest='custom_suite_name', default=None,
+        help='name of the custom suite')
+    parser.add_argument(
+        '--custom-test-root', dest='custom_test_root', default=None, type=is_directory,
+        help='directory with test files for the custom suite. '
+             'It cannot be set along with --test-root. '
+             'It must be set if --custom-suite is set')
+    parser.add_argument(
+        '--custom-list-root', dest='custom_list_root', default=None, type=is_directory,
+        help='directory with files what are lists of excluded/ignored tests for the custom suite. '
+             'It cannot be set along with --list-root. '
+             'It must be set if --custom-suite is set')
+    parser.add_argument(
+        '--custom-generator', dest='custom_generator', default=None, type=is_file,
+        help='executable file generating tests. If this option is set, then --test-root is considered as a path '
+             'where template files are located. '
+             'It must be set if --custom-suite is set')
+    parser.add_argument(
+        '--custom-generator-option', action="append", dest='custom_generator_option', default=None,
+        help='Options for the custom generator. It cannot be used without --custom-generator.')
 
 
 def add_general_args(parser: argparse.ArgumentParser) -> None:
@@ -408,6 +436,7 @@ def get_args() -> argparse.Namespace:
     add_ets_args(parser)
     add_test_group_args(parser)
     add_config_args(parser)
+    add_custom_suite_args(parser)
     add_general_args(parser)
     add_general_other_args(parser)
     add_es2panda_args(parser)

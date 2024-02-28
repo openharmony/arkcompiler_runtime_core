@@ -25,6 +25,7 @@ from runner.options.cli_args_wrapper import CliArgsWrapper
 from runner.options.decorator_value import value, _to_test_suites, _to_str
 from runner.options.options_ark import ArkOptions
 from runner.options.options_ark_aot import ArkAotOptions
+from runner.options.options_custom import CustomSuiteOptions
 from runner.options.options_es2panda import Es2PandaOptions
 from runner.options.options_ets import ETSOptions
 from runner.options.options_general import GeneralOptions
@@ -49,7 +50,7 @@ class Config:
     @value(
         yaml_path="test-suites",
         cli_name=["test_suites", "test262", "parser", "hermes",
-                  "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked"],
+                  "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom"],
         cast_to_type=_to_test_suites,
         required=True
     )
@@ -57,6 +58,7 @@ class Config:
         return set([])
 
     general = GeneralOptions()
+    custom = CustomSuiteOptions()
     es2panda = Es2PandaOptions()
     verifier = VerifierOptions()
     quick = QuickOptions()
@@ -69,6 +71,7 @@ class Config:
     def _to_dict(self) -> Dict[str, object]:
         return {
             "test-suites": list(self.test_suites),
+            "custom": self.custom.to_dict(),
             "general": self.general.to_dict(),
             "es2panda": self.es2panda.to_dict(),
             "verifier": self.verifier.to_dict(),
