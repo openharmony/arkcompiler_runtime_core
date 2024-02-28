@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H
 
 #include "libpandafile/file.h"
 
@@ -31,4 +31,4 @@ public:
 
 }  // namespace panda::ets
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_ANNOTATION_H

@@ -4079,7 +4079,7 @@ TEST(parsertests, test_function_overloading_1)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
         )";
 
     auto res = p.Parse(source);

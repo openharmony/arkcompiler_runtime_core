@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_FIELD_WRAPPER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_FIELD_WRAPPER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_FIELD_WRAPPER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_FIELD_WRAPPER_H
 
 #include <memory>
 #include <node_api.h>
@@ -86,4 +86,4 @@ private:
 
 }  // namespace panda::ets::interop::js::ets_proxy
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_FIELD_WRAPPER_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_FIELD_WRAPPER_H

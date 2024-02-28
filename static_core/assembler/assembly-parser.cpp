@@ -459,7 +459,6 @@ bool Parser::ParseArrayElementValueFloat()
     }
     if (currArrayElem_->IsFloatValue()) {
         currArrayElem_->value = static_cast<float>(n);
-
     } else {
         currArrayElem_->value = static_cast<double>(n);
     }
@@ -569,9 +568,7 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
             if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
                 currRecord_->bodyLocation.begin = GetCurrentPosition(false);
                 ++context_;
-
                 LOG(DEBUG, ASSEMBLER) << "record body is open, line " << lineStric_ << ": " << tokens[0].wholeLine;
-
                 open_ = true;
             }
 
@@ -583,10 +580,8 @@ void Parser::ParseAsRecord(const std::vector<Token> &tokens)
 
             if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
                 LOG(DEBUG, ASSEMBLER) << "record body is closed, line " << lineStric_ << ": " << tokens[0].wholeLine;
-
                 currRecord_->bodyLocation.end = GetCurrentPosition(true);
                 ++context_;
-
                 open_ = false;
             }
         }
@@ -614,9 +609,7 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
             if (!open_ && *context_ == Token::Type::DEL_BRACE_L) {
                 currFunc_->bodyLocation.begin = GetCurrentPosition(false);
                 ++context_;
-
                 LOG(DEBUG, ASSEMBLER) << "function body is open, line " << lineStric_ << ": " << tokens[0].wholeLine;
-
                 open_ = true;
             }
 
@@ -628,7 +621,6 @@ void Parser::ParseAsFunction(const std::vector<Token> &tokens)
 
             if (open_ && *context_ == Token::Type::DEL_BRACE_R) {
                 LOG(DEBUG, ASSEMBLER) << "function body is closed, line " << lineStric_ << ": " << tokens[0].wholeLine;
-
                 currFunc_->bodyLocation.end = GetCurrentPosition(true);
                 ++context_;
                 open_ = false;
@@ -774,11 +766,9 @@ void Parser::ParseResetFunctionTable()
                     if (insn.IsCallRange() && (static_cast<int>(insn.regs.size()) - static_cast<int>(diff) >= 0)) {
                         continue;
                     }
-
-                    const auto &debug = insn.insDebug;
-                    context_.err = Error("Function argument mismatch.", debug.lineNumber,
-                                         Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.boundLeft,
-                                         debug.boundRight, debug.wholeLine);
+                    context_.err = Error("Function argument mismatch.", insn.insDebug.lineNumber,
+                                         Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", insn.insDebug.boundLeft,
+                                         insn.insDebug.boundRight, insn.insDebug.wholeLine);
                     SetError();
                 }
             }

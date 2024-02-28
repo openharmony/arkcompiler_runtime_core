@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_ETS_TYPE_VISITOR_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_ETS_TYPE_VISITOR_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_ETS_TYPE_VISITOR_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_ETS_TYPE_VISITOR_H
 
 #include "libpandabase/macros.h"
 #include "runtime/include/runtime.h"
@@ -315,4 +315,4 @@ private:
 
 }  // namespace panda::ets::interop::js
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_ETS_TYPE_VISITOR_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_ETS_TYPE_VISITOR_H

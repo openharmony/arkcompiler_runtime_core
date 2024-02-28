@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H
 
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "runtime/handle_scope.h"
@@ -28,4 +28,4 @@ public:
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_SCOPE_H

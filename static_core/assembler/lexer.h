@@ -112,6 +112,7 @@ private:
     bool Eol() const; /* End of line */
     bool LexString();
     void LexTokens();
+    void UpdateCurLinePos();
     void LexPreprocess();
     void SkipSpace();
     void AnalyzeLine();

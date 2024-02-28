@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H
 
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
@@ -274,4 +274,4 @@ static_assert(JSValue::GetTypeOffset() == sizeof(ObjectHeader));
 
 }  // namespace panda::ets::interop::js
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_H

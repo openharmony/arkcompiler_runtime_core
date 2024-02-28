@@ -33,48 +33,53 @@ def get_chapters(source_dir, target, build_dir):
 
     return result
 
+def merge_chapters_helper(dest_file, chapter):
+    with open(chapter, "r") as chapter_file:
+        for line in chapter_file:
+            # Hacks to mitigate Markdown builder bugs
+            line = line.replace("`a | b`", "`a \| b`")
+            line = line.replace("`a || b`", "`a \|\| b`")
+
+            # Hacks to avoid recipes subheaders
+            if (line.startswith("### Rule")):
+                line = line.strip().replace("### Rule", "**Rule") + "**\n"
+            if (line == "### TypeScript\n"):
+                line = "**TypeScript**\n"
+            if (line == "### ArkTS\n"):
+                line = "**ArkTS**\n"
+            if (line == "### See also\n"):
+                line = "**See also**\n"
+
+            # A hack to cut off hyperlinks
+            if (line.startswith("<a id=")):
+                next(chapter_file)
+                continue
+
+            # A hack to cut off keyword comments
+            if (line.startswith("<!--")):
+                next(chapter_file)
+                next(chapter_file)
+                continue
+
+            # A hack to make recipe links a simple text
+            line = re.sub("\[(.+)\]\(#r[0-9]+\)", "\\1", line)
+
+            # Fix links to recipes
+            line = line.replace("(recipes.md)", "(#recipes)")
+
+            # Fix link to quick-start dir
+            link = "https://gitee.com/openharmony/docs/blob/master/en/application-dev/quick-start/"
+            line = line.replace(link, "../")
+
+            dest_file.write(line)
+
+        dest_file.write("\n")
+
+
 def merge_chapters(chapters, dest_path):
     with open(dest_path, "w") as dest_file:
         for chapter in chapters:
-            with open(chapter, "r") as chapter_file:
-                for line in chapter_file:
-                    # Hacks to mitigate Markdown builder bugs
-                    line = line.replace("`a | b`", "`a \| b`")
-                    line = line.replace("`a || b`", "`a \|\| b`")
-
-                    # Hacks to avoid recipes subheaders
-                    if (line.startswith("### Rule")):
-                        line = line.strip().replace("### Rule", "**Rule") + "**\n"
-                    if (line == "### TypeScript\n"):
-                        line = "**TypeScript**\n"
-                    if (line == "### ArkTS\n"):
-                        line = "**ArkTS**\n"
-                    if (line == "### See also\n"):
-                        line = "**See also**\n"
-
-                    # A hack to cut off hyperlinks
-                    if (line.startswith("<a id=")):
-                        next(chapter_file)
-                        continue
-
-                    # A hack to cut off keyword comments
-                    if (line.startswith("<!--")):
-                        next(chapter_file)
-                        next(chapter_file)
-                        continue
-
-                    # A hack to make recipe links a simple text
-                    line = re.sub("\[(.+)\]\(#r[0-9]+\)", "\\1", line)
-
-                    # Fix links to recipes
-                    line = line.replace("(recipes.md)", "(#recipes)")
-
-                    # Fix link to quick-start dir
-                    line = line.replace("https://gitee.com/openharmony/docs/blob/master/en/application-dev/quick-start/", "../")
-
-                    dest_file.write(line)
-
-            dest_file.write("\n")
+            merge_chapters_helper(dest_file, chapter)
 
 def main():
     if len(sys.argv) != 4:

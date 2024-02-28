@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_API_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_API_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_API_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_API_H
 
 #include <string>
 #include <functional>

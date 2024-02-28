@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_H
 
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -79,4 +79,4 @@ private:
 
 }  // namespace panda::ets
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_LINKER_H

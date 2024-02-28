@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_PLUGINS_ETS_ARKTS_HEADER_HEADER_WRITER_H_
-#define PANDA_PLUGINS_ETS_ARKTS_HEADER_HEADER_WRITER_H_
+#ifndef PANDA_PLUGINS_ETS_ARKTS_HEADER_HEADER_WRITER_H
+#define PANDA_PLUGINS_ETS_ARKTS_HEADER_HEADER_WRITER_H
 
 #include <iostream>
 #include <cstdint>
@@ -85,4 +85,4 @@ private:
 
 }  // namespace panda::ets::header_writer
 
-#endif  // PANDA_PLUGINS_ETS_ARKTS_HEADER_HEADER_WRITER_H_
+#endif  // PANDA_PLUGINS_ETS_ARKTS_HEADER_HEADER_WRITER_H

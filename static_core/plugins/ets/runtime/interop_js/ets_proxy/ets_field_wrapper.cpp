@@ -263,13 +263,13 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
 napi_property_descriptor EtsFieldWrapper::MakeInstanceProperty(EtsClassWrapper *owner, Field *field)
 {
     new (this) EtsFieldWrapper(owner, field);
-    return DoMakeNapiProperty</*IS_STATIC=*/false>(this);
+    return DoMakeNapiProperty<false>(this);
 }
 
 napi_property_descriptor EtsFieldWrapper::MakeStaticProperty(EtsClassWrapper *owner, Field *field)
 {
     new (this) EtsFieldWrapper(owner, field);
-    return DoMakeNapiProperty</*IS_STATIC=*/true>(this);
+    return DoMakeNapiProperty<true>(this);
 }
 
 }  // namespace panda::ets::interop::js::ets_proxy

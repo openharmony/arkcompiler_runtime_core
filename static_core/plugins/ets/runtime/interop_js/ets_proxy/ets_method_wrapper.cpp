@@ -40,8 +40,7 @@ std::unique_ptr<EtsMethodWrapper> EtsMethodWrapper::CreateFunction(InteropCtx *c
 
     napi_value jsValue;
     NAPI_CHECK_FATAL(napi_create_function(env, wrapper->etsMethod_->GetName(), NAPI_AUTO_LENGTH,
-                                          &EtsMethodCallHandler</*IS_STATIC=*/true, /*IS_FUNC=*/true>, wrapper.get(),
-                                          &jsValue));
+                                          &EtsMethodCallHandler<true, true>, wrapper.get(), &jsValue));
     NAPI_CHECK_FATAL(napi_create_reference(env, jsValue, 1, &wrapper->jsRef_));
     NAPI_CHECK_FATAL(NapiObjectSeal(env, jsValue));
 
@@ -81,9 +80,9 @@ napi_property_descriptor EtsMethodWrapper::MakeNapiProperty(Method *method, Lazy
 {
     napi_callback callback {};
     if (method->IsStatic()) {
-        callback = EtsMethodWrapper::EtsMethodCallHandler</*IS_STATIC=*/true, /*IS_FUNC=*/false>;
+        callback = EtsMethodWrapper::EtsMethodCallHandler<true, false>;
     } else {
-        callback = EtsMethodWrapper::EtsMethodCallHandler</*IS_STATIC=*/false, /*IS_FUNC=*/false>;
+        callback = EtsMethodWrapper::EtsMethodCallHandler<false, false>;
     }
 
     napi_property_descriptor prop {};

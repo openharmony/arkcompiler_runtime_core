@@ -339,7 +339,6 @@ static JSValue *JSRuntimeLoadModule(EtsString *module)
         napi_value recv;
         NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
         auto status = (napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj));
-
         if (status == napi_pending_exception) {
             napi_value exp;
             NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
@@ -544,7 +543,6 @@ JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
-
     if (UNLIKELY(IsNull(env, jsVal))) {
         return nullptr;
     }
@@ -627,7 +625,6 @@ EtsString *CompilerConvertLocalToString(void *value)
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
-
     // NOTE(kprokopenko): can't assign undefined to EtsString *, see #14765
     if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
         return nullptr;
@@ -652,7 +649,6 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
-
     if (UNLIKELY(IsNull(env, jsVal))) {
         return nullptr;
     }

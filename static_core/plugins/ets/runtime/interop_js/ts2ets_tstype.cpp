@@ -384,7 +384,6 @@ static void *GetTSTypeGetterBridge(Method *method)
                 return klass;
             };
             auto klass = resolveRefCls(0);
-
             if (klass->IsStringClass()) {
                 return reinterpret_cast<void *>(TSTypeGetter<JSConvertString>);
             }

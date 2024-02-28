@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H
 
 #include <node_api.h>
 
@@ -24,4 +24,4 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
 
 }  // namespace panda::ets::interop::js
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H

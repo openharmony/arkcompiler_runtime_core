@@ -314,7 +314,6 @@ std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::Calculat
                       // thus method inheritance via prototype chain wont work
 #endif
     };
-
     if (hasSquashedProto(this)) {
         // Copy properties of base classes if we have to split prototype chain
         for (auto wclass = baseWrapper_; wclass != nullptr; wclass = wclass->baseWrapper_) {

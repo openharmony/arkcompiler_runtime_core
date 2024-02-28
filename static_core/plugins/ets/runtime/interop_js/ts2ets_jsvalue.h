@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_JSVALUE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_JSVALUE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_JSVALUE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_JSVALUE_H
 
 #include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
 
@@ -39,4 +39,4 @@ void Init();
 
 }  // namespace panda::ets::ts2ets
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_JSVALUE_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_JSVALUE_H

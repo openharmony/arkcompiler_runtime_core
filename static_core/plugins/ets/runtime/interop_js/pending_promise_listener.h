@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_PENDING_PROMISE_LISTENER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_PENDING_PROMISE_LISTENER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_PENDING_PROMISE_LISTENER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_PENDING_PROMISE_LISTENER_H
 
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
@@ -41,4 +41,4 @@ private:
 };
 }  // namespace panda::ets::interop::js
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_PENDING_PROMISE_LISTENER_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_PENDING_PROMISE_LISTENER_H

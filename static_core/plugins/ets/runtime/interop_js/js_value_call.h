@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H
 
 #include <node_api.h>
 #include "utils/span.h"
@@ -77,4 +77,4 @@ static bool WalkQualifiedName(std::string_view name, F const &f)
 
 }  // namespace panda::ets::interop::js
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JSVALUE_CALL_H

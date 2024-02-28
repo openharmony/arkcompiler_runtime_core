@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H
 
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_object.h"
@@ -56,4 +56,4 @@ private:
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_HANDLE_H
