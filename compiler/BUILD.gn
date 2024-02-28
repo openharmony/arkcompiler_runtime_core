@@ -60,6 +60,7 @@ libarkcompiler_sources = [
   "optimizer/ir/locations.cpp",
   "optimizer/ir_builder/inst_builder.cpp",
   "optimizer/ir_builder/ir_builder.cpp",
+  "optimizer/optimizations/branch_elimination.cpp",
   "optimizer/optimizations/cleanup.cpp",
   "optimizer/optimizations/constant_propagation/constant_propagation.cpp",
   "optimizer/optimizations/constant_propagation/lattice_element.cpp",

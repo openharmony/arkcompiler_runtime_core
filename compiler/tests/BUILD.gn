@@ -61,7 +61,10 @@ foreach(file, graph_test_js_files) {
   }
 }
 
-graph_test_js_files_un_opt = [ "constantProgagation" ]
+graph_test_js_files_un_opt = [
+  "branchElimination",
+  "constantProgagation",
+]
 
 foreach(file, graph_test_js_files_un_opt) {
   es2abc_gen_abc("gen_${file}_abc") {
@@ -80,6 +83,7 @@ foreach(file, graph_test_js_files_un_opt) {
 host_unittest_action("GraphInterfaceTest") {
   module_out_path = module_output_path
   sources = [
+    "branch_elimination_new_test.cpp",
     "compiler_basicblock_test.cpp",
     "compiler_graph_test.cpp",
     "compiler_inst_test.cpp",
