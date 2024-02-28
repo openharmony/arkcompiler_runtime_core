@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_ENTRYPOINTS_STRING_INDEX_OF_H_
-#define PANDA_RUNTIME_ENTRYPOINTS_STRING_INDEX_OF_H_
+#ifndef PANDA_RUNTIME_ENTRYPOINTS_STRING_INDEX_OF_H
+#define PANDA_RUNTIME_ENTRYPOINTS_STRING_INDEX_OF_H
 
 #include <cstdint>
 #include <type_traits>
@@ -154,7 +154,6 @@ inline size_t ClzInSwappedBytes<PandaWideUintT>(PandaWideUintT val)
 {
     uint64_t hi = __builtin_bswap64(static_cast<uint64_t>(val >> BITS_PER_UINT64));
     uint64_t lo = __builtin_bswap64(static_cast<uint64_t>(val));
-
     if (lo == 0) {
         return BITS_PER_UINT64 + Clz(hi);
     }
@@ -210,4 +209,4 @@ inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
 
 }  // namespace panda::intrinsics
 
-#endif
+#endif  // PANDA_RUNTIME_ENTRYPOINTS_STRING_INDEX_OF_H

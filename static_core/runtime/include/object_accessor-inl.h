@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H_
-#define PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H_
+#ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H
+#define PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H
 
 #include <securec.h>
 
@@ -480,4 +480,4 @@ inline void ObjectAccessor::SetClass(ObjectHeader *obj, BaseClass *newClass)
 }
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H_
+#endif  // PANDA_RUNTIME_OBJECT_ACCESSOR_INL_H

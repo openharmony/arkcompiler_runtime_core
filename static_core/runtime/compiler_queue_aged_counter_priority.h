@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_COMPILER_QUEUE_AGED_COUNTER_PRIORITY_H_
-#define PANDA_RUNTIME_COMPILER_QUEUE_AGED_COUNTER_PRIORITY_H_
+#ifndef PANDA_RUNTIME_COMPILER_QUEUE_AGED_COUNTER_PRIORITY_H
+#define PANDA_RUNTIME_COMPILER_QUEUE_AGED_COUNTER_PRIORITY_H
 
 #include "runtime/compiler_queue_counter_priority.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -64,4 +64,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_COMPILER_QUEUE_AGED_COUNTER_PRIORITY_H_
+#endif  // PANDA_RUNTIME_COMPILER_QUEUE_AGED_COUNTER_PRIORITY_H

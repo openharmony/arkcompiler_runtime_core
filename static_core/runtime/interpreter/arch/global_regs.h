@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_ARCH_GLOBAL_REGS_H_
-#define PANDA_INTERPRETER_ARCH_GLOBAL_REGS_H_
+#ifndef PANDA_INTERPRETER_ARCH_GLOBAL_REGS_H
+#define PANDA_INTERPRETER_ARCH_GLOBAL_REGS_H
 
 #if defined(PANDA_TARGET_ARM64)
 #include "aarch64/global_regs.h"
@@ -21,4 +21,4 @@
 #error "Unsupported target arch"
 #endif
 
-#endif  // PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
+#endif  // PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H

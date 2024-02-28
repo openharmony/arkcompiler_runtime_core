@@ -33,12 +33,7 @@ bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::stri
                  const panda::PandArg<std::string> &output, const panda::PandArg<bool> &help, int argc,
                  const char **argv)
 {
-    if (!pa_parser.Parse(argc, argv)) {
-        PrintHelp(pa_parser);
-        return false;
-    }
-
-    if (input.GetValue().empty() || output.GetValue().empty() || help.GetValue()) {
+    if (!pa_parser.Parse(argc, argv) || input.GetValue().empty() || output.GetValue().empty() || help.GetValue()) {
         PrintHelp(pa_parser);
         return false;
     }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_INTERPRETER_INL_H_
-#define PANDA_INTERPRETER_INL_H_
+#ifndef PANDA_INTERPRETER_INL_H
+#define PANDA_INTERPRETER_INL_H
 
 #include <array>
 #include <cmath>
@@ -2692,7 +2692,6 @@ public:
             ASSERT(thread->HasPendingException());
 
             uint32_t pcOffset = this->FindCatchBlock(thread->GetException(), this->GetBytecodeOffset());
-
             if (pcOffset != panda_file::INVALID_OFFSET) {
                 return pcOffset;
             }
@@ -3806,4 +3805,4 @@ void ExecuteImplInner(ManagedThread *thread, const uint8_t *pc, Frame *frame, bo
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_INTERPRETER_INL_H_
+#endif  // PANDA_INTERPRETER_INL_H

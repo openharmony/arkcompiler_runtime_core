@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_THREAD_INL_H_
-#define PANDA_RUNTIME_THREAD_INL_H_
+#ifndef PANDA_RUNTIME_THREAD_INL_H
+#define PANDA_RUNTIME_THREAD_INL_H
 
 #include "runtime/handle_base.h"
 #include "runtime/global_handle_storage-inl.h"
@@ -140,4 +140,4 @@ ALWAYS_INLINE inline void MTManagedThread::ReleaseMonitors()
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_THREAD_INL_H_
+#endif  // PANDA_RUNTIME_THREAD_INL_H

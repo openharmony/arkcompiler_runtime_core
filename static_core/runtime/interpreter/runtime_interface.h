@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_RUNTIME_INTERFACE_H_
-#define PANDA_INTERPRETER_RUNTIME_INTERFACE_H_
+#ifndef PANDA_INTERPRETER_RUNTIME_INTERFACE_H
+#define PANDA_INTERPRETER_RUNTIME_INTERFACE_H
 
 #include <memory>
 
@@ -311,4 +311,4 @@ public:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_INTERPRETER_RUNTIME_INTERFACE_H_
+#endif  // PANDA_INTERPRETER_RUNTIME_INTERFACE_H

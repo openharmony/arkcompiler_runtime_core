@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_HCLASS_H_
-#define PANDA_RUNTIME_HCLASS_H_
+#ifndef PANDA_RUNTIME_HCLASS_H
+#define PANDA_RUNTIME_HCLASS_H
 
 #include "mem/mem.h"
 #include "mem/vm_handle.h"
@@ -155,4 +155,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_HCLASS_H_
+#endif  // PANDA_RUNTIME_HCLASS_H

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_IMPL_H_
-#define PANDA_INTERPRETER_IMPL_H_
+#ifndef PANDA_INTERPRETER_IMPL_H
+#define PANDA_INTERPRETER_IMPL_H
 
 #include <cstdint>
 
@@ -26,4 +26,4 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_INTERPRETER_IMPL_H_
+#endif  // PANDA_INTERPRETER_IMPL_H

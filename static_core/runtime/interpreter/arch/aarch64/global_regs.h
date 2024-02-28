@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
-#define PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H_
+#ifndef PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H
+#define PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REGS_H
 
 #include <cstdint>
 
@@ -120,4 +120,4 @@ ALWAYS_INLINE inline void SetThread(ManagedThread *thread)
 
 }  // namespace panda::interpreter::arch::regs
 
-#endif  // PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REG_VARS_H_
+#endif  // PANDA_INTERPRETER_ARCH_AARCH64_GLOBAL_REG_VARS_H

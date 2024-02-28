@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_THREAD_H_
-#define PANDA_RUNTIME_THREAD_H_
+#ifndef PANDA_RUNTIME_THREAD_H
+#define PANDA_RUNTIME_THREAD_H
 
 #include <memory>
 #include <chrono>
@@ -420,8 +420,8 @@ private:
 
 }  // namespace panda
 
-#ifdef PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS
+#ifdef PANDA_TARGET_MOBILE_WITHNATIVE_LIBS
 #include "platforms/mobile/runtime/thread-inl.cpp"
-#endif  // PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS
+#endif  // PANDA_TARGET_MOBILE_WITHNATIVE_LIBS
 
-#endif  // PANDA_RUNTIME_THREAD_H_
+#endif  // PANDA_RUNTIME_THREAD_H

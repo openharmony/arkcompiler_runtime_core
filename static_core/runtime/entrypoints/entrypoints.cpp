@@ -87,7 +87,7 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BEGIN_ENTRYPOINT() \
     CHECK_STACK_WALKER;    \
-    LOG_ENTRYPOINT();
+    LOG_ENTRYPOINT()
 
 extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame *frame)
 {
@@ -1515,7 +1515,6 @@ extern "C" const uint8_t *FindCatchBlockInIFrames(ManagedThread *currThread, Fra
     uint32_t pcOffset = panda_file::INVALID_OFFSET;
 
     pcOffset = FindCatchBlockInIFramesStackless(&currThread, &currFrame, pc);
-
     if (pcOffset == panda_file::INVALID_OFFSET) {
         if constexpr (RUNTIME_ARCH == Arch::AARCH64 || RUNTIME_ARCH == Arch::AARCH32 || RUNTIME_ARCH == Arch::X86_64) {
             panda::FindCatchBlockInCallStack(currThread);
@@ -1630,7 +1629,7 @@ static void MoveStorageData(ObjectHeader *sb, void *newstorage)
     auto size = GetCountValue(sb) << 1U;
     auto newbuf = ToVoidPtr(ToUintPtr(newstorage) + coretypes::Array::GetDataOffset());
     auto oldbuf = ToVoidPtr(ToUintPtr(GetStorageAddress(sb, 0U)));
-    memcpy(newbuf, oldbuf, size);
+    memcpy_s(newbuf, size, oldbuf, size);
 }
 
 static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(ObjectHeader *sb, uint32_t newsize,
@@ -1668,7 +1667,7 @@ static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(Obje
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define check_capacity_fast(sb, newsize)                                           \
+#define CHECK_CAPACITY_FAST(sb, newsize)                                           \
     {                                                                              \
         auto success = false;                                                      \
         std::tie(success, sb, std::ignore) = AssureCapacity(sb, newsize, nullptr); \
@@ -1685,7 +1684,7 @@ static ObjectHeader *StoreNumber(ObjectHeader *sb, int64_t n)
     auto count = GetCountValue(sb);
     auto newsize = count + size;
 
-    check_capacity_fast(sb, newsize);
+    CHECK_CAPACITY_FAST(sb, newsize);
     utf::UInt64ToUtf16Array(num, GetStorageAddress(sb, count), size, n < 0);
     sb->SetFieldPrimitive<uint32_t>(SB_COUNT_OFFSET, newsize);
     return sb;
@@ -1711,7 +1710,7 @@ extern "C" ObjectHeader *CoreStringBuilderBool(ObjectHeader *sb, const uint8_t v
     auto size = 4U + (1U - v);  // v is actually u1
     auto newsize = count + size;
 
-    check_capacity_fast(sb, newsize);
+    CHECK_CAPACITY_FAST(sb, newsize);
     auto dst = reinterpret_cast<uint64_t *>(GetStorageAddress(sb, count));
 
     if (v != 0) {
@@ -1732,7 +1731,7 @@ extern "C" ObjectHeader *CoreStringBuilderChar(ObjectHeader *sb, const uint16_t 
     auto count = GetCountValue(sb);
     auto newsize = count + 1;
 
-    check_capacity_fast(sb, newsize);
+    CHECK_CAPACITY_FAST(sb, newsize);
     auto dst = GetStorageAddress(sb, count);
 
     *dst = c;
@@ -1746,7 +1745,6 @@ extern "C" ObjectHeader *CoreStringBuilderString(ObjectHeader *sb, void *s)
     auto str = static_cast<coretypes::String *>(s);
     auto isnull = str == nullptr;
     auto size = isnull ? sizeof(nullstr) / sizeof(uint16_t) : str->GetLength();
-
     if (size == 0) {
         return sb;
     }

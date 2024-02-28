@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_BRIDGE_BRIDGE_H_
-#define PANDA_RUNTIME_BRIDGE_BRIDGE_H_
+#ifndef PANDA_RUNTIME_BRIDGE_BRIDGE_H
+#define PANDA_RUNTIME_BRIDGE_BRIDGE_H
 
 #include <cstdint>
 #include "libpandabase/macros.h"
@@ -49,4 +49,4 @@ PANDA_PUBLIC_API const void *GetAbstractMethodStub();
 PANDA_PUBLIC_API const void *GetDefaultConflictMethodStub();
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_BRIDGE_BRIDGE_H_
+#endif  // PANDA_RUNTIME_BRIDGE_BRIDGE_H

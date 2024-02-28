@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_
-#define PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_
+#ifndef PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H
+#define PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H
 
 #include <climits>
 #include <cstddef>
@@ -261,9 +261,6 @@ public:
     inline ObjectHeader *GetHeapObject() const
     {
         ASSERT_PRINT(IsHeapObject(), "can not convert TaggedValue to HeapObject :" << std::hex << value_);
-        // NOTE(vpukhov): weakref ignored
-        // ASSERT_PRINT((value_ & TAG_WEAK_FILTER) == 0U,
-        //             "can not convert TaggedValue to HeapObject :" << std::hex << value_);
         return reinterpret_cast<ObjectHeader *>(value_ & (~TAG_WEAK_MASK));
     }
 
@@ -419,4 +416,4 @@ inline int32_t JsCastDoubleToInt(double d, size_t bits)
 }
 
 }  // namespace panda::coretypes
-#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H_
+#endif  // PANDA_RUNTIME_INCLUDE_CORETYPES_TAGGED_VALUE_H

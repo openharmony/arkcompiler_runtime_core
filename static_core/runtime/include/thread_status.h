@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_THREAD_STATUS_H_
-#define PANDA_RUNTIME_THREAD_STATUS_H_
+#ifndef PANDA_RUNTIME_THREAD_STATUS_H
+#define PANDA_RUNTIME_THREAD_STATUS_H
 
 namespace panda {
 
@@ -36,4 +36,4 @@ enum class ThreadStatus : uint16_t {
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_THREAD_H_
+#endif  // PANDA_RUNTIME_THREAD_H

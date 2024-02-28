@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_LANGUAGE_CONFIG_H_
-#define PANDA_RUNTIME_LANGUAGE_CONFIG_H_
+#ifndef PANDA_RUNTIME_LANGUAGE_CONFIG_H
+#define PANDA_RUNTIME_LANGUAGE_CONFIG_H
 
 #include "runtime/mem/lock_config_helper.h"
 
@@ -32,4 +32,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_LANGUAGE_CONFIG_H_
+#endif  // PANDA_RUNTIME_LANGUAGE_CONFIG_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_FILE_MANAGER_H_
-#define PANDA_FILE_MANAGER_H_
+#ifndef PANDA_FILE_MANAGER_H
+#define PANDA_FILE_MANAGER_H
 
 #include "libpandafile/file.h"
 #include "runtime/compiler.h"
@@ -35,4 +35,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_FILE_MANAGER_H_
+#endif  // PANDA_FILE_MANAGER_H

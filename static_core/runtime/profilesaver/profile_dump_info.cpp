@@ -77,7 +77,7 @@ static void AddUintToBuffer(PandaVector<uint8_t> *buffer, T value)
  *   1 if the descriptor has more content to read
  */
 // NOLINTNEXTLINE(readability-identifier-naming)
-static int testEOF(int fd)
+static int TestEof(int fd)
 {
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     uint8_t buffer[1];
@@ -349,7 +349,6 @@ bool ProfileDumpInfo::Load(int fd)
     trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
     PandaString error;
     ProfileLoadSatus status = LoadInternal(fd, &error);
-
     if (status == PROFILE_LOAD_SUCCESS) {
         return true;
     }
@@ -393,7 +392,7 @@ ProfileDumpInfo::ProfileLoadSatus ProfileDumpInfo::LoadInternal(int fd, PandaStr
         numberOfLines--;
     }
 
-    int result = testEOF(fd);
+    int result = TestEof(fd);
     if (result == 0) {
         return PROFILE_LOAD_SUCCESS;
     }

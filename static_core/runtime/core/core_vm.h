@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_VM_CORE_CORE_VM_H_
-#define PANDA_RUNTIME_VM_CORE_CORE_VM_H_
+#ifndef PANDA_RUNTIME_VM_CORE_CORE_VM_H
+#define PANDA_RUNTIME_VM_CORE_CORE_VM_H
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/expected.h"
@@ -194,4 +194,4 @@ private:
 }  // namespace core
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_VM_CORE_CORE_VM_H_
+#endif  // PANDA_RUNTIME_VM_CORE_CORE_VM_H

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_EXCEPTIONS_H_
-#define PANDA_RUNTIME_EXCEPTIONS_H_
+#ifndef PANDA_RUNTIME_EXCEPTIONS_H
+#define PANDA_RUNTIME_EXCEPTIONS_H
 
 #include "runtime/include/class-inl.h"
 #include "runtime/include/coretypes/array.h"
@@ -111,4 +111,4 @@ inline void SetExceptionEvent([[maybe_unused]] events::ExceptionType type, [[may
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_EXCEPTIONS_H_
+#endif  // PANDA_RUNTIME_EXCEPTIONS_H

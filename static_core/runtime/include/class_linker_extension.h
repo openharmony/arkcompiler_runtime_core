@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
-#define PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
+#ifndef PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H
+#define PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H
 
 #include "libpandabase/os/mutex.h"
 #include "libpandafile/file.h"
@@ -355,4 +355,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H_
+#endif  // PANDA_RUNTIME_CLASS_LINKER_EXTENSION_H

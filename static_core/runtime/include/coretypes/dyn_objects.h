@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H_
-#define PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H_
+#ifndef PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H
+#define PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H
 
 #include "runtime/include/hclass.h"
 #include "runtime/include/coretypes/array.h"
@@ -72,4 +72,4 @@ public:
 
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H_
+#endif  // PANDA_RUNTIME_CORETYPES_DYNOBJECTS_H

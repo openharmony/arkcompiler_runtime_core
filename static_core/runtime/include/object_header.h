@@ -27,8 +27,8 @@
 // - Marked for GC or not
 // - Monitor functions (get monitor, notify, notify all, wait)
 // - Forwarded or not
-#ifndef PANDA_RUNTIME_OBJECT_HEADER_H_
-#define PANDA_RUNTIME_OBJECT_HEADER_H_
+#ifndef PANDA_RUNTIME_OBJECT_HEADER_H
+#define PANDA_RUNTIME_OBJECT_HEADER_H
 
 #include <atomic>
 #include <ctime>
@@ -334,4 +334,4 @@ static_assert(OBJECT_HEADER_CLASS_OFFSET == panda::ObjectHeader::GetClassOffset(
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_OBJECT_HEADER_H_
+#endif  // PANDA_RUNTIME_OBJECT_HEADER_H

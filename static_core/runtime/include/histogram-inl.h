@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_HISTOGRAM_INL_H_
-#define PANDA_RUNTIME_HISTOGRAM_INL_H_
+#ifndef PANDA_RUNTIME_HISTOGRAM_INL_H
+#define PANDA_RUNTIME_HISTOGRAM_INL_H
 
 #include "histogram.h"
 #include "mem/panda_containers.h"
@@ -94,4 +94,4 @@ void Histogram<Value>::AddValue(const Value &element, size_t number)
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_HISTOGRAM_INL_H_
+#endif  // PANDA_RUNTIME_HISTOGRAM_INL_H

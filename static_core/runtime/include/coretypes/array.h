@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_CORETYPES_ARRAY_H_
-#define PANDA_RUNTIME_CORETYPES_ARRAY_H_
+#ifndef PANDA_RUNTIME_CORETYPES_ARRAY_H
+#define PANDA_RUNTIME_CORETYPES_ARRAY_H
 
 #include <securec.h>
 #include <cstddef>
@@ -231,4 +231,4 @@ static_assert(ARRAY_DATA_OFFSET == panda::coretypes::Array::GetDataOffset());
 #endif
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_
+#endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H

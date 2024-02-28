@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_PROFILE_DUMP_INFO_H_
-#define PANDA_RUNTIME_PROFILE_DUMP_INFO_H_
+#ifndef PANDA_RUNTIME_PROFILE_DUMP_INFO_H
+#define PANDA_RUNTIME_PROFILE_DUMP_INFO_H
 
 #include <map>
 #include <set>
@@ -284,4 +284,4 @@ private:
 
 }  // namespace panda
 
-#endif
+#endif  // PANDA_RUNTIME_PROFILE_DUMP_INFO_H

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_OBJECT_HEADER_INL_H_
-#define PANDA_RUNTIME_OBJECT_HEADER_INL_H_
+#ifndef PANDA_RUNTIME_OBJECT_HEADER_INL_H
+#define PANDA_RUNTIME_OBJECT_HEADER_INL_H
 
 #include "runtime/include/class-inl.h"
 #include "runtime/include/field.h"
@@ -201,4 +201,4 @@ inline T ObjectHeader::GetAndBitwiseXorFieldPrimitive(size_t offset, T value, st
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_OBJECT_HEADER_INL_H_
+#endif  // PANDA_RUNTIME_OBJECT_HEADER_INL_H

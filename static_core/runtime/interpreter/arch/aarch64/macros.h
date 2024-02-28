@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_ARCH_AARCH64_MACROS_H_
-#define PANDA_INTERPRETER_ARCH_AARCH64_MACROS_H_
+#ifndef PANDA_INTERPRETER_ARCH_AARCH64_MACROS_H
+#define PANDA_INTERPRETER_ARCH_AARCH64_MACROS_H
 
 #ifndef __clang_analyzer__
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -24,13 +24,13 @@
 #endif
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DISPATCH(DISPATCH_TABLE, OPCODE)                                             \
-    do {                                                                             \
-        void const *_label;                                                          \
-        asm("ldr %[label], [%[dispatch_table], %w[opcode], uxtw #3]"                 \
-            : [label] "=r"(_label)                                                   \
-            : [dispatch_table] "r"(DISPATCH_TABLE), [opcode] "r"((uint32_t)OPCODE)); \
-        goto *_label;                                                                \
+#define DISPATCH(DISPATCH_TABLE, OPCODE)                                              \
+    do {                                                                              \
+        void const *_label;                                                           \
+        asm("ldr %[label], [%[dispatch_table], %w[opcode], uxtw #3]"                  \
+            : [label] "=r"(_label)                                                    \
+            : [dispatch_table] "r"(DISPATCH_TABLE), [opcode] "r"((uint32_t)(OPCODE)); \
+        goto *_label;                                                                 \
     } while (0)
 
-#endif  // PANDA_INTERPRETER_ARCH_AARCH64_MACROS_H_
+#endif  // PANDA_INTERPRETER_ARCH_AARCH64_MACROS_H

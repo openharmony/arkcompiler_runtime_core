@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_CORE_CORE_ITABLE_BUILDER_H_
-#define PANDA_RUNTIME_CORE_CORE_ITABLE_BUILDER_H_
+#ifndef PANDA_RUNTIME_CORE_CORE_ITABLE_BUILDER_H
+#define PANDA_RUNTIME_CORE_CORE_ITABLE_BUILDER_H
 
 #include "runtime/include/itable_builder.h"
 
@@ -48,4 +48,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_CORE_CORE_ITABLE_BUILDER_H_
+#endif  // PANDA_RUNTIME_CORE_CORE_ITABLE_BUILDER_H

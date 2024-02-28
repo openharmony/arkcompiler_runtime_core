@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_COMPILER_INTERFACE_H_
-#define PANDA_RUNTIME_COMPILER_INTERFACE_H_
+#ifndef PANDA_RUNTIME_COMPILER_INTERFACE_H
+#define PANDA_RUNTIME_COMPILER_INTERFACE_H
 
 #include <cstdint>
 #include <atomic>
@@ -236,4 +236,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_COMPILER_INTERFACE_H_
+#endif  // PANDA_RUNTIME_COMPILER_INTERFACE_H

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_RUNTIME_COMPILER_INTERFACE_INL_H
+#define PANDA_RUNTIME_COMPILER_INTERFACE_INL_H
+
 #include "runtime/include/compiler_interface.h"
 #include "runtime/include/panda_vm.h"
 
@@ -24,3 +27,5 @@ inline CompilerTask::~CompilerTask()
     }
 }
 }  // namespace panda
+
+#endif  // PANDA_RUNTIME_COMPILER_INTERFACE_INL_H

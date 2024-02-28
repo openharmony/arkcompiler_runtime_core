@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_PANDA_VM_H_
-#define PANDA_RUNTIME_PANDA_VM_H_
+#ifndef PANDA_RUNTIME_PANDA_VM_H
+#define PANDA_RUNTIME_PANDA_VM_H
 
 #include "include/coretypes/string.h"
 #include "include/runtime_options.h"
@@ -256,4 +256,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_PANDA_VM_H_
+#endif  // PANDA_RUNTIME_PANDA_VM_H

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_LOCKS_H_
-#define PANDA_RUNTIME_LOCKS_H_
+#ifndef PANDA_RUNTIME_LOCKS_H
+#define PANDA_RUNTIME_LOCKS_H
 
 #include "libpandabase/os/mutex.h"
 
@@ -60,4 +60,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_LOCKS_H_
+#endif  // PANDA_RUNTIME_LOCKS_H

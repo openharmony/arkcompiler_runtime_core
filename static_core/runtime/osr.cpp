@@ -67,7 +67,6 @@ bool OsrEntry(uintptr_t loopHeadBc, const void *osrCode)
     LOG(DEBUG, INTEROP) << "OSR entry in method '" << stack.GetMethod()->GetFullName() << "': " << osrCode;
     CodeInfo codeInfo(CodeInfo::GetCodeOriginFromEntryPoint(osrCode));
     auto stackmap = codeInfo.FindOsrStackMap(loopHeadBc);
-
     if (!stackmap.IsValid()) {
 #if EVENT_OSR_ENTRY_ENABLED
         WriteOsrEventError(frame, stack.GetPreviousFrameKind(), loopHeadBc);

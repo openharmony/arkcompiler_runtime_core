@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
-#define PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
+#ifndef PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H
+#define PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H
 
 #include "runtime/interpreter/state.h"
 #include "runtime/jit/profiling_data.h"
@@ -141,4 +141,4 @@ private:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H_
+#endif  // PANDA_INTERPRETER_INSTRUCTION_HANDLER_STATE_H

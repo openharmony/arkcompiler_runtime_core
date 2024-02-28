@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_DPROFILER_TRACE_H_
-#define PANDA_RUNTIME_DPROFILER_TRACE_H_
+#ifndef PANDA_RUNTIME_DPROFILER_TRACE_H
+#define PANDA_RUNTIME_DPROFILER_TRACE_H
 
 #include "macros.h"
 #include "include/mem/panda_containers.h"
@@ -155,4 +155,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_DPROFILER_TRACE_H_
+#endif  // PANDA_RUNTIME_DPROFILER_TRACE_H

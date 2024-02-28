@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_COMPILER_QUEUE_H_
-#define PANDA_RUNTIME_COMPILER_QUEUE_H_
+#ifndef PANDA_RUNTIME_COMPILER_QUEUE_H
+#define PANDA_RUNTIME_COMPILER_QUEUE_H
 
 #include "runtime/include/compiler_interface-inl.h"
 #include "runtime/include/method-inl.h"
@@ -39,4 +39,4 @@ protected:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_COMPILER_QUEUE_H_
+#endif  // PANDA_RUNTIME_COMPILER_QUEUE_H

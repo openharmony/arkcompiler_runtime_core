@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_MONITOR_POOL_H_
-#define PANDA_RUNTIME_MONITOR_POOL_H_
+#ifndef PANDA_RUNTIME_MONITOR_POOL_H
+#define PANDA_RUNTIME_MONITOR_POOL_H
 
 #include "libpandabase/os/mutex.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -110,4 +110,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_MONITOR_POOL_H_
+#endif  // PANDA_RUNTIME_MONITOR_POOL_H

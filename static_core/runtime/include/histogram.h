@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_HISTOGRAM_H_
-#define PANDA_RUNTIME_HISTOGRAM_H_
+#ifndef PANDA_RUNTIME_HISTOGRAM_H
+#define PANDA_RUNTIME_HISTOGRAM_H
 
 #include "libpandabase/utils/type_converter.h"
 #include "libpandabase/macros.h"
@@ -153,4 +153,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_HISTOGRAM_H_
+#endif  // PANDA_RUNTIME_HISTOGRAM_H
