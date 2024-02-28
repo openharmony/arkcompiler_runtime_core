@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,16 @@ Amd64CallingConvention::Amd64CallingConvention(ArenaAllocator *allocator, Encode
                                                CallConvMode mode)
     : CallingConvention(allocator, enc, descr, mode)
 {
+}
+
+constexpr auto Amd64CallingConvention::GetTarget()
+{
+    return ark::compiler::Target(Arch::X86_64);
+}
+
+bool Amd64CallingConvention::IsValid() const
+{
+    return true;
 }
 
 ParameterInfo *Amd64CallingConvention::GetParameterInfo(uint8_t regsOffset)
@@ -211,4 +221,20 @@ void Amd64CallingConvention::GenerateEpilogue([[maybe_unused]] const FrameInfo &
     SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
     GetMasm()->ret();
 }
+
+void Amd64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo)
+{
+    GeneratePrologue(frameInfo);
+}
+
+void Amd64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
+{
+    GenerateEpilogue(frameInfo, postJob);
+}
+
+asmjit::x86::Assembler *Amd64CallingConvention::GetMasm()
+{
+    return (static_cast<Amd64Encoder *>(GetEncoder()))->GetMasm();
+}
+
 }  // namespace ark::compiler::amd64

@@ -368,7 +368,7 @@ public:
         return class_ == other.class_;
     }
 
-    // NOLINTNEXTLINE(google-explicit-constructor)
+    // NOLINTNEXTLINE(*-explicit-constructor)
     operator bool() const
     {
         return class_ != 0;

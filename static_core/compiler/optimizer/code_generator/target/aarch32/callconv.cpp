@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,10 @@ namespace ark::compiler::aarch32 {
 using vixl::aarch32::RegisterList;
 using vixl::aarch32::SRegister;
 using vixl::aarch32::SRegisterList;
+
+constexpr size_t MAX_SCALAR_PARAM_ID = 3;                           // r0-r3
+[[maybe_unused]] constexpr size_t MAX_VECTOR_SINGLE_PARAM_ID = 15;  // s0-s15
+[[maybe_unused]] constexpr size_t MAX_VECTOR_DOUBLE_PARAM_ID = 7;   // d0-d7
 
 Aarch32CallingConvention::Aarch32CallingConvention(ArenaAllocator *allocator, Encoder *enc, RegistersDescription *descr,
                                                    CallConvMode mode)
@@ -101,6 +105,15 @@ uint8_t Aarch32CallingConvention::PushPopVRegs(VRegMask vregs, bool isPush = tru
         }
     }
     return realOffset;
+}
+
+vixl::aarch32::MacroAssembler *Aarch32CallingConvention::GetMasm()
+{
+    return (static_cast<Aarch32Encoder *>(GetEncoder()))->GetMasm();
+}
+constexpr auto Aarch32CallingConvention::GetTarget()
+{
+    return ark::compiler::Target(Arch::AARCH32);
 }
 
 uint8_t Aarch32CallingConvention::PushRegs(RegMask regs, VRegMask vregs, bool isCallee)
@@ -246,6 +259,20 @@ Location Aarch32ParameterInfo::GetNextLocation(DataType::Type type)
         return Location::MakeRegister(reg.GetId(), type);
     }
     return Location::MakeStackArgument(std::get<uint8_t>(res));
+}
+
+bool Aarch32CallingConvention::IsValid() const
+{
+    return true;
+}
+
+void Aarch32CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo)
+{
+    GeneratePrologue(frameInfo);
+}
+void Aarch32CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
+{
+    GenerateEpilogue(frameInfo, postJob);
 }
 
 void Aarch32CallingConvention::GeneratePrologue([[maybe_unused]] const FrameInfo &frameInfo)

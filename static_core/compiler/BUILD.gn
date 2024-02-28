@@ -80,6 +80,7 @@ libarkcompiler_sources = [
   "optimizer/analysis/reg_alloc_verifier.cpp",
   "optimizer/analysis/rpo.cpp",
   "optimizer/analysis/types_analysis.cpp",
+  "optimizer/code_generator/encode.cpp",
   "optimizer/ir/analysis.cpp",
   "optimizer/ir/aot_data.cpp",
   "optimizer/ir/basicblock.cpp",

@@ -150,4 +150,4 @@ void Aarch64Encoder::EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc) {
 [slow_path.h](../optimizer/code_generator/slow_path.h)  
 
 Tests:  
-[codegen_test.cpp](../tests/codegen_test.cpp), [inst_generator_test.cpp](../tests/inst_generator_test.cpp) - test with generation each instruction.
+[codegen_test_1.cpp](../tests/codegen/codegen_test_1.cpp), [codegen_test_2.cpp](../tests/codegen/codegen_test_2.cpp), [inst_generator_test.cpp](../tests/inst_generator_test.cpp) - test with generation each instruction.

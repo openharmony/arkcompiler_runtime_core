@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,21 +61,21 @@ void Disassembly::Init()
     if (g_options.IsCompilerDisasmDumpStdout()) {
         stream_.reset(&std::cout);
     } else if (g_options.IsCompilerDisasmDumpSingleFile()) {
-        auto stm = new std::ofstream;
-        if (stm == nullptr) {
+        auto os = new std::ofstream;
+        if (os == nullptr) {
             UNREACHABLE();
         }
         static std::once_flag flag;
         auto fileName = g_options.GetCompilerDisasmDumpFileName();
         std::call_once(flag, [&fileName]() { std::remove(fileName.c_str()); });
-        stm->open(fileName, std::ios_base::app);
-        if (!stm->is_open()) {
+        os->open(fileName, std::ios_base::app);
+        if (!os->is_open()) {
             LOG(FATAL, COMPILER) << "Cannot open 'disasm.txt'";
         }
-        stream_.reset(stm);
+        stream_.reset(os);
     } else {
-        auto stm = new std::ofstream;
-        if (stm == nullptr) {
+        auto os = new std::ofstream;
+        if (os == nullptr) {
             UNREACHABLE();
         }
         std::stringstream ss;
@@ -83,11 +83,11 @@ void Disassembly::Init()
         auto execNum = graph->GetPassManager()->GetExecutionCounter();
         ss << "disasm_" << execNum << '_' << codegen_->GetRuntime()->GetClassNameFromMethod(graph->GetMethod()) << '_'
            << codegen_->GetRuntime()->GetMethodName(graph->GetMethod()) << (graph->IsOsrMode() ? "_osr" : "") << ".txt";
-        stm->open(ss.str());
-        if (!stm->is_open()) {
+        os->open(ss.str());
+        if (!os->is_open()) {
             LOG(FATAL, COMPILER) << "Cannot open '" << ss.str() << "'";
         }
-        stream_.reset(stm);
+        stream_.reset(os);
     }
 }
 
@@ -106,7 +106,7 @@ void Disassembly::IncreaseDepth()
 
 void Disassembly::PrintMethodEntry(const Codegen *codegen)
 {
-    static constexpr const char *INDENT = "  ";
+    constexpr const char *INDENT = "  ";
     auto graph = codegen->GetGraph();
     {
         ItemAppender item(this);

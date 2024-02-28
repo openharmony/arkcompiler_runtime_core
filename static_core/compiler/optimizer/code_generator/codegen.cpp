@@ -18,6 +18,7 @@ Codegen Hi-Level implementation
 */
 #include "operands.h"
 #include "codegen.h"
+#include "encode_visitor.h"
 #include "compiler_options.h"
 #include "lib_call_inst.h"
 #include "relocations.h"
@@ -31,6 +32,7 @@ Codegen Hi-Level implementation
 #include "events/events.h"
 #include "libpandabase/utils/tsan_interface.h"
 #include "libpandabase/utils/utils.h"
+#include <algorithm>
 #include <iomanip>
 
 namespace ark::compiler {
@@ -146,7 +148,7 @@ Codegen::Codegen(Graph *graph)
       codeBuilder_(allocator_->New<CodeInfoBuilder>(graph->GetArch(), allocator_)),
       slowPaths_(graph->GetLocalAllocator()->Adapter()),
       slowPathsMap_(graph->GetLocalAllocator()->Adapter()),
-      frame_layout_(CFrameLayout(graph->GetArch(), graph->GetStackSlotsCount())),
+      frameLayout_(CFrameLayout(graph->GetArch(), graph->GetStackSlotsCount())),
       osrEntries_(graph->GetLocalAllocator()->Adapter()),
       vregIndices_(GetAllocator()->Adapter()),
       runtime_(graph->GetRuntime()),
@@ -255,6 +257,27 @@ void Codegen::Convert(ArenaVector<Reg> *regsUsage, const ArenaVector<bool> *mask
             regsUsage->emplace_back(i, typeInfo);
         }
     }
+}
+
+void Codegen::IntrinsicSlowPathEntry([[maybe_unused]] IntrinsicInst *inst)
+{
+    GetEncoder()->SetFalseResult();
+}
+void Codegen::IntrinsicCallRuntimeSaveAll([[maybe_unused]] IntrinsicInst *inst)
+{
+    GetEncoder()->SetFalseResult();
+}
+void Codegen::IntrinsicSaveRegisters([[maybe_unused]] IntrinsicInst *inst)
+{
+    GetEncoder()->SetFalseResult();
+}
+void Codegen::IntrinsicRestoreRegisters([[maybe_unused]] IntrinsicInst *inst)
+{
+    GetEncoder()->SetFalseResult();
+}
+void Codegen::IntrinsicTailCall([[maybe_unused]] IntrinsicInst *inst)
+{
+    GetEncoder()->SetFalseResult();
 }
 
 #ifdef INTRINSIC_SLOW_PATH_ENTRY_ENABLED
@@ -480,7 +503,7 @@ void Codegen::EndMethod()
 // encodes the code info and sets it to the graph.
 bool Codegen::CopyToCodeCache()
 {
-    auto codeEntry = reinterpret_cast<void *>(GetEncoder()->GetLabelAddress(GetLabelEntry()));
+    auto codeEntry = reinterpret_cast<char *>(GetEncoder()->GetLabelAddress(GetLabelEntry()));
     auto codeSize = GetEncoder()->GetCursorOffset();
     bool saveAllCalleeRegisters = !GetGraph()->GetMethodProperties().GetCompactPrologueAllowed();
 
@@ -488,7 +511,7 @@ bool Codegen::CopyToCodeCache()
     if (code == nullptr) {
         return false;
     }
-    memcpy_s(code, codeSize, codeEntry, codeSize);
+    std::copy_n(codeEntry, codeSize, code);
     GetGraph()->SetCode(EncodeDataType(code, codeSize));
 
     RegMask calleeRegs;
@@ -1305,7 +1328,7 @@ void Codegen::CreateAlignmentValue(Reg alignmentReg, Reg tmpReg, size_t alignmen
     GetEncoder()->EncodeMov(alignmentReg, tmpReg);
 }
 
-inline Reg GetObjectReg(Codegen *codegen, Inst *inst)
+Reg GetObjectReg(Codegen *codegen, Inst *inst)
 {
     ASSERT(inst->IsCall() || inst->GetOpcode() == Opcode::ResolveVirtual);
     auto location = inst->GetLocation(0);
@@ -1625,7 +1648,7 @@ void Codegen::EmitCallVirtual(CallInst *call)
     FinalizeCall(call);
 }
 
-[[maybe_unused]] bool Codegen::EnsureParamsFitIn32Bit(std::initializer_list<std::variant<Reg, TypedImm>> params)
+bool Codegen::EnsureParamsFitIn32Bit(std::initializer_list<std::variant<Reg, TypedImm>> params)
 {
     for (auto &param : params) {
         if (std::holds_alternative<Reg>(param)) {
@@ -2387,37 +2410,29 @@ void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UnaryOperation(opc)                                                       \
-    void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
-    {                                                                             \
-        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);               \
-        auto type = inst->GetType();                                              \
-        auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);   \
-        auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type); \
-        enc->GetEncoder()->Encode##opc(dst, src0);                                \
+#define UNARY_OPERATION(opc)                                              \
+    void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)     \
+    {                                                                     \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);       \
+        auto [dst, src0] = enc->GetCodegen()->ConvertRegisters<1U>(inst); \
+        enc->GetEncoder()->Encode##opc(dst, src0);                        \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperation(opc)                                                      \
-    void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
-    {                                                                             \
-        auto type = inst->GetType();                                              \
-        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);               \
-        auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);   \
-        auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type); \
-        auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type); \
-        enc->GetEncoder()->Encode##opc(dst, src0, src1);                          \
+#define BINARY_OPERATION(opc)                                                   \
+    void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)           \
+    {                                                                           \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);             \
+        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst); \
+        enc->GetEncoder()->Encode##opc(dst, src0, src1);                        \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryShiftedRegisterOperation(opc)                                                     \
+#define BINARY_SHIFTED_REGISTER_OPERATION(opc)                                                  \
     void EncodeVisitor::Visit##opc##SR(GraphVisitor *visitor, Inst *inst)                       \
     {                                                                                           \
-        auto type = inst->GetType();                                                            \
         EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                             \
-        auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                 \
-        auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);               \
-        auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);               \
+        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);                 \
         auto imm_shift_inst = static_cast<BinaryShiftedRegisterOperation *>(inst);              \
         auto imm_value = static_cast<uint32_t>(imm_shift_inst->GetImm()) & (dst.GetSize() - 1); \
         auto shift = Shift(src1, imm_shift_inst->GetShiftType(), imm_value);                    \
@@ -2425,45 +2440,48 @@ void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src)
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(OPCODE, TYPE) TYPE(OPCODE)
+#define INST_DEF(OPCODE, MACRO) MACRO(OPCODE)
 
 ENCODE_MATH_LIST(INST_DEF)
 ENCODE_INST_WITH_SHIFTED_OPERAND(INST_DEF)
 
-#undef UnaryOperation
-#undef BinaryOperation
-#undef BinaryShiftedRegisterOperation
+#undef UNARY_OPERATION
+#undef BINARY_OPERATION
+#undef BINARY_SHIFTED_REGISTER_OPERATION
 #undef INST_DEF
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryImmOperation(opc)                                                   \
-    void EncodeVisitor::Visit##opc##I(GraphVisitor *visitor, Inst *inst)          \
-    {                                                                             \
-        auto binop = inst->CastTo##opc##I();                                      \
-        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);               \
-        auto type = inst->GetType();                                              \
-        auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);   \
-        auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type); \
-        enc->GetEncoder()->Encode##opc(dst, src0, Imm(binop->GetImm()));          \
+#define BINARY_IMM_OPERATION(opc)                                         \
+    void EncodeVisitor::Visit##opc##I(GraphVisitor *visitor, Inst *inst)  \
+    {                                                                     \
+        auto binop = inst->CastTo##opc##I();                              \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);       \
+        auto [dst, src0] = enc->GetCodegen()->ConvertRegisters<1U>(inst); \
+        enc->GetEncoder()->Encode##opc(dst, src0, Imm(binop->GetImm()));  \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BINARRY_IMM_OPS(DEF) DEF(Add) DEF(Sub) DEF(Shl) DEF(AShr) DEF(And) DEF(Or) DEF(Xor)
+#define BINARRY_IMM_OPS(DEF) \
+    DEF(Add)                 \
+    DEF(Sub)                 \
+    DEF(Shl)                 \
+    DEF(AShr)                \
+    DEF(And)                 \
+    DEF(Or)                  \
+    DEF(Xor)
 
-BINARRY_IMM_OPS(BinaryImmOperation)
+BINARRY_IMM_OPS(BINARY_IMM_OPERATION)
 
 #undef BINARRY_IMM_OPS
-#undef BinaryImmOperation
+#undef BINARY_IMM_OPERATION
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinarySignUnsignOperation(opc)                                            \
+#define BINARY_SIGN_UNSIGN_OPERATION(opc)                                         \
     void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
     {                                                                             \
         auto type = inst->GetType();                                              \
         EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);               \
-        auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);   \
-        auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type); \
-        auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type); \
+        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);   \
         auto arch = enc->GetCodegen()->GetArch();                                 \
         if (!Codegen::InstEncodedWithLibCall(inst, arch)) {                       \
             enc->GetEncoder()->Encode##opc(dst, IsTypeSigned(type), src0, src1);  \
@@ -2482,9 +2500,12 @@ BINARRY_IMM_OPS(BinaryImmOperation)
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define SIGN_UNSIGN_OPS(DEF) DEF(Div) DEF(Min) DEF(Max)
+#define SIGN_UNSIGN_OPS(DEF) \
+    DEF(Div)                 \
+    DEF(Min)                 \
+    DEF(Max)
 
-SIGN_UNSIGN_OPS(BinarySignUnsignOperation)
+SIGN_UNSIGN_OPS(BINARY_SIGN_UNSIGN_OPERATION)
 
 #undef SIGN_UNSIGN_OPS
 #undef BINARY_SIGN_UNSIGN_OPERATION
@@ -2493,9 +2514,7 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
 {
     auto type = inst->GetType();
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
     auto arch = enc->GetCodegen()->GetArch();
     if (!Codegen::InstEncodedWithLibCall(inst, arch)) {
         enc->GetEncoder()->EncodeMod(dst, IsTypeSigned(type), src0, src1);
@@ -2545,82 +2564,56 @@ void EncodeVisitor::VisitShrI(GraphVisitor *visitor, Inst *inst)
 {
     auto binop = inst->CastToShrI();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto type = inst->GetType();
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
+    auto [dst, src0] = enc->GetCodegen()->ConvertRegisters<1U>(inst);
     enc->GetEncoder()->EncodeShr(dst, src0, Imm(binop->GetImm()));
 }
 
 void EncodeVisitor::VisitMAdd(GraphVisitor *visitor, Inst *inst)
 {
-    auto type = inst->GetType();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
-    constexpr int64_t IMM_2 = 2;
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), type);
+    auto [dst, src0, src1, src2] = enc->GetCodegen()->ConvertRegisters<3U>(inst);
     enc->GetEncoder()->EncodeMAdd(dst, src0, src1, src2);
 }
 
 void EncodeVisitor::VisitMSub(GraphVisitor *visitor, Inst *inst)
 {
-    auto type = inst->GetType();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
-    constexpr int64_t IMM_2 = 2;
-    auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), type);
+    auto [dst, src0, src1, src2] = enc->GetCodegen()->ConvertRegisters<3U>(inst);
     enc->GetEncoder()->EncodeMSub(dst, src0, src1, src2);
 }
 
 void EncodeVisitor::VisitMNeg(GraphVisitor *visitor, Inst *inst)
 {
-    auto type = inst->GetType();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
     enc->GetEncoder()->EncodeMNeg(dst, src0, src1);
 }
 
 void EncodeVisitor::VisitOrNot(GraphVisitor *visitor, Inst *inst)
 {
-    auto type = inst->GetType();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
     enc->GetEncoder()->EncodeOrNot(dst, src0, src1);
 }
 
 void EncodeVisitor::VisitAndNot(GraphVisitor *visitor, Inst *inst)
 {
-    auto type = inst->GetType();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
     enc->GetEncoder()->EncodeAndNot(dst, src0, src1);
 }
 
 void EncodeVisitor::VisitXorNot(GraphVisitor *visitor, Inst *inst)
 {
-    auto type = inst->GetType();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
     enc->GetEncoder()->EncodeXorNot(dst, src0, src1);
 }
 
 void EncodeVisitor::VisitNegSR(GraphVisitor *visitor, Inst *inst)
 {
-    auto type = inst->GetType();
     auto enc = static_cast<EncodeVisitor *>(visitor);
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);
-    auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);
+    auto [dst, src] = enc->GetCodegen()->ConvertRegisters<1U>(inst);
     auto immShiftInst = static_cast<UnaryShiftedRegisterOperation *>(inst);
     enc->GetEncoder()->EncodeNeg(dst, Shift(src, immShiftInst->GetShiftType(), immShiftInst->GetImm()));
 }
@@ -3149,7 +3142,7 @@ void EncodeVisitor::VisitLoadCompressedStringChar(GraphVisitor *visitor, Inst *i
     if (mask != 1) {
         UNREACHABLE();  // mask is hardcoded in JCL, but verify it just in case it's changed
     }
-    enc->GetEncoder()->EncodeCompressedStringCharAt(dst, src0, src1, src2, tmp, offset, shift);
+    enc->GetEncoder()->EncodeCompressedStringCharAt({dst, src0, src1, src2, tmp, offset, shift});
 }
 
 void EncodeVisitor::VisitLenArray(GraphVisitor *visitor, Inst *inst)
@@ -4862,14 +4855,14 @@ void EncodeVisitor::VisitLoadCompressedStringCharI(GraphVisitor *visitor, Inst *
     auto offset = runtime->GetStringDataOffset(enc->GetArch());
     auto encoder = enc->GetEncoder();
     auto arch = encoder->GetArch();
-    int32_t shift = DataType::ShiftByType(type, arch);
-    auto index = inst->CastToLoadCompressedStringCharI()->GetImm();
+    uint8_t shift = DataType::ShiftByType(type, arch);
+    uint32_t index = inst->CastToLoadCompressedStringCharI()->GetImm();
     ASSERT(encoder->CanEncodeCompressedStringCharAt());
     auto mask = runtime->GetStringCompressionMask();
     if (mask != 1) {
         UNREACHABLE();  // mask is hardcoded in JCL, but verify it just in case it's changed
     }
-    enc->GetEncoder()->EncodeCompressedStringCharAtI(dst, src0, src1, offset, index, shift);
+    enc->GetEncoder()->EncodeCompressedStringCharAtI({dst, src0, src1, offset, index, shift});
 }
 
 void EncodeVisitor::VisitMultiArray(GraphVisitor *visitor, Inst *inst)
@@ -5043,41 +5036,35 @@ void EncodeVisitor::VisitSafePoint(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitSelect(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto dstType = inst->GetType();
     auto cmpType = inst->CastToSelect()->GetOperandsType();
 
     constexpr int32_t IMM_2 = 2;
     constexpr int32_t IMM_3 = 3;
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dstType);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), dstType);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), dstType);
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
     auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
     auto src3 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_3), cmpType);
     auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelect()->GetCc());
     if (IsTestCc(cc)) {
-        enc->GetEncoder()->EncodeSelectTest(dst, src0, src1, src2, src3, cc);
+        enc->GetEncoder()->EncodeSelectTest({dst, src0, src1, src2, src3, cc});
     } else {
-        enc->GetEncoder()->EncodeSelect(dst, src0, src1, src2, src3, cc);
+        enc->GetEncoder()->EncodeSelect({dst, src0, src1, src2, src3, cc});
     }
 }
 
 void EncodeVisitor::VisitSelectImm(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
-    auto dstType = inst->GetType();
     auto cmpType = inst->CastToSelectImm()->GetOperandsType();
 
-    auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), dstType);
-    auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), dstType);
-    auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), dstType);
     constexpr int32_t IMM_2 = 2;
+    auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);
     auto src2 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(IMM_2), cmpType);
     auto imm = Imm(inst->CastToSelectImm()->GetImm());
     auto cc = enc->GetCodegen()->ConvertCc(inst->CastToSelectImm()->GetCc());
     if (IsTestCc(cc)) {
-        enc->GetEncoder()->EncodeSelectTest(dst, src0, src1, src2, imm, cc);
+        enc->GetEncoder()->EncodeSelectTest({dst, src0, src1, src2, imm, cc});
     } else {
-        enc->GetEncoder()->EncodeSelect(dst, src0, src1, src2, imm, cc);
+        enc->GetEncoder()->EncodeSelect({dst, src0, src1, src2, imm, cc});
     }
 }
 
@@ -5387,8 +5374,7 @@ void EncodeVisitor::VisitIsMustDeoptimize(GraphVisitor *visitor, Inst *inst)
 void EncodeVisitor::VisitGetInstanceClass(GraphVisitor *visitor, Inst *inst)
 {
     auto *codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
-    auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
-    auto objReg = codegen->ConvertRegister(inst->GetSrcReg(0), inst->GetType());
+    auto [dst, objReg] = codegen->ConvertRegisters<1U>(inst);
     ASSERT(objReg.IsValid());
     codegen->LoadClassFromObject(dst, objReg);
 }

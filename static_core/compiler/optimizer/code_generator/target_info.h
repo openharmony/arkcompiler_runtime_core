@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ constexpr size_t ConvertRegNumberX86(size_t regId)
     REG(31)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFINE_REG(name, reg) static constexpr uint8_t name = reg
+#define DEFINE_REG(name, reg) static constexpr uint8_t name = (reg)
 
 struct ArchCallingConventionX8664 {
     // Following registers are swapped (see comment above for ConvertRegNumberX86):
@@ -484,24 +484,24 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define VERIFY_GETTER(name)                                                    \
     static_assert(Target(Arch::X86_64).name() == Target(Arch::X86_64).name()); \
-    static_assert(Target(Arch::AARCH64).name() == Target(Arch::AARCH64).name());
-VERIFY_GETTER(WordSize)
-VERIFY_GETTER(GetReturnRegId)
-VERIFY_GETTER(GetReturnFpRegId)
-VERIFY_GETTER(GetStackReg)
-VERIFY_GETTER(GetFrameReg)
-VERIFY_GETTER(GetLinkReg)
-VERIFY_GETTER(SupportLinkReg)
-VERIFY_GETTER(GetZeroReg)
-VERIFY_GETTER(SupportZeroReg)
-VERIFY_GETTER(GetTempRegsMask)
-VERIFY_GETTER(GetTempVRegsMask)
-VERIFY_GETTER(GetGeneralRegsMask)
-VERIFY_GETTER(GetAvailableRegsMask)
-VERIFY_GETTER(GetAvailableVRegsMask)
-VERIFY_GETTER(GetParamRegsCount)
-VERIFY_GETTER(GetParamRegsMask)
-VERIFY_GETTER(GetSpAlignment)
+    static_assert(Target(Arch::AARCH64).name() == Target(Arch::AARCH64).name())
+VERIFY_GETTER(WordSize);
+VERIFY_GETTER(GetReturnRegId);
+VERIFY_GETTER(GetReturnFpRegId);
+VERIFY_GETTER(GetStackReg);
+VERIFY_GETTER(GetFrameReg);
+VERIFY_GETTER(GetLinkReg);
+VERIFY_GETTER(SupportLinkReg);
+VERIFY_GETTER(GetZeroReg);
+VERIFY_GETTER(SupportZeroReg);
+VERIFY_GETTER(GetTempRegsMask);
+VERIFY_GETTER(GetTempVRegsMask);
+VERIFY_GETTER(GetGeneralRegsMask);
+VERIFY_GETTER(GetAvailableRegsMask);
+VERIFY_GETTER(GetAvailableVRegsMask);
+VERIFY_GETTER(GetParamRegsCount);
+VERIFY_GETTER(GetParamRegsMask);
+VERIFY_GETTER(GetSpAlignment);
 static_assert(Target(Arch::X86_64).GetParamReg(0) == Target(Arch::X86_64).GetParamReg(0));
 static_assert(Target(Arch::AARCH64).GetParamReg(0) == Target(Arch::AARCH64).GetParamReg(0));
 

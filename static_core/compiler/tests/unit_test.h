@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -308,7 +308,6 @@ class PandaRuntimeTest : public ::testing::Test, public PandaRuntimeInterface {
 public:
     PandaRuntimeTest();
     ~PandaRuntimeTest() override;
-
     NO_MOVE_SEMANTIC(PandaRuntimeTest);
     NO_COPY_SEMANTIC(PandaRuntimeTest);
 
@@ -392,12 +391,10 @@ public:
         Logger::EnableComponent(Logger::Component::COMPILER);
         Logger::SetLevel(level);
     }
-
     const char *GetExecPath() const
     {
         return execPath_;
     }
-
     static RuntimeInterface *GetDefaultRuntime();
 
 protected:
@@ -462,6 +459,41 @@ struct TmpFile {
 private:
     const char *fileName_ {nullptr};
 };
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define TEST_GRAPH(ns, testName, ...)                                                 \
+    namespace ns {                                                                    \
+    class testName {                                                                  \
+    public:                                                                           \
+        template <typename... Args>                                                   \
+        static void Create(IrConstructor *builder, Args &&...args)                    \
+        {                                                                             \
+            testName(builder, std::forward<Args>(args)...);                           \
+        }                                                                             \
+                                                                                      \
+    private:                                                                          \
+        template <typename... Args>                                                   \
+        explicit testName(IrConstructor *builder, Args &&...args) : builder_(builder) \
+        {                                                                             \
+            BuildGraph(std::forward<Args>(args)...);                                  \
+        }                                                                             \
+        void BuildGraph(__VA_ARGS__);                                                 \
+                                                                                      \
+        auto GetBuilder()                                                             \
+        {                                                                             \
+            return builder_;                                                          \
+        }                                                                             \
+                                                                                      \
+    private:                                                                          \
+        IrConstructor *builder_ {};                                                   \
+    };                                                                                \
+    }                                                                                 \
+    void ns::testName::BuildGraph(__VA_ARGS__)
+
+#define CREATE(...) Create(builder_, __VA_ARGS__)
+#define SRC_GRAPH(testName, ...) TEST_GRAPH(src_graph, testName, __VA_ARGS__)
+#define OUT_GRAPH(testName, ...) TEST_GRAPH(out_graph, testName, __VA_ARGS__)
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
 }  // namespace ark::compiler
 
 #endif  // COMPILER_TESTS_UNIT_TEST_H
