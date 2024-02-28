@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_HELPERS_H_
-#define LIBPANDAFILE_HELPERS_H_
+#ifndef LIBPANDAFILE_HELPERS_H
+#define LIBPANDAFILE_HELPERS_H
 
 #include "macros.h"
 #include "utils/bit_helpers.h"
@@ -188,4 +188,4 @@ inline bool EnumerateTaggedValuesWithEarlyStop(Span<const uint8_t> sp, E tag, Ca
 
 }  // namespace panda::panda_file::helpers
 
-#endif  // LIBPANDAFILE_HELPERS_H_
+#endif  // LIBPANDAFILE_HELPERS_H

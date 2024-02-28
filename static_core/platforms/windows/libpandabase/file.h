@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_WINDOWS_FILE_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_WINDOWS_FILE_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_WINDOWS_FILE_H
+#define PANDA_LIBPANDABASE_PBASE_OS_WINDOWS_FILE_H
 
 #include "os/error.h"
 #include "utils/expected.h"

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_
-#define LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR_
+#ifndef LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR
+#define LIBPANDAFILE_METHOD_HANDLE_DATA_ACCESSOR
 
 #include "file.h"
 #include "file_items.h"

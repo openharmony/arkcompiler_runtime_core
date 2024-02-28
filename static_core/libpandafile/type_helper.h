@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef LIBPANDAFILE_TYPE_HELPER_H_
-#define LIBPANDAFILE_TYPE_HELPER_H_
+#ifndef LIBPANDAFILE_TYPE_HELPER_H
+#define LIBPANDAFILE_TYPE_HELPER_H
 
 #include "file_items.h"
 
@@ -43,4 +43,4 @@ inline bool IsDummyClassName(const std::string &name)
 }
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_TYPE_HELPER_H_
+#endif  // LIBPANDAFILE_TYPE_HELPER_H

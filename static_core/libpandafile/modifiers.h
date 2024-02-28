@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_MODIFIERS_H_
-#define LIBPANDAFILE_MODIFIERS_H_
+#ifndef LIBPANDAFILE_MODIFIERS_H
+#define LIBPANDAFILE_MODIFIERS_H
 
 #include "utils/bit_utils.h"
 

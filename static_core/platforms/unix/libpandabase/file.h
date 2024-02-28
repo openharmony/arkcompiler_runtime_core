@@ -149,7 +149,6 @@ public:
 #endif
 
         std::string::size_type pos = std::string(buffer.data()).find_last_of(File::GetPathDelim());
-
         return (pos != std::string::npos) ? std::string(buffer.data()).substr(0, pos) : std::string("");
     }
 

@@ -97,7 +97,6 @@ TEST(ItemContainer, TestFileFormatVersionTooOld)
         auto writer = FileWriter(fileName);
 
         File::Header header {};
-        memset(&header, 0, sizeof(header));
         header.magic = File::MAGIC;
 
         auto old = std::array<uint8_t, File::VERSION_SIZE>(MIN_VERSION);
@@ -122,7 +121,6 @@ TEST(ItemContainer, TestFileFormatVersionTooNew)
         auto writer = FileWriter(fileName);
 
         File::Header header {};
-        memset(&header, 0, sizeof(header));
         header.magic = File::MAGIC;
 
         auto newArr = std::array<uint8_t, File::VERSION_SIZE>(VERSION);
@@ -147,7 +145,6 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         auto writer = FileWriter(fileName);
 
         File::Header header {};
-        memset(&header, 0, sizeof(header));
         header.magic = File::MAGIC;
         header.version = {0, 0, 0, 5};
         header.fileSize = sizeof(File::Header);

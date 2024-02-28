@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
-#define LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
+#ifndef LIBPANDAFILE_FILE_ITEM_CONTAINER_H
+#define LIBPANDAFILE_FILE_ITEM_CONTAINER_H
 
 #include "file_items.h"
 #include "file_writer.h"
@@ -283,13 +283,11 @@ private:
             bool operator()(IndexedItem *item1, IndexedItem *item2) const noexcept
             {
                 auto indexType = item1->GetIndexType();
-
                 if (indexType == IndexType::CLASS) {
                     auto typeItem1 = static_cast<TypeItem *>(item1);
                     auto typeItem2 = static_cast<TypeItem *>(item2);
                     auto typeId1 = static_cast<size_t>(typeItem1->GetType().GetId());
                     auto typeId2 = static_cast<size_t>(typeItem2->GetType().GetId());
-
                     if (typeId1 != typeId2) {
                         return typeId1 < typeId2;
                     }
@@ -298,7 +296,6 @@ private:
                 if (indexType == IndexType::LINE_NUMBER_PROG) {
                     auto refCount1 = item1->GetRefCount();
                     auto refCount2 = item2->GetRefCount();
-
                     if (refCount1 != refCount2) {
                         return refCount1 > refCount2;
                     }
@@ -587,4 +584,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_FILE_ITEM_CONTAINER_H_
+#endif  // LIBPANDAFILE_FILE_ITEM_CONTAINER_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_LINE_NUMBER_PROGRAM_H
-#define LIBPANDAFILE_LINE_NUMBER_PROGRAM_H
+#ifndef LIBPANDAFILE_LINE_NUMBER_PROGRAMH
+#define LIBPANDAFILE_LINE_NUMBER_PROGRAMH
 
 #include "file-inl.h"
 #include "file_items.h"

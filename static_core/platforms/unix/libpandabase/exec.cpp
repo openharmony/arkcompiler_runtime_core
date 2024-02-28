@@ -27,7 +27,6 @@ Expected<int, Error> Exec(Span<const char *> args)
     ASSERT(args[args.Size() - 1] == nullptr && "Last argument must be a nullptr");
 
     pid_t pid = fork();
-
     if (pid == 0) {
         setpgid(0, 0);
         execv(args[0], const_cast<char **>(args.Data()));

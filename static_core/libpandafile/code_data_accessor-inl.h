@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
-#define LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H
+#define LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H
 
 #include "code_data_accessor.h"
 
@@ -99,4 +99,4 @@ inline const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::En
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_CODE_DATA_ACCESSOR_INL_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
-#define LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
+#ifndef LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H
+#define LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H
 
 #include "file.h"
 #include "file_items.h"
@@ -95,4 +95,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H_
+#endif  // LIBPANDAFILE_DEBUG_INFO_EXTRACTOR_H

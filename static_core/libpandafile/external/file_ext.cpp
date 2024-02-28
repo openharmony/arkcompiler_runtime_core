@@ -59,27 +59,29 @@ public:
 
         // Enmuate all methods and put them to local cache.
         panda::panda_file::ext::MethodSymEntry *found = nullptr;
+        auto callBack = [this, offset, &found](panda::panda_file::MethodDataAccessor &mda) -> void {
+            if (!mda.GetCodeId().has_value()) {
+                return;
+            }
+            panda::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
+            panda::panda_file::ext::MethodSymEntry entry;
+            entry.id = mda.GetCodeId().value();
+            entry.length = ca.GetCodeSize();
+            entry.name = std::string(panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
+
+            auto ret = methodSymbols_.emplace(offset, entry);
+            if (mda.GetCodeId().value().GetOffset() <= offset &&
+                offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
+                found = &ret.first->second;
+            }
+        };
+
         for (uint32_t id : pandaFile_->GetClasses()) {
             if (pandaFile_->IsExternal(panda::panda_file::File::EntityId(id))) {
                 continue;
             }
             panda::panda_file::ClassDataAccessor cda {*pandaFile_, panda::panda_file::File::EntityId(id)};
-            cda.EnumerateMethods([&](panda::panda_file::MethodDataAccessor &mda) -> void {
-                if (mda.GetCodeId().has_value()) {
-                    panda::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
-                    panda::panda_file::ext::MethodSymEntry entry;
-                    entry.id = mda.GetCodeId().value();
-                    entry.length = ca.GetCodeSize();
-                    entry.name =
-                        std::string(panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data));
-
-                    auto ret = methodSymbols_.emplace(offset, entry);
-                    if (mda.GetCodeId().value().GetOffset() <= offset &&
-                        offset < mda.GetCodeId().value().GetOffset() + ca.GetCodeSize()) {
-                        found = &ret.first->second;
-                    }
-                }
-            });
+            cda.EnumerateMethods(callBack);
         }
         return found;
     }
@@ -129,24 +131,26 @@ public:
     {
         // Enmuate all methods and put them to local cache.
         std::vector<panda::panda_file::ext::MethodSymEntry> res;
+        auto queryCb = [this, &res](panda::panda_file::MethodDataAccessor &mda) -> void {
+            if (!mda.GetCodeId().has_value()) {
+                return;
+            }
+            panda::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
+            std::stringstream ss;
+            std::string_view cname(
+                    panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetClassId()).data));
+            if (!cname.empty()) {
+                ss << cname.substr(0, cname.size() - 1);
+            }
+            ss << "." << panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data);
+            res.push_back({mda.GetCodeId().value(), ca.GetCodeSize(), ss.str()});
+        };
         for (uint32_t id : pandaFile_->GetClasses()) {
             if (pandaFile_->IsExternal(panda::panda_file::File::EntityId(id))) {
                 continue;
             }
             panda::panda_file::ClassDataAccessor cda {*pandaFile_, panda::panda_file::File::EntityId(id)};
-            cda.EnumerateMethods([&](panda::panda_file::MethodDataAccessor &mda) -> void {
-                if (mda.GetCodeId().has_value()) {
-                    panda::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
-                    std::stringstream ss;
-                    std::string_view cname(
-                        panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetClassId()).data));
-                    if (!cname.empty()) {
-                        ss << cname.substr(0, cname.size() - 1);
-                    }
-                    ss << "." << panda::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data);
-                    res.push_back({mda.GetCodeId().value(), ca.GetCodeSize(), ss.str()});
-                }
-            });
+            cda.EnumerateMethods(queryCb);
         }
 
         std::vector<struct MethodSymInfoExt> methodInfo;

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_OS_WINDOWS_MEM_HOOKS_H_
-#define PANDA_LIBPANDABASE_OS_WINDOWS_MEM_HOOKS_H_
+#ifndef PANDA_LIBPANDABASE_OS_WINDOWS_MEM_HOOKS_H
+#define PANDA_LIBPANDABASE_OS_WINDOWS_MEM_HOOKS_H
 
 #include <crtdbg.h>
 #include <iostream>

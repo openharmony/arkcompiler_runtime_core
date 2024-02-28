@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FILE_ITEMS_H_
-#define LIBPANDAFILE_FILE_ITEMS_H_
+#ifndef LIBPANDAFILE_FILE_ITEMS_H
+#define LIBPANDAFILE_FILE_ITEMS_H
 
 #include "file.h"
 #include "file_writer.h"
@@ -142,7 +142,7 @@ enum class IndexType {
     NONE
 };
 
-static constexpr size_t INDEX_COUNT_16 = static_cast<size_t>(IndexType::LAST_16) + 1;
+inline constexpr size_t INDEX_COUNT_16 = static_cast<size_t>(IndexType::LAST_16) + 1;
 
 class IndexedItem;
 
@@ -1989,4 +1989,4 @@ enum class ArgumentType : uint8_t {
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_FILE_ITEMS_H_
+#endif  // LIBPANDAFILE_FILE_ITEMS_H

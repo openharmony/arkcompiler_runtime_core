@@ -69,7 +69,7 @@ static os::memory::PandaThreadKey GetHandlingSignalKey()
 static bool GetHandlingSignal()
 {
     void *result = os::memory::PandaGetspecific(GetHandlingSignalKey());
-    return reinterpret_cast<uintptr_t>(result) != 0;
+    return result != nullptr;
 }
 
 static void SetHandlingSignal(bool value)

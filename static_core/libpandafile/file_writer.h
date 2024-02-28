@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef LIBPANDAFILE_FILE_WRITER_H_
-#define LIBPANDAFILE_FILE_WRITER_H_
+#ifndef LIBPANDAFILE_FILE_WRITER_H
+#define LIBPANDAFILE_FILE_WRITER_H
 
 #include "os/file.h"
 #include "utils/span.h"
@@ -217,4 +217,4 @@ private:
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_FILE_WRITER_H_
+#endif  // LIBPANDAFILE_FILE_WRITER_H

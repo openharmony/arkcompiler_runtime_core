@@ -146,7 +146,7 @@ TEST(File, OpenPandaFile)
     auto data = GetEmptyPandaFileBytes();
     int ret;
     const char *zipFilename = "__OpenPandaFile__.zip";
-    const char *filename1 = ARCHIVE_FILENAME;
+    const char *filename1 = g_archiveFilenames;
     const char *filename2 = "classses2.abc";  // just for testing.
     ret = CreateOrAddZipPandaFile(&data, zipFilename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
@@ -166,7 +166,7 @@ TEST(File, OpenPandaFileFromZipNameAnonMem)
     auto data = GetEmptyPandaFileBytes();
     int ret;
     const char *zipFilename = "__OpenPandaFileFromZipNameAnonMem__.zip";
-    const char *filename1 = ARCHIVE_FILENAME;
+    const char *filename1 = g_archiveFilenames;
     ret = CreateOrAddZipPandaFile(&data, zipFilename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
 
@@ -184,7 +184,7 @@ TEST(File, OpenPandaFileOrZip)
     auto data = GetEmptyPandaFileBytes();
     int ret;
     const char *zipFilename = "__OpenPandaFileOrZip__.zip";
-    const char *filename1 = ARCHIVE_FILENAME;
+    const char *filename1 = g_archiveFilenames;
     const char *filename2 = "classes2.abc";  // just for testing.
     ret = CreateOrAddZipPandaFile(&data, zipFilename, filename1, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     ASSERT_EQ(ret, 0);
@@ -205,7 +205,7 @@ TEST(File, OpenPandaFileUncompressed)
     std::cout << "pandafile size = " << data.size() << std::endl;
     int ret;
     const char *zipFilename = "__OpenPandaFileUncompressed__.zip";
-    const char *filename1 = ARCHIVE_FILENAME;
+    const char *filename1 = g_archiveFilenames;
     const char *filename2 = "class.abc";  // just for testing.
     ret = CreateOrAddZipPandaFile(&data, zipFilename, filename2, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
     ASSERT_EQ(ret, 0);

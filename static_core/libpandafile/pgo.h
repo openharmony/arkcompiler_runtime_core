@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_PGO_H
-#define LIBPANDAFILE_PGO_H
+#ifndef LIBPANDAFILE_PGOH
+#define LIBPANDAFILE_PGOH
 
 #include "file_items.h"
 
