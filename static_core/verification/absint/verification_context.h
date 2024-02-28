@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP_
-#define PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP_
+#ifndef PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP
+#define PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP
 
 #include "libpandabase/macros.h"
 #include "runtime/include/method.h"
@@ -137,4 +137,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP_
+#endif  // !PANDA_VERIFICATION_VERIFICATION_CONTEXT_HPP

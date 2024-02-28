@@ -24,6 +24,7 @@ import argparse
 import json
 import multiprocessing
 import os
+import shutil
 import sys
 import subprocess
 import time
@@ -90,13 +91,13 @@ def check_file_list(file_list, panda_dir, build_dir, fix_dir, clang_rules_autofi
     jobs = []
     total_count = str(len(file_list))
     idx = 0
-    for src, args in file_list:
+    for src, file_args in file_list:
         idx += 1
 
         msg = "[%s/%s] Running clang-tidy-rename: %s" % (
             str(idx), total_count, src)
         proc = pool.apply_async(func=run_clang_tidy, args=(
-            src, panda_dir, build_dir, fix_dir, args, msg, clang_rules_autofix))
+            src, panda_dir, build_dir, fix_dir, file_args, msg, clang_rules_autofix))
         jobs.append(proc)
 
     # Wait for jobs to complete before exiting
@@ -180,7 +181,7 @@ def apply_fixies(fix_dir, panda_dir):
 
 if __name__ == "__main__":
     args = get_args()
-    file_list = []
+    main_file_list = []
 
     args.build_dir = str(os.path.abspath(args.build_dir))
     args.panda_dir = str(os.path.abspath(args.panda_dir))
@@ -189,15 +190,18 @@ if __name__ == "__main__":
     args.fix_dir = tempfile.mkdtemp(prefix='renamer_fixies_', dir=args.fix_dir)
 
     if not os.path.exists(os.path.join(args.build_dir, 'compile_commands.json')):
+        shutil.rmtree(args.fix_dir)
         sys.exit("Error: Missing file `compile_commands.json` in build directory")
 
-    file_list = get_file_list(
+    main_file_list = get_file_list(
         args.panda_dir, args.build_dir, args.filename_filter)
 
-    if not file_list:
-        sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json` and correcting of parameter `--filename-filter` if you use it.")
+    if not main_file_list:
+        shutil.rmtree(args.fix_dir)
+        sys.exit("Can't be prepaired source list. Please check availble in build `dir compile_commands.json`"
+                 " and correcting of parameter `--filename-filter` if you use it.")
 
-    check_file_list(file_list, args.panda_dir, args.build_dir, args.fix_dir, args.clang_rules_autofix)
+    check_file_list(main_file_list, args.panda_dir, args.build_dir, args.fix_dir, args.clang_rules_autofix)
 
     res = apply_fixies(args.fix_dir, args.panda_dir)
 
@@ -205,3 +209,4 @@ if __name__ == "__main__":
         print("Clang-tidy renamer was applyed successfully! Please review changes")
     else:
         print("Clang-tidy renamer has errors, please check it")
+    shutil.rmtree(args.fix_dir)

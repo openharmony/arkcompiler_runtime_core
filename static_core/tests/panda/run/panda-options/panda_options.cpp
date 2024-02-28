@@ -56,9 +56,9 @@ TEST_F(PandaOptionsTest, PandaFiles)
         auto boot = GetDirName() + Separator() + "boot.abc";
         // clang-format off
         boot += ":" + GetDirName()
-            + Separator() + ".." 
-            + Separator() + ".." 
-            + Separator() + ".." 
+            + Separator() + ".."
+            + Separator() + ".."
+            + Separator() + ".."
             + Separator() + "pandastdlib" + Separator() + "arkstdlib.abc";
         // clang-format on
 

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_H_
-#define PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_H_
+#ifndef PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_H
+#define PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_H
 
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -241,4 +241,4 @@ private:
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_H_
+#endif  // PANDA_VERIFIER_DEBUG_OPTIONS_METHOD_OPTIONS_H

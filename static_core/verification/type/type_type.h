@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_TYPE_TYPE_HPP
-#define _PANDA_VERIFIER_TYPE_TYPE_HPP
+#ifndef PANDA_VERIFIER_TYPE_TYPE_HPP
+#define PANDA_VERIFIER_TYPE_TYPE_HPP
 
 #include "verification/util/mem.h"
 
@@ -238,4 +238,4 @@ struct hash<panda::verifier::Type> {
 };
 }  // namespace std
 
-#endif  // !_PANDA_VERIFIER_TYPE_TYPE_HPP
+#endif  // !PANDA_VERIFIER_TYPE_TYPE_HPP

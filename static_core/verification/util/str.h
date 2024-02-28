@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_STR_HPP_
-#define PANDA_VERIFIER_UTIL_STR_HPP_
+#ifndef PANDA_VERIFIER_UTIL_STR_HPP
+#define PANDA_VERIFIER_UTIL_STR_HPP
 
 #include "lazy.h"
 #include "include/mem/panda_string.h"
@@ -40,6 +40,9 @@ template <typename Int, typename = std::enable_if_t<std::is_integral_v<Int>>>
 PandaString NumToStr(Int val, Int base = 10, size_t width = 0)
 {
     PandaString result {};
+    if (base <= 0) {
+        return result;
+    }
     bool neg = false;
     if (val < 0) {
         neg = true;
@@ -80,4 +83,4 @@ PandaString OffsetToHexStr(Offset offset)
 }
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_STR_HPP_
+#endif  // !PANDA_VERIFIER_UTIL_STR_HPP

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_TESTS_PANDA_RUN_COMMON_H
+#define PANDA_TESTS_PANDA_RUN_COMMON_H
+
 #include "os/exec.h"
 
 #include <gtest/gtest.h>
@@ -79,3 +82,5 @@ private:
 };
 
 }  // namespace panda::cli::test
+
+#endif  //  PANDA_TESTS_PANDA_RUN_COMMON_H

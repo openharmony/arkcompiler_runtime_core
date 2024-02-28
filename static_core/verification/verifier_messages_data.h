@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_VERIFIER_MESSAGES_DATA_H_
-#define PANDA_VERIFICATION_VERIFIER_MESSAGES_DATA_H_
+#ifndef PANDA_VERIFICATION_VERIFIER_MESSAGES_DATA_H
+#define PANDA_VERIFICATION_VERIFIER_MESSAGES_DATA_H
 
 #include "verification/config/options/method_options.h"
 #include "verifier_messages.h"
@@ -25,4 +25,4 @@ MethodOption::MsgClass GetDefaultClassForMessage(VerifierMessage msg);
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_VERIFIER_MESSAGES_DATA_H_
+#endif  // PANDA_VERIFICATION_VERIFIER_MESSAGES_DATA_H

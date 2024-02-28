@@ -112,8 +112,11 @@ def test_cmake_checker(directory):
             content = content.replace(function[1], function[0])
             content += function[0] + "\n"
 
-        with open(temp_file, 'w') as file:
-            file.write(content)
+        fo = os.fdopen(temp_file, "w+")
+        try:
+            fo.write(content)
+        finally:
+            fo.close()
 
         args = [sys.argv[0], directory]
         process = subprocess.run(args, capture_output=True)
@@ -121,14 +124,15 @@ def test_cmake_checker(directory):
         if process.returncode == 1 and errorMessage in process.stdout.decode():
             print("test-cmake-checker passed successfully!")
         else:
+            shutil.rmtree(temp_dir)
             sys.exit("Failed: cmake-checker doesn't work properly.")
 
     finally:
         shutil.rmtree(temp_dir)
 
 if __name__ == "__main__":
-    directory = sys.argv[1]
+    arg_directory = sys.argv[1]
     if len(sys.argv) == 3:
-        test_cmake_checker(directory)
+        test_cmake_checker(arg_directory)
     else:
-        run_cmake_checker(directory)
+        run_cmake_checker(arg_directory)

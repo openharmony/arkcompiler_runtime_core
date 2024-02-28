@@ -326,7 +326,6 @@ int Main(int argc, const char **argv)
     auto bootPandaFiles = cliOptions.GetBootPandaFiles();
     auto pandaFiles = cliOptions.GetPandaFiles();
     std::string mainFileName = file.GetValue();
-
     if (!mainFileName.empty()) {
         if (pandaFiles.empty()) {
             bootPandaFiles.push_back(mainFileName);

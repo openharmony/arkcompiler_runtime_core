@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIF_CONFIG_LOAD_H_
-#define PANDA_VERIF_CONFIG_LOAD_H_
-
 #include "config_load.h"
 
 #include "verification/public.h"
@@ -45,7 +42,6 @@ bool ProcessConfigFile(panda::verifier::Config *cfg, const char *text)
 
     bool result =
         panda::verifier::config::ParseConfig(text, section) && panda::verifier::config::ProcessConfig(cfg, section);
-
     if (result) {
         LOG(DEBUG, VERIFIER) << "Verifier debug configuration: \n" << section.Image();
         panda::verifier::debug::SetDefaultMethodOptions(cfg);
@@ -100,5 +96,3 @@ bool LoadConfig(Config *cfg, std::string_view filename)
 }
 
 }  // namespace panda::verifier::config
-
-#endif  // PANDA_VERIF_CONFIG_LOAD_H_

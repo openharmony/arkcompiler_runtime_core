@@ -43,7 +43,6 @@ bool AbsIntInstructionHandler::CheckRegType(int reg, Type tgtType)
         return false;
     }
     auto type = GetRegType(reg);
-
     if (CheckType(type, tgtType)) {
         return true;
     }
@@ -106,7 +105,7 @@ void AbsIntInstructionHandler::SetRegAndOthersOfSameOrigin(int regIdx, Type type
 
 const AbstractTypedValue &AbsIntInstructionHandler::GetAcc()
 {
-    return context_.ExecCtx().CurrentRegContext()[ACC];
+    return context_.ExecCtx().CurrentRegContext()[acc];
 }
 
 Type AbsIntInstructionHandler::GetAccType()
@@ -116,22 +115,22 @@ Type AbsIntInstructionHandler::GetAccType()
 
 void AbsIntInstructionHandler::SetAcc(const AbstractTypedValue &val)
 {
-    SetReg(ACC, val);
+    SetReg(acc, val);
 }
 
 void AbsIntInstructionHandler::SetAcc(Type type)
 {
-    SetReg(ACC, type);
+    SetReg(acc, type);
 }
 
 void AbsIntInstructionHandler::SetAccAndOthersOfSameOrigin(const AbstractTypedValue &val)
 {
-    SetRegAndOthersOfSameOrigin(ACC, val);
+    SetRegAndOthersOfSameOrigin(acc, val);
 }
 
 void AbsIntInstructionHandler::SetAccAndOthersOfSameOrigin(Type type)
 {
-    SetRegAndOthersOfSameOrigin(ACC, type);
+    SetRegAndOthersOfSameOrigin(acc, type);
 }
 
 AbstractTypedValue AbsIntInstructionHandler::MkVal(Type t)

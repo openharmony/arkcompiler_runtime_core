@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEBUG_CONTEXT_H_
-#define PANDA_VERIFIER_DEBUG_CONTEXT_H_
+#ifndef PANDA_VERIFIER_DEBUG_CONTEXT_H
+#define PANDA_VERIFIER_DEBUG_CONTEXT_H
 
 #include "verification/config/config.h"
 #include "verification/config/debug_breakpoint/breakpoint.h"
@@ -103,4 +103,4 @@ private:
 };
 }  // namespace panda::verifier::debug
 
-#endif  // !PANDA_VERIFIER_DEBUG_CONTEXT_H_
+#endif  // !PANDA_VERIFIER_DEBUG_CONTEXT_H

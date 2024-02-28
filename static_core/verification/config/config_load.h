@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIF_CONFIG_LOAD_H_
-#define PANDA_VERIF_CONFIG_LOAD_H_
+#ifndef PANDA_VERIF_CONFIG_LOAD_H
+#define PANDA_VERIF_CONFIG_LOAD_H
 
 #include <string>
 
@@ -24,4 +24,4 @@ namespace panda::verifier::config {
 bool LoadConfig(Config *cfg, std::string_view filename);
 }  // namespace panda::verifier::config
 
-#endif  // PANDA_VERIF_CONFIG_LOAD_H_
+#endif  // PANDA_VERIF_CONFIG_LOAD_H

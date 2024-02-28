@@ -43,7 +43,7 @@ using panda::verifier::config::Section;
 
 void RegisterConfigHandlerMethodGroups(Config *dcfg)
 {
-    static const auto CONFIG_DEBUG_METHOD_GROUPS_VERIFIER_OPTIONS = [](Config *cfg, const Section &section) {
+    static const auto configDebugMethodGroupsVerifierOptions = [](Config *cfg, const Section &section) {
         auto &verifOptions = cfg->opts;
 
         for (const auto &item : section.items) {
@@ -91,7 +91,7 @@ void RegisterConfigHandlerMethodGroups(Config *dcfg)
     };
 
     config::RegisterConfigHandler(dcfg, "config.debug.method_groups.verifier.options",
-                                  CONFIG_DEBUG_METHOD_GROUPS_VERIFIER_OPTIONS);
+                                  configDebugMethodGroupsVerifierOptions);
 }
 
 }  // namespace panda::verifier::debug

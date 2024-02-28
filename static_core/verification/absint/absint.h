@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_ABSINT_HPP_
-#define PANDA_VERIFIER_ABSINT_HPP_
+#ifndef PANDA_VERIFIER_ABSINT_HPP
+#define PANDA_VERIFIER_ABSINT_HPP
 
 #include "verification_context.h"
 #include "verification/type/type_system.h"
@@ -35,4 +35,4 @@ VerificationStatus AbstractInterpret(VerificationContext &verifCtx, const uint8_
 VerificationStatus VerifyMethod(VerificationContext &verifCtx);
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_ABSINT_HPP_
+#endif  // !PANDA_VERIFIER_ABSINT_HPP

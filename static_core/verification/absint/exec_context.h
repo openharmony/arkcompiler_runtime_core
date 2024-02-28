@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP_
-#define PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP_
+#ifndef PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP
+#define PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP
 
 #include "reg_context.h"
 
@@ -61,7 +61,6 @@ public:
     {
         RegContext &ctx = regContextOnCheckPoint_[addr];
         auto lub = RcUnion(&ctx, &currentRegContext_, typeSystem_);
-
         if (lub.HasInconsistentRegs()) {
             for (int regIdx : lub.InconsistentRegsNums()) {
                 if (!reporter(regIdx, currentRegContext_[regIdx], ctx[regIdx])) {
@@ -197,4 +196,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP_
+#endif  // !PANDA_VERIFIER_ABSINT_EXEC_CONTEXT_HPP

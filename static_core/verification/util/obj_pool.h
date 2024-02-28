@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_OBJ_POOL_HPP_
-#define PANDA_VERIFIER_UTIL_OBJ_POOL_HPP_
+#ifndef PANDA_VERIFIER_UTIL_OBJ_POOL_HPP
+#define PANDA_VERIFIER_UTIL_OBJ_POOL_HPP
 
 #include "macros.h"
 
@@ -253,4 +253,4 @@ private:
 
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_OBJ_POOL_HPP_
+#endif  // !PANDA_VERIFIER_UTIL_OBJ_POOL_HPP
