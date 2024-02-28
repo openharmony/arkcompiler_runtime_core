@@ -130,7 +130,6 @@ BasicBlock *LinearOrder::LeastLikelySuccessor(const BasicBlock *block)
 
     auto counter0 = GetGraph()->GetBranchCounter(block, true);
     auto counter1 = GetGraph()->GetBranchCounter(block, false);
-
     if (counter0 > 0 || counter1 > 0) {
         auto denom = std::max(counter0, counter1);
         // NOLINTNEXTLINE(readability-magic-numbers)

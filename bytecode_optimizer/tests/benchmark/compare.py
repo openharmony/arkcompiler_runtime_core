@@ -101,7 +101,8 @@ if __name__ == '__main__':
                 result[r]["old_size"],
                 result[r]["new_size"],
                 result[r]["diff"],
-                100 * (1 - float(result[r]["new_size"]) / result[r]["old_size"]), r))
+                100 * (1 - float(result[r]["new_size"]) / result[r]["old_size"]) if result[r]["old_size"] != 0 else 0,
+                r))
 
     print("""\nSummary:\n=============\
     \n Total code_item section size of baseline files: {:d} bytes\
