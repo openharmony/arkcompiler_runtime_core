@@ -2089,3 +2089,29 @@
 # 16602 es2panda aborts if Numeric, Integral, or Floating is used in a union
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-un_13.ets
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-un_13.ets
+
+# es2panda fails: 14691 Abstract classes and interfaces cannot be instantied with array creation expression
+04.names_declarations_and_scopes/07.function_declarations/02.parameter_list/param_list_3.ets
+04.names_declarations_and_scopes/07.function_declarations/function_decl_5.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_14.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_16.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_7.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_12.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_13.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_15.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_16.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_17.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_19.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_25.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_26.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_27.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_14.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_7.ets
+05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args2_7.ets
+06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_6.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_43.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_44.ets
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.ets
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_7.ets
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_8.ets
+# end of 14691 fails
