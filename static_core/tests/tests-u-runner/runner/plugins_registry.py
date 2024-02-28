@@ -18,9 +18,11 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
+import importlib
 import logging
 import subprocess
 from os import path, listdir, getenv, chdir
+from types import ModuleType
 from typing import Dict, List, Optional
 
 from runner.logger import Log
@@ -44,7 +46,7 @@ class PluginsRegistry:
         return [item for item in items if not item.startswith("__")]
 
     @staticmethod
-    def my_dir(obj: str) -> List[str]:
+    def my_dir(obj: ModuleType) -> List[str]:
         return PluginsRegistry.filter_builtins(dir(obj))
 
     def load_plugin(self, plugin_name: str, plugin_path: str) -> None:
@@ -60,9 +62,7 @@ class PluginsRegistry:
             class_module_name = f"{PluginsRegistry.BUILTIN_ROOT}" \
                                 f".{PluginsRegistry.BUILTIN_PLUGINS}" \
                                 f".{plugin_name}.{runner_class_name}"
-            class_module_root = __import__(class_module_name)
-            class_module_plugin = getattr(getattr(class_module_root, PluginsRegistry.BUILTIN_PLUGINS), plugin_name)
-            class_module_runner = getattr(class_module_plugin, runner_class_name)
+            class_module_runner: ModuleType = importlib.import_module(class_module_name)
             classes = PluginsRegistry.my_dir(class_module_runner)
             classes = [cls for cls in classes if cls.startswith("Runner") and cls.lower().endswith(plugin_name.lower())]
             class_name = classes.pop() if len(classes) > 0 else None

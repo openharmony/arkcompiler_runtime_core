@@ -84,11 +84,13 @@ class TestFileBased(Test):
                 encoding='utf-8',
                 errors='ignore',
         ) as process:
+            fail_kind: Optional[FailKind] = None
             try:
                 output, error = process.communicate(timeout=params.timeout)
                 return_code = process.returncode
                 passed = result_validator(output, error, return_code)
-                fail_kind = params.fail_kind_fail if not passed else None
+                if not passed:
+                    fail_kind = params.fail_kind_fail
             except subprocess.TimeoutExpired:
                 self.log_cmd(f"Failed by timeout after {params.timeout} sec")
                 fail_kind = params.fail_kind_timeout
