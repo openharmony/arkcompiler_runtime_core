@@ -1277,7 +1277,7 @@ intrinsics:
   - name: StdCoreDoubleParseInt
     space: ets
     class_name: std.core.Double
-    method_name: parseInt
+    method_name: parseIntCore
     static: true
     signature:
       ret: f64

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,15 +80,46 @@ double StdCoreDoubleParseFloat(EtsString *s)
 
 double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
 {
-    if (UNLIKELY(s->IsUtf16())) {
-        size_t len = utf::Utf16ToUtf8Size(s->GetDataUtf16(), s->GetUtf16Length()) - 1;
-        PandaVector<uint8_t> buf(len);
-        len = utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), s->GetLength(), len, 0);
+    bool isUtf16 = s->IsUtf16();
+    size_t startIndex = 0;
+    size_t length = s->GetLength();
+    const int baseDec = 10;
+    const int baseHex = 16;
 
-        Span<uint8_t> str = Span<uint8_t>(buf.data(), len);
-        return std::abs(helpers::StringToDoubleWithRadix(str.begin(), str.end(), radix));
+    Span<uint16_t> utf16Span {};
+    Span<uint8_t> mutf8Span {};
+    if (isUtf16) {
+        utf16Span = {s->GetDataUtf16(), s->GetUtf16Length()};
+    } else {
+        mutf8Span = {s->GetDataMUtf8(), s->GetMUtf8Length()};
     }
 
+    if (length >= 1) {
+        char firstChar = isUtf16 ? utf16Span[0] : mutf8Span[0];
+        if (firstChar == '-') {
+            startIndex = 1;
+        }
+    }
+
+    if (radix == -1 || radix == 0) {
+        radix = baseDec;
+        if (length >= 2U + startIndex) {
+            auto first = isUtf16 ? utf16Span[startIndex] : mutf8Span[startIndex];
+            auto second = isUtf16 ? utf16Span[startIndex + 1] : mutf8Span[startIndex + 1];
+            if (first == '0' && (second == 'x' || second == 'X')) {
+                radix = baseHex;
+            }
+        }
+    }
+
+    if (isUtf16) {
+        size_t utf16Length = s->GetUtf16Length();
+        size_t utf8Size = utf::Utf16ToUtf8Size(s->GetDataUtf16(), utf16Length) - 1;
+        PandaVector<uint8_t> buf(utf8Size);
+        size_t convertedSize = utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), length, utf8Size, 0);
+        Span<uint8_t> str = Span<uint8_t>(buf.data(), convertedSize);
+        return std::trunc(helpers::StringToDoubleWithRadix(str.begin(), str.end(), radix));
+    }
     Span<uint8_t> str = Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
     return std::trunc(helpers::StringToDoubleWithRadix(str.begin(), str.end(), radix));
 }
