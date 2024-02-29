@@ -49,8 +49,8 @@ os::unique_fd::UniqueFd CreateUnixServerSocket(int backlog)
         PLOG(ERROR, DPROF) << "CreateUnixServerSocket memcpy_s failed";
         UNREACHABLE();
     }
-    if (PANDA_FAILURE_RETRY(::bind(sock.Get(), reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr))) ==
-        -1) {
+    auto *sockAddr = reinterpret_cast<sockaddr *>(&serverAddr);
+    if (PANDA_FAILURE_RETRY(::bind(sock.Get(), sockAddr, sizeof(serverAddr))) == -1) {
         PLOG(ERROR, DPROF) << "bind() failed";
         return os::unique_fd::UniqueFd();
     }
@@ -81,8 +81,8 @@ os::unique_fd::UniqueFd CreateUnixClientSocket()
         PLOG(ERROR, DPROF) << "CreateUnixClientSocket memcpy_s failed";
         UNREACHABLE();
     }
-    if (PANDA_FAILURE_RETRY(
-            ::connect(sock.Get(), reinterpret_cast<struct sockaddr *>(&serverAddr), sizeof(serverAddr))) == -1) {
+    auto *sockAddr = reinterpret_cast<sockaddr *>(&serverAddr);
+    if (PANDA_FAILURE_RETRY(::connect(sock.Get(), sockAddr, sizeof(serverAddr))) == -1) {
         PLOG(ERROR, DPROF) << "connect() failed";
         return os::unique_fd::UniqueFd();
     }
