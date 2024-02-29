@@ -257,6 +257,30 @@ bool Lexer::LexString()
     return true;
 }
 
+void Lexer::UpdateCurLinePos()
+{
+    if (FindDelim(currLine_->buffer[currLine_->pos]) != Token::Type::ID_BAD) {
+        ++(currLine_->pos);
+    } else if (IsQuote(currLine_->buffer[currLine_->pos])) {
+        if (!LexString()) {
+            return;
+        }
+    } else {
+        while (!Eol() && FindDelim(currLine_->buffer[currLine_->pos]) == Token::Type::ID_BAD &&
+               isspace(currLine_->buffer[currLine_->pos]) == 0) {
+            ++(currLine_->pos);
+            size_t position = currLine_->pos;
+            while (FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
+                   FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
+                position++;
+            }
+            if (isspace(currLine_->buffer[position]) == 0 && (position != currLine_->end)) {
+                currLine_->pos = position;
+            }
+        }
+    }
+}
+
 /*
  * Tokens handling: set a corresponding
  * elements bound_left and bound_right of the array tokens
@@ -296,26 +320,7 @@ void Lexer::LexTokens()
     while (!Eol()) {
         boundLeft = currLine_->pos;
 
-        if (FindDelim(currLine_->buffer[currLine_->pos]) != Token::Type::ID_BAD) {
-            ++(currLine_->pos);
-        } else if (IsQuote(currLine_->buffer[currLine_->pos])) {
-            if (!LexString()) {
-                return;
-            }
-        } else {
-            while (!Eol() && FindDelim(currLine_->buffer[currLine_->pos]) == Token::Type::ID_BAD &&
-                   isspace(currLine_->buffer[currLine_->pos]) == 0) {
-                ++(currLine_->pos);
-                size_t position = currLine_->pos;
-                while (FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
-                       FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
-                    position++;
-                }
-                if (isspace(currLine_->buffer[position]) == 0 && (position != currLine_->end)) {
-                    currLine_->pos = position;
-                }
-            }
-        }
+        UpdateCurLinePos();
 
         boundRight = currLine_->pos;
 

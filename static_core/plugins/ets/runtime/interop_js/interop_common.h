@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H
 
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
@@ -234,4 +234,4 @@ inline napi_status NapiWrap(napi_env env, napi_value jsObject, void *nativeObjec
 
 }  // namespace panda::ets::interop::js
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTEROP_COMMON_H

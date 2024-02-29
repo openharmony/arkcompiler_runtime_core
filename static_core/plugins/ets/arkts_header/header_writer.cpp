@@ -58,19 +58,19 @@ bool HeaderWriter::PrintFunction()
         }
         std::vector<std::string> methods;
         cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-            if (mda.IsNative()) {
-                // Founded first native, need to create file and write beginning
-                if (!needHeader_) {
-                    needHeader_ = true;
-                    CreateHeader();
-                }
-
-                std::string className = utf::Mutf8AsCString(cda.GetDescriptor());
-                if (className[0] == 'L') {
-                    className = className.substr(1, className.size() - 2U);
-                }
-                PrintPrototype(className, mda, CheckOverloading(cda, mda));
+            if (!mda.IsNative()) {
+                return;
             }
+            // Found first native, need to create file and write beginning
+            if (!needHeader_) {
+                needHeader_ = true;
+                CreateHeader();
+            }
+            std::string className = utf::Mutf8AsCString(cda.GetDescriptor());
+            if (className[0] == 'L') {
+                className = className.substr(1, className.size() - 2U);
+            }
+            PrintPrototype(className, mda, CheckOverloading(cda, mda));
         });
     }
     if (needHeader_) {

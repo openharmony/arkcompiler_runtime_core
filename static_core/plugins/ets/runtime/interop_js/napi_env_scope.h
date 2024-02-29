@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NAPI_ENV_SCOPE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NAPI_ENV_SCOPE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NAPI_ENV_SCOPE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NAPI_ENV_SCOPE_H
 
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -45,4 +45,4 @@ private:
 
 }  // namespace panda::ets::interop::js
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NAPI_ENV_SCOPE_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_NAPI_ENV_SCOPE_H

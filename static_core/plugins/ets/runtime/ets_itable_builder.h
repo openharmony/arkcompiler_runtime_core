@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H
 
 #include "libpandabase/utils/span.h"
 #include "runtime/include/class.h"
@@ -50,4 +50,4 @@ private:
 
 }  // namespace panda::ets
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_ITABLE_BUILDER_H

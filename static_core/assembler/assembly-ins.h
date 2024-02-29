@@ -67,7 +67,7 @@ constexpr InstFlags operator|(InstFlags a, InstFlags b)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) flags,
+#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) (flags),
 constexpr std::array<unsigned, static_cast<size_t>(Opcode::NUM_OPCODES)> INST_FLAGS_TABLE = {
     PANDA_INSTRUCTION_LIST(OPLIST)};
 #undef OPLIST

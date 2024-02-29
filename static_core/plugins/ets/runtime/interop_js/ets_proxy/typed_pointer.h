@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TYPED_POINTER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TYPED_POINTER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TYPED_POINTER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TYPED_POINTER_H
 
 #include "libpandabase/macros.h"
 
@@ -90,4 +90,4 @@ private:
 
 }  // namespace panda::ets::interop::js::ets_proxy
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TYPED_POINTER_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_TYPED_POINTER_H

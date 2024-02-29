@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_METHOD_WRAPPER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_METHOD_WRAPPER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_METHOD_WRAPPER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_METHOD_WRAPPER_H
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/typed_pointer.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/wrappers_cache.h"
@@ -96,4 +96,4 @@ private:
 
 }  // namespace panda::ets::interop::js::ets_proxy
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_METHOD_WRAPPER_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_METHOD_WRAPPER_H

@@ -47,10 +47,8 @@ panda_file::Type::TypeId Type::GetId(std::string_view name, bool ignorePrimitive
         PANDA_ASSEMBLER_TYPES(PANDATYPE)
 #undef PANDATYPE
     };
-
     if (!ignorePrimitive) {
         auto iter = pandaTypes.find(name);
-
         if (iter == pandaTypes.end()) {
             return panda_file::Type::TypeId::REFERENCE;
         }

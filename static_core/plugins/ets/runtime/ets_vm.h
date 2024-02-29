@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_H
 
 #include <atomic>
 #include <optional>
@@ -389,4 +389,4 @@ private:
 
 }  // namespace panda::ets
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_VM_H

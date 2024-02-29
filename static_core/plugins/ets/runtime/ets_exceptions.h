@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H
 
 #include <string_view>
 #include "libpandabase/macros.h"
@@ -37,4 +37,4 @@ inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDes
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_EXCEPTIONS_H

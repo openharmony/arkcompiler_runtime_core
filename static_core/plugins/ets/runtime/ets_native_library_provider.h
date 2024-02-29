@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H
 
 #include "libpandabase/os/mutex.h"
 #include "plugins/ets/runtime/ets_native_library.h"
@@ -39,4 +39,4 @@ private:
 };
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H

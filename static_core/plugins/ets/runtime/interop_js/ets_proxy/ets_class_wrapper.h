@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H
 
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_field_wrapper.h"
@@ -38,9 +38,12 @@ using EtsClassWrappersCache = WrappersCache<EtsClass *, EtsClassWrapper>;
 class EtsClassWrapper {
 public:
     // clang-format off
-    static constexpr auto FIELD_ATTR         = static_cast<napi_property_attributes>(napi_writable | napi_enumerable);
-    static constexpr auto METHOD_ATTR        = napi_default;
-    static constexpr auto STATIC_FIELD_ATTR  = static_cast<napi_property_attributes>(napi_writable | napi_enumerable | napi_static);  // NOLINT(hicpp-signed-bitwise)
+    static constexpr auto FIELD_ATTR =
+        static_cast<napi_property_attributes>(napi_writable | napi_enumerable);
+    static constexpr auto METHOD_ATTR = napi_default;
+    static constexpr auto STATIC_FIELD_ATTR =
+        static_cast<napi_property_attributes>(
+            napi_writable | napi_enumerable | napi_static);  // NOLINT(hicpp-signed-bitwise)
     static constexpr auto STATIC_METHOD_ATTR = napi_static;
     // clang-format on
 
@@ -135,4 +138,4 @@ private:
 
 }  // namespace panda::ets::interop::js::ets_proxy
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H

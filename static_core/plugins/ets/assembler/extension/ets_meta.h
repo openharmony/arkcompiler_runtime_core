@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ASSEMBLER_EXTENSIONS_ETS_META_H_
-#define PANDA_ASSEMBLER_EXTENSIONS_ETS_META_H_
+#ifndef PANDA_ASSEMBLER_EXTENSIONS_ETS_META_H
+#define PANDA_ASSEMBLER_EXTENSIONS_ETS_META_H
 
 #include "meta.h"
 
@@ -276,4 +276,4 @@ protected:
 
 }  // namespace panda::pandasm::extensions::ets
 
-#endif  // PANDA_ASSEMBLER_EXTENSIONS_ETS_META_H_
+#endif  // PANDA_ASSEMBLER_EXTENSIONS_ETS_META_H

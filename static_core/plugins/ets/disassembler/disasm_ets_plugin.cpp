@@ -88,7 +88,6 @@ void Disassembler::SetETSAttributes(pandasm::Record *record, const panda_file::F
 
     panda_file::ClassDataAccessor classAccessor(*file_, recordId);
     uint32_t accFlags = classAccessor.GetAccessFlags();
-
     if ((accFlags & ACC_INTERFACE) != 0) {
         record->metadata->SetAttribute("ets.interface");
     }
@@ -151,7 +150,6 @@ void Disassembler::SetETSAttributes(pandasm::Function *method, const panda_file:
 {
     panda_file::MethodDataAccessor methodAccessor(*file_, methodId);
     uint32_t accFlags = methodAccessor.GetAccessFlags();
-
     if ((accFlags & ACC_ABSTRACT) != 0) {
         method->metadata->SetAttribute("ets.abstract");
     }
@@ -194,7 +192,6 @@ void Disassembler::SetETSAttributes(pandasm::Field *field, const panda_file::Fil
 {
     panda_file::FieldDataAccessor fieldAccessor(*file_, fieldId);
     uint32_t accFlags = fieldAccessor.GetAccessFlags();
-
     if ((accFlags & ACC_VOLATILE) != 0) {
         field->metadata->SetAttribute("ets.volatile");
     }

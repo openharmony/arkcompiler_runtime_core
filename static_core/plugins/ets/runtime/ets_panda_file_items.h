@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_PANDA_FILE_ITEMS_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_PANDA_FILE_ITEMS_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_PANDA_FILE_ITEMS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_PANDA_FILE_ITEMS_H
 
 #include <string_view>
 
@@ -106,4 +106,4 @@ static constexpr std::string_view CTOR  = "<ctor>";
 
 }  // namespace panda::ets::panda_file_items
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_PANDA_FILE_ITEMS_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_PANDA_FILE_ITEMS_H

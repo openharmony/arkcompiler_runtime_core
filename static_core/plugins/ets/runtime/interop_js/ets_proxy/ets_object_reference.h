@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
@@ -45,4 +45,4 @@ using UniqueEtsObjectReference = std::unique_ptr<mem::Reference, EtsObjectRefere
 
 }  // namespace panda::ets::interop::js::ets_proxy
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_OBJECT_REFERENCE_H

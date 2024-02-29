@@ -623,13 +623,9 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
                 // Definitions of the system annotations may be absent.
                 // So print message and continue if corresponding function isn't found.
                 LOG(INFO, ASSEMBLER) << "Function " << functionName << " not found";
-            } else {
-                auto &function = funcIt->second;
-
-                if (!CheckValue(value, function.returnType, program)) {
-                    SetLastError("Incorrect annotation element " + functionName + ": " + GetLastError());
-                    return nullptr;
-                }
+            } else if (!CheckValue(value, funcIt->second.returnType, program)) {
+                SetLastError("Incorrect annotation element " + functionName + ": " + GetLastError());
+                return nullptr;
             }
         }
 

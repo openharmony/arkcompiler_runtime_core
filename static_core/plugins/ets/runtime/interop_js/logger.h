@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_LOGGER_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_LOGGER_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_LOGGER_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_LOGGER_H
 
 #include <string>
 
@@ -72,4 +72,4 @@ inline std::string EtsLogMakeString(const char *fmt, ...)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_LOGGER_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_LOGGER_H

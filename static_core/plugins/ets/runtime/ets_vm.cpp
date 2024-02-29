@@ -581,6 +581,18 @@ void PandaEtsVM::SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
     }
 }
 
+static void VisitVmRootsHelper(const GCRootVisitor &visitor, const panda_file::ShortyIterator &it,
+                               const PandaVector<Value> &arguments, size_t argIdx)
+{
+    if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
+        ASSERT(arguments[argIdx].IsReference());
+        ObjectHeader *arg = arguments[argIdx].GetAs<ObjectHeader *>();
+        if (arg != nullptr) {
+            visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arg));
+        }
+    }
+}
+
 void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
@@ -593,34 +605,29 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
             return true;
         }
         const PandaVector<Value> &arguments = coroutine->GetManagedEntrypointArguments();
-        if (!arguments.empty()) {
-            // arguments may be empty in the following cases:
-            // 1. The entrypoint is static and doesn't accept any arguments
-            // 2. The coroutine is launched.
-            // 3. The entrypoint is the main method
-            Method *entrypoint = coroutine->GetManagedEntrypoint();
-            panda_file::ShortyIterator it(entrypoint->GetShorty());
-            size_t argIdx = 0;
-            ++it;  // skip return type
-            if (!entrypoint->IsStatic()) {
-                // handle 'this' argument
-                ASSERT(arguments[argIdx].IsReference());
-                ObjectHeader *arg = arguments[argIdx].GetAs<ObjectHeader *>();
-                ASSERT(arg != nullptr);
-                visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arg));
-                ++argIdx;
-            }
-            while (it != panda_file::ShortyIterator()) {
-                if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
-                    ASSERT(arguments[argIdx].IsReference());
-                    ObjectHeader *arg = arguments[argIdx].GetAs<ObjectHeader *>();
-                    if (arg != nullptr) {
-                        visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arg));
-                    }
-                }
-                ++it;
-                ++argIdx;
-            }
+        if (arguments.empty()) {
+            return true;
+        }
+        // arguments may be empty in the following cases:
+        // 1. The entrypoint is static and doesn't accept any arguments
+        // 2. The coroutine is launched.
+        // 3. The entrypoint is the main method
+        Method *entrypoint = coroutine->GetManagedEntrypoint();
+        panda_file::ShortyIterator it(entrypoint->GetShorty());
+        size_t argIdx = 0;
+        ++it;  // skip return type
+        if (!entrypoint->IsStatic()) {
+            // handle 'this' argument
+            ASSERT(arguments[argIdx].IsReference());
+            ObjectHeader *arg = arguments[argIdx].GetAs<ObjectHeader *>();
+            ASSERT(arg != nullptr);
+            visitor(mem::GCRoot(mem::RootType::ROOT_THREAD, arg));
+            ++argIdx;
+        }
+        while (it != panda_file::ShortyIterator()) {
+            VisitVmRootsHelper(visitor, it, arguments, argIdx);
+            ++it;
+            ++argIdx;
         }
         return true;
     });
@@ -657,27 +664,28 @@ void PandaEtsVM::UpdateVmRefs()
             return true;
         }
         PandaVector<Value> &arguments = coroutine->GetManagedEntrypointArguments();
-        if (!arguments.empty()) {
-            // arguments may be empty in the following cases:
-            // 1. The entrypoint is static and doesn't accept any arguments
-            // 2. The coroutine is launched.
-            // 3. The entrypoint is the main method
-            Method *entrypoint = coroutine->GetManagedEntrypoint();
-            panda_file::ShortyIterator it(entrypoint->GetShorty());
-            size_t argIdx = 0;
-            ++it;  // skip return type
-            if (!entrypoint->IsStatic()) {
-                // handle 'this' argument
-                UpdateMovedVmRef<false>(arguments[argIdx]);
-                ++argIdx;
+        if (arguments.empty()) {
+            return true;
+        }
+        // arguments may be empty in the following cases:
+        // 1. The entrypoint is static and doesn't accept any arguments
+        // 2. The coroutine is launched.
+        // 3. The entrypoint is the main method
+        Method *entrypoint = coroutine->GetManagedEntrypoint();
+        panda_file::ShortyIterator it(entrypoint->GetShorty());
+        size_t argIdx = 0;
+        ++it;  // skip return type
+        if (!entrypoint->IsStatic()) {
+            // handle 'this' argument
+            UpdateMovedVmRef<false>(arguments[argIdx]);
+            ++argIdx;
+        }
+        while (it != panda_file::ShortyIterator()) {
+            if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
+                UpdateMovedVmRef<true>(arguments[argIdx]);
             }
-            while (it != panda_file::ShortyIterator()) {
-                if ((*it).GetId() == panda_file::Type::TypeId::REFERENCE) {
-                    UpdateMovedVmRef<true>(arguments[argIdx]);
-                }
-                ++it;
-                ++argIdx;
-            }
+            ++it;
+            ++argIdx;
         }
         return true;
     });

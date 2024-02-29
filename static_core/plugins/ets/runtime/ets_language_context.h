@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H
 
 #include <libpandafile/include/source_lang_enum.h>
 
@@ -333,4 +333,4 @@ public:
 
 }  // namespace panda::ets
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_ETS_LANGUAGE_CONTEXT_H

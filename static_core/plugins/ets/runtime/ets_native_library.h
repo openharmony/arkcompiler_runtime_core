@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H
 
 #include "runtime/include/mem/panda_string.h"
 #include "libpandabase/os/library_loader.h"
@@ -51,4 +51,4 @@ private:
 };
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_H
