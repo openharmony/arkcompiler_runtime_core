@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_IMPL_H_
-#define PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_IMPL_H_
+#ifndef PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_IMPL_H
+#define PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_IMPL_H
 
 #include "libpandafile/bytecode_instruction-inl.h"
 #include "runtime/include/thread.h"
@@ -25,4 +25,4 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame);
 
 }  // namespace panda::interpreter::test
 
-#endif  // PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_IMPL_H_
+#endif  // PANDA_RUNTIME_TESTS_INTERPRETER_TEST_INTERPRETER_IMPL_H

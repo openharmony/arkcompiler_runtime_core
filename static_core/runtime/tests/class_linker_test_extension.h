@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H_
-#define PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H_
+#ifndef PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H
+#define PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H
 
 #include "runtime/include/class_linker.h"
 #include "runtime/include/class_linker_extension.h"
@@ -127,4 +127,4 @@ private:
 
 }  // namespace panda::test
 
-#endif  // PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H_
+#endif  // PANDA_RUNTIME_TESTS_CLASS_LINKER_TEST_EXTENSION_H
