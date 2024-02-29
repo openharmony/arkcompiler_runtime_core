@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_TSAN_INTERFACE_H_
-#define LIBPANDABASE_UTILS_TSAN_INTERFACE_H_
+#ifndef LIBPANDABASE_UTILS_TSAN_INTERFACE_H
+#define LIBPANDABASE_UTILS_TSAN_INTERFACE_H
 
 // for clang
 #if defined(__has_feature)
@@ -27,4 +27,4 @@
 #define PANDA_TSAN_ON
 #endif
 
-#endif  // LIBPANDABASE_UTILS_TSAN_INTERFACE_H_
+#endif  // LIBPANDABASE_UTILS_TSAN_INTERFACE_H

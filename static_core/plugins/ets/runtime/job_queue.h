@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
 
@@ -38,4 +38,4 @@ public:
     NO_MOVE_SEMANTIC(JobQueue);
 };
 }  // namespace panda::ets
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H

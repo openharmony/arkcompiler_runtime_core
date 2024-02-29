@@ -16,8 +16,8 @@
 #include "runtime/include/thread_scopes.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_BUFFER_INL_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_BUFFER_INL_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_BUFFER_INL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_BUFFER_INL_H
 
 namespace panda::ets {
 
@@ -43,4 +43,4 @@ std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, cons
 
 }  // namespace panda::ets
 
-#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BUFFER_INL_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_BUFFER_INL_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/math_helpers.h"
@@ -100,7 +100,6 @@ public:
         paddedItem->~PaddedItem();
     }
 
-    // NOTE:
     //  This method only checks the validity of the item in the allocated interval
     //  This method does not check whether the item has been allocated or not
     bool IsValidItem(const Item *item) const
@@ -142,4 +141,4 @@ private:
 
 }  // namespace panda::ets::interop::js::ets_proxy
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H_
+#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H

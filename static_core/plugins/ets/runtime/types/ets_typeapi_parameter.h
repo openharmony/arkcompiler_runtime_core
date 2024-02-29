@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_TYPEAPI_PARAMETER_H_
-#define PANDA_PLUGINS_ETS_TYPEAPI_PARAMETER_H_
+#ifndef PANDA_PLUGINS_ETS_TYPEAPI_PARAMETER_H
+#define PANDA_PLUGINS_ETS_TYPEAPI_PARAMETER_H
 
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"

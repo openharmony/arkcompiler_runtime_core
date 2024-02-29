@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_VOID_H_
-#define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_VOID_H_
+#ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_VOID_H
+#define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_VOID_H
 
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -61,4 +61,4 @@ private:
 
 }  // namespace panda::ets
 
-#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_VOID_H_
+#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_VOID_H

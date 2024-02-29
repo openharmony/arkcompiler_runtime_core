@@ -186,7 +186,8 @@ TEST_F(FibersTest, LoopedSwitch)
         double n1 = 0;
         double n2 = 0;
         // NOLINTNEXTLINE(cert-err34-c, cppcoreguidelines-pro-type-vararg)
-        sscanf("1.23 4.56", "%lf %lf", &n1, &n2);
+        size_t ret = sscanf("1.23 4.56", "%lf %lf", &n1, &n2);
+        ASSERT_EQ(ret, 2U);
 
         fibers::SwitchContext(fInit.GetContextPtr(), fTarget.GetContextPtr());
 

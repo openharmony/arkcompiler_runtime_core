@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_PBASE_OS_PROP_H_
-#define PANDA_LIBPANDABASE_PBASE_OS_PROP_H_
+#ifndef PANDA_LIBPANDABASE_PBASE_OS_PROP_H
+#define PANDA_LIBPANDABASE_PBASE_OS_PROP_H
 
 #if defined(PANDA_TARGET_UNIX)
 #include "platforms/unix/libpandabase/property.h"
@@ -31,8 +31,8 @@ const auto ARK_TRACE_PROP = panda::os::unix::property::ARK_TRACE_PROP;
 // NOLINTNEXTLINE(readability-identifier-naming)
 const auto GetPropertyBuffer = panda::os::unix::property::GetPropertyBuffer;
 #else
-bool GetPropertyBuffer(const char *ark_prop, std::string &out);
+bool GetPropertyBuffer(const char *arkProp, std::string &out);
 #endif  // PANDA_TARGET_UNIX
 }  // namespace panda::os::property
 
-#endif  // PANDA_LIBPANDABASE_PBASE_OS_PROP_H_
+#endif  // PANDA_LIBPANDABASE_PBASE_OS_PROP_H

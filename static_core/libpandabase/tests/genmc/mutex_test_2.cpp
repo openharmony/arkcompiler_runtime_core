@@ -14,14 +14,14 @@
  */
 
 #include <pthread.h>
-#include <stdlib.h>
+#include <cstdlib>
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
 
 // The tests checks mutex try lock
 
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
-thread_local pthread_t current_tid;
+thread_local pthread_t g_currentTid;
 
 extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
 

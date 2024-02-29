@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBPANDABASE_UTILS_BIT_HELPERS_H_
-#define PANDA_LIBPANDABASE_UTILS_BIT_HELPERS_H_
+#ifndef PANDA_LIBPANDABASE_UTILS_BIT_HELPERS_H
+#define PANDA_LIBPANDABASE_UTILS_BIT_HELPERS_H
 
 #include "macros.h"
 
@@ -52,4 +52,4 @@ using TypeHelperT = typename TypeHelper<WIDTH, IS_SIGNED>::type;
 
 }  // namespace panda::helpers
 
-#endif  // PANDA_LIBPANDABASE_UTILS_BIT_HELPERS_H_
+#endif  // PANDA_LIBPANDABASE_UTILS_BIT_HELPERS_H

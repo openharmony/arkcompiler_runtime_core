@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H_
-#define PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H_
+#ifndef PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H
+#define PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H
 
 #include <fstream>
 #include <sstream>
@@ -318,4 +318,4 @@ protected:
 
 }  // namespace panda::ets::interop::js::testing
 
-#endif  // !PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H_
+#endif  // !PANDA_PLUGINS_ETS_INTEROP_JS_GTEST_H

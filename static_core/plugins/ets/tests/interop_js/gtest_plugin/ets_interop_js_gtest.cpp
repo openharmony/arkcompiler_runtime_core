@@ -18,7 +18,6 @@
 #include <memory>
 
 #ifdef PANDA_TARGET_OHOS
-// NOTE:
 //  napi_fatal_exception() is not implemented it libace_napi.z.so,
 //  so let's implement it ourselves
 extern "C" napi_status napi_fatal_exception([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value err)

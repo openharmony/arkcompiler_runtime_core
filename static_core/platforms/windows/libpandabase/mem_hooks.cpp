@@ -20,8 +20,8 @@
 
 namespace panda::os::windows::mem_hooks {
 
-volatile bool enable = false;
-static bool first = true;
+volatile bool g_enable = false;
+static bool g_first = true;
 
 static const char *GetAllocTypeName(int at)
 {
@@ -54,7 +54,7 @@ static const char *GetBlockTypeName(int bt)
 int PandaAllocHook(int alloctype, [[maybe_unused]] void *data, std::size_t size, int blocktype,
                    [[maybe_unused]] long request, const unsigned char *filename, int linenumber)
 {
-    if (!enable) {
+    if (!g_enable) {
         return true;
     }
 
@@ -67,13 +67,13 @@ int PandaAllocHook(int alloctype, [[maybe_unused]] void *data, std::size_t size,
 
     constexpr int ALIGN_SIZE = 32;
 
-    if (first) {
+    if (g_first) {
         std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << "alloc type";
         std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << "block type";
         std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << "size";
         std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << "filename";
         std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << "linenumber" << std::endl;
-        first = false;
+        g_first = false;
     }
 
     const char *alloctypeName = GetAllocTypeName(alloctype);
@@ -91,7 +91,7 @@ int PandaAllocHook(int alloctype, [[maybe_unused]] void *data, std::size_t size,
 /* static */
 void PandaHooks::Initialize()
 {
-    enable = true;
+    g_enable = true;
 }
 
 /* static */
@@ -105,7 +105,7 @@ void PandaHooks::Enable()
 /* static */
 void PandaHooks::Disable()
 {
-    enable = false;
+    g_enable = false;
 
     _CrtMemCheckpoint(&end);
     _CrtMemDumpAllObjectsSince(&end);

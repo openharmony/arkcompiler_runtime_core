@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H_
-#define PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H_
+#ifndef PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H
+#define PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H
 
 #include <cstdint>
 #include <type_traits>
@@ -180,4 +180,4 @@ coretypes::TaggedValue InvokeDynEntryPoint(Method *method, uint32_t numArgs, Arg
 
 }  // namespace panda::test
 
-#endif  // PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H_
+#endif  // PANDA_RUNTIME_TESTS_INVOCATION_HELPER_H

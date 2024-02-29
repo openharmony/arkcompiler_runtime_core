@@ -47,7 +47,7 @@ public:
         spaces_.youngSpace_.Initialize(spaceSize, spaceSize);
         spaces_.memSpace_.Initialize(spaceSize, spaceSize);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        spaces_.InitializePercentages(0, 100);
+        spaces_.InitializePercentages(0, 100U);
         spaces_.isInitialized_ = true;
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();

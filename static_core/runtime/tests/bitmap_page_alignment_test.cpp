@@ -106,7 +106,6 @@ TEST_F(BitmapTest, TSANMultithreadingTest)
 
             if (value) {
                 bm.AtomicTestAndSet(ToVoidPtr(heapBegin + offset));
-
             } else {
                 bm.AtomicTestAndClear(ToVoidPtr(heapBegin + offset));
             }

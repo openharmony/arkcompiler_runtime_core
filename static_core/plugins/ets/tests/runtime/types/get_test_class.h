@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_TESTS_RUNTIME_TYPES_GET_TEST_CLASS_H_
-#define PANDA_PLUGINS_ETS_TESTS_RUNTIME_TYPES_GET_TEST_CLASS_H_
+#ifndef PANDA_PLUGINS_ETS_TESTS_RUNTIME_TYPES_GET_TEST_CLASS_H
+#define PANDA_PLUGINS_ETS_TESTS_RUNTIME_TYPES_GET_TEST_CLASS_H
 
 #include <string>
 
@@ -28,4 +28,4 @@ EtsClass *GetTestClass(const char *source, const char *className, const std::str
 
 }  // namespace panda::ets::test
 
-#endif  // !PANDA_PLUGINS_ETS_TESTS_RUNTIME_TYPES_GET_TEST_CLASS_H_
+#endif  // !PANDA_PLUGINS_ETS_TESTS_RUNTIME_TYPES_GET_TEST_CLASS_H

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_ARCH_X86_MEMORY_HELPERS_H_
-#define PANDA_RUNTIME_ARCH_X86_MEMORY_HELPERS_H_
+#ifndef PANDA_RUNTIME_ARCH_X86_MEMORY_HELPERS_H
+#define PANDA_RUNTIME_ARCH_X86_MEMORY_HELPERS_H
 
 namespace panda::arch_specific {
 
@@ -25,4 +25,4 @@ inline void FullMemoryBarrier()
 
 }  // namespace panda::arch_specific
 
-#endif  // PANDA_RUNTIME_ARCH_X86_MEMORY_HELPERS_H_
+#endif  // PANDA_RUNTIME_ARCH_X86_MEMORY_HELPERS_H

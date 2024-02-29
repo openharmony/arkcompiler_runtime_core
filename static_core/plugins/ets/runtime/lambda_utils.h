@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_LAMBDA_UTILS_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_LAMBDA_UTILS_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_LAMBDA_UTILS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_LAMBDA_UTILS_H
 
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -35,4 +35,4 @@ private:
 };
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_LAMBDA_UTILS_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_LAMBDA_UTILS_H

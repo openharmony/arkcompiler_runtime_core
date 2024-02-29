@@ -1687,7 +1687,6 @@ void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &co
         }
 
         auto expectedRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(garbageRegion);
-
         if (gcPauseTimeBudget < expectedRegionCollectionTime) {
             LOG_DEBUG_GC << "Not enough budget to add old regions anymore";
             break;
@@ -2232,7 +2231,6 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
         auto pauseTime = predictionError + analytics_.PredictYoungCollectionTimeInMicros(edenLength);
         return pauseTime <= maxPause;
     };
-
     if (!edenLengthPredicate(minEdenLength)) {
         return minEdenLength;
     }

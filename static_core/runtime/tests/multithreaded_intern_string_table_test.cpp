@@ -74,6 +74,7 @@ public:
     {
         thread_->ManagedCodeEnd();
         delete table_;
+        table_ = nullptr;
     }
 
     StringTable *GetTable()

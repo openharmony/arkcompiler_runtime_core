@@ -79,8 +79,8 @@
 // |-----------------------------------------------------|--------------------------------|--------------------|
 // |         Forwarding address:14            | state:11 |     OOP to metadata object     |         GC         |
 // |-----------------------------------------------------|--------------------------------|--------------------|
-#ifndef PANDA_RUNTIME_MARK_WORD_H_
-#define PANDA_RUNTIME_MARK_WORD_H_
+#ifndef PANDA_RUNTIME_MARK_WORD_H
+#define PANDA_RUNTIME_MARK_WORD_H
 
 #include <cstdint>
 
@@ -383,4 +383,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_MARK_WORD_H_
+#endif  // PANDA_RUNTIME_MARK_WORD_H

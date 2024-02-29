@@ -24,4 +24,4 @@ int GetPriority(DWORD threadId);
 int SetPriority(DWORD threadId, int prio);
 }  // namespace panda::os::thread
 
-#endif  // PANDA_LIBPANDABASE_OS_WINDOWS_THREAD_H_
+#endif  // PANDA_LIBPANDABASE_OS_WINDOWS_THREAD_H

@@ -47,4 +47,4 @@ namespace panda::os::mem_hooks {
 using PandaHooks = panda::os::windows::mem_hooks::PandaHooks;
 }  // namespace panda::os::mem_hooks
 
-#endif  // PANDA_LIBPANDABASE_OS_WINDOWS_MEM_HOOKS_H_
+#endif  // PANDA_LIBPANDABASE_OS_WINDOWS_MEM_HOOKS_H

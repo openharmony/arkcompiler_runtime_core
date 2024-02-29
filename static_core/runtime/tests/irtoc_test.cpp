@@ -113,7 +113,7 @@ TEST(Irtoc, SeqLabels)
 extern "C" int IrtocTestRelocations(int);
 extern "C" int TestCall(int n)
 {
-    return n + 2;
+    return n + 2L;
 }
 
 TEST(Irtoc, Relocations)
@@ -125,7 +125,7 @@ TEST(Irtoc, Relocations)
 
 extern "C" size_t IncrementInt(size_t n)
 {
-    return n + 1;
+    return n + 1U;
 }
 
 extern "C" double IncrementFloat(double n)

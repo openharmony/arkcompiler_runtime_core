@@ -14,14 +14,14 @@
  */
 
 #include <pthread.h>
-#include <stdlib.h>
+#include <cstdlib>
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
 
 // The tests checks a recursive mutex
 
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
-thread_local pthread_t current_tid;
+thread_local pthread_t g_currentTid;
 
 static struct fmutex g_x;
 static int g_shared;

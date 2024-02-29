@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_ARENA_CONTAINERS_H_
-#define LIBPANDABASE_UTILS_ARENA_CONTAINERS_H_
+#ifndef LIBPANDABASE_UTILS_ARENA_CONTAINERS_H
+#define LIBPANDABASE_UTILS_ARENA_CONTAINERS_H
 
 #include <deque>
 #include <list>
@@ -69,4 +69,4 @@ using ArenaString = ArenaStringT<false>;
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_ARENA_CONTAINERS_H_
+#endif  // LIBPANDABASE_UTILS_ARENA_CONTAINERS_H

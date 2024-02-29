@@ -205,7 +205,6 @@ void StackfulCoroutineManager::CheckProgramCompletion()
 {
     os::memory::LockHolder lkCompletion(programCompletionLock_);
     size_t activeWorkerCoros = GetActiveWorkersCount();
-
     if (coroutineCount_ == 1 + activeWorkerCoros) {  // 1 here is for MAIN
         LOG(DEBUG, COROUTINES)
             << "StackfulCoroutineManager::CheckProgramCompletion(): all coroutines finished execution!";

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_LIBBASE_UTILS_MATH_HELPERS_H_
-#define PANDA_LIBBASE_UTILS_MATH_HELPERS_H_
+#ifndef PANDA_LIBBASE_UTILS_MATH_HELPERS_H
+#define PANDA_LIBBASE_UTILS_MATH_HELPERS_H
 
 #include "bit_utils.h"
 #include "macros.h"
@@ -142,4 +142,4 @@ inline T PowerOfTwoTableSlot(T key, T tableSize, uint32_t skippedLowestBits = 0)
 
 }  // namespace panda::helpers::math
 
-#endif  // PANDA_LIBBASE_UTILS_MATH_HELPERS_H_
+#endif  // PANDA_LIBBASE_UTILS_MATH_HELPERS_H

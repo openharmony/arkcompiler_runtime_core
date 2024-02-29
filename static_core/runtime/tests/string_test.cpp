@@ -353,7 +353,6 @@ TEST_F(StringTest, ForeignLengthAndCopyTest6b)
     ASSERT_EQ(string->GetMUtf8Length(), utf8Data.size());
     ASSERT_EQ(string->GetUtf16Length(), 3U);  // \0 doesn't counts for UTF16
     std::vector<uint8_t> out8(utf8Data.size());
-    // ASSERT_EQ(string->CopyDataMUtf8(out8.data(), out8.size()), data.size());
     string->CopyDataMUtf8(out8.data(), out8.size(), true);
     ASSERT_EQ(out8, utf8Data);
     std::vector<uint16_t> res16 {0xd801, 0xdc37, 0x20};

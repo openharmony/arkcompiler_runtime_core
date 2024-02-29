@@ -36,4 +36,4 @@ enum class ThreadStatus : uint16_t {
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_THREAD_H
+#endif  // PANDA_RUNTIME_THREAD_STATUS_H

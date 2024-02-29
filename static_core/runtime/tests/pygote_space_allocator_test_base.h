@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_TESTS_PYGOTE_SPACE_ALLOCATOR_TEST_H_
-#define PANDA_RUNTIME_TESTS_PYGOTE_SPACE_ALLOCATOR_TEST_H_
+#ifndef PANDA_RUNTIME_TESTS_PYGOTE_SPACE_ALLOCATOR_TEST_H
+#define PANDA_RUNTIME_TESTS_PYGOTE_SPACE_ALLOCATOR_TEST_H
 
 #include <sys/mman.h>
 #include <gtest/gtest.h>
@@ -276,4 +276,4 @@ inline void PygoteSpaceAllocatorTest::MuchObjectAllocTest()
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_TESTS_PYGOTE_SPACE_ALLOCATOR_TEST_H_
+#endif  // PANDA_RUNTIME_TESTS_PYGOTE_SPACE_ALLOCATOR_TEST_H

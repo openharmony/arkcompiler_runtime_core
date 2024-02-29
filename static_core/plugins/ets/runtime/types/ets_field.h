@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H
+#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H
 
 #include "libpandafile/file.h"
 #include "runtime/include/field.h"
@@ -115,4 +115,4 @@ public:
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_FIELD_H

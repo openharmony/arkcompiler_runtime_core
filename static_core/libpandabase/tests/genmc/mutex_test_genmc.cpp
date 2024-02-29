@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <pthread.h>
-#include <stdlib.h>
 #define MC_ON
 #include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
 
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
-thread_local pthread_t current_tid;
+thread_local pthread_t g_currentTid;
 
 static struct fmutex g_x;
 static int g_shared;

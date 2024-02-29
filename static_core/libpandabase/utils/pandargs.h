@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_PANDARGS_H_
-#define LIBPANDABASE_UTILS_PANDARGS_H_
+#ifndef LIBPANDABASE_UTILS_PANDARGS_H
+#define LIBPANDABASE_UTILS_PANDARGS_H
 
 #include <algorithm>
 #include <array>
@@ -1048,4 +1048,4 @@ private:
 
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_PANDARGS_H_
+#endif  // LIBPANDABASE_UTILS_PANDARGS_H

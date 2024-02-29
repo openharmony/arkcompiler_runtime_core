@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_
-#define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_
+#ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H
+#define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H
 
 #include "mark_word.h"
 #include "runtime/include/object_header-inl.h"
@@ -239,4 +239,4 @@ static_assert(sizeof(EtsObject) == sizeof(ObjectHeader));
 
 }  // namespace panda::ets
 
-#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H_
+#endif  // PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_OBJECT_H

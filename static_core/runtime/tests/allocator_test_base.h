@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H_
-#define PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H_
+#ifndef PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H
+#define PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H
 
 #include <gtest/gtest.h>
 
@@ -1409,4 +1409,4 @@ inline void AllocatorTest<Allocator>::MtAllocCollectTest(size_t minElementsCount
 
 }  // namespace panda::mem
 
-#endif  // PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H_
+#endif  // PANDA_RUNTIME_TESTS_ALLOCATOR_TEST_BASE_H

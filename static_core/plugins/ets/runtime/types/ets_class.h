@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H
 
 #include <cstdint>
 #include "include/mem/panda_containers.h"
@@ -465,4 +465,4 @@ static_assert(EtsClass::GetRuntimeClassOffset() + sizeof(panda::Class) == sizeof
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_CLASS_H

@@ -22,7 +22,9 @@ namespace panda::mem {
 void Bitmap::CopyTo(Bitmap *dest) const
 {
     ASSERT(dest->bitmap_.SizeBytes() == bitmap_.SizeBytes());
-    memmove_s(dest->bitmap_.Data(), dest->bitmap_.SizeBytes(), bitmap_.Data(), bitmap_.SizeBytes());
+    [[maybe_unused]] auto res =
+        memmove_s(dest->bitmap_.Data(), dest->bitmap_.SizeBytes(), bitmap_.Data(), bitmap_.SizeBytes());
+    ASSERT(res == 0);
 }
 
 void Bitmap::ClearBitsInRange(size_t begin, size_t end)

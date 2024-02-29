@@ -14,7 +14,7 @@
  */
 
 #include "os/error.h"
-#include <string.h>
+#include <cstring>
 
 namespace panda::os {
 
@@ -30,7 +30,8 @@ std::string Error::ToString() const
 
     char res[BUFSIZE];
 
-    strerror_s(res, BUFSIZE, err);
+    [[maybe_unused]] auto ret = strerror_s(res, BUFSIZE, err);
+    ASSERT(ret == 0);
 
     return std::string(res);
 }

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_MARK_WORD_CPP_
-#define PANDA_RUNTIME_MARK_WORD_CPP_
+#ifndef PANDA_RUNTIME_MARK_WORD_CPP
+#define PANDA_RUNTIME_MARK_WORD_CPP
 
 #include "runtime/mark_word.h"
 
@@ -98,4 +98,4 @@ inline bool MarkWord::IsHashed() const
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_MARK_WORD_CPP_
+#endif  // PANDA_RUNTIME_MARK_WORD_CPP

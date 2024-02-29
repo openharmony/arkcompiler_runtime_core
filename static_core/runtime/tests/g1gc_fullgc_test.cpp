@@ -90,9 +90,9 @@ public:
         options.SetGcDebugTriggerStart(std::numeric_limits<int>::max());
         options.SetCompilerEnableJit(false);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetHeapSizeLimit(33554432);
+        options.SetHeapSizeLimit(33554432U);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetYoungSpaceSize(4194304);
+        options.SetYoungSpaceSize(4194304U);
         options.SetExplicitConcurrentGcEnabled(false);
         [[maybe_unused]] bool success = Runtime::Create(options);
         ASSERT(success);
@@ -179,7 +179,7 @@ G1GCFullGCTest::ObjVec G1GCFullGCTest::MakeAllocations(size_t minSize, size_t ma
             auto free =
                 reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
             // NOLINTNEXTLINE(readability-magic-numbers)
-            if (size + 5000000 > free) {
+            if (size + 5000000U > free) {
                 return result;
             }
         }

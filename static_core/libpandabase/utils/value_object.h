@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDABASE_UTILS_VALUE_OBJECT_LIST_H_
-#define LIBPANDABASE_UTILS_VALUE_OBJECT_LIST_H_
+#ifndef LIBPANDABASE_UTILS_VALUE_OBJECT_LIST_H
+#define LIBPANDABASE_UTILS_VALUE_OBJECT_LIST_H
 
 namespace panda {
 class ValueObject {};
 }  // namespace panda
 
-#endif  // LIBPANDABASE_UTILS_VALUE_OBJECT_LIST_H_
+#endif  // LIBPANDABASE_UTILS_VALUE_OBJECT_LIST_H
