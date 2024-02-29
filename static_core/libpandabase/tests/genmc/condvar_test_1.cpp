@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "common.h"
-#include "libpandabase/utils/utils.h"
 
 // The test checks the work of Wait-SignalOne
 // Thread1 sets g_shared to 1, then waits,
@@ -27,6 +26,8 @@ extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
 static struct fmutex g_x;
 static struct CondVar g_c;
 constexpr int N = 2;
+constexpr int G_SHARED_VAL_2 = 2;
+constexpr int G_SHARED_VAL_3 = 3;
 
 static void *Thread1(void *arg)
 {
@@ -72,7 +73,7 @@ int main()
     pthread_join(t2, nullptr);
 
     // Check that the thread was really waken
-    ASSERT(g_shared == 3_I || g_shared == 2_I);
+    ASSERT(g_shared == G_SHARED_VAL_3 || g_shared == G_SHARED_VAL_2);
 
     ConditionVariableDestroy(&g_c);
     MutexDestroy(&g_x);

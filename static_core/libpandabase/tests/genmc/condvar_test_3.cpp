@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "common.h"
-#include "libpandabase/utils/utils.h"
 
 // The test checks the work of TimedWait-SignalOne
 // Thread1 sets g_shared to 1, then waits with timeout,
@@ -27,6 +26,7 @@ extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
 static struct fmutex g_x;
 static struct CondVar g_c;
 constexpr int N = 2;
+constexpr int TIME_LIMIT = 100;
 
 static void *Thread1(void *arg)
 {
@@ -34,7 +34,7 @@ static void *Thread1(void *arg)
 
     MutexLock(&g_x, false);
     g_shared = 1;
-    if (TimedWait(&g_c, &g_x, 100_I, 0, false)) {
+    if (TimedWait(&g_c, &g_x, TIME_LIMIT, 0, false)) {
         // Timeout
         return nullptr;
     }

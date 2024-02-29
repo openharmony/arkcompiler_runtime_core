@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ int main()
 {
     constexpr int N = 2;
     MutexInit(&g_x);
-    g_x.recursive_mutex = true;
+    g_x.recursiveMutex = true;
     pthread_t t[N];
 
     for (long i = 0u; i < N; i++) {
