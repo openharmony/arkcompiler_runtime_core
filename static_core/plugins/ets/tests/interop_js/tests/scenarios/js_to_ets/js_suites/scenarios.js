@@ -20,6 +20,7 @@ const INT_VALUE2 = 2;
 const INT_VALUE3 = 3;
 const FLOAT_VALUE = 1.0;
 
+
 function standaloneFunctionJs() {
 	return 1;
 }
@@ -286,6 +287,25 @@ function functionIntersectionTypePrimitive(arg) {
     // transpiled from Typescript code: functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB
 }
 
+class ClassWithInFieldDeclaration {
+    constructor(value) {
+        this.value = value;
+    }
+}
+
+function functionReturnsCompositeType(arg) {
+    switch (arg){
+      case 0:
+        return STRING_VALUE
+      case 1:
+        return FLOAT_VALUE
+      case 2:
+        return INT_VALUE
+      default:
+        return [ 'arrayvalue1', 'arrayvalue2' ]
+    } 
+}
+
 exports.standaloneFunctionJs = standaloneFunctionJs;
 exports.ClassWithMethodJs = ClassWithMethodJs;
 exports.newInterfaceWithMethod = newInterfaceWithMethod;
@@ -328,3 +348,5 @@ exports.functionOverload = functionOverload;
 exports.functionCallableReturnValue = functionCallableReturnValue;
 exports.functionArgStringLiteralType = functionArgStringLiteralType;
 exports.functionIntersectionTypePrimitive = functionIntersectionTypePrimitive;
+exports.ClassWithInFieldDeclaration = ClassWithInFieldDeclaration;
+exports.functionReturnsCompositeType = functionReturnsCompositeType;

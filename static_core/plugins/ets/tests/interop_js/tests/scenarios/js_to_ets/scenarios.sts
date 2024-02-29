@@ -20,8 +20,9 @@ import {
     functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
     functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
     functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
-    functionRestParameter, functionSpreadParameter, functionOverload, functionCallableReturnValue,
-    genericTypeReturnValue, functionArgStringLiteralType, functionIntersectionTypePrimitive
+    functionRestParameter, functionSpreadParameter, functionOverload, genericTypeReturnValue,
+    functionArgStringLiteralType, functionIntersectionTypePrimitive, functionCallableReturnValue,
+    ClassWithInFieldDeclaration, functionReturnsCompositeType
 } from "pure_js"
 
 import {
@@ -171,7 +172,6 @@ function TestFunctionReturnTypePrimitive(): boolean {
 
 function TestRestParams() {
     // NOTE: casts due to bug in frontend
-
     assert js.jsSumRestParams(1, 2, 3) as Int == (1 + 2 + 3)
     assert js.jsMultiplyArgBySumRestParams(1, 2, 3, 4) as Int == (1) * (2 + 3 + 4)
     assert js.jsMultiplySumArgsBySumRestParams(1, 2, 3, 4, 5) as Int == (1 + 2) * (3 + 4 + 5);
@@ -259,7 +259,7 @@ function TestStaticMethodCallReturnTypeUnion(): boolean {
     return true;
 }
 
-function Test_function_rest_parameter(): boolean {
+function testFunctionRestParameter(): boolean {
     return functionRestParameter(1, 2, 3) as int == 1;
 }
 
@@ -288,4 +288,31 @@ function testFunctionArgStringLiteralType(): boolean {
 function testFunctionIntersectionTypePrimitive(): boolean {
     let arg: JSValue = 1;
     return functionIntersectionTypePrimitive(arg) as int == 1;
+}
+
+function testClassInPlaceFieldDeclarations(): boolean {
+    let obj = new ClassWithInFieldDeclaration(1);
+    return obj.value as int == 1;
+}
+
+function testFunctionReturnsCompositeTypeInt(): boolean {
+    let isOk = true;
+    for (let i = 0; i < 4; i++){
+        const expectedValue = functionReturnsCompositeType(i) as (string | number | double | string[]);
+        switch (i) {
+            case 0:
+                isOk = isOk && expectedValue as string == '1';
+                break;
+            case 1:
+                isOk = isOk &&  expectedValue as double == 1.0;
+                break;
+            case 2:
+                isOk = isOk &&  expectedValue as number == 1;
+                break;
+            default:
+                isOk &= typeof expectedValue == 'object';
+                break;
+        }
+    }
+    return isOk;
 }

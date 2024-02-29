@@ -424,4 +424,15 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_class_with_symbol_call
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_class_with_symbol_call.js"));
 }
 
+// NOTE(smirnovams) enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_class_in_place_field_declarations)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_in_place_field_declarations.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_returns_composite_type)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_returns_composite_type.js"));
+}
+
 }  // namespace ark::ets::interop::js::testing

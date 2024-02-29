@@ -218,14 +218,14 @@ TEST_F(EtsInteropScenariosJsToEts, Test_static_methodCall_return_type_union)
 
 TEST_F(EtsInteropScenariosJsToEts, Test_function_rest_parameter)
 {
-    auto ret = CallEtsMethod<bool>("Test_function_rest_parameter");
+    auto ret = CallEtsMethod<bool>("testFunctionRestParameter");
     ASSERT_EQ(ret, true);
 }
 
 // NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
 TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_spread_parameter)
 {
-    auto ret = CallEtsMethod<bool>("Test_function_spread_parameter");
+    auto ret = CallEtsMethod<bool>("testFunctionSpreadParameter");
     ASSERT_EQ(ret, true);
 }
 
@@ -250,6 +250,18 @@ TEST_F(EtsInteropScenariosJsToEts, testFunctionArgStringLiteralType)
 TEST_F(EtsInteropScenariosJsToEts, testFunctionIntersectionTypePrimitive)
 {
     auto ret = CallEtsMethod<bool>("testFunctionIntersectionTypePrimitive");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_class_in_place_field_declarations)
+{
+    auto ret = CallEtsMethod<bool>("testClassInPlaceFieldDeclarations");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_function_returns_composite_type_int)
+{
+    auto ret = CallEtsMethod<bool>("testFunctionReturnsCompositeTypeInt");
     ASSERT_EQ(ret, true);
 }
 
