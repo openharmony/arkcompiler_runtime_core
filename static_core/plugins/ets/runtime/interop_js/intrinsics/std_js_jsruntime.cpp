@@ -103,6 +103,7 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
+    NotImplementedAdapter,
     // clang-format on
 };
 
@@ -260,6 +261,11 @@ uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 EtsString *JSValueToStringIntrinsic(JSValue *object)
 {
     return S_INTRINSICS_API->JSValueToString(object);
+}
+
+EtsString *JSONStringifyIntrinsic(JSValue *obj)
+{
+    return S_INTRINSICS_API->JSONStringify(obj);
 }
 
 // Compiler intrinsics for fast interop

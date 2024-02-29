@@ -189,6 +189,7 @@ public:
     PANDA_PUBLIC_API bool IsArrayClass() const;
     bool IsTupleClass() const;
     bool IsBoxedClass() const;
+    bool IsJSValueClass() const;
 
     static bool IsInSamePackage(std::string_view className1, std::string_view className2);
 

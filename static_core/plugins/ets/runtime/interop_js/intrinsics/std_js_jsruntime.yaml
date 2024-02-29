@@ -361,6 +361,21 @@ intrinsics:
     clear_flags: [ ]
 
 #######################
+# JSON instrinsics #
+#######################
+
+  - name: JSONStringify
+    space: ets
+    class_name: escompat.JSON
+    method_name: stringify
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.interop.js.JSValue ]
+    impl: ark::ets::interop::js::intrinsics::JSONStringifyIntrinsic
+    clear_flags: [can_throw]
+
+#######################
 # Internal intrinsics #
 #######################
   - name: CompilerGetJSNamedProperty

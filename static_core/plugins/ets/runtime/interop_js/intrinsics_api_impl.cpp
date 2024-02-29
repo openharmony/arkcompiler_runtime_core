@@ -722,6 +722,42 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     return EtsObject::FromCoreType(res);
 }
 
+EtsString *JSONStringify(JSValue *jsvalue)
+{
+    ASSERT(jsvalue != nullptr);
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    auto global = GetGlobal(env);
+
+    napi_value jsonInstance;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "JSON", &jsonInstance));
+
+    napi_value stringify;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsonInstance, "stringify", &stringify));
+
+    auto object = jsvalue->GetNapiValue(env);
+    std::array<napi_value, 1> args = {object};
+
+    napi_value result;
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_call_function(env, jsonInstance, stringify, args.size(), args.data(), &result);
+    }
+
+    if (UNLIKELY(jsStatus != napi_ok)) {
+        INTEROP_FATAL_IF(jsStatus != napi_pending_exception);
+        ctx->ForwardJSException(coro);
+        return nullptr;
+    }
+    auto res = JSConvertString::Unwrap(ctx, env, result);
+    return res.value_or(nullptr);
+}
+
 const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeFinalizationRegistryCallback,
     JSRuntimeNewJSValueDouble,
@@ -752,6 +788,7 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeLoadModule,
     JSRuntimeStrictEqual,
     JSValueToString,
+    JSONStringify,
     CompilerGetJSNamedProperty,
     CompilerGetJSProperty,
     CompilerGetJSElement,
