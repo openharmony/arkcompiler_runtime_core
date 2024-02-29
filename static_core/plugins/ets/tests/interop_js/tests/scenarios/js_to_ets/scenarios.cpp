@@ -229,15 +229,27 @@ TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_spread_parameter)
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropScenariosJsToEts, Test_function_overload)
+TEST_F(EtsInteropScenariosJsToEts, testFunctionOverload)
 {
-    auto ret = CallEtsMethod<bool>("Test_function_overload");
+    auto ret = CallEtsMethod<bool>("testFunctionOverload");
     ASSERT_EQ(ret, true);
 }
 
-TEST_F(EtsInteropScenariosJsToEts, Test_function_callable_return_value)
+TEST_F(EtsInteropScenariosJsToEts, testFunctionCallableReturnValue)
 {
-    auto ret = CallEtsMethod<bool>("Test_function_callable_return_value");
+    auto ret = CallEtsMethod<bool>("testFunctionCallableReturnValue");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, testFunctionArgStringLiteralType)
+{
+    auto ret = CallEtsMethod<bool>("testFunctionArgStringLiteralType");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, testFunctionIntersectionTypePrimitive)
+{
+    auto ret = CallEtsMethod<bool>("testFunctionIntersectionTypePrimitive");
     ASSERT_EQ(ret, true);
 }
 

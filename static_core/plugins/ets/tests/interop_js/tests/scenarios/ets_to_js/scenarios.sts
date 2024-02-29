@@ -420,27 +420,65 @@ async function asyncNewInterfaceWithMethodEts(): Promise<InterfaceWithMethodEts>
 async function asyncFunctionUserInterface(obj: InterfaceWithMethodEts): Promise<int> {
     return obj.methodInInterface();
 }
-//function function_rest_parameter(...arg: number[]): number {
+
+//function functionRestParameter(...arg: number[]): number {
 //    return arg[0];
 //}
 
-function function_spread_parameter(arg1: number, arg2: number): number {
+function functionSpreadParameter(arg1: number, arg2: number): number {
     return arg1 + arg2;
 }
 
-function function_overloaded(): void {
+function functionOverloaded(): void {
 }
 
-function function_overloaded(arg: number): void {
+function functionOverloaded(arg: number): void {
 }
 
-function function_overload(): number {
-    function_overloaded();
-    function_overloaded(1);
+function functionOverload(): number {
+    functionOverloaded();
+    functionOverloaded(1);
     return 1;
 }
 
-function function_callable_return_value(): Function<int> {
+function functionCallableReturnValue(): Function<int> {
     const value = () => 1;
     return value;
 }
+
+// NOTE(nikitayegorov) #18198 enable this after literal types are fixed
+//type TypeString = "1";
+//type TypeStringU = "1" | "2";
+//type PrimitiveA = 0 | 1;
+//type PrimitiveB = 1 | 2;
+//type PrimitiveAB = PrimitiveA & PrimitiveB;
+
+//interface A {
+//  a: number;
+//}
+//interface B {
+//  b: string;
+//}
+//type AB = A & B;
+
+
+//function functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB {
+//  const ret: PrimitiveAB = arg;
+//  return ret;
+//}
+
+//function functionIntersectionTypeObject(): AB {
+//  let ab: AB = {
+//    a: 1,
+//    b: "1"
+//  };
+//  return ab;
+//}
+
+//function functionArgStringLiteralType(arg: TypeString): TypeString {
+//  return arg;
+//}
+
+//function functionArgStringLiteralTypeUnion(arg: TypeStringU): TypeStringU {
+//  return arg;
+//}

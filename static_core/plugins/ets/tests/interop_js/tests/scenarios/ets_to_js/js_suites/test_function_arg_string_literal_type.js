@@ -15,13 +15,18 @@
 const { getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
-const restParameterFunctionEts = etsMod.getFunction('functionRestParameter');
+const functionArgStringLiteralTypeEts = etsMod.getFunction('functionArgStringLiteralType');
+const functionArgStringLiteralTypeUnionEts = etsMod.getFunction('functionArgStringLiteralTypeUnion');
 
 {
-  const VALUE = 1;
-  let ret = restParameterFunctionEts(VALUE, VALUE);
-  ASSERT_EQ(ret, VALUE);
+  const VALUE1 = "1";
+  const VALUE2 = "2";
+  let ret = functionArgStringLiteralTypeEts(VALUE1);
+  ASSERT_EQ(ret, VALUE1);
 
-  ret = restParameterFunctionEts(VALUE, VALUE, VALUE);
-  ASSERT_EQ(ret, VALUE);
+  ret = functionArgStringLiteralTypeUnionEts(VALUE1);
+  ASSERT_EQ(ret, VALUE1);
+
+  ret = functionArgStringLiteralTypeUnionEts(VALUE2);
+  ASSERT_EQ(ret, VALUE2);
 }

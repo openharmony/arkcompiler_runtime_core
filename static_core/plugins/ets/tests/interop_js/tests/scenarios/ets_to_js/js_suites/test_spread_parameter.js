@@ -15,7 +15,7 @@
 const { getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
-const spreadParameterFunctionEts = etsMod.getFunction('function_spread_parameter');
+const spreadParameterFunctionEts = etsMod.getFunction('functionSpreadParameter');
 
 {
   const EXPECTED_RET = 2;
