@@ -420,3 +420,27 @@ async function asyncNewInterfaceWithMethodEts(): Promise<InterfaceWithMethodEts>
 async function asyncFunctionUserInterface(obj: InterfaceWithMethodEts): Promise<int> {
     return obj.methodInInterface();
 }
+//function function_rest_parameter(...arg: number[]): number {
+//    return arg[0];
+//}
+
+function function_spread_parameter(arg1: number, arg2: number): number {
+    return arg1 + arg2;
+}
+
+function function_overloaded(): void {
+}
+
+function function_overloaded(arg: number): void {
+}
+
+function function_overload(): number {
+    function_overloaded();
+    function_overloaded(1);
+    return 1;
+}
+
+function function_callable_return_value(): Function<int> {
+    const value = () => 1;
+    return value;
+}

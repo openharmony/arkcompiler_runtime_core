@@ -380,4 +380,26 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_object)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_object.js"));
 }
 
+// NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_rest_parameter)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_rest_parameter.js"));
+}
+
+// NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_spread_parameter)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_spread_parameter.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_overload)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_overload_set.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_callable_return_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_callable_return_value.js"));
+}
+
 }  // namespace ark::ets::interop::js::testing

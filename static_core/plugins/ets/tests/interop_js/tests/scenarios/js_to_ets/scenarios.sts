@@ -15,13 +15,19 @@
 import * as js from "pure_js"
 import {
     ClassWithMethodJs, ClassWithGetterSetter, InterfaceWithUnionImpl, UnionTestClassJs,
-    ClassWithStaticMethod
-} from "pure_js"
+    ClassWithStaticMethod, standaloneFunctionJs, newInterfaceWithMethod, lambdaFunction,
+    genericFunction, ClassToExtend, functionArgTypeAny, functionArgTypeUnknown, functionArgTypeUndefined,
+    functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
+    functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
+    functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
+    genericTypeReturnValue, functionRestParameter, functionSpreadParameter,
+    functionOverload, functionCallableReturnValue } from "pure_js"
 
 import {
     optionalCall,
     singleRequired,
 } from "decl_js"
+
 
 function testOptionals() {
     let x = optionalCall(123, 321, 5)
@@ -249,3 +255,26 @@ function TestStaticMethodCallReturnTypeUnion(): boolean {
     }
     return true;
 }
+
+function Test_function_rest_parameter(): boolean {
+    return functionRestParameter(1, 2, 3) as int == 1;
+}
+
+function Test_function_spread_parameter(): boolean {
+    // NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
+    //const arr = [1, 1];
+    //return functionSpreadParameter(...arr) as int == 2;
+    return false;
+}
+
+function Test_function_overload(): boolean {
+    return functionOverload() as int == 1;
+}
+
+function Test_function_callable_return_value(): boolean {
+    const fn = functionCallableReturnValue;
+    return fn()(1) as int == 2;
+}
+
+
+
