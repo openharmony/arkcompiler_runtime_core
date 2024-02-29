@@ -116,7 +116,7 @@ export final class GC {
      * @throws IllegalArgumentException if cause of GC is invalid or
      *         current GC does not support requested cause
      *
-     * @throws RuntimeException if VM is running with incorrect GC trigger
+     * @throws UnsupportedOperationException if VM is running with incorrect GC trigger
      */
     public static native scheduleGcAfterNthAlloc(counter: int, cause: int): void throws;
 

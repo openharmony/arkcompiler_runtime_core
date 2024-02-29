@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -453,7 +453,7 @@ extern "C" EtsVoid *StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     }
     mem::GCTrigger *trigger = vm->GetGCTrigger();
     if (trigger->GetType() != mem::GCTriggerType::ON_NTH_ALLOC) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::RUNTIME_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
                           "VM is running with unsupported GC trigger");
         return EtsVoid::GetInstance();
     }
