@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -458,7 +458,7 @@ public:
 
     const CFrameLayout &GetFrameLayout() const
     {
-        return frame_layout_;
+        return frameLayout_;
     }
 
     bool RegisterKeepCallArgument(CallInst *callInst, Reg reg);
@@ -750,7 +750,7 @@ private:
     ArenaVector<SlowPathBase *> slowPaths_;
     ArenaUnorderedMap<RuntimeInterface::EntrypointId, SlowPathShared *> slowPathsMap_;
 
-    const CFrameLayout frame_layout_;  // NOLINT(readability-identifier-naming)
+    const CFrameLayout frameLayout_;  // NOLINT(readability-identifier-naming)
 
     ArenaVector<OsrEntryStub *> osrEntries_;
 
@@ -858,33 +858,34 @@ protected:
     static void VisitNegOverflowAndZeroCheck(GraphVisitor *v, Inst *inst);
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryImmOperation(opc) static void Visit##opc##I(GraphVisitor *visitor, Inst *inst);
+#define BINARY_IMM_OPERATION(opc) static void Visit##opc##I(GraphVisitor *visitor, Inst *inst);
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BINARRY_IMM_OPS(DEF) DEF(Add) DEF(Sub) DEF(Shl) DEF(AShr) DEF(And) DEF(Or) DEF(Xor)
 
-    BINARRY_IMM_OPS(BinaryImmOperation)
+    BINARRY_IMM_OPS(BINARY_IMM_OPERATION)
 
 #undef BINARRY_IMM_OPS
-#undef BinaryImmOperation
+#undef BINARY_IMM_OPERATION
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinarySignUnsignOperation(opc) static void Visit##opc(GraphVisitor *visitor, Inst *inst);
+#define BINARY_SIGN_UNSIGN_OPERATION(opc) static void Visit##opc(GraphVisitor *visitor, Inst *inst);
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SIGN_UNSIGN_OPS(DEF) DEF(Div) DEF(Mod) DEF(Min) DEF(Max) DEF(Shr)
 
-    SIGN_UNSIGN_OPS(BinarySignUnsignOperation)
+    SIGN_UNSIGN_OPS(BINARY_SIGN_UNSIGN_OPERATION)
 
 #undef SIGN_UNSIGN_OPS
-#undef BinarySignUnsignOperation
+#undef BINARY_SIGN_UNSIGN_OPERATION
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryShiftedRegisterOperationDef(opc, ignored) static void Visit##opc##SR(GraphVisitor *visitor, Inst *inst);
+#define BINARY_SHIFTED_REGISTER_OPERATION_DEF(opc, ignored) \
+    static void Visit##opc##SR(GraphVisitor *visitor, Inst *inst);
 
-    ENCODE_INST_WITH_SHIFTED_OPERAND(BinaryShiftedRegisterOperationDef)
+    ENCODE_INST_WITH_SHIFTED_OPERAND(BINARY_SHIFTED_REGISTER_OPERATION_DEF)
 
-#undef BinaryShiftedRegisterOperationDef
+#undef BINARY_SHIFTED_REGISTER_OPERATION_DEF
 
     static void VisitShrI(GraphVisitor *visitor, Inst *inst);
 

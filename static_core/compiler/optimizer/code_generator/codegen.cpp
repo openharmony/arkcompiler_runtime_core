@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,7 +146,7 @@ Codegen::Codegen(Graph *graph)
       codeBuilder_(allocator_->New<CodeInfoBuilder>(graph->GetArch(), allocator_)),
       slowPaths_(graph->GetLocalAllocator()->Adapter()),
       slowPathsMap_(graph->GetLocalAllocator()->Adapter()),
-      frame_layout_(CFrameLayout(graph->GetArch(), graph->GetStackSlotsCount())),
+      frameLayout_(CFrameLayout(graph->GetArch(), graph->GetStackSlotsCount())),
       osrEntries_(graph->GetLocalAllocator()->Adapter()),
       vregIndices_(GetAllocator()->Adapter()),
       runtime_(graph->GetRuntime()),
@@ -1825,9 +1825,9 @@ void Codegen::CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved, bool store
     } else {
         CheckObject(tmpRef, label);
     }
-    auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
-    live_regs |= preserved;
-    CallBarrier(live_regs, live_vregs, entrypointReg.GetReg(), tmpRef);
+    auto [liveRegs, liveVregs] = GetLiveRegisters<true>(inst);
+    liveRegs |= preserved;
+    CallBarrier(liveRegs, liveVregs, entrypointReg.GetReg(), tmpRef);
 
     if (storePair) {
         // store pair doesn't support index and scalar
@@ -1844,7 +1844,7 @@ void Codegen::CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved, bool store
             enc->EncodeLdr(tmpRef, false, MemRef(mem.GetBase(), secondOffset));
         }
         CheckObject(tmpRef, label);
-        CallBarrier(live_regs, live_vregs, entrypointReg.GetReg(), tmpRef);
+        CallBarrier(liveRegs, liveVregs, entrypointReg.GetReg(), tmpRef);
     }
     enc->BindLabel(label);
 }
@@ -2159,18 +2159,18 @@ void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg
     enc->EncodeShr(tmp, tmp, Imm(regionSizeBit));
 
     enc->EncodeJump(label, tmp, Condition::EQ);
-    auto [live_regs, live_vregs] = GetLiveRegisters<true>(inst);
+    auto [liveRegs, liveVregs] = GetLiveRegisters<true>(inst);
 
     if (mem.HasIndex()) {
         ASSERT(mem.GetScale() == 0 && !mem.HasDisp());
         enc->EncodeAdd(tmp, base, mem.GetIndex());
-        CallBarrier(live_regs, live_vregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, tmp, reg1);
+        CallBarrier(liveRegs, liveVregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, tmp, reg1);
     } else if (mem.HasDisp()) {
         ASSERT(!mem.HasIndex());
         enc->EncodeAdd(tmp, base, Imm(mem.GetDisp()));
-        CallBarrier(live_regs, live_vregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, tmp, reg1);
+        CallBarrier(liveRegs, liveVregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, tmp, reg1);
     } else {
-        CallBarrier(live_regs, live_vregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, base, reg1);
+        CallBarrier(liveRegs, liveVregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, base, reg1);
     }
     enc->BindLabel(label);
 
@@ -2193,7 +2193,7 @@ void Codegen::CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg
             ASSERT(!mem.HasIndex());
             enc->EncodeAdd(tmp, tmp, Imm(mem.GetDisp()));
         }
-        CallBarrier(live_regs, live_vregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, tmp, reg2);
+        CallBarrier(liveRegs, liveVregs, EntrypointId::POST_WRB_UPDATE_CARD_FUNC_NO_BRIDGE, tmp, reg2);
         enc->BindLabel(label1);
     }
 }
@@ -2257,10 +2257,10 @@ void Codegen::CreatePostInterGenerationalBarrier(Reg base)
 
 bool Codegen::HasLiveCallerSavedRegs(Inst *inst)
 {
-    auto [live_regs, live_fp_regs] = GetLiveRegisters<false>(inst);
-    live_regs &= GetCallerRegsMask(GetArch(), false);
-    live_fp_regs &= GetCallerRegsMask(GetArch(), true);
-    return live_regs.Any() || live_fp_regs.Any();
+    auto [liveRegs, liveFpRegs] = GetLiveRegisters<false>(inst);
+    liveRegs &= GetCallerRegsMask(GetArch(), false);
+    liveFpRegs &= GetCallerRegsMask(GetArch(), true);
+    return liveRegs.Any() || liveFpRegs.Any();
 }
 
 void Codegen::SaveCallerRegisters(RegMask liveRegs, VRegMask liveVregs, bool adjustRegs)
@@ -2386,7 +2386,7 @@ void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UnaryOperation(opc)                                                       \
+#define UNARY_OPERATION(opc)                                                      \
     void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
     {                                                                             \
         EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);               \
@@ -2397,7 +2397,7 @@ void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src)
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryOperation(opc)                                                      \
+#define BINARY_OPERATION(opc)                                                     \
     void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
     {                                                                             \
         auto type = inst->GetType();                                              \
@@ -2409,18 +2409,18 @@ void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src)
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryShiftedRegisterOperation(opc)                                                     \
-    void EncodeVisitor::Visit##opc##SR(GraphVisitor *visitor, Inst *inst)                       \
-    {                                                                                           \
-        auto type = inst->GetType();                                                            \
-        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                             \
-        auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);                 \
-        auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);               \
-        auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);               \
-        auto imm_shift_inst = static_cast<BinaryShiftedRegisterOperation *>(inst);              \
-        auto imm_value = static_cast<uint32_t>(imm_shift_inst->GetImm()) & (dst.GetSize() - 1); \
-        auto shift = Shift(src1, imm_shift_inst->GetShiftType(), imm_value);                    \
-        enc->GetEncoder()->Encode##opc(dst, src0, shift);                                       \
+#define BINARY_SHIFTED_REGISTER_OPERATION(opc)                                               \
+    void EncodeVisitor::Visit##opc##SR(GraphVisitor *visitor, Inst *inst)                    \
+    {                                                                                        \
+        auto type = inst->GetType();                                                         \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                          \
+        auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), type);              \
+        auto src0 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), type);            \
+        auto src1 = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), type);            \
+        auto immShiftInst = static_cast<BinaryShiftedRegisterOperation *>(inst);             \
+        auto immValue = static_cast<uint32_t>(immShiftInst->GetImm()) & (dst.GetSize() - 1); \
+        auto shift = Shift(src1, immShiftInst->GetShiftType(), immValue);                    \
+        enc->GetEncoder()->Encode##opc(dst, src0, shift);                                    \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -2429,13 +2429,13 @@ void Codegen::EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src)
 ENCODE_MATH_LIST(INST_DEF)
 ENCODE_INST_WITH_SHIFTED_OPERAND(INST_DEF)
 
-#undef UnaryOperation
-#undef BinaryOperation
-#undef BinaryShiftedRegisterOperation
+#undef UNARY_OPERATION
+#undef BINARY_OPERATION
+#undef BINARY_SHIFTED_REGISTER_OPERATION
 #undef INST_DEF
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinaryImmOperation(opc)                                                   \
+#define BINARY_IMM_OPERATION(opc)                                                 \
     void EncodeVisitor::Visit##opc##I(GraphVisitor *visitor, Inst *inst)          \
     {                                                                             \
         auto binop = inst->CastTo##opc##I();                                      \
@@ -2447,15 +2447,15 @@ ENCODE_INST_WITH_SHIFTED_OPERAND(INST_DEF)
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BINARRY_IMM_OPS(DEF) DEF(Add) DEF(Sub) DEF(Shl) DEF(AShr) DEF(And) DEF(Or) DEF(Xor)
+#define BINARY_IMM_OPS(DEF) DEF(Add) DEF(Sub) DEF(Shl) DEF(AShr) DEF(And) DEF(Or) DEF(Xor)
 
-BINARRY_IMM_OPS(BinaryImmOperation)
+BINARY_IMM_OPS(BINARY_IMM_OPERATION)
 
-#undef BINARRY_IMM_OPS
-#undef BinaryImmOperation
+#undef BINARY_IMM_OPS
+#undef BINARY_IMM_OPERATION
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BinarySignUnsignOperation(opc)                                            \
+#define BINARY_SIGN_UNSIGN_OPERATION(opc)                                         \
     void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
     {                                                                             \
         auto type = inst->GetType();                                              \
@@ -2473,17 +2473,17 @@ BINARRY_IMM_OPS(BinaryImmOperation)
             enc->GetEncoder()->SetFalseResult();                                  \
             return;                                                               \
         }                                                                         \
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst); \
-        enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);      \
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);      \
+        auto [liveRegs, liveVregs] = enc->GetCodegen()->GetLiveRegisters(inst);   \
+        enc->GetEncoder()->SetRegister(&liveRegs, &liveVregs, dst, false);        \
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveVregs, true);        \
         enc->GetEncoder()->Encode##opc(dst, IsTypeSigned(type), src0, src1);      \
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);      \
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveVregs, true);        \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SIGN_UNSIGN_OPS(DEF) DEF(Div) DEF(Min) DEF(Max)
 
-SIGN_UNSIGN_OPS(BinarySignUnsignOperation)
+SIGN_UNSIGN_OPS(BINARY_SIGN_UNSIGN_OPERATION)
 
 #undef SIGN_UNSIGN_OPS
 #undef BINARY_SIGN_UNSIGN_OPERATION
@@ -2505,8 +2505,8 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
         RuntimeInterface::IntrinsicId entry =
             ((type == DataType::FLOAT32) ? RuntimeInterface::IntrinsicId::LIB_CALL_FMODF
                                          : RuntimeInterface::IntrinsicId::LIB_CALL_FMOD);
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+        auto [liveRegs, liveVregs] = enc->GetCodegen()->GetLiveRegisters(inst);
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveVregs, true);
 
         enc->GetCodegen()->FillCallParams(src0, src1);
         enc->GetCodegen()->CallIntrinsic(inst, entry);
@@ -2522,8 +2522,8 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
                                          Reg(retVal.GetId(), dst.GetSize() == WORD_SIZE ? INT32_TYPE : INT64_TYPE));
         }
 
-        enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+        enc->GetEncoder()->SetRegister(&liveRegs, &liveVregs, dst, false);
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveVregs, true);
         return;
     }
 
@@ -2533,11 +2533,11 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
         enc->GetEncoder()->SetFalseResult();
         return;
     }
-    auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-    enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
-    enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+    auto [liveRegs, liveVregs] = enc->GetCodegen()->GetLiveRegisters(inst);
+    enc->GetEncoder()->SetRegister(&liveRegs, &liveVregs, dst, false);
+    enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveVregs, true);
     enc->GetEncoder()->EncodeMod(dst, IsTypeSigned(type), src0, src1);
-    enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+    enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveVregs, true);
 }
 
 void EncodeVisitor::VisitShrI(GraphVisitor *visitor, Inst *inst)
@@ -2658,11 +2658,11 @@ void EncodeVisitor::VisitCast(GraphVisitor *visitor, Inst *inst)
         enc->GetEncoder()->SetFalseResult();
         return;
     }
-    auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-    enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
-    enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+    auto [liveRegs, liveVregs] = enc->GetCodegen()->GetLiveRegisters(inst);
+    enc->GetEncoder()->SetRegister(&liveRegs, &liveVregs, dst, false);
+    enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveVregs, true);
     enc->GetEncoder()->EncodeCast(dst, dstSigned, src, srcSigned);
-    enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+    enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveVregs, true);
 }
 
 void EncodeVisitor::VisitBitcast(GraphVisitor *visitor, Inst *inst)
@@ -2933,22 +2933,22 @@ void EncodeVisitor::VisitFillConstArray(GraphVisitor *visitor, Inst *inst)
         encoder->EncodeAdd(methodReg, methodReg, Imm(arrOffset));
         // call memcpy
         RuntimeInterface::IntrinsicId entry = RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY;
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+        auto [liveRegs, liveVregs] = enc->GetCodegen()->GetLiveRegisters(inst);
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveVregs, true);
 
         enc->GetCodegen()->FillCallParams(arrayReg, methodReg, TypedImm(arraySize));
         enc->GetCodegen()->CallIntrinsic(inst, entry);
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveVregs, true);
     } else {
         auto data = runtime->GetPointerToConstArrayData(method, arrayType);
         // call memcpy
         RuntimeInterface::IntrinsicId entry = RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY;
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+        auto [liveRegs, liveVregs] = enc->GetCodegen()->GetLiveRegisters(inst);
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveVregs, true);
 
         enc->GetCodegen()->FillCallParams(arrayReg, TypedImm(data), TypedImm(arraySize));
         enc->GetCodegen()->CallIntrinsic(inst, entry);
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveVregs, true);
     }
 }
 

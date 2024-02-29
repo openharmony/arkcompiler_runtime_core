@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,10 +67,10 @@ public:
         ASSERT_EQ(inst->GetOpcode(), Opcode::SpillFill);
         auto sf = inst->CastToSpillFill();
 
-        for (auto &[src_loc, dst_loc, src, dst] : data) {
+        for (auto &[srcLoc, dstLoc, src, dst] : data) {
             bool found = false;
             for (auto &sfData : sf->GetSpillFills()) {
-                found |= sfData.SrcType() == src_loc && sfData.DstType() == dst_loc && sfData.SrcValue() == src &&
+                found |= sfData.SrcType() == srcLoc && sfData.DstType() == dstLoc && sfData.SrcValue() == src &&
                          sfData.DstValue() == dst;
             }
             EXPECT_TRUE(found) << "SpillFillData {move, src=" << static_cast<int>(src)
@@ -438,10 +438,10 @@ TEST_F(SplitResolverTest, ReuseExistingSpillFillWithinBlock)
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(3).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(3).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(3U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(3U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0U, 0U},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 // If there are spill fills inserted to load instn's operand or spill instn's result
@@ -499,10 +499,10 @@ TEST_F(SplitResolverTest, DontReuseInstructionSpillFills)
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(4).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(7).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(4U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(7U).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0U, 0U},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 TEST_F(SplitResolverTest, DoNotReuseExistingSpillFillBeforeInstruction)
@@ -874,23 +874,23 @@ TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
     auto la = RunLivenessAnalysis(initialGraph);
     auto var0 = la->GetInstLifeIntervals(&INS(4U));
     var0->SetLocation(Location::MakeStackSlot(0U));
-    SplitAssignSlot(SplitAssignReg(var0, la->GetInstLifeIntervals(&INS(6))->GetBegin(), 4),
-                    la->GetInstLifeIntervals(&INS(8))->GetBegin(), 0);
+    SplitAssignSlot(SplitAssignReg(var0, la->GetInstLifeIntervals(&INS(6U))->GetBegin(), 4U),
+                    la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 0U);
     auto var1 = la->GetInstLifeIntervals(&INS(5U));
     var1->SetLocation(Location::MakeStackSlot(1U));
-    SplitAssignSlot(SplitAssignReg(var1, la->GetInstLifeIntervals(&INS(6))->GetBegin(), 5),
-                    la->GetInstLifeIntervals(&INS(8))->GetBegin(), 1);
+    SplitAssignSlot(SplitAssignReg(var1, la->GetInstLifeIntervals(&INS(6U))->GetBegin(), 5U),
+                    la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 1U);
 
     SplitResolver resolver(initialGraph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(6).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 4},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
-    CheckSpillFills(INS(8).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 4, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 5U, 1U}});
+    CheckSpillFills(INS(6U).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0U, 4U},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
+    CheckSpillFills(INS(8U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 4U, 0U},
+                                        {LocationType::REGISTER, LocationType::STACK, 5U, 1U}});
     auto resolverBlock = initialGraph->GetVectorBlocks().back();
-    CheckSpillFills(resolverBlock->GetLastInst(), {{LocationType::STACK, LocationType::REGISTER, 0, 4},
+    CheckSpillFills(resolverBlock->GetLastInst(), {{LocationType::STACK, LocationType::REGISTER, 0U, 4U},
                                                    {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
 }
 
@@ -984,9 +984,9 @@ TEST_F(SplitResolverTest, ConnectIntervalsForConstantWithinBlock)
     auto la = RunLivenessAnalysis(initialGraph);
     auto con = la->GetInstLifeIntervals(&INS(0U));
     con->SetReg(0U);
-    SplitAssignReg(SplitAssignImmSlot(SplitAssignImmSlot(con, la->GetInstLifeIntervals(&INS(1))->GetBegin(), 0),
-                                      la->GetInstLifeIntervals(&INS(2))->GetBegin(), 0),
-                   la->GetInstLifeIntervals(&INS(3))->GetBegin(), 0);
+    SplitAssignReg(SplitAssignImmSlot(SplitAssignImmSlot(con, la->GetInstLifeIntervals(&INS(1U))->GetBegin(), 0U),
+                                      la->GetInstLifeIntervals(&INS(2U))->GetBegin(), 0U),
+                   la->GetInstLifeIntervals(&INS(3U))->GetBegin(), 0U);
 
     SplitResolver resolver(initialGraph, la);
     resolver.Run();
@@ -1039,8 +1039,8 @@ TEST_F(SplitResolverTest, ConnectIntervalsForConstantBetweenBlock)
     con0->SetReg(0U);
     con1->SetReg(1U);
     SplitAssignImmSlot(con0, la->GetInstLifeIntervals(&INS(7U))->GetBegin(), 0U);
-    SplitAssignReg(SplitAssignImmSlot(con1, la->GetInstLifeIntervals(&INS(3))->GetBegin(), 0),
-                   la->GetInstLifeIntervals(&INS(7))->GetBegin(), 2);
+    SplitAssignReg(SplitAssignImmSlot(con1, la->GetInstLifeIntervals(&INS(3U))->GetBegin(), 0U),
+                   la->GetInstLifeIntervals(&INS(7U))->GetBegin(), 2U);
     // Assign reg to the phi and its inputs
     la->GetInstLifeIntervals(&INS(5U))->SetReg(2U);
     la->GetInstLifeIntervals(&INS(6U))->SetReg(2U);
@@ -1213,10 +1213,10 @@ TEST_F(SplitResolverTest, MultipleEndBlockMoves)
     auto p1 = la->GetInstLifeIntervals(&INS(1U));
     p0->SetReg(0U);
     p1->SetReg(1U);
-    SplitAssignReg(SplitAssignSlot(p0, la->GetInstLifeIntervals(&INS(5))->GetEnd(), 0),
-                   la->GetInstLifeIntervals(&INS(8))->GetBegin(), 0);
-    SplitAssignReg(SplitAssignSlot(p1, la->GetInstLifeIntervals(&INS(5))->GetEnd(), 1),
-                   la->GetInstLifeIntervals(&INS(8))->GetBegin(), 1);
+    SplitAssignReg(SplitAssignSlot(p0, la->GetInstLifeIntervals(&INS(5U))->GetEnd(), 0U),
+                   la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 0U);
+    SplitAssignReg(SplitAssignSlot(p1, la->GetInstLifeIntervals(&INS(5U))->GetEnd(), 1U),
+                   la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 1U);
     // Assign reg to the phi and its inputs
     la->GetInstLifeIntervals(&INS(6U))->SetReg(2U);
     la->GetInstLifeIntervals(&INS(7U))->SetReg(2U);
@@ -1227,14 +1227,14 @@ TEST_F(SplitResolverTest, MultipleEndBlockMoves)
     resolver.Run();
     initialGraph->RunPass<Cleanup>();
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(6).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(6).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
-    CheckSpillFills(INS(7).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(7).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(6U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(6U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0U, 0U},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(7U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0U, 0U},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(7U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0U, 0U},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 TEST_F(SplitResolverTest, SwapCallInputs)

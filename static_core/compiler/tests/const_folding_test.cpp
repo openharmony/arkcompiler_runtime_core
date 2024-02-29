@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -151,7 +151,7 @@ TEST_F(ConstFoldingTest, NegInt64Test)
             INST(2U, Opcode::Return).s64().Inputs(1U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingNeg(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -170,7 +170,7 @@ TEST_F(ConstFoldingTest, NegInt32Test)
             INST(2U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    int32_t result = -1;
+    int32_t result = -1L;
     ASSERT_EQ(ConstFoldingNeg(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -190,7 +190,7 @@ TEST_F(ConstFoldingTest, Constant32NegIntTest)
             INST(2U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    int32_t result = -1;
+    int32_t result = -1L;
     ASSERT_EQ(ConstFoldingNeg(&INS(1U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -202,14 +202,14 @@ TEST_F(ConstFoldingTest, NegFloatTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0, static_cast<float>(12U));
+        CONSTANT(0U, static_cast<float>(12U));
         BASIC_BLOCK(2U, 1U)
         {
             INST(1U, Opcode::Neg).f32().Inputs(0U);
             INST(2U, Opcode::Return).f32().Inputs(1U);
         }
     }
-    float result = -12.0;
+    float result = -12.0F;
     ASSERT_EQ(ConstFoldingNeg(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -247,7 +247,7 @@ TEST_F(ConstFoldingTest, AbsIntTest)
             INST(2U, Opcode::Return).s64().Inputs(1U);
         }
     }
-    int64_t result = 1;
+    int64_t result = 1U;
     ASSERT_EQ(ConstFoldingAbs(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -267,7 +267,7 @@ TEST_F(ConstFoldingTest, Constant32AbsIntTest)
             INST(2U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    int64_t result = 1;
+    int64_t result = 1U;
     ASSERT_EQ(ConstFoldingAbs(&INS(1U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -324,7 +324,7 @@ TEST_F(ConstFoldingTest, NotIntTest)
             INST(2U, Opcode::Return).s64().Inputs(1U);
         }
     }
-    int result = 11;
+    int result = 11U;
     ASSERT_EQ(ConstFoldingNot(&INS(1U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -344,7 +344,7 @@ TEST_F(ConstFoldingTest, Constant32NotIntTest)
             INST(2U, Opcode::Return).s32().Inputs(1U);
         }
     }
-    int result = 11;
+    int result = 11U;
     ASSERT_EQ(ConstFoldingNot(&INS(1U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -364,7 +364,7 @@ TEST_F(ConstFoldingTest, AddIntTest)
             INST(3U, Opcode::Return).s64().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingAdd(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -385,7 +385,7 @@ TEST_F(ConstFoldingTest, Constant32AddIntTest)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingAdd(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -405,7 +405,7 @@ TEST_F(ConstFoldingTest, AddInt8Test)
             INST(3U, Opcode::Return).u8().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingAdd(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -426,7 +426,7 @@ TEST_F(ConstFoldingTest, Constant32AddInt8Test)
             INST(3U, Opcode::Return).u8().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingAdd(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -466,7 +466,7 @@ TEST_F(ConstFoldingTest, AddDoubleTest)
             INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
-    double result = 1.0;
+    double result = 1.0_D;
     ASSERT_EQ(ConstFoldingAdd(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -486,7 +486,7 @@ TEST_F(ConstFoldingTest, SubIntTest)
             INST(3U, Opcode::Return).s8().Inputs(2U);
         }
     }
-    int result = 0xffffffff;
+    int result = 0xffffffffU;
     ASSERT_EQ(ConstFoldingSub(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -507,7 +507,7 @@ TEST_F(ConstFoldingTest, Constant32SubIntTest)
             INST(3U, Opcode::Return).s8().Inputs(2U);
         }
     }
-    int result = 0xffffffff;
+    int result = 0xffffffffU;
     ASSERT_EQ(ConstFoldingSub(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -527,7 +527,7 @@ TEST_F(ConstFoldingTest, SubUIntTest)
             INST(3U, Opcode::Return).u8().Inputs(2U);
         }
     }
-    int result = 0xff;
+    int result = 0xffU;
     ASSERT_EQ(ConstFoldingSub(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -548,7 +548,7 @@ TEST_F(ConstFoldingTest, Constant32SubUIntTest)
             INST(3U, Opcode::Return).u8().Inputs(2U);
         }
     }
-    int result = 0xff;
+    int result = 0xffU;
     ASSERT_EQ(ConstFoldingSub(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -588,7 +588,7 @@ TEST_F(ConstFoldingTest, SubDoubleTest)
             INST(3U, Opcode::Return).f64().Inputs(2U);
         }
     }
-    double result = 1.0;
+    double result = 1.0_D;
     ASSERT_EQ(ConstFoldingSub(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT64, bit_cast<uint64_t, double>(result));
     ASSERT(inst != nullptr);
@@ -608,7 +608,7 @@ TEST_F(ConstFoldingTest, SubTestIntXsubX)
         }
     }
     ASSERT_EQ(ConstFoldingSub(&INS(1U)), true);
-    int result = 0;
+    int result = 0U;
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
     ASSERT_EQ(INS(2U).GetInput(0U).GetInst(), inst);
@@ -628,7 +628,7 @@ TEST_F(ConstFoldingTest, Constant32SubTestIntXsubX)
         }
     }
     ASSERT_EQ(ConstFoldingSub(&INS(1U)), true);
-    int result = 0;
+    int result = 0U;
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
     ASSERT_EQ(INS(2U).GetInput(0U).GetInst(), inst);
@@ -662,7 +662,7 @@ TEST_F(ConstFoldingTest, MulIntTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 6;
+    int result = 6U;
     ASSERT_EQ(ConstFoldingMul(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -683,7 +683,7 @@ TEST_F(ConstFoldingTest, Constant32MulIntTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 6;
+    int result = 6U;
     ASSERT_EQ(ConstFoldingMul(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -743,7 +743,7 @@ TEST_F(ConstFoldingTest, DivIntTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -764,7 +764,7 @@ TEST_F(ConstFoldingTest, Constant32DivIntTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -784,7 +784,7 @@ TEST_F(ConstFoldingTest, DivIntTest1)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int32_t result = 0x80000000;
+    int32_t result = 0x80000000U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -805,7 +805,7 @@ TEST_F(ConstFoldingTest, Constant32DivIntTest1)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int32_t result = 0x80000000;
+    int32_t result = 0x80000000U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -825,7 +825,7 @@ TEST_F(ConstFoldingTest, DivIntTest2)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int64_t result = 0x8000000000000000;
+    int64_t result = 0x8000000000000000U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -846,7 +846,7 @@ TEST_F(ConstFoldingTest, Constant32DivIntTest2)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int32_t result = 0x80000000;
+    int32_t result = 0x80000000U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -866,7 +866,7 @@ TEST_F(ConstFoldingTest, UDivIntTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int64_t result = 0x80000000;
+    int64_t result = 0x80000000U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -887,7 +887,7 @@ TEST_F(ConstFoldingTest, Constant32UDivIntTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int64_t result = 0x80000000;
+    int64_t result = 0x80000000U;
     ASSERT_EQ(ConstFoldingDiv(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -947,7 +947,7 @@ TEST_F(ConstFoldingTest, MinIntTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 2;
+    int result = 2U;
     ASSERT_EQ(ConstFoldingMin(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1046,8 +1046,8 @@ TEST_F(ConstFoldingTest, MinDoubleNegativeZeroTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, -0.0);
-        CONSTANT(1U, +0.0);
+        CONSTANT(0U, -0.0_D);
+        CONSTANT(1U, +0.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Min).f64().Inputs(0U, 1U);
@@ -1070,7 +1070,7 @@ TEST_F(ConstFoldingTest, MinDoubleNaNTest)
     GRAPH(GetGraph())
     {
         CONSTANT(0U, std::numeric_limits<double>::quiet_NaN());
-        CONSTANT(1U, 1.3);
+        CONSTANT(1U, 1.3_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Min).f64().Inputs(0U, 1U);
@@ -1101,7 +1101,7 @@ TEST_F(ConstFoldingTest, MaxIntTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 3;
+    int result = 3U;
     ASSERT_EQ(ConstFoldingMax(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1200,8 +1200,8 @@ TEST_F(ConstFoldingTest, MaxDoubleNegativeZeroTest)
 {
     GRAPH(GetGraph())
     {
-        CONSTANT(0U, -0.0);
-        CONSTANT(1U, +0.0);
+        CONSTANT(0U, -0.0_D);
+        CONSTANT(1U, +0.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Max).f64().Inputs(0U, 1U);
@@ -1255,7 +1255,7 @@ TEST_F(ConstFoldingTest, ShlTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 4;
+    int result = 4U;
     ASSERT_EQ(ConstFoldingShl(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1276,7 +1276,7 @@ TEST_F(ConstFoldingTest, Constant32ShlTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 4;
+    int result = 4U;
     ASSERT_EQ(ConstFoldingShl(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1296,7 +1296,7 @@ TEST_F(ConstFoldingTest, Shl64Test)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 4;
+    int result = 4U;
     ASSERT_EQ(ConstFoldingShl(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1316,7 +1316,7 @@ TEST_F(ConstFoldingTest, Shl32Test)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 4;
+    int result = 4U;
     ASSERT_EQ(ConstFoldingShl(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1337,7 +1337,7 @@ TEST_F(ConstFoldingTest, Constant32Shl32Test)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 4;
+    int result = 4U;
     ASSERT_EQ(ConstFoldingShl(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1357,7 +1357,7 @@ TEST_F(ConstFoldingTest, ShrTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingShr(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1378,7 +1378,7 @@ TEST_F(ConstFoldingTest, Constant32ShrTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingShr(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1398,7 +1398,7 @@ TEST_F(ConstFoldingTest, AShrUTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    uint64_t result = 1;
+    uint64_t result = 1U;
     ASSERT_EQ(ConstFoldingAShr(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1419,7 +1419,7 @@ TEST_F(ConstFoldingTest, Constant32AShrUTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    uint32_t result = 1;
+    uint32_t result = 1U;
     ASSERT_EQ(ConstFoldingAShr(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1439,7 +1439,7 @@ TEST_F(ConstFoldingTest, AShrTest)
             INST(3U, Opcode::Return).s64().Inputs(2U);
         }
     }
-    int64_t result = -1;
+    int64_t result = -1L;
     ASSERT_EQ(ConstFoldingAShr(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1460,7 +1460,7 @@ TEST_F(ConstFoldingTest, Constant32AShrTest)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int64_t result = -1;
+    int64_t result = -1L;
     ASSERT_EQ(ConstFoldingAShr(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1480,7 +1480,7 @@ TEST_F(ConstFoldingTest, Shr32Test)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int64_t result = 0xfffffff;
+    int64_t result = 0xfffffffL;
     ASSERT_EQ(ConstFoldingShr(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1501,7 +1501,7 @@ TEST_F(ConstFoldingTest, Constant32Shr32Test)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int64_t result = 0xfffffff;
+    int64_t result = 0xfffffffL;
     ASSERT_EQ(ConstFoldingShr(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1521,7 +1521,7 @@ TEST_F(ConstFoldingTest, ModTestInt)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1542,7 +1542,7 @@ TEST_F(ConstFoldingTest, Constant32ModTestInt)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1562,7 +1562,7 @@ TEST_F(ConstFoldingTest, ModIntTest1)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int32_t result = 0;
+    int32_t result = 0U;
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1583,7 +1583,7 @@ TEST_F(ConstFoldingTest, Constant32ModIntTest1)
             INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    int32_t result = 0;
+    int32_t result = 0U;
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1603,7 +1603,7 @@ TEST_F(ConstFoldingTest, ModTestFloat)
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 1.5;
+    float result = 1.5F;
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -1644,7 +1644,7 @@ TEST_F(ConstFoldingTest, Mod1Test)
         }
     }
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
-    int result = 0;
+    int result = 0U;
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
     ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), inst);
@@ -1665,7 +1665,7 @@ TEST_F(ConstFoldingTest, Constant32Mod1Test)
         }
     }
     ASSERT_EQ(ConstFoldingMod(&INS(2U)), true);
-    int result = 0;
+    int result = 0U;
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
     ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), inst);
@@ -1677,7 +1677,7 @@ TEST_F(ConstFoldingTest, Mod1TestFloat)
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).f64();
-        CONSTANT(1U, 1.0);
+        CONSTANT(1U, 1.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mod).f64().Inputs(0U, 1U);
@@ -1700,7 +1700,7 @@ TEST_F(ConstFoldingTest, AndTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingAnd(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1721,7 +1721,7 @@ TEST_F(ConstFoldingTest, Constant32AndTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingAnd(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1741,7 +1741,7 @@ TEST_F(ConstFoldingTest, OrTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 3;
+    int result = 3U;
     ASSERT_EQ(ConstFoldingOr(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1762,7 +1762,7 @@ TEST_F(ConstFoldingTest, Constant32OrTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 3;
+    int result = 3U;
     ASSERT_EQ(ConstFoldingOr(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1782,7 +1782,7 @@ TEST_F(ConstFoldingTest, XorTest)
             INST(3U, Opcode::Return).u64().Inputs(2U);
         }
     }
-    int result = 3;
+    int result = 3U;
     ASSERT_EQ(ConstFoldingXor(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1803,7 +1803,7 @@ TEST_F(ConstFoldingTest, Constant32XorTest)
             INST(3U, Opcode::Return).u32().Inputs(2U);
         }
     }
-    int result = 3;
+    int result = 3U;
     ASSERT_EQ(ConstFoldingXor(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1823,7 +1823,7 @@ TEST_F(ConstFoldingTest, CompareEQTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1844,7 +1844,7 @@ TEST_F(ConstFoldingTest, Constant32CompareEQTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1864,7 +1864,7 @@ TEST_F(ConstFoldingTest, CompareNETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1885,7 +1885,7 @@ TEST_F(ConstFoldingTest, Constant32CompareNETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1905,7 +1905,7 @@ TEST_F(ConstFoldingTest, CompareLTTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1926,7 +1926,7 @@ TEST_F(ConstFoldingTest, Constant32CompareLTTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1946,7 +1946,7 @@ TEST_F(ConstFoldingTest, CompareLTTest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -1967,7 +1967,7 @@ TEST_F(ConstFoldingTest, Constant32CompareLTTest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -1987,7 +1987,7 @@ TEST_F(ConstFoldingTest, CompareLETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2008,7 +2008,7 @@ TEST_F(ConstFoldingTest, Constant32CompareLETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2028,7 +2028,7 @@ TEST_F(ConstFoldingTest, CompareLETest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2049,7 +2049,7 @@ TEST_F(ConstFoldingTest, Constant32CompareLETest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2069,7 +2069,7 @@ TEST_F(ConstFoldingTest, CompareGTTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2090,7 +2090,7 @@ TEST_F(ConstFoldingTest, Constant32CompareGTTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2110,7 +2110,7 @@ TEST_F(ConstFoldingTest, CompareGTTest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2131,7 +2131,7 @@ TEST_F(ConstFoldingTest, Constant32CompareGTTest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2151,7 +2151,7 @@ TEST_F(ConstFoldingTest, CompareGETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2172,7 +2172,7 @@ TEST_F(ConstFoldingTest, Constant32CompareGETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2192,7 +2192,7 @@ TEST_F(ConstFoldingTest, CompareGETest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2213,7 +2213,7 @@ TEST_F(ConstFoldingTest, Constant32CompareGETest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2233,7 +2233,7 @@ TEST_F(ConstFoldingTest, CompareBTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2254,7 +2254,7 @@ TEST_F(ConstFoldingTest, Constant32CompareBTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2274,7 +2274,7 @@ TEST_F(ConstFoldingTest, CompareBETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2295,7 +2295,7 @@ TEST_F(ConstFoldingTest, Constant32CompareBETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2315,7 +2315,7 @@ TEST_F(ConstFoldingTest, CompareATest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2336,7 +2336,7 @@ TEST_F(ConstFoldingTest, Constant32CompareATest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2356,7 +2356,7 @@ TEST_F(ConstFoldingTest, CompareAETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2377,7 +2377,7 @@ TEST_F(ConstFoldingTest, Constant32CompareAETest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
@@ -2426,7 +2426,7 @@ TEST_F(ConstFoldingTest, CompareTstEqTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2446,7 +2446,7 @@ TEST_F(ConstFoldingTest, CompareTstEqTest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2466,7 +2466,7 @@ TEST_F(ConstFoldingTest, CompareTstNeTest)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 0;
+    int result = 0U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2486,7 +2486,7 @@ TEST_F(ConstFoldingTest, CompareTstNeTest1)
             INST(3U, Opcode::Return).b().Inputs(2U);
         }
     }
-    int result = 1;
+    int result = 1U;
     ASSERT_EQ(ConstFoldingCompare(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -2666,7 +2666,7 @@ TEST_F(ConstFoldingTest, MulDoubleZeroTest)
     GRAPH(GetGraph())
     {
         CONSTANT(0U, 3.0_D);
-        CONSTANT(1U, 0.0);
+        CONSTANT(1U, 0.0_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Mul).f64().Inputs(0U, 1U);
@@ -2760,7 +2760,7 @@ TEST_F(ConstFoldingTest, XorEqualInputs)
         }
     }
     ASSERT_EQ(ConstFoldingXor(&INS(2U)), true);
-    int result = 0;
+    int result = 0U;
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
     ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), inst);
@@ -2780,7 +2780,7 @@ TEST_F(ConstFoldingTest, Constant32XorEqualInputs)
         }
     }
     ASSERT_EQ(ConstFoldingXor(&INS(2U)), true);
-    int result = 0;
+    int result = 0U;
     auto inst = graph->FindConstant(DataType::INT32, result);
     ASSERT(inst != nullptr);
     ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), inst);
@@ -2863,29 +2863,29 @@ TEST_F(ConstFoldingTest, Constant32ShrBigOffsetTest)
 
 TEST_F(ConstFoldingTest, CastTest)
 {
-    uint8_t srcU8 = 0xff;
+    uint8_t srcU8 = 0xffU;
     CastTest(srcU8, static_cast<int8_t>(srcU8), DataType::INT8);
     CastTest(srcU8, static_cast<int16_t>(srcU8), DataType::INT16);
     CastTest(srcU8, static_cast<uint16_t>(srcU8), DataType::UINT16);
 
-    int8_t srcI8 = -1;
+    int8_t srcI8 = -1L;
     CastTest(srcI8, static_cast<float>(srcI8), DataType::FLOAT32);
 
-    uint16_t srcU16 = 0xffff;
+    uint16_t srcU16 = 0xffffU;
     CastTest(srcU16, static_cast<int8_t>(srcU16), DataType::INT8);
     CastTest(srcU16, static_cast<double>(srcU16), DataType::FLOAT64);
     CastTest(srcU16, srcU16, DataType::UINT16);
 
-    int64_t srcI64 = -1;
+    int64_t srcI64 = -1L;
     CastTest(srcI64, static_cast<uint8_t>(srcI64), DataType::UINT8);
 
-    int32_t srcI32 = -1;
+    int32_t srcI32 = -1L;
     CastTest(srcI32, static_cast<int8_t>(srcI32), DataType::INT8);
 
-    float srcF = 0.25;
+    float srcF = 0.25F;
     CastTest(srcF, srcF, DataType::FLOAT32);
 
-    double srcD = 0.25;
+    double srcD = 0.25_D;
     CastTest(srcD, srcD, DataType::FLOAT64);
 
     CastTest(FLT_MAX, static_cast<double>(FLT_MAX), DataType::FLOAT64);
@@ -2959,7 +2959,7 @@ TEST_F(ConstFoldingTest, CmpEqualInputsIntTest)
         }
     }
     ASSERT_EQ(ConstFoldingCmp(&INS(2U)), true);
-    int result = 0;
+    int result = 0U;
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
     ASSERT_EQ(INS(3U).GetInput(0U).GetInst(), inst);
@@ -2991,7 +2991,7 @@ TEST_F(ConstFoldingTest, SqrtTest)
             INST(3U, Opcode::Return).f32().Inputs(2U);
         }
     }
-    float result = 0.88622695207595825;
+    float result = 0.88622695207595825F;
     ASSERT_EQ(ConstFoldingSqrt(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::FLOAT32, bit_cast<uint32_t, float>(result));
     ASSERT(inst != nullptr);
@@ -3011,7 +3011,7 @@ TEST_F(ConstFoldingTest, MaxIntTest1)
             INST(3U, Opcode::Return).s64().Inputs(2U);
         }
     }
-    int result = 2;
+    int result = 2U;
     ASSERT_EQ(ConstFoldingMax(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);
@@ -3031,7 +3031,7 @@ TEST_F(ConstFoldingTest, MinIntTest1)
             INST(3U, Opcode::Return).s64().Inputs(2U);
         }
     }
-    int result = -1;
+    int result = -1L;
     ASSERT_EQ(ConstFoldingMin(&INS(2U)), true);
     auto inst = GetGraph()->FindConstant(DataType::INT64, result);
     ASSERT(inst != nullptr);

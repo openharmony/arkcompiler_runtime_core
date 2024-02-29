@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1840,7 +1840,6 @@ bool Peepholes::TrySimplifyAddSubWithZeroInput(Inst *inst)
 {
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
-
     if (input1->IsConst()) {
         auto cnst = input1->CastToConstant();
         if (cnst->IsEqualConstAllTypes(0)) {
@@ -2408,7 +2407,6 @@ bool Peepholes::TrySimplifyCompareLenArrayWithZero(Inst *inst)
         return false;
     }
     ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
-
     if (cc == CC_GE || cc == CC_LT) {
         // We create constant, so we don't need to check SaveStateOSR between insts
         compare->ReplaceUsers(ConstFoldingCreateIntConst(compare, cc == CC_GE ? 1 : 0));
