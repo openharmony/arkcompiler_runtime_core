@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,7 +49,6 @@ general:
     list-root: null
     processes: 1
     qemu: NONE
-    report-format: LOG
     report-root: null
     run_gc_in_place: false
     show-progress: false
@@ -57,6 +56,13 @@ general:
     verbose: ''
     verbose-filter: NEW
     generate-only: false
+report:
+    report-format: LOG
+    detailed-report: False
+    detailed-report-file: None
+    spec-report: False
+    spec-report-file: None
+    spec-file: None
 quick:
     enable: false
 test-lists:
