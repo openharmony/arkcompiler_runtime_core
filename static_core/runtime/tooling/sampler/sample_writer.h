@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_WRITER_H_
-#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_WRITER_H_
+#ifndef PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_WRITER_H
+#define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_WRITER_H
 
 #include <iostream>
 #include <string>
@@ -104,4 +104,4 @@ private:
 
 }  // namespace panda::tooling::sampler
 
-#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_WRITER_H_
+#endif  // PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_WRITER_H

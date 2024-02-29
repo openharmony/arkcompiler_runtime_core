@@ -28,6 +28,8 @@
 
 // NOLINTBEGIN
 
+using namespace std::placeholders;
+
 namespace panda::tooling::inspector::test {
 
 class TestServer : public Server {
@@ -44,8 +46,7 @@ public:
     }
 
     void OnCall(const char *method_call,
-                std::function<void(const std::string &session_id, JsonObjectBuilder &result, const JsonObject &params)>
-                    &&handler) override
+                std::function<void(const std::string &, JsonObjectBuilder &, const JsonObject &)> &&handler) override
     {
         std::string tmp(method_call);
         OnCallMock(tmp, std::move(handler));
@@ -57,8 +58,7 @@ public:
 
     MOCK_METHOD(void, OnCallMock,
                 (const std::string &method_call,
-                 std::function<void(const std::string &session_id, JsonObjectBuilder &result, const JsonObject &params)>
-                     &&handler));
+                 std::function<void(const std::string &, JsonObjectBuilder &, const JsonObject &)> &&handler));
 
     bool Poll() override
     {
@@ -70,10 +70,10 @@ public:
     };
 };
 
-PtThread mthread = PtThread(PtThread::NONE);
-const std::string session_id;
-const std::string source_file = "source";
-bool handler_called = false;
+static PtThread g_mthread = PtThread(PtThread::NONE);
+static const std::string g_sessionId;
+static const std::string g_sourceFile = "source";
+static bool g_handlerCalled = false;
 
 class ServerTest : public testing::Test {
 public:
@@ -83,43 +83,43 @@ public:
         options.SetShouldInitializeIntrinsics(false);
         options.SetShouldLoadBootPandaFiles(false);
         Runtime::Create(options);
-        mthread = PtThread(ManagedThread::GetCurrent());
-        handler_called = false;
+        g_mthread = PtThread(ManagedThread::GetCurrent());
+        g_handlerCalled = false;
     }
     void TearDown() override
     {
         Runtime::Destroy();
     }
     TestServer server;
-    InspectorServer inspector_server {server};
+    InspectorServer inspectorServer {server};
 };
 
 TEST_F(ServerTest, CallDebuggerResumed)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
-    EXPECT_CALL(server, CallMock(session_id, "Debugger.resumed", testing::_)).Times(1);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+    EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.resumed", testing::_)).Times(1);
 
-    inspector_server.CallDebuggerResumed(mthread);
+    inspectorServer.CallDebuggerResumed(g_mthread);
 }
 
 TEST_F(ServerTest, CallDebuggerScriptParsed)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
-    size_t script_id = 4;
-    EXPECT_CALL(server, CallMock(session_id, "Debugger.scriptParsed", testing::_))
+    size_t scriptId = 4;
+    EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.scriptParsed", testing::_))
         .WillOnce([&](testing::Unused, testing::Unused, auto s) {
             ASSERT_THAT(ToObject(std::move(s)),
-                        JsonProperties(JsonProperty<JsonObject::NumT> {"executionContextId", mthread.GetId()},
-                                       JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(script_id)},
+                        JsonProperties(JsonProperty<JsonObject::NumT> {"executionContextId", g_mthread.GetId()},
+                                       JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(scriptId)},
                                        JsonProperty<JsonObject::NumT> {"startLine", 0},
                                        JsonProperty<JsonObject::NumT> {"startColumn", 0},
                                        JsonProperty<JsonObject::NumT> {"endLine", std::numeric_limits<int>::max()},
                                        JsonProperty<JsonObject::NumT> {"endColumn", std::numeric_limits<int>::max()},
                                        JsonProperty<JsonObject::StringT> {"hash", ""},
-                                       JsonProperty<JsonObject::StringT> {"url", source_file.c_str()}));
+                                       JsonProperty<JsonObject::StringT> {"url", g_sourceFile.c_str()}));
         });
-    inspector_server.CallDebuggerScriptParsed(mthread, ScriptId(script_id), source_file);
+    inspectorServer.CallDebuggerScriptParsed(g_mthread, ScriptId(scriptId), g_sourceFile);
 }
 
 TEST_F(ServerTest, DebuggerEnable)
@@ -128,29 +128,29 @@ TEST_F(ServerTest, DebuggerEnable)
     EXPECT_CALL(server1, OnCallMock("Debugger.enable", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObject empty;
-        handler(session_id, res, empty);
+        handler(g_sessionId, res, empty);
         ASSERT_THAT(JsonObject(std::move(res).Build()),
                     JsonProperties(JsonProperty<JsonObject::StringT> {"debuggerId", "debugger"}));
     });
     InspectorServer inspector_server1(server1);
 }
 
-auto simple_handler = []([[maybe_unused]] auto unused, auto handler) {
+static auto g_simpleHandler = []([[maybe_unused]] auto unused, auto handler) {
     JsonObjectBuilder res;
     JsonObject empty;
-    handler(session_id, res, empty);
+    handler(g_sessionId, res, empty);
     ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-    ASSERT_TRUE(handler_called);
+    ASSERT_TRUE(g_handlerCalled);
 };
 
 TEST_F(ServerTest, OnCallDebuggerPause)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
-    EXPECT_CALL(server, OnCallMock("Debugger.pause", testing::_)).WillOnce(simple_handler);
-    inspector_server.OnCallDebuggerPause([](PtThread thread) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+    EXPECT_CALL(server, OnCallMock("Debugger.pause", testing::_)).WillOnce(g_simpleHandler);
+    inspectorServer.OnCallDebuggerPause([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 
@@ -158,193 +158,185 @@ TEST_F(ServerTest, OnCallDebuggerRemoveBreakpoint)
 {
     size_t break_id = 14;
 
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Debugger.removeBreakpoint", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObject empty;
-            handler(session_id, res, empty);
+            handler(g_sessionId, res, empty);
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-            ASSERT_FALSE(handler_called);
+            ASSERT_FALSE(g_handlerCalled);
         });
 
     auto breaks = [break_id](PtThread thread, BreakpointId bid) {
         ASSERT_EQ(bid, BreakpointId(break_id));
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     };
-    inspector_server.OnCallDebuggerRemoveBreakpoint(std::move(breaks));
+    inspectorServer.OnCallDebuggerRemoveBreakpoint(std::move(breaks));
 
     EXPECT_CALL(server, OnCallMock("Debugger.removeBreakpoint", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObjectBuilder params;
             params.AddProperty("breakpointId", std::to_string(break_id));
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            handler(g_sessionId, res, JsonObject(std::move(params).Build()));
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-            ASSERT_TRUE(handler_called);
+            ASSERT_TRUE(g_handlerCalled);
         });
 
-    inspector_server.OnCallDebuggerRemoveBreakpoint(std::move(breaks));
+    inspectorServer.OnCallDebuggerRemoveBreakpoint(std::move(breaks));
 }
 
 TEST_F(ServerTest, OnCallDebuggerRestartFrame)
 {
     size_t fid = 5;
 
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Debugger.restartFrame", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         std::vector<testing::Matcher<JsonObject::JsonObjPointer>> callFrames;
         JsonObjectBuilder res;
         JsonObjectBuilder params;
-        handler(session_id, res, JsonObject(std::move(params).Build()));
+        handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-        ASSERT_FALSE(handler_called);
+        ASSERT_FALSE(g_handlerCalled);
     });
 
-    inspector_server.OnCallDebuggerRestartFrame([&](auto, auto) { handler_called = true; });
+    inspectorServer.OnCallDebuggerRestartFrame([&](auto, auto) { g_handlerCalled = true; });
 
     EXPECT_CALL(server, OnCallMock("Debugger.restartFrame", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         std::vector<testing::Matcher<JsonObject::JsonObjPointer>> callFrames;
         JsonObjectBuilder res;
         JsonObjectBuilder params;
         params.AddProperty("callFrameId", std::to_string(fid));
-        handler(session_id, res, JsonObject(std::move(params).Build()));
+        handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()),
                     JsonProperties(JsonProperty<JsonObject::ArrayT> {"callFrames", JsonElementsAreArray(callFrames)}));
-        ASSERT_TRUE(handler_called);
+        ASSERT_TRUE(g_handlerCalled);
     });
 
-    inspector_server.OnCallDebuggerRestartFrame([&](PtThread thread, FrameId id) {
+    inspectorServer.OnCallDebuggerRestartFrame([&](PtThread thread, FrameId id) {
         ASSERT_EQ(id, FrameId(fid));
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 
 TEST_F(ServerTest, OnCallDebuggerResume)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
-    EXPECT_CALL(server, OnCallMock("Debugger.resume", testing::_)).WillOnce(simple_handler);
-    inspector_server.OnCallDebuggerResume([](PtThread thread) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+    EXPECT_CALL(server, OnCallMock("Debugger.resume", testing::_)).WillOnce(g_simpleHandler);
+    inspectorServer.OnCallDebuggerResume([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 
+static JsonObject CreatePossibleBreakpointsRequest(ScriptId startScriptId, size_t start, ScriptId endScriptId,
+                                                   size_t end, bool restrictToFunction)
+{
+    JsonObjectBuilder params;
+    params.AddProperty("start", Location(startScriptId, start).ToJson());
+    params.AddProperty("end", Location(endScriptId, end).ToJson());
+    params.AddProperty("restrictToFunction", restrictToFunction);
+    return JsonObject(std::move(params).Build());
+}
+
+static auto g_getPossibleBreakpointsHandler = [](ScriptId scriptId, size_t start, size_t end, bool restrictToFunction,
+                                                 testing::Unused, auto handler) {
+    JsonObjectBuilder res;
+    handler(g_sessionId, res, CreatePossibleBreakpointsRequest(scriptId, start, scriptId, end, restrictToFunction));
+    std::vector<testing::Matcher<JsonObject::JsonObjPointer>> locations;
+    for (auto i = start; i < end; i++) {
+        locations.push_back(
+            testing::Pointee(JsonProperties(JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(scriptId)},
+                                            JsonProperty<JsonObject::NumT> {"lineNumber", i})));
+    }
+    ASSERT_THAT(JsonObject(std::move(res).Build()),
+                JsonProperties(JsonProperty<JsonObject::ArrayT> {"locations", JsonElementsAreArray(locations)}));
+};
+
 TEST_F(ServerTest, OnCallDebuggerGetPossibleBreakpoints)
 {
-    auto script_id = 0;
+    auto scriptId = 0;
     size_t start = 5;
     size_t end = 5;
 
     auto func = [&](auto &handler) {
         auto scope_chain = std::vector {Scope(Scope::Type::LOCAL, RemoteObject::Number(72))};
-        handler(FrameId(0), std::to_string(0), source_file, 0, scope_chain);
+        handler(FrameId(0), std::to_string(0), g_sourceFile, 0, scope_chain);
     };
 
-    inspector_server.CallTargetAttachedToTarget(mthread);
-    inspector_server.CallDebuggerPaused(mthread, {}, {}, func);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, func);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getPossibleBreakpoints", testing::_))
-        .WillOnce([&](testing::Unused, auto handler) {
-            JsonObjectBuilder res;
-            JsonObjectBuilder params;
-            params.AddProperty("start", Location(script_id, start).ToJson());
-            params.AddProperty("end", Location(script_id, end).ToJson());
-            params.AddProperty("restrictToFunction", true);
-            handler(session_id, res, JsonObject(std::move(params).Build()));
-            std::vector<testing::Matcher<JsonObject::JsonObjPointer>> locations;
-            for (auto i = start; i < end; i++) {
-                locations.push_back(testing::Pointee(
-                    JsonProperties(JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(script_id)},
-                                   JsonProperty<JsonObject::NumT> {"lineNumber", i})));
-            }
-            ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties(JsonProperty<JsonObject::ArrayT> {
-                                                                "locations", JsonElementsAreArray(locations)}));
-        });
-    auto get_lines_true = [](std::string_view source, size_t start_line, size_t end_line, bool param) {
+        .WillOnce(std::bind(g_getPossibleBreakpointsHandler, scriptId, start, end,  // NOLINT(modernize-avoid-bind)
+                            true, _1, _2));
+    auto getLinesTrue = [](std::string_view source, size_t startLine, size_t endLine, bool restrictToFunction) {
         std::set<size_t> result;
-        if ((source == source_file) && param) {
-            for (auto i = start_line; i < end_line; i++) {
+        if ((source == g_sourceFile) && restrictToFunction) {
+            for (auto i = startLine; i < endLine; i++) {
                 result.insert(i);
             }
         }
         return result;
     };
-    inspector_server.OnCallDebuggerGetPossibleBreakpoints(get_lines_true);
+    inspectorServer.OnCallDebuggerGetPossibleBreakpoints(getLinesTrue);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getPossibleBreakpoints", testing::_))
-        .WillOnce([&](testing::Unused, auto handler) {
-            JsonObjectBuilder res;
-            JsonObjectBuilder params;
-            params.AddProperty("start", Location(script_id, start).ToJson());
-            params.AddProperty("end", Location(script_id, end).ToJson());
-            params.AddProperty("restrictToFunction", false);
-            handler(session_id, res, JsonObject(std::move(params).Build()));
-            std::vector<testing::Matcher<JsonObject::JsonObjPointer>> locations;
-            for (auto i = start; i < end; i++) {
-                locations.push_back(testing::Pointee(
-                    JsonProperties(JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(script_id)},
-                                   JsonProperty<JsonObject::NumT> {"lineNumber", i})));
-            }
-            ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties(JsonProperty<JsonObject::ArrayT> {
-                                                                "locations", JsonElementsAreArray(locations)}));
-        });
-    auto get_lines_false = [](std::string_view source, size_t start_line, size_t end_line, bool param) {
+        .WillOnce(std::bind(g_getPossibleBreakpointsHandler, scriptId, start, end,  // NOLINT(modernize-avoid-bind)
+                            false, _1, _2));
+    auto getLinesFalse = [](std::string_view source, size_t startLine, size_t endLine, bool restrictToFunction) {
         std::set<size_t> result;
-        if ((source == source_file) && !param) {
-            for (auto i = start_line; i < end_line; i++) {
+        if ((source == g_sourceFile) && !restrictToFunction) {
+            for (auto i = startLine; i < endLine; i++) {
                 result.insert(i);
             }
         }
         return result;
     };
-    inspector_server.OnCallDebuggerGetPossibleBreakpoints(get_lines_false);
+    inspectorServer.OnCallDebuggerGetPossibleBreakpoints(getLinesFalse);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getPossibleBreakpoints", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
-            JsonObjectBuilder params;
-            params.AddProperty("start", Location(script_id, start).ToJson());
-            params.AddProperty("end", Location(script_id + 1, end).ToJson());
-            params.AddProperty("restrictToFunction", false);
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            handler(g_sessionId, res, CreatePossibleBreakpointsRequest(scriptId, start, scriptId + 1, end, false));
             std::vector<testing::Matcher<JsonObject::JsonObjPointer>> locations;
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
         });
-    inspector_server.OnCallDebuggerGetPossibleBreakpoints(get_lines_false);
+    inspectorServer.OnCallDebuggerGetPossibleBreakpoints(getLinesFalse);
 }
 
 TEST_F(ServerTest, OnCallDebuggerGetScriptSource)
 {
-    auto script_id = 0;
+    auto scriptId = 0;
 
     auto func = [&](auto &handler) {
         auto scope_chain = std::vector {Scope(Scope::Type::LOCAL, RemoteObject::Number(72))};
-        handler(FrameId(0), std::to_string(0), source_file, 0, scope_chain);
+        handler(FrameId(0), std::to_string(0), g_sourceFile, 0, scope_chain);
     };
 
-    EXPECT_CALL(server, CallMock(session_id, "Debugger.paused", testing::_))
+    EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.paused", testing::_))
         .WillOnce([&](testing::Unused, testing::Unused, auto s) { ToObject(std::move(s)); });
-    EXPECT_CALL(server, CallMock(session_id, "Debugger.scriptParsed", testing::_)).Times(1);
+    EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.scriptParsed", testing::_)).Times(1);
 
-    inspector_server.CallTargetAttachedToTarget(mthread);
-    inspector_server.CallDebuggerPaused(mthread, {}, {}, func);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, func);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getScriptSource", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObjectBuilder params;
-            params.AddProperty("scriptId", std::to_string(script_id));
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            params.AddProperty("scriptId", std::to_string(scriptId));
+            handler(g_sessionId, res, JsonObject(std::move(params).Build()));
             ASSERT_THAT(JsonObject(std::move(res).Build()),
-                        JsonProperties(JsonProperty<JsonObject::StringT> {"scriptSource", source_file}));
+                        JsonProperties(JsonProperty<JsonObject::StringT> {"scriptSource", g_sourceFile}));
         });
-    inspector_server.OnCallDebuggerGetScriptSource([](auto source) {
+    inspectorServer.OnCallDebuggerGetScriptSource([](auto source) {
         std::string s(source);
         return s;
     });
@@ -353,45 +345,45 @@ TEST_F(ServerTest, OnCallDebuggerGetScriptSource)
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObject empty;
-            handler(session_id, res, empty);
+            handler(g_sessionId, res, empty);
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
         });
-    inspector_server.OnCallDebuggerGetScriptSource([](auto) { return "a"; });
+    inspectorServer.OnCallDebuggerGetScriptSource([](auto) { return "a"; });
 }
 
 TEST_F(ServerTest, OnCallDebuggerStepOut)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
-    EXPECT_CALL(server, OnCallMock("Debugger.stepOut", testing::_)).WillOnce(simple_handler);
+    EXPECT_CALL(server, OnCallMock("Debugger.stepOut", testing::_)).WillOnce(g_simpleHandler);
 
-    inspector_server.OnCallDebuggerStepOut([](PtThread thread) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+    inspectorServer.OnCallDebuggerStepOut([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 
 TEST_F(ServerTest, OnCallDebuggerStepInto)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
-    EXPECT_CALL(server, OnCallMock("Debugger.stepInto", testing::_)).WillOnce(simple_handler);
+    EXPECT_CALL(server, OnCallMock("Debugger.stepInto", testing::_)).WillOnce(g_simpleHandler);
 
-    inspector_server.OnCallDebuggerStepInto([](PtThread thread) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+    inspectorServer.OnCallDebuggerStepInto([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 
 TEST_F(ServerTest, OnCallDebuggerStepOver)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
-    EXPECT_CALL(server, OnCallMock("Debugger.stepOver", testing::_)).WillOnce(simple_handler);
+    EXPECT_CALL(server, OnCallMock("Debugger.stepOver", testing::_)).WillOnce(g_simpleHandler);
 
-    inspector_server.OnCallDebuggerStepOver([](PtThread thread) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+    inspectorServer.OnCallDebuggerStepOver([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 
@@ -414,70 +406,70 @@ std::optional<BreakpointId> handlerForSetBreakEmpty([[maybe_unused]] PtThread th
 
 TEST_F(ServerTest, OnCallDebuggerSetBreakpoint)
 {
-    auto script_id = 0;
+    auto scriptId = 0;
     size_t start = 5;
 
     auto func = [&](auto &handler) {
         auto scope_chain = std::vector {Scope(Scope::Type::LOCAL, RemoteObject::Number(72))};
-        handler(FrameId(0), std::to_string(0), source_file, 0, scope_chain);
+        handler(FrameId(0), std::to_string(0), g_sourceFile, 0, scope_chain);
     };
 
-    inspector_server.CallTargetAttachedToTarget(mthread);
-    inspector_server.CallDebuggerPaused(mthread, {}, {}, func);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, func);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObjectBuilder params;
-        params.AddProperty("location", Location(script_id, start).ToJson());
-        handler(session_id, res, JsonObject(std::move(params).Build()));
+        params.AddProperty("location", Location(scriptId, start).ToJson());
+        handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()),
                     JsonProperties(JsonProperty<JsonObject::StringT> {"breakpointId", std::to_string(start)},
                                    JsonProperty<JsonObject::JsonObjPointer> {
                                        "actualLocation",
                                        testing::Pointee(JsonProperties(
-                                           JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(script_id)},
+                                           JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(scriptId)},
                                            JsonProperty<JsonObject::NumT> {"lineNumber", start - 1}))}));
     });
 
-    inspector_server.OnCallDebuggerSetBreakpoint(handlerForSetBreak);
+    inspectorServer.OnCallDebuggerSetBreakpoint(handlerForSetBreak);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObject empty;
-        handler(session_id, res, empty);
+        handler(g_sessionId, res, empty);
         ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
     });
 
-    inspector_server.OnCallDebuggerSetBreakpoint(handlerForSetBreak);
+    inspectorServer.OnCallDebuggerSetBreakpoint(handlerForSetBreak);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObjectBuilder params;
-        params.AddProperty("location", Location(script_id, start).ToJson());
-        handler(session_id, res, JsonObject(std::move(params).Build()));
+        params.AddProperty("location", Location(scriptId, start).ToJson());
+        handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
     });
 
-    inspector_server.OnCallDebuggerSetBreakpoint(handlerForSetBreakEmpty);
+    inspectorServer.OnCallDebuggerSetBreakpoint(handlerForSetBreakEmpty);
 }
 
 TEST_F(ServerTest, OnCallDebuggerSetBreakpointByUrl)
 {
-    auto script_id = 0;
+    auto scriptId = 0;
     size_t start = 5;
 
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpointByUrl", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObjectBuilder params;
             params.AddProperty("lineNumber", start);
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            handler(g_sessionId, res, JsonObject(std::move(params).Build()));
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
         });
 
-    inspector_server.OnCallDebuggerSetBreakpointByUrl(handlerForSetBreak);
+    inspectorServer.OnCallDebuggerSetBreakpointByUrl(handlerForSetBreak);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpointByUrl", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
@@ -485,10 +477,10 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpointByUrl)
             JsonObjectBuilder params;
             params.AddProperty("lineNumber", start);
             params.AddProperty("url", "file://source");
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            handler(g_sessionId, res, JsonObject(std::move(params).Build()));
             std::vector<testing::Matcher<JsonObject::JsonObjPointer>> locations;
             locations.push_back(testing::Pointee(
-                JsonProperties(JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(script_id)},
+                JsonProperties(JsonProperty<JsonObject::StringT> {"scriptId", std::to_string(scriptId)},
                                JsonProperty<JsonObject::NumT> {"lineNumber", start})));
 
             ASSERT_THAT(
@@ -497,26 +489,26 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpointByUrl)
                                JsonProperty<JsonObject::ArrayT> {"locations", JsonElementsAreArray(locations)}));
         });
 
-    inspector_server.OnCallDebuggerSetBreakpointByUrl(handlerForSetBreak);
+    inspectorServer.OnCallDebuggerSetBreakpointByUrl(handlerForSetBreak);
 }
 
 TEST_F(ServerTest, OnCallDebuggerSetBreakpointsActive)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpointsActive", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObject empty;
-            handler(session_id, res, empty);
+            handler(g_sessionId, res, empty);
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-            ASSERT_FALSE(handler_called);
+            ASSERT_FALSE(g_handlerCalled);
         });
 
-    inspector_server.OnCallDebuggerSetBreakpointsActive([](auto thread, auto value) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
+    inspectorServer.OnCallDebuggerSetBreakpointsActive([](auto thread, auto value) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
         ASSERT_FALSE(value);
-        handler_called = true;
+        g_handlerCalled = true;
     });
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpointsActive", testing::_))
@@ -524,16 +516,16 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpointsActive)
             JsonObjectBuilder res;
             JsonObjectBuilder params;
             params.AddProperty("active", true);
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            handler(g_sessionId, res, JsonObject(std::move(params).Build()));
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-            ASSERT_TRUE(handler_called);
-            handler_called = false;
+            ASSERT_TRUE(g_handlerCalled);
+            g_handlerCalled = false;
         });
 
-    inspector_server.OnCallDebuggerSetBreakpointsActive([](auto thread, auto value) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
+    inspectorServer.OnCallDebuggerSetBreakpointsActive([](auto thread, auto value) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
         ASSERT_TRUE(value);
-        handler_called = true;
+        g_handlerCalled = true;
     });
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpointsActive", testing::_))
@@ -541,53 +533,53 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpointsActive)
             JsonObjectBuilder res;
             JsonObjectBuilder params;
             params.AddProperty("active", false);
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            handler(g_sessionId, res, JsonObject(std::move(params).Build()));
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-            ASSERT_TRUE(handler_called);
+            ASSERT_TRUE(g_handlerCalled);
         });
 
-    inspector_server.OnCallDebuggerSetBreakpointsActive([](auto thread, auto value) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
+    inspectorServer.OnCallDebuggerSetBreakpointsActive([](auto thread, auto value) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
         ASSERT_FALSE(value);
-        handler_called = true;
+        g_handlerCalled = true;
     });
 }
 
 TEST_F(ServerTest, OnCallDebuggerSetPauseOnExceptions)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setPauseOnExceptions", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObjectBuilder params;
             params.AddProperty("state", "none");
-            handler(session_id, res, JsonObject(std::move(params).Build()));
+            handler(g_sessionId, res, JsonObject(std::move(params).Build()));
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-            ASSERT_TRUE(handler_called);
+            ASSERT_TRUE(g_handlerCalled);
         });
 
-    inspector_server.OnCallDebuggerSetPauseOnExceptions([](PtThread thread, PauseOnExceptionsState state) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
+    inspectorServer.OnCallDebuggerSetPauseOnExceptions([](PtThread thread, PauseOnExceptionsState state) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
         ASSERT_EQ(PauseOnExceptionsState::NONE, state);
-        handler_called = true;
+        g_handlerCalled = true;
     });
 }
 
 TEST_F(ServerTest, OnCallRuntimeEnable)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Runtime.enable", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObject empty;
-        handler(session_id, res, empty);
+        handler(g_sessionId, res, empty);
         ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-        ASSERT_TRUE(handler_called);
+        ASSERT_TRUE(g_handlerCalled);
     });
-    inspector_server.OnCallRuntimeEnable([](PtThread thread) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+    inspectorServer.OnCallRuntimeEnable([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 
@@ -596,14 +588,14 @@ TEST_F(ServerTest, OnCallRuntimeGetProperties)
     auto object_id = 6;
     auto preview = true;
 
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Runtime.getProperties", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObjectBuilder params;
         params.AddProperty("objectId", std::to_string(object_id));
         params.AddProperty("generatePreview", preview);
-        handler(session_id, res, JsonObject(std::move(params).Build()));
+        handler(g_sessionId, res, JsonObject(std::move(params).Build()));
 
         std::vector<testing::Matcher<JsonObject::JsonObjPointer>> result;
         result.push_back(testing::Pointee(JsonProperties(
@@ -625,7 +617,7 @@ TEST_F(ServerTest, OnCallRuntimeGetProperties)
         result.push_back(testing::Pointee(JsonProperties(
             JsonProperty<JsonObject::StringT> {"name", "threadId"},
             JsonProperty<JsonObject::JsonObjPointer> {
-                "value", testing::Pointee(JsonProperties(JsonProperty<JsonObject::NumT> {"value", mthread.GetId()},
+                "value", testing::Pointee(JsonProperties(JsonProperty<JsonObject::NumT> {"value", g_mthread.GetId()},
                                                          JsonProperty<JsonObject::StringT> {"type", "number"}))},
             JsonProperty<JsonObject::BoolT> {"writable", testing::_},
             JsonProperty<JsonObject::BoolT> {"configurable", testing::_},
@@ -643,25 +635,25 @@ TEST_F(ServerTest, OnCallRuntimeGetProperties)
         return res;
     };
 
-    inspector_server.OnCallRuntimeGetProperties(getProperties);
+    inspectorServer.OnCallRuntimeGetProperties(getProperties);
 }
 
 TEST_F(ServerTest, OnCallRuntimeRunIfWaitingForDebugger)
 {
-    inspector_server.CallTargetAttachedToTarget(mthread);
+    inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
     EXPECT_CALL(server, OnCallMock("Runtime.runIfWaitingForDebugger", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
             JsonObjectBuilder res;
             JsonObject empty;
-            handler(session_id, res, empty);
+            handler(g_sessionId, res, empty);
             ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
-            ASSERT_TRUE(handler_called);
+            ASSERT_TRUE(g_handlerCalled);
         });
 
-    inspector_server.OnCallRuntimeRunIfWaitingForDebugger([](PtThread thread) {
-        ASSERT_EQ(thread.GetId(), mthread.GetId());
-        handler_called = true;
+    inspectorServer.OnCallRuntimeRunIfWaitingForDebugger([](PtThread thread) {
+        ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        g_handlerCalled = true;
     });
 }
 

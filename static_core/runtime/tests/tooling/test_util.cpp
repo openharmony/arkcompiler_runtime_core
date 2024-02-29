@@ -69,7 +69,7 @@ std::ostream &operator<<(std::ostream &out, DebugEvent value)
 #define ADD_CASE(entry) \
     case (entry):       \
         s = #entry;     \
-        break;
+        break
 
     switch (value) {
         ADD_CASE(DebugEvent::BREAKPOINT);

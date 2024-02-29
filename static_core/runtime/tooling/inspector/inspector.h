@@ -92,6 +92,9 @@ private:
     std::vector<PropertyDescriptor> GetProperties(PtThread thread, RemoteObjectId objectId, bool generatePreview);
     std::string GetSourceCode(std::string_view sourceFile);
 
+    void DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &objectRepository,
+                                     const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception);
+
 private:
     bool breakOnStart_;
 

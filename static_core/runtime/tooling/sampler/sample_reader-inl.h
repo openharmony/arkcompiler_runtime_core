@@ -16,6 +16,7 @@
 #define PANDA_RUNTIME_TOOLING_SAMPLER_SAMPLE_READER_INL_H
 
 #include <iostream>
+#include <securec.h>
 #include <string>
 
 #include "libpandabase/utils/logger.h"
@@ -114,8 +115,10 @@ inline bool SampleReader::GetNextSample(SampleInfo *sampleOut)
     sampleOut->stackInfo.managedStackSize = ReadUintptrTBitMisaligned(&currentSamplePtr[SAMPLE_STACK_SIZE_OFFSET]);
 
     ASSERT(sampleOut->stackInfo.managedStackSize <= SampleInfo::StackInfo::MAX_STACK_DEPTH);
-    memcpy(sampleOut->stackInfo.managedStack.data(), currentSamplePtr + SAMPLE_STACK_OFFSET,
-           sampleOut->stackInfo.managedStackSize * sizeof(SampleInfo::ManagedStackFrameId));
+    auto copySize = sampleOut->stackInfo.managedStackSize * sizeof(SampleInfo::ManagedStackFrameId);
+    [[maybe_unused]] int r =
+        memcpy_s(sampleOut->stackInfo.managedStack.data(), copySize, currentSamplePtr + SAMPLE_STACK_OFFSET, copySize);
+    ASSERT(r == 0);
     ++sampleRowCounter_;
     return true;
 }

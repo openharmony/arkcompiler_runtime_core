@@ -30,9 +30,18 @@
 
 namespace panda::tooling::inspector::test {
 
+static constexpr const char *g_source = R"(
+    .record Test {}
+
+    .function i32 Test.foo() {
+        ldai 111
+        return
+    }
+)";
+
 class ObjectRepositoryTest : public testing::Test {
 protected:
-    void SetUp()
+    static void SetUpTestSuite()
     {
         RuntimeOptions options;
         options.SetShouldInitializeIntrinsics(false);
@@ -40,131 +49,129 @@ protected:
         Runtime::Create(options);
         thread_ = panda::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();
+
+        pandasm::Parser p;
+
+        auto res = p.Parse(g_source, "source.pa");
+        ASSERT_TRUE(res.HasValue());
+        auto pf = pandasm::AsmEmitter::Emit(res.Value());
+        ASSERT(pf);
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        classLinker->AddPandaFile(std::move(pf));
+
+        PandaString descriptor;
+        auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+        Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("Test"), &descriptor));
+        ASSERT_NE(klass, nullptr);
+
+        auto methods = klass->GetMethods();
+        ASSERT_EQ(methods.size(), 1);
+
+        clsObject = klass->GetManagedObject();
+        methodFoo = &methods[0];
     }
-    void TearDown()
+
+    static void TearDownTestSuite()
     {
         thread_->ManagedCodeEnd();
         Runtime::Destroy();
     }
-    panda::MTManagedThread *thread_ = nullptr;
+
+    static constexpr uint16_t U16_VALUE = 43602;
+    static constexpr int32_t I32_VALUE = -2345678;
+    static constexpr int64_t I64_VALUE = 200000000000002;
+    static constexpr double F64_VALUE = 6.547;
+
+    static panda::MTManagedThread *thread_;
+    static Method *methodFoo;
+    static ObjectHeader *clsObject;
 };
+
+panda::MTManagedThread *ObjectRepositoryTest::thread_ = nullptr;
+Method *ObjectRepositoryTest::methodFoo = nullptr;
+ObjectHeader *ObjectRepositoryTest::clsObject = nullptr;
+
+template <typename ValueT, typename V>
+static auto GetPrimitiveProperties(const char *type, V value, const char *valueName = "value")
+{
+    return JsonProperties(JsonProperty<JsonObject::StringT> {"type", type}, JsonProperty<ValueT> {valueName, value});
+}
+
+template <typename NameT, typename DescT>
+static auto GetObjectProperties(NameT className, DescT description, const char *objectId)
+{
+    return JsonProperties(JsonProperty<JsonObject::StringT> {"type", "object"},
+                          JsonProperty<JsonObject::StringT> {"className", className},
+                          JsonProperty<JsonObject::StringT> {"description", description},
+                          JsonProperty<JsonObject::StringT> {"objectId", objectId});
+}
+
+template <typename NameT, typename V>
+static auto GetFrameObjectProperties(NameT name, V valueProperties)
+{
+    return JsonProperties(JsonProperty<JsonObject::StringT> {"name", name},
+                          JsonProperty<JsonObject::JsonObjPointer> {"value", valueProperties},
+                          JsonProperty<JsonObject::BoolT> {"writable", testing::_},
+                          JsonProperty<JsonObject::BoolT> {"configurable", testing::_},
+                          JsonProperty<JsonObject::BoolT> {"enumerable", testing::_});
+}
 
 TEST_F(ObjectRepositoryTest, S)
 {
-    const char *source = R"(
-        .record Test {}
-
-        .function i32 Test.foo() {
-            ldai 111
-            return
-        }
-    )";
-
-    pandasm::Parser p;
-
-    auto res = p.Parse(source, "source.pa");
-    ASSERT_TRUE(res.HasValue());
-    auto pf = pandasm::AsmEmitter::Emit(res.Value());
-    ASSERT(pf);
-    ClassLinker *class_linker = Runtime::GetCurrent()->GetClassLinker();
-    class_linker->AddPandaFile(std::move(pf));
-
-    PandaString descriptor;
-    auto *ext = class_linker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-    Class *klass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("Test"), &descriptor));
-    ASSERT_NE(klass, nullptr);
-
-    auto methods = klass->GetMethods();
-    ASSERT_EQ(methods.size(), 1);
-    ObjectHeader *cls_object = klass->GetManagedObject();
-
     ObjectRepository obj;
 
-    auto cls_obj = obj.CreateObject(TypedValue::Reference(cls_object));
-    ASSERT_EQ(cls_obj.GetObjectId(), RemoteObjectId(1));
-    ASSERT_THAT(ToJson(cls_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"description", testing::_},
-                                                JsonProperty<JsonObject::StringT> {"objectId", "1"},
-                                                JsonProperty<JsonObject::StringT> {"className", testing::_},
-                                                JsonProperty<JsonObject::StringT> {"type", "object"}));
+    auto clsObj = obj.CreateObject(TypedValue::Reference(clsObject));
+    ASSERT_EQ(clsObj.GetObjectId(), RemoteObjectId(1));
+    ASSERT_THAT(ToJson(clsObj), GetObjectProperties(testing::_, testing::_, "1"));
 
-    auto null_obj = obj.CreateObject(TypedValue::Reference(nullptr));
-    ASSERT_THAT(ToJson(null_obj),
-                JsonProperties(JsonProperty<JsonObject::StringT> {"type", "object"},
-                               JsonProperty<JsonObject::StringT> {"subtype", "null"},
-                               JsonProperty<JsonObject::JsonObjPointer> {"value", testing::IsNull()}));
+    auto nullObj = obj.CreateObject(TypedValue::Reference(nullptr));
+    ASSERT_THAT(ToJson(nullObj), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "object"},
+                                                JsonProperty<JsonObject::StringT> {"subtype", "null"},
+                                                JsonProperty<JsonObject::JsonObjPointer> {"value", testing::IsNull()}));
 
-    auto inv_obj = obj.CreateObject(TypedValue::Invalid());
-    ASSERT_THAT(ToJson(inv_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "undefined"}));
+    auto invObj = obj.CreateObject(TypedValue::Invalid());
+    ASSERT_THAT(ToJson(invObj), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "undefined"}));
 
-    auto bool_obj = obj.CreateObject(TypedValue::U1(true));
-    ASSERT_THAT(ToJson(bool_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "boolean"},
-                                                 JsonProperty<JsonObject::BoolT> {"value", true}));
+    auto boolObj = obj.CreateObject(TypedValue::U1(true));
+    ASSERT_THAT(ToJson(boolObj), GetPrimitiveProperties<JsonObject::BoolT>("boolean", true));
 
-    auto num_obj = obj.CreateObject(TypedValue::U16(43602));
-    ASSERT_THAT(ToJson(num_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "number"},
-                                                JsonProperty<JsonObject::NumT> {"value", 43602}));
+    auto numObj = obj.CreateObject(TypedValue::U16(U16_VALUE));
+    ASSERT_THAT(ToJson(numObj), GetPrimitiveProperties<JsonObject::NumT>("number", U16_VALUE));
 
-    auto neg_obj = obj.CreateObject(TypedValue::I32(-2345678));
-    ASSERT_THAT(ToJson(neg_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "number"},
-                                                JsonProperty<JsonObject::NumT> {"value", -2345678}));
+    auto negObj = obj.CreateObject(TypedValue::I32(I32_VALUE));
+    ASSERT_THAT(ToJson(negObj), GetPrimitiveProperties<JsonObject::NumT>("number", I32_VALUE));
 
-    auto huge_obj = obj.CreateObject(TypedValue::I64(200000000000002));
-    ASSERT_THAT(ToJson(huge_obj),
-                JsonProperties(JsonProperty<JsonObject::StringT> {"type", "bigint"},
-                               JsonProperty<JsonObject::StringT> {"unserializableValue", "200000000000002"}));
+    auto hugeObj = obj.CreateObject(TypedValue::I64(I64_VALUE));
+    ASSERT_THAT(ToJson(hugeObj),
+                GetPrimitiveProperties<JsonObject::StringT>("bigint", "200000000000002", "unserializableValue"));
 
-    auto doub_obj = obj.CreateObject(TypedValue::F64(6.547));
-    ASSERT_THAT(ToJson(doub_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "number"},
-                                                 JsonProperty<JsonObject::NumT> {"value", testing::DoubleEq(6.547)}));
+    auto doubObj = obj.CreateObject(TypedValue::F64(F64_VALUE));
+    ASSERT_THAT(ToJson(doubObj), GetPrimitiveProperties<JsonObject::NumT>("number", testing::DoubleEq(F64_VALUE)));
 
-    auto glob_obj1 = obj.CreateGlobalObject();
-    ASSERT_THAT(ToJson(glob_obj1), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "object"},
-                                                  JsonProperty<JsonObject::StringT> {"className", "[Global]"},
-                                                  JsonProperty<JsonObject::StringT> {"description", "Global object"},
-                                                  JsonProperty<JsonObject::StringT> {"objectId", "0"}));
+    auto globObj1 = obj.CreateGlobalObject();
+    ASSERT_THAT(ToJson(globObj1), GetObjectProperties("[Global]", "Global object", "0"));
 
-    auto glob_obj2 = obj.CreateGlobalObject();
-    ASSERT_THAT(ToJson(glob_obj2), JsonProperties(JsonProperty<JsonObject::StringT> {"type", "object"},
-                                                  JsonProperty<JsonObject::StringT> {"className", "[Global]"},
-                                                  JsonProperty<JsonObject::StringT> {"description", "Global object"},
-                                                  JsonProperty<JsonObject::StringT> {"objectId", "0"}));
+    auto globObj2 = obj.CreateGlobalObject();
+    ASSERT_THAT(ToJson(globObj2), GetObjectProperties("[Global]", "Global object", "0"));
 
-    PtDebugFrame frame(&methods[0], nullptr);
+    PtDebugFrame frame(methodFoo, nullptr);
     std::map<std::string, TypedValue> locals;
     locals.emplace("a", TypedValue::U16(56U));
-    locals.emplace("ref", TypedValue::Reference(cls_object));
+    locals.emplace("ref", TypedValue::Reference(clsObject));
 
-    auto frame_obj = obj.CreateFrameObject(frame, locals);
-    ASSERT_EQ(frame_obj.GetObjectId().value(), RemoteObjectId(2UL));
+    auto frameObj = obj.CreateFrameObject(frame, locals);
+    ASSERT_EQ(frameObj.GetObjectId().value(), RemoteObjectId(2UL));
 
-    auto properties = obj.GetProperties(frame_obj.GetObjectId().value(), true);
+    auto properties = obj.GetProperties(frameObj.GetObjectId().value(), true);
     ASSERT_EQ(properties.size(), 2UL);
     ASSERT_EQ(properties[0].GetName(), "a");
 
-    ASSERT_THAT(ToJson(frame_obj), JsonProperties(JsonProperty<JsonObject::StringT> {"description", "Frame #0"},
-                                                  JsonProperty<JsonObject::StringT> {"objectId", "2"},
-                                                  JsonProperty<JsonObject::StringT> {"className", ""},
-                                                  JsonProperty<JsonObject::StringT> {"type", "object"}));
-    ASSERT_THAT(ToObject(properties[0].ToJson()),
-                JsonProperties(JsonProperty<JsonObject::StringT> {"name", "a"},
-                               JsonProperty<JsonObject::JsonObjPointer> {
-                                   "value", testing::Pointee(
-                                                JsonProperties(JsonProperty<JsonObject::NumT> {"value", 56},
-                                                               JsonProperty<JsonObject::StringT> {"type", "number"}))},
-                               JsonProperty<JsonObject::BoolT> {"writable", testing::_},
-                               JsonProperty<JsonObject::BoolT> {"configurable", testing::_},
-                               JsonProperty<JsonObject::BoolT> {"enumerable", testing::_}));
+    ASSERT_THAT(ToJson(frameObj), GetObjectProperties("", "Frame #0", "2"));
+    ASSERT_THAT(
+        ToObject(properties[0].ToJson()),
+        GetFrameObjectProperties("a", testing::Pointee(GetPrimitiveProperties<JsonObject::NumT>("number", 56U))));
     ASSERT_THAT(ToObject(properties[1].ToJson()),
-                JsonProperties(JsonProperty<JsonObject::StringT> {"name", "ref"},
-                               JsonProperty<JsonObject::JsonObjPointer> {
-                                   "value", testing::Pointee(JsonProperties(
-                                                JsonProperty<JsonObject::StringT> {"objectId", "1"},
-                                                JsonProperty<JsonObject::StringT> {"description", testing::_},
-                                                JsonProperty<JsonObject::StringT> {"className", testing::_},
-                                                JsonProperty<JsonObject::StringT> {"type", "object"}))},
-                               JsonProperty<JsonObject::BoolT> {"writable", testing::_},
-                               JsonProperty<JsonObject::BoolT> {"configurable", testing::_},
-                               JsonProperty<JsonObject::BoolT> {"enumerable", testing::_}));
+                GetFrameObjectProperties("ref", testing::Pointee(GetObjectProperties(testing::_, testing::_, "1"))));
 }
 }  // namespace panda::tooling::inspector::test
 
