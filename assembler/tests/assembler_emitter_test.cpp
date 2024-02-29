@@ -1014,7 +1014,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_015, TestSize.Level1)
     program.Value().record_table.at("R").field_list[0].metadata->SetValue(insn_order_anno);
     auto pf4 = AsmEmitter::Emit(program.Value());
     EXPECT_NE(pf4, nullptr);
-
 }
 
 /**

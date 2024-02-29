@@ -151,7 +151,8 @@ private:
             ManagedThread::GetCurrent()->SetCurrentFrame(reinterpret_cast<Frame *>(fp));
             return callback_(lr, fp);
         } else if constexpr (RUNTIME_ARCH == Arch::AARCH32) {
-            uintptr_t fp, lr;
+            uintptr_t fp;
+            uintptr_t lr;
             ManagedThread::GetCurrent()->SetCurrentFrameIsCompiled(true);
 #if (defined(__clang__) || defined(PANDA_TARGET_ARM64))
             asm("ldr %0, [fp, #0]" : "=r"(fp));
@@ -164,7 +165,8 @@ private:
             ManagedThread::GetCurrent()->SetCurrentFrame(reinterpret_cast<Frame *>(fp));
             return callback_(lr, fp);
         } else if constexpr (RUNTIME_ARCH == Arch::X86_64) {
-            uintptr_t fp, lr;
+            uintptr_t fp;
+            uintptr_t lr;
             ManagedThread::GetCurrent()->SetCurrentFrameIsCompiled(true);
             asm("movq (%%rbp), %0" : "=r"(fp));
             asm("movq 8(%%rbp), %0" : "=r"(lr));
