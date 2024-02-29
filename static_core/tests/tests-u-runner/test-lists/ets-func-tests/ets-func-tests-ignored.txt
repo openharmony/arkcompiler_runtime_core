@@ -602,3 +602,6 @@ spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_000
 ### Issue 16535 end
 
 
+### Issue 1661
+spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_03.ets
+### Issue 1661 end
