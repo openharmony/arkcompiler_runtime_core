@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_H
 
 #include <cmath>
 #include <cstdint>
@@ -346,7 +346,6 @@ int GetMinmumDigits(FpType d, int *decpt, char *buf)
         GetBase(d, digits, decpt, buf, bufTmp, sizeof(bufTmp));
 
         bool same = StrToFp<FpType>(bufTmp, nullptr) == d;
-
         if (same) {
             // no need to keep the trailing zeros
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -488,7 +487,6 @@ EtsString *FpToString(FpType number, int radix)
     auto value = bit_cast<UnsignedIntType>(number);
     value += 1;
     float delta = static_cast<FpType>(HALF) * (bit_cast<FpType>(value) - number);
-
     if (delta == 0) {
         delta = number;
     }
@@ -520,4 +518,4 @@ inline constexpr uint32_t IGNORE_TRAILING = 1U << 3U;
 
 }  // namespace panda::ets::intrinsics::helpers::flags
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_H

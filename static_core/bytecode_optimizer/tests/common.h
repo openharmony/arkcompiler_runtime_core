@@ -720,7 +720,7 @@ public:
             BASIC_BLOCK(3U, 4_I) {}
             BASIC_BLOCK(4U, -1)
             {
-                INST(4, Opcode::ReturnVoid).v0id();
+                INST(4U, Opcode::ReturnVoid).v0id();
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));

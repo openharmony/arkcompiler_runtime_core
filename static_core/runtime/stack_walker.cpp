@@ -787,7 +787,6 @@ void StackWalker::DumpFrame(std::ostream &os)
                 codeInfo_.Dump(os, stackmap_);
             }
         }
-
     } else {
         os << " (managed)";
     }

@@ -372,7 +372,6 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
     auto *vm = Thread::GetCurrent()->GetVM();
     SpaceType objSpaceType =
         PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(obj->GetCoreType()));
-
     if (objSpaceType == SpaceType::SPACE_TYPE_OBJECT && vm->GetGC()->IsGenerational()) {
         if (vm->GetHeapManager()->IsObjectInYoungSpace(obj->GetCoreType())) {
             const EtsInt youngSpace = 4;

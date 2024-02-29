@@ -469,7 +469,6 @@ bool StackOverflowHandler::Action(int sig, [[maybe_unused]] siginfo_t *siginfo, 
     auto memCheckLocation = signalContext.GetSP() - ManagedThread::GetStackOverflowCheckOffset();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     auto memFaultLocation = ToUintPtr(siginfo->si_addr);
-
     if (memCheckLocation != memFaultLocation) {
         return false;
     }
