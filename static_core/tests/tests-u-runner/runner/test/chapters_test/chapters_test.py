@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import unittest
 from typing import List, Set
 
@@ -19,6 +20,7 @@ from runner.chapters import Chapters
 
 
 class ChapterTest(unittest.TestCase):
+    current_folder = os.path.dirname(__file__)
     chapters: Chapters
     base_folder: str
     files: List[str]
@@ -39,7 +41,7 @@ class ChapterTest(unittest.TestCase):
             'folder4/file1.ets',
             'fol-der 1/fi_le 1.ets',
         ]
-        cls.chapters = Chapters('runner/test/chapters_test.yaml')
+        cls.chapters = Chapters(os.path.join(cls.current_folder, 'chapters_test.yaml'))
 
     def test_ch1(self) -> None:
         actual = ChapterTest.chapters.filter_by_chapter(

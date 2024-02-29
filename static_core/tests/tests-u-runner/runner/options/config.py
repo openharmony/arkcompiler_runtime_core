@@ -21,7 +21,9 @@ import re
 from functools import cached_property
 from typing import Set, Dict
 
+from runner.logger import Log
 from runner.options.cli_args_wrapper import CliArgsWrapper
+from runner.options.config_keeper import ConfigKeeper
 from runner.options.decorator_value import value, _to_test_suites, _to_str
 from runner.options.options_ark import ArkOptions
 from runner.options.options_ark_aot import ArkAotOptions
@@ -33,7 +35,6 @@ from runner.options.options_quick import QuickOptions
 from runner.options.options_test_lists import TestListsOptions
 from runner.options.options_time_report import TimeReportOptions
 from runner.options.options_verifier import VerifierOptions
-from runner.options.yaml_document import YamlDocument
 
 _LOGGER = logging.getLogger("runner.options.config")
 
@@ -41,7 +42,9 @@ _LOGGER = logging.getLogger("runner.options.config")
 class Config:
     def __init__(self, args: argparse.Namespace):
         CliArgsWrapper.setup(args)
-        YamlDocument.load(args.config)
+        ConfigKeeper.get().load_configs(args.configs)
+        for warning in ConfigKeeper.get().warnings():
+            Log.summary(_LOGGER, warning)
 
     def __str__(self) -> str:
         return _to_str(self, 0)
@@ -87,7 +90,7 @@ class Config:
         if self.general.generate_config is None:
             return
         data = self._to_dict()
-        YamlDocument.save(self.general.generate_config, data)
+        ConfigKeeper.get().save(self.general.generate_config, data)
 
     def get_command_line(self) -> str:
         _test_suites = ['--' + suite.replace('_', '-') for suite in self.test_suites]

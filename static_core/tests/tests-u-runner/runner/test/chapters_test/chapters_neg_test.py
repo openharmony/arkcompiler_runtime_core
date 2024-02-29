@@ -12,32 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import unittest
 
 from runner.chapters import Chapters, IncorrectFileFormatChapterException
 
 
 class ChapterNegativeCases(unittest.TestCase):
+    current_folder = os.path.dirname(__file__)
+
     def test_unknown(self) -> None:
         with self.assertRaises(FileNotFoundError):
             Chapters('does-not-exist.yaml')
 
     def test_no_chapters(self) -> None:
         with self.assertRaises(IncorrectFileFormatChapterException):
-            Chapters('runner/test/chapters_neg_1_test.yaml')
+            Chapters(os.path.join(self.current_folder, 'chapters_neg_1_test.yaml'))
 
     def test_no_semicolon(self) -> None:
         with self.assertRaises(IncorrectFileFormatChapterException):
-            Chapters('runner/test/chapters_neg_2_test.yaml')
+            Chapters(os.path.join(self.current_folder, 'chapters_neg_2_test.yaml'))
 
     def test_incorr_exclude_01(self) -> None:
         with self.assertRaises(IncorrectFileFormatChapterException):
-            Chapters('runner/test/chapters_neg_3_test.yaml')
+            Chapters(os.path.join(self.current_folder, 'chapters_neg_3_test.yaml'))
 
     def test_incorr_exclude_02(self) -> None:
         # Missed ':' results in parsing of entire exclude list as one include item.
         # This is YAML parser behaviour
-        test_file = 'runner/test/chapters_neg_4_test.yaml'
+        test_file = os.path.join(self.current_folder, 'chapters_neg_4_test.yaml')
         test_chapter = 'ch1'
         chapters = Chapters(test_file)
         ch1 = chapters.chapters.get(test_chapter)

@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-# pylint: disable=unused-import
-from runner.test.chapters_test.chapters_test import ChapterTest
-# pylint: disable=unused-import
-from runner.test.chapters_test.chapters_neg_test import ChapterNegativeCases
-# pylint: disable=unused-import
-from runner.test.multiple_config_test.multiple_config_test import MultipleConfigTest
+import logging
+from typing import Optional
 
-if __name__ == '__main__':
-    unittest.main()
+from runner.options.yaml_document import YamlDocument
+
+_LOGGER = logging.getLogger("runner.options.config_keeper")
+
+
+class ConfigKeeper:
+    _yaml: Optional[YamlDocument] = None
+
+    @classmethod
+    def get(cls) -> YamlDocument:
+        if cls._yaml is None:
+            cls._yaml = YamlDocument()
+        return cls._yaml
