@@ -59,23 +59,23 @@ const auto &BreakpointParser()
     static const auto DEC = P2::OfCharset("0123456789");
     static const auto HEX = P3::OfCharset("0123456789abcdefABCDEF");
 
-    static const auto OFFSET_HANDLER = [](Action a, Context &c, auto from) {
+    static const auto offsetHandler = [](Action a, Context &c, auto from) {
         if (a == Action::PARSED) {
             c.offsets.push_back(std::strtol(from, nullptr, 0));
         }
         return true;
     };
 
-    static const auto OFFSET = P4::OfString("0x") >> HEX | DEC |= OFFSET_HANDLER;
+    static const auto OFFSET = ((P4::OfString("0x") >> HEX) | DEC) |= offsetHandler;
 
-    static const auto METHOD_NAME_HANDLER = [](Action a, Context &c, auto from, auto to) {
+    static const auto methodNameHandler = [](Action a, Context &c, auto from, auto to) {
         if (a == Action::PARSED) {
             c.method = PandaString {from, to};
         }
         return true;
     };
 
-    static const auto BREAKPOINT_HANDLER = [](Action a, Context &c) {
+    static const auto breakpointHandler = [](Action a, Context &c) {
         if (a == Action::START) {
             c.method.clear();
             c.offsets.clear();
@@ -83,15 +83,15 @@ const auto &BreakpointParser()
         return true;
     };
 
-    static const auto METHOD_NAME = P5::OfCharset(!Charset {" \t,"}) |= METHOD_NAME_HANDLER;
-    static const auto BREAKPOINT = ~WS >> METHOD_NAME >> *(~WS >> COMMA >> ~WS >> OFFSET) >> ~WS >> P::End() |
-                                   ~WS >> P::End() |= BREAKPOINT_HANDLER;  // NOLINT
+    static const auto METHOD_NAME = P5::OfCharset(!Charset {" \t,"}) |= methodNameHandler;
+    static const auto BREAKPOINT = (~WS >> METHOD_NAME >> *(~WS >> COMMA >> ~WS >> OFFSET) >> ~WS >> P::End()) |
+                                   (~WS >> P::End()) |= breakpointHandler;  // NOLINT
     return BREAKPOINT;
 }
 
 void RegisterConfigHandlerBreakpoints(Config *dcfg)
 {
-    static const auto CONFIG_DEBUG_BREAKPOINTS = [](Config *cfg, const Section &section) {
+    static const auto configDebugBreakpoints = [](Config *cfg, const Section &section) {
         for (const auto &s : section.sections) {
             if (s.name == "verifier") {
                 for (const auto &i : s.items) {
@@ -119,7 +119,7 @@ void RegisterConfigHandlerBreakpoints(Config *dcfg)
         return true;
     };
 
-    config::RegisterConfigHandler(dcfg, "config.debug.breakpoints", CONFIG_DEBUG_BREAKPOINTS);
+    config::RegisterConfigHandler(dcfg, "config.debug.breakpoints", configDebugBreakpoints);
 }
 
 }  // namespace panda::verifier::debug

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_FUNCTION_TRAITS_
-#define PANDA_VERIFIER_UTIL_FUNCTION_TRAITS_
+#ifndef PANDA_VERIFIER_UTIL_FUNCTION_TRAITS
+#define PANDA_VERIFIER_UTIL_FUNCTION_TRAITS
 
 #include <tuple>
 
@@ -127,4 +127,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_FUNCTION_TRAITS_
+#endif  // !PANDA_VERIFIER_UTIL_FUNCTION_TRAITS

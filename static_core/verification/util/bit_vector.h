@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_BIT_VECTOR_HPP_
-#define PANDA_VERIFIER_BIT_VECTOR_HPP_
+#ifndef PANDA_VERIFIER_BIT_VECTOR_HPP
+#define PANDA_VERIFIER_BIT_VECTOR_HPP
 
 #include "utils/bit_utils.h"
 #include "function_traits.h"
@@ -744,4 +744,4 @@ private:
 
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_BIT_VECTOR_HPP_
+#endif  // !PANDA_VERIFIER_BIT_VECTOR_HPP

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_JOB_QUEUE_JOB_H_
-#define PANDA_VERIFIER_JOB_QUEUE_JOB_H_
+#ifndef PANDA_VERIFIER_JOB_QUEUE_JOB_H
+#define PANDA_VERIFIER_JOB_QUEUE_JOB_H
 
 #include "source_lang_enum.h"
 #include "verification/cflow/cflow_info.h"
@@ -174,4 +174,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFIER_JOB_QUEUE_JOB_H_
+#endif  // PANDA_VERIFIER_JOB_QUEUE_JOB_H

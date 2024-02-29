@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_CFLOW_CHECK_HPP_
-#define PANDA_VERIFICATION_CFLOW_CHECK_HPP_
+#ifndef PANDA_VERIFICATION_CFLOW_CHECK_HPP
+#define PANDA_VERIFICATION_CFLOW_CHECK_HPP
 
 #include "cflow_info.h"
 
@@ -28,4 +28,4 @@ namespace panda::verifier {
 PandaUniquePtr<CflowMethodInfo> CheckCflow(Method const *method);
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFICATION_CFLOW_CHECK_HPP_
+#endif  // !PANDA_VERIFICATION_CFLOW_CHECK_HPP

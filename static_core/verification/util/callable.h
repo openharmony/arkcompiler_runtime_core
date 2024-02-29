@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIF_PARSER_CALLABLE_H_
-#define PANDA_VERIF_PARSER_CALLABLE_H_
+#ifndef PANDA_VERIF_PARSER_CALLABLE_H
+#define PANDA_VERIF_PARSER_CALLABLE_H
 
 #include <utility>
 #include <tuple>
@@ -114,4 +114,4 @@ public:
 };
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIF_PARSER_CALLABLE_H_
+#endif  // PANDA_VERIF_PARSER_CALLABLE_H

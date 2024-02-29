@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_PUBLIC_INTERNAL_H_
-#define PANDA_VERIFICATION_PUBLIC_INTERNAL_H_
+#ifndef PANDA_VERIFICATION_PUBLIC_INTERNAL_H
+#define PANDA_VERIFICATION_PUBLIC_INTERNAL_H
 
 #include "verification/verification_options.h"
 #include "verification/jobs/service.h"
@@ -37,4 +37,4 @@ struct Service {
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_PUBLIC_INTERNAL_H_
+#endif  // PANDA_VERIFICATION_PUBLIC_INTERNAL_H

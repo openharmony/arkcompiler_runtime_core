@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEBUG_METHOD_GROUP_PARSER_H_
-#define PANDA_VERIFIER_DEBUG_METHOD_GROUP_PARSER_H_
+#ifndef PANDA_VERIFIER_DEBUG_METHOD_GROUP_PARSER_H
+#define PANDA_VERIFIER_DEBUG_METHOD_GROUP_PARSER_H
 
 #include "verification/util/parser/parser.h"
 #include "runtime/include/mem/panda_string.h"
@@ -56,4 +56,4 @@ const auto &MethodGroupParser(RegexHandler &regexHandler)
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFIER_DEBUG_METHOD_GROUP_PARSER_H_
+#endif  // PANDA_VERIFIER_DEBUG_METHOD_GROUP_PARSER_H

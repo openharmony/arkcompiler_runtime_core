@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_SYNCHRONIZED_HPP_
-#define PANDA_VERIFIER_SYNCHRONIZED_HPP_
+#ifndef PANDA_VERIFIER_SYNCHRONIZED_HPP
+#define PANDA_VERIFIER_SYNCHRONIZED_HPP
 
 #include "verification/util/callable.h"
 
@@ -150,4 +150,4 @@ private:
 };
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_SYNCHRONIZED_HPP_
+#endif  // !PANDA_VERIFIER_SYNCHRONIZED_HPP

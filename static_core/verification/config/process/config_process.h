@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIF_CONFIG_PROCESS_H_
-#define PANDA_VERIF_CONFIG_PROCESS_H_
+#ifndef PANDA_VERIF_CONFIG_PROCESS_H
+#define PANDA_VERIF_CONFIG_PROCESS_H
 
 #include "verification/config/config.h"
 #include "verification/config/context/context.h"
@@ -31,4 +31,4 @@ bool ProcessConfig(Config *cfg, const Section &section);
 void RegisterConfigHandler(Config *cfg, const PandaString &path, callable<bool(Config *, const Section &)> handler);
 }  // namespace panda::verifier::config
 
-#endif  // PANDA_VERIF_CONFIG_PROCESS_H_
+#endif  // PANDA_VERIF_CONFIG_PROCESS_H

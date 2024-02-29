@@ -24,31 +24,31 @@ void OpenPandaFileFuzzTest(const uint8_t *data, size_t size)
     const char *filename1 = panda::panda_file::ARCHIVE_FILENAME;
     const char *filename2 = "classes1.abc";
 
-    const char *zip_filename1 = "__OpenPandaFileFuzzTest.zip";
+    const char *zipFilename1 = "__OpenPandaFileFuzzTest.zip";
     int ret1 =
-        panda::CreateOrAddFileIntoZip(zip_filename1, filename1, data, size, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+        panda::CreateOrAddFileIntoZip(zipFilename1, filename1, data, size, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     int ret2 =
-        panda::CreateOrAddFileIntoZip(zip_filename1, filename2, data, size, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
+        panda::CreateOrAddFileIntoZip(zipFilename1, filename2, data, size, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
     if (ret1 != 0 || ret2 != 0) {
-        (void)remove(zip_filename1);
+        (void)remove(zipFilename1);
         return;
     }
 
-    const char *zip_filename2 = "__OpenPandaFileFromZipNameAnonMem.zip";
+    const char *zipFilename2 = "__OpenPandaFileFromZipNameAnonMem.zip";
     int ret3 =
-        panda::CreateOrAddFileIntoZip(zip_filename2, filename1, data, size, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+        panda::CreateOrAddFileIntoZip(zipFilename2, filename1, data, size, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     if (ret3 != 0) {
-        (void)remove(zip_filename2);
+        (void)remove(zipFilename2);
         return;
     }
 
     // Call OpenPandaFile
     {
-        panda::panda_file::OpenPandaFile(zip_filename1);
-        panda::panda_file::OpenPandaFile(zip_filename2);
+        panda::panda_file::OpenPandaFile(zipFilename1);
+        panda::panda_file::OpenPandaFile(zipFilename2);
     }
-    (void)remove(zip_filename1);
-    (void)remove(zip_filename2);
+    (void)remove(zipFilename1);
+    (void)remove(zipFilename2);
 }
 }  // namespace OHOS
 

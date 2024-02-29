@@ -53,18 +53,18 @@ bool ParseConfig(const char *str, Section &cfg)
     static const auto WS = ~CM >> P::OfCharset(" \t\r\n");
     static const auto NL = ~CM >> P1::OfCharset("\r\n");
     static const auto SP = P2::OfCharset(" \t");
-    static const auto NAME_HANDLER = [](auto a, Context &c, auto from, auto to) {
+    static const auto nameHandler = [](auto a, Context &c, auto from, auto to) {
         if (a == Action::PARSED) {
             c.current.name = PandaString {from, to};
         }
         return true;
     };
-    static const auto NAME = P3::OfCharset("abcdefghijklmnopqrstuvwxyz_") |= NAME_HANDLER;
+    static const auto NAME = P3::OfCharset("abcdefghijklmnopqrstuvwxyz_") |= nameHandler;
 
     static const auto LCURL = P4::OfString("{");
     static const auto RCURL = P5::OfString("}");
 
-    static const auto IS_COMMENT = [](auto s) {
+    static const auto isComment = [](auto s) {
         for (char const c : s) {
             if (c == '#') {
                 return true;
@@ -76,23 +76,23 @@ bool ParseConfig(const char *str, Section &cfg)
         return false;
     };
 
-    static const auto LINE_HANDLER = [](auto a, Context &c, auto from, auto to) {
+    static const auto lineHandler = [](auto a, Context &c, auto from, auto to) {
         if (a == Action::PARSED) {
             auto item = PandaString {from, to};
-            if (!IS_COMMENT(item)) {
+            if (!isComment(item)) {
                 c.current.items.push_back(PandaString {from, to});
             }
         }
         return true;
     };
 
-    static const auto LINE = P6::OfCharset(!Charset {"\r\n"}) |= LINE_HANDLER;
+    static const auto LINE = P6::OfCharset(!Charset {"\r\n"}) |= lineHandler;
 
     static const auto SECTION_END = ~SP >> RCURL >> ~SP >> NL;
     static const auto SECTION_START = ~SP >> NAME >> ~SP >> LCURL >> ~SP >> NL;
     static const auto ITEM = (!SECTION_END) & (~SP >> LINE >> NL);
 
-    static const auto SECTION_HANDLER = [](auto a, Context &c) {
+    static const auto sectionHandler = [](auto a, Context &c) {
         if (a == Action::START) {
             c.sections.push_back(c.current);
             c.current.sections.clear();
@@ -112,7 +112,7 @@ bool ParseConfig(const char *str, Section &cfg)
     static P::P sectionRec;
 
     static const auto SECTION = ~WS >> SECTION_START >> ~WS >> *sectionRec >> *ITEM >> SECTION_END >> ~WS |=
-        SECTION_HANDLER;  // NOLINT
+        sectionHandler;  // NOLINT
 
     sectionRec = SECTION;
 

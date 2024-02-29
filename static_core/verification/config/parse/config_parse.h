@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIF_CONFIG_PARSE_H_
-#define PANDA_VERIF_CONFIG_PARSE_H_
+#ifndef PANDA_VERIF_CONFIG_PARSE_H
+#define PANDA_VERIF_CONFIG_PARSE_H
 
 #include "verification/config/config.h"
 
@@ -22,4 +22,4 @@ namespace panda::verifier::config {
 bool ParseConfig(const char *str, Section &cfg);
 }  // namespace panda::verifier::config
 
-#endif  // PANDA_VERIF_CONFIG_PARSE_H_
+#endif  // PANDA_VERIF_CONFIG_PARSE_H

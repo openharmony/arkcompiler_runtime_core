@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_MISC_HPP_
-#define PANDA_VERIFIER_UTIL_MISC_HPP_
+#ifndef PANDA_VERIFIER_UTIL_MISC_HPP
+#define PANDA_VERIFIER_UTIL_MISC_HPP
 
 #include "libpandabase/utils/hash.h"
 
@@ -64,4 +64,4 @@ struct hash<std::tuple<T...>> {
 
 }  // namespace std
 
-#endif  // !PANDA_VERIFIER_UTIL_MISC_HPP_
+#endif  // !PANDA_VERIFIER_UTIL_MISC_HPP

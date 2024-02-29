@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEBUG_LITERAL_PARSER_H_
-#define PANDA_VERIFIER_DEBUG_LITERAL_PARSER_H_
+#ifndef PANDA_VERIFIER_DEBUG_LITERAL_PARSER_H
+#define PANDA_VERIFIER_DEBUG_LITERAL_PARSER_H
 
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -64,16 +64,16 @@ inline const auto &LiteralsParser()
     static const auto WS = P::OfCharset(" \t");
     static const auto COMMA = P1::OfCharset(",");
 
-    static const auto LITERAL_HANDLER = [](Context &c, PandaString &&str) {
+    static const auto literalHandler = [](Context &c, PandaString &&str) {
         c.emplace_back(std::move(str));
         return true;
     };
 
-    static const auto LITERALS = ~WS >> *(~WS >> LiteralParser<P2>(LITERAL_HANDLER) >> ~WS >> ~COMMA) >> P::End();
+    static const auto LITERALS = ~WS >> *(~WS >> LiteralParser<P2>(literalHandler) >> ~WS >> ~COMMA) >> P::End();
 
     return LITERALS;
 }
 
 }  // namespace panda::verifier::debug
 
-#endif  // !PANDA_VERIFIER_DEBUG_LITERAL_PARSER_H_
+#endif  // !PANDA_VERIFIER_DEBUG_LITERAL_PARSER_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_TAG_FOR_INT__
-#define PANDA_VERIFIER_UTIL_TAG_FOR_INT__
+#ifndef PANDA_VERIFIER_UTIL_TAG_FOR_INT
+#define PANDA_VERIFIER_UTIL_TAG_FOR_INT
 
 #include <cstddef>
 
@@ -47,4 +47,4 @@ public:
 
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_TAG_FOR_INT__
+#endif  // !PANDA_VERIFIER_UTIL_TAG_FOR_INT

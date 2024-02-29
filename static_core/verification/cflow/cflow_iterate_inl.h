@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_CFLOW_ITER_INL_H_
-#define PANDA_VERIFIER_CFLOW_ITER_INL_H_
+#ifndef PANDA_VERIFIER_CFLOW_ITER_INL_H
+#define PANDA_VERIFIER_CFLOW_ITER_INL_H
 
 #include "bytecode_instruction-inl.h"
 #include "file_items.h"
@@ -46,4 +46,4 @@ namespace panda::verifier {
 #include <cflow_iterate_inl_gen.h>
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFIER_CFLOW_ITER_INL_H_
+#endif  // PANDA_VERIFIER_CFLOW_ITER_INL_H

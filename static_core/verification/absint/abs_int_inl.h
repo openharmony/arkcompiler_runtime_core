@@ -132,8 +132,8 @@ namespace panda::verifier {
 class AbsIntInstructionHandler {
 public:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-    static constexpr int ACC = -1;
-    static constexpr int INVALID_REG = -2;  // NOTE(vdyadov): may be use Index<..> here?
+    static constexpr int acc = -1;
+    static constexpr int invalidReg = -2;  // NOTE(vdyadov): may be use Index<..> here?
 
     using TypeId = panda_file::Type::TypeId;
     using Builtin = Type::Builtin;
@@ -306,12 +306,12 @@ public:
 
     void AssignAccToReg(int src)
     {
-        AssignRegToReg(ACC, src);
+        AssignRegToReg(acc, src);
     }
 
     void AssignRegToAcc(int dst)
     {
-        AssignRegToReg(dst, ACC);
+        AssignRegToReg(dst, acc);
     }
 
     // Names meanings: vs - v_source, vd - v_destination
@@ -629,7 +629,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(ACC, bits32_)) {
+        if (!CheckRegType(acc, bits32_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -649,7 +649,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(ACC, bits64_)) {
+        if (!CheckRegType(acc, bits64_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -666,7 +666,7 @@ public:
         DBGBRK();
         uint16_t vd = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(ACC, refType_)) {
+        if (!CheckRegType(acc, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -720,7 +720,7 @@ public:
 
         Sync();
 
-        if (!CheckRegType(ACC, refType_)) {
+        if (!CheckRegType(acc, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -728,7 +728,7 @@ public:
 
         // NOTE(vdyadov): think of two-pass absint, where we can catch const-null cases
 
-        auto type = GetRegType(ACC);
+        auto type = GetRegType(acc);
         SetAccAndOthersOfSameOrigin(nullRefType_);
 
         if (!ProcessBranching(imm)) {
@@ -751,7 +751,7 @@ public:
         auto imm = inst_.GetImm<FORMAT>();
         Sync();
 
-        if (!CheckRegType(ACC, refType_)) {
+        if (!CheckRegType(acc, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -791,7 +791,7 @@ public:
 
         Sync();
 
-        if (!CheckRegType(ACC, refType_)) {
+        if (!CheckRegType(acc, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -824,7 +824,7 @@ public:
 
         Sync();
 
-        if (!CheckRegType(ACC, refType_)) {
+        if (!CheckRegType(acc, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -1530,7 +1530,7 @@ public:
         DBGBRK();
         uint16_t vs = inst_.GetVReg<FORMAT>();
         Sync();
-        if (!CheckRegType(ACC, integral32_)) {
+        if (!CheckRegType(acc, integral32_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -1751,7 +1751,6 @@ public:
     bool CheckCtor(Span<int> regs)
     {
         Type type = GetCachedType();
-
         if (UNLIKELY(type.IsClass() && type.GetClass()->IsArrayClass())) {
             if (job_->IsMethodPresentForOffset(inst_.GetOffset())) {
                 // Array constructors are synthetic methods; ClassLinker does not provide them.
@@ -1972,7 +1971,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessFieldLoad(int regIdx, Type expectedFieldType, bool isStatic)
     {
-        return ProcessFieldLoad<FORMAT>(ACC, regIdx, expectedFieldType, isStatic);
+        return ProcessFieldLoad<FORMAT>(acc, regIdx, expectedFieldType, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -1984,7 +1983,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessFieldLoadVolatile(int regIdx, Type expectedFieldType, bool isStatic)
     {
-        return ProcessFieldLoadVolatile<FORMAT>(ACC, regIdx, expectedFieldType, isStatic);
+        return ProcessFieldLoadVolatile<FORMAT>(acc, regIdx, expectedFieldType, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2161,7 +2160,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobj(int vd, bool isStatic)
     {
-        return ProcessStobj<FORMAT>(ACC, vd, isStatic);
+        return ProcessStobj<FORMAT>(acc, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2173,7 +2172,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjVolatile(int vd, bool isStatic)
     {
-        return ProcessStobjVolatile<FORMAT>(ACC, vd, isStatic);
+        return ProcessStobjVolatile<FORMAT>(acc, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2231,7 +2230,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjWide(int vd, bool isStatic)
     {
-        return ProcessStobjWide<FORMAT>(ACC, vd, isStatic);
+        return ProcessStobjWide<FORMAT>(acc, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2243,7 +2242,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjVolatileWide(int vd, bool isStatic)
     {
-        return ProcessStobjVolatileWide<FORMAT>(ACC, vd, isStatic);
+        return ProcessStobjVolatileWide<FORMAT>(acc, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2318,7 +2317,6 @@ public:
         }
 
         Type vsType = GetRegType(vs);
-
         if (!IsSubtype(vsType, fieldType, GetTypeSystem())) {
             SHOW_MSG(BadAccumulatorType)
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vsType), ToString(fieldType));
@@ -2334,7 +2332,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjObj(int vd, bool isStatic)
     {
-        return ProcessStobjObj<FORMAT>(ACC, vd, isStatic);
+        return ProcessStobjObj<FORMAT>(acc, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2346,7 +2344,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjVolatileObj(int vd, bool isStatic)
     {
-        return ProcessStobjVolatileObj<FORMAT>(ACC, vd, isStatic);
+        return ProcessStobjVolatileObj<FORMAT>(acc, vd, isStatic);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2397,7 +2395,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoad<FORMAT>(INVALID_REG, bits32_, true);
+        return ProcessFieldLoad<FORMAT>(invalidReg, bits32_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2406,7 +2404,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoad<FORMAT>(INVALID_REG, bits64_, true);
+        return ProcessFieldLoad<FORMAT>(invalidReg, bits64_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2415,7 +2413,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoad<FORMAT>(INVALID_REG, refType_, true);
+        return ProcessFieldLoad<FORMAT>(invalidReg, refType_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2424,7 +2422,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoadVolatile<FORMAT>(INVALID_REG, bits32_, true);
+        return ProcessFieldLoadVolatile<FORMAT>(invalidReg, bits32_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2433,7 +2431,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoadVolatile<FORMAT>(INVALID_REG, bits64_, true);
+        return ProcessFieldLoadVolatile<FORMAT>(invalidReg, bits64_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2442,7 +2440,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessFieldLoadVolatile<FORMAT>(INVALID_REG, refType_, true);
+        return ProcessFieldLoadVolatile<FORMAT>(invalidReg, refType_, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2451,7 +2449,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessStobj<FORMAT>(INVALID_REG, true);
+        return ProcessStobj<FORMAT>(invalidReg, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2460,7 +2458,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessStobjWide<FORMAT>(INVALID_REG, true);
+        return ProcessStobjWide<FORMAT>(invalidReg, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2469,7 +2467,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessStobjObj<FORMAT>(INVALID_REG, true);
+        return ProcessStobjObj<FORMAT>(invalidReg, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2478,7 +2476,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessStobjVolatile<FORMAT>(INVALID_REG, true);
+        return ProcessStobjVolatile<FORMAT>(invalidReg, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2487,7 +2485,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessStobjVolatileWide<FORMAT>(INVALID_REG, true);
+        return ProcessStobjVolatileWide<FORMAT>(invalidReg, true);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2496,7 +2494,7 @@ public:
         LOG_INST();
         DBGBRK();
         Sync();
-        return ProcessStobjVolatileObj<FORMAT>(INVALID_REG, true);
+        return ProcessStobjVolatileObj<FORMAT>(invalidReg, true);
     }
 
     template <typename Check>
@@ -2551,7 +2549,7 @@ public:
             return false;
         }
 
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -2740,7 +2738,7 @@ public:
         if (!type.IsConsistent()) {
             return false;
         }
-        SetReg(ACC, type);
+        SetReg(acc, type);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -2778,7 +2776,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT, typename Check>
     bool ProcessStoreFieldByName(int vd, Type expectedFieldType, Check check)
     {
-        if (!CheckRegType(ACC, expectedFieldType)) {
+        if (!CheckRegType(acc, expectedFieldType)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -2798,7 +2796,7 @@ public:
             return false;
         }
 
-        Type vsType = GetRegType(ACC);
+        Type vsType = GetRegType(acc);
 
         CheckResult const &result = check(fieldType.ToTypeId(), vsType.ToTypeId());
         if (result.status != VerificationStatus::OK) {
@@ -2832,14 +2830,13 @@ public:
             return false;
         }
 
-        if (!CheckRegType(ACC, refType_)) {
+        if (!CheckRegType(acc, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
-        Type vsType = GetRegType(ACC);
-
+        Type vsType = GetRegType(acc);
         if (!IsSubtype(vsType, fieldType, GetTypeSystem())) {
             SHOW_MSG(BadAccumulatorType)
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vsType), ToString(fieldType));
@@ -2914,7 +2911,7 @@ public:
         DBGBRK();
         Sync();
 
-        if (!CheckRegType(ACC, refType_)) {
+        if (!CheckRegType(acc, refType_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -2938,7 +2935,7 @@ public:
             return false;
         }
 
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -2963,13 +2960,12 @@ public:
             return false;
         }
 
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
 
         auto accType = GetAccType();
-
         if (!CheckType(accType, ReturnType())) {
             LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE_WITH_SUBTYPE(ToString(accType), ToString(ReturnType()));
             // NOTE(vdyadov) : after solving issues with set of types in LUB, uncomment next line
@@ -3012,7 +3008,7 @@ public:
             SET_STATUS_FOR_MSG(CheckCastToNonObjectType, WARNING);
             return false;
         }
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -3093,7 +3089,7 @@ public:
             SET_STATUS_FOR_MSG(BadIsInstanceInstruction, WARNING);
             return false;
         }
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -3172,24 +3168,24 @@ public:
         auto sigIter = formalArgs.cbegin();
         auto regsIter = regs.cbegin();
         for (size_t argnum = 0; argnum < formalArgs.size(); argnum++) {
-            auto regNum = (checkingConstructor && sigIter == formalArgs.cbegin()) ? INVALID_REG : *(regsIter++);
+            auto regNum = (checkingConstructor && sigIter == formalArgs.cbegin()) ? invalidReg : *(regsIter++);
             auto formalType = *(sigIter++);
             auto const normType = GetTypeSystem()->NormalizedTypeOf(formalType);
 
-            if (regNum != INVALID_REG && !IsRegDefined(regNum)) {
+            if (regNum != invalidReg && !IsRegDefined(regNum)) {
                 LOG_VERIFIER_BAD_CALL_UNDEFINED_REGISTER(nameGetter(), regNum);
                 SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
                 result = false;
                 break;
             }
-            Type actualType = regNum == INVALID_REG ? constructedType : GetRegType(regNum);
+            Type actualType = regNum == invalidReg ? constructedType : GetRegType(regNum);
             Type normActualType = GetTypeSystem()->NormalizedTypeOf(actualType);
             // arg: NormalizedTypeOf(actual_type) <= norm_type
             // check of physical compatibility
             bool incompatibleTypes = false;
             auto actualIsRef = IsSubtype(actualType, refType_, GetTypeSystem());
-            if (regNum != INVALID_REG && IsSubtype(formalType, refType_, GetTypeSystem()) &&
-                formalType != Type::Bot() && actualIsRef) {
+            if (regNum != invalidReg && IsSubtype(formalType, refType_, GetTypeSystem()) && formalType != Type::Bot() &&
+                actualIsRef) {
                 if (IsSubtype(actualType, formalType, GetTypeSystem())) {
                     continue;
                 }
@@ -3201,7 +3197,7 @@ public:
                 incompatibleTypes = true;
             }
             if (incompatibleTypes) {
-                PandaString regOrParam = regNum == INVALID_REG ? "Actual parameter" : RegisterName(regNum, true);
+                PandaString regOrParam = regNum == invalidReg ? "Actual parameter" : RegisterName(regNum, true);
                 SHOW_MSG(BadCallIncompatibleParameter)
                 LOG_VERIFIER_BAD_CALL_INCOMPATIBLE_PARAMETER(nameGetter(), regOrParam, ToString(normActualType),
                                                              ToString(normType));
@@ -3265,8 +3261,8 @@ public:
                     LogInnerMessage(checkResult);
                     LOG_VERIFIER_DEBUG_CALL_PARAMETER_TYPES(
                         nameGetter(),
-                        (regNum == INVALID_REG ? ""
-                                               : PandaString {"Actual parameter in "} + RegisterName(regNum) + ". "),
+                        (regNum == invalidReg ? ""
+                                              : PandaString {"Actual parameter in "} + RegisterName(regNum) + ". "),
                         ToString(actualType), ToString(formalType));
                     END_SHOW_MSG();
                     status_ = checkResult.status;
@@ -3278,7 +3274,7 @@ public:
                 continue;
             }
             if (!CheckType(actualType, formalType)) {
-                if (regNum == INVALID_REG) {
+                if (regNum == invalidReg) {
                     SHOW_MSG(BadCallWrongParameter)
                     LOG_VERIFIER_BAD_CALL_WRONG_PARAMETER(nameGetter(), ToString(actualType), ToString(formalType));
                     END_SHOW_MSG();
@@ -3366,8 +3362,8 @@ public:
         DBGBRK();
         uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
         auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x00>());
-        static constexpr auto NUM_ARGS = 2;
-        if (accPos >= NUM_ARGS) {
+        static constexpr auto numArgs = 2;
+        if (accPos >= numArgs) {
             LOG_VERIFIER_ACCUMULATOR_POSITION_IS_OUT_OF_RANGE();
             SET_STATUS_FOR_MSG(AccumulatorPositionIsOutOfRange, WARNING);
             return status_ != VerificationStatus::ERROR;
@@ -3384,11 +3380,11 @@ public:
         }
 
         Sync();
-        std::array<int, NUM_ARGS> regs {};
+        std::array<int, numArgs> regs {};
         if (accPos == 0) {
-            regs = {ACC, vs1};
+            regs = {acc, vs1};
         } else {
-            regs = {vs1, ACC};
+            regs = {vs1, acc};
         }
         return CheckCall<FORMAT>(method, Span {regs});
     }
@@ -3433,8 +3429,8 @@ public:
         LOG_INST();
         DBGBRK();
         auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x0>());
-        static constexpr auto NUM_ARGS = 4;
-        if (accPos >= NUM_ARGS) {
+        static constexpr auto numArgs = 4;
+        if (accPos >= numArgs) {
             LOG_VERIFIER_ACCUMULATOR_POSITION_IS_OUT_OF_RANGE();
             SET_STATUS_FOR_MSG(AccumulatorPositionIsOutOfRange, WARNING);
             return status_ != VerificationStatus::ERROR;
@@ -3451,11 +3447,11 @@ public:
         }
 
         Sync();
-        std::array<int, NUM_ARGS> regs {};
+        std::array<int, numArgs> regs {};
         auto regIdx = 0;
-        for (unsigned i = 0; i < NUM_ARGS; ++i) {
+        for (unsigned i = 0; i < numArgs; ++i) {
             if (i == accPos) {
-                regs[i] = ACC;
+                regs[i] = acc;
             } else {
                 regs[i] = static_cast<int>(inst_.GetVReg(regIdx++));
             }
@@ -3517,7 +3513,7 @@ public:
         DBGBRK();
         uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
         auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x00>());
-        static constexpr auto NUM_ARGS = 2;
+        static constexpr auto numArgs = 2;
         Method const *method = GetCachedMethod();
         if (method != nullptr) {
             LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
@@ -3528,11 +3524,11 @@ public:
             return false;
         }
         Sync();
-        std::array<int, NUM_ARGS> regs {};
+        std::array<int, numArgs> regs {};
         if (accPos == 0) {
-            regs = {ACC, vs1};
+            regs = {acc, vs1};
         } else {
-            regs = {vs1, ACC};
+            regs = {vs1, acc};
         }
         return CheckCall<FORMAT>(method, Span {regs});
     }
@@ -3567,7 +3563,7 @@ public:
         LOG_INST();
         DBGBRK();
         auto accPos = static_cast<unsigned>(inst_.GetImm<FORMAT, 0x0>());
-        static constexpr auto NUM_ARGS = 4;
+        static constexpr auto numArgs = 4;
         Method const *method = GetCachedMethod();
         if (method != nullptr) {
             LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
@@ -3578,11 +3574,11 @@ public:
             return false;
         }
         Sync();
-        std::array<int, NUM_ARGS> regs {};
+        std::array<int, numArgs> regs {};
         auto regIdx = 0;
-        for (unsigned i = 0; i < NUM_ARGS; ++i) {
+        for (unsigned i = 0; i < numArgs; ++i) {
             if (i == accPos) {
-                regs[i] = ACC;
+                regs[i] = acc;
             } else {
                 regs[i] = static_cast<int>(inst_.GetVReg(regIdx++));
             }
@@ -3704,7 +3700,7 @@ public:
 
     static PandaString RegisterName(int regIdx, bool capitalize = false)
     {
-        if (regIdx == ACC) {
+        if (regIdx == acc) {
             return capitalize ? "Accumulator" : "accumulator";
         }
         return PandaString {capitalize ? "Register v" : "register v"} + NumToStr(regIdx);
@@ -3783,12 +3779,11 @@ private:
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
         Type regType = GetRegType(v1);
-
         if (regType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
@@ -3801,7 +3796,6 @@ private:
         }
 
         auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
-
         if (!IsSubtype(arrEltType, expectedEltType, GetTypeSystem())) {
             SHOW_MSG(BadArrayElementType2)
             LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE2(ToString(arrEltType), ToString(expectedEltType));
@@ -3832,13 +3826,12 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckArrayStoreExact(int v1, int v2, Type accSupertype, std::initializer_list<Type> const &expectedEltTypes)
     {
-        if (!CheckRegType(v2, integral32_) || !CheckRegType(v1, arrayType_) || !IsRegDefined(ACC)) {
+        if (!CheckRegType(v2, integral32_) || !CheckRegType(v1, arrayType_) || !IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
         Type regType = GetRegType(v1);
-
         if (regType == nullRefType_) {
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(v1);
@@ -3871,7 +3864,6 @@ private:
         }
 
         Type accType = GetAccType();
-
         if (!IsSubtype(accType, accSupertype, GetTypeSystem())) {
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE2(ToString(accType));
             SET_STATUS_FOR_MSG(BadArrayElementType, WARNING);
@@ -3903,7 +3895,7 @@ private:
         } else {
             vs = inst_.GetVReg<FORMAT>();
         }
-        if (!CheckRegType(ACC, accIn)) {
+        if (!CheckRegType(acc, accIn)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -3925,7 +3917,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT, bool REG_DST = false>
     bool CheckBinaryOp2(Type accIn, Type regIn)
     {
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -3950,7 +3942,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckBinaryOp2Imm(Type accIn, Type accOut)
     {
-        if (!CheckRegType(ACC, accIn)) {
+        if (!CheckRegType(acc, accIn)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -3963,7 +3955,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckBinaryOp2Imm(Type accIn)
     {
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -3973,7 +3965,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckUnaryOp(Type accIn, Type accOut)
     {
-        if (!CheckRegType(ACC, accIn)) {
+        if (!CheckRegType(acc, accIn)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -3986,7 +3978,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckUnaryOp(Type accIn)
     {
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -4020,7 +4012,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckBinaryOp(Type vs1In, Type vs2In)
     {
-        if (!IsRegDefined(ACC)) {
+        if (!IsRegDefined(acc)) {
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
         }
@@ -4030,7 +4022,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleConversion(Type from, Type to)
     {
-        if (!CheckRegType(ACC, from)) {
+        if (!CheckRegType(acc, from)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -4048,7 +4040,7 @@ private:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool CheckArrayLoad(int vs, std::initializer_list<Type> const &expectedEltTypes)
     {
-        if (!CheckRegType(ACC, integral32_)) {
+        if (!CheckRegType(acc, integral32_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -4129,7 +4121,7 @@ private:
     {
         auto imm = inst_.GetImm<FORMAT>();
 
-        if (!CheckRegType(ACC, integral32_)) {
+        if (!CheckRegType(acc, integral32_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;
@@ -4149,7 +4141,7 @@ private:
         auto imm = inst_.GetImm<FORMAT>();
         uint16_t vs = inst_.GetVReg<FORMAT>();
 
-        if (!CheckRegType(ACC, integral32_)) {
+        if (!CheckRegType(acc, integral32_)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
             SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
             return false;

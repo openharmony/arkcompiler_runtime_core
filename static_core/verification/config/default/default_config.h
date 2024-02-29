@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H_
-#define PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H_
+#ifndef PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H
+#define PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H
 
 namespace panda::verifier::config {
 
@@ -23,4 +23,4 @@ extern const char VERIFIER_DEBUG_DEFAULT_CONFIG[];
 
 }  // namespace panda::verifier::config
 
-#endif  // PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H_
+#endif  // PANDA_VERIFIER_DEFAULT_DEBUG_CONFIG_H

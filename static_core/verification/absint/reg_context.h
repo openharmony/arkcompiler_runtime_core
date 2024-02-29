@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP_
-#define PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP_
+#ifndef PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP
+#define PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP
 
 #include "value/abstract_typed_value.h"
 
@@ -241,4 +241,4 @@ inline RegContext RcUnion(RegContext const *lhs, RegContext const *rhs, TypeSyst
 
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP_
+#endif  // !PANDA_VERIFIER_ABSINT_REG_CONTEXT_HPP

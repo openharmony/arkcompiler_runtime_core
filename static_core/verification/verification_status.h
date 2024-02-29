@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_VERIFICATION_STATUS_HPP_
-#define PANDA_VERIFIER_VERIFICATION_STATUS_HPP_
+#ifndef PANDA_VERIFIER_VERIFICATION_STATUS_HPP
+#define PANDA_VERIFIER_VERIFICATION_STATUS_HPP
 
 namespace panda::verifier {
 enum class VerificationStatus { OK, WARNING, ERROR };
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFIER_VERIFICATION_STATUS_HPP_
+#endif  // !PANDA_VERIFIER_VERIFICATION_STATUS_HPP

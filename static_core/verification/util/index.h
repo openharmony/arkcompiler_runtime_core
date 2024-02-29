@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_INDEX_HPP_
-#define PANDA_VERIFIER_UTIL_INDEX_HPP_
+#ifndef PANDA_VERIFIER_UTIL_INDEX_HPP
+#define PANDA_VERIFIER_UTIL_INDEX_HPP
 
 #include "libpandabase/macros.h"
 #include "verification/util/hash.h"
@@ -117,4 +117,4 @@ struct hash<panda::verifier::Index<Int, I>> {
 };
 }  // namespace std
 
-#endif  // !PANDA_VERIFIER_UTIL_INDEX_HPP_
+#endif  // !PANDA_VERIFIER_UTIL_INDEX_HPP

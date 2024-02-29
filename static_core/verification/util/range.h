@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_RANGE_HPP_
-#define PANDA_VERIFIER_UTIL_RANGE_HPP_
+#ifndef PANDA_VERIFIER_UTIL_RANGE_HPP
+#define PANDA_VERIFIER_UTIL_RANGE_HPP
 
 #include <limits>
 #include <string>
@@ -172,4 +172,4 @@ string to_string(const panda::verifier::Range<Int> &range)  // NOLINT(readabilit
 }
 }  // namespace std
 
-#endif  // !PANDA_VERIFIER_UTIL_RANGE_HPP_
+#endif  // !PANDA_VERIFIER_UTIL_RANGE_HPP

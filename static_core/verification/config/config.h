@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIF_CONFIG_H_
-#define PANDA_VERIF_CONFIG_H_
+#ifndef PANDA_VERIF_CONFIG_H
+#define PANDA_VERIF_CONFIG_H
 
 #include "libpandabase/utils/logger.h"
 
@@ -61,4 +61,4 @@ struct Section {
 };
 }  // namespace panda::verifier::config
 
-#endif  // PANDA_VERIF_CONFIG_H_
+#endif  // PANDA_VERIF_CONFIG_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_PUBLIC_H_
-#define PANDA_VERIFICATION_PUBLIC_H_
+#ifndef PANDA_VERIFICATION_PUBLIC_H
+#define PANDA_VERIFICATION_PUBLIC_H
 
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/method.h"
@@ -50,4 +50,4 @@ PANDA_PUBLIC_API Status Verify(Service *service, panda::Method *method, Verifica
 
 }  // namespace panda::verifier
 
-#endif  // PANDA_VERIFICATION_PUBLIC_H_
+#endif  // PANDA_VERIFICATION_PUBLIC_H

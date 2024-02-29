@@ -63,7 +63,7 @@ using panda::verifier::config::Section;
 
 void RegisterConfigHandlerOptions(Config *dcfg)
 {
-    static const auto CONFIG_DEBUG_OPTIONS_VERIFIER = [](Config *config, const Section &section) {
+    static const auto configDebugOptionsVerifier = [](Config *config, const Section &section) {
         using BoolField = StructField<VerificationOptions, bool>;
         using Flags = PandaUnorderedMap<PandaString, BoolField>;
         using FlagsSection = PandaUnorderedMap<PandaString, Flags>;
@@ -119,7 +119,7 @@ void RegisterConfigHandlerOptions(Config *dcfg)
         return true;
     };
 
-    config::RegisterConfigHandler(dcfg, "config.debug.options.verifier", CONFIG_DEBUG_OPTIONS_VERIFIER);
+    config::RegisterConfigHandler(dcfg, "config.debug.options.verifier", configDebugOptionsVerifier);
 }
 
 }  // namespace panda::verifier::debug

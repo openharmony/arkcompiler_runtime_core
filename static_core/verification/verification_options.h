@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFICATION_OPTIONS_H__
-#define PANDA_VERIFICATION_OPTIONS_H__
+#ifndef PANDA_VERIFICATION_OPTIONS_H
+#define PANDA_VERIFICATION_OPTIONS_H
 
 #include "utils/pandargs.h"
 #include "runtime/include/runtime_options.h"
@@ -87,4 +87,4 @@ struct VerificationOptions {
 
 }  // namespace panda::verifier
 
-#endif  // !PANDA_VERIFICATION_OPTIONS_H__
+#endif  // !PANDA_VERIFICATION_OPTIONS_H

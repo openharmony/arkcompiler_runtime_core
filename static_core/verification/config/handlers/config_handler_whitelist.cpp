@@ -43,23 +43,23 @@ const auto &WhitelistMethodParser()
 
     static const auto WS = P::OfCharset(" \t");
 
-    static const auto METHOD_NAME_HANDLER = [](Action a, PandaString &c, auto from, auto to) {
+    static const auto methodNameHandler = [](Action a, PandaString &c, auto from, auto to) {
         if (a == Action::PARSED) {
             c = PandaString {from, to};
         }
         return true;
     };
 
-    static const auto METHOD_NAME = P1::OfCharset(!Charset {" \t,"}) |= METHOD_NAME_HANDLER;  // NOLINT
+    static const auto METHOD_NAME = P1::OfCharset(!Charset {" \t,"}) |= methodNameHandler;  // NOLINT
 
-    static const auto WHITELIST_METHOD = ~WS >> METHOD_NAME >> ~WS >> P::End() | ~WS >> P::End();
+    static const auto WHITELIST_METHOD = (~WS >> METHOD_NAME >> ~WS >> P::End()) | (~WS >> P::End());
 
     return WHITELIST_METHOD;
 }
 
 void RegisterConfigHandlerWhitelist(Config *dcfg)
 {
-    static const auto CONFIG_DEBUG_WHITELIST_VERIFIER = [](Config *config, const Section &section) {
+    static const auto configDebugWhitelistVerifier = [](Config *config, const Section &section) {
         for (const auto &s : section.sections) {
             WhitelistKind kind;
             if (s.name == "class") {
@@ -93,7 +93,7 @@ void RegisterConfigHandlerWhitelist(Config *dcfg)
         return true;
     };
 
-    config::RegisterConfigHandler(dcfg, "config.debug.whitelist.verifier", CONFIG_DEBUG_WHITELIST_VERIFIER);
+    config::RegisterConfigHandler(dcfg, "config.debug.whitelist.verifier", configDebugWhitelistVerifier);
 }
 
 }  // namespace panda::verifier::debug

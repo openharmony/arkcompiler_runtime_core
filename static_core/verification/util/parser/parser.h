@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIF_PARSER_H_
-#define PANDA_VERIF_PARSER_H_
+#ifndef PANDA_VERIF_PARSER_H
+#define PANDA_VERIF_PARSER_H
 
 #include "charset.h"
 #include "util/callable.h"
@@ -393,4 +393,4 @@ using Parser = BaseParser<Context, initial, Char, Iter>;
 
 }  // namespace panda::parser
 
-#endif  // PANDA_VERIF_PARSER_H_
+#endif  // PANDA_VERIF_PARSER_H

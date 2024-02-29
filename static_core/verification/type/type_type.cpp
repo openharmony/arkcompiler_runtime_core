@@ -68,36 +68,36 @@ std::array<uint32_t, SZ> TransitiveClosure(std::array<uint32_t, SZ> const *sourc
 }
 
 std::array<uint32_t, Builtin::LAST> builtin_supertypes_nontrans = {
-    /* undefined */ 0,
-    /* top */ 0,
-    /* u1 */ Bitmap({Builtin::U8, Builtin::I8}),
-    /* i8 */ Bitmap({Builtin::I16, Builtin::INTEGRAL8}),
-    /* u8 */ Bitmap({Builtin::U16, Builtin::I16, Builtin::INTEGRAL8}),
-    /* i16 */ Bitmap({Builtin::I32, Builtin::INTEGRAL16}),
-    /* u16 */ Bitmap({Builtin::I32, Builtin::U32, Builtin::INTEGRAL16}),
-    /* i32 */ Bitmap({Builtin::INTEGRAL32}),
-    /* u32 */ Bitmap({Builtin::INTEGRAL32}),
-    /* f32 */ Bitmap({Builtin::FLOAT32}),
-    /* f64 */ Bitmap({Builtin::FLOAT64}),
-    /* i64 */ Bitmap({Builtin::INTEGRAL64}),
-    /* u64 */ Bitmap({Builtin::INTEGRAL64}),
-    /* integral8 */ Bitmap({Builtin::INTEGRAL16}),
-    /* integral16 */ Bitmap({Builtin::INTEGRAL32}),
-    /* integral32 */ Bitmap({Builtin::BITS32}),
-    /* integral64 */ Bitmap({Builtin::BITS64}),
-    /* float32 */ Bitmap({Builtin::BITS32}),
-    /* float64 */ Bitmap({Builtin::BITS64}),
-    /* bits32 */ Bitmap({Builtin::PRIMITIVE}),
-    /* bits64 */ Bitmap({Builtin::PRIMITIVE}),
-    /* primitive */ Bitmap({Builtin::TOP}),
-    /* reference */ Bitmap({Builtin::TOP}),
-    /* null_reference */ Bitmap({Builtin::REFERENCE, Builtin::OBJECT, Builtin::TYPE_CLASS, Builtin::ARRAY}),
-    /* object */ Bitmap({Builtin::REFERENCE}),
-    /* type_class */ Bitmap({Builtin::REFERENCE}),
-    /* array */ Bitmap({Builtin::OBJECT}),
-    /* bot */
+    0,                                                                                   // undefined
+    0,                                                                                   // top
+    Bitmap({Builtin::U8, Builtin::I8}),                                                  // u1
+    Bitmap({Builtin::I16, Builtin::INTEGRAL8}),                                          // i8
+    Bitmap({Builtin::U16, Builtin::I16, Builtin::INTEGRAL8}),                            // u8
+    Bitmap({Builtin::I32, Builtin::INTEGRAL16}),                                         // i16
+    Bitmap({Builtin::I32, Builtin::U32, Builtin::INTEGRAL16}),                           // u16
+    Bitmap({Builtin::INTEGRAL32}),                                                       // i32
+    Bitmap({Builtin::INTEGRAL32}),                                                       // u32
+    Bitmap({Builtin::FLOAT32}),                                                          // f32
+    Bitmap({Builtin::FLOAT64}),                                                          // f64
+    Bitmap({Builtin::INTEGRAL64}),                                                       // i64
+    Bitmap({Builtin::INTEGRAL64}),                                                       // u64
+    Bitmap({Builtin::INTEGRAL16}),                                                       // integral8
+    Bitmap({Builtin::INTEGRAL32}),                                                       // integral16
+    Bitmap({Builtin::BITS32}),                                                           // integral32
+    Bitmap({Builtin::BITS64}),                                                           // integral64
+    Bitmap({Builtin::BITS32}),                                                           // float32
+    Bitmap({Builtin::BITS64}),                                                           // float64
+    Bitmap({Builtin::PRIMITIVE}),                                                        // bits32
+    Bitmap({Builtin::PRIMITIVE}),                                                        // bits64
+    Bitmap({Builtin::TOP}),                                                              // primitive
+    Bitmap({Builtin::TOP}),                                                              // reference
+    Bitmap({Builtin::REFERENCE, Builtin::OBJECT, Builtin::TYPE_CLASS, Builtin::ARRAY}),  // null_reference
+    Bitmap({Builtin::REFERENCE}),                                                        // object
+    Bitmap({Builtin::REFERENCE}),                                                        // type_class
+    Bitmap({Builtin::OBJECT}),                                                           // array
     Bitmap({Builtin::U1, Builtin::I8, Builtin::U8, Builtin::I16, Builtin::U16, Builtin::I32, Builtin::U32, Builtin::F32,
-            Builtin::F64, Builtin::I64, Builtin::U64, Builtin::NULL_REFERENCE, Builtin::OBJECT, Builtin::ARRAY})};
+            Builtin::F64, Builtin::I64, Builtin::U64, Builtin::NULL_REFERENCE, Builtin::OBJECT,
+            Builtin::ARRAY})};  // bot
 
 std::array<uint32_t, Builtin::LAST> builtin_supertypes = TransitiveClosure(&builtin_supertypes_nontrans);
 
@@ -149,39 +149,39 @@ bool IsObjectClass(Class const *klass)
 }
 
 struct ClassSubtypingFuns {
-    ClassSubtypingCheckFun is_builtin_supertype_of_class;
-    ClassSubtypingCheckFun is_class_supertype_of_builtin;
+    ClassSubtypingCheckFun isBuiltinSupertypeOfClass;
+    ClassSubtypingCheckFun isClassSupertypeOfBuiltin;
 };
 
 std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
-    /* undefined */ ClassSubtypingFuns {nullptr, nullptr},
-    /* top */ ClassSubtypingFuns {AlwaysTrue, nullptr},
-    /* u1 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i8 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u8 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i16 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u16 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* f32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* f64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral8 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral16 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* float32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* float64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* bits32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* bits64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* primitive */ ClassSubtypingFuns {nullptr, nullptr},
-    /* reference */ ClassSubtypingFuns {AlwaysTrue, nullptr},
-    /* null_reference */ ClassSubtypingFuns {nullptr, AlwaysTrue},
-    /* object */ ClassSubtypingFuns {AlwaysTrue, IsObjectClass},
-    /* type_class */ ClassSubtypingFuns {IsClassClass, nullptr},
-    /* array */ ClassSubtypingFuns {IsClassArray, nullptr},
-    /* bot */ ClassSubtypingFuns {nullptr, AlwaysTrue}};
+    ClassSubtypingFuns {nullptr, nullptr},           // undefined
+    ClassSubtypingFuns {AlwaysTrue, nullptr},        // top
+    ClassSubtypingFuns {nullptr, nullptr},           // u1
+    ClassSubtypingFuns {nullptr, nullptr},           // i8
+    ClassSubtypingFuns {nullptr, nullptr},           // u8
+    ClassSubtypingFuns {nullptr, nullptr},           // i16
+    ClassSubtypingFuns {nullptr, nullptr},           // u16
+    ClassSubtypingFuns {nullptr, nullptr},           // i32
+    ClassSubtypingFuns {nullptr, nullptr},           // u32
+    ClassSubtypingFuns {nullptr, nullptr},           // f32
+    ClassSubtypingFuns {nullptr, nullptr},           // f64
+    ClassSubtypingFuns {nullptr, nullptr},           // i64
+    ClassSubtypingFuns {nullptr, nullptr},           // u64
+    ClassSubtypingFuns {nullptr, nullptr},           // integral8
+    ClassSubtypingFuns {nullptr, nullptr},           // integral16
+    ClassSubtypingFuns {nullptr, nullptr},           // integral32
+    ClassSubtypingFuns {nullptr, nullptr},           // integral64
+    ClassSubtypingFuns {nullptr, nullptr},           // float32
+    ClassSubtypingFuns {nullptr, nullptr},           // float64
+    ClassSubtypingFuns {nullptr, nullptr},           // bits32
+    ClassSubtypingFuns {nullptr, nullptr},           // bits64
+    ClassSubtypingFuns {nullptr, nullptr},           // primitive
+    ClassSubtypingFuns {AlwaysTrue, nullptr},        // reference
+    ClassSubtypingFuns {nullptr, AlwaysTrue},        // null_reference
+    ClassSubtypingFuns {AlwaysTrue, IsObjectClass},  // object
+    ClassSubtypingFuns {IsClassClass, nullptr},      // type_class
+    ClassSubtypingFuns {IsClassArray, nullptr},      // array
+    ClassSubtypingFuns {nullptr, AlwaysTrue}};       // bot
 
 [[maybe_unused]] bool InvariantHolds(Type tp, TypeSystem const *tsys)
 {
@@ -261,10 +261,10 @@ PandaString Type::ToString(TypeSystem const *tsys) const
         }
         return PandaString {klass->GetName()};
     }
+    std::stringstream ss;
     if (IsIntersection()) {
         auto members = GetIntersectionMembers(tsys);
         ASSERT(!members.empty());
-        std::stringstream ss;
         ss << "(";
         bool first = true;
         for (auto t : members) {
@@ -281,7 +281,6 @@ PandaString Type::ToString(TypeSystem const *tsys) const
     if (IsUnion()) {
         auto members = GetUnionMembers(tsys);
         ASSERT(!members.empty());
-        std::stringstream ss;
         ss << "(";
         bool first = true;
         for (auto t : members) {
@@ -449,13 +448,13 @@ bool IsSubtypeImpl(Type lhs, Type rhs, TypeSystem *tsys)
     if (lhs.IsBuiltin() && rhs.IsClass()) {
         auto lhsBuiltin = lhs.GetBuiltin();
         auto rhsClass = rhs.GetClass();
-        auto *checker = class_subtyping_funs[lhsBuiltin].is_class_supertype_of_builtin;
+        auto *checker = class_subtyping_funs[lhsBuiltin].isClassSupertypeOfBuiltin;
         return checker != nullptr && checker(rhsClass);
     }
     if (lhs.IsClass() && rhs.IsBuiltin()) {
         auto const *lhsClass = lhs.GetClass();
         auto rhsBuiltin = rhs.GetBuiltin();
-        auto *checker = class_subtyping_funs[rhsBuiltin].is_builtin_supertype_of_class;
+        auto *checker = class_subtyping_funs[rhsBuiltin].isBuiltinSupertypeOfClass;
         return checker != nullptr && checker(lhsClass);
     }
     if (lhs.IsClass() && rhs.IsClass()) {
@@ -553,12 +552,12 @@ static bool IsIntersectionReasonable(Span<Type> members)
                 // no meaningful intersection possible
                 return false;
             }
+            if (!cls->IsInterface() && haveClass) {
+                // no memaningful intersection between classes,
+                // other than subtyping
+                return false;
+            }
             if (!cls->IsInterface()) {
-                if (haveClass) {
-                    // no memaningful intersection between classes,
-                    // other than subtyping
-                    return false;
-                }
                 haveClass = true;
             }
         }

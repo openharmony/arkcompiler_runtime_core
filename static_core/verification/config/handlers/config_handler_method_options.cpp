@@ -118,7 +118,7 @@ bool ProcessSectionCheck(const Literals &checks, MethodOptions *options)
 
 const auto &MethodOptionsProcessor()
 {
-    static const auto PROCESS_METHOD_OPTIONS = [](Config *cfg, const Section &section) {
+    static const auto processMethodOptions = [](Config *cfg, const Section &section) {
         MethodOptionsConfig &allOptions = cfg->opts.debug.GetMethodOptions();
         MethodOptions &options = allOptions.NewOptions(section.name);
 
@@ -175,12 +175,12 @@ const auto &MethodOptionsProcessor()
         return true;
     };
 
-    return PROCESS_METHOD_OPTIONS;
+    return processMethodOptions;
 }
 
 void RegisterConfigHandlerMethodOptions(Config *dcfg)
 {
-    static const auto CONFIG_DEBUG_METHOD_OPTIONS_VERIFIER = [](Config *ddcfg, const Section &section) {
+    static const auto configDebugMethodOptionsVerifier = [](Config *ddcfg, const Section &section) {
         bool defaultPresent = false;
         for (const auto &s : section.sections) {
             if (s.name == "default") {
@@ -209,7 +209,7 @@ void RegisterConfigHandlerMethodOptions(Config *dcfg)
         return true;
     };
 
-    config::RegisterConfigHandler(dcfg, "config.debug.method_options.verifier", CONFIG_DEBUG_METHOD_OPTIONS_VERIFIER);
+    config::RegisterConfigHandler(dcfg, "config.debug.method_options.verifier", configDebugMethodOptionsVerifier);
 }
 
 void SetDefaultMethodOptions(Config *dcfg)

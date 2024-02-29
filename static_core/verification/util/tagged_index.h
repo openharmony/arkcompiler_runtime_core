@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP_
-#define PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP_
+#ifndef PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP
+#define PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/bit_utils.h"
@@ -396,4 +396,4 @@ struct hash<panda::verifier::TaggedIndex<TagsAndInt...>> {
 
 }  // namespace std
 
-#endif  // !PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP_
+#endif  // !PANDA_VERIFIER_UTIL_TAGGED_INDEX_HPP
