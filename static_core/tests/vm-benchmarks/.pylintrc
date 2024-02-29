@@ -1,0 +1,23 @@
+[MAIN]
+
+[MESSAGES CONTROL]
+
+disable=
+    too-many-instance-attributes,
+    too-few-public-methods,
+    fixme,
+    too-many-branches,
+    too-many-arguments,
+    missing-docstring,
+    missing-function-docstring,
+    missing-module-docstring,
+    missing-class-docstring,
+    global-statement
+
+
+[REPORTS]
+
+[LOGGING]
+
+[MISCELLANEOUS]
+
