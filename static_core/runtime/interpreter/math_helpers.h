@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_MATH_HELPERS_H_
-#define PANDA_INTERPRETER_MATH_HELPERS_H_
+#ifndef PANDA_INTERPRETER_MATH_HELPERS_H
+#define PANDA_INTERPRETER_MATH_HELPERS_H
 
 #include <cmath>
 #include <functional>
@@ -130,7 +130,6 @@ struct idivides {  // NOLINT(readability-identifier-naming)
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (std::is_signed_v<T>) {
             constexpr T MIN = std::numeric_limits<T>::min();
-
             if (UNLIKELY(x == MIN && y == -1)) {
                 return MIN;
             }
@@ -150,7 +149,6 @@ struct imodulus {  // NOLINT(readability-identifier-naming)
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (std::is_signed_v<T>) {
             constexpr T MIN = std::numeric_limits<T>::min();
-
             if (UNLIKELY(x == MIN && y == -1)) {
                 return 0;
             }
@@ -212,4 +210,4 @@ struct dec {  // NOLINT(readability-identifier-naming)
 
 }  // namespace panda::interpreter::math_helpers
 
-#endif  // PANDA_INTERPRETER_FRAME_H_
+#endif  // PANDA_INTERPRETER_FRAME_H

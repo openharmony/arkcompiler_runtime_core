@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_ARCH_MACROS_H_
-#define PANDA_INTERPRETER_ARCH_MACROS_H_
+#ifndef PANDA_INTERPRETER_ARCH_MACROS_H
+#define PANDA_INTERPRETER_ARCH_MACROS_H
 
 #if defined(PANDA_TARGET_ARM64)
 
@@ -25,12 +25,12 @@
 #define RESTORE_GLOBAL_REGS()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DISPATCH(DISPATCH_TABLE, OPCODE)             \
-    do {                                             \
-        void const *_label = DISPATCH_TABLE[OPCODE]; \
-        goto *_label;                                \
+#define DISPATCH(DISPATCH_TABLE, OPCODE)               \
+    do {                                               \
+        void const *_label = (DISPATCH_TABLE)[OPCODE]; \
+        goto *_label;                                  \
     } while (0)
 
 #endif
 
-#endif  // PANDA_INTERPRETER_ARCH_MACROS_H_
+#endif  // PANDA_INTERPRETER_ARCH_MACROS_H

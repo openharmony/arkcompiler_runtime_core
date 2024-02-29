@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_METHOD_H_
-#define PANDA_RUNTIME_METHOD_H_
+#ifndef PANDA_RUNTIME_METHOD_H
+#define PANDA_RUNTIME_METHOD_H
 
 #include <atomic>
 #include <cstdint>
@@ -922,4 +922,4 @@ static_assert(!std::is_polymorphic_v<Method>);
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_METHOD_H_
+#endif  // PANDA_RUNTIME_METHOD_H

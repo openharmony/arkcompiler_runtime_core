@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_VTABLE_BUILDER_INL_H_
-#define PANDA_RUNTIME_VTABLE_BUILDER_INL_H_
+#ifndef PANDA_RUNTIME_VTABLE_BUILDER_INL_H
+#define PANDA_RUNTIME_VTABLE_BUILDER_INL_H
 
 #include "runtime/include/vtable_builder.h"
 
@@ -197,4 +197,4 @@ void VTableBuilderImpl<SearchBySignature, OverridePred>::UpdateClass(Class *klas
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_VTABLE_BUILDER_H_
+#endif  // PANDA_RUNTIME_VTABLE_BUILDER_H

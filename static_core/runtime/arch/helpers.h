@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_ARCH_HELPERS_H_
-#define PANDA_RUNTIME_ARCH_HELPERS_H_
+#ifndef PANDA_RUNTIME_ARCH_HELPERS_H
+#define PANDA_RUNTIME_ARCH_HELPERS_H
 
 #include "libpandabase/utils/arch.h"
 #include "libpandabase/utils/bit_utils.h"
@@ -63,7 +63,7 @@ namespace panda::arch {
         ASSERT(dispatch_table[static_cast<uint8_t>(TypeId::REFERENCE)] == &&LABEL_TYPEID_REFERENCE);                 \
                                                                                                                      \
         uint8_t encoding = 0;                                                                                        \
-        panda_file::ShortyIterator it(METHOD->GetShorty());                                                          \
+        panda_file::ShortyIterator it((METHOD)->GetShorty());                                                        \
         /* Skip the return value */                                                                                  \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
                                                                                                                      \
@@ -72,33 +72,33 @@ namespace panda::arch {
         UNREACHABLE();                                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_I8 : {                                                                                              \
-        auto v = ARG_READER.template Read<int8_t>();                                                                 \
-        ARG_WRITER.template Write<int8_t>(v);                                                                        \
+        auto v = (ARG_READER).template Read<int8_t>();                                                               \
+        (ARG_WRITER).template Write<int8_t>(v);                                                                      \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_U8 : {                                                                                              \
-        auto v = ARG_READER.template Read<uint8_t>();                                                                \
-        ARG_WRITER.template Write<uint8_t>(v);                                                                       \
+        auto v = (ARG_READER).template Read<uint8_t>();                                                              \
+        (ARG_WRITER).template Write<uint8_t>(v);                                                                     \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_I16 : {                                                                                             \
-        auto v = ARG_READER.template Read<int16_t>();                                                                \
-        ARG_WRITER.template Write<int16_t>(v);                                                                       \
+        auto v = (ARG_READER).template Read<int16_t>();                                                              \
+        (ARG_WRITER).template Write<int16_t>(v);                                                                     \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_U16 : {                                                                                             \
-        auto v = ARG_READER.template Read<uint16_t>();                                                               \
-        ARG_WRITER.template Write<uint16_t>(v);                                                                      \
+        auto v = (ARG_READER).template Read<uint16_t>();                                                             \
+        (ARG_WRITER).template Write<uint16_t>(v);                                                                    \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_I32 : {                                                                                             \
-        auto v = ARG_READER.template Read<int32_t>();                                                                \
-        ARG_WRITER.template Write<int32_t>(v);                                                                       \
+        auto v = (ARG_READER).template Read<int32_t>();                                                              \
+        (ARG_WRITER).template Write<int32_t>(v);                                                                     \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_U32 : {                                                                                             \
-        auto v = ARG_READER.template Read<uint32_t>();                                                               \
-        ARG_WRITER.template Write<uint32_t>(v);                                                                      \
+        auto v = (ARG_READER).template Read<uint32_t>();                                                             \
+        (ARG_WRITER).template Write<uint32_t>(v);                                                                    \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_F32 : {                                                                                             \
@@ -107,23 +107,23 @@ namespace panda::arch {
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_F64 : {                                                                                             \
-        auto v = ARG_READER.template Read<double>();                                                                 \
-        ARG_WRITER.template Write<double>(v);                                                                        \
+        auto v = (ARG_READER).template Read<double>();                                                               \
+        (ARG_WRITER).template Write<double>(v);                                                                      \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_I64 : {                                                                                             \
-        auto v = ARG_READER.template Read<int64_t>();                                                                \
-        ARG_WRITER.template Write<int64_t>(v);                                                                       \
+        auto v = (ARG_READER).template Read<int64_t>();                                                              \
+        (ARG_WRITER).template Write<int64_t>(v);                                                                     \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_U64 : {                                                                                             \
-        auto v = ARG_READER.template Read<uint64_t>();                                                               \
-        ARG_WRITER.template Write<uint64_t>(v);                                                                      \
+        auto v = (ARG_READER).template Read<uint64_t>();                                                             \
+        (ARG_WRITER).template Write<uint64_t>(v);                                                                    \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_REFERENCE : {                                                                                       \
-        auto v = const_cast<ObjectHeader **>(ARG_READER.template ReadPtr<ObjectHeader *>());                         \
-        ARG_WRITER.template Write<ObjectHeader **>(v);                                                               \
+        auto v = const_cast<ObjectHeader **>((ARG_READER).template ReadPtr<ObjectHeader *>());                       \
+        (ARG_WRITER).template Write<ObjectHeader **>(v);                                                             \
         ARCH_COPY_METHOD_ARGS_DISPATCH                                                                               \
     }                                                                                                                \
     LABEL_TYPEID_INVALID : {                                                                                         \
@@ -378,7 +378,6 @@ protected:
 
         constexpr size_t WRITE_BYTES = std::max(sizeof(T), PTR_SIZE);
         gpArgBytesWritten_ = RoundUp(gpArgBytesWritten_, WRITE_BYTES);
-
         if (gpArgBytesWritten_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
             ArgWriterBase<A>::RegisterValueWrite(v);
             gpArgBytesWritten_ += WRITE_BYTES;
@@ -582,4 +581,4 @@ private:
 
 }  // namespace panda::arch
 
-#endif  // PANDA_RUNTIME_ARCH_HELPERS_H_
+#endif  // PANDA_RUNTIME_ARCH_HELPERS_H

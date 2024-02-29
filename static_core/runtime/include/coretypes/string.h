@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_CORETYPES_STRING_H_
-#define PANDA_RUNTIME_CORETYPES_STRING_H_
+#ifndef PANDA_RUNTIME_CORETYPES_STRING_H
+#define PANDA_RUNTIME_CORETYPES_STRING_H
 
 #include <securec.h>
 #include <cstddef>
@@ -378,4 +378,4 @@ static_assert(STRING_DATA_OFFSET == panda::coretypes::String::GetDataOffset());
 
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_CORETYPES_STRING_H_
+#endif  // PANDA_RUNTIME_CORETYPES_STRING_H

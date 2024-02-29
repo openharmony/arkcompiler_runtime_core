@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_CACHE_H_
-#define PANDA_INTERPRETER_CACHE_H_
+#ifndef PANDA_INTERPRETER_CACHE_H
+#define PANDA_INTERPRETER_CACHE_H
 
 #include <array>
 #include "libpandabase/utils/math_helpers.h"
@@ -69,4 +69,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_INTERPRETER_CACHE_H_
+#endif  // PANDA_INTERPRETER_CACHE_H

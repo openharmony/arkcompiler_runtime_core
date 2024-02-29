@@ -370,7 +370,6 @@ Monitor::State Monitor::Wait(ObjectHeader *obj, ThreadStatus status, uint64_t ti
         switch (state) {
             case MarkWord::STATE_HEAVY_LOCKED: {
                 auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
-
                 if (monitor->GetOwner() != thread) {
                     // The monitor is acquired by other thread
                     // throw an internal exception?
@@ -467,7 +466,6 @@ Monitor::State Monitor::Notify(ObjectHeader *obj)
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
             auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
-
             if (monitor->GetOwner() != thread) {
                 // The monitor is acquired by other thread
                 // throw an internal exception?
@@ -516,7 +514,6 @@ Monitor::State Monitor::NotifyAll(ObjectHeader *obj)
     switch (state) {
         case MarkWord::STATE_HEAVY_LOCKED: {
             auto monitor = thread->GetMonitorPool()->LookupMonitor(mark.GetMonitorId());
-
             if (monitor->GetOwner() != thread) {
                 // The monitor is acquired by other thread
                 // throw an internal exception?

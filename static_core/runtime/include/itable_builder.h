@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_ITABLE_BUILDER_H_
-#define PANDA_RUNTIME_ITABLE_BUILDER_H_
+#ifndef PANDA_RUNTIME_ITABLE_BUILDER_H
+#define PANDA_RUNTIME_ITABLE_BUILDER_H
 
 #include "libpandabase/macros.h"
 #include "libpandafile/class_data_accessor-inl.h"
@@ -65,4 +65,4 @@ public:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_ITABLE_BUILDER_H_
+#endif  // PANDA_RUNTIME_ITABLE_BUILDER_H

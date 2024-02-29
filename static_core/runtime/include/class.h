@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_CLASS_H_
-#define PANDA_RUNTIME_CLASS_H_
+#ifndef PANDA_RUNTIME_CLASS_H
+#define PANDA_RUNTIME_CLASS_H
 
 #include <securec.h>
 #include <atomic>
@@ -1011,4 +1011,4 @@ PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, const Class::State &
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_CLASS_H_
+#endif  // PANDA_RUNTIME_CLASS_H

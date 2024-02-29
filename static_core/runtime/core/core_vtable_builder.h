@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H_
-#define PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H_
+#ifndef PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H
+#define PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H
 
 #include "runtime/include/vtable_builder.h"
 
@@ -39,4 +39,4 @@ using CoreVTableBuilder = VTableBuilderImpl<CoreVTableSearchBySignature, CoreVTa
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H_
+#endif  // PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H

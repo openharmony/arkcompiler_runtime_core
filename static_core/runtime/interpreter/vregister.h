@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_VREGISTER_H_
-#define PANDA_INTERPRETER_VREGISTER_H_
+#ifndef PANDA_INTERPRETER_VREGISTER_H
+#define PANDA_INTERPRETER_VREGISTER_H
 
 #include <cstddef>
 #include <cstdint>
@@ -572,4 +572,4 @@ public:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_INTERPRETER_VREGISTER_H_
+#endif  // PANDA_INTERPRETER_VREGISTER_H

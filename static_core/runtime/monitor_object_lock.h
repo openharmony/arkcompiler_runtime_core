@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_MONITOR_OBJECT_LOCK_H_
-#define PANDA_RUNTIME_MONITOR_OBJECT_LOCK_H_
+#ifndef PANDA_RUNTIME_MONITOR_OBJECT_LOCK_H
+#define PANDA_RUNTIME_MONITOR_OBJECT_LOCK_H
 
 #include "runtime/monitor.h"
 #include "runtime/handle_scope.h"
@@ -43,4 +43,4 @@ private:
 };
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_MONITOR_OBJECT_LOCK_H_
+#endif  // PANDA_RUNTIME_MONITOR_OBJECT_LOCK_H

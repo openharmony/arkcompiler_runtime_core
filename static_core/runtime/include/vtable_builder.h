@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_VTABLE_BUILDER_H_
-#define PANDA_RUNTIME_VTABLE_BUILDER_H_
+#ifndef PANDA_RUNTIME_VTABLE_BUILDER_H
+#define PANDA_RUNTIME_VTABLE_BUILDER_H
 
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/hash.h"
@@ -342,4 +342,4 @@ private:
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_VTABLE_BUILDER_H_
+#endif  // PANDA_RUNTIME_VTABLE_BUILDER_H

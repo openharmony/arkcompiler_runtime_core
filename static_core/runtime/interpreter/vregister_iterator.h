@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_VREGISTER_ITERATOR_H_
-#define PANDA_RUNTIME_VREGISTER_ITERATOR_H_
+#ifndef PANDA_RUNTIME_VREGISTER_ITERATOR_H
+#define PANDA_RUNTIME_VREGISTER_ITERATOR_H
 
 namespace panda::interpreter {
 
@@ -86,4 +86,4 @@ public:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H_
+#endif  // PANDA_RUNTIME_CORETYPES_ARRAY_H

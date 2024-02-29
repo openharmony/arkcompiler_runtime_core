@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_UTILS_H_
-#define PANDA_RUNTIME_UTILS_H_
+#ifndef PANDA_RUNTIME_UTILS_H
+#define PANDA_RUNTIME_UTILS_H
 
 #include <cstdint>
 
@@ -45,4 +45,4 @@ PandaString GetCurrentTimeString(const char *format);
 
 }  // namespace panda::time
 
-#endif  // PANDA_RUNTIME_UTILS_H_
+#endif  // PANDA_RUNTIME_UTILS_H

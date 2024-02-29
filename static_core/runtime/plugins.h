@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_PLUGINS_H_
-#define PANDA_PLUGINS_PLUGINS_H_
+#ifndef PANDA_PLUGINS_PLUGINS_H
+#define PANDA_PLUGINS_PLUGINS_H
 
 #include "runtime/include/language_context.h"
 
@@ -27,4 +27,4 @@ bool HasRuntime(const std::string &runtimeType);
 
 }  // namespace panda::plugins
 
-#endif  // PANDA_PLUGINS_PLUGINS_H_
+#endif  // PANDA_PLUGINS_PLUGINS_H

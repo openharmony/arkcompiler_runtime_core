@@ -410,7 +410,6 @@ bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::Cl
 
     auto &copiedMethods = classInfo->vtableBuilder->GetCopiedMethods();
     uint32_t n = numMethods + copiedMethods.size();
-
     if (n == 0) {
         return true;
     }
@@ -660,7 +659,6 @@ bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool isStatic,
 
     for (auto &field : fields) {
         auto type = field.GetType();
-
         if (!type.IsPrimitive()) {
             refFields.push_back(&field);
             continue;
@@ -759,7 +757,6 @@ std::optional<Span<Class *>> ClassLinker::LoadInterfaces(panda_file::ClassDataAc
 {
     ASSERT(context != nullptr);
     size_t ifacesNum = cda->GetIfacesNumber();
-
     if (ifacesNum == 0) {
         return Span<Class *>(nullptr, ifacesNum);
     }
@@ -893,7 +890,6 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     ASSERT(context != nullptr);
     panda_file::ClassDataAccessor classDataAccessor(*pf, classId);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
-
     if (ctx.GetLanguage() != context->GetSourceLang()) {
         LanguageContext currentCtx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
         PandaStringStream ss;

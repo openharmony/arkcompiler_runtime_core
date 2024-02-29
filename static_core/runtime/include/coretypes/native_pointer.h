@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H_
-#define PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H_
+#ifndef PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H
+#define PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H
 
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
@@ -52,4 +52,4 @@ private:
 
 }  // namespace panda::coretypes
 
-#endif  // PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H_
+#endif  // PANDA_RUNTIME_ECMASCRIPT_NATIVEPOINTER_H

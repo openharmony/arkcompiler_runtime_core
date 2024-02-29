@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_QUICKENER_QUICKENER_H
+#define PANDA_QUICKENER_QUICKENER_H
+
 #include "file.h"
 #include "file_item_container.h"
 #include "file_items.h"
@@ -52,3 +55,5 @@ private:
 
 #include <translation_table_gen.h>
 }  // namespace panda::quick
+
+#endif  // PANDA_QUICKENER_QUICKENER_H

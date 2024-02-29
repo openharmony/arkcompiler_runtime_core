@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_ACC_VREGISTER_INL_H_
-#define PANDA_INTERPRETER_ACC_VREGISTER_INL_H_
+#ifndef PANDA_INTERPRETER_ACC_VREGISTER_INL_H
+#define PANDA_INTERPRETER_ACC_VREGISTER_INL_H
 
 #include <cstddef>
 #include <cstdint>
@@ -207,4 +207,4 @@ using AccVRegisterT = AccVRegister;
 #endif  // PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES
 }  // namespace panda::interpreter
 
-#endif  // PANDA_INTERPRETER_ACC_VREGISTER_INL_H_
+#endif  // PANDA_INTERPRETER_ACC_VREGISTER_INL_H

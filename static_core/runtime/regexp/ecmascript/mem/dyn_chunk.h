@@ -22,7 +22,7 @@
 namespace panda {
 
 template <typename T>
-static inline T UnalignedLoad(T const *p)
+inline T UnalignedLoad(T const *p)
 {
     struct Wrapper {
         T x;
@@ -31,7 +31,7 @@ static inline T UnalignedLoad(T const *p)
 }
 
 template <typename T>
-static inline void UnalignedStore(T *p, T v)
+inline void UnalignedStore(T *p, T v)
 {
     struct Wrapper {
         T x;

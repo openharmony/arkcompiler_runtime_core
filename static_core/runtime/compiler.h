@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_COMPILER_H_
-#define PANDA_RUNTIME_COMPILER_H_
+#ifndef PANDA_RUNTIME_COMPILER_H
+#define PANDA_RUNTIME_COMPILER_H
 
 #include "compiler/compile_method.h"
 #include "compiler/compiler_task_runner.h"
@@ -774,4 +774,4 @@ uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceL
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_COMPILER_H_
+#endif  // PANDA_RUNTIME_COMPILER_H

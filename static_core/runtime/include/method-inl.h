@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_METHOD_INL_H_
-#define PANDA_RUNTIME_METHOD_INL_H_
+#ifndef PANDA_RUNTIME_METHOD_INL_H
+#define PANDA_RUNTIME_METHOD_INL_H
 
 #include "entrypoints/entrypoints.h"
 #include "libpandafile/code_data_accessor-inl.h"
@@ -610,4 +610,4 @@ void Method::EnumerateExceptionHandlers(Callback callback) const
 
 }  // namespace panda
 
-#endif  // !PANDA_RUNTIME_METHOD_INL_H_
+#endif  // !PANDA_RUNTIME_METHOD_INL_H

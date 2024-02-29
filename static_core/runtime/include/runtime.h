@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_RUNTIME_H_
-#define PANDA_RUNTIME_RUNTIME_H_
+#ifndef PANDA_RUNTIME_RUNTIME_H
+#define PANDA_RUNTIME_RUNTIME_H
 
 #include <atomic>
 #include <csignal>
@@ -571,4 +571,4 @@ void InitSignals();
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_RUNTIME_H_
+#endif  // PANDA_RUNTIME_RUNTIME_H

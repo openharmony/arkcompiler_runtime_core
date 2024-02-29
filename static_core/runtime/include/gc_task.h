@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_GC_TASK_H_
-#define PANDA_RUNTIME_GC_TASK_H_
+#ifndef PANDA_RUNTIME_GC_TASK_H
+#define PANDA_RUNTIME_GC_TASK_H
 
 #include <cstdint>
 
@@ -101,4 +101,4 @@ std::ostream &operator<<(std::ostream &os, const GCCollectionType &collectionTyp
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_GC_TASK_H_
+#endif  // PANDA_RUNTIME_GC_TASK_H

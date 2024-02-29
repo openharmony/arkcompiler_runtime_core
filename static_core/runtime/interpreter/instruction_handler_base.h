@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H_
-#define PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H_
+#ifndef PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H
+#define PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H
 
 #include <isa_constants_gen.h>
 #include "runtime/include/method.h"
@@ -373,4 +373,4 @@ private:
 
 }  // namespace panda::interpreter
 
-#endif  // PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H_
+#endif  // PANDA_INTERPRETER_INSTRUCTION_HANDLER_BASE_H

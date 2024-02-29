@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_OPTIONS_H_
-#define PANDA_RUNTIME_OPTIONS_H_
+#ifndef PANDA_RUNTIME_OPTIONS_H
+#define PANDA_RUNTIME_OPTIONS_H
 
 #include "generated/runtime_options_gen.h"
 #include "utils/logger.h"
@@ -241,4 +241,4 @@ private:
 };
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_OPTIONS_H_
+#endif  // PANDA_RUNTIME_OPTIONS_H

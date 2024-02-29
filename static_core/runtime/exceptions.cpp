@@ -76,8 +76,7 @@ void ThrowArrayIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::
 void ThrowArrayIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::ArraySizeT length,
                                          const LanguageContext &ctx, ManagedThread *thread)
 {
-    PandaString msg;
-    msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
+    PandaString msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
 
     ThrowException(ctx, thread, ctx.GetArrayIndexOutOfBoundsExceptionClassDescriptor(),
                    utf::CStringAsMutf8(msg.c_str()));
@@ -89,8 +88,7 @@ void ThrowIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::Array
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg;
-    msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
+    PandaString msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
 
     ThrowException(ctx, thread, ctx.GetIndexOutOfBoundsExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
@@ -107,8 +105,7 @@ void ThrowStringIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes:
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg;
-    msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
+    PandaString msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
 
     ThrowException(ctx, thread, ctx.GetStringIndexOutOfBoundsExceptionClassDescriptor(),
                    utf::CStringAsMutf8(msg.c_str()));
@@ -120,8 +117,7 @@ void ThrowNegativeArraySizeException(coretypes::ArraySsizeT size)
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg;
-    msg = "size = " + ToPandaString(size);
+    PandaString msg = "size = " + ToPandaString(size);
 
     ThrowException(ctx, thread, ctx.GetNegativeArraySizeExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
@@ -147,8 +143,8 @@ void ThrowClassCastException(const Class *dstType, const Class *srcType)
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg;
-    msg = srcType->GetName() + " cannot be cast to " + dstType->GetName();
+    PandaString msg = "";
+    msg += srcType->GetName() + " cannot be cast to " + dstType->GetName();
 
     ThrowException(ctx, thread, ctx.GetClassCastExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
     SetExceptionEvent(events::ExceptionType::CAST_CHECK, thread);
@@ -159,8 +155,8 @@ void ThrowAbstractMethodError(const Method *method)
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg;
-    msg = "abstract method \"" + method->GetClass()->GetName() + ".";
+    PandaString msg = "";
+    msg += "abstract method \"" + method->GetClass()->GetName() + ".";
     msg += utf::Mutf8AsCString(method->GetName().data);
     msg += "\"";
 
@@ -173,8 +169,8 @@ void ThrowIncompatibleClassChangeErrorForMethodConflict(const Method *method)
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg;
-    msg = "Conflicting default method implementations \"" + method->GetClass()->GetName() + ".";
+    PandaString msg = "Conflicting default method implementations \"";
+    msg += method->GetClass()->GetName() + ".";
     msg += utf::Mutf8AsCString(method->GetName().data);
     msg += "\"";
 
@@ -237,7 +233,6 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWal
         auto *method = stack->GetMethod();
         ASSERT(method != nullptr);
         uint32_t pcOffset = method->FindCatchBlock(thread->GetException()->ClassAddr<Class>(), pc);
-
         if (pcOffset != panda_file::INVALID_OFFSET) {
             if (origFrame != nullptr) {
                 FreeFrame(origFrame);

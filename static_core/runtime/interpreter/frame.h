@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_INTERPRETER_FRAME_H_
-#define PANDA_INTERPRETER_FRAME_H_
+#ifndef PANDA_INTERPRETER_FRAME_H
+#define PANDA_INTERPRETER_FRAME_H
 
 #include <cstddef>
 #include <cstdint>
@@ -786,4 +786,4 @@ ALWAYS_INLINE inline void DestroyFrame(mem::StackFrameAllocator *stackFrameAlloc
 
 }  // namespace panda
 
-#endif  // PANDA_INTERPRETER_FRAME_H_
+#endif  // PANDA_INTERPRETER_FRAME_H

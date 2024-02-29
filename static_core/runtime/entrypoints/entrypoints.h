@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H_
-#define PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H_
+#ifndef PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H
+#define PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H
 
 #include "entrypoints_gen.h"
 #include "plugins_entrypoints_gen.h"
@@ -48,4 +48,4 @@ extern "C" void ThrowInstantiationErrorEntrypoint(Class *klass);
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H_
+#endif  // PANDA_RUNTIME_ENTRYPOINTS_ENTRYPOINTS_H

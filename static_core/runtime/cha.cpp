@@ -48,7 +48,6 @@ void ClassHierarchyAnalysis::Update(Class *klass)
     for (size_t i = 0; i < parent->GetVTableSize(); ++i) {
         auto method = klass->GetVTable()[i];
         auto parentMethod = parent->GetVTable()[i];
-
         if (method == parentMethod || method->IsDefaultInterfaceMethod()) {
             continue;
         }

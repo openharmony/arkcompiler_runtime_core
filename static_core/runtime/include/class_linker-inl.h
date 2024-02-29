@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_CLASS_LINKER_INL_H_
-#define PANDA_RUNTIME_CLASS_LINKER_INL_H_
+#ifndef PANDA_RUNTIME_CLASS_LINKER_INL_H
+#define PANDA_RUNTIME_CLASS_LINKER_INL_H
 
 #include "libpandafile/panda_cache.h"
 #include "runtime/include/class_linker.h"
@@ -76,4 +76,4 @@ inline Class *ClassLinker::GetLoadedClass(const panda_file::File &pf, panda_file
 
 }  // namespace panda
 
-#endif  // PANDA_RUNTIME_CLASS_LINKER_INL_H_
+#endif  // PANDA_RUNTIME_CLASS_LINKER_INL_H

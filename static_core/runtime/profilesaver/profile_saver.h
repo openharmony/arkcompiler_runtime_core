@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_PROFILE_SAVER_H_
-#define PANDA_RUNTIME_PROFILE_SAVER_H_
+#ifndef PANDA_RUNTIME_PROFILE_SAVER_H
+#define PANDA_RUNTIME_PROFILE_SAVER_H
 
 #include <pthread.h>
 
@@ -164,4 +164,4 @@ private:
 
 }  // namespace panda
 
-#endif
+#endif  // PANDA_RUNTIME_PROFILE_SAVER_H
