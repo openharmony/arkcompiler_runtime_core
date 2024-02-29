@@ -61,7 +61,7 @@ constexpr const char *INDICES_FIELD_NAME = "indices";
 constexpr const char *RESULT_FIELD_NAME = "result";
 constexpr const char *IS_CORRECT_FIELD_NAME = "isCorrect";
 
-constexpr const uint32_t INDICES_DEMESIONS_NUM = 2;
+constexpr const uint32_t INDICES_DIMENSIONS_NUM = 2;
 
 EtsObject *GetFieldObjectByName(EtsObject *object, const char *name)
 {
@@ -121,6 +121,21 @@ uint32_t CastToBitMask(EtsString *checkStr)
 }
 }  // namespace
 
+void SetFlags(EtsObject *regexpObject, EtsString *checkStr)
+{
+    auto coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+    VMHandle<EtsObject> regexp(coroutine, regexpObject->GetCoreType());
+
+    auto regexpClass = regexp->GetClass();
+    EtsField *flagsField = regexpClass->GetDeclaredFieldIDByName(FLAGS_FIELD_NAME);
+
+    auto flags = checkStr->GetMutf8();
+    std::sort(flags.begin(), flags.end());
+    VMHandle<EtsString> newFlags(coroutine, EtsString::CreateFromMUtf8(flags.c_str())->GetCoreType());
+    regexp->SetFieldObject(flagsField, newFlags->AsObject());
+}
+
 void SetBuffer(EtsObject *regexpObject, const RegExpParser &parser)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
@@ -171,8 +186,10 @@ extern "C" EtsObject *EscompatRegExpCompile(EtsObject *regexpObj)
     EtsString *patternStrObj = EtsString::FromEtsObject(GetFieldObjectByName(regexp.GetPtr(), PATTERN_FIELD_NAME));
     VMHandle<EtsString> patternStr(coroutine, patternStrObj->GetCoreType());
 
-    EtsString *flags = EtsString::FromEtsObject(GetFieldObjectByName(regexp.GetPtr(), FLAGS_FIELD_NAME));
-    auto flagsBits = static_cast<uint8_t>(CastToBitMask(flags));
+    auto flags = EtsHandle<EtsString>(
+        coroutine, EtsString::FromEtsObject(GetFieldObjectByName(regexp.GetPtr(), FLAGS_FIELD_NAME)));
+    auto flagsBits = static_cast<uint8_t>(CastToBitMask(flags.GetPtr()));
+    SetFlags(regexp.GetPtr(), flags.GetPtr());
 
     RegExpParser parser = RegExpParser();
     PandaString pattern = ConvertToString(patternStr->GetCoreType());
@@ -329,7 +346,7 @@ void SetIndicesField(EtsObject *regexpExecArrayObj, const PandaVector<std::pair<
         coroutine,
         EtsObjectArray::Create(classLinker->GetClassRoot(EtsClassRoot::DOUBLE_ARRAY), indices.size())->GetCoreType());
     for (size_t i = 0; i < indices.size(); ++i) {
-        VMHandle<EtsDoubleArray> index(coroutine, EtsDoubleArray::Create(INDICES_DEMESIONS_NUM)->GetCoreType());
+        VMHandle<EtsDoubleArray> index(coroutine, EtsDoubleArray::Create(INDICES_DIMENSIONS_NUM)->GetCoreType());
         index->Set(0, static_cast<EtsDouble>(indices[i].first));
         index->Set(1, static_cast<EtsDouble>(indices[i].second));
         indicesArray->Set(i, index->AsObject());

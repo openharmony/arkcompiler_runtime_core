@@ -62,7 +62,10 @@ module ESChecker
             if value_is_string rb_obj
                 return { :kind => :trivial, :str => "string" }
             end
-            if rb_obj.kind_of?(Array) && rb_obj.size > 0
+            if rb_obj.kind_of?(Array)
+                if rb_obj.size == 0
+                    return { :kind => :array, :el => { :kind => :trivial, :str => "Object|null|undefined" } }
+                end
                 typs = rb_obj.map { |r| detect r }
                 if typs.all? { |t| t == typs[0] }
                     return { :kind => :array, :el => typs[0] }

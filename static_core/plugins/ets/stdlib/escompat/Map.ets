@@ -15,13 +15,13 @@
 
 package escompat;
 
-export interface ReadonlyMap<K, V> /* TODO(kprokopenko): extends Iterable */ {
+export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
     /**
      * Returns number of Entries with unique keys in the Map
      *
      * @returns number of Entries with unique keys in the Map
      */
-    size(): number; // TODO(kprokopenko): must be a property
+    get size(): number;
 
     /**
      * Returns a value assosiated with key if present
@@ -60,7 +60,7 @@ export interface ReadonlyMap<K, V> /* TODO(kprokopenko): extends Iterable */ {
      *
      * @param fn to apply
      */
-    forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void;
+    //forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void;
 
     // TODO(kprokopenko): uncomment when internal issue #14416 is fixed
 
@@ -69,21 +69,21 @@ export interface ReadonlyMap<K, V> /* TODO(kprokopenko): extends Iterable */ {
      *
      * @returns ValueIterator with map keys
      */
-    //keys(): ValuesIterator<K>;
+    //keys(): IterableIterator<K>;
 
     /**
      * Returns elements from the Map as an values Iterator
      *
      * @returns ValueIterator with map values
      */
-    //values(): ValuesIterator<V>;
+    values(): IterableIterator<V>;
 
     /**
      * Returns elements from the Map as an array of Entries
      *
      * @returns an array of Entries
      */
-    //entries(): MapIterator<K, V>;
+    //entries(): IterableIterator<[K, V]>;
 }
 
 class MapEntry<K, V> extends Entry<K, V> {
@@ -91,27 +91,41 @@ class MapEntry<K, V> extends Entry<K, V> {
         super(key, value)
     }
 
-    /* override */ equals(o: NullishType): boolean {
+    override equals(o: NullishType): boolean {
         if (o instanceof MapEntry) {
-            return __runtimeEquals(this.key as NullishType, ((o as MapEntry<K, V>).key) as NullishType)
+            return __runtimeSameValueZero(this.key as NullishType, ((o as MapEntry<K, V>).key) as NullishType)
         }
-        return __runtimeEquals(this.key as NullishType, o)
+        return __runtimeSameValueZero(this.key as NullishType, o)
     }
 
-    /* override */ $_hashCode(): int {
-        return hashOf(this.key as NullishType)
+    override $_hashCode(): int {
+        return Set.hashOf(this.key as NullishType)
     }
 }
 
 export type Record<K, V> = Map<K, V>;
 
-export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
+export final class Map<K, V> implements ReadonlyMap<K, V> {
     private s: Set<MapEntry<K, V>> = new Set<MapEntry<K, V>>()
 
     /**
-     * Constructs an empty Map
+     * Constructs a Set from collection
+     * @param iter initial collection
      */
-    constructor() {
+    constructor(iter?: ArrayLike<[K, V]> | Iterable<[K, V]> | null) {
+        if (!__runtimeIsSameReference(iter, undefined) && !__runtimeIsSameReference(iter, null)) {
+            // NOTE(kprokopenko): dealing with this overload is tricky
+            // with banned `instanceof` generic, so it is delegated to array here
+            const vals = Array.from<[K, V]>(iter!);
+            for (let i = 0; i < vals.actualLength; i++) {
+                const v = vals[i];
+                this.set(v[0], v[1])
+            }
+        }
+    }
+
+    override toString(): String {
+        return "Map[" + this.s.toStringVals() + "]"
     }
 
 
@@ -122,8 +136,9 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @param v the value to put into the Map
      */
-    set(k: K, v: V): void {
+    set(k: K, v: V): this {
         this.s.add(new MapEntry<K, V>(k, v))
+        return this;
     }
 
     /**
@@ -133,7 +148,7 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @returns true if the value is in the Map
      */
-    /* override */ has(k: K): boolean {
+    override has(k: K): boolean {
         return !__runtimeIsSameReference(this.s.get(k as NullishType), undefined)
     }
 
@@ -142,8 +157,8 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    /* override */ size(): number {
-        return this.s.size()
+    get size(): number {
+        return this.s.size
     }
 
     /**
@@ -169,7 +184,7 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @returns value if assosiated with key presents.
      */
-    /* override */ get(k: K): V | undefined {
+    override get(k: K): V | undefined {
         const r = this.s.get(k as NullishType)
         if (!__runtimeIsSameReference(r, undefined)) {
             return r!.value
@@ -208,8 +223,12 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @returns iterator with map values
      */
-    /* override */ values(): IterableIterator<V> {
+    override values(): IterableIterator<V> {
         return this.s.mappedIterator<V>((x: ListNode): V => { return (x.val as MapEntry<K, V>).value })
+    }
+
+    override iterator(): IterableIterator<[K, V]> {
+        return this.entries()
     }
 
     /**
@@ -217,9 +236,12 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @returns an array of Entries
      */
-    /* override */ entries(): IterableIterator<Entry<K, V>> {
-        // NOTE: (x: ListNode): Entry<K, V> => { return ... } does not parse.
-        return this.s.mappedIterator<Object>((x: ListNode): Object => { return x.val as MapEntry<K, V> }) as IterableIterator<Entry<K, V>>
+    /* override */ entries(): IterableIterator<[K, V]> {
+        return this.s.mappedIterator<Object>((x: ListNode): Object => {
+            const node = x.val as MapEntry<K, V>
+            const r: [K, V] = [node.key, node.value]
+            return r
+        }) as IterableIterator<[K, V]>
     }
 
     /**
@@ -227,8 +249,20 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @param fn to apply
      */
-    /* override */ forEach(fn: (v: V, k: K) => void): void {
-        iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
+     // NOTE(gogabr): should override from ReadonlyMap, but blocked by #15096
+    /* override */ forEach(fn: (v: V, k: K, map: Map<K, V>) => void): void {
+        iteratorForEach<MapEntry<K, V>>(this.s.keys(), (x: MapEntry<K, V>): void => {
+            fn(x.value, x.key, this)
+        })
+    }
+
+    /**
+     * Applies a function over all elements of the Map
+     *
+     * @param fn to apply
+     */
+    override forEach(fn: (v: V, k: K) => void): void {
+        iteratorForEach<MapEntry<K, V>>(this.s.keys(), (x: MapEntry<K, V>): void => {
             fn(x.value, x.key)
         })
     }
@@ -238,19 +272,7 @@ export final class Map<K, V> /* implements ReadonlyMap<K, V> */ {
      *
      * @param fn to apply
      */
-    /* override */ forEach(fn: (v: V) => void): void {
+    override forEach(fn: (v: V) => void): void {
         iteratorForEach<V>(this.values(), fn)
-    }
-
-    /**
-     * Applies a function over all elements of the Map
-     *
-     * @param fn to apply
-     */
-    // NOTE(gogabr): map should be Map instead of ReadonlyMap, but blocked by #15096
-    /* override */ forEach(fn: (value: V, key: K, map: Map<K, V>) => void): void {
-        iteratorForEach<Entry<K, V>>(this.entries(), (x: Entry<K, V>): void => {
-            fn(x.value, x.key, this)
-        })
     }
 }

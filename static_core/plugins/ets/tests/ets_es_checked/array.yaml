@@ -15,17 +15,42 @@ sub:
   - category: Array
     self:
       - Array.of<number>(0, -0.0, 4, 1, 2, -1, Infinity, 11, -Infinity, 1, 21, 111, NaN, -NaN, 0, -0.0)
+      - Array.of<number>(0, -0.0, 4, 1, 2, -1, 1, 21, 111, 0, -0.0)
+      - Array.of<number>()
     self_type: Array<number>
     vars:
       default_inds: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.1, 5.0, 100.0, -1.1, 2.0, "Infinity", "-Infinity", "NaN", "0x8 as number", "-0o4 as number"]
       default_search: ["NaN", "-NaN", "Infinity", "-Infinity", 0.0, "-0.0", 100, 1]
+      reduce_lamdbas:
+        - |
+          (x: number, y: number): number => x * y
+        - |
+          (x: number, y: number, i: number): number => x - y + i
+        - |
+          (x: number, y: number, i: number): number => y - x + i
+      reduce_u_lamdbas:
+        - |
+          (x: string, y: number): string => x + y
+        - |
+          (x: string, y: number, i: number): string => x + y + i
+        - |
+          (x: string, y: number, i: number): string => y + x + i
     sub:
       - method: "concat"
         ignored: true # generics overriding is flaky
         params: []
         rest:
           - combinationRest "Array.of<number>(1)", "Array.of<number>()", "Array.of<number>(NaN, 10, Infinity)"
-      - method: "at"
+      - method: values
+      - method: keys
+      - method: entries
+        ret_type: Iterable<[number, number]>
+      - expr: self.length
+      - expr: |
+          ((): void => { self.length = pars })()
+        params:
+          - paramOf '0.0', '-1.0'
+      - method: at
         params:
           - paramOf(*default_inds)
       - method: "with"
@@ -38,27 +63,30 @@ sub:
           - paramOf(*default_inds)
           - paramOf(*default_inds)
         mandatory: 1
-      - method: "copyWithin"
-        params:
-          - paramOf(*default_inds)
-          - paramOf(*default_inds)
-          - paramOf(*default_inds)
-        mandatory: 2
+      - self:
+          - |
+            Array.of<number>(0, -0.0, 4, 1, 2, -1, Infinity, 11, -Infinity, 1, 21, 111, NaN, -NaN, 0, -0.0)
+        sub:
+          - method: "copyWithin"
+            params:
+              - paramOf(*default_inds)
+              - paramOf(*default_inds)
+              - paramOf(*default_inds)
+            mandatory: 2
+          - method: "splice"
+            ret_type: Array<number>
+            params:
+              - paramOf(*default_inds)
+              - paramOf(*default_inds)
+            mandatory: 1
+            rest:
+              - combinationRest 31, 34, 45
       - method: "slice"
         ret_type: Array<number>
         params:
           - paramOf(*default_inds)
           - paramOf(*default_inds)
         mandatory: 0
-      - method: "splice"
-        ret_type: Array<number>
-        params:
-          - paramOf(*default_inds)
-          - paramOf(*default_inds)
-        mandatory: 1
-        rest:
-          - emptyRest
-          - combinationRest 31, 34, 45
       - method: includes
         params:
           - paramOf(*default_search)
@@ -83,12 +111,34 @@ sub:
         mandatory: 0
       - method: reverse
       - method: sort
+        mandatory: 0
+        # params:
+        #   - |
+        #     paramOf('(a: number, b: number): number => b - a')
       - method: toReversed
       - method: toSorted
       - method: unshift
         rest:
           - emptyRest
           - combinationRest 0.0, 10, 11
+      - method: reduce
+        mandatory: 1
+        params:
+          - paramOf *reduce_lamdbas
+        #  - paramOf '0.0', 'NaN', '-1.0'
+      - method: reduce<string>
+        params:
+          - paramOf *reduce_u_lamdbas
+          - paramOf "'!'"
+      - method: reduceRight
+        mandatory: 1
+        params:
+          - paramOf *reduce_lamdbas
+        #  - paramOf '0.0', 'NaN', '-1.0'
+      - method: reduceRight<string>
+        params:
+          - paramOf *reduce_u_lamdbas
+          - paramOf "'!'"
       - self:
           - Array.of<number>()
           - Array.of<number>(1, 2)
@@ -104,18 +154,18 @@ sub:
           - method: includes
             params:
               - paramOf("null", "undefined", '""', '"123"', 123, "NaN")
-              - paramOf(0, 1, 2, 3)
+              - paramOf(0.0, 1.0, 2.0, 3.0)
             mandatory: 1
           - method: indexOf
             params:
               - paramOf("null", "undefined", '""', '"123"', "NaN")
-              - paramOf(0, 1, 2, 3)
+              - paramOf(0.0, 1.0, 2.0, 3.0)
             mandatory: 1
           - method: values
             ret_type: Iterable<Object | null | undefined>
           - method: keys
           - method: entries
-            ignored: true
+            ignored: true # es2panda parser fails
             ret_type: Iterable<[number, Object | null | undefined]>
       - self: null
         sub:
@@ -125,3 +175,5 @@ sub:
             rest:
               - combinationRest "NaN", "10.0", "Infinity"
             ret_type: Array<number>
+          - expr: Array.from<number>(Array.of<number>(1, 2, 3, NaN))
+          - expr: Array.from<number>(new Set<number>(Array.of<number>(1, 2, 3, NaN)))

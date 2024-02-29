@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-package std.core;
-
-export const KEY_NOT_FOUND: int = -1;
-
-// Range is [startIndex, endIndex), i.e. startIndex included and endIndex is excluded
-function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
-    // Since mostly everywhere for loop is used from startIndex till endIndex exclusive,
-    // startIndex <= endIndex is used to cover empty array case
-    return ((0 <= startIndex) && (startIndex <= endIndex) && (endIndex <= arrLen));
+function main(): void {
+    const arr: int[] = [1, 2];
+    const res: Object[] = map<Object>(arr, (x: int): Object => {
+        return x.toString()
+    })
+    assert res.length == 2
+    assert res[0] as String == "1"
+    assert res[1] as String == "2"
 }

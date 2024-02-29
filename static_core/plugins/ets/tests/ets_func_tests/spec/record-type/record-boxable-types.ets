@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@ let string_number: Record<String, Number> = {
   "world": 20,
 };
 
-assert string_number.size() == 2
+assert string_number.size == 2
 assert string_number.get("hello") == 10
 assert string_number.get("world") == 20
 
@@ -32,7 +32,7 @@ let string_double: Record<String, Double> = {
   "world": 20,
 };
 
-assert string_double.size() == 2
+assert string_double.size == 2
 assert string_double.get("hello") == 10
 assert string_double.get("world") == 20
 
@@ -41,7 +41,7 @@ let string_float: Record<String, Float> = {
   "world": 20,
 };
 
-assert string_float.size() == 2
+assert string_float.size == 2
 assert string_float.get("hello") == 10
 assert string_float.get("world") == 20
 
@@ -50,7 +50,7 @@ let string_long: Record<String, Long> = {
   "world": 20,
 };
 
-assert string_long.size() == 2
+assert string_long.size == 2
 assert string_long.get("hello") == 10
 assert string_long.get("world") == 20
 
@@ -59,7 +59,7 @@ let string_int: Record<String, Int> = {
   "world": 20,
 };
 
-assert string_int.size() == 2
+assert string_int.size == 2
 assert string_int.get("hello") == 10
 assert string_int.get("world") == 20
 

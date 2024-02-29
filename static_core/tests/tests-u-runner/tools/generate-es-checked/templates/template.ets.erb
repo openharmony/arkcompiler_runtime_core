@@ -68,7 +68,13 @@ class IterableData {
 }
 const KNOWN_ITERABLES = new Array<IterableData>()
 
-function getIteratorFromIterable(a: Object, aType: ClassType): Iterator<NullishType> | undefined {
+function getIteratorFromIterable(a: NullishType, aTypeUncasted: Type): Iterator<NullishType> | undefined {
+  if (!(aTypeUncasted instanceof ClassType)) {
+    return undefined
+  }
+
+  const aType = aTypeUncasted as ClassType
+
   for (let i = 0; i < KNOWN_ITERABLES.length; i++) {
     const ki = KNOWN_ITERABLES[i];
     if (ki.cls.equals(aType)) {
@@ -119,8 +125,8 @@ function __value_is_same(a: NullishType, b: NullishType): boolean {
   const aType = Type.of(a)
   const bType = Type.of(b)
 
-  const aItMb = getIteratorFromIterable(a!, aType as ClassType);
-  const bItMb = getIteratorFromIterable(b!, bType as ClassType);
+  const aItMb = getIteratorFromIterable(a, aType);
+  const bItMb = getIteratorFromIterable(b, bType);
   if (aItMb != undefined && bItMb != undefined) {
     const aIt = aItMb!;
     const bIt = bItMb!;
@@ -149,15 +155,8 @@ function __check_value(a: NullishType, b: NullishType): void {
     return
   }
 
-  __fail_description += "\\ngot ";
-  if (runtime.isSameReference(a, null)) { __fail_description += "null"; }
-  else if (runtime.isSameReference(a, undefined)) { __fail_description += "undefined"; }
-  else { __fail_description += a!.toString(); }
-
-  __fail_description += "\\nexp ";
-  if (runtime.isSameReference(b, null)) { __fail_description += "null"; }
-  else if (runtime.isSameReference(b, undefined)) { __fail_description += "undefined"; }
-  else { __fail_description += b!.toString(); }
+  __fail_description += "\ngot " + Value.of(a).toString() + " of type " + Type.of(a).toString();
+  __fail_description += "\nexp " + Value.of(b).toString() + " of type " + Type.of(b).toString();
 
   __fail();
 }
@@ -183,7 +182,7 @@ function test<%= slice_idx %>(): void {
       threw = true;
     }
     if (!threw) {
-      __fail_description += "\\nexpected to throw ; ts description : " + <%= rb_obj.dump %>
+      __fail_description += "\nexpected to throw ; ts description : " + <%= rb_obj.dump %>
       __fail();
     }
 %     elsif test_case_cur.conf.ret_type == "void"

@@ -188,8 +188,8 @@ function Array_TestJSCopyWithin(arr: Array<FooClass>): void {
 function Array_TestJSLastIndexOf(arr: Array<FooClass>): void {
     arr.push(arr.at(1) as FooClass);
 
-    assert arr.lastIndexOf(arr.at(1) as FooClass, 2) == 2;
-    assert arr.lastIndexOf(new FooClass("not in array"), 2) == -1;
+    assert arr.lastIndexOf(arr.at(1) as FooClass, 2.0) == 2;
+    assert arr.lastIndexOf(new FooClass("not in array"), 2.0) == -1;
 
     // NOTE (oignatenko) uncomment below after interop will be supported for this method signature
     // assert arr.lastIndexOf(arr.at(1) as FooClass) == 2;
@@ -367,4 +367,3 @@ function ArrayBuffer_TestJSResize(arr: ArrayBuffer): void {
 function ArrayBuffer_CreateEtsSample(): ArrayBuffer {
     return new ArrayBuffer(32);
 }
-

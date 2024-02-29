@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,7 @@ export class JSON {
         let len = d.getLength()
         for (let i = 0; i < len; ++i) {
             let c = d.charAt(i)
-            let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, c)
+            let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, c, JSON.ESCAPED_CHARS.length)
             if (escapedCharIndex != -1) {
                 sb.append(c'\\')
                 sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
@@ -638,7 +638,7 @@ export class JSONParser {
                     resBuilder.append(this.curChar)
                 }
             } else {
-                let escapedCharIndex = indexOf(JSONParser.CAN_BE_ESCAPED_CHARS, this.curChar)
+                let escapedCharIndex = indexOf(JSONParser.CAN_BE_ESCAPED_CHARS, this.curChar, 0)
                 if (escapedCharIndex != -1) {
                     resBuilder.append(JSONParser.ESCAPED_CHARS[escapedCharIndex])
                 } else {

@@ -1,0 +1,46 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+sub:
+  - category: Map
+    self:
+      - new Map<number, string>()
+      - new Map<number, string>().set(+0, "1").set(NaN, "2").set(Infinity, "5").set(-Infinity, "6")
+      - new Map<number, string>().set(+0, "1").set(-0, "2").set(1e30, "3")
+    self_type: Iterable<[number, string]>
+    vars:
+      default_keys: ['+0', '-0', 'NaN', '1e-30', '1e+30', 'Infinity', '-Infinity']
+      default_values: ['"1"', '"2"', '""', '"3"']
+    sub:
+      - method: values
+        ret_type: Iterable<string>
+      - method: keys
+        ret_type: Iterable<number>
+      - method: clear
+      - method: entries
+        ret_type: Iterable<[number, string]>
+      - expr: self.size
+      - method: set
+        ret_type: Iterable<[number, string]>
+        params:
+          - paramOf(*default_keys)
+          - paramOf(*default_values)
+      - method: delete
+        params:
+          - paramOf(*default_keys)
+      - method: has
+        params:
+          - paramOf(*default_keys)
+      - method: get
+        params:
+          - paramOf(*default_keys)

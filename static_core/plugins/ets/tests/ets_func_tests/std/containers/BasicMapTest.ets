@@ -58,9 +58,9 @@ function createMapAddAndCheckEntriesOrder(): int {
     map.set(c'a', 3.0);
     let entries = map.entries();
 
-    if (entries.next().value!.key == c'c' &&
-        entries.next().value!.key == c'x' &&
-        entries.next().value!.key == c'a') {
+    if (entries.next().value![0] as Char as char == c'c' &&
+        entries.next().value![0] as Char as char == c'x' &&
+        entries.next().value![0] as Char as char == c'a') {
         return 0;
     }
 
@@ -94,7 +94,7 @@ function createMapAddAndCheckHasKey(): int {
 
 function createEmptyMap(): int {
     let map: Map<char, double> = new Map<char, double>();
-    return map.size() as int;
+    return map.size as int;
 }
 
 function createMapAddAndGet(): int {
@@ -183,7 +183,7 @@ function createMapAddClearAndGetKeys(): int {
 function createMapAndGetEntries(): int {
     let map: Map<char, double> = new Map<char, double>();
     let entries = map.entries();
-    return getIteratorLen<Entry<char, double>>(entries);
+    return getIteratorLen<[char, double]>(entries);
 }
 
 function createMapAddAndGetEntries(): int {
@@ -194,7 +194,7 @@ function createMapAddAndGetEntries(): int {
 
     let entries = map.entries();
 
-    let result = getIteratorLen<Entry<char, double>>(entries) == 3 ? 0 : 1;
+    let result = getIteratorLen<[char, double]>(entries) == 3 ? 0 : 1;
     return result;
 }
 
@@ -207,7 +207,7 @@ function createMapAddRemoveAndGetEntries(): int {
     map.delete(c'b');
     let entries = map.entries();
 
-    let result = getIteratorLen<Entry<char, double>>(entries) == 2 ? 0 : 1;
+    let result = getIteratorLen<[char, double]>(entries) == 2 ? 0 : 1;
     return result;
 }
 
@@ -219,7 +219,7 @@ function createMapAddClearAndGetEntries(): int {
     map.clear();
     let entries = map.entries();
 
-    return getIteratorLen<Entry<char, double>>(entries);
+    return getIteratorLen<[char, double]>(entries);
 }
 
 function createMapAddAndRemove(): int {
@@ -228,7 +228,7 @@ function createMapAddAndRemove(): int {
     map.set(c'b', 2.0);
     map.set(c'c', 3.0);
     map.delete(c'c');
-    let result = map.size() == 2 ? 0 : 1;
+    let result = map.size == 2 ? 0 : 1;
     return result;
 }
 
@@ -247,13 +247,13 @@ function createMapAddAndClear(): int {
     map.set(c'c', 3.0);
     map.clear();
 
-    return map.size() as int;
+    return map.size as int;
 }
 
 function createMapAndAdd(): int {
     let map: Map<char, double> = new Map<char, double>();
     map.set(c'a', 1.0);
-    let result = map.size() == 1 ? 0 : 1;
+    let result = map.size == 1 ? 0 : 1;
     return result;
 }
 

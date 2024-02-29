@@ -24,7 +24,7 @@ class ArrayLikeIterator<T> implements Iterator<T> {
     }
 
     override next(): IteratorResult<T> {
-        if (this.index >= this.base.lengthMakeProp()) {
+        if (this.index >= this.base.length) {
             return new IteratorResult<T>()
         }
         return new IteratorResult<T>(this.base.$_get(this.index++))
@@ -34,9 +34,7 @@ class ArrayLikeIterator<T> implements Iterator<T> {
 export interface ArrayLike<T> /* extends Iterable<T> */ {
     $_get(index: number): T;
 
-    // TODO(kprokopenko): blocked by internal issue #15201
-    // readonly length: number
-    lengthMakeProp(): number
+    get length(): number
 
     // NOTE(kprokopenko) blocked by #15308
     /*

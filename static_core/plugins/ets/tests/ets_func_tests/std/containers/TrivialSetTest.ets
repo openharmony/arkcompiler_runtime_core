@@ -19,7 +19,7 @@ function main(): void {
     s.add(2)
     s.add(3)
     s.add(1)
-    assert s.size() == 3 : "size"
+    assert s.size == 3 : "size"
     assert s.has(1) : "has 1"
     assert s.has(2) : "has 2"
     assert s.has(3) : "has 3"
@@ -66,7 +66,7 @@ function test_bad_hash(): void {
     assert !s.has(new BadHash(29)) : "!has 29"
 
     s.clear()
-    assert s.size() == 0
+    assert s.size == 0
     assert !s.has(new BadHash(0)) : "!has 0"
 }
 

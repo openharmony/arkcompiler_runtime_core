@@ -67,6 +67,11 @@ function main(): int {
     printTestVerdict(testResult, "test100")
     failCounter += testResult
 
+    let regExpObj110 = new RegExp("", "yusmigd");
+    testResult = checkTestResult(regExpObj110, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
+    printTestVerdict(testResult, "test110")
+    failCounter += testResult
+
     if (failCounter > 0) return 1
     return 0;
 }

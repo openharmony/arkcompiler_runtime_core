@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@
     result: arr,
     result_nature: array,
     result_type: "boolean[]",
-    method_signature: { arr: "boolean[]", fn : "(value:boolean,index:int,self:boolean[])=>void" },
+    method_signature: { arr: "boolean[]", fn : "(value:boolean,index:number,self:boolean[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "boolean_array", fn: "func_boolean_int_boolean_array"},
     method_test_index_data:
@@ -25,12 +25,12 @@
         test1:
           {
             arr: "[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]",
-            fn: '(value:boolean,index:int,self:boolean[]): void =>  {self[index] = !value}',
+            fn: '(value:boolean,index:number,self:boolean[]): void =>  {self[index as int] = !value}',
           },
         test2:
           {
             arr: "[]",
-            fn: '(value:boolean,index:int,self:boolean[]): void =>  {self[index] = !value}',
+            fn: '(value:boolean,index:number,self:boolean[]): void =>  {self[index as int] = !value}',
           },
 
       },
@@ -46,7 +46,7 @@
     result: arr,
     result_nature: array,
     result_type: "byte[]",
-    method_signature: { arr: "byte[]", fn : "(value:byte,index:int,self:byte[])=>void" },
+    method_signature: { arr: "byte[]", fn : "(value:byte,index:number,self:byte[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "byte_array", fn: "func_byte_int_byte_array"},
     method_test_index_data:
@@ -54,17 +54,17 @@
         test1:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:int,self:byte[]): void =>  {self[index] = ((value * 2) as byte)}',
+            fn: '(value:byte,index:number,self:byte[]): void =>  {self[index as int] = ((value * 2) as byte)}',
           },
           test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:byte,index:int,self:byte[]): void =>  {self[index] = ((value + index) as byte)}',
+            fn: '(value:byte,index:number,self:byte[]): void =>  {self[index as int] = ((value + index as int) as byte)}',
           },
           test3:
           {
             arr: "[]",
-            fn: '(value:byte,index:int,self:byte[]): void =>  {self[index] = ((value + index) as byte)}',
+            fn: '(value:byte,index:number,self:byte[]): void =>  {self[index as int] = ((value + index as int) as byte)}',
           },
       },
       method_expected_data:
@@ -80,7 +80,7 @@
     result: arr,
     result_nature: array,
     result_type: "short[]",
-    method_signature: { arr: "short[]", fn : "(value:short,index:int,self:short[])=>void" },
+    method_signature: { arr: "short[]", fn : "(value:short,index:number,self:short[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "short_array", fn: "func_short_int_short_array"},
     method_test_index_data:
@@ -88,17 +88,17 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:int,self:short[]): void =>  {self[index] = ((value * 2) as short)}',
+            fn: '(value:short,index:number,self:short[]): void =>  {self[index as int] = ((value * 2) as short)}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:short,index:int,self:short[]): void =>  {self[index] = ((value + index) as short)}',
+            fn: '(value:short,index:number,self:short[]): void =>  {self[index as int] = ((value + index as int) as short)}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:short,index:int,self:short[]): void =>  {self[index] = ((value + index) as short)}',
+            fn: '(value:short,index:number,self:short[]): void =>  {self[index as int] = ((value + index as int) as short)}',
           },
       },
       method_expected_data:
@@ -114,7 +114,7 @@
     result: arr,
     result_nature: array,
     result_type: "int[]",
-    method_signature: { arr: "int[]", fn : "(value:int,index:int,self:int[])=>void" },
+    method_signature: { arr: "int[]", fn : "(value:int,index:number,self:int[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "int_array", fn: "func_int_int_int_array"},
     method_test_index_data:
@@ -122,18 +122,18 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:int,self:int[]): void =>  {self[index] = value * 2}',
+            fn: '(value:int,index:number,self:int[]): void =>  {self[index as int] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:int,index:int,self:int[]): void =>  {self[index] = value + index}',
+            fn: '(value:int,index:number,self:int[]): void =>  {self[index as int] = value + index as int}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:int,index:int,self:int[]): void =>  {self[index] = value + index}',
-          },  
+            fn: '(value:int,index:number,self:int[]): void =>  {self[index as int] = value + index as int}',
+          },
       },
       method_expected_data:
         {
@@ -148,7 +148,7 @@
     result: arr,
     result_nature: array,
     result_type: "long[]",
-    method_signature: { arr: "long[]", fn : "(value:long,index:int,self:long[])=>void" },
+    method_signature: { arr: "long[]", fn : "(value:long,index:number,self:long[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "long_array", fn: "func_long_int_long_array"},
     method_test_index_data:
@@ -156,17 +156,17 @@
        test1:
          {
           arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-          fn: '(value:long,index:int,self:long[]): void =>  {self[index] = value * 2}',
+          fn: '(value:long,index:number,self:long[]): void =>  {self[index as int] = value * 2}',
         },
       test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:long,index:int,self:long[]): void =>  {self[index] = value + index}',
+            fn: '(value:long,index:number,self:long[]): void =>  {self[index as int] = value + index as int}',
           },
       test3:
           {
             arr: "[]",
-            fn: '(value:long,index:int,self:long[]): void =>  {self[index] = value + index}',
+            fn: '(value:long,index:number,self:long[]): void =>  {self[index as int] = value + index as int}',
           },
       },
       method_expected_data:
@@ -182,7 +182,7 @@
     result: arr,
     result_nature: array,
     result_type: "float[]",
-    method_signature: { arr: "float[]", fn : "(value:float,index:int,self:float[])=>void" },
+    method_signature: { arr: "float[]", fn : "(value:float,index:number,self:float[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "float_array", fn: "func_float_int_float_array"},
     method_test_index_data:
@@ -190,18 +190,18 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:int,self:float[]): void =>  {self[index] = value * 2}', 
+            fn: '(value:float,index:number,self:float[]): void =>  {self[index as int] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:float,index:int,self:float[]): void =>  {self[index] = value + index}',
+            fn: '(value:float,index:number,self:float[]): void =>  {self[index as int] = value + index as int}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:float,index:int,self:float[]): void =>  {self[index] = value + index}',
-          },  
+            fn: '(value:float,index:number,self:float[]): void =>  {self[index as int] = value + index as int}',
+          },
       },
       method_expected_data:
         {
@@ -216,7 +216,7 @@
     result: arr,
     result_nature: array,
     result_type: "double[]",
-    method_signature: { arr: "double[]", fn : "(value:double,index:int,self:double[])=>void" },
+    method_signature: { arr: "double[]", fn : "(value:double,index:number,self:double[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "double_array", fn: "func_double_int_double_array"},
     method_test_index_data:
@@ -224,17 +224,17 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:double,index:int,self:double[]): void =>  {self[index] = value * 2}', 
+            fn: '(value:double,index:number,self:double[]): void =>  {self[index as int] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:double,index:int,self:double[]): void =>  {self[index] = value + index}',
+            fn: '(value:double,index:number,self:double[]): void =>  {self[index as int] = value + index as int}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:double,index:int,self:double[]): void =>  {self[index] = value + index}',
+            fn: '(value:double,index:number,self:double[]): void =>  {self[index as int] = value + index as int}',
           },
       },
       method_expected_data:
@@ -250,7 +250,7 @@
     result: arr,
     result_nature: array,
     result_type: "char[]",
-    method_signature: { arr: "char[]", fn : "(value:char,index:int,self:char[])=>void" },
+    method_signature: { arr: "char[]", fn : "(value:char,index:number,self:char[])=>void" },
     method_throws: "false",
     method_signature_desc: {arr: "char_array", fn: "func_char_int_char_array"},
       method_test_index_data:
@@ -258,18 +258,18 @@
         test1:
           {
             arr: "[0 ,1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:int,self:char[]): void =>  {self[index] = value * 2}', 
+            fn: '(value:char,index:number,self:char[]): void =>  {self[index as int] = value * 2}',
           },
         test2:
           {
             arr: "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",
-            fn: '(value:char,index:int,self:char[]): void =>  {self[index] = value + index}',
+            fn: '(value:char,index:number,self:char[]): void =>  {self[index as int] = value + index as int}',
           },
         test3:
           {
             arr: "[]",
-            fn: '(value:char,index:int,self:char[]): void =>  {self[index] = value + index}',
-          },          
+            fn: '(value:char,index:number,self:char[]): void =>  {self[index as int] = value + index as int}',
+          },
       },
       method_expected_data:
         {

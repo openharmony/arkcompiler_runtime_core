@@ -15,6 +15,8 @@
 
 package escompat;
 
+import {PI, E, LN10, LN2, LOG2E, LOG10E, SQRT1_2, SQRT2} from "std/math/consts";
+
 /**
  * The Math class contains static properties and methods for mathematical constants and functions.
  */
@@ -23,42 +25,42 @@ export class Math {
     /**
      * PI as double value
      */
-    public static readonly PI: number = 3.141592653589793;
+    public static readonly PI: number = PI;
 
     /**
      * Euler number as double value
      */
-    public static readonly E: number = 2.718281828459045;
+    public static readonly E: number = E;
 
     /**
      * Natural logarithm of 10 as double value
      */
-    public static readonly LN10: number = 2.302585092994046;
+    public static readonly LN10: number = LN10;
 
     /**
      * Natural logarithm of 2 as double value
      */
-    public static readonly LN2: number = 0.6931471805599453;
+    public static readonly LN2: number = LN2;
 
     /**
      * Logarithm base 2 of Euler number as double value
      */
-    public static readonly LOG2E: number = 1.4426950408889634;
+    public static readonly LOG2E: number = LOG2E;
 
     /**
      * Logarithm base 10 of Euler number as double value
      */
-    public static readonly LOG10E: number = 0.4342944819032518;
+    public static readonly LOG10E: number = LOG10E;
 
     /**
      * Square root of 1/2 as double value
      */
-    public static readonly SQRT1_2: number = 0.7071067811865476;
+    public static readonly SQRT1_2: number = SQRT1_2;
 
     /**
      * Square root of 2 as double value
      */
-    public static readonly SQRT2: number = 1.4142135623730951;
+    public static readonly SQRT2: number = SQRT2;
 
     /**
      * Absolute value

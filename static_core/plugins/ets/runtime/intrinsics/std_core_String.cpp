@@ -278,6 +278,11 @@ EtsString *ToUpperCase(EtsString *thisStr, const icu::Locale &locale)
 
 UErrorCode ParseSingleBCP47LanguageTag(EtsString *langTag, icu::Locale &locale)
 {
+    if (langTag == nullptr) {
+        locale = icu::Locale::getDefault();
+        return U_ZERO_ERROR;
+    }
+
     PandaVector<uint8_t> buf;
     std::string_view locTag = langTag->ConvertToStringView(&buf);
     icu::StringPiece sp {locTag.data(), static_cast<int32_t>(locTag.size())};
@@ -326,7 +331,7 @@ EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag
 
 ets_double StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsString *langTag)
 {
-    ASSERT(thisStr != nullptr && cmpStr != nullptr && langTag != nullptr);
+    ASSERT(thisStr != nullptr && cmpStr != nullptr);
 
     icu::Locale locale;
     auto status = ParseSingleBCP47LanguageTag(langTag, locale);
