@@ -124,7 +124,6 @@ ArenaVector<unsigned> InterferenceGraph::LexBFS() const
         auto it = std::stable_partition(out.begin() + pos, out.begin() + prev_end,
                                         [id, &out, this](unsigned val) { return HasEdge(id, out[val]); });
         auto pivot = static_cast<unsigned>(std::distance(out.begin(), it));
-
         // Split group if needed
         if (pivot > pos && pivot != prev_end) {
             boundary_stack.push_back(pivot);

@@ -1832,7 +1832,6 @@ std::string GetOwnerName(std::string name)
 {
     name = DeMangleName(name);
     auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
-
     if (super_pos == std::string::npos) {
         return "";
     }
@@ -1844,7 +1843,6 @@ std::string GetItemName(std::string name)
 {
     name = DeMangleName(name);
     auto super_pos = name.find_last_of(PARSE_AREA_MARKER);
-
     if (super_pos == std::string::npos) {
         return name;
     }

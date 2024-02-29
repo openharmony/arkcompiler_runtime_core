@@ -167,7 +167,6 @@ void RegAllocBase::SetType(LifeIntervals *interval)
 void RegAllocBase::SetPreassignedRegisters(LifeIntervals *interval)
 {
     auto inst = interval->GetInst();
-
     if (inst->GetDstReg() != INVALID_REG) {
         interval->SetPreassignedReg(inst->GetDstReg());
         return;

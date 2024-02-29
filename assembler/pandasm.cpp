@@ -131,7 +131,6 @@ bool ParseProgram(panda::pandasm::Parser &parser, std::vector<std::vector<panda:
                   panda::Expected<panda::pandasm::Program, panda::pandasm::Error> &res)
 {
     res = parser.Parse(tokens, input_file.GetValue());
-
     if (!res) {
         PrintError(res.Error(), "ERROR");
         return false;

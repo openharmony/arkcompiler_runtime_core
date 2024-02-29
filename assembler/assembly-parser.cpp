@@ -14,7 +14,7 @@
  */
 
 #include <cctype>
-#include <errno.h>
+#include <cerrno>
 
 #include <iterator>
 
@@ -87,7 +87,6 @@ bool Parser::ParseFieldName()
 
         auto match_names = [&field_name](const pandasm::Field &f) { return field_name == f.name; };
         const auto iter = std::find_if(curr_record_->field_list.begin(), curr_record_->field_list.end(), match_names);
-
         if (iter != curr_record_->field_list.end()) {
             if (iter->is_defined) {
                 context_.err =
@@ -1107,7 +1106,6 @@ bool IsNonDigit(char c)
 bool Parser::PrefixedValidName()
 {
     auto s = context_.GiveToken();
-
     if (!IsNonDigit(s[0])) {
         return false;
     }
@@ -1148,7 +1146,6 @@ bool Parser::ArrayValidName()
 bool Parser::LabelValidName()
 {
     auto token = context_.GiveToken();
-
     if (!IsNonDigit(token[0])) {
         return false;
     }
@@ -1264,11 +1261,9 @@ bool Parser::ParseOperandVreg()
     }
 
     std::string_view p = context_.GiveToken();
-
     if (p[0] == 'v') {
         p.remove_prefix(1);
         int64_t number = static_cast<int64_t>(ToNumber(p));
-
         if (number > *(context_.max_value_of_reg)) {
             *(context_.max_value_of_reg) = number;
         }
@@ -1793,7 +1788,6 @@ bool Parser::ParseOperandLiteralArray()
 
     std::string_view p = context_.GiveToken();
     auto array_id = std::string(p.data(), p.length());
-
     if (program_.literalarray_table.find(array_id) == program_.literalarray_table.end()) {
         context_.err = GetError("No array was found for this array id", Error::ErrorType::ERR_BAD_ID_ARRAY);
         return false;
@@ -1912,7 +1906,6 @@ bool Parser::UpdateFunctionName()
 {
     auto signature = GetFunctionSignatureFromName(curr_func_->name, curr_func_->params);
     auto iter = program_.function_table.find(signature);
-
     if (iter == program_.function_table.end() || !iter->second.file_location->is_defined) {
         program_.function_synonyms[curr_func_->name].push_back(signature);
         program_.function_table.erase(signature);
@@ -1987,7 +1980,6 @@ bool Parser::ParseRecordName()
     }
 
     auto iter = program_.record_table.find(std::string(context_.GiveToken().data(), context_.GiveToken().length()));
-
     if (iter == program_.record_table.end() || !iter->second.file_location->is_defined) {
         SetRecordInformation();
     } else {
@@ -2057,7 +2049,6 @@ bool Parser::ParseArrayName()
 
     auto iter =
         program_.literalarray_table.find(std::string(context_.GiveToken().data(), context_.GiveToken().length()));
-
     if (iter == program_.literalarray_table.end()) {
         SetArrayInformation();
     } else {
