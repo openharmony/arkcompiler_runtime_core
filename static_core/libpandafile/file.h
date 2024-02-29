@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FILE_H_
-#define LIBPANDAFILE_FILE_H_
+#ifndef LIBPANDAFILE_FILE_H
+#define LIBPANDAFILE_FILE_H
 
 #include "os/mem.h"
 #include "utils/span.h"
@@ -445,7 +445,7 @@ std::unique_ptr<const File> OpenPandaFile(std::string_view location, std::string
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "");
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-extern const char *ARCHIVE_FILENAME;
+extern const char *g_archiveFilenames;
 }  // namespace panda::panda_file
 
 namespace std {

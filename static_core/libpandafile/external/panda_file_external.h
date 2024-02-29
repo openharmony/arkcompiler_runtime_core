@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_PANDA_FILE_SUPPORT_H
-#define LIBPANDAFILE_PANDA_FILE_SUPPORT_H
+#ifndef LIBPANDAFILE_PANDA_FILE_SUPPORTH
+#define LIBPANDAFILE_PANDA_FILE_SUPPORTH
 #include "file_ext.h"
 #include <vector>
 #include <memory>

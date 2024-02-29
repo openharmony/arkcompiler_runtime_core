@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
-#define LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
+#ifndef LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H
+#define LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H
 
 #include "bytecode_instruction.h"
 #include "macros.h"
@@ -92,4 +92,4 @@ inline size_t BytecodeInst<MODE>::GetSize() const
 
 }  // namespace panda
 
-#endif  // LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H_
+#endif  // LIBPANDAFILE_BYTECODE_INSTRUCTION_INL_H

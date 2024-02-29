@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_DEBUG_INFO_UPDATER_INL_H_
-#define LIBPANDAFILE_DEBUG_INFO_UPDATER_INL_H_
+#ifndef LIBPANDAFILE_DEBUG_INFO_UPDATER_INL_H
+#define LIBPANDAFILE_DEBUG_INFO_UPDATER_INL_H
 
 #include <type_traits>
 #include "debug_data_accessor.h"
@@ -255,4 +255,4 @@ private:
 };
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_DEBUG_INFO_UPDATER_INL_H_
+#endif  // LIBPANDAFILE_DEBUG_INFO_UPDATER_INL_H

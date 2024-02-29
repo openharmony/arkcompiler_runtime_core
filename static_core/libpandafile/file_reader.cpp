@@ -968,7 +968,6 @@ ClassItem *FileReader::CreateClassItem(File::EntityId classId)
     }
 
     auto superClassId = classAcc.GetSuperClassId();
-
     if (superClassId.GetOffset() != 0) {
         if (superClassId.GetOffset() == classId.GetOffset()) {
             LOG(FATAL, PANDAFILE) << "Class " << className << " has cyclic inheritance";

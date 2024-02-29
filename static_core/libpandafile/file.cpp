@@ -41,15 +41,15 @@
 namespace panda::panda_file {
 
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
-const char *ARCHIVE_FILENAME = "classes.abc";
+const char *g_archiveFilenames = "classes.abc";
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
-const char *ARCHIVE_SPLIT = "!/";
+const char *g_archiveSplit = "!/";
 
 const std::array<uint8_t, File::MAGIC_SIZE> File::MAGIC {'P', 'A', 'N', 'D', 'A', '\0', '\0', '\0'};
 
 // Name anonymous maps for perfing tools finding symbol file correctly.
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
-const char *ANONMAPNAME_PERFIX = "panda-";
+const char *g_anonmapnamePerfix = "panda-";
 
 os::file::Mode GetMode(panda_file::File::OpenMode openMode)
 {
@@ -114,8 +114,8 @@ private:
 
 std::unique_ptr<const File> OpenPandaFileOrZip(std::string_view location, panda_file::File::OpenMode openMode)
 {
-    std::string_view archiveFilename = ARCHIVE_FILENAME;
-    std::size_t archiveSplitIndex = location.find(ARCHIVE_SPLIT);
+    std::string_view archiveFilename = g_archiveFilenames;
+    std::size_t archiveSplitIndex = location.find(g_archiveSplit);
     if (archiveSplitIndex != std::string::npos) {
         archiveFilename = location.substr(archiveSplitIndex + 2);  // 2 - archive split size
         location = location.substr(0, archiveSplitIndex);
@@ -155,7 +155,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
     }
     os::mem::BytePtr ptr(reinterpret_cast<std::byte *>(mem), sizeToMmap, os::mem::MmapDeleter);
     std::stringstream ss;
-    ss << ANONMAPNAME_PERFIX << archiveName << " extracted in memory from " << location;
+    ss << g_anonmapnamePerfix << archiveName << " extracted in memory from " << location;
     auto it = AnonMemSet::GetInstance().Insert(std::string(location), ss.str());
     auto ret = os::mem::TagAnonymousMemory(reinterpret_cast<void *>(ptr.Get()), sizeToMmap, it->second.c_str());
     if (ret.has_value()) {
@@ -201,23 +201,31 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     uint32_t magic;
 
 #ifdef PANDA_TARGET_WINDOWS
-    constexpr char const *MODE = "rb";
+    constexpr char const *mode = "rb";
 #else
-    constexpr char const *MODE = "rbe";
+    constexpr char const *mode = "rbe";
 #endif
 
-    FILE *fp = fopen(std::string(location).c_str(), MODE);
+    FILE *fp = fopen(std::string(location).c_str(), mode);
     if (fp == nullptr) {
         LOG(ERROR, PANDAFILE) << "Can't fopen location: " << location;
         return nullptr;
     }
-    fseek(fp, 0, SEEK_SET);
+    if (fseek(fp, 0, SEEK_SET) != 0) {
+        fclose(fp);
+        LOG(ERROR, PANDAFILE) << "Can't fseek location: " << location;
+        return nullptr;
+    }
     if (fread(&magic, sizeof(magic), 1, fp) != 1) {
         fclose(fp);
         LOG(ERROR, PANDAFILE) << "Can't read from file!(magic) " << location;
         return nullptr;
     }
-    fseek(fp, 0, SEEK_SET);
+    if (fseek(fp, 0, SEEK_SET) != 0) {
+        fclose(fp);
+        LOG(ERROR, PANDAFILE) << "Can't fseek location: " << location;
+        return nullptr;
+    }
     std::unique_ptr<const panda_file::File> file;
     if (IsZipMagic(magic)) {
         // Open Zipfile and do the extraction.
@@ -231,14 +239,14 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         if (!tryDefault) {
             if (LocateFile(zipfile, archiveFilename.data()) != ZIPARCHIVE_OK) {
                 LOG(INFO, PANDAFILE) << "Can't find entry with name '" << archiveFilename << "', will try "
-                                     << ARCHIVE_FILENAME;
+                                     << g_archiveFilenames;
                 tryDefault = true;
             }
         }
         if (tryDefault) {
-            if (LocateFile(zipfile, ARCHIVE_FILENAME) != ZIPARCHIVE_OK) {
+            if (LocateFile(zipfile, g_archiveFilenames) != ZIPARCHIVE_OK) {
                 OpenPandaFileFromZipErrorHandler(zipfile);
-                LOG(ERROR, PANDAFILE) << "Can't find entry with " << ARCHIVE_FILENAME;
+                LOG(ERROR, PANDAFILE) << "Can't find entry with " << g_archiveFilenames;
                 fclose(fp);
                 return nullptr;
             }
@@ -253,7 +261,8 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         // check that file is not empty, otherwise crash at CloseArchiveFile
         if (entry.GetUncompressedSize() == 0) {
             OpenPandaFileFromZipErrorHandler(zipfile);
-            LOG(ERROR, PANDAFILE) << "Invalid panda file '" << (tryDefault ? ARCHIVE_FILENAME : archiveFilename) << "'";
+            const auto &filename = (tryDefault ? g_archiveFilenames : archiveFilename);
+            LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
             return nullptr;
         }
         if (OpenCurrentFile(zipfile) != ZIPARCHIVE_OK) {
@@ -456,7 +465,6 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openM
     trace::ScopedTrace scopedTrace("Open panda file " + std::string(filename));
     os::file::Mode mode = GetMode(openMode);
     os::file::File file = os::file::Open(filename, mode);
-
     if (!file.IsValid()) {
         PLOG(ERROR, PANDAFILE) << "Failed to open panda file '" << filename << "'";
         return nullptr;
@@ -533,7 +541,6 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
     }
 
     auto fileVersion = header->version;
-
     if (fileVersion < MIN_VERSION || fileVersion > VERSION) {
         LOG(ERROR, PANDAFILE) << "Unable to open file '" << filename << "' with bytecode version "
                               << VersionToString(fileVersion);
@@ -573,7 +580,6 @@ std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr, st
 File::EntityId File::GetClassId(const uint8_t *mutf8Name) const
 {
     auto classHashTable = GetClassHashTable();
-
     if (!classHashTable.empty()) {
         return GetClassIdFromClassHashTable(mutf8Name);
     }
@@ -611,7 +617,6 @@ File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8Name) cons
     auto hash = GetHash32String(mutf8Name);
     auto pos = hash & (classHashTable.size() - 1);
     auto entityPair = &classHashTable[pos];
-
     if (entityPair->descriptorHash % classHashTable.size() != pos) {
         return File::EntityId();
     }

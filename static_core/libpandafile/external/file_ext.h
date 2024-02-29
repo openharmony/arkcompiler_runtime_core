@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 //
-#ifndef LIBPANDAFILE_EXTERNAL_FILE_EXT_H
-#define LIBPANDAFILE_EXTERNAL_FILE_EXT_H
+#ifndef LIBPANDAFILE_EXTERNAL_FILE_EXTH
+#define LIBPANDAFILE_EXTERNAL_FILE_EXTH
 
 #include <string>
 #include <vector>

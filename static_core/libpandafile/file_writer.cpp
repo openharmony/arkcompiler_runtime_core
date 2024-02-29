@@ -21,12 +21,12 @@ namespace panda::panda_file {
 FileWriter::FileWriter(const std::string &fileName) : checksum_(adler32(0, nullptr, 0))
 {
 #ifdef PANDA_TARGET_WINDOWS
-    constexpr char const *MODE = "wb";
+    constexpr char const *mode = "wb";
 #else
-    constexpr char const *MODE = "wbe";
+    constexpr char const *mode = "wbe";
 #endif
 
-    file_ = fopen(fileName.c_str(), MODE);
+    file_ = fopen(fileName.c_str(), mode);
 }
 
 FileWriter::~FileWriter()

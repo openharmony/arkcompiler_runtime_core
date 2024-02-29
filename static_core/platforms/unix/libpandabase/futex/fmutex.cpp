@@ -37,25 +37,25 @@ static ATOMIC(bool) g_deadlockFlag = false;
 
 #ifdef MC_ON
 // GenMC does not support syscalls(futex)
-static ATOMIC_INT FUTEX_SIGNAL;
+static ATOMIC_INT g_futexSignal;
 
 static inline void FutexWait(ATOMIC_INT *m, int v)
 {
     // Atomic with acquire order reason: mutex synchronization
-    int s = ATOMIC_LOAD(&FUTEX_SIGNAL, memory_order_acquire);
+    int s = ATOMIC_LOAD(&g_futexSignal, memory_order_acquire);
     // Atomic with acquire order reason: mutex synchronization
     if (ATOMIC_LOAD(m, memory_order_acquire) != v) {
         return;
     }
     // Atomic with acquire order reason: mutex synchronization
-    while (ATOMIC_LOAD(&FUTEX_SIGNAL, memory_order_acquire) == s) {
+    while (ATOMIC_LOAD(&g_futexSignal, memory_order_acquire) == s) {
     }
 }
 
 static inline void FutexWake(void)
 {
     // Atomic with release order reason: mutex synchronization
-    ATOMIC_FETCH_ADD(&FUTEX_SIGNAL, 1, memory_order_release);
+    ATOMIC_FETCH_ADD(&g_futexSignal, 1, memory_order_release);
 }
 #else
 // futex() is defined in header, as it is still included in different places

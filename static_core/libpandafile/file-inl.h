@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_FILE_INL_H_
-#define LIBPANDAFILE_FILE_INL_H_
+#ifndef LIBPANDAFILE_FILE_INL_H
+#define LIBPANDAFILE_FILE_INL_H
 
 #include "helpers.h"
 #include "file.h"

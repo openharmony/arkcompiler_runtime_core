@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LIBPANDAFILE_DEBUG_DATA_ACCESSOR_INL_H_
-#define LIBPANDAFILE_DEBUG_DATA_ACCESSOR_INL_H_
+#ifndef LIBPANDAFILE_DEBUG_DATA_ACCESSOR_INL_H
+#define LIBPANDAFILE_DEBUG_DATA_ACCESSOR_INL_H
 
 #include "debug_data_accessor.h"
 #include "helpers.h"
@@ -80,4 +80,4 @@ inline void DebugInfoDataAccessor::SkipLineNumberProgram()
 
 }  // namespace panda::panda_file
 
-#endif  // LIBPANDAFILE_DEBUG_DATA_ACCESSOR_INL_H_
+#endif  // LIBPANDAFILE_DEBUG_DATA_ACCESSOR_INL_H

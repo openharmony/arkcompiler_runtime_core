@@ -17,8 +17,8 @@
 #define PANDA_LIBPANDABASE_PBASE_OS_UNIX_FUTEX_FMUTEX_H
 
 #ifdef MC_ON
-#include <assert.h>
-#include <limits.h>
+#include <cassert>
+#include <climits>
 #include <pthread.h>
 #include <stdatomic.h>
 #define THREAD_ID pthread_t
@@ -82,12 +82,12 @@ inline int futex(volatile int *uaddr, int op, int val, const struct timespec *ti
 }
 #endif
 
-static constexpr int WAKE_ONE = 1;
-static constexpr int WAKE_ALL = INT_MAX;
-static constexpr int32_t HELD_MASK = 1;
-static constexpr int32_t WAITER_SHIFT = 1;
+inline constexpr int WAKE_ONE = 1;
+inline constexpr int WAKE_ALL = INT_MAX;
+inline constexpr int32_t HELD_MASK = 1;
+inline constexpr int32_t WAITER_SHIFT = 1;
 // NOLINTNEXTLINE(hicpp-signed-bitwise, cppcoreguidelines-narrowing-conversions, bugprone-narrowing-conversions)
-static constexpr int32_t WAITER_INCREMENT = 1 << WAITER_SHIFT;
+inline constexpr int32_t WAITER_INCREMENT = 1 << WAITER_SHIFT;
 
 struct fmutex {
     // Lowest bit: 0 - unlocked, 1 - locked.
@@ -110,7 +110,7 @@ __attribute__((visibility("default"))) void MutexIgnoreChecksOnTerminationLoop()
 
 struct CondVar {
 #ifdef MC_ON
-    alignas(alignof(uint64_t)) struct fmutex *ATOMIC(mutex_ptr);
+    alignas(alignof(uint64_t)) struct fmutex *ATOMIC(mutexPtr);
 #else
     alignas(alignof(uint64_t)) ATOMIC(struct fmutex *) mutexPtr;
 #endif

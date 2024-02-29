@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H_
-#define PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H_
+#ifndef PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H
+#define PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H
 
 #include <cstdint>
 #include "unzip.h"
@@ -171,4 +171,4 @@ int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void
                            int append = APPEND_STATUS_CREATE, int level = Z_BEST_COMPRESSION);
 }  // namespace panda
 
-#endif  // PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H_
+#endif  // PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H
