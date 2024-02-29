@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTest, CallMethodsTestGeneral6)
+TEST_F(MethodsTest, CallMethodsTestGeneral14)
 {
     ets_class cCls = env_->FindClass("C");
     ASSERT_NE(cCls, nullptr);
@@ -44,24 +44,7 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     ASSERT_NE(voidId, nullptr);
     ets_method objectId = env_->Getp_method(cCls, "object_method", ":LA;");
     ASSERT_NE(objectId, nullptr);
-    ets_method booleanId = env_->Getp_method(cCls, "boolean_method", "ZI:Z");
-    ASSERT_NE(booleanId, nullptr);
-    ets_method byteId = env_->Getp_method(cCls, "byte_method", "BI:B");
-    ASSERT_NE(byteId, nullptr);
-    ets_method charId = env_->Getp_method(cCls, "char_method", "CI:C");
-    ASSERT_NE(charId, nullptr);
-    ets_method shortId = env_->Getp_method(cCls, "short_method", "SI:S");
-    ASSERT_NE(shortId, nullptr);
-    ets_method intId = env_->Getp_method(cCls, "int_method", ":I");
-    ASSERT_NE(intId, nullptr);
-    ets_method longId = env_->Getp_method(cCls, "long_method", "JI:J");
-    ASSERT_NE(longId, nullptr);
-    ets_method floatId = env_->Getp_method(cCls, "float_method", "FI:F");
-    ASSERT_NE(floatId, nullptr);
-    ets_method doubleId = env_->Getp_method(cCls, "double_method", "DI:D");
-    ASSERT_NE(doubleId, nullptr);
 
-    // CallNonvirtual<type>Method part
     env_->CallNonvirtualVoidMethod(obj, cCls, voidId, static_cast<ets_int>(1), static_cast<ets_int>(121_I));
     ets_field dMemberId = env_->Getp_field(dCls, "member", "I");
     ASSERT_NE(dMemberId, nullptr);
@@ -74,27 +57,6 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(env_->IsInstanceOf(aObj, aCls), ETS_TRUE);
     EXPECT_EQ(env_->GetIntField(obj, dMemberId), static_cast<ets_int>(0));
 
-    EXPECT_EQ(env_->CallNonvirtualBooleanMethod(obj, cCls, booleanId, static_cast<ets_boolean>(1),
-                                                static_cast<ets_int>(121_I)),
-              static_cast<ets_boolean>(0));
-    EXPECT_EQ(env_->CallNonvirtualByteMethod(obj, cCls, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)),
-              static_cast<ets_byte>(0));
-    EXPECT_EQ(env_->CallNonvirtualCharMethod(obj, cCls, charId, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
-              static_cast<ets_char>(0));
-    EXPECT_EQ(
-        env_->CallNonvirtualShortMethod(obj, cCls, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121_I)),
-        static_cast<ets_short>(0));
-    EXPECT_EQ(env_->CallNonvirtualIntMethod(obj, cCls, intId), static_cast<ets_int>(0));
-    EXPECT_EQ(env_->CallNonvirtualLongMethod(obj, cCls, longId, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
-              static_cast<ets_long>(0));
-    EXPECT_EQ(
-        env_->CallNonvirtualFloatMethod(obj, cCls, floatId, static_cast<ets_float>(1.0F), static_cast<ets_int>(121_I)),
-        static_cast<ets_float>(0.0F));
-    EXPECT_EQ(env_->CallNonvirtualDoubleMethod(obj, cCls, doubleId, static_cast<ets_double>(1.0),
-                                               static_cast<ets_int>(121_I)),
-              static_cast<ets_double>(0.0));
-
-    // CallNonvirtual<Type>MethodArray part
     ets_value intTmp;
     intTmp.i = 121_I;
     ets_value tmp;
@@ -108,6 +70,39 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(env_->IsInstanceOf(aObjFromArrayFunc, aCls), ETS_TRUE);
     EXPECT_EQ(env_->GetIntField(obj, dMemberId), static_cast<ets_int>(0));
 
+    CallNonvirtualVoidMethodListHelper(env_, obj, cCls, voidId, static_cast<ets_int>(1), static_cast<ets_int>(121_I));
+    EXPECT_EQ(env_->GetIntField(obj, dMemberId), static_cast<ets_int>(0));
+
+    ets_object aObjFromListFunc = CallNonvirtualObjectMethodListHelper(env_, obj, cCls, objectId);
+    ASSERT_NE(aObjFromListFunc, nullptr);
+    EXPECT_EQ(env_->IsInstanceOf(aObjFromListFunc, aCls), ETS_TRUE);
+    EXPECT_EQ(env_->GetIntField(obj, dMemberId), static_cast<ets_int>(0));
+}
+
+TEST_F(MethodsTest, CallMethodsTestGeneral15)
+{
+    ets_class cCls = env_->FindClass("C");
+    ASSERT_NE(cCls, nullptr);
+    ets_class dCls = env_->FindClass("D");
+    ASSERT_NE(dCls, nullptr);
+    ets_object obj = env_->AllocObject(dCls);
+    ASSERT_NE(obj, nullptr);
+
+    ets_method booleanId = env_->Getp_method(cCls, "boolean_method", "ZI:Z");
+    ASSERT_NE(booleanId, nullptr);
+    ets_method byteId = env_->Getp_method(cCls, "byte_method", "BI:B");
+    ASSERT_NE(byteId, nullptr);
+
+    EXPECT_EQ(env_->CallNonvirtualBooleanMethod(obj, cCls, booleanId, static_cast<ets_boolean>(1),
+                                                static_cast<ets_int>(121_I)),
+              static_cast<ets_boolean>(0));
+    EXPECT_EQ(env_->CallNonvirtualByteMethod(obj, cCls, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_byte>(0));
+
+    ets_value intTmp;
+    intTmp.i = 121_I;
+    ets_value tmp;
+
     tmp.z = static_cast<ets_boolean>(1);
     const std::vector<ets_value> booleanArgs = {tmp, intTmp};
     EXPECT_EQ(env_->CallNonvirtualBooleanMethodArray(obj, cCls, booleanId, booleanArgs.data()),
@@ -117,6 +112,49 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     const std::vector<ets_value> byteArgs = {tmp, intTmp};
     EXPECT_EQ(env_->CallNonvirtualByteMethodArray(obj, cCls, byteId, byteArgs.data()), static_cast<ets_byte>(0));
 
+    EXPECT_EQ(CallNonvirtualBooleanMethodListHelper(env_, obj, cCls, booleanId, static_cast<ets_boolean>(1),
+                                                    static_cast<ets_int>(121_I)),
+              static_cast<ets_boolean>(0));
+    EXPECT_EQ(CallNonvirtualByteMethodListHelper(env_, obj, cCls, byteId, static_cast<ets_byte>(1),
+                                                 static_cast<ets_int>(121_I)),
+              static_cast<ets_byte>(0));
+
+    EXPECT_EQ(env_->CallNonvirtualBooleanMethodArray(obj, nullptr, booleanId, booleanArgs.data()),
+              static_cast<ets_boolean>(0));
+    EXPECT_EQ(env_->CallNonvirtualByteMethodArray(obj, nullptr, byteId, byteArgs.data()), static_cast<ets_byte>(0));
+
+    EXPECT_EQ(CallNonvirtualBooleanMethodListHelper(env_, obj, nullptr, booleanId, static_cast<ets_boolean>(1),
+                                                    static_cast<ets_int>(121_I)),
+              static_cast<ets_boolean>(0));
+    EXPECT_EQ(CallNonvirtualByteMethodListHelper(env_, obj, nullptr, byteId, static_cast<ets_byte>(1),
+                                                 static_cast<ets_int>(121_I)),
+              static_cast<ets_byte>(0));
+}
+
+TEST_F(MethodsTest, CallMethodsTestGeneral16)
+{
+    ets_class cCls = env_->FindClass("C");
+    ASSERT_NE(cCls, nullptr);
+    ets_class dCls = env_->FindClass("D");
+    ASSERT_NE(dCls, nullptr);
+    ets_object obj = env_->AllocObject(dCls);
+    ASSERT_NE(obj, nullptr);
+
+    ets_method charId = env_->Getp_method(cCls, "char_method", "CI:C");
+    ASSERT_NE(charId, nullptr);
+    ets_method shortId = env_->Getp_method(cCls, "short_method", "SI:S");
+    ASSERT_NE(shortId, nullptr);
+
+    EXPECT_EQ(env_->CallNonvirtualCharMethod(obj, cCls, charId, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_char>(0));
+    EXPECT_EQ(
+        env_->CallNonvirtualShortMethod(obj, cCls, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121_I)),
+        static_cast<ets_short>(0));
+
+    ets_value intTmp;
+    intTmp.i = 121_I;
+    ets_value tmp;
+
     tmp.c = static_cast<ets_char>(1);
     const std::vector<ets_value> charArgs = {tmp, intTmp};
     EXPECT_EQ(env_->CallNonvirtualCharMethodArray(obj, cCls, charId, charArgs.data()), static_cast<ets_char>(0));
@@ -125,11 +163,103 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     const std::vector<ets_value> shortArgs = {tmp, intTmp};
     EXPECT_EQ(env_->CallNonvirtualShortMethodArray(obj, cCls, shortId, shortArgs.data()), static_cast<ets_short>(0));
 
+    EXPECT_EQ(CallNonvirtualCharMethodListHelper(env_, obj, cCls, charId, static_cast<ets_char>(1),
+                                                 static_cast<ets_int>(121_I)),
+              static_cast<ets_char>(0));
+    EXPECT_EQ(CallNonvirtualShortMethodListHelper(env_, obj, cCls, shortId, static_cast<ets_short>(1),
+                                                  static_cast<ets_int>(121_I)),
+              static_cast<ets_short>(0));
+
+    EXPECT_EQ(
+        env_->CallNonvirtualCharMethod(obj, nullptr, charId, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
+        static_cast<ets_char>(0));
+    EXPECT_EQ(
+        env_->CallNonvirtualShortMethod(obj, nullptr, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121_I)),
+        static_cast<ets_short>(0));
+
+    EXPECT_EQ(env_->CallNonvirtualCharMethodArray(obj, nullptr, charId, charArgs.data()), static_cast<ets_char>(0));
+    EXPECT_EQ(env_->CallNonvirtualShortMethodArray(obj, nullptr, shortId, shortArgs.data()), static_cast<ets_short>(0));
+
+    EXPECT_EQ(CallNonvirtualCharMethodListHelper(env_, obj, nullptr, charId, static_cast<ets_char>(1),
+                                                 static_cast<ets_int>(121_I)),
+              static_cast<ets_char>(0));
+    EXPECT_EQ(CallNonvirtualShortMethodListHelper(env_, obj, nullptr, shortId, static_cast<ets_short>(1),
+                                                  static_cast<ets_int>(121_I)),
+              static_cast<ets_short>(0));
+}
+
+TEST_F(MethodsTest, CallMethodsTestGeneral17)
+{
+    ets_class cCls = env_->FindClass("C");
+    ASSERT_NE(cCls, nullptr);
+    ets_class dCls = env_->FindClass("D");
+    ASSERT_NE(dCls, nullptr);
+    ets_object obj = env_->AllocObject(dCls);
+    ASSERT_NE(obj, nullptr);
+
+    ets_method intId = env_->Getp_method(cCls, "int_method", ":I");
+    ASSERT_NE(intId, nullptr);
+    ets_method longId = env_->Getp_method(cCls, "long_method", "JI:J");
+    ASSERT_NE(longId, nullptr);
+
+    EXPECT_EQ(env_->CallNonvirtualIntMethod(obj, cCls, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(env_->CallNonvirtualLongMethod(obj, cCls, longId, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
+              static_cast<ets_long>(0));
+
     EXPECT_EQ(env_->CallNonvirtualIntMethodArray(obj, cCls, intId, nullptr), static_cast<ets_int>(0));
+
+    ets_value intTmp;
+    intTmp.i = 121_I;
+    ets_value tmp;
 
     tmp.j = static_cast<ets_long>(1);
     const std::vector<ets_value> longArgs = {tmp, intTmp};
     EXPECT_EQ(env_->CallNonvirtualLongMethodArray(obj, cCls, longId, longArgs.data()), static_cast<ets_long>(0));
+
+    EXPECT_EQ(CallNonvirtualIntMethodListHelper(env_, obj, cCls, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(CallNonvirtualLongMethodListHelper(env_, obj, cCls, longId, static_cast<ets_long>(1),
+                                                 static_cast<ets_int>(121_I)),
+              static_cast<ets_long>(0));
+
+    EXPECT_EQ(env_->CallNonvirtualIntMethod(obj, nullptr, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(
+        env_->CallNonvirtualLongMethod(obj, nullptr, longId, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
+        static_cast<ets_long>(0));
+
+    EXPECT_EQ(env_->CallNonvirtualIntMethodArray(obj, nullptr, intId, nullptr), static_cast<ets_int>(0));
+    EXPECT_EQ(env_->CallNonvirtualLongMethodArray(obj, nullptr, longId, longArgs.data()), static_cast<ets_long>(0));
+
+    EXPECT_EQ(CallNonvirtualIntMethodListHelper(env_, obj, nullptr, intId), static_cast<ets_int>(0));
+    EXPECT_EQ(CallNonvirtualLongMethodListHelper(env_, obj, nullptr, longId, static_cast<ets_long>(1),
+                                                 static_cast<ets_int>(121_I)),
+              static_cast<ets_long>(0));
+}
+
+TEST_F(MethodsTest, CallMethodsTestGeneral18)
+{
+    ets_class cCls = env_->FindClass("C");
+    ASSERT_NE(cCls, nullptr);
+    ets_class dCls = env_->FindClass("D");
+    ASSERT_NE(dCls, nullptr);
+    ets_object obj = env_->AllocObject(dCls);
+    ASSERT_NE(obj, nullptr);
+
+    ets_method floatId = env_->Getp_method(cCls, "float_method", "FI:F");
+    ASSERT_NE(floatId, nullptr);
+    ets_method doubleId = env_->Getp_method(cCls, "double_method", "DI:D");
+    ASSERT_NE(doubleId, nullptr);
+
+    EXPECT_EQ(
+        env_->CallNonvirtualFloatMethod(obj, cCls, floatId, static_cast<ets_float>(1.0F), static_cast<ets_int>(121_I)),
+        static_cast<ets_float>(0.0F));
+    EXPECT_EQ(env_->CallNonvirtualDoubleMethod(obj, cCls, doubleId, static_cast<ets_double>(1.0),
+                                               static_cast<ets_int>(121_I)),
+              static_cast<ets_double>(0.0));
+
+    // CallNonvirtual<Type>MethodArray part
+    ets_value intTmp;
+    intTmp.i = 121_I;
+    ets_value tmp;
 
     tmp.j = static_cast<ets_float>(1.0F);
     const std::vector<ets_value> floatArgs = {tmp, intTmp};
@@ -140,31 +270,6 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(env_->CallNonvirtualDoubleMethodArray(obj, cCls, doubleId, doubleArgs.data()),
               static_cast<ets_double>(0.0));
 
-    // CallNonvirtual<type>MethodList part
-    CallNonvirtualVoidMethodListHelper(env_, obj, cCls, voidId, static_cast<ets_int>(1), static_cast<ets_int>(121_I));
-    EXPECT_EQ(env_->GetIntField(obj, dMemberId), static_cast<ets_int>(0));
-
-    ets_object aObjFromListFunc = CallNonvirtualObjectMethodListHelper(env_, obj, cCls, objectId);
-    ASSERT_NE(aObjFromListFunc, nullptr);
-    EXPECT_EQ(env_->IsInstanceOf(aObjFromListFunc, aCls), ETS_TRUE);
-    EXPECT_EQ(env_->GetIntField(obj, dMemberId), static_cast<ets_int>(0));
-
-    EXPECT_EQ(CallNonvirtualBooleanMethodListHelper(env_, obj, cCls, booleanId, static_cast<ets_boolean>(1),
-                                                    static_cast<ets_int>(121_I)),
-              static_cast<ets_boolean>(0));
-    EXPECT_EQ(CallNonvirtualByteMethodListHelper(env_, obj, cCls, byteId, static_cast<ets_byte>(1),
-                                                 static_cast<ets_int>(121_I)),
-              static_cast<ets_byte>(0));
-    EXPECT_EQ(CallNonvirtualCharMethodListHelper(env_, obj, cCls, charId, static_cast<ets_char>(1),
-                                                 static_cast<ets_int>(121_I)),
-              static_cast<ets_char>(0));
-    EXPECT_EQ(CallNonvirtualShortMethodListHelper(env_, obj, cCls, shortId, static_cast<ets_short>(1),
-                                                  static_cast<ets_int>(121_I)),
-              static_cast<ets_short>(0));
-    EXPECT_EQ(CallNonvirtualIntMethodListHelper(env_, obj, cCls, intId), static_cast<ets_int>(0));
-    EXPECT_EQ(CallNonvirtualLongMethodListHelper(env_, obj, cCls, longId, static_cast<ets_long>(1),
-                                                 static_cast<ets_int>(121_I)),
-              static_cast<ets_long>(0));
     EXPECT_EQ(CallNonvirtualFloatMethodListHelper(env_, obj, cCls, floatId, static_cast<ets_float>(1.0F),
                                                   static_cast<ets_int>(121_I)),
               static_cast<ets_float>(0.0F));
@@ -172,23 +277,6 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
                                                    static_cast<ets_int>(121_I)),
               static_cast<ets_double>(0.0));
 
-    // Check class null argument
-    EXPECT_EQ(env_->CallNonvirtualBooleanMethod(obj, nullptr, booleanId, static_cast<ets_boolean>(1),
-                                                static_cast<ets_int>(121_I)),
-              static_cast<ets_boolean>(0));
-    EXPECT_EQ(
-        env_->CallNonvirtualByteMethod(obj, nullptr, byteId, static_cast<ets_byte>(1), static_cast<ets_int>(121_I)),
-        static_cast<ets_byte>(0));
-    EXPECT_EQ(
-        env_->CallNonvirtualCharMethod(obj, nullptr, charId, static_cast<ets_char>(1), static_cast<ets_int>(121_I)),
-        static_cast<ets_char>(0));
-    EXPECT_EQ(
-        env_->CallNonvirtualShortMethod(obj, nullptr, shortId, static_cast<ets_short>(1), static_cast<ets_int>(121_I)),
-        static_cast<ets_short>(0));
-    EXPECT_EQ(env_->CallNonvirtualIntMethod(obj, nullptr, intId), static_cast<ets_int>(0));
-    EXPECT_EQ(
-        env_->CallNonvirtualLongMethod(obj, nullptr, longId, static_cast<ets_long>(1), static_cast<ets_int>(121_I)),
-        static_cast<ets_long>(0));
     EXPECT_EQ(env_->CallNonvirtualFloatMethod(obj, nullptr, floatId, static_cast<ets_float>(1.0F),
                                               static_cast<ets_int>(121_I)),
               static_cast<ets_float>(0.0F));
@@ -196,43 +284,23 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
                                                static_cast<ets_int>(121_I)),
               static_cast<ets_double>(0.0));
 
-    EXPECT_EQ(env_->CallNonvirtualBooleanMethodArray(obj, nullptr, booleanId, booleanArgs.data()),
-              static_cast<ets_boolean>(0));
-    EXPECT_EQ(env_->CallNonvirtualByteMethodArray(obj, nullptr, byteId, byteArgs.data()), static_cast<ets_byte>(0));
-    EXPECT_EQ(env_->CallNonvirtualCharMethodArray(obj, nullptr, charId, charArgs.data()), static_cast<ets_char>(0));
-    EXPECT_EQ(env_->CallNonvirtualShortMethodArray(obj, nullptr, shortId, shortArgs.data()), static_cast<ets_short>(0));
-    EXPECT_EQ(env_->CallNonvirtualIntMethodArray(obj, nullptr, intId, nullptr), static_cast<ets_int>(0));
-    EXPECT_EQ(env_->CallNonvirtualLongMethodArray(obj, nullptr, longId, longArgs.data()), static_cast<ets_long>(0));
     EXPECT_EQ(env_->CallNonvirtualFloatMethodArray(obj, nullptr, floatId, floatArgs.data()),
               static_cast<ets_float>(0.0F));
     EXPECT_EQ(env_->CallNonvirtualDoubleMethodArray(obj, nullptr, doubleId, doubleArgs.data()),
               static_cast<ets_double>(0.0));
 
-    EXPECT_EQ(CallNonvirtualBooleanMethodListHelper(env_, obj, nullptr, booleanId, static_cast<ets_boolean>(1),
-                                                    static_cast<ets_int>(121_I)),
-              static_cast<ets_boolean>(0));
-    EXPECT_EQ(CallNonvirtualByteMethodListHelper(env_, obj, nullptr, byteId, static_cast<ets_byte>(1),
-                                                 static_cast<ets_int>(121_I)),
-              static_cast<ets_byte>(0));
-    EXPECT_EQ(CallNonvirtualCharMethodListHelper(env_, obj, nullptr, charId, static_cast<ets_char>(1),
-                                                 static_cast<ets_int>(121_I)),
-              static_cast<ets_char>(0));
-    EXPECT_EQ(CallNonvirtualShortMethodListHelper(env_, obj, nullptr, shortId, static_cast<ets_short>(1),
-                                                  static_cast<ets_int>(121_I)),
-              static_cast<ets_short>(0));
-    EXPECT_EQ(CallNonvirtualIntMethodListHelper(env_, obj, nullptr, intId), static_cast<ets_int>(0));
-    EXPECT_EQ(CallNonvirtualLongMethodListHelper(env_, obj, nullptr, longId, static_cast<ets_long>(1),
-                                                 static_cast<ets_int>(121_I)),
-              static_cast<ets_long>(0));
     EXPECT_EQ(CallNonvirtualFloatMethodListHelper(env_, obj, nullptr, floatId, static_cast<ets_float>(1.0F),
                                                   static_cast<ets_int>(121_I)),
               static_cast<ets_float>(0.0F));
     EXPECT_EQ(CallNonvirtualDoubleMethodListHelper(env_, obj, nullptr, doubleId, static_cast<ets_double>(1.0),
                                                    static_cast<ets_int>(121_I)),
               static_cast<ets_double>(0.0));
+}
 
 // NOTE(m.morozov): enable this test, when virtual calls will be implemented
 #ifdef ENABLE_THIS_CODE_IN_FUTURE
+TEST_F(MethodsTest, CallMethodsTestGeneral19)
+{
     // Call<type>Method part
     env->CallVoidMethod(obj, void_id, static_cast<ets_int>(11_I), static_cast<ets_int>(121_I));
     EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(11_I));
@@ -275,7 +343,10 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(env->CallLongMethodArray(obj, long_id, long_args.data()), static_cast<ets_long>(1));
     EXPECT_EQ(env->CallFloatMethodArray(obj, float_id, float_args.data()), static_cast<ets_float>(1.0F));
     EXPECT_EQ(env->CallDoubleMethodArray(obj, double_id, double_args.data()), static_cast<ets_double>(1.0));
+}
 
+TEST_F(MethodsTest, CallMethodsTestGeneral20)
+{
     // Call<type>MethodList part
     CallVoidMethodListHelper(env, obj, void_id, static_cast<ets_int>(84_I), static_cast<ets_int>(121_I));
     EXPECT_EQ(env->GetIntField(obj, d_member_id), static_cast<ets_int>(84_I));
@@ -302,10 +373,10 @@ TEST_F(MethodsTest, CallMethodsTestGeneral6)
     EXPECT_EQ(
         CallDoubleMethodListHelper(env, obj, double_id, static_cast<ets_double>(1.0), static_cast<ets_int>(121_I)),
         static_cast<ets_double>(1.0));
-#endif  // ENABLE_THIS_CODE_IN_FUTURE
 }
+#endif  // ENABLE_THIS_CODE_IN_FUTURE
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath6)
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath14)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 

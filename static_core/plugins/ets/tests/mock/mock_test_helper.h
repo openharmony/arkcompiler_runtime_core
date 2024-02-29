@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_TESTS_MOCK_MOCK_TEST_HELPER_H_
-#define PANDA_PLUGINS_ETS_TESTS_MOCK_MOCK_TEST_HELPER_H_
+#ifndef PANDA_PLUGINS_ETS_TESTS_MOCK_MOCK_TEST_HELPER_H
+#define PANDA_PLUGINS_ETS_TESTS_MOCK_MOCK_TEST_HELPER_H
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -40,12 +40,12 @@ protected:
     {
         std::vector<EtsVMOption> optionsVector;
 
-        optionsVector = {{EtsOptionType::EtsGcType, "epsilon"},
-                         {EtsOptionType::EtsNoJit, nullptr},
-                         {EtsOptionType::EtsBootFile, std::getenv("PANDA_STD_LIB")}};
+        optionsVector = {{EtsOptionType::ETS_GC_TYPE, "epsilon"},
+                         {EtsOptionType::ETS_NO_JIT, nullptr},
+                         {EtsOptionType::ETS_BOOT_FILE, std::getenv("PANDA_STD_LIB")}};
 
         if (testBinFileName_ != nullptr) {
-            optionsVector.push_back({EtsOptionType::EtsBootFile, testBinFileName_});
+            optionsVector.push_back({EtsOptionType::ETS_BOOT_FILE, testBinFileName_});
         }
 
         EtsVMInitArgs vmArgs;
@@ -70,4 +70,4 @@ protected:
 
 }  // namespace panda::ets::test
 
-#endif  // PANDA_PLUGINS_ETS_TESTS_MOCK_MOCK_TEST_HELPER_H_
+#endif  // PANDA_PLUGINS_ETS_TESTS_MOCK_MOCK_TEST_HELPER_H

@@ -17,7 +17,6 @@
 #include "libpandabase/utils/utils.h"
 
 extern "C" {
-
 ETS_EXPORT ets_int ETS_CALL ETS_InnerNativeTest_Inner_innerNative([[maybe_unused]] EtsEnv *, [[maybe_unused]] ets_class)
 {
     return 2_I;

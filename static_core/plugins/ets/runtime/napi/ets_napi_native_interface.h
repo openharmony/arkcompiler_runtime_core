@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H
 
 #include "ets_napi.h"
 
@@ -21,4 +21,4 @@ namespace panda::ets::napi {
 const ETS_NativeInterface *GetNativeInterface();
 }  // namespace panda::ets::napi
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_NAPI_ETS_NAPI_NATIVE_INTERFACE_H

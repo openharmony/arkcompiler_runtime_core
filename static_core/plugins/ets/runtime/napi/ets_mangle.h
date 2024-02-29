@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_MANGLE_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_MANGLE_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_MANGLE_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_MANGLE_H
 
 #include <iostream>
 
@@ -27,4 +27,4 @@ std::string MangleMethodNameWithSignature(const std::string &mangledName, const 
 
 }  // namespace panda::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_MANGLE_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_MANGLE_H

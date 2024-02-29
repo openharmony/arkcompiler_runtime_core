@@ -31,7 +31,7 @@ public:
 class MethodsTest : public CallingMethodsTestGeneral {};
 class MethodsTestDeath : public CallingMethodsTestGeneral {};
 
-TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath15)
 {
     testing::FLAGS_gtest_death_test_style = "threadsafe";
 
@@ -52,6 +52,54 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
     ASSERT_NE(byteId, nullptr);
     ets_method charId = env_->Getp_method(cCls, "char_method", "CI:C");
     ASSERT_NE(charId, nullptr);
+
+    ets_value intTmp;
+    intTmp.i = 121_I;
+    ets_value tmp;
+    tmp.i = static_cast<ets_int>(42_I);
+    const std::vector<ets_value> voidArgs = {tmp, intTmp};
+    EXPECT_DEATH(env_->CallNonvirtualVoidMethodArray(nullptr, cCls, voidId, voidArgs.data()), "");
+    EXPECT_DEATH(env_->CallNonvirtualObjectMethodArray(nullptr, cCls, objectId, nullptr), "");
+
+    tmp.z = static_cast<ets_boolean>(1);
+    const std::vector<ets_value> booleanArgs = {tmp, intTmp};
+    EXPECT_DEATH(env_->CallNonvirtualBooleanMethodArray(nullptr, cCls, booleanId, booleanArgs.data()), "");
+
+    tmp.b = static_cast<ets_byte>(1);
+    const std::vector<ets_value> byteArgs = {tmp, intTmp};
+    EXPECT_DEATH(env_->CallNonvirtualByteMethodArray(nullptr, cCls, byteId, byteArgs.data()), "");
+
+    tmp.c = static_cast<ets_char>(1);
+    const std::vector<ets_value> charArgs = {tmp, intTmp};
+    EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(nullptr, cCls, charId, charArgs.data()), "");
+
+    EXPECT_DEATH(env_->CallNonvirtualVoidMethodArray(nullptr, cCls, voidId, nullptr), "");
+    EXPECT_DEATH(env_->CallNonvirtualObjectMethodArray(nullptr, cCls, objectId, nullptr), "");
+    EXPECT_DEATH(env_->CallNonvirtualBooleanMethodArray(nullptr, cCls, booleanId, nullptr), "");
+    EXPECT_DEATH(env_->CallNonvirtualByteMethodArray(nullptr, cCls, byteId, nullptr), "");
+    EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(nullptr, cCls, charId, nullptr), "");
+
+    tmp.j = static_cast<ets_long>(1);
+    const std::vector<ets_value> longArgs = {tmp, intTmp};
+
+    EXPECT_DEATH(env_->CallNonvirtualVoidMethodArray(obj, cCls, nullptr, nullptr), "");
+    EXPECT_DEATH(env_->CallNonvirtualObjectMethodArray(obj, cCls, nullptr, longArgs.data()), "");
+    EXPECT_DEATH(env_->CallNonvirtualBooleanMethodArray(obj, cCls, nullptr, nullptr), "");
+    EXPECT_DEATH(env_->CallNonvirtualByteMethodArray(obj, cCls, nullptr, nullptr), "");
+    EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(obj, cCls, nullptr, nullptr), "");
+}
+
+TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath16)
+{
+    testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+    ets_class cCls = env_->FindClass("C");
+    ASSERT_NE(cCls, nullptr);
+    ets_class dCls = env_->FindClass("D");
+    ASSERT_NE(dCls, nullptr);
+    ets_object obj = env_->AllocObject(dCls);
+    ASSERT_NE(obj, nullptr);
+
     ets_method shortId = env_->Getp_method(cCls, "short_method", "SI:S");
     ASSERT_NE(shortId, nullptr);
     ets_method intId = env_->Getp_method(cCls, "int_method", ":I");
@@ -67,23 +115,6 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
     ets_value intTmp;
     intTmp.i = 121_I;
     ets_value tmp;
-    tmp.i = static_cast<ets_int>(42_I);
-    const std::vector<ets_value> voidArgs = {tmp, intTmp};
-    EXPECT_DEATH(env_->CallNonvirtualVoidMethodArray(nullptr, cCls, voidId, voidArgs.data()), "");
-
-    EXPECT_DEATH(env_->CallNonvirtualObjectMethodArray(nullptr, cCls, objectId, nullptr), "");
-
-    tmp.z = static_cast<ets_boolean>(1);
-    const std::vector<ets_value> booleanArgs = {tmp, intTmp};
-    EXPECT_DEATH(env_->CallNonvirtualBooleanMethodArray(nullptr, cCls, booleanId, booleanArgs.data()), "");
-
-    tmp.b = static_cast<ets_byte>(1);
-    const std::vector<ets_value> byteArgs = {tmp, intTmp};
-    EXPECT_DEATH(env_->CallNonvirtualByteMethodArray(nullptr, cCls, byteId, byteArgs.data()), "");
-
-    tmp.c = static_cast<ets_char>(1);
-    const std::vector<ets_value> charArgs = {tmp, intTmp};
-    EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(nullptr, cCls, charId, charArgs.data()), "");
 
     tmp.s = static_cast<ets_short>(1);
     const std::vector<ets_value> shortArgs = {tmp, intTmp};
@@ -103,22 +134,12 @@ TEST_F(MethodsTestDeath, CallMethodsTestGeneralDeath7)
     const std::vector<ets_value> doubleArgs = {tmp, intTmp};
     EXPECT_DEATH(env_->CallNonvirtualDoubleMethodArray(nullptr, cCls, doubleId, doubleArgs.data()), "");
 
-    EXPECT_DEATH(env_->CallNonvirtualVoidMethodArray(nullptr, cCls, voidId, nullptr), "");
-    EXPECT_DEATH(env_->CallNonvirtualObjectMethodArray(nullptr, cCls, objectId, nullptr), "");
-    EXPECT_DEATH(env_->CallNonvirtualBooleanMethodArray(nullptr, cCls, booleanId, nullptr), "");
-    EXPECT_DEATH(env_->CallNonvirtualByteMethodArray(nullptr, cCls, byteId, nullptr), "");
-    EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(nullptr, cCls, charId, nullptr), "");
     EXPECT_DEATH(env_->CallNonvirtualShortMethodArray(nullptr, cCls, shortId, nullptr), "");
     EXPECT_DEATH(env_->CallNonvirtualIntMethodArray(nullptr, cCls, intId, nullptr), "");
     EXPECT_DEATH(env_->CallNonvirtualLongMethodArray(nullptr, cCls, longId, nullptr), "");
     EXPECT_DEATH(env_->CallNonvirtualFloatMethodArray(nullptr, cCls, floatId, nullptr), "");
     EXPECT_DEATH(env_->CallNonvirtualDoubleMethodArray(nullptr, cCls, doubleId, nullptr), "");
 
-    EXPECT_DEATH(env_->CallNonvirtualVoidMethodArray(obj, cCls, nullptr, nullptr), "");
-    EXPECT_DEATH(env_->CallNonvirtualObjectMethodArray(obj, cCls, nullptr, longArgs.data()), "");
-    EXPECT_DEATH(env_->CallNonvirtualBooleanMethodArray(obj, cCls, nullptr, nullptr), "");
-    EXPECT_DEATH(env_->CallNonvirtualByteMethodArray(obj, cCls, nullptr, nullptr), "");
-    EXPECT_DEATH(env_->CallNonvirtualCharMethodArray(obj, cCls, nullptr, nullptr), "");
     EXPECT_DEATH(env_->CallNonvirtualShortMethodArray(obj, cCls, nullptr, nullptr), "");
     EXPECT_DEATH(env_->CallNonvirtualIntMethodArray(obj, cCls, nullptr, longArgs.data()), "");
     EXPECT_DEATH(env_->CallNonvirtualLongMethodArray(obj, cCls, nullptr, nullptr), "");
