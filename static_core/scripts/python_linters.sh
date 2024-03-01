@@ -18,7 +18,7 @@ if [[ -z $1 ]]; then
     exit 1
 fi
 
-root_dir=$(realpath $1)
+root_dir=$(realpath "$1")
 # For pylint, we only enable certain rules
 # - C0121 - comparison to True / False / None
 # - C0123 - use instanceof() instead of type
@@ -47,23 +47,24 @@ root_dir=$(realpath $1)
 # - W0640 - do not use variables deined in outer loop
 # - W0706 - except handler raises immediately
 # - W1201 - string interpolation for logging
+# - W3101 - timeout is used in certain functions
 
 PYLINT_RULES=${PYLINT_RULES:-"C0121,C0123,C0304,C0305,C0321,C0410,\
 C0411,C1801,E0303,E0304,E0701,E1111,R1708,R1710,W0101,W0102,W0109,\
-W0123,W0150,W0201,W0212,W0221,W0231,W0601,W0706,W0640,W1201"
-}
+W0123,W0150,W0201,W0212,W0221,W0231,W0601,W0706,W0640,W1201,W3101"}
 
 # flake8 rules - can't be checked by pylint
 # - S506 - unsafe-yaml-load
 # - S602 - subprocess popen with shell
 # - C101 - coding magic comment required
-FLAKE8_RULES=${FLAKE8_RULES:-"S506,S602,C101"}
+# - EXE022 - executable files have shebang 
+FLAKE8_RULES=${FLAKE8_RULES:-"C101,EXE002,S506,S602"}
 
 function save_exit_code() {
     EXIT_CODE=$(($1 + $2))
 }
 
-source ${root_dir}/scripts/python/venv-utils.sh
+source "${root_dir}/scripts/python/venv-utils.sh"
 activate_venv
 
 set +e
@@ -71,7 +72,7 @@ set +e
 EXIT_CODE=0
 
 skip_options="^${root_dir}/third_party/"
-if [ ! -z "$SKIP_FOLDERS" ]; then
+if [ -n "$SKIP_FOLDERS" ]; then
     for pt in $SKIP_FOLDERS; do
         skip_options="${skip_options}\|^${root_dir}/${pt}/"
     done
@@ -79,13 +80,13 @@ fi
 
 # Check all files with '.py' extensions except *conf.py which are config files for sphinx
 while read file_to_check; do
-    pylint -s false --disable=all -e ${PYLINT_RULES} "${file_to_check}"
+    pylint -s false --timeout-methods subprocess.Popen.communicate --disable=all -e "${PYLINT_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
-    flake8 --select ${FLAKE8_RULES} "${file_to_check}"
+    flake8 --select "${FLAKE8_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
 done <<<$(find "${root_dir}" -name "*.py" -type f | grep -v "${skip_options}")
 
-num_checked=$(find "${root_dir}" -name "*.py" -type f | grep -v "${skip_options}" | wc -l)
+num_checked=$(find "${root_dir}" -name "*.py" -type f | grep -c -v "${skip_options}")
 echo "Checked ${num_checked} files"
 
 deactivate_venv
