@@ -196,10 +196,9 @@ void JSRuntimeSetPropertyStringIntrinsic(JSValue *etsJsValue, EtsString *etsProp
     S_INTRINSICS_API->JSRuntimeSetPropertyString(etsJsValue, etsPropName, value);
 }
 
-EtsVoid *JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, uint8_t value)
+void JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, uint8_t value)
 {
     S_INTRINSICS_API->JSRuntimeSetPropertyBoolean(etsJsValue, etsPropName, static_cast<bool>(value));
-    return EtsVoid::GetInstance();
 }
 
 JSValue *JSRuntimeGetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index)

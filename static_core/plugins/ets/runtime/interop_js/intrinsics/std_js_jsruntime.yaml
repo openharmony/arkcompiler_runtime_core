@@ -220,7 +220,7 @@ intrinsics:
     method_name: setPropertyBoolean
     static: true
     signature:
-      ret: std.core.void
+      ret: void
       args: [ std.interop.js.JSValue, std.core.String, u1 ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeSetPropertyBooleanIntrinsic
     clear_flags: [can_throw, heap_inv]
@@ -745,7 +745,7 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToJSValueIntrinsic
     interop_intrinsic_kind: unwrap
     clear_flags: [no_dce, can_throw, heap_inv]
-  
+
   - name: CompilerConvertLocalToString
     space: ets
     compiler_only: true

@@ -27,6 +27,7 @@ sub:
       - method: keys
         ret_type: Iterable<number>
       - method: clear
+        ret_type: void
       - method: entries
         ret_type: Iterable<[number, string]>
       - expr: self.size
