@@ -640,7 +640,21 @@ std/core/std_core_array_map_byte_array_func_byte_int_byte_array.ets
 std/core/std_core_array_map_short_array_func_short.ets
 std/core/std_core_array_map_float_array_func_float_int_float_array.ets
 std/core/std_core_array_map_long_array_func_long_int_long_array.ets
-
+### issue 15523
+spec/10.interfaces/overriding/15523_0000_iterable_override.ets
+spec/10.interfaces/overriding/15523_0001_iterable_override.ets
+spec/10.interfaces/overriding/15523_0002_iterable_override.ets
+spec/10.interfaces/overriding/15523_0003_iterable_override.ets
+spec/10.interfaces/overriding/15523_0004_iterable_override.ets
+spec/10.interfaces/overriding/15523_0005_iterable_override.ets
+### Related to (reverted) builtin void type
+### StdLib is not testing corectly after the void revert
+std/core/TypeCreateClassTest.ets
+std/core/TypeCreateErasedBodyTest.ets
+std/core/TypeCreateInterfaceTest.ets
+std/core/TypeCreatePrimitiveNameTest.ets
+### End StdLib is not testing corectly after the void revert
+### End of Related to (reverted) builtin void type
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
