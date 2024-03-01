@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,37 +153,6 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(GCG1BarrierSe
 }
 
 template <class LanguageConfig>
-class RemsetCardHandler : public CardHandler {
-public:
-    RemsetCardHandler(CardTable *cardTable, size_t regionSizeBits, const std::atomic<bool> &deferCards)
-        : CardHandler(cardTable), regionSizeBits_(regionSizeBits), deferCards_(deferCards)
-    {
-    }
-
-protected:
-    bool HandleObject(ObjectHeader *objectHeader, void *begin, void *end) override
-    {
-        auto objRefVisitor = [this](ObjectHeader *fromObj, ObjectHeader *toObj, uint32_t offset,
-                                    [[maybe_unused]] bool isVolatile) {
-            ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(toObj)),
-                      std::cerr << "Not suitable space for to_obj: " << toObj << std::endl);
-
-            // don't need lock because only one thread changes remsets
-            RemSet<>::AddRefWithAddr<false>(fromObj, offset, toObj);
-            LOG(DEBUG, GC) << "fill rem set " << fromObj << " -> " << toObj;
-            // Atomic with relaxed order reason: memory order is not required
-            return !deferCards_.load(std::memory_order_relaxed);
-        };
-        return ObjectHelpers<LanguageConfig::LANG_TYPE>::template TraverseAllObjectsWithInfo<true>(
-            objectHeader, objRefVisitor, begin, end);
-    }
-
-private:
-    size_t regionSizeBits_;
-    const std::atomic<bool> &deferCards_;
-};
-
-template <class LanguageConfig>
 size_t UpdateRemsetWorker<LanguageConfig>::ProcessAllCards()
 {
     FillFromQueue(&cards_);
@@ -192,7 +161,7 @@ size_t UpdateRemsetWorker<LanguageConfig>::ProcessAllCards()
     LOG_IF(!cards_.empty(), DEBUG, GC) << "Started process: " << cards_.size() << " cards";
 
     size_t cardsSize = 0;
-    RemsetCardHandler<LanguageConfig> cardHandler(gc_->GetCardTable(), regionSizeBits_, deferCards_);
+    CardHandler<LanguageConfig> cardHandler(gc_->GetCardTable(), regionSizeBits_, deferCards_);
     for (auto it = cards_.begin(); it != cards_.end();) {
         if (!cardHandler.Handle(*it)) {
             break;

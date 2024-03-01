@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,18 @@ void RemSet<LockConfigT>::AddRef(const ObjectHeader *fromObjAddr, size_t offset)
 {
     ASSERT(fromObjAddr != nullptr);
     auto ref = ToUintPtr(fromObjAddr) + offset;
+    auto bitmapBeginAddr = ref & ~DEFAULT_REGION_MASK;
+    os::memory::LockHolder<LockConfigT, NEED_LOCK> lock(remSetLock_);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    bitmaps_[bitmapBeginAddr].Set(GetIdxInBitmap(ref, bitmapBeginAddr));
+}
+
+template <typename LockConfigT>
+template <bool NEED_LOCK>
+void RemSet<LockConfigT>::AddRef(const void *fromAddr)
+{
+    ASSERT(fromAddr != nullptr);
+    auto ref = ToUintPtr(fromAddr);
     auto bitmapBeginAddr = ref & ~DEFAULT_REGION_MASK;
     os::memory::LockHolder<LockConfigT, NEED_LOCK> lock(remSetLock_);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -99,6 +111,25 @@ void RemSet<LockConfigT>::AddRefWithAddr(const ObjectHeader *objAddr, size_t off
 
     toRegion->GetRemSet()->AddRef<NEED_LOCK>(objAddr, offset);
     fromRegion->GetRemSet()->AddRefRegion<NEED_LOCK>(toRegion);
+    TSAN_ANNOTATE_IGNORE_WRITES_END();
+}
+
+template <typename LockConfigT>
+template <bool NEED_LOCK>
+void RemSet<LockConfigT>::AddRefWithAddr(RemSet<> *fromRemset, const void *fromAddr, const ObjectHeader *valueAddr)
+{
+    ASSERT(AddrToRegion(fromAddr)->GetRemSet() == fromRemset);
+    auto *toRegion = ObjectToRegion(valueAddr);
+    // TSAN thinks that we can have a data race here when we get region or getRemSet from region, because we don't have
+    // synchronization between these events. In reality it's impossible, because if we get write from/to region it
+    // should be created already by allocator in mutator thread, and only then writes happens.
+    TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
+    ASSERT(toRegion != nullptr);
+    ASSERT_PRINT(toRegion->GetRemSet() != nullptr,
+                 "region " << toRegion << ", from addr " << fromAddr << ", value " << valueAddr);
+
+    toRegion->GetRemSet()->AddRef<NEED_LOCK>(fromAddr);
+    fromRemset->AddRefRegion<NEED_LOCK>(toRegion);
     TSAN_ANNOTATE_IGNORE_WRITES_END();
 }
 

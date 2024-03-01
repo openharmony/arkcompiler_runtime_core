@@ -137,7 +137,6 @@ set(SOURCES
     mem/gc/g1/g1-helpers.cpp
     mem/gc/g1/ref_updater.cpp
     mem/gc/g1/g1-allocator.cpp
-    mem/gc/g1/card_handler.cpp
     mem/gc/g1/g1_analytics.cpp
     plugins.cpp
     mem/gc/g1/update_remset_worker.cpp
