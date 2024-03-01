@@ -206,6 +206,11 @@ public:
         return codeBuilder_;
     }
 
+    bool IsCompressedStringsEnabled() const
+    {
+        return runtime_->IsCompressedStringsEnabled();
+    }
+
     void CreateStackMap(Inst *inst, Inst *user = nullptr);
 
     void CreateStackMapRec(SaveStateInst *saveState, bool requireVregMap, Inst *targetSite);

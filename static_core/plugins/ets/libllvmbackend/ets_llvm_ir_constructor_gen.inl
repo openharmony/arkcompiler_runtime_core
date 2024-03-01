@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,4 +49,62 @@ bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
 bool LLVMIrConstructor::EmitStdStringSubstring(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::SUB_STRING_FROM_STRING_TLAB_COMPRESSED, 3U);
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendBool(Inst *inst)
+{
+    auto offset = GetGraph()->GetRuntime()->GetArrayU16ClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
+    auto eid = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_BOOL;
+    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), GetInputValue(inst, 1), klass});
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendChar(Inst *inst)
+{
+    auto offset = GetGraph()->GetRuntime()->GetArrayU16ClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
+    auto eid = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_CHAR_COMPRESSED;
+    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), GetInputValue(inst, 1), klass});
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendByte(Inst *inst)
+{
+    auto call = CreateStringBuilderAppendLong(inst);
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendShort(Inst *inst)
+{
+    auto call = CreateStringBuilderAppendLong(inst);
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendInt(Inst *inst)
+{
+    auto call = CreateStringBuilderAppendLong(inst);
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendLong(Inst *inst)
+{
+    auto call = CreateStringBuilderAppendLong(inst);
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+llvm::Value *LLVMIrConstructor::CreateStringBuilderAppendLong(Inst *inst)
+{
+    auto sb = GetInputValue(inst, 0);
+    auto value = builder_.CreateSExt(GetInputValue(inst, 1), builder_.getInt64Ty());
+    auto eid = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_LONG;
+    auto offset = GetGraph()->GetRuntime()->GetArrayU16ClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
+    return CreateFastPathCall(inst, eid, {sb, value, klass});
 }

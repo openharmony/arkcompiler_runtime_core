@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -330,7 +330,7 @@ void GetBase(FpType d, int digits, int *decpt, char *buf, char *bufTmp, int size
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-int GetMinmumDigits(FpType d, int *decpt, char *buf)
+int GetMinimumDigits(FpType d, int *decpt, char *buf)
 {
     int digits = 0;
 
@@ -371,45 +371,56 @@ EtsString *DoubleToPrecision(double number, int digit);
 double GetStdDoubleArgument(ObjectHeader *obj);
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-EtsString *FpToStringDecimalRadix(FpType number)
+inline const char *FpNonFiniteToString(FpType number)
 {
-    PandaString result;
+    ASSERT(std::isnan(number) || !std::isfinite(number));
+    if (std::isnan(number)) {
+        return "NaN";
+    }
+    return std::signbit(number) ? "-Infinity" : "Infinity";
+}
+
+template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
+void FpToStringDecimalRadix(FpType number, PandaString &result)
+{
+    ASSERT(result.empty());
+    using SignedInt = typename ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, true>;
+    static constexpr FpType MIN_BOUND = 0.1;
+
+    // isfinite checks if the number is normal, subnormal or zero, but not infinite or NaN.
+    if (!std::isfinite(number)) {
+        result = FpNonFiniteToString(number);
+        return;
+    }
+
     if (number < 0) {
         result += "-";
         number = -number;
     }
-
-    static constexpr FpType MIN_BOUND = 0.1;
-    using SignedIntType = ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, true>;
-
-    if (MIN_BOUND <= number && number < 1) {  // 0.1: 10 ** -1
+    if (MIN_BOUND <= number && number < 1) {
         // Fast path. In this case, n==0, just need to calculate k and s.
-        PandaString resultFast = "0.";
-        SignedIntType sFast = 0;
-        int kFast = 1;
-        SignedIntType power = 1;
-        while (kFast <= helpers::FLOAT_MAX_PRECISION) {
-            power *= TEN;                                                      // 10: base 10
-            int digitFast = static_cast<SignedIntType>(number * power) % TEN;  // 10: base 10
-            ASSERT(0 <= digitFast && digitFast <= 9);                          // 9: single digit max
-            sFast = sFast * TEN + digitFast;                                   // 10: base 10
-            resultFast += ToPandaString(digitFast);
-            if (sFast / static_cast<FpType>(power) == number) {  // s * (10 ** -k)
+        result += "0.";
+        SignedInt power = TEN;
+        SignedInt s = 0;
+        for (int k = 1; k <= intrinsics::helpers::FLOAT_MAX_PRECISION; ++k) {
+            int digit = static_cast<SignedInt>(number * power) % TEN;
+            s = s * TEN + digit;
+            result.append(ToPandaString(digit));
+            if (s / static_cast<FpType>(power) == number) {  // s * (10 ** -k)
                 break;
             }
-            kFast++;
+            power *= TEN;
         }
-        result += resultFast;
-        return EtsString::CreateFromMUtf8(result.c_str());
+        return;
     }
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char buffer[BUF_SIZE] = {0};
-
     int n = 0;
-    int k = GetMinmumDigits(number, &n, buffer);
-    PandaString base = buffer;
-    if (n > 0 && n <= 21_I) {  // NOLINT(readability-magic-numbers)
+    int k = intrinsics::helpers::GetMinimumDigits(number, &n, buffer);
+    PandaString base(buffer);
+
+    if (0 < n && n <= 21_I) {  // NOLINT(readability-magic-numbers)
         base.erase(1, 1);
         if (k <= n) {
             // 6. If k ≤ n ≤ 21, return the String consisting of the code units of the k digits of the decimal
@@ -436,11 +447,18 @@ EtsString *FpToStringDecimalRadix(FpType number)
         // followed by code unit 0x0065 (LATIN SMALL LETTER E), followed by the code unit 0x002B (PLUS SIGN) or the code
         // unit 0x002D (HYPHEN-MINUS) according to whether n−1 is positive or negative, followed by the code units of
         // the decimal representation of the integer abs(n−1) (with no leading zeroes).
-        base += "e" + (n >= 1 ? PandaString("+") : "") + ToPandaString(n - 1);
+        base += (n >= 1 ? PandaString("e+") : "e") + ToPandaString(n - 1);
     }
     result += base;
+}
 
-    return EtsString::CreateFromMUtf8(result.c_str());
+template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
+inline float FpDelta(FpType number)
+{
+    using UnsignedIntType = ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, false>;
+    auto value = bit_cast<FpType>(bit_cast<UnsignedIntType>(number) + 1U);
+    float delta = static_cast<FpType>(HALF) * (bit_cast<FpType>(value) - number);
+    return delta == 0 ? number : delta;
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
@@ -458,49 +476,31 @@ EtsString *FpToString(FpType number, int radix)
         return nullptr;
     }
 
-    if (std::isnan(number)) {
-        return EtsString::CreateFromMUtf8("NaN");
-    }
-
-    if (!std::isfinite(number)) {
-        if (number < 0) {
-            return EtsString::CreateFromMUtf8("-Infinity");
-        }
-        return EtsString::CreateFromMUtf8("Infinity");
-    }
-
     if (radix == helpers::DECIMAL) {
-        return helpers::FpToStringDecimalRadix(number);
+        PandaString result;
+        helpers::FpToStringDecimalRadix(number, result);
+        return EtsString::CreateFromMUtf8(result.data());
     }
 
-    using UnsignedIntType = ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, false>;
-
-    bool negative = false;
-    if (number < 0.0) {
-        negative = true;
-        number = -number;
-    }
-
-    FpType integralPart;
-    FpType numberFraction = std::modf(number, &integralPart);
-
-    auto value = bit_cast<UnsignedIntType>(number);
-    value += 1;
-    float delta = static_cast<FpType>(HALF) * (bit_cast<FpType>(value) - number);
-    if (delta == 0) {
-        delta = number;
+    // isfinite checks if the number is normal, subnormal or zero, but not infinite or NaN.
+    if (!std::isfinite(number)) {
+        return EtsString::CreateFromMUtf8(FpNonFiniteToString(number));
     }
 
     PandaString result;
-    if (numberFraction != 0 && numberFraction >= delta) {
-        result += ".";
-        result += DecimalsToString<FpType>(&integralPart, numberFraction, radix, delta);
+    if (number < 0.0) {
+        result += "-";
+        number = -number;
     }
 
-    result = IntegerToString(integralPart, radix) + result;
-
-    if (negative) {
-        result = "-" + result;
+    float delta = FpDelta(number);
+    FpType integral;
+    FpType fractional = std::modf(number, &integral);
+    if (fractional != 0 && fractional >= delta) {
+        PandaString fraction(DecimalsToString<FpType>(&integral, fractional, radix, delta));
+        result += IntegerToString(integral, radix) + "." + fraction;
+    } else {
+        result += IntegerToString(integral, radix);
     }
 
     return EtsString::CreateFromMUtf8(result.c_str());

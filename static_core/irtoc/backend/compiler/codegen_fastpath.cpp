@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,9 +43,19 @@ static void RestoreCallerRegistersFromFrame(RegMask mask, Encoder *encoder, cons
     encoder->LoadRegisters(mask, isFp, -startSlot, fpReg, GetCallerRegsMask(fl.GetArch(), isFp));
 }
 
-static bool InsnHasRuntimeCall(const Inst *inst)
+static bool InstHasRuntimeCall(const Inst *inst)
 {
     switch (inst->GetOpcode()) {
+        case Opcode::Store:
+            if (inst->CastToStore()->GetNeedBarrier()) {
+                return true;
+            }
+            break;
+        case Opcode::StoreI:
+            if (inst->CastToStoreI()->GetNeedBarrier()) {
+                return true;
+            }
+            break;
         case Opcode::StoreArray:
             if (inst->CastToStoreArray()->GetNeedBarrier()) {
                 return true;
@@ -87,7 +97,7 @@ static bool HasRuntimeCalls(const Graph &graph)
 {
     for (auto bb : graph.GetBlocksRPO()) {
         for (auto inst : bb->Insts()) {
-            if (InsnHasRuntimeCall(inst)) {
+            if (InstHasRuntimeCall(inst)) {
                 return true;
             }
         }

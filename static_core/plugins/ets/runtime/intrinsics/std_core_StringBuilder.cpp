@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,11 +113,6 @@ ObjectHeader *StdCoreStringBuilderAppendChar(ObjectHeader *sb, EtsChar v)
     return StringBuilderAppendChar(sb, v);
 }
 
-ObjectHeader *StdCoreStringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
-{
-    return StringBuilderAppendLong(sb, v);
-}
-
 ObjectHeader *StdCoreStringBuilderAppendByte(ObjectHeader *sb, EtsByte v)
 {
     return StringBuilderAppendLong(sb, static_cast<EtsLong>(v));
@@ -131,6 +126,21 @@ ObjectHeader *StdCoreStringBuilderAppendShort(ObjectHeader *sb, EtsShort v)
 ObjectHeader *StdCoreStringBuilderAppendInt(ObjectHeader *sb, EtsInt v)
 {
     return StringBuilderAppendLong(sb, static_cast<EtsLong>(v));
+}
+
+ObjectHeader *StdCoreStringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
+{
+    return StringBuilderAppendLong(sb, v);
+}
+
+ObjectHeader *StdCoreStringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
+{
+    return StringBuilderAppendFloat(sb, v);
+}
+
+ObjectHeader *StdCoreStringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
+{
+    return StringBuilderAppendDouble(sb, v);
 }
 
 EtsString *StdCoreStringBuilderToString(ObjectHeader *sb)

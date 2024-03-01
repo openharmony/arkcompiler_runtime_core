@@ -151,10 +151,7 @@ export final class StringBuilder {
      *
      * @returns builder with updated internal buffer
      */
-    public append(i: float): StringBuilder {
-        this.append(StringBuilder.toString(i));
-        return this;
-    }
+    public native append(i: float): StringBuilder;
 
     /**
      * Appends a double as string to the builder's internal buffer
@@ -163,10 +160,7 @@ export final class StringBuilder {
      *
      * @returns builder with updated internal buffer
      */
-    public append(i: double): StringBuilder {
-        this.append(StringBuilder.toString(i));
-        return this;
-    }
+    public native append(i: double): StringBuilder;
 
     /**
      * Returns the string that was formed as a result of all append operations

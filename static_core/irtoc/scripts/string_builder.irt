@@ -218,5 +218,8 @@ Label(:CallCppIntrinsic)
 
 }
 end
+
+include_plugin 'string_builder'
+
 GenerateStringBuilderString(true)
 GenerateStringBuilderString(false)

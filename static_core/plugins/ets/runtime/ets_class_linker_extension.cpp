@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,8 +108,9 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     // NOLINTNEXTLINE(google-build-using-namespace)
     using namespace panda_file_items::class_descriptors;
 
+    auto *coroutine = ets::EtsCoroutine::GetCurrent();
     langCtx_ = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-    heapManager_ = EtsCoroutine::GetCurrent()->GetVM()->GetHeapManager();
+    heapManager_ = coroutine->GetVM()->GetHeapManager();
 
     // NB! By convention, class_class should be allocated first, so that all
     // other class objects receive a pointer to it in their klass words.
@@ -231,7 +232,12 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         return false;
     }
 
-    ets::EtsCoroutine::GetCurrent()->SetPromiseClass(promiseClass_);
+    coroutine->SetPromiseClass(promiseClass_);
+    // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
+    // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
+    coroutine->SetStringClassPtr(stringClass);
+    coroutine->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
+
     Class *weakRefClass;
     // Cache into local variable, no need to cache to this class
     if (!CacheClass(&weakRefClass, WEAK_REF.data())) {

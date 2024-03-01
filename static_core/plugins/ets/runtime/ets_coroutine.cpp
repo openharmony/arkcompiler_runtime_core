@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,11 @@ void EtsCoroutine::Initialize()
     if (HasManagedEntrypoint()) {
         promiseClassPtr_ = GetPandaVM()->GetClassLinker()->GetPromiseClass()->GetRuntimeClass();
         undefinedObj_ = GetPandaVM()->GetUndefinedObject();
+        // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
+        // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
+        auto *linkExt = GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
+        SetStringClassPtr(linkExt->GetClassRoot(ClassRoot::STRING));
+        SetArrayU16ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U16));
     }
     ASSERT(promiseClassPtr_ != nullptr || !HasManagedEntrypoint());
 
