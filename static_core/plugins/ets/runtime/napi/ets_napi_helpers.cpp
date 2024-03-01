@@ -45,7 +45,7 @@ using ArgCounter = arch::ArgCounter<RUNTIME_ARCH>;
 
 class ArgWriter : public arch::ArgWriter<RUNTIME_ARCH> {
 public:
-    ArgWriter(Span<uint8_t> *gprArgs, Span<uint8_t> *fprArgs, uint8_t *stackArgs)
+    ArgWriter(Span<uint8_t> gprArgs, Span<uint8_t> fprArgs, uint8_t *stackArgs)
         : arch::ArgWriter<RUNTIME_ARCH>(gprArgs, fprArgs, stackArgs)
     {
     }
@@ -175,7 +175,7 @@ extern "C" void EtsNapiBeginCritical(Method *method, uint8_t *inRegsArgs, uint8_
     Span<uint8_t> outGprArgs(outArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
     Span<uint8_t> outFprArgs(outGprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
     auto outStackArgs = outFprArgs.end();
-    ArgWriter argWriter(&outGprArgs, &outFprArgs, outStackArgs);
+    ArgWriter argWriter(outGprArgs, outFprArgs, outStackArgs);
 
     argReader.Read<Method *>();  // Skip method
 
@@ -257,7 +257,7 @@ extern "C" uint8_t *EtsNapiBegin(Method *method, uint8_t *inRegsArgs, uint8_t *i
 
     Span<uint8_t> outGprArgs(outRegsArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
     Span<uint8_t> outFprArgs(outGprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
-    ArgWriter argWriter(&outGprArgs, &outFprArgs, outStackArgs);
+    ArgWriter argWriter(outGprArgs, outFprArgs, outStackArgs);
 
     argReader.Read<Method *>();  // Skip method
 
