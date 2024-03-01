@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1629,7 +1629,7 @@ static void MoveStorageData(ObjectHeader *sb, void *newstorage)
     auto size = GetCountValue(sb) << 1U;
     auto newbuf = ToVoidPtr(ToUintPtr(newstorage) + coretypes::Array::GetDataOffset());
     auto oldbuf = ToVoidPtr(ToUintPtr(GetStorageAddress(sb, 0U)));
-    memcpy_s(newbuf, size, oldbuf, size);
+    std::copy_n(reinterpret_cast<uint8_t *>(oldbuf), size, reinterpret_cast<uint8_t *>(newbuf));
 }
 
 static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(ObjectHeader *sb, uint32_t newsize,

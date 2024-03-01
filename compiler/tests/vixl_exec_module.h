@@ -129,14 +129,13 @@ public:
     void *CreateArray(T *array, int size, ArenaAllocator *object_allocator)
     {
         void *arr_data = object_allocator->Alloc(size * sizeof(T) + runtime_info_->GetArrayDataOffset(Arch::AARCH64));
-        ASSERT(IsInObjectsAddressSpace(static_cast<uintptr_t>arr_data));
+        ASSERT(IsInObjectsAddressSpace(static_cast<uintptr_t> arr_data));
         int *lenarr = reinterpret_cast<int *>(reinterpret_cast<char *>(arr_data) +
                                               runtime_info_->GetArrayLengthOffset(Arch::AARCH64));
         lenarr[0] = size;
         T *arr = reinterpret_cast<T *>(reinterpret_cast<char *>(arr_data) +
                                        runtime_info_->GetArrayDataOffset(Arch::AARCH64));
-
-        memcpy_s(arr, size * sizeof(T), array, size * sizeof(T));
+        std::copy_n(reinterpret_cast<uint8_t *>(array), size * sizeof(T), reinterpret_cast<uint8_t *>(arr));
         return arr_data;
     }
 
@@ -148,7 +147,7 @@ public:
         auto size = lenarr[0];
         T *arr = reinterpret_cast<T *>(reinterpret_cast<char *>(arr_data) +
                                        runtime_info_->GetArrayDataOffset(Arch::AARCH64));
-        memcpy_s(array, size * sizeof(T), arr, size * sizeof(T));
+        std::copy_n(reinterpret_cast<uint8_t *>(arr), size * sizeof(T), reinterpret_cast<uint8_t *>(array));
     }
 
     void FreeArray([[maybe_unused]] void *array)

@@ -27,6 +27,7 @@
 #include <string>
 #include <unordered_map>
 #include <cstring>
+#include <algorithm>
 
 namespace panda::serializer {
 
@@ -123,7 +124,7 @@ inline Expected<size_t, const char *> BufferToTypeUnpackString(const uint8_t *da
     }
 
     out.resize(strSize);
-    memcpy_s(out.data(), strSize, data, strSize);
+    std::copy_n(data, strSize, reinterpret_cast<uint8_t *>(out.data()));
     return value + strSize;
 }
 

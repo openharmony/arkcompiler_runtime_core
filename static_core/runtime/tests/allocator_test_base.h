@@ -123,17 +123,18 @@ protected:
         size_t copied = 0;
         size_t firstCopySize = std::min(size, BYTE_ARRAY_SIZE - startIndex);
         // Set head of memory
-        memcpy_s(mem, firstCopySize, &byteArray_[startIndex], firstCopySize);
+        std::copy_n(&byteArray_[startIndex], firstCopySize, reinterpret_cast<uint8_t *>(mem));
         size -= firstCopySize;
         copied += firstCopySize;
         // Set middle part of memory
         while (size > BYTE_ARRAY_SIZE) {
-            memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), BYTE_ARRAY_SIZE, byteArray_.data(), BYTE_ARRAY_SIZE);
+            std::copy_n(byteArray_.data(), BYTE_ARRAY_SIZE,
+                        reinterpret_cast<uint8_t *>(ToVoidPtr(ToUintPtr(mem) + copied)));
             size -= BYTE_ARRAY_SIZE;
             copied += BYTE_ARRAY_SIZE;
         }
         // Set tail of memory
-        memcpy_s(ToVoidPtr(ToUintPtr(mem) + copied), size, byteArray_.data(), size);
+        std::copy_n(byteArray_.data(), size, reinterpret_cast<uint8_t *>(ToVoidPtr(ToUintPtr(mem) + copied)));
 
         return startIndex;
     }

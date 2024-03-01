@@ -143,8 +143,7 @@ void ThrowClassCastException(const Class *dstType, const Class *srcType)
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg = "";
-    msg += srcType->GetName() + " cannot be cast to " + dstType->GetName();
+    PandaString msg = ConvertToString(srcType->GetName() + " cannot be cast to " + dstType->GetName());
 
     ThrowException(ctx, thread, ctx.GetClassCastExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
     SetExceptionEvent(events::ExceptionType::CAST_CHECK, thread);
@@ -155,8 +154,7 @@ void ThrowAbstractMethodError(const Method *method)
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
 
-    PandaString msg = "";
-    msg += "abstract method \"" + method->GetClass()->GetName() + ".";
+    PandaString msg = ConvertToString("abstract method \"" + method->GetClass()->GetName() + ".");
     msg += utf::Mutf8AsCString(method->GetName().data);
     msg += "\"";
 

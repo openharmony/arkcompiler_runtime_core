@@ -57,7 +57,7 @@ Array *Array::Create(panda::Class *arrayClass, const uint8_t *data, ArraySizeT l
     // length == 0 is guaranteed by AllocateArray
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     array->SetLength(length);
-    memcpy_s(array->GetData(), array->GetLength() * elemSize, data, length * elemSize);
+    std::copy_n(data, length * elemSize, reinterpret_cast<uint8_t *>(array->GetData()));
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // Witout full memory barrier it is possible that architectures with weak memory order can try fetching array
     // legth before it's set
