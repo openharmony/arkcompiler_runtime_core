@@ -16,6 +16,7 @@
 #include "encoder32_test.h"
 
 namespace ark::compiler {
+// NOLINTBEGIN(readability-magic-numbers)
 /*
     Tests work with one default parameter:
         r0 - for 32-bit parameter

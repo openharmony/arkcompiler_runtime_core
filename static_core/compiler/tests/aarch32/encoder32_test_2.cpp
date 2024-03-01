@@ -16,6 +16,7 @@
 #include "encoder32_test.h"
 
 namespace ark::compiler {
+// NOLINTBEGIN(readability-magic-numbers)
 
 // A32-encoding of immediates allow to encode any value in range [0, 255],
 // other values should be encoded as masks.
