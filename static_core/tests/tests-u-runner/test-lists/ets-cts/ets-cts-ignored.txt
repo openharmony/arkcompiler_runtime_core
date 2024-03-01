@@ -554,39 +554,27 @@
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.ets
 07.expressions/07.object_literal/04.object_literal_evaluation/ex1.ets
 07.expressions/07.object_literal/04.object_literal_evaluation/ex2.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_100.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_101.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_120.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_121.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_122.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_135.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_136.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_137.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_150.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_151.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_152.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_165.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_166.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_167.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_180.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_181.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_182.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_198.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_199.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_200.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_216.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_217.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_218.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_24.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_25.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_26.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_51.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_52.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_53.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_78.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_79.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_80.ets
-07.expressions/28.assignment/02.compound_assignment_operators/ops_boxed_99.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_100.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_101.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_120.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_121.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_122.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_150.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_151.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_152.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_165.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_166.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_167.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_216.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_217.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_218.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_51.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_52.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_78.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_80.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_99.ets
 07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/numeric_condition_expression_type_3.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_105.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_106.ets
@@ -1472,8 +1460,8 @@
 # end of es2panda fails
 
 # 15297 Enum constants equality behavior is different from TS
-07.expressions/24.equality_expressions/02.value_equality_operators/enum_equality_1.ets
-07.expressions/24.equality_expressions/02.value_equality_operators/enum_equality_3.ets
+07.expressions/25.equality_expressions/02.value_equality_operators/enum_equality_1.ets
+07.expressions/25.equality_expressions/02.value_equality_operators/enum_equality_3.ets
 11.enumerations/01.enumeration_integer_values/enum_int_4.ets
 
 # 15299 Invalid Enum initialization value error
@@ -1943,3 +1931,6 @@
 07.expressions/18.ensure_not_null_expression/undefined_1.ets
 07.expressions/18.ensure_not_null_expression/undefined_3.ets
 07.expressions/18.ensure_not_null_expression/undefined_4.ets
+
+# Failed compilation of Enumeration-Operations
+11.enumerations/03.enumeration_operations/enum_type_methods_valueof.ets
