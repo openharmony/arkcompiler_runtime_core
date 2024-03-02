@@ -50,6 +50,7 @@ sub:
           ((): void => { self.length = pars })()
         params:
           - paramOf '0.0', '-1.0'
+        ignored: true
       - method: at
         params:
           - paramOf(*default_inds)
