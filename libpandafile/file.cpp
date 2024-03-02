@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,7 +276,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     return file;
 }
 
-std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t size)
+std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t size, std::string tag)
 {
     size_t size_to_mmap = AlignUp(size, panda::os::mem::GetPageSize());
     void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
@@ -288,12 +288,22 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
         PLOG(ERROR, PANDAFILE) << "Failed to copy buffer into mem'";
     }
 
+    if (!tag.empty()) {
+        if (tag == "ArkTS Code") {
+            std::string memAddr = std::to_string(ToUintPtr(mem));
+            tag = tag + ":" + memAddr;
+        }
+        auto ret = os::mem::TagAnonymousMemory(mem, size_to_mmap, tag.c_str());
+        if (ret.has_value()) {
+            PLOG(ERROR, PANDAFILE) << "Can't tag mmap anonymous, errno: " << errno;
+        }
+    }
+
     os::mem::ConstBytePtr ptr(reinterpret_cast<std::byte *>(mem), size_to_mmap, os::mem::MmapDeleter);
     if (ptr.Get() == nullptr) {
         PLOG(ERROR, PANDAFILE) << "Failed to open panda file from memory'";
         return nullptr;
     }
-
     std::hash<void *> hash;
     return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
 }
