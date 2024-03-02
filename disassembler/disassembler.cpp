@@ -1923,11 +1923,26 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
             }
         }
 
-        method->ins.push_back(pa_ins);
+        method->AddInstruction(pa_ins);
         bc_ins = bc_ins.GetNext();
     }
 
+    size_t instruction_count = method->ins.size();
     for (const auto &pair : label_table) {
+        if (pair.first > instruction_count) {
+            LOG(ERROR, DISASSEMBLER) << "> Wrong label index got, count of instructions is " << instruction_count
+                                     << ", but the label index is " << pair.first;
+            continue;
+        }
+
+        // In some case, the end label can be after the last instruction
+        // Creating an invalid instruction for the label to make sure it can be serialized
+        if (pair.first == instruction_count) {
+            pandasm::Ins ins{};
+            ins.opcode = pandasm::Opcode::INVALID;
+            method->AddInstruction(ins);
+        }
+
         method->ins[pair.first].label = pair.second;
         method->ins[pair.first].set_label = true;
     }
