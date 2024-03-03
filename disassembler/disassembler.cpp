@@ -16,6 +16,7 @@
 #include "disassembler.h"
 #include "mangling.h"
 #include "utils/logger.h"
+#include "utils/const_value.h"
 
 #include <iomanip>
 
@@ -1588,6 +1589,44 @@ void Disassembler::SerializeMethodAnnotations(const pandasm::Function &method, s
     }
 }
 
+void Disassembler::SerializeInstructions(const pandasm::Function &method, std::ostream &os,
+                                         const std::map<std::string, MethodInfo>::const_iterator &method_info_it,
+                                         bool print_method_info) const
+{
+    std::string delim = ": ";
+    size_t width = 0;
+    if (print_method_info) {
+        for (const auto &i : method.ins) {
+            size_t ins_size = i.ToString().size();
+            if (i.set_label) {
+                ins_size = ins_size - i.label.size() - delim.length();
+            }
+
+            if (ins_size > width && ins_size < ark::INSTRUCTION_WIDTH_LIMIT) {
+                width = i.ToString().size();
+            }
+        }
+    }
+
+    for (size_t i = 0; i < method.ins.size(); i++) {
+        std::string ins = method.ins[i].ToString("", true, method.regs_num);
+        if (method.ins[i].set_label) {
+            size_t pos = ins.find(delim);
+            std::string label = ins.substr(0, pos);
+            ins.erase(0, pos + delim.length());
+            os << label << ":\n";
+        }
+
+        if (ins != "") {
+            os << "\t" << std::setw(width) << std::left << ins;
+            if (print_method_info && i < method_info_it->second.instructions_info.size()) {
+                os << " # " << method_info_it->second.instructions_info.at(i);
+            }
+            os << "\n";
+        }
+    }
+}
+
 void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, bool print_information) const
 {
     SerializeMethodAnnotations(method, os);
@@ -1614,37 +1653,11 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     auto method_info_it = prog_info_.methods_info.find(signature);
     bool print_method_info = print_information && method_info_it != prog_info_.methods_info.end();
     if (print_method_info) {
-        const MethodInfo &method_info = method_info_it->second;
-
-        size_t width = 0;
-        for (const auto &i : method.ins) {
-            if (i.ToString().size() > width) {
-                width = i.ToString().size();
-            }
-        }
-
-        os << " { # " << method_info.method_info << "\n#   CODE:\n";
-
-        for (size_t i = 0; i < method.ins.size(); i++) {
-            os << "\t" << std::setw(width) << std::left << method.ins.at(i).ToString("", true, method.regs_num) << " # "
-               << method_info.instructions_info.at(i) << "\n";
-        }
+        os << " { # " << method_info_it->second.method_info << "\n#   CODE:\n";
     } else {
         os << " {\n";
-
-        for (const auto &i : method.ins) {
-            if (i.set_label) {
-                std::string ins = i.ToString("", true, method.regs_num);
-                std::string delim = ": ";
-                size_t pos = ins.find(delim);
-                std::string label = ins.substr(0, pos);
-                ins.erase(0, pos + delim.length());
-                os << label << ":\n\t" << ins << "\n";
-            } else {
-                os << "\t" << i.ToString("", true, method.regs_num) << "\n";
-            }
-        }
     }
+    SerializeInstructions(method, os, method_info_it, print_method_info);
 
     if (method.catch_blocks.size() != 0) {
         os << "\n";
