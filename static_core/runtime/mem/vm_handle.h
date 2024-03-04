@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,19 +84,31 @@ class VMMutableHandle : public VMHandle<T> {
 public:
     VMMutableHandle(ManagedThread *thread, ObjectHeader *object)
     {
-        auto scope = thread->GetTopScope<ObjectHeader *>();
-        ASSERT(scope != nullptr);
-        this->address_ = scope->NewHandle(object);
+        scope_ = thread->GetTopScope<ObjectHeader *>();
+        ASSERT(scope_ != nullptr);
+        if (object != nullptr) {
+            this->address_ = scope_->NewHandle(object);
+        } else {
+            this->address_ = reinterpret_cast<uintptr_t>(nullptr);
+        }
     }
     ~VMMutableHandle() = default;
 
     void Update(ObjectHeader *object)
     {
-        *reinterpret_cast<ObjectHeader **>(this->address_) = object;
+        ASSERT(object != nullptr);
+        if (this->address_ == reinterpret_cast<uintptr_t>(nullptr)) {
+            this->address_ = scope_->NewHandle(object);
+        } else {
+            *reinterpret_cast<ObjectHeader **>(this->address_) = object;
+        }
     }
 
     NO_COPY_SEMANTIC(VMMutableHandle);
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(VMMutableHandle);
+
+private:
+    HandleScope<ObjectHeader *> *scope_ {nullptr};
 };
 }  // namespace ark
 
