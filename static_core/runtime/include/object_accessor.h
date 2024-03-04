@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 
 #include <cstddef>
 
+#include "libpandabase/utils/atomic.h"
+#include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 
 namespace ark {
@@ -128,6 +130,50 @@ public:
 
     static void SetClass(ObjectHeader *obj, BaseClass *newClass);
 
+    static bool IsHeapObject(ObjectPointerType v)
+    {
+        return reinterpret_cast<ObjectHeader *>(v) != nullptr;
+    }
+
+    static bool IsHeapObject(coretypes::TaggedType v)
+    {
+        return coretypes::TaggedValue(v).IsHeapObject();
+    }
+
+    static ObjectHeader *DecodeNotNull(ObjectPointerType v)
+    {
+        auto *p = reinterpret_cast<ObjectHeader *>(v);
+        ASSERT(p != nullptr);
+        return p;
+    }
+
+    static ObjectHeader *DecodeNotNull(coretypes::TaggedType v)
+    {
+        return coretypes::TaggedValue(v).GetHeapObject();
+    }
+
+    template <typename P>
+    static P Load(P *p)
+    {
+        return *p;
+    }
+
+    template <typename P>
+    static P LoadAtomic(P *p)
+    {
+        return AtomicLoad(p, std::memory_order_relaxed);
+    }
+
+    static void Store(ObjectPointerType *ref, ObjectHeader *val)
+    {
+        *ref = EncodeObjectPointerType(val);
+    }
+
+    static void Store(coretypes::TaggedType *ref, ObjectHeader *val)
+    {
+        *ref = EncodeTaggedType(val);
+    }
+
 private:
     template <class T, bool IS_VOLATILE>
     static T Get(const void *obj, size_t offset)
@@ -171,6 +217,16 @@ private:
         ASSERT(IsAddressInObjectsHeap(addr));
         // Atomic with parameterized order reason: memory order passed as argument
         return reinterpret_cast<std::atomic<T> *>(addr)->store(value, memoryOrder);
+    }
+
+    static ObjectPointerType EncodeObjectPointerType(ObjectHeader *obj)
+    {
+        return static_cast<ObjectPointerType>(ToUintPtr(obj));
+    }
+
+    static coretypes::TaggedType EncodeTaggedType(ObjectHeader *obj)
+    {
+        return coretypes::TaggedValue::Cast(obj);
     }
 
     PANDA_PUBLIC_API static mem::GCBarrierSet *GetBarrierSet();

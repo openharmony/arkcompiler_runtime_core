@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,8 @@ public:
 
     template <bool NEED_LOCK = true>
     void AddRef(const ObjectHeader *fromObjAddr, size_t offset);
+    template <bool NEED_LOCK = true>
+    void AddRef(const void *fromAddr);
 
     template <typename RegionPred, typename MemVisitor>
     void Iterate(const RegionPred &regionPred, const MemVisitor &visitor);
@@ -64,13 +66,23 @@ public:
     }
 
     /**
-     * Used in the barrier. Record the reference from the region of obj_addr to the region of value_addr.
-     * @param obj_addr - address of the object
-     * @param offset   - offset in the object where value is stored
-     * @param value_addr - address of the reference in the field
+     * Used in the barrier. Record the reference from the region of objAddr to the region of valueAddr.
+     * @param objAddr - address of the object
+     * @param offset - offset in the object where value is stored
+     * @param valueAddr - address of the reference in the field
      */
     template <bool NEED_LOCK = true>
     static void AddRefWithAddr(const ObjectHeader *objAddr, size_t offset, const ObjectHeader *valueAddr);
+
+    /**
+     * Used in the barrier. Record the reference from the region of fromAddr to the region of valueAddr.
+     * @param fromRemset - pointer to remset of region which contains fromAddr object (avoid region resolving on each
+     * call)
+     * @param fromAddr - pointer to the reference in the object where value is stored
+     * @param valueAddr - address of the reference in the field
+     */
+    template <bool NEED_LOCK = true>
+    static void AddRefWithAddr(RemSet<> *fromRemset, const void *fromAddr, const ObjectHeader *valueAddr);
 
     void Dump(std::ostream &out);
 
