@@ -72,7 +72,7 @@ export final class GC {
      * - -1 in case the task is canceled
      */
     public static startGC(cause: int, callback: () => void): long throws {
-        GC.startGCImpl(cause, callback as Object);
+        return GC.startGCImpl(cause, callback as Object);
     }
 
     /**

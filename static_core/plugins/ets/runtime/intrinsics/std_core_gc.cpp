@@ -474,7 +474,11 @@ extern "C" EtsLong StdGetUsedHeapSize()
 {
     const auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    return static_cast<EtsLong>(coroutine->GetPandaVM()->GetHeapManager()->GetTotalMemory());
+    auto *headManager = coroutine->GetPandaVM()->GetHeapManager();
+    auto totalMemory = headManager->GetTotalMemory();
+    auto freeMemory = headManager->GetFreeMemory();
+    ASSERT(totalMemory >= freeMemory);
+    return static_cast<EtsLong>(totalMemory - freeMemory);
 }
 
 extern "C" EtsLong StdGetReservedHeapSize()

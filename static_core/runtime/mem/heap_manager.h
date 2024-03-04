@@ -247,7 +247,7 @@ private:
     void *AllocateMemoryForObject(size_t size, Alignment align, ManagedThread *thread,
                                   ObjectAllocatorBase::ObjMemInitPolicy objInitType);
 
-    ObjectAllocatorPtr GetObjectAllocator();
+    ObjectAllocatorPtr GetObjectAllocator() const;
 
     static constexpr float DEFAULT_TARGET_UTILIZATION = 0.5;
 
