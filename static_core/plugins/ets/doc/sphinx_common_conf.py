@@ -38,6 +38,8 @@ release = u'1.1.0'
 rst_epilog = '''
 .. |CB_BAD| replace:: TypeScript
 .. |CB_OK| replace:: {lang}
+.. |CB_NON_COMPLIANT_CODE| replace:: Non-compliant code
+.. |CB_COMPLIANT_CODE| replace:: Compliant code
 .. |CB_R| replace:: Recipe:
 .. |CB_RULE| replace:: Rule
 .. |CB_ERROR| replace:: **Severity: error**

@@ -1898,7 +1898,7 @@ to check whether certain class members exist.
 |CB_ERROR|
 
 |LANG| supports destructuring assignment for arrays and tuples. Object
-destructuring and spread operator are not supported, use other idioms
+destructuring and spread operator are not supported. Use other idioms
 (e.g., a temporary variable, where applicable) for replacement.
 
 |CB_BAD|
@@ -2329,7 +2329,7 @@ explicitly.
 |CB_ERROR|
 
 |LANG| supports unpacking arrays and tuples passed as function parameters.
-Unpacking properties from objects is not supported, |LANG| requires parameters
+Unpacking properties from objects is not supported. |LANG| requires parameters
 to be passed directly to the function, and local names to be assigned manually.
 
 |CB_BAD|
@@ -3965,9 +3965,9 @@ Properties and functions of the global object: ``eval``
 ``handler.preventExtensions()``, ``handler.set()``,
 ``handler.setPrototypeOf()``
 
-The following APIs is partially supported:
+The following APIs are partially supported:
 
-``Object.assign(target: Record<string, Object | null | undefined>,``
+``Object.assign(target: Record<string, Object | null | undefined>``,
 ``...source: Object[]): Record<string, Object | null | undefined>``
 
 |CB_SEE|
@@ -4374,3 +4374,337 @@ Thus these functions are excessive.
 ~~~~~~~~
 
 * :ref:`R093`
+
+.. _R153:
+
+|CB_R| The inheritance for ``Sendable`` classes is limited
+----------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-class-inheritance``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableClassInheritance
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+In |LANG|, ``Sendable`` class can inherit only from other ``Sendable``
+classes. At the same time, ``Non-Sendable`` class is not allowed to
+inherit from ``Sendable`` class.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    class A {}
+
+    @Sendable
+    class B extends A {
+        constructor() {
+            super()
+        }
+    }
+
+    @Sendable
+    class C {}
+
+    class D extends C {
+        constructor() {
+            super()
+        }
+    }
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    @Sendable
+    class A {}
+
+    @Sendable
+    class B extends A {
+        constructor() {
+            super()
+        }
+    }
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R154`
+* :ref:`R155`
+* :ref:`R156`
+* :ref:`R157`
+
+.. _R154:
+
+|CB_R| Properties in ``Sendable`` classes and interfaces must have a Sendable data type
+---------------------------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-prop-types``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendablePropType
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+In |LANG|, all properties of ``Sendable`` class or interface must have a
+``Sendable data type``.
+
+The ``Sendable data`` is data whose type belongs to one of the following
+category:
+
+* Primitive types: ``boolean``, ``number``, ``string``, ``bigint``,
+  ``null``, ``undefined``
+
+* ``Sendable`` class or interface
+
+* ``Nullish Sendable`` type: ``T | null``, ``T | undefined``
+  or ``T | null | undefined``, where ``T`` is a sendable data type
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    class A {}
+
+    interface I {}
+
+    @Sendable
+    class B {
+        a: A = new A()  // Invalid, 'A' is not Sendable
+        b: I = {}       // Invalid, 'I' is not Sendable
+    }
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    // a.ets
+    @Sendable
+    class A {}
+
+    interface I extends ISendable {}
+
+    // b.ets
+    import { A, I } from "a"
+
+    @Sendable
+    class B {
+        a: A = new A()
+        b: I = {}
+        c: number = 1
+        d: string | null | undefined = undefined
+    }
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R155`
+* :ref:`R156`
+* :ref:`R157`
+
+.. _R155:
+
+|CB_R| Definite assignment assertion is not allowed in ``Sendable`` classes and Interfaces
+------------------------------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-definite-assignment``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableDefiniteAssignment
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+|LANG| doesn't allow using definite assignment assertions on properties of
+``Sendable`` classes and interfaces.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    @Sendable
+    class A {
+        a!: number;
+    }
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    @Sendable
+    class A {
+        a: number = 1;
+    }
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R154`
+* :ref:`R156`
+* :ref:`R157`
+
+.. _R156:
+
+|CB_R| Type arguments of generic ``Sendable`` type must be a ``Sendable`` data type
+-----------------------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-generic-types``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableGenericTypes
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+In |LANG|, only ``Sendable`` data types are allowed as type arguments of
+generic ``Sendable`` type.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    class A {}
+
+    @Sendable
+    class B<T> {
+        a: T | undefined
+    }
+
+    let b = new B<A>()  // Invalid, 'A' is not Sendable
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    // a.ets
+    @Sendable
+    export class A {
+        a: number = 1;
+    }
+
+    @Sendable
+    export class B<T> {}
+
+    // b.ets
+    import { A, B } from "a";
+
+    @Sendable
+    class C<T> {
+        a: T | undefined = undefined
+        b: B<T> = new B<T>();
+        c: B<number | undefined> = new B<number | undefined>();
+    }
+
+    let c1 = new B<A>()
+    let c2 = new B<string>()
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R154`
+* :ref:`R155`
+* :ref:`R157`
+
+.. _R157:
+
+|CB_R| Only imported variables can be captured by ``Sendable`` class
+--------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-imported-variables``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableImportedVariables
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+The |LANG| doesn't support sharing closures at runtime. Therefore, ``Sendable``
+classes are not allowed to capture local variable, or use a function or class
+from the same module, as it would create a closure. Only imported variables,
+classes and functions can be used inside a ``Sendable`` class body.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    let foo: number = 1;
+
+    function bar() {
+        console.log("hello")
+    }
+
+    @Sendable
+    class A {}
+
+    @Sendable
+    class B {
+        a: A = new A();     // Invalid, 'A' is not imported
+        b: number = foo;    // Invalid, 'foo' is not imported
+
+        m(): number {
+            bar();          // Invalid, 'bar' is not imported
+            return foo;     // Invalid, 'foo' is not imported
+        }
+    }
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    // a.ets
+    export let foo: number = 1;
+
+    export function bar() {
+        console.log("hello")
+    }
+
+    @Sendable
+    export class A {}
+
+    // b.ets
+    import {foo, bar, A} from "a"
+
+    @Sendable
+    class B {
+        a: A = new A();
+        b: number = foo;
+
+        m(): number {
+            bar();
+            return foo;
+        }
+    }
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R154`
+* :ref:`R155`
+* :ref:`R156`
