@@ -63,10 +63,10 @@ access modifiers (see :ref:`Access Modifiers`):
 -  *Internal*, or
 -  *Private*.
 
-A newly declared field can hide a field declared in a superclass or
+A newly declared field can shadow a field declared in a superclass or
 superinterface.
 
-A newly declared method can hide, implement, or override a method
+A newly declared method can shadow, overload, implement, or override a method
 declared in a superclass or superinterface.
 
 Every class defines two class-level scopes (see :ref:`Scopes`): one for
@@ -80,12 +80,12 @@ of a class can have the same name if one is static while the other is not.
    method declaration
    accessor declaration
    constructor declaration
-   hiding
-   implementation
+   shadowing
+   implementing
    overriding
    superclass
    superinterface
-   
+
 
 |
 
@@ -197,7 +197,7 @@ Abstract methods do not have bodies, i.e., they can be declared but not
 implemented.
 
 Only abstract classes can have abstract methods.
-A :index:`compile-time error` occurs if a non-abstract class has 
+A :index:`compile-time error` occurs if a non-abstract class has
 an abstract method:
 
 .. code-block:: typescript
@@ -205,7 +205,7 @@ an abstract method:
 
    class Y {
      abstract method (p: string): void
-     /* Compile-time error: Abstract methods can only 
+     /* Compile-time error: Abstract methods can only
         be within an abstract class. */
    }
 
@@ -290,8 +290,8 @@ A :index:`compile-time error` occurs if:
 
 -  The *extends* graph has a cycle.
 
--  typeReference refers directly, or as alias of types ``primitive``, ``enum``,
-   ``union``, ``interface``, or ``function``.
+-  typeReference refers directly to, or is an alias of primitive, enumeration,
+   union, interface, or function types.
 
 -  Any type argument of ``typeReference`` is a wildcard type argument.
 
@@ -444,7 +444,7 @@ following:
 A class *implements* all its superinterfaces.
 
 A :index:`compile-time error` occurs if a class is at the same time a
-subtype of:
+subtype (see :ref:`Subtyping`) of:
 
 -  Two interface types that represent different instantiations of the same
    generic interface (see :ref:`Generic Declarations`); or
@@ -467,12 +467,12 @@ subtype of:
 If a class is not declared *abstract*, then:
 
 -  Any abstract method of each direct superinterface is implemented (see
-   :ref:`Overriding by Instance Methods`) by a declaration in that class.
+   :ref:`Inheritance`) by a declaration in that class.
 -  The declaration of the existing method is inherited from a direct superclass,
    or a direct superinterface.
 
 
-If a default method (see :ref:`Default Method Declarations`) of a 
+If a default method (see :ref:`Default Method Declarations`) of a
 superinterface is not inherited, then that default method can:
 
 -  Be overridden by a class method; and
@@ -512,10 +512,13 @@ Implementing Interface Properties
 .. meta:
     frontend_status: Done
 
-A class must implement all properties from all interfaces (see
-:ref:`Implementing Interface Properties`) which are defined as a getter, a
+A class must implement all properties from all superinterfaces (see
+:ref:`Interface Properties`) that are always defined as a getter, a
 setter, or both. Providing implementation for the property in the form of
-a field is not necessary.
+a field is not necessary:
+
+.. code-block-meta:
+
 
 .. code-block:: typescript
    :linenos:
@@ -540,6 +543,33 @@ a field is not necessary.
         this.color_ = s
       }
     }
+
+If a property is defined in the form that requires a setter, then the
+implementation of the property in the form of a readonly field triggers
+a compile-time error:
+
+.. code-block-meta:
+   expect-cte
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Style {
+      set color(s: string)
+      writable: number
+    }
+
+    class StyleClassTwo implements Style {
+      readonly color: string = "" // compile-time error
+      readonly writable: number = 0  // compile-time error
+    }
+
+    function write_into_read_only (s: Style) {
+      s.color = "Black"
+      s.writable = 666
+    }
+
+    write_into_read_only (new StyleClassTwo)
 
 .. index::
    class
@@ -569,7 +599,7 @@ A *class body* can contain declarations of the following members:
 .. code-block:: abnf
 
     classBody:
-        '{' 
+        '{'
            classBodyDeclaration* classInitializer? classBodyDeclaration*
         '}'
         ;
@@ -875,12 +905,14 @@ Fields are actually class instance variables (see :ref:`Variable Declarations`).
 
 A :index:`compile-time error` occurs if:
 
--  The same field modifier is used more than once in a field declaration.
--  The name of a field declared in the body of a class declaration is already
-   used for another field or method in the same declaration.
+-  One and the same field modifier is used more than once in a field declaration.
+-  Name of a field declared in the body of a class declaration is already
+   used for a method in the same declaration.
+-  Name of a field declared in the body of a class declaration is already
+   used for another field in the same declaration with the same static or
+   non-static status.
 
-
-A field declared by a class with a certain name *hides* any accessible
+A field declared by a class with a certain name *shadows* any accessible
 declaration of fields if they have the same name in superclasses and
 superinterfaces of the class.
 
@@ -890,22 +922,22 @@ superinterfaces of the class.
    class instance
    field modifier
    class declaration
-   hiding
+   shadowing
    access
    superclass
    superinterface
    class declaration body
-   
-If a hidden field is static, then it can be accessed with the qualification
-of a superclass or of a superinterface, or with a field access expression with
-the keyword ``super`` (see :ref:`Field Access Expressions`).
+
+If a shadowed field is static, then it can be accessed only with the
+qualification of a superclass or of a superinterface name (see
+:ref:`Field Access Expression`).
 
 A class can access all non-private fields of a superclass and superinterfaces
 from its direct superclass and direct superinterfaces if such non-private
 fields are both:
 
 -  Accessible (see :ref:`Scopes`) to code in the class; and
--  Not hidden by a declaration in the class.
+-  Not shadowed by a declaration in the class.
 
 A class can inherit more than one field or property with the same name from
 its superinterfaces, or from both its superclass and superinterfaces. However,
@@ -921,8 +953,8 @@ no ambiguity).
    qualified name
    access
    class body
-   hiding
-   hidden field
+   shadowing
+   shadowed field
    static field
    field access expression
    keyword super
@@ -984,7 +1016,7 @@ Readonly (Constant) Fields
 
 A field that has the modifier ``readonly`` is a *readonly field*. Changing
 the value of a readonly field after initialization is not allowed.
- 
+
 Both static and non-static fields can be declared *readonly fields*.
 
 A static readonly field must be initialized as follows:
@@ -1025,9 +1057,9 @@ an assignment (see :ref:`Assignment`) to the declared variable.
 The following rules apply to an initializer in a static field declaration:
 
 -  A :index:`compile-time error` occurs if the initializer uses the keywords
-   ``this`` or ``super`` while calling a method (see 
+   ``this`` or ``super`` while calling a method (see
    :ref:`Method Call Expression`) or accessing a field (see
-   :ref:`Field Access Expressions`).
+   :ref:`Field Access Expression`).
 -  The initializer is evaluated, and the assignment is performed only once
    when the class is initialized at runtime.
 
@@ -1152,7 +1184,7 @@ A :index:`compile-time error` occurs if:
 -  The body of a class declaration declares a method but the name of that
    method is already used for a field in the same declaration.
 -  The body of a class declaration declares two same-name methods with
-   override-equivalent signatures (see :ref:`Override-Equivalent Signatures`)
+   overload-equivalent signatures (see :ref:`Overload-Equivalent Signatures`)
    as members of that body of a class declaration.
 
 .. index::
@@ -1162,7 +1194,7 @@ A :index:`compile-time error` occurs if:
    method
    method modifier
    class declaration
-   override-equivalent signature
+   overload-equivalent signature
    class declaration body
 
 |
@@ -1297,7 +1329,7 @@ Overriding Methods
 
 The ``override`` modifier indicates that an instance method in a superclass is
 overridden by the corresponding instance method from a subclass (see
-:ref:`Overriding by Instance Methods`).
+:ref:`Overloading and Overriding`).
 
 The usage of the modifier ``override`` is optional but strongly recommended as
 it makes the overriding explicit.
@@ -1316,8 +1348,6 @@ uses the default parameter values of the overridden method.
 
 A :index:`compile-time error` occurs if a parameter in the overriding method
 has a default value.
-
-See :ref:`Overriding by Instance Methods` for the specific rules of overriding.
 
 .. index::
    keyword override
@@ -1349,7 +1379,7 @@ Native methods are described in the chapter Experimental Features (see
 
 |
 
-.. _Methods Overload Signatures:
+.. _Method Overload Signatures:
 
 Method Overload Signatures
 ==========================
@@ -1412,7 +1442,7 @@ the ``undefined`` argument. The call ``c.foo(x)`` is executed as a call of the
 implementation method with an argument.
 
 *Overload signature* compatibility requirements are described in
-:ref:`Overload Signature Compatibility`.
+:ref:`Overload Signature Correctness Check`.
 
 In addition, a :index:`compile-time error` occurs if not **all** of the
 following requirements are met:
@@ -1482,331 +1512,10 @@ type, but its body can complete normally (see :ref:`Normal and Abrupt Statement 
    method declaration
    return statement
    return type
-   
-|
-
-.. _Inheritance:
-
-Inheritance
-===========
-
-.. meta:
-    frontend_status: Done
-
-Class *C* inherits from its direct superclass all concrete methods *m* (both
-*static* and *instance*) that meet **all** of the following requirements:
-
--  *m* is a member of the direct superclass of *C*;
--  *m* is public, protected, or internal in the same package as *C*;
--  No signature of a method declared in *C* is compatible with the signature
-   of *m* (see :ref:`Compatible Signature`).
-
-
-Class *C* inherits from its direct superclass and direct superinterfaces all
-abstract and default methods *m* (see :ref:`Default Method Declarations`)
-that meet the following requirements:
-
--  *m* is a member of *D*, which is a direct superclass or direct superinterface
-   of *C*;
--  *m* is public, protected, or internal in the same package as *C*;
--  No method declared in *C* has a signature that is compatible with the
-   signature of *m* (see :ref:`Compatible Signature`);
--  No signature of a concrete method inherited by *C* from its direct
-   superclass is compatible with the signature of *m* (see
-   :ref:`Compatible Signature`);
--  No method :math:`m'` that is a member of *D*', which is a direct superclass or
-   direct superinterface of *C* (while :math:`m'` is distinct from *m*,
-   and :math:`D'` from *D*), overrides the declaration of the method *m* from
-   :math:`D'` (see :ref:`Overriding by Instance Methods` for class method
-   overriding, and :ref:`Overriding by Instance Methods in Interfaces` for
-   interface method overriding).
-
-
-No class can inherit private or static methods from its superinterfaces.
-
-.. index::
-   inheritance
-   direct superclass
-   static method
-   instance method
-   public
-   protected
-   package
-   signature
-   subsignature
-   override-equivalent signature
-   default method
-   abstract method
-   direct superinterface
-   interface method overriding
-   private method
-   static method
 
 |
 
-.. _Overriding by Instance Methods:
 
-Overriding by Instance Methods
-==============================
-
-.. meta:
-    frontend_status: Done
-
-The instance method  *m*:sub:`C` (inherited by, or declared in class *C*)
-overrides another method *m*:sub:`A` (declared in class *A*) if **all** the
-following requirements are met:
-
--  *C* is a subclass of *A*;
--  *C* does not inherit *m*:sub:`A`;
--  The signature of *m*:sub:`C` is compatible with the signature of *m*:sub:`A`
-   (see :ref:`Compatible Signature`);
-
----and if one of the following is also true:
-
--  *m*:sub:`A` is public;
--  *m*:sub:`A` is protected; or
--  *m*:sub:`A` is internal in the same package as *C* while:
-
-    -  Either *C* declares *m*:sub:`C`; or
-    -  *m*:sub:`A` is a member of the direct superclass of *C*;
-
--  *m*:sub:`A` is declared  with package access, and *m*:sub:`C` overrides:
-
-    -  *m*:sub:`A` from a superclass of *C*; or
-    -  method :math:`m'` from *C* (while :math:`m'` is distinct from both
-       *m*:sub:`C` and *m*:sub:`A`, i.e., :math:`m'` overrides *m*:sub:`A`
-       from a superclass of *C*).
-
-
-.. index::
-   instance method
-   overriding
-   subclass
-   inheritance
-   signature
-   subsignature
-   public
-   protected
-   abstract method
-   non-abstract method
-   implementation
-
-Non-abstract *m*:sub:`C` implements *m*:sub:`A` from *C* if it overrides an
-abstract method *m*:sub:`A`.
-
-An instance method *m*:sub:`C` (inherited by, or declared in class *C*)
-overrides another method *m*:sub:`I` (declared in interface *I*) from *C* if
-**all** of the following requirements are met:
-
--  *I* is a superinterface of *C*;
--  *m*:sub:`I` is not static;
--  *C* does not inherit *m*:sub:`I`;
--  The signature of *m*:sub:`C` is a subsignature of the signature of
-   *m*:sub:`I` (see :ref:`Override-Equivalent Signatures`); and
--  *m*:sub:`I` is ``public``.
-
-
-A method call expression (see :ref:`Method Call Expression`) containing the
-keyword ``super`` can be used to call an overridden method.
-
-Among the methods that override each other, return types can vary if they are
-reference types.
-
-The specialization of return type to a subtype (i.e., *covariant*
-:ref:`Covariance` return) is based on the concept of
-*return-type-substitutability*. For example, the method declaration *d*:sub:`1`
-with return type *R*:sub:`1` is return-type-substitutable for another method
-*d*:sub:`2` with return type *R*:sub:`2` if:
-
--  *R*:sub:`1` is a primitive type (*R*:sub:`2` is identical to *R*:sub:`1`); or
--  *R*:sub:`1` is a reference type (*R*:sub:`1` adapted to type parameters of
-   *d*:sub:`2` is a subtype of *R*:sub:`2`).
-
-.. index::
-   abstract method
-   non-abstract method
-   implementation
-   overriding
-   instance method
-   superinterface
-   static method
-   inheritance
-   signature
-   subsignature
-   keyword super
-   qualified name
-   overridden method
-   superclass type
-   return type
-   reference type
-   return-type-substitutability
-   covariant
-   covariance
-   primitive type
-   subtype
-   type parameter
-  
-|
-
-.. _Hiding by Class Methods:
-
-Hiding by Class Methods
-=======================
-
-.. meta:
-    frontend_status: Done
-
-A static method *m* declared in, or inherited by a class *C* *hides* any
-method :math:`m'` (where the signature of *m* is a subsignature of the
-signature of :math:`m'` as described in :ref:`Override-Equivalent Signatures`)
-in its superclasses and superinterfaces.
-
-A hidden method is not directly accessible (see :ref:`Scopes`) to code in *C*.
-However, a hidden method can be accessed by using a qualified name, or a method
-call expression (see :ref:`Method Call Expression`) that contains the keyword
-``super`` or a cast to a superclass type.
-
-A :index:`compile-time error` occurs if a static method hides an instance
-method.
-
-.. index::
-   hiding
-   static method
-   inheritance
-   method
-   signature
-   override-equivalent signature
-   superclass
-   superinterface
-   hidden method
-   scope
-   access
-   qualified name
-   method call expression
-   keyword super
-   superclass type
-   instance method
-   cast
-
-|
-
-.. _Requirements in Overriding and Hiding:
-
-Requirements in Overriding and Hiding
-=====================================
-
-.. meta:
-    frontend_status: Done
-
-The method declaration *d*:sub:`1` with return type *R*:sub:`1` can override or
-hide the declaration of another method *d*:sub:`2` with return type *R*:sub:`2`
-if *d*:sub:`1` is return-type-substitutable for *d*:sub:`2` (see
-:ref:`Overriding by Instance Methods`). Otherwise, a compile-time error occurs.
-
-A method that overrides or hides another method (including the methods that
-implement abstract methods defined in interfaces) cannot change ``throws`` or
-``rethrows`` clauses of the overridden or hidden method.
-
-A compile-time error occurs if a type declaration *T* has a member method
-*m*:sub:`1`, but there is also a method *m*:sub:`2` declared in *T* or a
-supertype of *T*, for which **all** of the following requirements are met:
-
--  *m*:sub:`1` and *m*:sub:`2` use the same name; and
--  *m*:sub:`2` is accessible from *T* (see :ref:`Scopes`); and
--  The signature of *m*:sub:`1` is not a subsignature of *m*:sub:`2` (see
-   :ref:`Override-Equivalent Signatures`).
-
-.. index::
-   overriding
-   hiding
-   method declaration
-   return type
-   return-type-substitutability
-   abstract method
-   interface
-   throws clause
-   rethrows clause
-   hidden method
-   overridden method
-   compile-time error
-   access
-   signature
-   subsignature
-   override-equivalent signature
-
-The access modifier of an overriding or hiding method must provide no less
-access than was provided in the overridden or hidden method.
-
-A compile-time error occurs if:
-
--  The overridden or hidden method is public, and the overriding or hiding
-   method is *not* public.
--  The overridden or hidden method is protected, and the overriding or hiding
-   method is *not* protected or public.
--  The overridden or hidden method has internal access, and the overriding
-   or hiding method is private.
-
-.. index::
-   overriding method
-   hiding method
-   access modifier
-   overridden method
-   compile-time error
-   hidden method
-   public method
-   protected method
-   private method
-   internal access
-
-|
-
-.. _Inheriting Methods with Override-Equivalent Signatures:
-
-Inheriting Methods with Override-Equivalent Signatures
-======================================================
-
-.. meta:
-    frontend_status: Done
-
-A class can inherit multiple methods with override-equivalent signatures (see
-:ref:`Override-Equivalent Signatures`).
-
-A compile-time error occurs if a class *C* inherits the following:
-
--  Concrete method whose signature is override-equivalent to another
-   method that *C* inherited; or
--  Default method whose signature is override-equivalent to another method
-   that *C* inherited, if there is no abstract method, declared in a
-   superclass of *C* and inherited by *C*, that is override-equivalent
-   to both methods.
-
-
-An abstract class can inherit all the methods, assuming that a set of
-override-equivalent methods consists of at least one abstract method, and
-zero or more default methods.
-
-A compile-time error occurs if one of the inherited methods is not
-return-type-substitutable for every other inherited method (except ``throws``
-and ``rethrows`` clauses that cause no error in this case).
-
-The same method declaration can be inherited from an interface in a number
-of ways, causing no compile-time error on its own.
-
-.. index::
-   inheriting method
-   override-equivalent signature
-   inheritance
-   compile-time error
-   abstract method
-   superclass
-   return-type-substitutability
-   inherited method
-   throws clause
-   rethrows clause
-   interface
-   method declaration
-
-|
 
 .. _Accessor Declarations:
 
@@ -1956,7 +1665,7 @@ A compile-time error occurs if a class initializer contains:
 -  A ``throw`` statement (see :ref:`Throw Statements`) with no surrounding
    ``try`` statement (see :ref:`Try Statements`) to handle the error or exception.
 -  Keywords ``this`` (see :ref:`this Expression`) or ``super`` (see
-   :ref:`Method Call Expression` and :ref:`Field Access Expressions`), or any
+   :ref:`Method Call Expression` and :ref:`Field Access Expression`), or any
    type of a variable declared outside the class initializer.
 
 
@@ -2073,7 +1782,7 @@ Formal Parameters
 The syntax and semantics of a constructor’s formal parameters are identical
 to those of a method.
 
-.. _Constructors Overload Signatures:
+.. _Constructor Overload Signatures:
 
 Constructor Overload Signatures
 ===============================
@@ -2125,7 +1834,7 @@ the constructor implementation with the argument  ``undefined``. The ``new C(x)`
 creates an object calling constructor implementation with 'x' as an argument.
 
 *Overload signature* compatibility requirements are described in
-:ref:`Overload Signature Compatibility`.
+:ref:`Overload Signature Correctness Check`.
 
 A :index:`compile-time error` occurs if at least two different overload
 signatures or implementation signatures have different *access modifiers*.
@@ -2180,11 +1889,11 @@ The high-level sequence of a *primary constructor* body includes the following:
 
 2. Mandatory call to ``super([arguments])`` (see :ref:`Explicit Constructor Call`)
    if a class has an extension clause (see :ref:`Class Extension Clause`).
-   
+
 3. Implicitly added compiler-generated code that:
 
     - Sets default values for instance own fields.
-    
+
     - Executes instance own field initializers in a valid order determined by
       the compiler. If the compiler detects a circular reference, then a
       compile-time error occurs.
@@ -2238,6 +1947,8 @@ The high-level sequence of a *secondary constructor* body includes the following
 
 The example below shows *primary* and *secondary* constuctors:
 
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
@@ -2246,14 +1957,14 @@ The example below shows *primary* and *secondary* constuctors:
       static readonly BLACK = 1
       color: number
 
-      // primary constructor:   
+      // primary constructor:
       constructor(x: number, y: number, color: number) {
         super(x, y) // calls base class constructor as class has 'extends'
         this.color = color
       }
-      // secondary constructor: 
+      // secondary constructor:
       constructor(color: number) {
-        this(0, 0, color) 
+        this(0, 0, color)
       }
     }
 
@@ -2263,14 +1974,17 @@ indirectly, through a series of one or more explicit constructor calls
 using ``this``.
 
 A constructor body looks like a method body (see :ref:`Method Body`), except
-the semantics described above, and explicit return of a value
-(see :ref:`Return Statements`) is prohibited. However, a return statement
-without an expression can be used in a constructor body.
+for the semantics as described above. Explicit return of a value (see
+:ref:`Return Statements`) is prohibited. On the opposite, a constructor body
+can use a return statement without an expression.
 
 A constructor body must not use fields of a created object before the fields
-are initialized; ``this`` cannot be passed as an argument until each object
-field receives an initial value. These checks are performed by the compiler
-that reports a compile-time error if a violation is detected. 
+are initialized: ``this`` can be passed as an argument only after each object
+field receives an initial value. The checks are performed by the compiler.
+If the compiler finds a violation, then a compile-time error occurs.
+
+A constructor body can have no more than one call to the current class or
+direct superclass constructor. A compile-time error occurs otherwise.
 
 .. index::
    compile-time error
@@ -2335,7 +2049,7 @@ constructor call statement:
    enclosing
    qualified superclass constructor call statement
    static context
-   
+
 
 An ordinary method call evaluates an alternate constructor call statement
 left-to-right. The evaluation starts from arguments, proceeds to constructor,
@@ -2403,7 +2117,7 @@ performed as follows:
 
    Non-static field initializers are executed if the superclass constructor
    call:
-   
+
    -  Has an explicit constructor call statement; or
    -  Is implicit.
 
@@ -2452,7 +2166,7 @@ the superclass:
 
 .. code-block:: typescript
    :linenos:
-    
+
    // Class declarations without constructors
    class Object {}
    class Base {}
@@ -2506,6 +2220,50 @@ the superclass:
 
 |
 
+.. _Inheritance:
+
+Inheritance
+***********
+
+.. meta:
+    frontend_status: Done
+
+Class *C* inherits all accessible members from its direct superclass and
+direct superinterfaces, and optionally overrides or hides some of the
+inherited members.
+
+An accessible member is a public, protected, or internal member in the
+same package as *C*.
+
+If *C* is not abstract, then it must implement all inherited abstract methods.
+The method of each inherited abstract method must be defined with
+*override-compatible* signatures (see :ref:`Override-Compatible Signatures`).
+
+Semantic checks for inherited method and accessors are described in
+:ref:`Overloading and Overriding in Classes`.
+
+Constructors from the direct superclass of *C*  are not subject of overloading
+and overriding because such constructors are not accessible in *C* directly,
+and can only be called from a constructor of *C* (see :ref:`Constructor Body`).
+
+If *C* defines a static or instance field *F* with the same name as that of
+a field accessible from its direct superclass, then *F* hides the inherited
+field.
+
+.. index::
+   inheritance
+   direct superclass
+   static method
+   instance method
+   public
+   protected
+   package
+   signature
+   abstract method
+   direct superinterface
+
+|
+
 .. _Local Classes and Interfaces:
 
 Local Classes and Interfaces
@@ -2536,7 +2294,7 @@ The example below shows local classes and interfaces in a top-level function:
 
 .. code-block:: typescript
    :linenos:
-    
+
     function foo (parameter: number) {
       let local: string = "function local"
       interface LocalInterface { // Local interface in a top-level function
@@ -2550,7 +2308,7 @@ The example below shows local classes and interfaces in a top-level function:
         static method () { console.log ("Static field = ", LocalClass.field) }
         static field: string = "`class/static field value`"
       }
-      let lc: LocalInterface  = new LocalClass 
+      let lc: LocalInterface  = new LocalClass
         // Both local types can be freely used in the top-level function scope
       lc.method()
       LocalClass.method()
@@ -2604,7 +2362,7 @@ surrounding class members are not accessible from local classes:
 -------------
 
 .. [1]
-   Class own fields here means fields declared in the class.
+   Class own fields here means fields declared within the class.
 
 .. raw:: pdf
 

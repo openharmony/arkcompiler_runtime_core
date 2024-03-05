@@ -254,10 +254,10 @@ Ambient Namespace Declarations
         ;
 
     ambentNamespaceElement:
-        ambentNamespaceDeclaration | selectiveExportDirective
+        ambentNamespaceElementDeclaration | selectiveExportDirective
     ;
 
-    ambentNamespaceDeclaration:
+    ambentNamespaceElementDeclaration:
         'export'? 
         ( ambientVariableDeclaration
         | ambientFunctionDeclaration

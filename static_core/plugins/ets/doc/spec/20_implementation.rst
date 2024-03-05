@@ -30,7 +30,7 @@ Import Path Lookup
     frontend_status: Done
 
 If an import path ``<some path>/name`` is resolved to a path in the folder
-"name", then  the compiler executes the following lookup sequence:
+'*name*', then  the compiler executes the following lookup sequence:
 
 -   If the folder contains the file ``index.ets``, then this file is imported
     as a separate module written in |LANG|;
@@ -71,6 +71,15 @@ be any valid type.
     interface SomeInterface {}
     let type_of_interface: Type = Type.for<SomeInterface>()
 
+.. _Methods for T[] types:
+
+Methods for ``T[]`` types
+*************************
+
+Some methods defined for ``Array<T>`` can be used for ``T[]`` (e.g., ``at``).
+It does not mean that ``T[]`` is a class type, but rather that the compiler
+must use appropriate lowering to implement such methods by using library
+function calls.
 
 
 .. raw:: pdf

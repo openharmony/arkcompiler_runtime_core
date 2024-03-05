@@ -88,10 +88,6 @@ Predefined types include the following:
 
 -  Class types: ``Object``, ``String``, ``Array<T>``, and ``BigInt``.
 
-Each predefined value type has a corresponding predefined class type that
-wraps the value of the predefined value type: ``Number``, ``Byte``, ``Short``,
-``Int``, ``Long``, ``Float``, ``Double``, ``Char``, and ``Boolean``.
-
 The predefined value types are called *primitive types*. Primitive type names
 are reserved, i.e., they cannot be used for user-defined type names. Primitive
 types have no methods. They only have the operations as referred herein (see
@@ -99,6 +95,18 @@ types have no methods. They only have the operations as referred herein (see
 
 Type ``double`` is an alias to ``number``. Type ``Double`` is an alias to
 ``Number``.
+
+
+.. _Boxed Types:
+
+Boxed Types
+===========
+
+Each predefined value type has a corresponding predefined class type (called
+*boxed type*) that wraps the value of the predefined value type:
+``Number``, ``Byte``, ``Short``, ``Int``, ``Long``, ``Float``, ``Double``,
+``Char``, and ``Boolean``.
+
 
 .. index::
    predefined type
@@ -156,39 +164,41 @@ Types by Category
 
 All |LANG| types are summarized in the following table:
 
-+-----------------------------------+-----------------------------------------+
-| **Predefined Types**              | **User-Defined Types**                  |
-+===================+===============+======================+==================+
-| *Value Types*     | *Reference*   |    *Value Types*     | *Reference*      |
-|                   | *Types*       |                      | *Types*          |
-| (Primitive Types) |               |                      |                  |
-+-------------------+---------------+----------------------+------------------+
-| ``number``,       | ``Number``,   |     enum types       | class types,     |
-| ``byte``,         | ``Byte``,     |                      |                  |
-|                   | ``Short``,    |                      | interface types, |
-|                   |               |                      |                  |
-| ``short``,        | ``Int``,      |                      | array types,     |
-| ``int``,          | ``Long``,     |                      |                  |
-|                   | ``Float``,    |                      | function types,  |
-|                   |               |                      |                  |
-| ``long``,         | ``Double``,   |                      | tuple types,     |
-| ``float``,        | ``Char``,     |                      |                  |
-|                   | ``Boolean``,  |                      | union types,     |
-|                   |               |                      |                  |
-| ``double``,       | ``Object``,   |                      | type parameters  |
-| ``char``,         | ``object``,   |                      |                  |
-|                   |               |                      |                  |
-| ``boolean``       | ``void``,     |                      |                  |
-|                   | ``null``,     |                      |                  |
-|                   |               |                      |                  |
-|                   | ``String``,   |                      |                  |
-|                   | ``string``,   |                      |                  |
-|                   |               |                      |                  |
-|                   | ``BigInt``,   |                      |                  |
-|                   | ``bigint``,   |                      |                  |
-|                   |               |                      |                  |
-|                   | ``never``     |                      |                  |
-+-------------------+---------------+----------------------+------------------+
+
++----------------------------------+-----------------------------------------+
+| **Predefined Types**             | **User-Defined Types**                  |
++===================+==============+=======================+=================+
+| *Value Types*     | *Reference*  |   *Value Types*       | *Reference*     |
+|                   |              |                       |                 |
+| (Primitive Types) | *Types*      |                       | *Types*         |
++-------------------+--------------+-----------------------+-----------------+
+| ``number``,       | ``Number``,  | enum        types     | class types,    |
+| ``byte``,         | ``Byte``,    |                       |                 |
+|                   | ``Short``,   |                       | interface types,|
+|                   |              |                       |                 |
+| ``short``,        | ``Int``,     |                       | array types,    |
+| ``int``,          | ``Long``,    |                       |                 |
+|                   | ``Float``,   |                       | function types, |
+|                   |              |                       |                 |
+| ``long``,         | ``Double``,  |                       | tuple types,    |
+| ``float``,        | ``Char``,    |                       |                 |
+|                   | ``Boolean``, |                       | union types,    |
+|                   |              |                       |                 |
+| ``double``,       | ``Object``,  |                       | type parameters |
+| ``char``,         | ``object``,  |                       |                 |
+|                   |              |                       |                 |
+| ``boolean``,      | ``void``,    |                       |                 |
+|                   | ``null``,    |                       |                 |
+| ``string``,       |              |                       |                 |
+|                   | ``String``,  |                       |                 |
+| ``bigint``        | ``string``,  |                       |                 |
+|                   |              |                       |                 |
+|                   | ``BigInt``,  |                       |                 |
+|                   | ``bigint``,  |                       |                 |
+|                   |              |                       |                 |
+|                   | ``never``    |                       |                 |
++-------------------+--------------+-----------------------+-----------------+
+
 
 .. index::
    class type
@@ -818,8 +828,9 @@ Larger types include smaller types or their values:
 A value of a smaller type can be assigned to a variable of a larger type.
 
 Type ``bigint`` does not belong to this hierarchy. There is no implicit
-conversion from a numeric type to ``bigint``. Standard library class ``BigInt``
-methods must be used to create ``bigint`` values from numeric types.
+conversion from a numeric type to ``bigint``. Standard library (see
+:ref:`Standard Library`) class ``BigInt`` methods must be used to create
+``bigint`` values from numeric types.
 
 .. index::
    numeric type
@@ -971,19 +982,18 @@ Other expressions can implicitly create a class instance (see
 
 The operations on references to objects are as follows:
 
--  Field access that uses a qualified name or a field access expression (see
-   :ref:`Field Access Expressions`);
+-  Field access expression (see :ref:`Field Access Expression`);
 -  Call expression (see :ref:`Method Call Expression` and :ref:`Function Call Expression`);
 -  Cast expression (see :ref:`Cast Expressions`);
 -  String concatenation operator (see :ref:`String Concatenation`) that---given
    an operand of type ``string`` and a reference---calls the ``toString``
    method of the referenced object, converts the reference to type ``string``,
    and creates a concatenation of the two strings as a new ``string``;
--  ``instanceof`` operator (see :ref:`InstanceOf Expression`);
--  ``typeof`` operator (see :ref:`TypeOf Expression`);
+-  ``instanceof`` expression (see :ref:`InstanceOf Expression`);
+-  ``typeof`` expression (see :ref:`TypeOf Expression`);
 -  Reference equality operators '``==``' and '``!=``' (see
    :ref:`Reference Equality`);
--  Conditional operator '``?:``' (see :ref:`Conditional Expressions`).
+-  Conditional expression '``?:``' (see :ref:`Conditional Expressions`).
 
 
 Multiple references to an object are possible.
@@ -1083,7 +1093,8 @@ Type ``string`` has dual semantics:
 
 -  If a string is created, assigned or passed as an argument, then it behaves
    like a reference type (see :ref:`Reference Types`).
--  All ``string`` operations (see :ref:`String Concatenation` and
+-  All ``string`` operations (see :ref:`String Concatenation`,
+   :ref:`Value Equality for Strings` and
    :ref:`String Comparison Operators`) handle strings as values (see
    :ref:`Value Types`).
 
@@ -1117,26 +1128,26 @@ Type ``never``
 
 Type ``never`` is a subtype (see :ref:`Subtyping`) of any other type.
 
-Type ``never`` type has no instances. It is used as a
+Type ``never`` has no instances. It is used as one of the following:
 
-- return type for functions or methods which never returns a value, but finish
-  their work throwing an error or exception.
-- type of variables which can never be assigned.
-- type of parameters of some function or method preventing a body of such
-  function or method be executed.
+- Return type for functions or methods that never return a value, but
+  throw an error or an exception when completing an operation.
+- Type of variables that can never be assigned.
+- Type of parameters of a function or a method to prevent the body of that
+  function or method from being executed.
 
 .. code-block:: typescript
    :linenos:
 
     function foo (): never {
-		throw new Error("foo() never returns")
-	}
+        throw new Error("foo() never returns")
+    }
 
     let x: never = foo() // x will never get value
 
     function bar (p: never) { // body of this 
        // function will never be executed
-	}
+    }
 
     bar (foo()) 
 
@@ -1156,7 +1167,6 @@ Type ``never`` type has no instances. It is used as a
    constant expression
    concatenation operator
    alias
-   subclass
    instance
    value
 
@@ -1187,6 +1197,11 @@ A compile-time occurs if:
 -  Type ``void`` is used as type annotation;
 -  An expression of type ``void`` is used as a value.
 
+
+
+.. code-block-meta:
+   expect-cte:
+
 .. code-block:: typescript
    :linenos:
 
@@ -1199,6 +1214,10 @@ A compile-time occurs if:
 Type ``void`` can be used as type argument that instantiates a generic type
 if a specific value of type argument is irrelevant. In this case, it is
 synonymous to type ``undefined`` (see :ref:`Type undefined`):
+
+
+.. code-block-meta:
+   expect-cte:
 
 .. code-block:: typescript
    :linenos:
@@ -1277,6 +1296,8 @@ in the library documentation. Common to these types is that the operator
 types. 
 
 **Note**: Type ``T[]`` and type ``Array<T>`` are different types.
+Some methods defined for ``Array<T>`` (e.g., ``at``) can be used for ``T[]``,
+but only if those do not change the array length.
 
 .. index::
    array type
@@ -1313,6 +1334,9 @@ A type alias can set a name for an array type (see :ref:`Type Alias Declaration`
     type Matrix = number[][] /* Two-dimensional array */
 
 An array as an object is assignable to a variable of type ``Object``:
+
+.. code-block-meta:
+
 
 .. code-block:: typescript
    :linenos:
@@ -1456,6 +1480,8 @@ nullish types (see :ref:`Nullish Types`).
 
 Type ``undefined`` can be used as the type argument that instantiates a
 generic type if specific value of the type argument is irrelevant.
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -1777,6 +1803,56 @@ and handling the type inference for array literals (see
 
 |
 
+.. _Access to Common Union Members:
+
+Access to Common Union Members
+------------------------------
+
+.. meta:
+    frontend_status: Partly
+
+Where ``u`` is a variable of union type *T*:sub:`1` | ... | *T*:sub:`N`,
+|LANG| supports access to a common member of ``u.m`` if the following
+conditions are met:
+ 
+- Each *T*:sub:`i` is an interface or class type;
+
+- Each *T*:sub:`i` has a member with the name ``m``; and
+
+- ``m`` for any *T*:sub:`i` is one of the following:
+
+    - Method or accessor with an equal signature; or
+    - Field with the same type.
+
+A compile-time error occurs otherwise:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    class A { 
+        n = 1
+        s = "aa"
+        foo(): void {}
+        goo(n: number) {}
+    }
+    class B { 
+        n = 2
+        s = 3.14
+        foo(): void {}
+        goo(): void {}
+    }
+
+    let u: A | B = new A
+
+    let x = u.n // ok, common field
+    u.foo() // ok, common method
+    
+    console.log(u.s) // compile-time error, field types are not equal
+    u.goo() // compile-time error, signatures are not equal
+
+|
+
 .. _Keyof Types:
 
 ``Keyof`` Types
@@ -1799,6 +1875,10 @@ names of all members of the class or interface type.
 A compile-time error occurs if ``typeReference`` is not a class or interface
 type. The semantics of type ``keyof`` is presented in the example below:
 
+
+.. code-block-meta:
+   expect-cte:
+
 .. code-block:: typescript
    :linenos:
 
@@ -1813,6 +1893,8 @@ type. The semantics of type ``keyof`` is presented in the example below:
 
 If the class or the interface is empty, then its type ``keyof`` is equivalent
 to type ``never``:
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -1890,9 +1972,9 @@ that can potentially violate null safety (e.g., access to a property):
 -  Use of safe operations:
 
    -  Safe method call (see :ref:`Method Call Expression` for details);
-   -  Safe field access expression (see :ref:`Field Access Expressions`
+   -  Safe field access expression (see :ref:`Field Access Expression`
       for details);
-   -  Safe indexing expression (see :ref:`Indexing Expression` for details);
+   -  Safe indexing expression (see :ref:`Indexing Expressions` for details);
    -  Safe function call (see :ref:`Function Call Expression` for details);
 
 -  Conversion from ``T | null`` or ``T | undefined`` to *T*:
@@ -1920,9 +2002,9 @@ that can potentially violate null safety (e.g., access to a property):
 
 |
 
-.. _Bigint Type:
+.. _BigInt Type:
 
-Type ``Bigint``
+Type ``BigInt``
 ===============
 
 .. meta:
@@ -1934,21 +2016,22 @@ numbers larger than the maximal value of type ``long``. This type uses the
 arbitrary-precision arithmetic. Values of type ``bigint`` can be created from
 the following:
 
-- Literals of type ``bigint`` (see :ref:`BigInt Literals`); or
-- Numeric types, by using a call to the Standard library class ``BigInt``
-  method.
-
-
-Applicable operations with ```bigint`` type values are described in
-:ref:`Integer Types and Operations`.
+- BigInt literals (see :ref:`BigInt Literals`); or
+- Numeric types, by using a call to the standard library (see
+  :ref:`Standard Library`) class ``BigInt`` method.
 
 Similarly to ``string``, ``bigint`` type has dual semantics.
 
-If created, assigned or passed as an argument, type ``bigint`` behaves
-in the same manner as a reference type (see :ref:`Reference Types`).
+If created, assigned or passed as an argument, type ``bigint`` behaves in the
+same manner as a reference type (see :ref:`Reference Types`).
 
-All operations handle type ``bigint`` as a value type (see :ref:`Value Types`).
+All applicable operations handle type ``bigint`` as a value type (see
+:ref:`Value Types`). These operations are described in
+:ref:`Integer Types and Operations`.
 
+Type ``bigint`` is to be used as type annotation. Type ``BigInt`` is to
+create new objects and calls to static methods of class ``BigInt``
+(see :ref:`BigInt Literals`):
 
 .. code-block:: typescript
    :linenos:
@@ -2111,6 +2194,9 @@ The wrapper must raise an error if:
 The indexing access expression *D[index]*, where *D* is of type
 ``DynamicObject``, is handled as an indexing access to an underlying object.
 
+
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
@@ -2192,7 +2278,7 @@ The result of a cast expression is an instance of type *T*.
 
    function foo(d: DynamicObject) {
       let x = d as I
-      x.bar() // a call of interface method	(not dynamic)  
+      x.bar() // a call of interface method (not dynamic)  
    }
 
 The wrapper must raise an error if an underlying object cannot be converted
@@ -2278,6 +2364,8 @@ The default values of nullish union types are as follows:
 +----------------------+--------------------+
 | ``null | undefined`` | ``undefined``      |
 +----------------------+--------------------+
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:

@@ -523,6 +523,9 @@ does not have enough information about the defined alias:
 The same rules apply to a generic type alias defined as
 ``type A<T> = something``:
 
+.. code-block-meta:
+   expect-cte:
+
 .. code-block:: typescript
    :linenos:
 
@@ -534,6 +537,9 @@ The same rules apply to a generic type alias defined as
 
 A compile-time error occurs if a generic type alias is used without
 a type argument:
+
+.. code-block-meta:
+   expect-cte:
 
 .. code-block:: typescript
    :linenos:
@@ -652,6 +658,10 @@ applied to the variable as described in :ref:`Readonly Parameters`.
 
 A :index:`compile-time error` occurs if a non-array type has the prefix
 ``readonly``.
+
+.. code-block-meta:
+   expect-cte:
+
 
 .. code-block:: typescript
    :linenos:
@@ -1120,7 +1130,7 @@ Rest Parameter
 .. meta:
     frontend_status: Done
 
-*Rest parameters* allow functions or methods to take unbounded numbers of
+*Rest parameters* allow functions or methods to take an arbitrary number of
 arguments. *Rest parameters* have the symbol '``...``' mark before the
 parameter name:
 
@@ -1139,14 +1149,13 @@ A :index:`compile-time error` occurs if a rest parameter:
 -  Is not the last parameter in a parameter list;
 -  Has a type that is not an array type.
 
-A function that has a rest parameter of type ``T[]`` can accept any
-number of arguments of type *T*:
+A function with a rest parameter of type ``T[]`` can accept any number of
+arguments of types that are subtypes (see :ref:`Subtyping`) of *T*:
 
 .. index::
    rest parameter
    function
    method
-   unbounded
    parameter name
    array type
    parameter list
@@ -1167,8 +1176,14 @@ number of arguments of type *T*:
     sum(1) // returns 1
     sum(1, 2, 3) // returns 6
 
-If an argument of type ``T[]`` is prefixed with the ``spread`` operator
-'``...``', then only one argument can be accepted:
+
+If an argument of array type ``T[]`` is to be passed to a function with the
+rest parameter, then the spread expression (see :ref:`Spread Expression`) must
+be used with the ``spread`` operator '``...``' as prefix before the array
+argument:
+
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -1181,7 +1196,8 @@ If an argument of type ``T[]`` is prefixed with the ``spread`` operator
     }
 
     let x: number[] = [1, 2, 3]
-    sum(...x) // returns 6
+    sum(...x) // spread an array 'x'
+       // returns 6
 
 .. index::
    argument
@@ -1190,10 +1206,10 @@ If an argument of type ``T[]`` is prefixed with the ``spread`` operator
 
 |
 
-.. _Shadowing Parameters:
+.. _Shadowing by Parameter:
 
-Shadowing Parameters
-====================
+Shadowing by Parameter
+======================
 
 .. meta:
     frontend_status: Done
@@ -1221,7 +1237,6 @@ top-level variable within the body of that function or method:
     }
 
 .. index::
-   shadowing parameter
    shadowing
    parameter
    top-level variable
@@ -1370,7 +1385,7 @@ with the ``undefined`` argument. The call of ``foo(x)`` is executed as a call
 of the implementation function with the ``x`` argument.
 
 The compatibility requirements of *overload signatures* are described in
-:ref:`Overload Signature Compatibility`.
+:ref:`Overload Signature Correctness Check`.
 
 A :index:`compile-time error` occurs unless all overload signatures are
 either exported or non-exported.

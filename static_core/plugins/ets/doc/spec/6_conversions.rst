@@ -38,6 +38,10 @@ is called a *standalone expression*:
 
 Otherwise, the expression is *non-standalone*:
 
+.. code-block-meta:
+   skip
+
+
 .. code-block:: typescript
    :linenos:
 
@@ -124,16 +128,16 @@ Assignment-like Contexts
 
 - *Assignment contexts* that allow assigning (see :ref:`Assignment`) an
   expression value to a variable;
-  
+
 - *Call contexts* that allow assigning an argument value to a corresponding
   formal parameter of a function, method, constructor or lambda call (see
   :ref:`Function Call Expression`, :ref:`Method Call Expression`,
   :ref:`Explicit Constructor Call`, and :ref:`New Expressions`);
-  
+
 - *Composite literal contexts* that allow setting an expression value to an
   array element (see :ref:`Array Type Inference from Context`), a class, or
   an interface field (see :ref:`Object Literal`);
-  
+
 .. index::
    assignment
    assignment context
@@ -188,7 +192,7 @@ Assignment-like contexts allow using of one of the following:
 - :ref:`Widening Union Conversions`;
 
 - :ref:`Widening Reference Conversions`;
- 
+
 - :ref:`Character to String Conversions`;
 
 - :ref:`Constant String to Character Conversions`;
@@ -370,6 +374,9 @@ Numeric Casting Conversions
 A *numeric casting conversion* occurs if the *target type* and the expression
 type are both ``numeric`` or ``char``:
 
+.. code-block-meta:
+   not-subset
+
 .. code-block:: typescript
    :linenos:
 
@@ -485,6 +492,9 @@ from union* converts an expression of type ``U`` to some type ``TT`` (*target ty
 A compile-time error occurs if the target type ``TT`` is not one of ``T``:sub:`i`,
 and not derived from one of ``T``:sub:`i`.
 
+.. code-block-meta:
+
+
 .. code-block:: typescript
    :linenos:
 
@@ -509,6 +519,31 @@ and not derived from one of ``T``:sub:`i`.
 
 These conversions can cause a runtime error (**TBD: name it**) if the runtime
 type of an expression is not the *target type*.
+
+Another form of *conversion from union* is implicit conversion from union type
+to the target type. The conversion is only possible if each type in a union is
+compatible (see :ref:`Type Compatibility`) with the target type. If so, the
+conversion never causes a runtime error. If at least one type of a union is not
+compatible with the target type, then conversion causes a compile-time error:
+
+.. code-block-meta:
+   expect-cte
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {}
+    class Derived1 extends Base {}
+    class Derived2 extends Base {}
+
+    let d: Derived1 | Derived2 = ...
+    let b: Base = d // OK, as Derived1 and Derived2 are compatible with Base
+
+    let x: Double | Int = ...
+    let y: double = x // OK, as Double and Int can be converetd into double 
+
+    let x: Double | Base = ...
+    let y: double = x // Compile-time error, as Base cannot be converetd into double 
 
 |
 
@@ -634,6 +669,9 @@ types or of type ``char`` to a value of a smaller integer type provided that:
 - The expression is a constant expression (see :ref:`Constant Expressions`);
 - The value of the expression fits into the range of the smaller type.
 
+.. code-block-meta:
+   expect-cte:
+
 .. code-block:: typescript
    :linenos:
 
@@ -663,6 +701,10 @@ conversion* of numeric types and type ``char``.
 
 For example, a *boxing conversion* converts *i* of primitive value type ``int``
 into a reference *n* of class type ``Number``:
+
+.. code-block-meta:
+   not-subset
+
 
 .. code-block:: typescript
    :linenos:
@@ -701,6 +743,10 @@ the *unboxing conversion* of numeric types and type ``char``.
 
 For example, the *unboxing conversion* converts *i* of reference type ``Int``
 into type ``long``:
+
+.. code-block-meta:
+   not-subset
+
 
 .. code-block:: typescript
    :linenos:
@@ -789,6 +835,9 @@ Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted into
 non-union type ``T`` if each ``U``:sub:`i` is a literal that can be implicitly
 converted to type ``T``.
 
+.. code-block-meta:
+   expect-cte:
+
 .. code-block:: typescript
    :linenos:
 
@@ -810,8 +859,9 @@ Widening Reference Conversions
 .. meta:
     frontend_status: Done
 
-A *widening reference conversion* handles any subtype as a supertype.
-It requires no special action at runtime, and never causes an error.
+A *widening reference conversion* handles any subtype (see :ref:`Subtyping`) as
+a supertype. It requires no special action at runtime, and never causes an
+error.
 
 .. index::
    widening reference conversion
@@ -848,7 +898,6 @@ a compile-time error as it can cause type-safety violations:
     class B { b_method() {} }
     let b: B = n // OK as never is a subtype of any type
     b.b_method() // this breaks type-safety if as cast to never is allowed  
-
 
 The conversion of array types (see :ref:`Array Types`) also works in accordance
 with the widening style of the type of array elements as shown below:
@@ -1022,10 +1071,7 @@ converted into tuple type ``U`` = [``U``:sub:`1`, ``U``:sub:`2`, ``...``, ``U``:
 if the following conditions are met:
 
 - Tuple types have the same number of elements, thus n == m.
-- Every *T*:sub:`i` is identical to *U*:sub:`1` for any *i* in ``1 .. n``.
-
-.. - Every *T*:sub:`i` is compatible (see :ref:`Type Compatibility`) to *U*:sub:`i` for i in 1 .. n.
-
+- Every *T*:sub:`i` is identical to *U*:sub:`i` for any *i* in ``1 .. n``.
 
 |
 

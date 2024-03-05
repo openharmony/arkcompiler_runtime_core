@@ -101,7 +101,7 @@ Generic Parameters
     frontend_status: Done
 
 A class, an interface, or a function must be parameterized by at least one
-type parameter to be a *generic*. The type parameter is declared in the type
+*type parameter* to be a *generic*. The type parameter is declared in the type
 parameter section. It can be used as an ordinary type inside a *generic*.
 
 Syntactically, a type parameter is an unqualified identifier (see :ref:`Scopes`
@@ -194,11 +194,11 @@ declared, then the type parameter is not compatible with ``Object``, and
 has no methods or fields available for use. Lack of constraint effectively
 means ``extends Object|null|undefined``.
 If type parameter *T* has type constraint *S*, then the actual type of the
-generic instantiation must be a subtype of *S*. If the constraint *S* is a
-non-nullish type (see :ref:`Nullish Types`), then *T* is non-nullish too.
-If the type parameter is constrained with the ``keyof T``, then valid
-instantiations of this parameter can be the values of the union type created
-from string names of *T* or the union type itself:
+generic instantiation must be a subtype (see :ref:`Subtyping`) of *S*. If the
+constraint *S* is a non-nullish type (see :ref:`Nullish Types`), then *T* is
+non-nullish too. If the type parameter is constrained with the ``keyof T``,
+then valid instantiations of this parameter can be the values of the union type
+created from string names of *T* or the union type itself:
 
 .. index::
    type parameter constraint
@@ -320,10 +320,10 @@ for the generic declaration *G*.
 
 If ``C``:sub:`1`, ``...``, ``C``:sub:`n` is the constraint for the corresponding
 type parameters ``T``:sub:`1`, ``...``, ``T``:sub:`n` of a generic declaration,
-then *T*:sub:`i` is a subtype of each constraint type *C*:sub:`i` (see
-:ref:`Subtyping`). All subtypes of the type listed in the corresponding
-constraint have each type argument *T*:sub:`i` of the parameterized
-declaration ranging over them.
+then *T*:sub:`i` is a subtype (see :ref:`Subtyping`) of each constraint type
+*C*:sub:`i`. All subtypes of the type listed in the corresponding constraint
+have each type argument *T*:sub:`i` of the parameterized declaration ranging
+over them.
 
 .. index::
    type argument
@@ -338,7 +338,8 @@ A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 
 -  The generic declaration name is *G*.
 -  The number of type arguments equals that of *G*’s type parameters.
--  All type arguments are subtypes of a corresponding type parameter constraint.
+-  All type arguments are subtypes (see :ref:`Subtyping`) of a corresponding
+   type parameter constraint.
 
 A compile-time error occurs if an instantiation is not well-formed.
 
@@ -395,6 +396,10 @@ The examples below illustrate this for both classes and functions:
    class
    function
    compile-time error
+
+
+.. code-block-meta:
+    expect-cte:
 
 .. code-block:: typescript
    :linenos:
@@ -566,9 +571,9 @@ Any two type arguments are considered *provably distinct* if:
    nor a wildcard; or
 -  One type argument is a type parameter or a wildcard with an upper bound
    of *S*, the other *T* is not a type parameter and not a wildcard, and
-   neither is a subtype of the other (see :ref:`Subtyping`); or
+   neither is a subtype (see :ref:`Subtyping`) of the other ; or
 -  Each type argument is a type parameter, or wildcard with upper bounds
-   *S* and *T*, and neither is a subtype of the other (see :ref:`Subtyping`).
+   *S* and *T*, and neither is a subtype (see :ref:`Subtyping`) of the other.
 
 .. index::
    provably distinct type argument

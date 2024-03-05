@@ -737,6 +737,8 @@ expression*. Only class and struct types can be callable. To make a type
 callable, a static method with the name ``invoke`` or ``instantiate`` must be
 defined or inherited:
 
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
@@ -752,6 +754,8 @@ valid for the methods ``invoke`` and ``instantiate``.
 
 **Note**: Only a constructor---not the methods ``invoke`` or ``instantiate``---is
 called in a *new expression*:
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -781,6 +785,8 @@ Callable Types with Invoke Method
 The method ``invoke`` can have an arbitrary signature. It can be used in a
 *type call expression* in either case. If the signature has parameters, then
 the call must contain corresponding arguments.
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -849,6 +855,9 @@ if:
 - *T* has neither method ``invoke`` nor  method ``instantiate``; or
 - *T* has the method ``instantiate`` but its first parameter is not
   a ``factory``.
+
+.. code-block-meta:
+    expect-cte
 
 .. code-block:: typescript
    :linenos:

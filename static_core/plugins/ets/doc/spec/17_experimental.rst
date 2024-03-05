@@ -18,7 +18,7 @@ Experimental Features
 .. meta:
     frontend_status: Partly
 
-This Chapter introduces the |LANG| features that are considered a part of
+This Chapter introduces the |LANG| features that are considered parts of
 the language, but have no counterpart in |TS|, and are therefore not
 recommended to those in need of a single source code for |TS| and |LANG|.
 
@@ -268,28 +268,10 @@ Character Type and Operations
 |LANG| provides a number of operators to act on character values as discussed
 below.
 
--  Comparison operators that produce a value of type ``boolean``:
-
-   +  Character comparison operators '``<``', '``<=``', '``>``', and '``>=``'
-      (see :ref:`Numerical Comparison Operators`);
-   +  Character equality operators '``==``' and '``!=``' (see
-      :ref:`Value Equality for Characters`);
-
--  Character operators that produce a value of type ``char``;
-
-   + Unary plus '``+``' and minus '``-``' operators (see :ref:`Unary Plus` and
-     :ref:`Unary Minus`);
-   + Additive operators '``+``' and '``-``' (see :ref:`Additive Expressions`);
-   + Increment operator '``++``' used as prefix (see :ref:`Prefix Increment`)
-     or postfix (see :ref:`Postfix Increment`);
-   + Decrement operator '``--``' used as prefix (see :ref:`Prefix Decrement`)
-     or postfix (see :ref:`Postfix Decrement`);
-
--  Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
--  The string concatenation operator '``+``' (see :ref:`String Concatenation`)
-   that, if one operand is ``string`` and the other is ``character``, converts
-   the character operand to a string, and then creates a concatenation of the
-   two strings as a new ``string``.
+- Character equality operators '``==``' and '``!=``' (see :ref:`Value Equality for Characters`);
+- All remaining operators are identical to the integer operators (see
+  :ref:`Integer Types and Operations`) in that they handle character values as
+  integers of type *int* (see :ref:`Widening Primitive Conversions`).
 
 The class ``Char`` provides constructors, methods, and constants that are
 parts of the |LANG| standard library (see :ref:`Standard Library`).
@@ -298,17 +280,7 @@ parts of the |LANG| standard library (see :ref:`Standard Library`).
    char
    Char
    boolean
-   comparison operator
    equality operator
-   unary operator
-   additive operator
-   increment operator
-   postfix
-   prefix
-   decrement operator
-   conditional operator
-   concatenation operator
-   operand
    constructor
    method
    constant
@@ -384,6 +356,9 @@ that does not contain an accessible parameterless constructor, or constructor
 with all parameters of the second form of optional parameters (see
 :ref:`Optional Parameters`), or if ``typeReference`` has no a default value:
 
+.. code-block-meta:
+   expect-cte:
+
 .. code-block:: typescript
    :linenos:
 
@@ -427,8 +402,8 @@ as follows:
    the expressions to the right of it are not evaluated.
 
 #. The values of dimension expressions are checked. If the value of any
-   ``dimExpr`` expression is less than zero, then ``NegativeArraySizeException``
-   is thrown.
+   ``dimExpr`` expression is less than zero, then ``NegativeArraySizeError`` is
+   thrown.
 
 #. Space for the new array is allocated. If the available space is not
    sufficient to allocate the array, then ``OutOfMemoryError`` is thrown,
@@ -469,7 +444,9 @@ Indexable Types
 If a class or an interface declares one or two functions with names ``$_get``
 and ``$_set``, and signatures *(index: Type1): Type2* and *(index: Type1,
 value: Type2)* respectively, then an indexing expression (see
-:ref:`Indexing Expression`) can be applied to variables of such types:
+:ref:`Indexing Expressions`) can be applied to variables of such types:
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -483,7 +460,10 @@ value: Type2)* respectively, then an indexing expression (see
     x[1] = x // This notation implies a call: x.$_set (1, x)
 
 If only one function is present, then only the appropriate form of the index
-expression (see :ref:`Indexing Expression`) is available:
+expressions (see :ref:`Indexing Expressions`) is available:
+
+.. code-block-meta:
+   expect-cte:
 
 .. code-block:: typescript
    :linenos:
@@ -504,6 +484,8 @@ expression (see :ref:`Indexing Expression`) is available:
 
 Type ``string`` can be used as a type of the index parameter:
 
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
@@ -521,10 +503,13 @@ Functions ``$_get`` and ``$_set`` are ordinary functions with compiler-known
 signatures. The functions can be used like any other function.
 The functions can be abstract or defined in an interface and implemented later.
 The functions can be overridden and provide a dynamic dispatch for the indexing
-expression evaluation (see :ref:`Indexing Expression`). They can be used in
+expression evaluation (see :ref:`Indexing Expressions`). They can be used in
 generic classes and interfaces for better flexibility.
 
 A compile-time error occurs if these functions are marked as ``async``.
+
+.. code-block-meta:
+   expect-cte:
 
 .. code-block:: typescript
    :linenos:
@@ -631,6 +616,8 @@ A compile-time error occurs if this function is marked as ``async``.
 ``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the class
 ``iterable`` looks as follows:
 
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
@@ -735,24 +722,31 @@ A :index:`compile-time error` occurs if:
    class ``Exception`` or ``Error``, nor a class derived from ``Exception`` or
    ``Error``.
 
+
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
-      class ZeroDivisor extends Exception {}
+      class ZeroDivisorException extends Exception {}
 
       function divide(a: int, b: int): int throws {
-        if (b == 0) throw new ZeroDivisor()
+        if (b == 0) throw new ZeroDivisorException()
         return a / b
       }
 
-      function process(a: int; b: int): int {
+      function process(a: int; b: int) {
         try {
           let res = divide(a, b)
 
-          // further processing ...
+          // division successful, further processing ...
         }
-        catch (d: ZeroDivisor) { return MaxInt }
-        catch (e) { return 0 }
+        catch (d: ZeroDivisorException) {
+          // handle zero division situation 
+        }
+        catch (e) {
+          // handle all other errors or exceptions 
+        }
       }
 
 .. index::
@@ -893,7 +887,7 @@ Most other languages support a different form of overloading that specifies
 a separate body for each overloaded header.
 
 Both approaches have their advantages and disadvantages. The experimental
-approach of |LANG| allows for improved performance as a specific body
+approach of |LANG| allows for improved performance because a specific body
 is executed at runtime.
 
 .. index::
@@ -919,13 +913,13 @@ Function Overloading
     frontend_status: Done
 
 If a declaration scope declares two functions with the same name but
-different signatures that are not *override-equivalent* (see
-:ref:`Override-Equivalent Signatures`), then the function name is *overloaded*.
+different signatures that are not *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`), then the function name is *overloaded*.
 An overloaded function name causes no compile-time error on its own.
 
 No specific relationship is required between the return types, or between the
 ``throws`` clauses of the two functions with the same name but different
-signatures that are not *override-equivalent*.
+signatures that are not *overload-equivalent*.
 
 When calling a function, the number of actual arguments (and any explicit type
 arguments) and compile-time types of arguments is used at compile time to
@@ -937,7 +931,7 @@ determine the signature of the function being called (see
    declaration scope
    signature
    name
-   override-equivalent signature
+   overload-equivalent signature
    overloaded function name
    return type
    throws clause
@@ -946,7 +940,6 @@ determine the signature of the function being called (see
    explicit type argument
    function call
    compile-time error
-
 
 |
 
@@ -959,12 +952,12 @@ Class Method Overloading
     frontend_status: Done
 
 If two methods within a class have the same name, and their signatures are not
-*override-equivalent*, then the methods name is considered *overloaded*.
+*overload-equivalent*, then the methods name is considered *overloaded*.
 
 An *overloaded* method name cannot cause a :index:`compile-time error`
 on its own.
 
-If the signatures of two methods with the same name are not *override-equivalent*,
+If the signatures of two methods with the same name are not *overload-equivalent*,
 then the return types of those methods, or the ``throws`` or ``rethrows``
 clauses of those methods can have any kind of relationship.
 
@@ -973,14 +966,10 @@ of the arguments is used at compile time to determine the signature of the
 method being called (see :ref:`Method Call Expression`, and
 :ref:`Step 2 Selection of Method`).
 
-In the case of an instance method, the actual method being called is determined
-at runtime by using the dynamic method lookup (see :ref:`Method Call Expression`)
-provided by the runtime system.
-
 .. index::
    class method overloading
    signature
-   override-equivalent signature
+   overload-equivalent signature
    throws clause
    rethrows clause
    explicit type argument
@@ -992,38 +981,6 @@ provided by the runtime system.
 
 |
 
-.. _Interface Method Overloading:
-
-Interface Method Overloading
-============================
-
-.. meta:
-    frontend_status: Done
-
-If two methods of an interface (declared or inherited in any combination)
-have the same name but different signatures that are not *override-equivalent*
-(see :ref:`Inheriting Methods with Override-Equivalent Signatures`), then
-such method name is considered *overloaded*.
-
-However, this causes no :index:`compile-time error` on its own, because no
-specific relationship is required between the return types, or between the
-``throws`` clauses of the two methods.
-
-.. index::
-   interface method overriding
-   interface
-   method
-   override-equivalent signature
-   inherited method
-   overloaded method
-   method inheritance
-   declared method
-   return type
-   throws clause
-   signature
-
-|
-
 .. _Constructor Overloading:
 
 Constructor Overloading
@@ -1032,7 +989,7 @@ Constructor Overloading
 .. meta:
     frontend_status: Done
 
-The constructor overloading behaves identically to the method overloading (see
+Constructor overloading behavior is identical to that of method overloading (see
 :ref:`Class Method Overloading`). Each class instance creation expression (see
 :ref:`New Expressions`) resolves the overloading at compile time.
 
@@ -1054,21 +1011,21 @@ Declaration Distinguishable by Signatures
 Declarations with the same name are distinguishable by signatures if:
 
 -  They are functions with the same name, but their signatures are not
-   *override-equivalent* (see :ref:`Override-Equivalent Signatures` and 
+   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and 
    :ref:`Function Overloading`).
 
 -  They are methods with the same name, but their signatures are not
-   *override-equivalent* (see :ref:`Override-Equivalent Signatures`,
+   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`,
    :ref:`Class Method Overloading`, and :ref:`Interface Method Overloading`).
 
 -  They are constructors of the same class, but their signatures are not
-   *override-equivalent* (see :ref:`Override-Equivalent Signatures` and
+   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and
    :ref:`Constructor Overloading`).
 
 .. index::
    signature
    function overloading
-   override-equivalent signature
+   overload-equivalent signature
    interface method overloading
    class method overloading
 
@@ -1089,11 +1046,11 @@ that cause a :index:`compile-time error`:
 .. code-block:: typescript
    :linenos:
 
-      // Functions have override-equivalent signatures
+      // Functions have overload-equivalent signatures
       function foo(x: number) {}
       function foo(y: number) {}
 
-      // Functions have override-equivalent signatures
+      // Functions have overload-equivalent signatures
       function foo(x: number) {}
       type MyNumber = number
       function foo(x: MyNumber) {}
@@ -1214,7 +1171,7 @@ Final Methods
     frontend_status: Done
 
 A method can be declared *final* to prevent it from being overridden (see
-:ref:`Overriding by Instance Methods`) or hidden in subclasses.
+:ref:`Overloading and Overriding`) in subclasses.
 
 A :index:`compile-time error` occurs if:
 
@@ -1227,7 +1184,6 @@ A :index:`compile-time error` occurs if:
    final method
    overriding
    instance method
-   hiding
    subclass
    method declaration
    keyword abstract
@@ -1390,7 +1346,7 @@ Only ``public`` members can be accessed:
    :linenos:
 
       class A {
-          foo () { ... this.bar() ... } 
+          foo () { ... this.bar() ... }
                        // Extension function bar() is accessible
           protected member_1 ...
           private member_2 ...
@@ -1493,7 +1449,7 @@ As illustrated by the examples below, an *extension function* can be:
 
       // file ext.ets
       import {A} from "a.ets" // import name 'A'
-      function A.bar () { ... 
+      function A.bar () { ...
          this.foo() // Method foo() is called
          ...
       }
@@ -1586,7 +1542,7 @@ Syntactically, the *trailing lambda* looks as follows:
    :linenos:
 
       class A {
-          foo (f: ()=>void) { ... } 
+          foo (f: ()=>void) { ... }
       }
 
       let a = new A()
@@ -1624,7 +1580,7 @@ argument (see :ref:`Optional Parameters`).
    :linenos:
 
       class A {
-          foo (p?: ()=>void) { ... } 
+          foo (p?: ()=>void) { ... }
       }
 
       let a = new A()
@@ -1682,6 +1638,8 @@ Enumeration Super Type
 Any ``enum`` type has class type ``Object`` as its supertype. This allows
 polymorphic assignments into ``Object`` type variables. The ``instanceof`` check
 can be used to get enumeration variable back by applying the ``as`` conversion:
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -1766,6 +1724,8 @@ There is an additional method for instances of any enumeration type:
    constant depending on the type of the enumeration constant.
 
 -  ``getName()`` returns the name of an enumeration constant.
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -1946,6 +1906,8 @@ requirements are met:
    try statement
    catch clause
 
+.. code-block-meta:
+   expect-cte:
 
 .. code-block:: typescript
    :linenos:
@@ -2311,6 +2273,8 @@ The following methods are used as follows:
 
 -  ``catch`` is the alias for ``Promise<T>.then<U>((value: T) : U => {}``, ``onRejected)``.
 
+.. code-block-meta:
+
 .. code-block:: typescript
 
         Promise<U> Promise<T>::catch<U>(rejectCallback : (err:
@@ -2624,16 +2588,17 @@ The import of this module is illustrated in the table below:
 |                                   | |     let y = new A() // Error: 'A' is |
 |                                   | |        not accessible                |
 +-----------------------------------+-+--------------------------------------+
+| .. code-block:: typescript        | | .. code-block:: typescript           |
+|                                   | |                                      |
+|     import {A.B.L as X} from ".." | |     if (X == 0) { ... }              |
++-----------------------------------+-+--------------------------------------+
+
 
 (table cont'd)
 
 +-----------------------------------+-+--------------------------------------+
 | **Import**                        | | **Usage**                            |
 +===================================+=+======================================+
-| .. code-block:: typescript        | | .. code-block:: typescript           |
-|                                   | |                                      |
-|     import {A.B.L as X} from ".." | |     if (X == 0) { ... }              |
-+-----------------------------------+-+--------------------------------------+
 | .. code-block:: typescript        | | .. code-block:: typescript           |
 |                                   | |                                      |
 |     import {A.B as AB} from "..." | |     let x = new AB()                 |
@@ -2728,14 +2693,15 @@ Import and Overloading of Function Names
 
 While importing functions, the following situations can occur:
 
--  *Overloading*, where different imported functions have the same name
-   but different signatures, or a function (functions) of the current module
-   and an imported function (functions) have the same name but different
-   signatures.
+-  Different imported functions have the same name but different signatures, or
+   a function (functions) of the current module and an imported function
+   (functions) have the same name but different signatures. This situation is
+   *overloading*. All such functions are accessible.
 
--  *Shadowing*, where a function (functions) of the current module and an
-   imported function (functions) have the same name and signature.
-
+-  A function (functions) of the current module and an imported function
+   (functions) have the same name and overload-equivalent signature. This
+   situation is a :index:`compile-time error` as declarations are duplicated.
+   Qualified import or alias in import can be used to access the imported entity.
 
 .. index::
    import
@@ -2745,26 +2711,16 @@ While importing functions, the following situations can occur:
    imported function
    signature
    module
-   shadowing
 
-|
+The two situations are illustrated by the examples below:
 
-.. _Overloading of Function Names:
-
-Overloading of Function Names
-=============================
-
-.. meta:
-    frontend_status: Done
-
-*Overloading* is the situation when a compilation unit has access to several
-functions with the same names (regardless of where such functions are declared).
-The code can use all such functions if they have distinguishable signatures
-(i.e., the functions are not override-equivalent):
+.. code-block-meta:
+   skip
 
 .. code-block:: typescript
    :linenos:
 
+      // Overloading case
       package P1
       function foo(p: int) {}
 
@@ -2783,32 +2739,8 @@ The code can use all such functions if they have distinguishable signatures
         foo(3.141592653589) // Call to local foo(double)
       }
 
-.. index::
-   overloading
-   access
-   function
-   signature
 
-|
-
-.. _Shadowing of Function Names:
-
-Shadowing of Function Names
-===========================
-
-.. meta:
-    frontend_status: Done
-
-*Shadowing* is the :index:`compile-time error` that occurs if an imported
-function is identical to the function declared in the current compilation
-unit (the same names and override-equivalent signatures), i.e., the
-declarations are duplicated.
-
-Qualified import or alias in import can be used to access the imported entity.
-
-.. code-block:: typescript
-   :linenos:
-
+      // Declaration duplication case
       package P1
          function foo() {}
       package P2
@@ -2824,18 +2756,6 @@ Qualified import or alias in import can be used to access the imported entity.
         // But not a call to local foo()
         // foo() from P1 and foo() from P2 are not accessible
       }
-
-.. index::
-   shadowing
-   function name
-   imported function
-   compilation unit
-   override-equivalent signature
-   qualified import
-   alias
-   import
-   access
-   imported entity
 
 |
 
@@ -2911,9 +2831,6 @@ types *A* <: *B*) as follows:
 
 NonNullish Type Parameter
 =========================
-
-.. meta:
-    frontend_status: Partly
 
 .. meta:
     frontend_status: None

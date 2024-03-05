@@ -580,8 +580,11 @@ converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
     frontend_status: Done
 
 ``BigInt`` literals represent integer numbers with unlimited number of digits.
-``BigInt`` literals use decimal base only. A ``BigInt`` literal is a sequence
-of digits followed by the symbol '``n``':
+``BigInt`` literals use decimal base only. 
+
+``BigInt`` literals are always of type ``bigint`` (see :ref:`BigInt Type`).
+
+A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
 
 .. code-block:: abnf
 
@@ -594,8 +597,8 @@ It is presented by the examples below:
 
 .. code-block:: typescript
 
-    153n // bigint literal
-    1_153n // bigint literal
+    153n // BigInt literal
+    1_153n // BigInt literal
 
 The underscore character '``_``' used between successive digits can be used to
 denote a ``BigInt`` literal and improve readability. Underscore characters in
@@ -603,10 +606,12 @@ such positions do not change the values of literals. However, an underscore
 character must not be the very first or the very last symbol of a ``BigInt``
 literal.
 
-``BigInt`` literals are always of type ``bigint``.
-
 Strings that represent numbers or any integer values can be converted to
 ``bigint`` by using the built-in functions:
+
+
+.. code-block-meta:
+    skip
 
 .. code-block:: typescript
 
