@@ -1932,8 +1932,9 @@
 07.expressions/18.ensure_not_null_expression/undefined_3.ets
 07.expressions/18.ensure_not_null_expression/undefined_4.ets
 
-# Failed compilation of Enumeration-Operations
+# 16022 Failed compilation of Enumeration-Operations
 11.enumerations/03.enumeration_operations/enum_type_methods_valueof.ets
+#
 
 # Null type annotation is allowed now, these test are incorrect
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_3.ets
@@ -1946,3 +1947,7 @@
 # es2panda: the specification changed
 09.classes/05.field_declarations/01.static_fields/static_field_declaration_n3.ets
 # end of es2panda fails
+
+# 16032 Timeouts
+escompat/ArrayTest.ets
+#
