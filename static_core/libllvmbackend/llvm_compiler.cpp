@@ -138,6 +138,7 @@ ark::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOption
     llvmCompilerOptions.dumpModuleBeforeOptimizations = g_options.IsLlvmDumpBefore();
     llvmCompilerOptions.inlineModuleFile = g_options.GetLlvmInlineModule();
     llvmCompilerOptions.pipelineFile = g_options.GetLlvmPipeline();
+    llvmCompilerOptions.llvmaotThreads = g_options.GetLlvmaotThreads();
 
     llvmCompilerOptions.inlining = !IsInliningDisabled();
     llvmCompilerOptions.recursiveInlining = g_options.IsLlvmRecursiveInlining();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,7 +130,7 @@ std::string GetOptimizationPipeline(const std::string &filename, bool isIrtoc)
 namespace ark::llvmbackend {
 
 LLVMOptimizer::LLVMOptimizer(ark::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *arkInterface,
-                             std::shared_ptr<llvm::TargetMachine> targetMachine)
+                             const std::unique_ptr<llvm::TargetMachine> &targetMachine)
     : options_(std::move(options)), arkInterface_(arkInterface), targetMachine_(std::move(targetMachine))
 {
 }
@@ -162,19 +162,18 @@ void LLVMOptimizer::ProcessInlineModule(llvm::Module *inlineModule) const
     modulePm.run(*inlineModule, moduleAm);
 }
 
-void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
+void LLVMOptimizer::DumpModuleBefore(llvm::Module *module) const
 {
-    ASSERT(arkInterface_ != nullptr);
-
     if (options_.dumpModuleBeforeOptimizations) {
         llvm::errs() << "; =========================================\n";
         llvm::errs() << "; LLVM IR module BEFORE LLVM optimizations:\n";
         llvm::errs() << "; =========================================\n";
         llvm::errs() << *module << '\n';
     }
+}
 
-    DoOptimizeModule(module);
-
+void LLVMOptimizer::DumpModuleAfter(llvm::Module *module) const
+{
     if (options_.dumpModuleAfterOptimizations) {
         llvm::errs() << "; =========================================\n";
         llvm::errs() << "; LLVM IR module AFTER LLVM optimizations: \n";
@@ -183,8 +182,9 @@ void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
     }
 }
 
-void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
+void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
 {
+    ASSERT(arkInterface_ != nullptr);
     // Create the analysis managers.
     llvm::LoopAnalysisManager loopAm;
     llvm::FunctionAnalysisManager functionAm;
@@ -220,19 +220,18 @@ void LLVMOptimizer::DoOptimizeModule(llvm::Module *module) const
     if (options_.optimize) {
         cantFail(passBuilder.parsePassPipeline(modulePm, GetOptimizationPipeline(options_.pipelineFile, isIrtocMode)));
     } else {
-        namespace pass = ark::llvmbackend::passes;
         llvm::FunctionPassManager functionPm;
         if (!isIrtocMode) {
-            AddPassIf(functionPm, pass::PruneDeopt());
-            AddPassIf(functionPm, pass::ArkGVN(arkInterface_));
-            AddPassIf(functionPm, pass::IntrinsicsLowering(arkInterface_));
-            AddPassIf(functionPm, pass::PandaRuntimeLowering(arkInterface_));
-            AddPassIf(functionPm, pass::InsertSafepoints(), options_.useSafepoint);
-            AddPassIf(functionPm, pass::GepPropagation());
-            AddPassIf(functionPm, pass::GcIntrusion());
-            AddPassIf(functionPm, pass::GcIntrusionCheck(), options_.gcIntrusionChecks);
+            AddPassIf(functionPm, passes::PruneDeopt());
+            AddPassIf(functionPm, passes::ArkGVN(arkInterface_));
+            AddPassIf(functionPm, passes::IntrinsicsLowering(arkInterface_));
+            AddPassIf(functionPm, passes::PandaRuntimeLowering(arkInterface_));
+            AddPassIf(functionPm, passes::InsertSafepoints(), options_.useSafepoint);
+            AddPassIf(functionPm, passes::GepPropagation());
+            AddPassIf(functionPm, passes::GcIntrusion());
+            AddPassIf(functionPm, passes::GcIntrusionCheck(), options_.gcIntrusionChecks);
         }
-        AddPassIf(functionPm, pass::ExpandAtomics());
+        AddPassIf(functionPm, passes::ExpandAtomics());
         modulePm.addPass(createModuleToFunctionPassAdaptor(std::move(functionPm)));
     }
     modulePm.run(*module, moduleAm);

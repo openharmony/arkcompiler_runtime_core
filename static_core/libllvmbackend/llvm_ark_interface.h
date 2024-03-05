@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/IntrinsicInst.h>
 #include <llvm/Support/AtomicOrdering.h>
+#include <llvm/Support/Mutex.h>
 
 namespace llvm {
 class Function;
@@ -63,15 +64,11 @@ public:
     enum class RuntimeCallType { INTRINSIC, ENTRYPOINT };
 
     explicit LLVMArkInterface(ark::compiler::RuntimeInterface *runtime, llvm::Triple triple,
-                              ark::compiler::AotBuilder *aotBuilder);
+                              ark::compiler::AotBuilder *aotBuilder, llvm::sys::Mutex *lock);
 
     RuntimeCallee GetEntrypointCallee(EntrypointId id) const;
 
     void PutCalleeSavedRegistersMask(const llvm::Function *method, RegMasks masks);
-
-    void IncrementIntfInlineCacheIndex() const;
-
-    llvm::Value *GetOffsetForIntfInlineCache(llvm::CallInst *callInst) const;
 
     RegMasks GetCalleeSavedRegistersMask(const llvm::Function *method);
 
@@ -132,6 +129,8 @@ public:
 
     bool IsIrtocReturnHandler(const llvm::Function &function) const;
 
+    int32_t CreateIntfInlineCacheSlotId(const llvm::Function *caller) const;
+
 public:
     static constexpr auto NO_INTRINSIC_ID = static_cast<IntrinsicId>(-1);
     static constexpr auto GC_ADDR_SPACE = 271;
@@ -156,9 +155,6 @@ private:
     IntrinsicId GetIntrinsicIdMemory(const llvm::IntrinsicInst *inst) const;
     IntrinsicId GetIntrinsicIdMath(const llvm::IntrinsicInst *inst) const;
 #include "get_intrinsic_id_llvm_ark_interface_gen.h.inl"
-
-    uint64_t GetIntfInlineCacheId(const llvm::Function *caller) const;
-
 private:
     static constexpr auto NO_INTRINSIC_ID_CONTINUE = static_cast<IntrinsicId>(-2);
 
@@ -173,6 +169,7 @@ private:
     llvm::DenseMap<const llvm::Function *, RegMasks> calleeSavedRegisters_;
     ark::compiler::AotBuilder *aotBuilder_;
     std::vector<llvm::StringRef> irtocReturnHandlers_;
+    mutable llvm::sys::Mutex *lock_;
 };
 }  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_ARK_INTERFACE_H

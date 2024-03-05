@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,9 +84,13 @@ void ArkGVN::RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree 
         } else {
             if (builtinKey.builtinTy == RESOLVE_VIRTUAL_METHOD && arkInterface_->IsArm64() &&
                 llvm::isa<llvm::ConstantInt>(callInst->getOperand(1))) {
-                auto offset = arkInterface_->GetOffsetForIntfInlineCache(callInst);
-                callInst->setArgOperand(2U, offset);
-                arkInterface_->IncrementIntfInlineCacheIndex();
+                auto func = callInst->getFunction();
+                auto slotId = arkInterface_->CreateIntfInlineCacheSlotId(func);
+                auto aotGot = func->getParent()->getGlobalVariable("__aot_got");
+                auto builder = llvm::IRBuilder<>(callInst);
+                auto arrayType = llvm::ArrayType::get(builder.getInt64Ty(), 0);
+                llvm::Value *slot = builder.CreateConstInBoundsGEP2_64(arrayType, aotGot, 0, slotId);
+                callInst->setArgOperand(2U, slot);
                 changed |= true;
             }
 
@@ -156,4 +160,5 @@ llvm::Value *ArkGVN::FindDominantCall(const ArkGVN::BuiltinKey &curBuiltin)
     }
     return nullptr;
 }
+
 }  // namespace ark::llvmbackend::passes

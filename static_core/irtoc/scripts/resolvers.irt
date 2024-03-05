@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -154,7 +154,7 @@ function(:IntfInlineCache,
     # equal to "and x22, x22, #0xffffffff"
     klass_1 := Shl(klass_0, 32).i64
     klass_64 := Shr(klass_1, 32).i64
-    klass := Cast(klass_64).SrcType("DataType::INT64").ptr
+    klass := Bitcast(klass_64).SrcType("DataType::INT64").ptr
 
     cache_64_1 := Shl(cache_64, 32).i64
     cache_64_2 := Shr(cache_64_1, 32).i64
@@ -170,7 +170,7 @@ function(:IntfInlineCache,
         Return(method_real).ptr
     } Else {
         # --> slow path
-        method_slow := Intrinsic(:SLOW_PATH_ENTRY, method, obj, callee_id, cacheaddr).AddImm(Constants::RESOLVE_VIRTUAL_CALL_AOT).Terminator.ptr
+        method_slow := Intrinsic(:SLOW_PATH_ENTRY, method, obj, callee_id, cacheaddr).AddImm(Constants::RESOLVE_VIRTUAL_CALL_AOT).AddImm(Constants::RESOLVE_VIRTUAL_CALL_AOT).Terminator.ptr
         Intrinsic(:UNREACHABLE).Terminator.void
     }
 }

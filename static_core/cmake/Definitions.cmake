@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -426,38 +426,44 @@ if (NOT PANDA_LLVM_BACKEND)
 endif()
 
 if (NOT (PANDA_TARGET_AMD64 OR PANDA_TARGET_ARM64))
-    set(PANDA_LLVM_BACKEND false)
+    set(PANDA_LLVM_BACKEND OFF)
 endif()
 
 if (PANDA_LLVM_BACKEND)
-    # PANDA_LLVM_BACKEND enables FASTPATH, INTERPRETER, and AOT unless the user has disabled it
-    # Examples:
-    # cmake -DPANDA_LLVM_BACKEND=ON => FASTPATH, INTERPRETER, and AOT are enabled
-    # cmake -DPANDA_LLVM_BACKEND=ON -DPANDA_LLVM_FASTPATH=OFF => FASTPATH is disabled, INTERPRETER, and AOT are enabled
-    if (NOT DEFINED PANDA_LLVM_FASTPATH)
-        set(PANDA_LLVM_FASTPATH ON)
-    endif()
+    # PANDA_LLVM_BACKEND auto-enables LLVM_INTERPRETER, LLVM_AOT and LLVM_FASTPATH unless user
+    # disabled some of them explicitly. Example:
+    # -DPANDA_LLVM_BACKEND=ON -DPANDA_LLVM_FASTPATH=OFF => FASTPATH is OFF, INTERPRETER and AOT are ON
     if (NOT DEFINED PANDA_LLVM_INTERPRETER)
         set(PANDA_LLVM_INTERPRETER ON)
+    endif()
+    if (PANDA_TARGET_AMD64 AND NOT CMAKE_CROSSCOMPILING AND NOT HOST_TOOLS)
+        # LLVM_FASTPATH is not supported for x86_64 target build
+        if (NOT DEFINED PANDA_LLVM_FASTPATH)
+            set(PANDA_LLVM_FASTPATH OFF)
+        elseif(PANDA_LLVM_FASTPATH)
+            message(FATAL_ERROR "PANDA_LLVM_FASTPATH is not supported for x86_64")
+        endif()
+    else()  # otherwise, it is processed similar to INTERPRETER above and AOT below
+        if (NOT DEFINED PANDA_LLVM_FASTPATH)
+            set(PANDA_LLVM_FASTPATH ON)
+        endif()
     endif()
     if (NOT DEFINED PANDA_LLVM_AOT)
         set(PANDA_LLVM_AOT ON)
     endif()
 
-    # Internal flag, merged from irtoc: FASTPATH and INTERPRETER
+    # LLVM_IRTOC is an internal flag telling if Irtoc compilation is necessary:
+    # al least one of LLVM_FASTPATH or LLVM_INTERPRETER should be on
     if (PANDA_LLVM_FASTPATH OR PANDA_LLVM_INTERPRETER)
         panda_set_flag(PANDA_LLVM_IRTOC)
     endif()
 
-    # PANDA_LLVM_AOT means either:
-    # 1. We're in cross-build, and llvm aot support is requested for the cross-build target.
-    #    For example, host is amd64, and cross target is aarch64, then we'll add llvm aot
-    #    support for the ark_aot compiled for aarch64.
-    # 2. We're in non cross-build, and llvm aot support is requested
-    #
-    # PANDA_LLVM_IRTOC AND NOT CMAKE_CROSS_COMPILING covers two scenarios:
-    # 1. Non cross-build, IRTOC support is requested
-    # 2. Cross-build, IRTOC support is requested but we'll require LLVM only for HOST_TOOLS
+    # PANDA_BUILD_LLVM_BACKEND is an internal flag telling if it is necessary to compile backend
+    # in this particular circumstances.
+    # LLVM_AOT means we need the backend. LLVM_AOT is always disabled in host_tools part.
+    # LLVM_IRTOC means we need the backend unless we are in cross compilation.
+    # For cross compilation case Irtoc would be processed in host_tools part.
+    # For host_tools BUILD_LLVM_BACKEND is effectively equal to LLVM_IRTOC.
     if (PANDA_LLVM_AOT OR (PANDA_LLVM_IRTOC AND NOT CMAKE_CROSSCOMPILING))
         panda_set_flag(PANDA_BUILD_LLVM_BACKEND)
     endif()

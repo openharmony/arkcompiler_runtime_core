@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,20 +132,13 @@ intptr_t AotData::GetCommonSlotOffset(uint64_t pc, uint32_t id)
     return GetEntrypointOffset(pc, slotId);
 }
 
-uint64_t AotData::GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t index)
+uint64_t AotData::GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t cacheIdx)
 {
-    int32_t slotId;
-    auto slot = gotIntfInlineCache_->find({pfile_, index});
-    if (slot != gotIntfInlineCache_->end()) {
-        slotId = slot->second;
-    } else {
-        slotId = GetSlotId();
-        gotIntfInlineCache_->insert({{pfile_, index}, slotId});
-    }
+    int32_t slotId = GetIntfInlineCacheSlotId(cacheIdx);
     return GetEntrypointOffset(pc, slotId);
 }
 
-int32_t AotData::GetIntfInlineCacheId(uint64_t cacheIdx)
+int32_t AotData::GetIntfInlineCacheSlotId(uint64_t cacheIdx)
 {
     int32_t slotId;
     auto slot = gotIntfInlineCache_->find({pfile_, cacheIdx});

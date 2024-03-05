@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ public:
     using PassInserterFunction = std::function<void(InsertingPassManager *manager)>;
 
     // Construct a compile functor with the given target builder.
-    explicit MIRCompiler(std::shared_ptr<llvm::TargetMachine> targetMachine, PassInserterFunction insertPasses)
+    explicit MIRCompiler(const std::unique_ptr<llvm::TargetMachine> &targetMachine, PassInserterFunction insertPasses)
         : targetMachine_(std::move(targetMachine)), insertPasses_(std::move(insertPasses))
     {
     }
@@ -52,13 +52,13 @@ public:
     // Compile a Module to an ObjectFile.
     llvm::Expected<std::unique_ptr<CreatedObjectFile>> CompileModule(llvm::Module &module);
 
-    std::shared_ptr<llvm::TargetMachine> GetTargetMachine()
+    const std::unique_ptr<llvm::TargetMachine> &GetTargetMachine()
     {
         return targetMachine_;
     }
 
 private:
-    std::shared_ptr<llvm::TargetMachine> targetMachine_;
+    const std::unique_ptr<llvm::TargetMachine> &targetMachine_;
     PassInserterFunction insertPasses_;
 };
 

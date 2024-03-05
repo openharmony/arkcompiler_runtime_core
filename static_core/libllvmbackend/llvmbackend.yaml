@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -102,7 +102,7 @@ options:
     type: std::string
     default: ""
     description: A supplemental LLVM IR bitcode module with additional functions to be inlined
-  - name: llvm-methods-per-module
+  - name: llvmaot-methods-per-module
     type: uint64_t
     default: 4096
     description: Number of methods to compile in one llvm module
@@ -119,3 +119,11 @@ options:
     type: std::string
     default: "aarch64v8.2a-unknown-linux-gnu"
     description: Set target triple
+  - name: llvmaot-threads
+    type: uint32_t
+    default: 1
+    description: >
+      Enables parallel compilation of different modules (see also --llvmaot-methods-per-module)
+      in LLVMAOT mode. Default value is 1 and compilation is sequential. Bigger values allow
+      to specify amount of parallel compilation threads. Value 0 allows to check available
+      hardware parallelism level (#CPUs) automatically.

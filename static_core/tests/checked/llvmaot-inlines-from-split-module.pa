@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #! CHECKER      LLVM AOT inlines functions from other split modules
-#! RUN_LLVM     options: "--llvm-methods-per-module=1 --llvm-dump-after"
+#! RUN_LLVM     options: "--llvmaot-methods-per-module=1 --llvm-dump-after"
 #! READ_FILE    "console.out"
 #! LLVM_METHOD  /define.*\"i32 _GLOBAL::main.*\d+\"/
 #! RUN          entry: "_GLOBAL::main"

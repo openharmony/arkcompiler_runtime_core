@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,19 +32,18 @@ class LLVMArkInterface;
 namespace ark::llvmbackend {
 class LLVMOptimizer {
 public:
+    void DumpModuleBefore(llvm::Module *module) const;
+    void DumpModuleAfter(llvm::Module *module) const;
     void OptimizeModule(llvm::Module *module) const;
     void ProcessInlineModule(llvm::Module *inlineModule) const;
 
     explicit LLVMOptimizer(ark::llvmbackend::LLVMCompilerOptions options, LLVMArkInterface *arkInterface,
-                           std::shared_ptr<llvm::TargetMachine> targetMachine);
-
-private:
-    void DoOptimizeModule(llvm::Module *module) const;
+                           const std::unique_ptr<llvm::TargetMachine> &targetMachine);
 
 private:
     ark::llvmbackend::LLVMCompilerOptions options_;
     ark::llvmbackend::LLVMArkInterface *arkInterface_;
-    std::shared_ptr<llvm::TargetMachine> targetMachine_;
+    const std::unique_ptr<llvm::TargetMachine> &targetMachine_;
 };
 
 }  // namespace ark::llvmbackend
