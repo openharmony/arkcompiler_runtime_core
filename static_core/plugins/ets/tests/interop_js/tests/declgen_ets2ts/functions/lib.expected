@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+declare const exports: any;
+
+function _$init$_(): void { return {} as any; };
+(_$init$_ as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
+export {_$init$_};
+exports._$init$_ = _$init$_;
+_$init$_();
+
+function SumDouble(a: number, b: number): number { return {} as any; };
+(SumDouble as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'SumDouble');
+export {SumDouble};
+exports.SumDouble = SumDouble;
+
+
+function SumBoxedDouble(a: number, b: number): number { return {} as any; };
+(SumBoxedDouble as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'SumBoxedDouble');
+export {SumBoxedDouble};
+exports.SumBoxedDouble = SumBoxedDouble;
+
+
+function SumString(a: string, b: string): string { return {} as any; };
+(SumString as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'SumString');
+export {SumString};
+exports.SumString = SumString;
+
+
+function ReplaceFirst(arr: Simple[], e: Simple): Simple[] { return {} as any; };
+(ReplaceFirst as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'ReplaceFirst');
+export {ReplaceFirst};
+exports.ReplaceFirst = ReplaceFirst;
+
+
+class Simple {
+    public constructor(x: number) {};
+    public val: number = {} as any;
+};
+(Simple as any) = (globalThis as any).Panda.getClass('LSimple;');
+export {Simple};
+exports.Simple = Simple;
+

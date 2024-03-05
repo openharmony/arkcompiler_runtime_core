@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
 
-class DynClass {
-  val = 10;
-  GetDynVal() {
-    return 20;
+const TWO = 2;
+
+import { NumberOrStringEquality } from './lib';
+
+function AssertEq<T>(a: T, b: T) {
+  console.log(`AssertEq: '${a}' === '${b}'`);
+  if (a !== b) {
+    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
   }
 }
 
-exports.DynClass = DynClass;
+export function main() {
+  testUnions();
+}
+
+function testUnions() {
+  AssertEq(NumberOrStringEquality(TWO, TWO), true);
+  AssertEq(NumberOrStringEquality(TWO, '2'), false);
+  AssertEq(NumberOrStringEquality('2', '2'), true);
+}

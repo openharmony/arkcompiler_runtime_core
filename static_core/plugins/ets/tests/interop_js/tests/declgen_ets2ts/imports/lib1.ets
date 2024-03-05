@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
-export type DoubleAlias = double;
+import { Lib2Class, Lib2Class2 /*as Lib2Class2Alias*/, IntAlias } from './lib2';
 
-export class Lib2Class {
-    val: double = 323;
-}
+import { DynClass } from "/plugins/ets/tests/interop_js/tests/declgen_ets2ts/imports/lib3.js"
 
-export class Lib2Class2 {
-    val: double = 324;
-}
+export class C {
+    constructor() {
+        this.o1 = new Lib2Class();
+        this.o2 = new Lib2Class2();
+    }
+    o1: Lib2Class;
+    o2: Lib2Class2;
+    v1: IntAlias = 1;
+};
 
+export class DynObjWrapper {
+    dynObj_: DynClass = new DynClass();
+};
