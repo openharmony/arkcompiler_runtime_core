@@ -72,10 +72,10 @@ public:
 #if (PANDA_TARGET_ARM32_ABI_HARD)
         if constexpr (std::is_same<float, T>::value) {
             auto param2 = GetParameter(TypeInfo(T(0)), 1);
-            auto s1_register = vixl::aarch32::s1;
+            auto s1Register = vixl::aarch32::s1;
             static_cast<aarch32::Aarch32Encoder *>(GetEncoder())
                 ->GetMasm()
-                ->Vmov(aarch32::VixlVReg(param2).S(), s1_register);
+                ->Vmov(aarch32::VixlVReg(param2).S(), s1Register);
         }
 #else
         if constexpr (std::is_same<float, T>::value) {

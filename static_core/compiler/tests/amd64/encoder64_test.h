@@ -256,6 +256,7 @@ public:
         return currResult;
     }
 };
+// NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler
 
