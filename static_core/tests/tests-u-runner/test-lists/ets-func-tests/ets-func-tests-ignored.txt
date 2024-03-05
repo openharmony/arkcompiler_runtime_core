@@ -107,6 +107,7 @@ spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_01.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
 ### Issue 14384
+spec/trailing_lambdas/trailing_only_fn_04_01.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_04_01.ets
 ### Issue 14387
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_nested_01.ets
