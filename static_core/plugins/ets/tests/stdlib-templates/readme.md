@@ -7,11 +7,11 @@
 
 ## Quick run
 - Go to the folder `$panda_source/tests/tests-u-runner`
-- Run tests `./runner.sh $panda_source --ets-func-tests --build-dir $panda_build <other options>`. For other options see documentation for runner at `$panda_source/tests/tests-u-runner/readme.md`
+- Run tests `./runner.sh --ets-func-tests --build-dir $panda_build <other options>`. For other options see documentation for runner at `$panda_source/tests/tests-u-runner/readme.md`
 
 ## Only generate tests without running
 - Go to the folder `$panda_source/tests/tests-u-runner`
-- Run generator: `./generate.sh $panda_source -t $panda_source/plugins/ets/tests/stdlib-templates/ -o /tmp/gen`. You can setup any other path for output of the generator if you wish.
+- Run generator: `./generate.sh -t $panda_source/plugins/ets/tests/stdlib-templates/ -o /tmp/gen`. You can setup any other path for output of the generator if you wish.
 
 ## Template structure
 For generating tests against ArkTS stdlib the Python library Jinja2 is used. For detail information about Jinja2 template, see :<https://jinja.palletsprojects.com/en/3.1.x/>

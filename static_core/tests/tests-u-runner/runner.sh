@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,19 +15,18 @@
 set -e
 
 if [[ -z $1 ]]; then
-    echo "Usage: runner.sh <panda source> <runner options>"
-    echo "    <panda source> path where the panda source are located"
+    echo "Usage: runner.sh <runner options>"
     echo "    <runner options> options to main.py. To see full list use --help"
 
     exit 1
 fi
 
-ROOT_DIR=$(realpath $1)
-shift 1
+SCRIPT_DIR=$(realpath "$(dirname "${0}")")
+ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
 
 RUNNER="${ROOT_DIR}/tests/tests-u-runner/main.py"
 
-source ${ROOT_DIR}/scripts/python/venv-utils.sh
+source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 activate_venv
 set +e
 
