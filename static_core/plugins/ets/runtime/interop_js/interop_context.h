@@ -70,7 +70,7 @@ public:
 
     CachedEntry Get(std::string &&str)
     {
-        auto [it, inserted] = stringTab_.insert({str, 0});
+        auto [it, inserted] = stringTab_.try_emplace(std::move(str), 0);
         it->second++;
         return CachedEntry(&it->first);
     }
@@ -86,6 +86,25 @@ public:
 
 private:
     std::unordered_map<std::string, uint64_t> stringTab_;
+};
+
+class ConstStringStorage {
+public:
+    void LoadDynamicCallClass(Class *klass);
+
+    template <typename Callback>
+    bool EnumerateStrings(size_t startFrom, size_t count, Callback cb);
+
+    napi_value GetConstantPool();
+
+private:
+    napi_value InitBuffer(size_t length);
+    InteropCtx *Ctx();
+
+private:
+    std::vector<napi_value> stringBuffer_ {};
+    napi_ref jsStringBufferRef_ {};
+    Class *lastLoadedClass_ {};
 };
 
 using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
@@ -147,6 +166,11 @@ public:
     {
         // Initialize InteropCtx in VM ExternalData
         new (InteropCtx::Current(coro)) InteropCtx(coro, env);
+    }
+
+    static void Destroy(void *ptr)
+    {
+        reinterpret_cast<InteropCtx *>(ptr)->~InteropCtx();
     }
 
     static InteropCtx *Current(PandaEtsVM *etsVm)
@@ -445,14 +469,40 @@ public:
         return EtsObject::FromCoreType(GetPandaEtsVM()->GetUndefinedObject());
     }
 
+    ConstStringStorage *GetConstStringStorage()
+    {
+        return &constStringStorage_;
+    }
+
+    uint32_t AllocateSlotsInStringBuffer(uint32_t count)
+    {
+        // Atomic with relaxed order reason: ordering constraints are not required
+        return qnameBufferSize_.fetch_add(count, std::memory_order_relaxed);
+    }
+
+    uint32_t GetStringBufferSize()
+    {
+        // Atomic with relaxed order reason: ordering constraints are not required
+        return qnameBufferSize_.load(std::memory_order_relaxed);
+    }
+
+    static InteropCtx *FromConstStringStorage(ConstStringStorage *constStringStorage)
+    {
+        return reinterpret_cast<InteropCtx *>(reinterpret_cast<uintptr_t>(constStringStorage) -
+                                              MEMBER_OFFSET(InteropCtx, constStringStorage_));
+    }
+
 private:
     explicit InteropCtx(EtsCoroutine *coro, napi_env env);
+    void CacheClasses(EtsClassLinker *etsClassLinker);
 
     napi_env jsEnv_ {};
 
     mem::GlobalObjectStorage *refstor_ {};
     ClassLinkerContext *linkerCtx_ {};
     JSValueStringStorage jsValueStringStor_ {};
+    ConstStringStorage constStringStorage_ {};
+
     LocalScopesStorage localScopesStorage_ {};
     mem::Reference *jsvalueFregistryRef_ {};
 
@@ -488,6 +538,9 @@ private:
     ets_proxy::EtsClassWrappersCache etsClassWrappersCache_ {};
     std::unique_ptr<ets_proxy::SharedReferenceStorage> etsProxyRefStorage_ {};
 
+    // should be one per VM when we will have multiple InteropContexts
+    std::atomic_uint32_t qnameBufferSize_ {};
+
     friend class EtsJSNapiEnvScope;
 };
 
@@ -502,6 +555,21 @@ inline napi_env JSEnvFromInteropCtx(InteropCtx *ctx)
 inline mem::GlobalObjectStorage *RefstorFromInteropCtx(InteropCtx *ctx)
 {
     return ctx->Refstor();
+}
+
+template <typename Callback>
+bool ConstStringStorage::EnumerateStrings(size_t startFrom, size_t count, Callback cb)
+{
+    auto jsArr = GetReferenceValue(Ctx()->GetJSEnv(), jsStringBufferRef_);
+    for (size_t index = startFrom; index < startFrom + count; index++) {
+        napi_value jsStr;
+        napi_get_element(Ctx()->GetJSEnv(), jsArr, index, &jsStr);
+        ASSERT(GetValueType(Ctx()->GetJSEnv(), jsStr) == napi_string);
+        if (!cb(jsStr)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace ark::ets::interop::js

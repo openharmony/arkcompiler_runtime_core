@@ -57,7 +57,7 @@ static JSValue *JSRuntimeNewJSValueString(EtsString *v)
     if (v->IsUtf16()) {
         InteropCtx::Fatal("not implemented");
     } else {
-        str = std::string(utf::Mutf8AsCString(v->GetDataMUtf8()));
+        str = std::string(utf::Mutf8AsCString(v->GetDataMUtf8()), v->GetLength());
     }
     return JSValue::CreateString(coro, ctx, std::move(str));
 }
@@ -363,30 +363,35 @@ void *CompilerGetJSNamedProperty(void *val, char *propStr)
     return res;
 }
 
-void *CompilerResolveQualifiedJSCall(void *val, EtsString *qnameStr)
+void *CompilerGetJSProperty(void *val, void *prop)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
-
     auto jsVal = ToLocal(val);
-    napi_value jsThis;
-    auto qname = std::string_view(utf::Mutf8AsCString(qnameStr->GetDataMUtf8()), qnameStr->GetMUtf8Length());
-    auto resolveName = [&jsThis, &jsVal, &env, &ctx, &coro](const std::string &name) -> bool {
-        jsThis = jsVal;
-        napi_status rc = napi_get_named_property(env, jsVal, name.c_str(), &jsVal);
-        if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
-            ctx->ForwardJSException(coro);
-            ASSERT(NapiIsExceptionPending(env));
-            return false;
-        }
-        return true;
-    };
-    jsThis = jsVal;
-    if (UNLIKELY(!WalkQualifiedName(qname, resolveName))) {
+    napi_value res;
+    napi_status rc = napi_get_property(env, jsVal, ToLocal(prop), &res);
+    if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+        ctx->ForwardJSException(coro);
+        ASSERT(NapiIsExceptionPending(env));
         return nullptr;
     }
-    return jsThis;
+    return res;
+}
+
+void *CompilerGetJSElement(void *val, int32_t index)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+
+    napi_value res;
+    auto rc = napi_get_element(env, ToLocal(val), index, &res);
+    if (UNLIKELY(NapiThrownGeneric(rc))) {
+        ctx->ForwardJSException(coro);
+        return {};
+    }
+    return res;
 }
 
 void *CompilerJSCallCheck(void *fn)
@@ -489,6 +494,21 @@ void CompilerDestroyLocalScope()
     auto scopesStorage = ctx->GetLocalScopesStorage();
     ASSERT(coro->IsCurrentFrameCompiled());
     scopesStorage->DestroyTopLocalScope(env, coro->GetCurrentFrame());
+}
+
+void *CompilerLoadJSConstantPool()
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    return ctx->GetConstStringStorage()->GetConstantPool();
+}
+
+void CompilerInitJSCallClassForCtx(void *klassPtr)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto klass = reinterpret_cast<Class *>(klassPtr);
+    ctx->GetConstStringStorage()->LoadDynamicCallClass(klass);
 }
 
 template <typename CONVERTOR>
@@ -687,13 +707,16 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeLoadModule,
     JSRuntimeStrictEqual,
     CompilerGetJSNamedProperty,
-    CompilerResolveQualifiedJSCall,
+    CompilerGetJSProperty,
+    CompilerGetJSElement,
     CompilerJSCallCheck,
     CompilerJSCallFunction<true>,
     CompilerJSCallFunction<false>,
     CompilerJSNewInstance,
     CreateLocalScope,
     CompilerDestroyLocalScope,
+    CompilerLoadJSConstantPool,
+    CompilerInitJSCallClassForCtx,
     CompilerConvertVoidToLocal,
     ConvertToLocal<JSConvertU1>,
     ConvertToLocal<JSConvertU8>,

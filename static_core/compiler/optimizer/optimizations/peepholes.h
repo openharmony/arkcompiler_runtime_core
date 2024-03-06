@@ -106,6 +106,7 @@ public:
     static void VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadConstantPool([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitLoadFromConstantPool([[maybe_unused]] GraphVisitor *v, Inst *inst);
+    static void VisitLoadStatic([[maybe_unused]] GraphVisitor *v, Inst *inst);
 
 #include "optimizer/ir/visitor.inc"
 

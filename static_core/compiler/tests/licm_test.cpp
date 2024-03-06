@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,9 @@ namespace ark::compiler {
 class LicmTest : public GraphTest {
 public:
     static constexpr uint32_t HOST_LIMIT = 8;
+
+    void HoistResolverBeforeMovableObjectBuildInitialGraph();
+    Graph *HoistResolverBeforeMovableObjectBuildExpectedGraph();
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -342,7 +345,7 @@ TEST_F(LicmTest, LicmResolver)
     }
 
     ASSERT_TRUE(GetGraph()->RunPass<Licm>(HOST_LIMIT));
-    GetGraph()->RunPass<Cleanup>(HOST_LIMIT);
+    GetGraph()->RunPass<Cleanup>();
 
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -610,6 +613,105 @@ TEST_F(LicmTest, DontLicmResolverThroughInitClass)
         }
     }
     ASSERT_FALSE(GetGraph()->RunPass<Licm>(HOST_LIMIT));
+}
+
+void LicmTest::HoistResolverBeforeMovableObjectBuildInitialGraph()
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(20U, 0xaU);
+
+        BASIC_BLOCK(5U, 2U)
+        {
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::UnresolvedLoadAndInitClass).ref().Inputs(2U).TypeId(0U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::UnresolvedLoadAndInitClass).ref().Inputs(5U).TypeId(0U);
+            INST(16U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(17U, Opcode::LoadObject).ref().Inputs(16U).TypeId(1U);
+            INST(1U, Opcode::SaveStateDeoptimize).NoVregs();
+            // We can safely hoist ResolveVirtual (INST[8]) into BLOCK[5] before INST[6] and link it to SaveState
+            // (INST[5])
+        }
+        BASIC_BLOCK(2U, 2U, 3U)
+        {
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::ResolveVirtual).ptr().Inputs(4U, 7U);
+            INST(9U, Opcode::CallResolvedVirtual)
+                .v0id()
+                .Inputs({{DataType::POINTER, 8U},
+                         {DataType::REFERENCE, 4U},
+                         {DataType::REFERENCE, 17U},
+                         {DataType::NO_TYPE, 7U}});
+            INST(10U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::NullCheck).ref().Inputs(0U, 10U);
+            INST(12U, Opcode::LoadObject).s32().Inputs(11U).TypeId(122U);
+            INST(13U, Opcode::Compare).b().SrcType(DataType::INT32).CC(CC_GE).Inputs(12U, 20U);
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(15U, Opcode::ReturnVoid).v0id();
+        }
+    }
+}
+
+Graph *LicmTest::HoistResolverBeforeMovableObjectBuildExpectedGraph()
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).ref();
+        CONSTANT(20U, 0xaU);
+
+        BASIC_BLOCK(5U, 2U)
+        {
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::UnresolvedLoadAndInitClass).ref().Inputs(2U).TypeId(0U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::UnresolvedLoadAndInitClass).ref().Inputs(5U).TypeId(0U);
+            INST(8U, Opcode::ResolveVirtual).ptr().Inputs(4U, 5U);
+            INST(16U, Opcode::NewObject).ref().Inputs(6U, 5U);
+            INST(17U, Opcode::LoadObject).ref().Inputs(16U).TypeId(1U);
+            INST(1U, Opcode::SaveStateDeoptimize).NoVregs();
+            // We can safely hoist ResolveVirtual (INST[8]) into BLOCK[5] before INST[6] and link it to SaveState
+            // (INST[5])
+        }
+        BASIC_BLOCK(2U, 2U, 3U)
+        {
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::CallResolvedVirtual)
+                .v0id()
+                .Inputs({{DataType::POINTER, 8U},
+                         {DataType::REFERENCE, 4U},
+                         {DataType::REFERENCE, 17U},
+                         {DataType::NO_TYPE, 7U}});
+            INST(10U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::NullCheck).ref().Inputs(0U, 10U);
+            INST(12U, Opcode::LoadObject).s32().Inputs(11U).TypeId(122U);
+            INST(13U, Opcode::Compare).b().SrcType(DataType::INT32).CC(CC_GE).Inputs(12U, 20U);
+            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(15U, Opcode::ReturnVoid).v0id();
+        }
+    }
+    return graph;
+}
+
+TEST_F(LicmTest, HoistResolverBeforeMovableObject)
+{
+    HoistResolverBeforeMovableObjectBuildInitialGraph();
+
+    ASSERT_TRUE(GetGraph()->RunPass<Licm>(HOST_LIMIT));
+    GetGraph()->RunPass<Cleanup>();
+
+    auto expected = HoistResolverBeforeMovableObjectBuildExpectedGraph();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 }
 
 TEST_F(LicmTest, DontHoistLenArray)

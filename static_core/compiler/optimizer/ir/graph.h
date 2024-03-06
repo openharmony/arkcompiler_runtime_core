@@ -1118,7 +1118,7 @@ public:
         return singleImplementationList_;
     }
 
-    Graph *GetParentGraph()
+    Graph *GetParentGraph() const
     {
         return parentGraph_;
     }

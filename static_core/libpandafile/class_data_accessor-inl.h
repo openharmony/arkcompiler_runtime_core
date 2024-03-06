@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "class_data_accessor.h"
 #include "field_data_accessor-inl.h"
 #include "method_data_accessor-inl.h"
+#include "annotation_data_accessor.h"
 
 #include "helpers.h"
 
@@ -130,6 +131,22 @@ inline bool ClassDataAccessor::EnumerateAnnotationsWithEarlyStop(const Callback 
 
     return helpers::EnumerateTaggedValuesWithEarlyStop<File::EntityId, ClassTag, Callback>(annotationsSp_,
                                                                                            ClassTag::ANNOTATION, cb);
+}
+
+template <class Callback>
+auto ClassDataAccessor::EnumerateAnnotation(const char *name, const Callback &cb)
+{
+    std::optional<std::invoke_result_t<const Callback &, panda_file::AnnotationDataAccessor &>> result {};
+    EnumerateAnnotationsWithEarlyStop([&cb, &pf = pandaFile_, name, &result](panda_file::File::EntityId annotationId) {
+        panda_file::AnnotationDataAccessor ada(pf, annotationId);
+        auto *annotationName = pf.GetStringData(ada.GetClassId()).data;
+        if (utf::IsEqual(utf::CStringAsMutf8(name), annotationName)) {
+            result = cb(ada);
+            return true;
+        }
+        return false;
+    });
+    return result;
 }
 
 inline std::optional<File::EntityId> ClassDataAccessor::GetSourceFileId()

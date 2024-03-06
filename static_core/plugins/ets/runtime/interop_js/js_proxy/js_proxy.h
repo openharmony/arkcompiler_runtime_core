@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,6 @@ private:
     explicit JSProxy(EtsClass *proxyKlass) : proxyKlass_(proxyKlass) {}
 
     EtsClass *const proxyKlass_ {};
-    std::unique_ptr<Method[]> proxyMethods_ {};  // NOLINT(modernize-avoid-c-arrays)
     // NOTE(vpukhov): add flag if original class has final methods or public fields
     // NOTE(vpukhov): must ensure compat-class methods except accessors do not access its private state
 };

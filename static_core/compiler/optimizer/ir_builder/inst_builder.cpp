@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -489,5 +489,19 @@ void InstBuilder::SyncWithGraph()
     }
     currentDefs_ = &defs_[currentBb_->GetId()];
 }
+
+template <bool IS_STATIC>
+bool InstBuilder::IsInConstructor() const
+{
+    for (auto graph = GetGraph(); graph != nullptr; graph = graph->GetParentGraph()) {
+        auto method = graph->GetMethod();
+        if (IS_STATIC ? GetRuntime()->IsMethodStaticConstructor(method) : GetRuntime()->IsInstanceConstructor(method)) {
+            return true;
+        }
+    }
+    return false;
+}
+template bool InstBuilder::IsInConstructor<true>() const;
+template bool InstBuilder::IsInConstructor<false>() const;
 
 }  // namespace ark::compiler

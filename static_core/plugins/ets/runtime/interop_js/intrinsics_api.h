@@ -60,13 +60,16 @@ struct IntrinsicsAPI {
     JSValue *(*JSRuntimeLoadModule)(EtsString *module);
     uint8_t (*JSRuntimeStrictEqual)(JSValue *lhs, JSValue *rhs);
     void *(*CompilerGetJSNamedProperty)(void *val, char *propName);
-    void *(*CompilerResolveQualifiedJSCall)(void *val, EtsString *qnameStr);
+    void *(*CompilerGetJSProperty)(void *val, void *prop);
+    void *(*CompilerGetJSElement)(void *val, int32_t index);
     void *(*CompilerJSCallCheck)(void *fn);
     void *(*CompilerJSCallFunction)(void *obj, void *fn, uint32_t argc, void *args);
     void (*CompilerJSCallVoidFunction)(void *obj, void *fn, uint32_t argc, void *args);
     void *(*CompilerJSNewInstance)(void *fn, uint32_t argc, void *args);
     void (*CreateLocalScope)();
     void (*CompilerDestroyLocalScope)();
+    void *(*CompilerLoadJSConstantPool)();
+    void (*CompilerInitJSCallClassForCtx)(void *klassPtr);
     void *(*CompilerConvertVoidToLocal)();
     void *(*CompilerConvertU1ToLocal)(bool etsVal);
     void *(*CompilerConvertU8ToLocal)(uint8_t etsVal);

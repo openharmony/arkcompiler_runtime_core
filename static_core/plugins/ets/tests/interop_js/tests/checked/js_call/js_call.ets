@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, StaticClass, extract_squared_int, ObjectWithPrototype, vundefined, dyn_storage }
+import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, StaticClass, extract_squared_int, ObjectWithPrototype, vundefined}
     from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
 
 //! CHECKER      Several js function calls JIT (slow)
@@ -36,8 +36,8 @@ import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, Static
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 3
-//! INST_COUNT   /LoadImmediate.*string/, 3
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 3
+//! INST_NOT     /LoadImmediate.*string/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 3
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertI32ToLocal", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertF64ToLocal", 1
@@ -83,8 +83,8 @@ import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, Static
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 3
-//! INST_COUNT   /LoadImmediate.*PandaFileOffset/, 3
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 3
+//! INST_NOT     /LoadImmediate.*PandaFileOffset/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 3
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertI32ToLocal", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertF64ToLocal", 1
@@ -135,8 +135,8 @@ function call_sequence(): int {
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
-//! INST_COUNT   /LoadImmediate.*string/, 6
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 6
+//! INST_NOT     /LoadImmediate.*string/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 6
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertI32ToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 6
@@ -183,8 +183,8 @@ function call_sequence(): int {
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
-//! INST_COUNT   /LoadImmediate.*PandaFileOffset/, 6
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 6
+//! INST_NOT     /LoadImmediate.*PandaFileOffset/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 6
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertI32ToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 6
@@ -227,8 +227,8 @@ function call_chain(): int {
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 4
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 4
-//! INST_COUNT   /LoadImmediate.*string/, 4
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 4
+//! INST_NOT     /LoadImmediate.*string/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 4
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertI32ToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 2
@@ -276,8 +276,8 @@ function call_chain(): int {
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 4
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 4
-//! INST_COUNT   /LoadImmediate.*PandaFileOffset/, 4
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 4
+//! INST_NOT     /LoadImmediate.*PandaFileOffset/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 4
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 4
 //! INST_COUNT   "Intrinsic.CompilerConvertI32ToLocal", 3
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 2
@@ -326,8 +326,8 @@ function new_chain(): int {
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT    /LoadImmediate.*string/
-//! INST_NEXT    "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT     /LoadImmediate.*string/
+//! INST_NEXT    "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT    "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT    "Intrinsic.CompilerConvertI32ToLocal"
 //! INST_NEXT    "Intrinsic.CompilerJSNewInstance"
@@ -367,8 +367,8 @@ function new_chain(): int {
 //! INST         "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT    "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT    "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT    /LoadImmediate.*PandaFileOffset/
-//! INST_NEXT    "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT     /LoadImmediate.*PandaFileOffset/
+//! INST_NEXT    "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT    "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT    "Intrinsic.CompilerConvertI32ToLocal"
 //! INST_NEXT    "Intrinsic.CompilerJSNewInstance"
@@ -411,8 +411,8 @@ function load_store_chain(): int {
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
-//! INST_COUNT   /LoadImmediate.*string/, 6
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 6
+//! INST_NOT     /LoadImmediate.*string/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 6
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 1
 //! INST_COUNT   "Intrinsic.CompilerJSNewInstance", 1
@@ -448,8 +448,8 @@ function load_store_chain(): int {
 //! INST_COUNT   "Intrinsic.CompilerCreateLocalScope", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertJSValueToLocal", 6
 //! INST_COUNT   "Intrinsic.CompilerResolveQualifiedJSCall", 6
-//! INST_COUNT   /LoadImmediate.*PandaFileOffset/, 6
-//! INST_COUNT   "Intrinsic.CompilerGetJSNamedProperty", 6
+//! INST_NOT     /LoadImmediate.*PandaFileOffset/
+//! INST_COUNT   "Intrinsic.CompilerLoadResolvedJSFunction", 6
 //! INST_COUNT   "Intrinsic.CompilerJSCallCheck", 6
 //! INST_COUNT   "Intrinsic.CompilerConvertRefTypeToLocal", 1
 //! INST_COUNT   "Intrinsic.CompilerJSNewInstance", 1
@@ -507,8 +507,8 @@ function method_call(): int {
 //! INST_NEXT       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT       "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT       "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT       /LoadImmediate.*string/
-//! INST_NEXT       "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT        /LoadImmediate.*string/
+//! INST_NEXT       "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT       "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT       "Intrinsic.CompilerJSCallFunction"
 //! INST_NEXT       "Intrinsic.CompilerConvertLocalToJSValue"
@@ -546,8 +546,8 @@ function method_call(): int {
 //! INST_NEXT       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT       "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT       "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT       /LoadImmediate.*PandaFileOffset/
-//! INST_NEXT       "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT        /LoadImmediate.*PandaFileOffset/
+//! INST_NEXT       "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT       "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT       "Intrinsic.CompilerJSCallFunction"
 //! INST_NEXT       "Intrinsic.CompilerConvertLocalToJSValue"
@@ -587,8 +587,8 @@ class EtsClass {
 //! INST       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT  "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT  "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT  /LoadImmediate.*string/
-//! INST_NEXT  "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT   /LoadImmediate.*string/
+//! INST_NEXT  "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT  "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT  "Intrinsic.CompilerConvertRefTypeToLocal"
 //! INST_NEXT  "Intrinsic.CompilerJSCallFunction"
@@ -612,8 +612,8 @@ class EtsClass {
 //! INST       "Intrinsic.CompilerCreateLocalScope"
 //! INST_NEXT  "Intrinsic.CompilerConvertJSValueToLocal"
 //! INST_NEXT  "Intrinsic.CompilerResolveQualifiedJSCall"
-//! INST_NEXT  /LoadImmediate.*PandaFileOffset/
-//! INST_NEXT  "Intrinsic.CompilerGetJSNamedProperty"
+//! INST_NOT   /LoadImmediate.*PandaFileOffset/
+//! INST_NEXT  "Intrinsic.CompilerLoadResolvedJSFunction"
 //! INST_NEXT  "Intrinsic.CompilerJSCallCheck"
 //! INST_NEXT  "Intrinsic.CompilerConvertRefTypeToLocal"
 //! INST_NEXT  "Intrinsic.CompilerJSCallFunction"
@@ -728,4 +728,28 @@ function js_call_overridden(): int {
         }
     }
     return 0;
+}
+
+//! CHECKER      Check that references stay valid after rehash in String->JSValue cast implementation
+//! RUN          force_jit: true, entry: "test_rehash", options: "--compiler-regex=ETSGLOBAL::test_rehash"
+
+function test_rehash(): int {
+    let count = 40
+    let jsValues = new JSValue[count];
+    for (let i = 0; i < count; i++) {
+        jsValues[i] = i.toString() as JSValue
+    }
+    let jsValues2 = new JSValue[count];
+    for (let i = 0; i < count; i++) {
+        jsValues2[i] = i.toString() as JSValue
+    }
+    for (let i = 0; i < count; i++) {
+        if (jsValues[i] as String != i.toString()) {
+            return 1
+        }
+        if (jsValues2[i] as String != i.toString()) {
+            return 2
+        }
+    }
+    return 0
 }

@@ -297,6 +297,79 @@ bool Peepholes::PeepholeJSRuntimeNewJSValueBoolean(GraphVisitor *v, IntrinsicIns
         intrinsic, RuntimeInterface::IntrinsicId::INTRINSIC_JS_RUNTIME_SET_PROPERTY_BOOLEAN);
 }
 
+static std::pair<Inst *, Inst *> BuildLoadPropertyChain(IntrinsicInst *intrinsic, uint64_t qnameStart,
+                                                        uint64_t qnameLen)
+{
+    auto *jsThis = intrinsic->GetInput(0).GetInst();
+    auto *jsFn = jsThis;
+    auto saveState = intrinsic->GetSaveState();
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    auto runtime = graph->GetRuntime();
+    auto klass = runtime->GetClass(intrinsic->GetMethod());
+    auto pc = intrinsic->GetPc();
+    auto jsConstPool = graph->CreateInstIntrinsic(
+        DataType::POINTER, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_LOAD_JS_CONSTANT_POOL);
+    jsConstPool->SetInputs(graph->GetAllocator(), {{saveState, DataType::NO_TYPE}});
+    intrinsic->InsertBefore(jsConstPool);
+    Inst *cpOffsetForClass = intrinsic->GetInput(3U).GetInst();
+    for (uint32_t strIndexInAnnot = qnameStart; strIndexInAnnot < qnameStart + qnameLen; strIndexInAnnot++) {
+        IntrinsicInst *jsProperty = nullptr;
+        auto uniqueStrIndex = graph->GetRuntime()->GetAnnotationElementUniqueIndex(
+            klass, "Lets/annotation/DynamicCall;", strIndexInAnnot);
+        auto strIndexInAnnotConst = graph->FindOrCreateConstant(uniqueStrIndex);
+        auto indexInst = graph->CreateInstAdd(DataType::INT32, pc, cpOffsetForClass, strIndexInAnnotConst);
+        intrinsic->InsertBefore(indexInst);
+        jsProperty = graph->CreateInstIntrinsic(DataType::POINTER, pc,
+                                                RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_GET_JS_ELEMENT);
+        // ConstantPool elements are immutable
+        jsProperty->ClearFlag(inst_flags::NO_CSE);
+        jsProperty->ClearFlag(inst_flags::NO_DCE);
+
+        jsProperty->SetInputs(
+            graph->GetAllocator(),
+            {{jsConstPool, DataType::POINTER}, {indexInst, DataType::INT32}, {saveState, DataType::NO_TYPE}});
+
+        auto getProperty = graph->CreateInstIntrinsic(
+            DataType::POINTER, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_GET_JS_PROPERTY);
+        getProperty->SetInputs(
+            graph->GetAllocator(),
+            {{jsFn, DataType::POINTER}, {jsProperty, DataType::POINTER}, {saveState, DataType::NO_TYPE}});
+        intrinsic->InsertBefore(jsProperty);
+        intrinsic->InsertBefore(getProperty);
+        jsThis = jsFn;
+        jsFn = getProperty;
+    }
+    return {jsThis, jsFn};
+}
+
+bool Peepholes::PeepholeResolveQualifiedJSCall([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    if (!intrinsic->HasUsers()) {
+        return false;
+    }
+    auto qnameStartInst = intrinsic->GetInput(1).GetInst();
+    auto qnameLenInst = intrinsic->GetInput(2U).GetInst();
+
+    if (!qnameStartInst->IsConst() || !qnameLenInst->IsConst()) {
+        // qnameStart and qnameLen are always constant, but may be e.g. Phi instructions after BCO
+        return false;
+    }
+    auto qnameStart = qnameStartInst->CastToConstant()->GetIntValue();
+    auto qnameLen = qnameLenInst->CastToConstant()->GetIntValue();
+    ASSERT(qnameLen > 0);
+    auto [jsThis, jsFn] = BuildLoadPropertyChain(intrinsic, qnameStart, qnameLen);
+    constexpr auto FN_PSEUDO_USER = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_LOAD_RESOLVED_JS_FUNCTION;
+    for (auto &user : intrinsic->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (userInst->IsIntrinsic() && userInst->CastToIntrinsic()->GetIntrinsicId() == FN_PSEUDO_USER) {
+            userInst->ReplaceUsers(jsFn);
+        }
+    }
+    intrinsic->ReplaceUsers(jsThis);
+    intrinsic->ClearFlag(inst_flags::NO_DCE);
+    return true;
+}
+
 #endif
 
 }  // namespace ark::compiler

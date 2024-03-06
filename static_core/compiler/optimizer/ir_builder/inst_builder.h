@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -410,7 +410,7 @@ private:
     Inst *BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataType::Type type, RuntimeInterface::FieldPtr field,
                                size_t fieldId, Inst **resolveInst);
     void BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type);
-    Inst *BuildLoadStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, size_t typeId, Inst *saveState);
+    Inst *BuildLoadStaticInst(size_t pc, DataType::Type type, size_t typeId, Inst *saveState);
     void BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::Type type);
     Inst *BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, size_t typeId, Inst *storeInput,
                                Inst *saveState);
@@ -500,6 +500,9 @@ private:
     DataType::Type GetCurrentMethodArgumentType(size_t index) const;
     /// Get count of arguments of currently compiling method
     size_t GetCurrentMethodArgumentsCount() const;
+
+    template <bool IS_STATIC>
+    bool IsInConstructor() const;
 
 #ifndef PANDA_ETS_INTEROP_JS
     bool TryBuildInteropCall([[maybe_unused]] const BytecodeInstruction *bcInst, [[maybe_unused]] bool isRange,

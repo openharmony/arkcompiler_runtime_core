@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,12 @@ template <size_t N>
 IntrinsicInst *BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id, DataType::Type retType,
                                      const std::array<DataType::Type, N> &types,
                                      const std::array<Inst *, N + 1> &inputs);
+Inst *BuildInitJSCallClass(RuntimeInterface::MethodPtr method, size_t pc, SaveStateInst *saveState);
 std::pair<Inst *, Inst *> BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind callKind, size_t pc,
                                                            RuntimeInterface::MethodPtr method, Inst *arg0, Inst *arg1,
+                                                           Inst *arg2, Inst *cpOffsetForClass,
                                                            SaveStateInst *saveState);
+IntrinsicInst *CreateInteropCallIntrinsic(size_t pc, RuntimeInterface::InteropCallKind callKind);
 void BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind callKind, size_t pc,
                                              RuntimeInterface::MethodPtr method, Inst *jsCall,
                                              SaveStateInst *saveState);

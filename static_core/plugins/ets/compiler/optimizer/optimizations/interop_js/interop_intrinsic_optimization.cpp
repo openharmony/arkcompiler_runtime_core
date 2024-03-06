@@ -1058,14 +1058,30 @@ void InteropIntrinsicOptimization::HoistAndEliminate(BasicBlock *startBlock, Ins
     }
 }
 
-void InteropIntrinsicOptimization::DoRedundancyElimination(Inst *input, Inst *scopeStart, InstVector &insts)
+void InteropIntrinsicOptimization::DoRedundancyElimination(Inst *scopeStart, InstVector &insts)
 {
     COMPILER_LOG(DEBUG, INTEROP_INTRINSIC_OPT)
-        << "Process group of intrinsics with identical inputs and scope start: " << *scopeStart
-        << "\ninput: " << *input;
-    auto *boundaryInst = input->IsDominate(scopeStart) ? scopeStart : input;
+        << "Process group of intrinsics with identical inputs and scope start: " << *scopeStart;
+    ASSERT(!insts.empty());
+#ifndef NDEBUG
+    for (auto *inst : insts) {
+        for (size_t i = 0; i < inst->GetInputsCount(); i++) {
+            auto inputInst = inst->GetInput(i).GetInst();
+            ASSERT(inputInst->IsSaveState() || inputInst == insts[0]->GetInput(i).GetInst());
+        }
+    }
+#endif
+    auto *boundaryInst = scopeStart;
+    // find highest common dominated inst of `scopeStart` and `insts` inputs
+    // i. e. lowest (latest) inst among them
+    for (auto &input : insts.front()->GetInputs()) {
+        auto *inputInst = input.GetInst();
+        if (!inputInst->IsSaveState() && boundaryInst->IsDominate(inputInst)) {
+            boundaryInst = inputInst;
+        }
+    }
+    ASSERT(scopeStart->IsDominate(boundaryInst));
     auto *boundary = boundaryInst->GetBasicBlock();
-    ASSERT(input->IsDominate(boundaryInst) && scopeStart->IsDominate(boundaryInst));
     auto instAnticipatedHolder = MarkerHolder(GetGraph());
     instAnticipated_ = instAnticipatedHolder.GetMarker();
     auto eliminationCandidateHolder = MarkerHolder(GetGraph());
@@ -1116,8 +1132,22 @@ void InteropIntrinsicOptimization::RedundancyElimination()
                 SaveSiblingForElimination(user.GetInst(), currentInsts, id, processed);
             }
             for (auto &[scope, insts] : currentInsts) {
-                DoRedundancyElimination(input, scope, insts);
+                DoRedundancyElimination(scope, insts);
             }
+        }
+    }
+    {
+        currentInsts.clear();
+        auto id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_LOAD_JS_CONSTANT_POOL;
+        for (auto *block : GetGraph()->GetBlocksRPO()) {
+            for (auto *inst : block->Insts()) {
+                if (inst->IsIntrinsic() && inst->CastToIntrinsic()->GetIntrinsicId() == id) {
+                    SaveSiblingForElimination(inst, currentInsts, id, processed);
+                }
+            }
+        }
+        for (auto &[scope, insts] : currentInsts) {
+            DoRedundancyElimination(scope, insts);
         }
     }
 }

@@ -45,10 +45,79 @@ static Class *CacheClass(EtsClassLinker *etsClassLinker, std::string_view descri
     return klass;
 }
 
+void ConstStringStorage::LoadDynamicCallClass(Class *klass)
+{
+    if (klass == lastLoadedClass_) {
+        return;
+    }
+    lastLoadedClass_ = klass;
+    auto fields = klass->GetStaticFields();
+    ASSERT(fields.Size() == 1);
+    auto startFrom = klass->GetFieldPrimitive<uint32_t>(fields[0]);
+    napi_value jsArr;
+    auto *env = Ctx()->GetJSEnv();
+    if (jsStringBufferRef_ == nullptr) {
+        jsArr = InitBuffer(Ctx()->GetStringBufferSize());
+    } else {
+        jsArr = GetReferenceValue(env, jsStringBufferRef_);
+        if (startFrom >= stringBuffer_.size()) {
+            stringBuffer_.resize(Ctx()->GetStringBufferSize());
+        } else if (stringBuffer_[startFrom] != nullptr) {
+            return;
+        }
+    }
+
+    auto *pf = klass->GetPandaFile();
+    panda_file::ClassDataAccessor cda(*pf, klass->GetFileId());
+    [[maybe_unused]] auto annotationFound = cda.EnumerateAnnotation(
+        "Lets/annotation/DynamicCall;", [this, pf, startFrom, jsArr, env](panda_file::AnnotationDataAccessor &ada) {
+            for (uint32_t i = 0; i < ada.GetCount(); i++) {
+                auto adae = ada.GetElement(i);
+                auto *elemName = pf->GetStringData(adae.GetNameId()).data;
+                if (!utf::IsEqual(utf::CStringAsMutf8("value"), elemName)) {
+                    continue;
+                }
+                auto arr = adae.GetArrayValue();
+                auto count = arr.GetCount();
+                for (uint32_t j = 0, bufferIndex = startFrom; j < count; j++, bufferIndex++) {
+                    panda_file::File::EntityId stringId(arr.Get<uint32_t>(j));
+                    auto data = pf->GetStringData(stringId);
+                    napi_value jsStr;
+                    NAPI_CHECK_FATAL(
+                        napi_create_string_utf8(env, utf::Mutf8AsCString(data.data), data.utf16Length, &jsStr));
+                    ASSERT(stringBuffer_[bufferIndex] == nullptr);
+                    napi_set_element(env, jsArr, bufferIndex, jsStr);
+                    stringBuffer_[bufferIndex] = jsStr;
+                }
+                return true;
+            }
+            UNREACHABLE();
+        });
+    ASSERT(annotationFound.has_value());
+}
+
+napi_value ConstStringStorage::GetConstantPool()
+{
+    return GetReferenceValue(Ctx()->GetJSEnv(), jsStringBufferRef_);
+}
+
+napi_value ConstStringStorage::InitBuffer(size_t length)
+{
+    napi_value jsArr;
+    NAPI_CHECK_FATAL(napi_create_array_with_length(Ctx()->GetJSEnv(), length, &jsArr));
+    NAPI_CHECK_FATAL(napi_create_reference(Ctx()->GetJSEnv(), jsArr, 1, &jsStringBufferRef_));
+    stringBuffer_.resize(Ctx()->GetStringBufferSize());
+    return jsArr;
+}
+
+InteropCtx *ConstStringStorage::Ctx()
+{
+    return InteropCtx::FromConstStringStorage(this);
+}
+
 InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
 {
     EtsJSNapiEnvScope envscope(this, env);
-
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     refstor_ = vm->GetGlobalObjectStorage();
@@ -58,27 +127,7 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     auto *jobQueue = Runtime::GetCurrent()->GetInternalAllocator()->New<JsJobQueue>();
     vm->InitJobQueue(jobQueue);
 
-    jsRuntimeClass_ = CacheClass(etsClassLinker, descriptors::JS_RUNTIME);
-    jsValueClass_ = CacheClass(etsClassLinker, descriptors::JS_VALUE);
-    jsErrorClass_ = CacheClass(etsClassLinker, descriptors::JS_ERROR);
-    objectClass_ = CacheClass(etsClassLinker, descriptors::OBJECT);
-    stringClass_ = CacheClass(etsClassLinker, descriptors::STRING);
-    voidClass_ = CacheClass(etsClassLinker, descriptors::VOID);
-    undefinedClass_ = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
-    promiseClass_ = CacheClass(etsClassLinker, descriptors::PROMISE);
-    errorClass_ = CacheClass(etsClassLinker, descriptors::ERROR);
-    exceptionClass_ = CacheClass(etsClassLinker, descriptors::EXCEPTION);
-    typeClass_ = CacheClass(etsClassLinker, descriptors::TYPE);
-
-    boxIntClass_ = CacheClass(etsClassLinker, descriptors::BOX_INT);
-    boxLongClass_ = CacheClass(etsClassLinker, descriptors::BOX_LONG);
-
-    arrayClass_ = CacheClass(etsClassLinker, descriptors::ARRAY);
-    arraybufClass_ = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
-
-    for (auto descr : FUNCTION_INTERFACE_DESCRIPTORS) {
-        functionalInterfaces_.insert(CacheClass(etsClassLinker, descr));
-    }
+    CacheClasses(etsClassLinker);
 
     RegisterBuiltinJSRefConvertors(this);
 
@@ -102,8 +151,33 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     ASSERT(etsProxyRefStorage_.get() != nullptr);
 
     // Set InteropCtx::DestroyLocalScopeForTopFrame to VM for call it it deoptimization and exception handlers
-    coro->GetPandaVM()->SetClearInteropHandleScopesFunction(
-        [this](Frame *frame) { this->DestroyLocalScopeForTopFrame(frame); });
+    vm->SetClearInteropHandleScopesFunction([this](Frame *frame) { this->DestroyLocalScopeForTopFrame(frame); });
+    vm->SetDestroyExternalDataFunction(Destroy);
+}
+
+void InteropCtx::CacheClasses(EtsClassLinker *etsClassLinker)
+{
+    jsRuntimeClass_ = CacheClass(etsClassLinker, descriptors::JS_RUNTIME);
+    jsValueClass_ = CacheClass(etsClassLinker, descriptors::JS_VALUE);
+    jsErrorClass_ = CacheClass(etsClassLinker, descriptors::JS_ERROR);
+    objectClass_ = CacheClass(etsClassLinker, descriptors::OBJECT);
+    stringClass_ = CacheClass(etsClassLinker, descriptors::STRING);
+    voidClass_ = CacheClass(etsClassLinker, descriptors::VOID);
+    undefinedClass_ = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
+    promiseClass_ = CacheClass(etsClassLinker, descriptors::PROMISE);
+    errorClass_ = CacheClass(etsClassLinker, descriptors::ERROR);
+    exceptionClass_ = CacheClass(etsClassLinker, descriptors::EXCEPTION);
+    typeClass_ = CacheClass(etsClassLinker, descriptors::TYPE);
+
+    boxIntClass_ = CacheClass(etsClassLinker, descriptors::BOX_INT);
+    boxLongClass_ = CacheClass(etsClassLinker, descriptors::BOX_LONG);
+
+    arrayClass_ = CacheClass(etsClassLinker, descriptors::ARRAY);
+    arraybufClass_ = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
+
+    for (auto descr : FUNCTION_INTERFACE_DESCRIPTORS) {
+        functionalInterfaces_.insert(CacheClass(etsClassLinker, descr));
+    }
 }
 
 EtsObject *InteropCtx::CreateETSCoreJSError(EtsCoroutine *coro, JSValue *jsvalue)

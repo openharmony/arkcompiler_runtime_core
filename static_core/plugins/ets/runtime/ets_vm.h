@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -262,7 +262,7 @@ public:
     }
 
     struct alignas(16U) ExternalData {  // NOLINT(readability-magic-numbers)
-        static constexpr size_t SIZE = 512U;
+        static constexpr size_t SIZE = 256U * 3;
         uint8_t data[SIZE];  // NOLINT(modernize-avoid-c-arrays)
     };
 
@@ -302,6 +302,12 @@ public:
         if (clearInteropHandleScopes_) {
             clearInteropHandleScopes_(frame);
         }
+    }
+
+    void SetDestroyExternalDataFunction(const std::function<void(void *)> &func)
+    {
+        ASSERT(!destroyExternalData_);
+        destroyExternalData_ = func;
     }
 
     os::memory::Mutex &GetAtomicsMutex()
@@ -376,6 +382,7 @@ private:
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     std::function<void(Frame *)> clearInteropHandleScopes_;
+    std::function<void(void *)> destroyExternalData_;
     // for JS Atomics
     os::memory::Mutex atomicsMutex_;
 

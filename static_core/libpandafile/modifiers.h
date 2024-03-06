@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ constexpr uint32_t ACC_SYNTHETIC = 0x1000;     // field, method, class
 constexpr uint32_t ACC_ANNOTATION = 0x2000;    // class
 constexpr uint32_t ACC_ENUM = 0x4000;          // field, class
 constexpr uint32_t ACC_DESTROYED = 0x8000;     // method
+constexpr uint32_t ACC_READONLY = 0x0020;      // field
 
 constexpr uint32_t ACC_FILE_MASK = 0xFFFF;
 

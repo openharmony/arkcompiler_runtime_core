@@ -519,9 +519,29 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallImpl(FSetupArgs &setupArgs, 
     return static_cast<uint64_t>(etsRet.GetAsLong());
 }
 
-static inline std::optional<std::pair<napi_value, napi_value>> CompilerResolveQualifiedJSCall(
-    napi_env env, napi_value jsVal, coretypes::String *qnameStr)
+template <char DELIM = '.', typename F>
+static bool WalkQualifiedName(std::string_view name, F const &f)
 {
+    ASSERT(name.back() == '\0');
+    for (const char *p = name.data(); *p == DELIM;) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto e = ++p;
+        while (*e != '\0' && *e != DELIM) {
+            e++;
+        }
+        std::string substr(p, ToUintPtr(e) - ToUintPtr(p));
+        if (UNLIKELY(!f(substr))) {
+            return false;
+        }
+        p = e;
+    }
+    return true;
+}
+
+static std::optional<std::pair<napi_value, napi_value>> ResolveQualifiedJSCall(napi_env env, napi_value jsVal,
+                                                                               coretypes::String *qnameStr)
+{
+    ASSERT(qnameStr->ClassAddr<Class>()->IsStringClass());
     napi_value jsThis {};
     ASSERT(qnameStr->IsMUtf8());
     auto qname = std::string_view(utf::Mutf8AsCString(qnameStr->GetDataMUtf8()), qnameStr->GetMUtf8Length());
@@ -543,7 +563,16 @@ static inline std::optional<std::pair<napi_value, napi_value>> CompilerResolveQu
     return std::make_pair(jsThis, jsVal);
 }
 
-template <bool IS_NEWCALL>
+static uint32_t GetClassQnameOffset(InteropCtx *ctx, Method *method)
+{
+    auto klass = method->GetClass();
+    ctx->GetConstStringStorage()->LoadDynamicCallClass(klass);
+    auto fields = klass->GetStaticFields();
+    ASSERT(fields.size() == 1);
+    return klass->GetFieldPrimitive<uint32_t>(fields[0]);
+}
+
+template <bool IS_NEWCALL, bool IS_QNAME>
 static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallBase(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
     auto argsetup =
@@ -554,35 +583,72 @@ static ALWAYS_INLINE inline uint64_t JSRuntimeJSCallBase(Method *method, uint8_t
         ASSERT(methodd->IsStatic());
 
         panda_file::ShortyIterator it(methodd->GetShorty());
-        uint32_t numArgs = methodd->GetNumArgs() - 2;
-        uint32_t refArgIdx = !(*it++).IsPrimitive() + 2;
-        it.IncrementWithoutCheck();
-        it.IncrementWithoutCheck();
+        constexpr uint32_t DROP_ARGS = IS_QNAME ? 2 : 3;
+        uint32_t numArgs = methodd->GetNumArgs() - DROP_ARGS;
+        uint32_t refArgIdx = !(*it++).IsPrimitive() + (IS_QNAME ? 2 : 1);
+        for (uint32_t i = 0; i < DROP_ARGS; i++) {
+            it.IncrementWithoutCheck();
+        }
 
         napi_value jsVal = JSConvertJSValue::Wrap(env, argReader.Read<JSValue *>());
-        auto qnameStr = argReader.Read<coretypes::String *>();
-        ASSERT(qnameStr->ClassAddr<Class>()->IsStringClass());
-        auto res = CompilerResolveQualifiedJSCall(env, jsVal, qnameStr);
-        if (UNLIKELY(!res.has_value())) {
+        if constexpr (IS_QNAME) {
+            // This branch is used only in tests where $jscall/$jsnew class is created manually
+            auto qnameStr = argReader.Read<coretypes::String *>();
+            auto res = ResolveQualifiedJSCall(env, jsVal, qnameStr);
+            if (UNLIKELY(!res.has_value())) {
+                ASSERT(NapiIsExceptionPending(env));
+                return std::nullopt;
+            }
+            return std::make_tuple(res->first, res->second, it, numArgs, refArgIdx);
+        }
+        auto classQnameOffset = GetClassQnameOffset(ctx, methodd);
+        auto qnameStart = argReader.Read<uint32_t>() + classQnameOffset;
+        auto qnameLen = argReader.Read<uint32_t>();
+        napi_value jsThis {};
+
+        auto success = ctx->GetConstStringStorage()->EnumerateStrings(
+            qnameStart, qnameLen, [&jsThis, &jsVal, env](napi_value jsStr) {
+                jsThis = jsVal;
+                napi_status rc = napi_get_property(env, jsVal, jsStr, &jsVal);
+                if (UNLIKELY(rc == napi_object_expected || NapiThrownGeneric(rc))) {
+                    ASSERT(NapiIsExceptionPending(env));
+                    return false;
+                }
+                return true;
+            });
+
+        if (!success) {
             ASSERT(NapiIsExceptionPending(env));
             return std::nullopt;
         }
-        return std::make_tuple(res->first, res->second, it, numArgs, refArgIdx);
+        return std::make_tuple(jsThis, jsVal, it, numArgs, refArgIdx);
     };
     return JSRuntimeJSCallImpl<IS_NEWCALL>(argsetup, method, args, inStackArgs);
 }
 
 extern "C" uint64_t JSRuntimeJSCall(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
-    return JSRuntimeJSCallBase<false>(method, args, inStackArgs);  // IS_NEWCALL is false
+    return JSRuntimeJSCallBase</*IS_NEWCALL=*/false, /*IS_QNAME=*/false>(method, args, inStackArgs);
 }
 extern "C" void JSRuntimeJSCallBridge(Method *method, ...);
 
+extern "C" uint64_t JSRuntimeJSCallQname(Method *method, uint8_t *args, uint8_t *inStackArgs)
+{
+    return JSRuntimeJSCallBase</*IS_NEWCALL=*/false, /*IS_QNAME=*/true>(method, args, inStackArgs);
+}
+extern "C" void JSRuntimeJSCallQnameBridge(Method *method, ...);
+
 extern "C" uint64_t JSRuntimeJSNew(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
-    return JSRuntimeJSCallBase<true>(method, args, inStackArgs);  // IS_NEWCALL is true
+    return JSRuntimeJSCallBase</*IS_NEWCALL=*/true, /*IS_QNAME=*/false>(method, args, inStackArgs);
 }
 extern "C" void JSRuntimeJSNewBridge(Method *method, ...);
+
+extern "C" uint64_t JSRuntimeJSNewQname(Method *method, uint8_t *args, uint8_t *inStackArgs)
+{
+    return JSRuntimeJSCallBase</*IS_NEWCALL=*/true, /*IS_QNAME=*/true>(method, args, inStackArgs);
+}
+extern "C" void JSRuntimeJSNewQnameBridge(Method *method, ...);
 
 extern "C" uint64_t JSRuntimeJSCallByValue(Method *method, uint8_t *args, uint8_t *inStackArgs)
 {
@@ -640,6 +706,24 @@ extern "C" uint64_t JSProxyCall(Method *method, uint8_t *args, uint8_t *inStackA
 }
 extern "C" void JSProxyCallBridge(Method *method, ...);
 
+static std::optional<uint32_t> GetQnameCount(Class *klass)
+{
+    auto pf = klass->GetPandaFile();
+    panda_file::ClassDataAccessor cda(*pf, klass->GetFileId());
+    auto qnameCount =
+        cda.EnumerateAnnotation("Lets/annotation/DynamicCall;", [pf](panda_file::AnnotationDataAccessor &ada) {
+            for (uint32_t i = 0; i < ada.GetCount(); i++) {
+                auto adae = ada.GetElement(i);
+                auto *elemName = pf->GetStringData(adae.GetNameId()).data;
+                if (utf::IsEqual(utf::CStringAsMutf8("value"), elemName)) {
+                    return adae.GetArrayValue().GetCount();
+                }
+            }
+            UNREACHABLE();
+        });
+    return qnameCount;
+}
+
 template <bool IS_NEWCALL>
 static void InitJSCallSignatures(coretypes::String *clsStr)
 {
@@ -647,7 +731,7 @@ static void InitJSCallSignatures(coretypes::String *clsStr)
     auto ctx = InteropCtx::Current(coro);
     auto classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    std::string classDescriptor(utf::Mutf8AsCString(clsStr->GetDataMUtf8()));
+    std::string classDescriptor(utf::Mutf8AsCString(clsStr->GetDataMUtf8()), clsStr->GetLength());
     INTEROP_LOG(DEBUG) << "Intialize jscall signatures for " << classDescriptor;
     EtsClass *etsClass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.c_str());
     INTEROP_FATAL_IF(etsClass == nullptr);
@@ -660,27 +744,39 @@ static void InitJSCallSignatures(coretypes::String *clsStr)
             continue;
         }
         ASSERT(method.IsStatic());
-        auto pf = method.GetPandaFile();
+        auto pf = klass->GetPandaFile();
         panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method.GetFileId()));
         pda.EnumerateTypes([](panda_file::Type) {});  // preload reftypes span
 
         void *methodEp = nullptr;
-        if constexpr (IS_NEWCALL) {
-            methodEp = reinterpret_cast<void *>(JSRuntimeJSNewBridge);
-        } else {
-            uint32_t const argReftypeShift = method.GetReturnType().IsReference() ? 1 : 0;
-            ASSERT(method.GetArgType(0).IsReference());  // arg0 is always a reference
-            ASSERT(method.GetArgType(1).IsReference());  // arg1 is always a reference
-            auto cls1 = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), ctx->LinkerCtx());
+        ASSERT(method.GetArgType(0).IsReference());  // arg0 is always a reference
+        if (method.GetArgType(1).IsReference()) {
+            uint32_t const argRefTypeShift = method.GetReturnType().IsReference() ? 1 : 0;
+            auto cls1 = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argRefTypeShift), ctx->LinkerCtx());
             if (cls1->IsStringClass()) {
-                methodEp = reinterpret_cast<void *>(JSRuntimeJSCallBridge);
+                methodEp =
+                    reinterpret_cast<void *>(IS_NEWCALL ? JSRuntimeJSNewQnameBridge : JSRuntimeJSCallQnameBridge);
             } else {
                 ASSERT(cls1 == ctx->GetJSValueClass());
+                ASSERT(!IS_NEWCALL);
                 methodEp = reinterpret_cast<void *>(JSRuntimeJSCallByValueBridge);
             }
+        } else {
+            ASSERT(method.GetArgType(1).GetId() == panda_file::Type::TypeId::I32);
+            ASSERT(method.GetArgType(2U).GetId() == panda_file::Type::TypeId::I32);
+            methodEp = reinterpret_cast<void *>(IS_NEWCALL ? JSRuntimeJSNewBridge : JSRuntimeJSCallBridge);
         }
         method.SetCompiledEntryPoint(methodEp);
         method.SetNativePointer(nullptr);
+    }
+
+    auto qnameCount = GetQnameCount(klass);
+    // JSCallClass which was manually created in test will not have the required annotation and field
+    if (qnameCount.has_value()) {
+        auto fields = klass->GetStaticFields();
+        ASSERT(fields.Size() == 1);
+        ASSERT(klass->GetFieldPrimitive<uint32_t>(fields[0]) == 0);
+        klass->SetFieldPrimitive<uint32_t>(fields[0], ctx->AllocateSlotsInStringBuffer(*qnameCount));
     }
 }
 
