@@ -1058,6 +1058,30 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendDouble/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 
+//! CHECKER       Invalid save states JIT (#I932LA/15833)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-inlining=false --compiler-regex='.*bugfix_concat_loop1'", entry: "ETSGLOBAL::main"
+//!
+//! METHOD        "bugfix_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 1/
+//! INST          /StringBuilder::<ctor>/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1/
+//! INST_NOT      /StringBuilder::<ctor>/
+
+//! CHECKER       Invalid save states AOT (#I932LA/15833)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*bugfix_concat_loop1'"
+//!
+//! METHOD        "bugfix_concat_loop1"
+//! PASS_BEFORE   "BranchElimination"
+//! IN_BLOCK      /loop 1/
+//! INST          /StringBuilder::<ctor>/
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! IN_BLOCK      /loop 1/
+//! INST_NOT      /StringBuilder::<ctor>/
+
 function concat_loop0(a: String, n: int): String {
     let str: String = "";
     for (let i = 0; i < n; ++i)
@@ -1506,6 +1530,24 @@ function bugfix_concat_loop0(): String {
     return res
 }
 
+
+function bugfix_concat_loop1(size: int, charset: string): string {
+    let res: string = new string()
+
+    switch (charset) {
+        case "ISO-8859-1":
+            for (let i = 0; i < size; ++i)
+                res += string.fromCharCode(0x43 as number)
+        break
+        case "UTF-16":
+            for (let i = 0; i < size; ++i)
+                res += string.fromCharCode(0xD799 as number)
+        break
+    }
+
+    return res
+}
+
 function main() {
     assert concat_loop0("a", 4) == "aaaa": "Wrong result at concat_loop0";
     assert concat_loop1("a", 4) == "aaaa": "Wrong result at concat_loop1";
@@ -1545,4 +1587,6 @@ function main() {
     assert reuse_concat_loop5("a", 4) == "a1a3a5a7": "Wrong result at reuse_concat_loop5";
     assert args_concat_loop0(1.5, false, c'A', c'B') == "1.5false2AB": "Wrong result at args_concat_loop0";
     assert bugfix_concat_loop0() == "12345678": "Wrong result at bugfix_concat_loop0";
+    assert bugfix_concat_loop1(4, "ISO-8859-1") == "CCCC": "Wrong result at bugfix_concat_loop1"
+    assert bugfix_concat_loop1(4, "UTF-16") == "힙힙힙힙": "Wrong result at bugfix_concat_loop1"
 }
