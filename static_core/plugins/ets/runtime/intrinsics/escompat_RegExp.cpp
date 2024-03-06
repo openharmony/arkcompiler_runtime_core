@@ -123,11 +123,11 @@ uint32_t CastToBitMask(EtsString *checkStr)
 
 void SetFlags(EtsObject *regexpObject, EtsString *checkStr)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> regexp(coroutine, regexpObject->GetCoreType());
 
-    auto regexpClass = regexp->GetClass();
+    auto *regexpClass = regexp->GetClass();
     EtsField *flagsField = regexpClass->GetDeclaredFieldIDByName(FLAGS_FIELD_NAME);
 
     auto flags = checkStr->GetMutf8();
@@ -138,13 +138,13 @@ void SetFlags(EtsObject *regexpObject, EtsString *checkStr)
 
 void SetBuffer(EtsObject *regexpObject, const RegExpParser &parser)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> regexp(coroutine, regexpObject->GetCoreType());
-    auto regexpClass = regexp->GetClass();
+    auto *regexpClass = regexp->GetClass();
 
     auto bufferSize = parser.GetOriginBufferSize();
-    auto buffer = parser.GetOriginBuffer();
+    auto *buffer = parser.GetOriginBuffer();
     EtsField *bufferField = regexpClass->GetDeclaredFieldIDByName(BUFFER_FIELD_NAME);
     VMHandle<EtsByteArray> etsBuffer(coroutine, EtsByteArray::Create(bufferSize)->GetCoreType());
     for (size_t i = 0; i < bufferSize; ++i) {
@@ -155,13 +155,13 @@ void SetBuffer(EtsObject *regexpObject, const RegExpParser &parser)
 
 void SetGroupNames(EtsObject *regexpObject, const RegExpParser &parser)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> regexp(coroutine, regexpObject->GetCoreType());
-    auto regexpClass = regexp->GetClass();
+    auto *regexpClass = regexp->GetClass();
 
-    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto *stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
 
     auto groupName = parser.GetGroupNames();
     EtsObjectArray *etsGroupNames = EtsObjectArray::Create(stringClass, groupName.size());
@@ -178,7 +178,7 @@ void SetGroupNames(EtsObject *regexpObject, const RegExpParser &parser)
 
 extern "C" EtsObject *EscompatRegExpCompile(EtsObject *regexpObj)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
     VMHandle<EtsObject> regexp(coroutine, regexpObj->GetCoreType());
@@ -203,22 +203,26 @@ extern "C" EtsObject *EscompatRegExpCompile(EtsObject *regexpObj)
     return regexp.GetPtr();
 }
 
-void SetSuccessfulMatchLegacyProperties(EtsClass *type, const PandaVector<VMMutableHandle<EtsString>> &matches,
-                                        EtsString *inputStrObj, uint32_t index)
+void SetSuccessfulMatchLegacyProperties(EtsClass *type, const EtsObject *regexpExecArrayObj, EtsString *inputStrObj,
+                                        uint32_t index)
 {
-    ASSERT(!matches.empty());
-
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    EtsClass *resultClass = regexpExecArrayObj->GetClass();
+    auto *resultField = resultClass->GetDeclaredFieldIDByName(RESULT_FIELD_NAME);
+    VMHandle<EtsObjectArray> matches(coroutine, regexpExecArrayObj->GetFieldObject(resultField)->GetCoreType());
+    ASSERT(matches->GetLength() != 0);
+
     VMHandle<EtsString> inputStr(coroutine, inputStrObj->GetCoreType());
     VMHandle<EtsString> emptyString(coroutine, EtsString::CreateNewEmptyString()->GetCoreType());
 
     EtsField *lastMatchField = type->GetStaticFieldIDByName(LAST_MATCH_FIELD_NAME);
-    type->SetStaticFieldObject(lastMatchField, matches.front().GetPtr()->AsObject());
+    type->SetStaticFieldObject(lastMatchField, matches->Get(0U));
     for (size_t i = 1; i < LAST_PAREN_FIELDS_COUNT; ++i) {
         EtsField *parenField = type->GetStaticFieldIDByName(PAREN_FIELD_NAMES[i]);
-        if (i < matches.size()) {
-            type->SetStaticFieldObject(parenField, matches[i].GetPtr()->AsObject());
+        if (i < matches->GetLength()) {
+            type->SetStaticFieldObject(parenField, matches->Get(i));
         } else {
             type->SetStaticFieldObject(parenField, emptyString->AsObject());
         }
@@ -228,8 +232,8 @@ void SetSuccessfulMatchLegacyProperties(EtsClass *type, const PandaVector<VMMuta
     type->SetStaticFieldObject(inputField, inputStr->AsObject());
 
     EtsField *lastParenField = type->GetStaticFieldIDByName(LAST_PAREN_FIELD_NAME);
-    if (matches.size() > 1) {
-        type->SetStaticFieldObject(lastParenField, matches.back().GetPtr()->AsObject());
+    if (matches->GetLength() > 1) {
+        type->SetStaticFieldObject(lastParenField, matches->Get(matches->GetLength() - 1U));
     } else {
         type->SetStaticFieldObject(lastParenField, emptyString->AsObject());
     }
@@ -241,7 +245,8 @@ void SetSuccessfulMatchLegacyProperties(EtsClass *type, const PandaVector<VMMuta
     VMHandle<EtsString> prefix(coroutine, EtsString::CreateFromMUtf8(inputCopy.c_str(), index)->GetCoreType());
     inputCopy[index] = old;
     type->SetStaticFieldObject(leftContextField, prefix->AsObject());
-    const char *suffixBegin = std::next(inputCopy.c_str(), index + matches.front().GetPtr()->GetLength());
+    const char *suffixBegin =
+        std::next(inputCopy.c_str(), index + EtsString::FromEtsObject(matches->Get(0U))->GetLength());
 
     EtsField *rightContextField = type->GetStaticFieldIDByName(RIGHT_CONTEXT_FIELD_NAME);
     VMHandle<EtsString> suffix(coroutine, EtsString::CreateFromMUtf8(suffixBegin)->GetCoreType());
@@ -250,7 +255,7 @@ void SetSuccessfulMatchLegacyProperties(EtsClass *type, const PandaVector<VMMuta
 
 void SetUnsuccessfulMatchLegacyProperties(EtsClass *type)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsString> emptyString(coroutine, EtsString::CreateNewEmptyString()->GetCoreType());
 
@@ -267,7 +272,7 @@ void SetUnsuccessfulMatchLegacyProperties(EtsClass *type)
 RegExpMatchResult Execute(EtsObject *regexpObj, EtsString *inputStrObj, EtsInt stringLength, EtsInt lastIndex,
                           bool hasIndices)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
     VMHandle<EtsString> inputStr(coroutine, inputStrObj->GetCoreType());
@@ -287,24 +292,24 @@ RegExpMatchResult Execute(EtsObject *regexpObj, EtsString *inputStrObj, EtsInt s
         strBuffer = u8Buffer.data();
     }
 
-    auto etsBuffer = reinterpret_cast<EtsByteArray *>(GetFieldObjectByName(regexp.GetPtr(), BUFFER_FIELD_NAME));
-    auto buffer = reinterpret_cast<uint8_t *>(etsBuffer->GetData<int8_t>());
+    auto *etsBuffer = reinterpret_cast<EtsByteArray *>(GetFieldObjectByName(regexp.GetPtr(), BUFFER_FIELD_NAME));
+    auto *buffer = reinterpret_cast<uint8_t *>(etsBuffer->GetData<int8_t>());
     bool ret = executor.Execute(strBuffer, lastIndex, stringLength, buffer, isUtf16);
     return executor.GetResult(ret, hasIndices);
 }
 
-void SetResultField(PandaVector<VMMutableHandle<EtsString>> &handledMatches, EtsObject *regexpExecArrayObj,
-                    const PandaVector<std::pair<bool, PandaString>> &matches, bool isWide)
+void SetResultField(EtsObject *regexpExecArrayObj, const PandaVector<std::pair<bool, PandaString>> &matches,
+                    bool isWide)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> regexpExecArray(coroutine, regexpExecArrayObj->GetCoreType());
     EtsClass *resultClass = regexpExecArray->GetClass();
 
-    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
-    auto stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto *stringClass = classLinker->GetClassRoot(EtsClassRoot::STRING);
 
-    auto resultField = resultClass->GetDeclaredFieldIDByName(RESULT_FIELD_NAME);
+    auto *resultField = resultClass->GetDeclaredFieldIDByName(RESULT_FIELD_NAME);
     VMHandle<EtsObjectArray> resultArray(coroutine, EtsObjectArray::Create(stringClass, matches.size())->GetCoreType());
     VMHandle<EtsString> match;
     for (size_t i = 0; i < matches.size(); ++i) {
@@ -319,7 +324,6 @@ void SetResultField(PandaVector<VMMutableHandle<EtsString>> &handledMatches, Ets
                                                      matches[i].second.length())
                                ->GetCoreType());
         }
-        handledMatches[i].Update(match->GetCoreType());
         resultArray->Set(i, match->AsObject());
     }
     regexpExecArray->SetFieldObject(resultField, resultArray->AsObject());
@@ -328,13 +332,13 @@ void SetResultField(PandaVector<VMMutableHandle<EtsString>> &handledMatches, Ets
 void SetIndicesField(EtsObject *regexpExecArrayObj, const PandaVector<std::pair<uint32_t, uint32_t>> &indices,
                      bool hasIndices)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> regexpExecArray(coroutine, regexpExecArrayObj->GetCoreType());
-    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
 
     EtsClass *resultClass = regexpExecArray->GetClass();
-    auto indicesField = resultClass->GetDeclaredFieldIDByName(INDICES_FIELD_NAME);
+    auto *indicesField = resultClass->GetDeclaredFieldIDByName(INDICES_FIELD_NAME);
 
     if (!hasIndices) {
         VMHandle<EtsDoubleArray> defaultVal(coroutine, EtsDoubleArray::Create(0)->GetCoreType());
@@ -356,35 +360,35 @@ void SetIndicesField(EtsObject *regexpExecArrayObj, const PandaVector<std::pair<
 
 void SetIsCorrectField(EtsObject *regexpExecArrayObj, bool value)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> regexpExecArray(coroutine, regexpExecArrayObj->GetCoreType());
     EtsClass *resultClass = regexpExecArray->GetClass();
-    auto resultCorrectField = resultClass->GetDeclaredFieldIDByName(IS_CORRECT_FIELD_NAME);
+    auto *resultCorrectField = resultClass->GetDeclaredFieldIDByName(IS_CORRECT_FIELD_NAME);
 
     regexpExecArray->SetFieldPrimitive<bool>(resultCorrectField, value);
 }
 
 void SetInputField(EtsObject *regexpExecArrayObj, EtsString *inputStrObj)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsString> inputStr(coroutine, inputStrObj->GetCoreType());
     VMHandle<EtsObject> regexpExecArray(coroutine, regexpExecArrayObj->GetCoreType());
     EtsClass *resultClass = regexpExecArray->GetClass();
-    auto inputField = resultClass->GetDeclaredFieldIDByName(INPUT_FIELD_NAME);
+    auto *inputField = resultClass->GetDeclaredFieldIDByName(INPUT_FIELD_NAME);
 
     regexpExecArray->SetFieldObject(inputField, inputStr->AsObject());
 }
 
 void SetIndexField(EtsObject *regexpExecArrayObj, uint32_t index)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> regexpExecArray(coroutine, regexpExecArrayObj->GetCoreType());
     EtsClass *resultClass = regexpExecArray->GetClass();
 
-    auto indexField = resultClass->GetDeclaredFieldIDByName(INDEX_FIELD_NAME);
+    auto *indexField = resultClass->GetDeclaredFieldIDByName(INDEX_FIELD_NAME);
     regexpExecArray->SetFieldPrimitive<EtsDouble>(indexField, static_cast<EtsDouble>(index));
 }
 
@@ -398,17 +402,17 @@ void SetLastIndexField(EtsObject *regexp, EtsField *lastIndexField, bool global,
 
 extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *str)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
+    auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
-    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
 
     VMHandle<EtsObject> regexp(coroutine, obj->GetCoreType());
     VMHandle<EtsString> strHandle(coroutine, str->GetCoreType());
-    auto regexpExecArrayClass = classLinker->GetClass(RESULT_CLASS_NAME);
+    auto *regexpExecArrayClass = classLinker->GetClass(RESULT_CLASS_NAME);
     VMHandle<EtsObject> regexpExecArrayObject(coroutine, EtsObject::Create(regexpExecArrayClass)->GetCoreType());
 
-    auto regexpClass = regexp->GetClass();
+    auto *regexpClass = regexp->GetClass();
 
     EtsField *lastIndexField = regexpClass->GetDeclaredFieldIDByName(LAST_INDEX_FIELD_NAME);
     auto lastIndex = static_cast<int32_t>(regexp.GetPtr()->GetFieldPrimitive<EtsDouble>(lastIndexField));
@@ -441,12 +445,9 @@ extern "C" EtsObject *EscompatRegExpExec(EtsObject *obj, EtsString *str)
     SetIsCorrectField(regexpExecArrayObject.GetPtr(), true);
     SetIndexField(regexpExecArrayObject.GetPtr(), execResult.index);
     SetInputField(regexpExecArrayObject.GetPtr(), strHandle.GetPtr());
-    PandaVector<VMMutableHandle<EtsString>> matches;
-    for (size_t i = 0; i < execResult.captures.size(); ++i) {
-        matches.push_back(VMMutableHandle<EtsString>(coroutine, nullptr));
-    }
-    SetResultField(matches, regexpExecArrayObject.GetPtr(), execResult.captures, execResult.isWide);
-    SetSuccessfulMatchLegacyProperties(regexpClass, matches, strHandle.GetPtr(), execResult.index);
+    SetResultField(regexpExecArrayObject.GetPtr(), execResult.captures, execResult.isWide);
+    SetSuccessfulMatchLegacyProperties(regexpClass, regexpExecArrayObject.GetPtr(), strHandle.GetPtr(),
+                                       execResult.index);
     SetIndicesField(regexpExecArrayObject.GetPtr(), execResult.indices, hasIndices);
     return regexpExecArrayObject.GetPtr();
 }
