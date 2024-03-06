@@ -125,9 +125,9 @@
     param_types: {},
     param_list: {},    
     method_return_type: String,
-    init_object_data: "[0 as double, 1 as double, Double.MIN_VALUE as double, Double.MAX_VALUE as double]",
+    init_object_data: "[0 as double, 1 as double, Double.MIN_VALUE as double, Double.MAX_VALUE as double, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY]",
     expected_data_type: "String[]",
-    expected_test_data: '["0", "1", "4.9e-324", "1.7976931348623157e+308"]',
+    expected_test_data: '["0", "1", "4.9e-324", "1.7976931348623157e+308", "NaN", "Infinity", "-Infinity"]',
     verify_test_result_function: compareStringTrivial
   }
 - {
@@ -416,18 +416,18 @@
     object_type: Double,
     init_object_data_type: "double[]",
     init_object_type: double,
-    init_object_data: "[0.25, 0.25, 0.25, 1.01, 11.01, -0.1234567e-8, 0.1234567e-8, 11, 12345.123455]",
+    init_object_data: "[0.25, 0.25, 0.25, 1.01, 11.01, -0.1234567e-8, 0.1234567e-8, 11, 12345.123455, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY]",
 
     param_init_data_types: {"param1":"Double[]"},
     param_types: {"param1":double},
     param_nature: {"param1": primitive},
-    param_list: {"param1": '[3.8, 4.0, 4.5, 4.7, 1.0, 5.0, 5.0, 2.0, 10.0]'},
+    param_list: {"param1": '[3.8, 4.0, 4.5, 4.7, 1.0, 5.0, 5.0, 2.0, 10.0, 1.0, 1.0, 1.0]'},
 
     method_return_type: String,
     
     expected_data_item_type: String,
     expected_data_type: "String[]",
-    expected_test_data: '["0.250", "0.2500", "0.2500", "1.010", "1e+1", "-1.2346e-9", "1.2346e-9", "11", "12345.12346"]',
+    expected_test_data: '["0.250", "0.2500", "0.2500", "1.010", "1e+1", "-1.2346e-9", "1.2346e-9", "11", "12345.12346", "NaN", "Infinity", "-Infinity"]',
     verify_test_result_function: compareStringTrivial    
   }
 

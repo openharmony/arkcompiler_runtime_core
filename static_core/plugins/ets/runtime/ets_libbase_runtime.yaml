@@ -1314,6 +1314,16 @@ intrinsics:
       args: [f64]
     impl: ark::ets::intrinsics::StdCoreDoubleToFixed
 
+  - name: StdCoreDoubleNumberFromString
+    space: ets
+    class_name: std.core.Double
+    method_name: numberFromString
+    static: true
+    signature:
+      ret: f64
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::StdCoreDoubleNumberFromString
+
   - name: StdDoubleIsNan
     space: ets
     class_name: std.core.Double

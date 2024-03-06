@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,25 @@
 #include "utils/utf.h"
 
 namespace ark::ets::intrinsics {
+
+namespace {
+
+double ParseFloat(EtsString *s, const uint32_t flags)
+{
+    if (UNLIKELY(s->IsUtf16())) {
+        size_t len = utf::Utf16ToUtf8Size(s->GetDataUtf16(), s->GetUtf16Length()) - 1;
+        PandaVector<uint8_t> buf(len);
+        len = utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), s->GetLength(), len, 0);
+
+        Span<uint8_t> str = Span<uint8_t>(buf.data(), len);
+        return helpers::StringToDouble(str.begin(), str.end(), 0, flags);
+    }
+
+    Span<uint8_t> str = Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
+    return helpers::StringToDouble(str.begin(), str.end(), 0, flags);
+}
+
+}  // namespace
 
 EtsString *StdCoreDoubleToString(double number, int radix)
 {
@@ -65,17 +84,7 @@ EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
 
 double StdCoreDoubleParseFloat(EtsString *s)
 {
-    if (UNLIKELY(s->IsUtf16())) {
-        size_t len = utf::Utf16ToUtf8Size(s->GetDataUtf16(), s->GetUtf16Length()) - 1;
-        PandaVector<uint8_t> buf(len);
-        len = utf::ConvertRegionUtf16ToUtf8(s->GetDataUtf16(), buf.data(), s->GetLength(), len, 0);
-
-        Span<uint8_t> str = Span<uint8_t>(buf.data(), len);
-        return helpers::StringToDouble(str.begin(), str.end(), 0, helpers::flags::IGNORE_TRAILING);
-    }
-
-    Span<uint8_t> str = Span<uint8_t>(s->GetDataMUtf8(), s->GetMUtf8Length() - 1);
-    return helpers::StringToDouble(str.begin(), str.end(), 0, helpers::flags::IGNORE_TRAILING);
+    return ParseFloat(s, helpers::flags::IGNORE_TRAILING);
 }
 
 double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
@@ -235,6 +244,17 @@ extern "C" EtsBoolean StdCoreDoubleIsInteger(double v)
 extern "C" EtsBoolean StdCoreDoubleIsSafeInteger(double v)
 {
     return ToEtsBoolean(IsInteger(v) && (std::fabs(v) <= helpers::MaxSafeInteger<double>()));
+}
+
+double StdCoreDoubleNumberFromString(EtsString *s)
+{
+    uint32_t flags = 0;
+    flags |= helpers::flags::ALLOW_BINARY;
+    flags |= helpers::flags::ALLOW_OCTAL;
+    flags |= helpers::flags::ALLOW_HEX;
+    flags |= helpers::flags::EMPTY_IS_ZERO;
+    flags |= helpers::flags::ERROR_IN_EXPONENT_IS_NAN;
+    return ParseFloat(s, flags);
 }
 
 }  // namespace ark::ets::intrinsics

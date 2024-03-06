@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,17 +29,18 @@ namespace ark::ets::intrinsics::helpers {
 
 double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, uint32_t flags)
 {
+    // 1. skip space and line terminal
     if (IsEmptyString(start, end)) {
+        if ((flags & flags::EMPTY_IS_ZERO) != 0) {
+            return 0.0;
+        }
         return NAN_VALUE;
     }
 
     radix = 0;
     auto p = const_cast<uint8_t *>(start);
 
-    // 1. skip space and line terminal
-    if (!GotoNonspace(&p, end)) {
-        return 0.0;
-    }
+    GotoNonspace(&p, end);
 
     // 2. get number sign
     Sign sign = Sign::NONE;
@@ -178,24 +179,35 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     char exponentSign = '+';
     int additionalExponent = 0;
     constexpr int MAX_EXPONENT = INT32_MAX / 2;
-    if (p != end && (*p == 'e' || *p == 'E')) {
-        RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
+    if (radix == DECIMAL && (p != end && (*p == 'e' || *p == 'E'))) {
+        bool undefinedExponent = false;
+        ++p;
+        if (p == end) {
+            undefinedExponent = true;
+        }
 
         // 10. parse exponent number
-        if (*p == '+' || *p == '-') {
+        if (!undefinedExponent && (*p == '+' || *p == '-')) {
             exponentSign = static_cast<char>(*p);
-            RETURN_IF_CONVERSION_END(++p, end, NAN_VALUE);
+            ++p;
+            if (p == end) {
+                undefinedExponent = true;
+            }
         }
-        uint8_t digit;
-        while ((digit = ToDigit(*p)) < radix) {
-            if (additionalExponent > static_cast<int>(MAX_EXPONENT / radix)) {
-                additionalExponent = MAX_EXPONENT;
-            } else {
-                additionalExponent = additionalExponent * static_cast<int>(radix) + static_cast<int>(digit);
+        if (!undefinedExponent) {
+            uint8_t digit;
+            while ((digit = ToDigit(*p)) < radix) {
+                if (additionalExponent > static_cast<int>(MAX_EXPONENT / radix)) {
+                    additionalExponent = MAX_EXPONENT;
+                } else {
+                    additionalExponent = additionalExponent * static_cast<int>(radix) + static_cast<int>(digit);
+                }
+                if (++p == end) {
+                    break;
+                }
             }
-            if (++p == end) {
-                break;
-            }
+        } else if ((flags & flags::ERROR_IN_EXPONENT_IS_NAN) != 0) {
+            return NAN_VALUE;
         }
     }
     exponent += (exponentSign == '-' ? -additionalExponent : additionalExponent);
