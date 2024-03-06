@@ -29,3 +29,7 @@
 # fails in JIT mode with --opt-level=2
 04.names_declarations_and_scopes/04.scopes/interface_level1.ets
 04.names_declarations_and_scopes/04.scopes/interface_level2.ets
+
+# 16032 Timeouts
+escompat/ArrayTest.ets
+#

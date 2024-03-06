@@ -1946,7 +1946,3 @@
 # es2panda: the specification changed
 09.classes/05.field_declarations/01.static_fields/static_field_declaration_n3.ets
 # end of es2panda fails
-
-# 16032 Timeouts
-escompat/ArrayTest.ets
-#
