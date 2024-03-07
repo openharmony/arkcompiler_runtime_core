@@ -126,7 +126,7 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
             return new IteratorResult<RegExpMatchArray>()
         }
         this.returned = true
-        return new IteratorResult<RegExpMatchArray>(match!)
+        return new IteratorResult<RegExpMatchArray>(match)
     }
 
     override iterator(): IterableIterator<RegExpMatchArray> {

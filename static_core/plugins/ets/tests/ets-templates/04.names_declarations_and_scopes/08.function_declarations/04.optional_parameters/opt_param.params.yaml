@@ -204,7 +204,7 @@ cases:
     # mixed optionality
     - decl: |-
           function foo(a: string, b: string = 'an', c?: string, d: string = 'ing'): string {
-              return a + b + (c === undefined ? 'undefined' : c!) + d
+              return a + b + (c === undefined ? 'undefined' : c) + d
           }
       call: |-
           assert foo('') == 'anundefineding'

@@ -18,6 +18,6 @@ desc: If the result of the evaluation of e is not equal to null or undefined, th
 ---*/
 
 function main(): void {
-  let a: Int | undefined = 5;
+  let a: Int|undefined = (): Int|undefined => { return 5; }();
   assert a! == 5;
 }

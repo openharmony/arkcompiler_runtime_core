@@ -75,24 +75,24 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
         return 1;
     }
 
-    if (actual!.isCorrect != expected!.isCorrect) {
+    if (actual.isCorrect != expected.isCorrect) {
         console.println("isCorrect field of actual is not equals to expected")
-        console.println("actual.isCorrect : " + actual!.isCorrect)
-        console.println("expected.isCorrect : " + expected!.isCorrect)
+        console.println("actual.isCorrect : " + actual.isCorrect)
+        console.println("expected.isCorrect : " + expected.isCorrect)
         return 1;
     }
 
-    if (actual!.index != expected!.index) {
+    if (actual.index != expected.index) {
         console.println("index field of actual is not equals to expected")
-        console.println("actual.index : " + actual!.index)
-        console.println("expected.index : " + expected!.index)
+        console.println("actual.index : " + actual.index)
+        console.println("expected.index : " + expected.index)
         return 1;
     }
 
-    if (actual!.result.length != expected!.result.length) {
+    if (actual.result.length != expected.result.length) {
         console.println("size of result array of actual is not equals to expected")
-        console.println("actual size : " + actual!.result.length);
-        console.println("expected size : " + expected!.result.length);
+        console.println("actual size : " + actual.result.length);
+        console.println("expected size : " + expected.result.length);
         return 1;
     }
 

@@ -545,10 +545,10 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
     public lastIndexOf(str: String, fromIndex?: Number): number {
-        if (fromIndex == undefined || isNaN(fromIndex!)) {
+        if (fromIndex == undefined || isNaN(fromIndex)) {
             return this.lastIndexOf(str, Int.MAX_VALUE as int)
         }
-        return this.lastIndexOf(str, fromIndex!.intValue())
+        return this.lastIndexOf(str, fromIndex.intValue())
     }
 
     /**
@@ -1344,7 +1344,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns string with the padString applied at the end of the current str
      */
     public padEnd(maxLength: number, fillString?: String): String {
-        const str = (fillString == undefined) ? "\u0020" : fillString!
+        const str = (fillString == undefined) ? "\u0020" : fillString
         return this.padEnd(maxLength as int, str)
     }
 
@@ -1402,7 +1402,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns string with the padString applied at the end of the current str
      */
     public padStart(maxLength: number, fillString?: String): String {
-        const str = (fillString == undefined) ? "\u0020" : fillString!
+        const str = (fillString == undefined) ? "\u0020" : fillString
         return this.padStart(maxLength as int, str)
     }
 
@@ -1899,7 +1899,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns the Unicode Normalization Form of the string
      */
     public normalize(form?: String): String {
-        const f = (form == undefined) ? "NFC" : form!
+        const f = (form == undefined) ? "NFC" : form
         switch (f) {
         case "NFC":
             return this.normalizeNFC()

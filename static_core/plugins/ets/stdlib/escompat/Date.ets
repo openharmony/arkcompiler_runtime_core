@@ -1513,11 +1513,11 @@ export final class Date {
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
     public static UTC(year: number, month: number, day?: Number, hours?: Number, minutes?: Number, seconds?: Number, ms?: Number): number {
-        let defaultDay = day !== undefined ? day!.valueOf() : 1.0;
-        let defaultHours = hours !== undefined ? hours!.valueOf() : 0.0;
-        let defaultMinutes = minutes !== undefined ? minutes!.valueOf() : 0.0;
-        let defaultSeconds = seconds !== undefined ? seconds!.valueOf() : 0.0;
-        let defaultMS = ms !== undefined ? ms!.valueOf() : 0.0;
+        let defaultDay = day !== undefined ? day.valueOf() : 1.0;
+        let defaultHours = hours !== undefined ? hours.valueOf() : 0.0;
+        let defaultMinutes = minutes !== undefined ? minutes.valueOf() : 0.0;
+        let defaultSeconds = seconds !== undefined ? seconds.valueOf() : 0.0;
+        let defaultMS = ms !== undefined ? ms.valueOf() : 0.0;
         return ecmaMakeDate(ecmaMakeDay(year, month, defaultDay), ecmaMakeTime(defaultHours, defaultMinutes, defaultSeconds, defaultMS)) as number;
     }
 

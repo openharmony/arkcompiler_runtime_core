@@ -144,8 +144,8 @@ function __value_is_same(a: NullishType, b: NullishType): boolean {
   const aItMb = getIteratorFromIterable(a, aType);
   const bItMb = getIteratorFromIterable(b, bType);
   if (aItMb != undefined && bItMb != undefined) {
-    const aIt = aItMb!;
-    const bIt = bItMb!;
+    const aIt = aItMb;
+    const bIt = bItMb;
     while (true) {
         const an = aIt.next();
         const bn = bIt.next();

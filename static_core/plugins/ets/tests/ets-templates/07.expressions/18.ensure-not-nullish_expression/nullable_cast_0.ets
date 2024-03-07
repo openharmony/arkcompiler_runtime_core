@@ -18,7 +18,7 @@ desc: nullable Cast T | null -> T with ensure not-null expression. not-null valu
 ---*/
 
 function main(): void {
-  let a: Int | null = new Int(1);
+  let a: Int | null = (): Int|null => { return new Int(1); }();
   let b: Int = a!;
 
   assert b == 1;

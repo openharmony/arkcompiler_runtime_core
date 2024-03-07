@@ -14,21 +14,28 @@ limitations under the License.
 ---*/
 
 /*---
-desc: >-
-tags: []
+desc: Generic interfaces is OK
 ---*/
 
-function refNotNullish(): string[]|null {
-    let res: string[]|null = ["abc", "def"];
-    return res;
+interface I<T> {
+    static undef2Null<T>(p: T|undefined|null): T|null {
+        return p === undefined ? null : p
+    }
+
+    undef2Null1<T>(p: T|undefined|null): T|null {
+        return p === undefined ? null : p
+    }
 }
 
-function refNullish(): string[]|null {
-    let res: string[]|null = null;
-    return res;
-}
+class C<T> implements I<T> {}
 
-function main() {
-    assert(refNotNullish()?.[0] == "abc") 
-    assert(!(refNullish()?.[0] == "abc"))
+function main(): void {
+  let c = new C<Int>();
+  assert(c.undef2Null1(null) == null);
+  assert(c.undef2Null1(undefined) == null);
+  assert(c.undef2Null1(new Int(6)) == 6);
+
+  assert(C.undef2Null(null) == null);
+  assert(C.undef2Null(undefined) == null)
+  assert(C.undef2Null<Int>(new Int(6)) == 6)
 }
