@@ -501,6 +501,8 @@ ProtoItem::ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &par
     for (auto &p : params) {
         AddType(p.GetType(), &n);
     }
+    // no need to emit protoItem
+    SetNeedsEmit(false);
 }
 
 void ProtoItem::AddType(TypeItem *type, size_t *n)
@@ -569,9 +571,8 @@ bool BaseMethodItem::Write(Writer *writer)
         return false;
     }
 
-    ASSERT(proto_->HasIndex(this));
-
-    if (!writer->Write<uint16_t>(proto_->GetIndex(this))) {
+    // reserve [proto_idx] field, write invalid index
+    if (!writer->Write<uint16_t>(MAX_INDEX_16)) {
         return false;
     }
 
