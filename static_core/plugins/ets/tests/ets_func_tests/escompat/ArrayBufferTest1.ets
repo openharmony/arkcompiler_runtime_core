@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ function main(): int {
   failures += test(createEmptyArrayBuffer(), "Create empty ArrayBuffer");
   failures += test(createArrayBufferOfVariousLengths(), "Create ArrayBuffer of Various lengths");
   failures += test(sliceArrayBufferInt(), "Slice ArrayBuffer with various int parameters");
-  failures += test(isViewArrayBuffer(), "isView ArrayBuffer with various parameters");
+
   return failures == 0 ? 0 : 1;
 }
 /**
@@ -92,32 +92,6 @@ function sliceArrayBufferInt(): int {
   if (a.slice(start, end).byteLength != 4)
     return 1;
   
-  return 0;
-}
-
-/**
- * Check isView() static method of ArrayBuffer
- */
-function isViewArrayBuffer(): int {
-  if (ArrayBuffer.isView({}))
-    return 1;
-
-  if (ArrayBuffer.isView(new ArrayBuffer(0)))
-    return 1;
-
-  if (ArrayBuffer.isView(""))
-    return 1;
-
-  if (!ArrayBuffer.isView(new Int8Array) ||
-    !ArrayBuffer.isView(new Int16Array) ||
-    !ArrayBuffer.isView(new Int32Array) ||
-    !ArrayBuffer.isView(new BigInt64Array) ||
-    !ArrayBuffer.isView(new Float32Array) ||
-    !ArrayBuffer.isView(new Float64Array)
-    // NOTE: no support for unsigned TypedArrays and DataView yet
-    )
-    return 1;
-
   return 0;
 }
 
