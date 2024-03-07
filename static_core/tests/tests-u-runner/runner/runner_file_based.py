@@ -34,6 +34,7 @@ from runner.logger import Log
 from runner.options.config import Config
 from runner.reports.report_format import ReportFormat
 from runner.reports.detailed_report import DetailedReport
+from runner.reports.spec_report import SpecReport
 from runner.runner_base import Runner
 from runner.test_base import Test
 from runner.test_file_based import TestFileBased
@@ -141,7 +142,7 @@ class RunnerFileBased(Runner):
             ark_quick=self.binaries.ark_quick,
             quick_args=self.quick_args,
             timestamp=int(datetime.timestamp(datetime.now())),
-            report_formats={self.config.general.report_format},
+            report_formats={self.config.report.report_format},
             work_dir=self.work_dir,
             verifier=self.binaries.verifier,
             verifier_args=self.verifier_args
@@ -245,6 +246,7 @@ class RunnerFileBased(Runner):
             xml_view.create_xml_report(results, execution_time)
             xml_view.create_ignore_list(set(results))
             self.__generate_detailed_report(results)
+            self.__generate_spec_report(results)
 
         if ReportFormat.HTML in self.test_env.report_formats:
             html_view = HtmlView(self.work_dir.report, self.config, summary)
@@ -263,13 +265,23 @@ class RunnerFileBased(Runner):
         return self.failed
 
     def __generate_detailed_report(self, results: List[Test]) -> None:
-        if self.config.general.detailed_report:
+        if self.config.report.detailed_report:
             detailed_report = DetailedReport(
                 results,
                 self.name,
                 self.work_dir.report,
-                self.config.general.detailed_report_file)
+                self.config.report.detailed_report_file)
             detailed_report.populate_report()
+
+    def __generate_spec_report(self, results: List[Test]) -> None:
+        if self.config.report.spec_report:
+            spec_report = SpecReport(
+                results,
+                self.name,
+                self.work_dir.report,
+                self.config.report.spec_report_file,
+                self.config.report.spec_file)
+            spec_report.populate_report()
 
     def _process_failed(self, test_result: TestFileBased, ignored_still_failed: List[Test],
                         excluded_still_failed: List[Test], fail_lists: Dict[FailKind, List[Test]]) -> None:

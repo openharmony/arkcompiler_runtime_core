@@ -23,7 +23,6 @@ from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
 from runner.options.decorator_value import value, _to_qemu, _to_bool, _to_enum, _to_str, _to_path, _to_int, \
     _to_processes
 from runner.options.options_coverage import CoverageOptions
-from runner.reports.report_format import ReportFormat
 
 
 # pylint: disable=too-many-public-methods
@@ -33,7 +32,6 @@ class GeneralOptions:
     __DEFAULT_GC_TYPE = "g1-gc"
     __DEFAULT_GC_BOMBING_FREQUENCY = 0
     __DEFAULT_HEAP_VERIFIER = "fail_on_verification"
-    __DEFAULT_REPORT_FORMAT = ReportFormat.LOG
     __DEFAULT_VERBOSE = VerboseKind.NONE
     __DEFAULT_VERBOSE_FILTER = VerboseFilter.NEW_FAILURES
     __DEFAULT_QEMU = QemuKind.NONE
@@ -54,9 +52,6 @@ class GeneralOptions:
             "full-gc-bombing-frequency": self.full_gc_bombing_frequency,
             "run_gc_in_place": self.run_gc_in_place,
             "heap-verifier": self.heap_verifier,
-            "report-format": self.report_format.value.upper(),
-            "detailed-report": self.detailed_report,
-            "detailed-report-file": self.detailed_report_file,
             "verbose": self.verbose.value.upper(),
             "verbose-filter": self.verbose_filter.value.upper(),
             "coverage": self.coverage.to_dict(),
@@ -140,33 +135,6 @@ class GeneralOptions:
 
     @cached_property
     @value(
-        yaml_path="general.report-format",
-        cli_name="report_formats",
-        cast_to_type=lambda x: _to_enum(x, ReportFormat)
-    )
-    def report_format(self) -> ReportFormat:
-        return GeneralOptions.__DEFAULT_REPORT_FORMAT
-
-    @cached_property
-    @value(
-        yaml_path="general.detailed-report",
-        cli_name="detailed_report",
-        cast_to_type=_to_bool
-    )
-    def detailed_report(self) -> bool:
-        return False
-
-    @cached_property
-    @value(
-        yaml_path="general.detailed-report-file",
-        cli_name="detailed_report_file",
-        cast_to_type=_to_path
-    )
-    def detailed_report_file(self) -> Optional[str]:
-        return None
-
-    @cached_property
-    @value(
         yaml_path="general.verbose",
         cli_name="verbose",
         cast_to_type=lambda x: _to_enum(x, VerboseKind)
@@ -236,8 +204,6 @@ class GeneralOptions:
             '--no-run-gc-in-place' if self.run_gc_in_place else '',
             f'--heap-verifier="{self.heap_verifier}"'
             if self.heap_verifier != GeneralOptions.__DEFAULT_HEAP_VERIFIER else '',
-            f'--report-format={self.report_format.value}'
-            if self.report_format != GeneralOptions.__DEFAULT_REPORT_FORMAT else '',
             f'--verbose={self.verbose.value}'
             if self.verbose != GeneralOptions.__DEFAULT_VERBOSE else '',
             f'--verbose-filter={self.verbose_filter.value}'

@@ -238,7 +238,7 @@ def add_general_args(parser: argparse.ArgumentParser) -> None:
         help='launch all binaries in qemu arm')
 
 
-def add_general_other_args(parser: argparse.ArgumentParser) -> None:
+def add_general_report_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--report-format', action='store', dest='report_formats', default=None,
         type=lambda arg: is_enum_value(arg, ReportFormat, "--report-format"),
@@ -255,7 +255,22 @@ def add_general_other_args(parser: argparse.ArgumentParser) -> None:
         help='specifies custom file name for the detailed report. '
              'By default the report is $WorkDir/report/<suite name>_detailed-report.md '
              'where $WorkDir is the folder specified by the option --work-dir')
+    parser.add_argument(
+        '--spec-report', action='store_true', dest='spec_report', default=None,
+        help='creates additional specification coverage report with counting tests for each chapter/section. '
+             'By default the report is $WorkDir/report/<suite name>_spec-report.md '
+             'where $WorkDir is the folder specified by the option --work-dir')
+    parser.add_argument(
+        '--spec-report-file', action='store', dest='spec_report_file', default=None,
+        help='specifies custom file name for the specification coverage report. '
+             'By default the report is $WorkDir/report/<suite name>_spec-report.md '
+             'where $WorkDir is the folder specified by the option --work-dir')
+    parser.add_argument(
+        '--spec-file', action='store', dest='spec_file', default=None, type=is_file,
+        help='specifies file/path of specification PDF file.')
 
+
+def add_general_other_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--show-progress', action='store_true', dest='progress', default=None,
         help='don\'t show progress bar')
@@ -440,6 +455,7 @@ def get_args() -> argparse.Namespace:
     add_config_args(parser)
     add_custom_suite_args(parser)
     add_general_args(parser)
+    add_general_report_args(parser)
     add_general_other_args(parser)
     add_es2panda_args(parser)
     add_verifier_args(parser)

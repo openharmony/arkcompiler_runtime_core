@@ -31,6 +31,7 @@ from runner.options.options_custom import CustomSuiteOptions
 from runner.options.options_es2panda import Es2PandaOptions
 from runner.options.options_ets import ETSOptions
 from runner.options.options_general import GeneralOptions
+from runner.options.options_report import ReportOptions
 from runner.options.options_quick import QuickOptions
 from runner.options.options_test_lists import TestListsOptions
 from runner.options.options_time_report import TimeReportOptions
@@ -61,6 +62,7 @@ class Config:
         return set([])
 
     general = GeneralOptions()
+    report = ReportOptions()
     custom = CustomSuiteOptions()
     es2panda = Es2PandaOptions()
     verifier = VerifierOptions()
@@ -76,6 +78,7 @@ class Config:
             "test-suites": list(self.test_suites),
             "custom": self.custom.to_dict(),
             "general": self.general.to_dict(),
+            "report": self.report.to_dict(),
             "es2panda": self.es2panda.to_dict(),
             "verifier": self.verifier.to_dict(),
             "quick": self.quick.to_dict(),
@@ -97,6 +100,7 @@ class Config:
         options = ' '.join([
             ' '.join(_test_suites),
             self.general.get_command_line(),
+            self.report.get_command_line(),
             self.es2panda.get_command_line(),
             self.verifier.get_command_line(),
             self.quick.get_command_line(),
