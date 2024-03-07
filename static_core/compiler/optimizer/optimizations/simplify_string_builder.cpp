@@ -955,6 +955,13 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascade(Inst *instance, Inst *
             inputAppendIntrinsic->GetBasicBlock()->EraseInst(inputAppendIntrinsic, true);
         }
         appendIntrinsic->InsertAfter(inputAppendIntrinsic);
+
+        for (auto &input : inputAppendIntrinsic->GetInputs()) {
+            if (input.GetInst()->IsSaveState()) {
+                continue;
+            }
+            FixBrokenSaveStates(input.GetInst(), inputAppendIntrinsic);
+        }
     }
 
     // Erase input_instance constructor from block
@@ -1032,16 +1039,14 @@ void SimplifyStringBuilder::ReconnectInstructions(const ConcatenationLoopMatch &
             instructionsVector_.push_back(userInst);
         }
         for (auto userInst : instructionsVector_) {
-            {
-                userInst->ReplaceInput(temp.instance, match.preheader.instance);
+            userInst->ReplaceInput(temp.instance, match.preheader.instance);
 
-                COMPILER_LOG(DEBUG, SIMPLIFY_SB)
-                    << "Replace input of instruction "
-                    << "id=" << userInst->GetId() << " (" << GetOpcodeString(userInst->GetOpcode())
-                    << ") old id=" << temp.instance->GetId() << " (" << GetOpcodeString(temp.instance->GetOpcode())
-                    << ") new id=" << match.preheader.instance->GetId() << " ("
-                    << GetOpcodeString(match.preheader.instance->GetOpcode()) << ")";
-            }
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB)
+                << "Replace input of instruction "
+                << "id=" << userInst->GetId() << " (" << GetOpcodeString(userInst->GetOpcode())
+                << ") old id=" << temp.instance->GetId() << " (" << GetOpcodeString(temp.instance->GetOpcode())
+                << ") new id=" << match.preheader.instance->GetId() << " ("
+                << GetOpcodeString(match.preheader.instance->GetOpcode()) << ")";
         }
     }
 
@@ -1411,9 +1416,6 @@ void SimplifyStringBuilder::RemoveUnusedPhiInstructions(Loop *loop)
 
 void SimplifyStringBuilder::FixBrokenSaveStates(Loop *loop)
 {
-    for (auto block : loop->GetBlocks()) {
-        ssb_.FixSaveStatesInBB(block);
-    }
     ssb_.FixSaveStatesInBB(loop->GetPreHeader());
     ssb_.FixSaveStatesInBB(GetLoopPostExit(loop));
 }
