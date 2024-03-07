@@ -177,6 +177,11 @@ public:
         return boxDoubleClass_;
     }
 
+    Method *GetSubscribeOnAnotherPromiseMethod()
+    {
+        return subscribeOnAnotherPromiseMethod_;
+    }
+
     static EtsClassLinkerExtension *FromCoreType(ClassLinkerExtension *ext)
     {
         ASSERT(ext->GetLanguage() == panda_file::SourceLang::ETS);
@@ -226,6 +231,7 @@ private:
     // std.core
     Class *bigintClass_ = nullptr;
     Class *promiseClass_ = nullptr;
+    Method *subscribeOnAnotherPromiseMethod_ = nullptr;
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;
     Class *arrayAsListIntClass_ = nullptr;

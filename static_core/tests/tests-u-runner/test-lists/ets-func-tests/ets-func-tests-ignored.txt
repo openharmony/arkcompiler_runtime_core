@@ -187,11 +187,6 @@ spec/lambda/callAsyncMethodFromAsyncLambda2.ets
 spec/lambda/callMethodFromAsyncLambda2.ets
 ### Issue 14131
 spec/lambda/callRegularLambdaWithAsyncOverload.ets
-### Issue 14234
-spec/lambda/resultFromAwait.ets
-spec/lambda/resultFromAwaitResolution.ets
-### Issue 14235
-spec/lambda/compareBooleanWithTrue.ets
 ### Negative tests
 spec/lambda/incorrectVariableDeclaration.ets
 ### Issue 14599

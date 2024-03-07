@@ -127,4 +127,9 @@ EtsClass *EtsClassLinker::GetTypeAPIParameterClass()
     return EtsClass::FromRuntimeClass(ext_->GetTypeAPIParameterClass());
 }
 
+Method *EtsClassLinker::GetSubscribeOnAnotherPromiseMethod()
+{
+    return ext_->GetSubscribeOnAnotherPromiseMethod();
+}
+
 }  // namespace ark::ets

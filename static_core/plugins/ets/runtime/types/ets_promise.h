@@ -144,7 +144,8 @@ public:
     {
         os::memory::LockHolder lk(*this);
         ASSERT(state_ == STATE_PENDING);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), value->GetCoreType());
+        auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
         state_ = STATE_RESOLVED;
         SetEventPtr(nullptr);
     }
