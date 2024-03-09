@@ -295,18 +295,6 @@ JSCONVERT_UNWRAP(String)
     return EtsString::CreateFromUtf8(value.data(), value.length());
 }
 
-JSCONVERT_DEFINE_TYPE(Void, EtsVoid *);
-JSCONVERT_WRAP(Void)
-{
-    napi_value jsVal;
-    NAPI_CHECK_FATAL(napi_get_undefined(env, &jsVal));
-    return jsVal;
-}
-JSCONVERT_UNWRAP(Void)
-{
-    return EtsVoid::GetInstance();
-}
-
 JSCONVERT_DEFINE_TYPE(JSValue, JSValue *);
 JSCONVERT_WRAP(JSValue)
 {
@@ -427,16 +415,6 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     buf->SetData(currentCoro, EtsArray::CreateForPrimitive<EtsByteArray>(EtsClassRoot::BYTE_ARRAY, byteLength));
     std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, buf->GetData()->GetData<EtsByte>());
     return buf.GetPtr();
-}
-
-JSCONVERT_DEFINE_TYPE(EtsVoid, EtsVoid *);
-JSCONVERT_WRAP(EtsVoid)
-{
-    return GetUndefined(env);
-}
-JSCONVERT_UNWRAP(EtsVoid)
-{
-    return EtsVoid::GetInstance();
 }
 
 JSCONVERT_DEFINE_TYPE(EtsUndefined, EtsObject *);

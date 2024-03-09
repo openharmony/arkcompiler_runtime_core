@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -238,8 +238,7 @@ static NapiType GeneralMethodCall(EtsEnv *env, ets_object obj, ets_method method
 static void CheckMethodReturnType(ets_method methodId, EtsType type)
 {
     EtsMethod *method = ToInternalType(methodId);
-    if (method->GetReturnValueType() != type &&
-        (type != EtsType::VOID || method->GetReturnValueType() != EtsType::OBJECT)) {
+    if (method->GetReturnValueType() != type) {
         LOG(FATAL, ETS_NAPI) << "Return type mismatch";
     }
 }
@@ -577,7 +576,7 @@ NO_UB_SANITIZE static void ErrorDescribe(EtsEnv *env)
     ETS_NAPI_ABORT_IF_NULL(consoleField);
     auto consoleObj = env->GetStaticObjectField(coreGlobalClass, consoleField);
 
-    auto printlnMethod = env->Getp_method(consoleKlass, "println", "Lstd/core/String;:Lstd/core/void;");
+    auto printlnMethod = env->Getp_method(consoleKlass, "println", "Lstd/core/String;:V");
     env->CallVoidMethod(consoleObj, printlnMethod, errorString);
     env->ThrowError(error);
 }

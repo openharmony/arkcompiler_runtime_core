@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "libpandafile/file-inl.h"
 #include "libpandafile/file_items.h"
 #include "libpandafile/proto_data_accessor-inl.h"
+#include "runtime/class_linker_context.h"
 #include "runtime/include/class-inl.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
@@ -45,7 +46,7 @@ public:
           proto_(*pf_, mda.GetProtoId()),
           ctx_(ctx),
           index_(index),
-          sourceLang_(GetSourceLang()),
+          sourceLang_(ctx->GetSourceLang()),
           returnType_(mda.GetReturnType())
     {
     }
@@ -61,7 +62,7 @@ public:
           index_(index),
           needsCopy_(needsCopy),
           isBase_(isBase),
-          sourceLang_(GetSourceLang()),
+          sourceLang_(method->GetClass()->GetLoadContext()->GetSourceLang()),
           returnType_(method->GetReturnType())
     {
     }

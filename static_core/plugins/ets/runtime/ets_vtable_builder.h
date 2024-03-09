@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "runtime/include/vtable_builder-inl.h"
+#include "runtime/include/runtime.h"
 
 namespace ark::ets {
 
@@ -35,11 +36,41 @@ struct EtsVTableSearchBySignature {
         if (info1.GetName() != info2.GetName()) {
             return false;
         }
-        if (((info1.IsAbstract() ^ info2.IsAbstract()) != 0) && (info1.GetReturnType() == info2.GetReturnType()) &&
-            (info1.GetSourceLang() == info2.GetSourceLang())) {
-            return true;
+        if ((info1.IsAbstract() == info2.IsAbstract()) || (info1.GetSourceLang() != info2.GetSourceLang())) {
+            return false;
         }
-        return false;
+        auto classLinker = Runtime::GetCurrent()->GetClassLinker();
+        auto const getClass = [classLinker](const MethodInfo &info, panda_file::ProtoDataAccessor pda, size_t idx) {
+            return classLinker->GetClass(info.GetProtoId().GetPandaFile(), pda.GetReferenceType(idx),
+                                         info.GetLoadContext());
+        };
+        panda_file::ProtoDataAccessor pda1(info1.GetProtoId().GetPandaFile(), info1.GetProtoId().GetEntityId());
+        panda_file::ProtoDataAccessor pda2(info2.GetProtoId().GetPandaFile(), info2.GetProtoId().GetEntityId());
+
+        if (info1.GetReturnType().IsReference() && info2.GetReturnType().IsReference()) {
+            auto cls1 = getClass(info1, pda1, 0);
+            auto cls2 = getClass(info2, pda2, 0);
+            ASSERT(cls1 != nullptr && cls2 != nullptr);
+            if (!cls2->IsAssignableFrom(cls1)) {
+                return false;
+            }
+        }
+        if ((pda1.GetNumArgs() == pda2.GetNumArgs()) && pda1.GetNumArgs() > 0) {
+            for (size_t idx = 0; idx < pda1.GetNumArgs(); idx++) {
+                if (pda1.GetArgType(idx) != pda2.GetArgType(idx)) {
+                    return false;
+                }
+                if (!pda1.GetArgType(idx).IsReference()) {
+                    continue;
+                }
+                auto cls1 = getClass(info1, pda1, idx + 1);
+                auto cls2 = getClass(info2, pda2, idx + 1);
+                if (!cls1->IsAssignableFrom(cls2)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 };
 

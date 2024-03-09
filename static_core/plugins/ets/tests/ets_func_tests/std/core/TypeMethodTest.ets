@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,14 +100,12 @@ function testMethodType(): int {
             test(addMethodType.getReceiverType() == pt,                 "   has Point receiver type") +
             test(cType.getParametersNum() == 1,                         "   1 Parameter") +
             test(cType.getParameter(0).getType() == IntType.VAL,        "       int parameter") +
-            test(cType.getResultType() == VoidType.REF,                 "   has void result type") +
             test(cType.getReceiverType() == hwt,                        "   has HTMLWriter receiver type") +
             test(getterType.getParametersNum() == 0,                    "   0 Parameters") +
             test(getterType.getResultType() == IntType.VAL,             "   has int result type") +
             test(getterType.getReceiverType() == hwt,                   "   has HTMLWriter receiver type") +
             test(setterType.getParametersNum() == 1,                    "   1 Parameter") +
             test(setterType.getParameter(0).getType() == IntType.VAL,   "       int parameter") +
-            test(setterType.getResultType() == VoidType.REF,            "   has void result type") +
             test(setterType.getReceiverType() == hwt,                   "   has HTMLWriter receiver type")
 }
 

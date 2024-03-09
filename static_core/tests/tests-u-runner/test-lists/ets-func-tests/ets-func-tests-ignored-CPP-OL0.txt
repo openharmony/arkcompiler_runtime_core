@@ -3,3 +3,6 @@ spec/conditional-expression/nullish_expr/loop/undefined-expression-for-loop.ets
 spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-do-while.ets
 spec/rest-params/Issue14187.ets
 ### Issue 15184 end
+### Used only with ARKUI plugin
+arkui/dollar_dollar_10.ets
+### End Of Built-In Component Two Way Value Synchronization

@@ -16,7 +16,6 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 
 namespace ark::ets::interop::js {
 
@@ -110,18 +109,16 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
 
 static const IntrinsicsAPI *S_INTRINSICS_API = &notimpl::S_INTRINSICS_API;
 
-PANDA_PUBLIC_API EtsVoid *JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAPI *intrinsicsApi)
+PANDA_PUBLIC_API void JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAPI *intrinsicsApi)
 {
     S_INTRINSICS_API = intrinsicsApi;
-    return EtsVoid::GetInstance();
 }
 
 namespace intrinsics {
 
-EtsVoid *JSRuntimeFinalizationRegistryCallbackIntrinsic(EtsObject *obj)
+void JSRuntimeFinalizationRegistryCallbackIntrinsic(EtsObject *obj)
 {
     S_INTRINSICS_API->JSRuntimeFinalizationRegistryCallback(obj);
-    return EtsVoid::GetInstance();
 }
 
 JSValue *JSRuntimeNewJSValueDoubleIntrinsic(double v)
@@ -184,28 +181,24 @@ uint8_t JSRuntimeGetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *ets
     return static_cast<uint8_t>(S_INTRINSICS_API->JSRuntimeGetPropertyBoolean(etsJsValue, etsPropName));
 }
 
-EtsVoid *JSRuntimeSetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, JSValue *value)
+void JSRuntimeSetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, JSValue *value)
 {
     S_INTRINSICS_API->JSRuntimeSetPropertyJSValue(etsJsValue, etsPropName, value);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *JSRuntimeSetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, double value)
+void JSRuntimeSetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, double value)
 {
     S_INTRINSICS_API->JSRuntimeSetPropertyDouble(etsJsValue, etsPropName, value);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *JSRuntimeSetPropertyStringIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, EtsString *value)
+void JSRuntimeSetPropertyStringIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, EtsString *value)
 {
     S_INTRINSICS_API->JSRuntimeSetPropertyString(etsJsValue, etsPropName, value);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, uint8_t value)
+void JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, uint8_t value)
 {
     S_INTRINSICS_API->JSRuntimeSetPropertyBoolean(etsJsValue, etsPropName, static_cast<bool>(value));
-    return EtsVoid::GetInstance();
 }
 
 JSValue *JSRuntimeGetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index)

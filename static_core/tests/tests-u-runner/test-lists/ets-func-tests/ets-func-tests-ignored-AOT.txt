@@ -1,2 +1,6 @@
-# #14647
+### Issue 14647
 spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_01.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_02.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_03.ets
+spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_04.ets
+### end of Issue 14647

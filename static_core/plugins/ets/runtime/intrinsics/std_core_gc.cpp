@@ -19,7 +19,6 @@
 #include "plugins/ets/runtime/lambda_utils.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/thread_scopes.h"
@@ -221,12 +220,12 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback)
  * @param gc_id - id of the GC which is returned by startGc.
  * If gc_id is 0 or -1 the function returns immediately.
  */
-extern "C" EtsVoid *StdGCWaitForFinishGC(EtsLong gcId)
+extern "C" void StdGCWaitForFinishGC(EtsLong gcId)
 {
     ManagedThread *thread = ManagedThread::GetCurrent();
     ASSERT(thread != nullptr);
     if (gcId <= 0) {
-        return EtsVoid::GetInstance();
+        return;
     }
     auto id = static_cast<uint64_t>(gcId);
     ASSERT(g_gGctaskTracker.IsInitialized());
@@ -235,7 +234,6 @@ extern "C" EtsVoid *StdGCWaitForFinishGC(EtsLong gcId)
         constexpr uint64_t WAIT_TIME_MS = 10;
         os::thread::NativeSleep(WAIT_TIME_MS);
     }
-    return EtsVoid::GetInstance();
 }
 
 extern "C" EtsBoolean StdGCIsScheduledGCTriggered()
@@ -252,7 +250,7 @@ extern "C" EtsBoolean StdGCIsScheduledGCTriggered()
     return ToEtsBoolean(schedTrigger->IsTriggered());
 }
 
-extern "C" EtsVoid *StdGCPostponeGCStart()
+extern "C" void StdGCPostponeGCStart()
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
@@ -260,18 +258,17 @@ extern "C" EtsVoid *StdGCPostponeGCStart()
     if (!gc->IsPostponeGCSupported()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
                           "GC postpone is not supported for this GC type");
-        return EtsVoid::GetInstance();
+        return;
     }
     if (gc->IsPostponeEnabled()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION,
                           "Calling postponeGCStart without calling postponeGCEnd");
-        return EtsVoid::GetInstance();
+        return;
     }
     gc->PostponeGCStart();
-    return EtsVoid::GetInstance();
 }
 
-extern "C" EtsVoid *StdGCPostponeGCEnd()
+extern "C" void StdGCPostponeGCEnd()
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
@@ -279,15 +276,14 @@ extern "C" EtsVoid *StdGCPostponeGCEnd()
     if (!gc->IsPostponeGCSupported()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
                           "GC postpone is not supported for this GC type");
-        return EtsVoid::GetInstance();
+        return;
     }
     if (!gc->IsPostponeEnabled()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_STATE_EXCEPTION,
                           "Calling postponeGCEnd without calling postponeGCStart");
-        return EtsVoid::GetInstance();
+        return;
     }
     gc->PostponeGCEnd();
-    return EtsVoid::GetInstance();
 }
 
 template <class ResArrayType>
@@ -384,14 +380,14 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
     return SpaceTypeToIndex(objSpaceType);
 }
 
-extern "C" EtsVoid *StdGCPinObject(EtsObject *obj)
+extern "C" void StdGCPinObject(EtsObject *obj)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     if (obj == nullptr) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION,
                           "The value must be an object");
-        return EtsVoid::GetInstance();
+        return;
     }
 
     auto *vm = coroutine->GetVM();
@@ -399,10 +395,9 @@ extern "C" EtsVoid *StdGCPinObject(EtsObject *obj)
     if (!gc->IsPinningSupported()) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
                           "Object pinning does not support with current gc");
-        return EtsVoid::GetInstance();
+        return;
     }
     vm->GetHeapManager()->PinObject(obj->GetCoreType());
-    return EtsVoid::GetInstance();
 }
 
 extern "C" void StdGCUnpinObject(EtsObject *obj)
@@ -426,7 +421,7 @@ extern "C" EtsLong StdGCGetObjectAddress(EtsObject *obj)
 
 // Function schedules GC before n-th allocation by setting counter to the specific GC trigger.
 // Another call may reset the counter.  In this case the last counter will be used to trigger the GC.
-extern "C" EtsVoid *StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
+extern "C" void StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
@@ -434,13 +429,13 @@ extern "C" EtsVoid *StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
     if (counter < 0) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION,
                           "counter for allocation is negative");
-        return EtsVoid::GetInstance();
+        return;
     }
     GCTaskCause reason = GCCauseFromInt(cause);
     if (reason == GCTaskCause::INVALID_CAUSE) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION,
                           "Invalid GC cause");
-        return EtsVoid::GetInstance();
+        return;
     }
 
     auto *vm = coroutine->GetVM();
@@ -449,18 +444,16 @@ extern "C" EtsVoid *StdGCScheduleGCAfterNthAlloc(EtsInt counter, EtsInt cause)
         PandaStringStream eMsg;
         eMsg << mem::GCStringFromType(gc->GetType()) << " does not support " << reason << " cause";
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ILLEGAL_ARGUMENT_EXCEPTION, eMsg.str());
-        return EtsVoid::GetInstance();
+        return;
     }
     mem::GCTrigger *trigger = vm->GetGCTrigger();
     if (trigger->GetType() != mem::GCTriggerType::ON_NTH_ALLOC) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::UNSUPPORTED_OPERATION_EXCEPTION,
                           "VM is running with unsupported GC trigger");
-        return EtsVoid::GetInstance();
+        return;
     }
-    EtsVoid *voidInstance = EtsVoid::GetInstance();
     auto schedTrigger = reinterpret_cast<mem::SchedGCOnNthAllocTrigger *>(trigger);
     schedTrigger->ScheduleGc(reason, counter);
-    return voidInstance;
 }
 
 extern "C" EtsLong StdGetFreeHeapSize()

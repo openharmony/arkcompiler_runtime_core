@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,6 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
-#include "plugins/ets/runtime/types/ets_void.h"
-#include "runtime/handle_scope-inl.h"
-#include "runtime/handle_scope.h"
 #include "plugins/ets/runtime/job_queue.h"
 
 namespace ark::ets::intrinsics {
@@ -53,51 +50,48 @@ static void OnPromiseCompletion(EtsCoroutine *coro, EtsHandle<EtsPromise> &promi
     coro->GetPandaVM()->FirePromiseStateChanged(promise);
 }
 
-EtsVoid *EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
+void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (promise == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
-        return EtsVoid::GetInstance();
+        return;
     }
     if (promise->GetState() != EtsPromise::STATE_PENDING) {
-        return EtsVoid::GetInstance();
+        return;
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObjectArray> thenQueue(coro, hpromise->GetThenQueue(coro));
     hpromise->Resolve(coro, value);
     OnPromiseCompletion(coro, hpromise, thenQueue, hpromise->GetThenQueueSize());
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *EtsPromiseReject(EtsPromise *promise, EtsObject *error)
+void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     if (promise == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, coro);
-        return EtsVoid::GetInstance();
+        return;
     }
     if (promise->GetState() != EtsPromise::STATE_PENDING) {
-        return EtsVoid::GetInstance();
+        return;
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObjectArray> catchQueue(coro, hpromise->GetCatchQueue(coro));
     hpromise->Reject(coro, error);
     OnPromiseCompletion(coro, hpromise, catchQueue, hpromise->GetCatchQueueSize());
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *EtsPromiseAddToJobQueue(EtsObject *callback)
+void EtsPromiseAddToJobQueue(EtsObject *callback)
 {
     auto *jobQueue = EtsCoroutine::GetCurrent()->GetPandaVM()->GetJobQueue();
     if (jobQueue != nullptr) {
         jobQueue->AddJob(callback);
     }
-    return EtsVoid::GetInstance();
 }
 
 void EtsPromiseCreateLink(EtsObject *source, EtsPromise *target)

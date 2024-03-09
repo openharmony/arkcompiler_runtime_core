@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +85,11 @@ public:
         return objectClass_;
     }
 
+    Class *GetUndefinedClass() const
+    {
+        return internalUndefinedClass_;
+    }
+
     Class *GetPromiseClass()
     {
         return promiseClass_;
@@ -113,11 +118,6 @@ public:
     Class *GetTypeAPIParameterClass()
     {
         return typeapiParameterClass_;
-    }
-
-    Class *GetVoidClass()
-    {
-        return voidClass_;
     }
 
     Class *GetBoxBooleanClass()
@@ -193,9 +193,6 @@ private:
     LanguageContext langCtx_ {nullptr};
     mem::HeapManager *heapManager_ {nullptr};
 
-    // void class
-    Class *voidClass_ = nullptr;
-
     // Box classes
     Class *boxBooleanClass_ = nullptr;
     Class *boxByteClass_ = nullptr;
@@ -208,6 +205,7 @@ private:
 
     // Cached classes
     Class *objectClass_ = nullptr;
+    Class *internalUndefinedClass_ = nullptr;
     Class *promiseClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
 

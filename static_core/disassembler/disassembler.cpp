@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1436,7 +1436,7 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
             }
         }
 
-        if (printInformation && !recInf.fieldsInfo.empty()) {
+        if (printInformation) {
             os << std::setw(INFO_OFFSET) << std::left << ss.str() << " # " << recInf.fieldsInfo.at(fieldIdx) << "\n";
         } else {
             os << ss.str() << "\n";

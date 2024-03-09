@@ -237,8 +237,6 @@ export abstract class Value extends Object {
             return NullValue.INSTANCE
         } else if (t instanceof UndefinedType) {
             return UndefinedValue.INSTANCE
-        } else if (t instanceof VoidType) {
-            return VoidValue.INSTANCE
         } else if (t instanceof ClassType) {
             return new ClassValue(t as ClassType, o!)
         } else if (t instanceof ArrayType) {
@@ -967,23 +965,5 @@ export final class UndefinedValue extends Value {
 
     public override toString(): string {
         return UndefinedType.REF.toString()
-    }
-}
-
-export final class VoidValue extends Value {
-    public static readonly INSTANCE = new VoidValue()
-
-    public override getType(): Type {
-        return VoidType.REF as Type
-    }
-
-    public override getData(): NullishType {
-        return Void
-    }
-
-    internal constructor() {}
-
-    public override toString(): string {
-        return VoidType.REF.toString()
     }
 }

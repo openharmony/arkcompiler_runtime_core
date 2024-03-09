@@ -140,10 +140,9 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
         jsvalueFregistryRef_ = Refstor()->Add(queue->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
         ASSERT(jsvalueFregistryRef_ != nullptr);
 
-        jsvalueFregistryRegister_ =
-            queue->GetClass()
-                ->GetMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lstd/core/void;")
-                ->GetPandaMethod();
+        jsvalueFregistryRegister_ = queue->GetClass()
+                                        ->GetMethod("register", "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:V")
+                                        ->GetPandaMethod();
         ASSERT(jsvalueFregistryRegister_ != nullptr);
     }
 
@@ -162,7 +161,6 @@ void InteropCtx::CacheClasses(EtsClassLinker *etsClassLinker)
     jsErrorClass_ = CacheClass(etsClassLinker, descriptors::JS_ERROR);
     objectClass_ = CacheClass(etsClassLinker, descriptors::OBJECT);
     stringClass_ = CacheClass(etsClassLinker, descriptors::STRING);
-    voidClass_ = CacheClass(etsClassLinker, descriptors::VOID);
     undefinedClass_ = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
     promiseClass_ = CacheClass(etsClassLinker, descriptors::PROMISE);
     errorClass_ = CacheClass(etsClassLinker, descriptors::ERROR);

@@ -86,8 +86,6 @@ public:
 
     pandasm::Record &AddRefTypeAsExternal(const std::string &name);
 
-    std::string GetRefVoidInstanceName();
-
     /**
      * Lazily declares primitive reference wrapper
      * @returns pair of constructor and unwrapper

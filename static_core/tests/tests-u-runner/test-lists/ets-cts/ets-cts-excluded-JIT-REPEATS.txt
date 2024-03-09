@@ -5,10 +5,10 @@
 04.names_declarations_and_scopes/07.function_declarations/scope2.ets
 07.expressions/01.evaluation_of_expressions/09.evaluation_of_arguments_lists/arg_order_function.ets
 07.expressions/01.evaluation_of_expressions/eval_se.ets
-07.expressions/28.assignment/01.simple_assignment_operator/ord1.ets
-07.expressions/28.assignment/01.simple_assignment_operator/ord21.ets
-07.expressions/28.assignment/01.simple_assignment_operator/ord25.ets
-07.expressions/28.assignment/01.simple_assignment_operator/ord26.ets
+07.expressions/29.assignment/01.simple_assignment_operator/ord1.ets
+07.expressions/29.assignment/01.simple_assignment_operator/ord21.ets
+07.expressions/29.assignment/01.simple_assignment_operator/ord25.ets
+07.expressions/29.assignment/01.simple_assignment_operator/ord26.ets
 09.classes/04.field_declarations/01.static_fields/static_field_declaration.ets
 11.enums/02.enum_type_methods/enum_type_methods_valueof.ets
 # RUNTIME_TIMEOUT - it required more than 600sec
@@ -29,3 +29,7 @@
 # fails in JIT mode with --opt-level=2
 04.names_declarations_and_scopes/04.scopes/interface_level1.ets
 04.names_declarations_and_scopes/04.scopes/interface_level2.ets
+
+# 16032 Timeouts
+escompat/ArrayTest.ets
+#

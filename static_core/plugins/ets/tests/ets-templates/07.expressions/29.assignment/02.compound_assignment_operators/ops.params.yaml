@@ -1,0 +1,308 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - { type: byte, v: 127, op: '+', q: 1 }
+  - { type: byte, v: 127, op: '+', q: 127 }
+  - { type: byte, v: -128, op: '+', q: -1 }
+
+  - { type: short, v: 32767, op: '+', q: 1 }
+  - { type: short, v: 32767, op: '+', q: 32767 }
+  - { type: short, v: -32768, op: '+', q: -1 }
+
+  - { type: int, v: 2147483647, op: '+', q: 1 }
+  - { type: int, v: 2147483647, op: '+', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '+', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '+', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '+', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '+', q: -1 }
+
+  - { type: float, v: 3.4023235e+38, op: '+', q: 1.0 }
+  - { type: float, v: 3.4023235e+38, op: '+', q: 3.4023235e+38 }
+  - { type: float, v: -3.4023235e+38, op: '+', q: -1.0 }
+  - { type: float, v: Float.POSITIVE_INFINITY, op: '+', q: Float.POSITIVE_INFINITY }
+  - { type: float, v: Float.NEGATIVE_INFINITY, op: '+', q: Float.NEGATIVE_INFINITY }
+  - { type: float, v: 0.0, op: '+', q: -0.0 }
+
+  - { type: double, v: 1.7976931348623157e+308, op: '+', q: 1.0 }
+  - { type: double, v: 1.7976931348623157e+308, op: '+', q: 1.7976931348623157e+308 }
+  - { type: double, v: -1.7976931348623157e+308, op: '+', q: -1.0 }
+  - { type: double, v: Double.POSITIVE_INFINITY, op: '+', q: Double.POSITIVE_INFINITY }
+  - { type: double, v: Double.NEGATIVE_INFINITY, op: '+', q: Double.NEGATIVE_INFINITY }
+  - { type: double, v: 0.0, op: '+', q: -0.0 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '+', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '+', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '+', q: "c'\\uFFFF'" }
+
+  - { type: String, v: '"xyz"', op: '+', q: '"abc"' }
+  - { type: String, v: '"1"', op: '+', q: '"2"' }
+  - { type: String, v: '"null"', op: '+', q: '"null"' }
+
+  - { type: byte, v: 127, op: '-', q: -1 }
+  - { type: byte, v: -128, op: '-', q: -128 }
+  - { type: byte, v: -128, op: '-', q: 1 }
+
+  - { type: short, v: 32767, op: '-', q: -1 }
+  - { type: short, v: -32768, op: '-', q: -32768 }
+  - { type: short, v: -32768, op: '-', q: 1 }
+
+  - { type: int, v: 2147483647, op: '-', q: -1 }
+  - { type: int, v: -2147483648, op: '-', q: -2147483648 }
+  - { type: int, v: -2147483648, op: '-', q: 1 }
+
+  - { type: long, v: 9223372036854775807, op: '-', q: -1 }
+  - { type: long, v: -9223372036854775808, op: '-', q: -9223372036854775808 }
+  - { type: long, v: -9223372036854775808, op: '-', q: 1 }
+
+  - { type: float, v: 3.4023235e+38, op: '-', q: 1.0 }
+  - { type: float, v: 3.4023235e+38, op: '-', q: 3.4023235e+38 }
+  - { type: float, v: -3.4023235e+38, op: '-', q: -1.0 }
+  - { type: float, v: Float.POSITIVE_INFINITY, op: '-', q: Float.NEGATIVE_INFINITY }
+  - { type: float, v: Float.NEGATIVE_INFINITY, op: '-', q: Float.POSITIVE_INFINITY }
+  - { type: float, v: -0.0, op: '-', q: 0.0 }
+
+  - { type: double, v: 1.7976931348623157e+308, op: '-', q: 1.0 }
+  - { type: double, v: 1.7976931348623157e+308, op: '-', q: 1.7976931348623157e+308 }
+  - { type: double, v: -1.7976931348623157e+308, op: '-', q: -1.0 }
+  - { type: double, v: Double.POSITIVE_INFINITY, op: '-', q: Double.NEGATIVE_INFINITY }
+  - { type: double, v: Double.NEGATIVE_INFINITY, op: '-', q: Double.POSITIVE_INFINITY }
+  - { type: double, v: -0.0, op: '-', q: 0.0 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '-', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '-', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '-', q: "c'\\uFFFF'" }
+
+  - { type: byte, v: 127, op: '*', q: 1 }
+  - { type: byte, v: 127, op: '*', q: 127 }
+  - { type: byte, v: -128, op: '*', q: -1 }
+
+  - { type: short, v: 32767, op: '*', q: 1 }
+  - { type: short, v: 32767, op: '*', q: 32767 }
+  - { type: short, v: -32768, op: '*', q: -1 }
+
+  - { type: int, v: 2147483647, op: '*', q: 1 }
+  - { type: int, v: 2147483647, op: '*', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '*', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '*', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '*', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '*', q: -1 }
+
+  - { type: float, v: 3.4023235e+38, op: '*', q: 1.0 }
+  - { type: float, v: 3.4023235e+38, op: '*', q: 3.4023235e+38 }
+  - { type: float, v: -3.4023235e+38, op: '*', q: -1.0 }
+  - { type: float, v: Float.POSITIVE_INFINITY, op: '*', q: Float.POSITIVE_INFINITY }
+  - { type: float, v: Float.NEGATIVE_INFINITY, op: '*', q: Float.NEGATIVE_INFINITY }
+  - { type: float, v: 0.0, op: '*', q: -0.0 }
+
+  - { type: double, v: 1.7976931348623157e+308, op: '*', q: 1.0 }
+  - { type: double, v: 1.7976931348623157e+308, op: '*', q: 1.7976931348623157e+308 }
+  - { type: double, v: -1.7976931348623157e+308, op: '*', q: -1.0 }
+  - { type: double, v: Double.POSITIVE_INFINITY, op: '*', q: Double.POSITIVE_INFINITY }
+  - { type: double, v: Double.NEGATIVE_INFINITY, op: '*', q: Double.NEGATIVE_INFINITY }
+  - { type: double, v: 0.0, op: '*', q: -0.0 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '*', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '*', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '*', q: "c'\\uFFFF'" }
+
+  - { type: byte, v: 127, op: '/', q: 1 }
+  - { type: byte, v: 127, op: '/', q: 127 }
+  - { type: byte, v: -128, op: '/', q: -1 }
+
+  - { type: short, v: 32767, op: '/', q: 1 }
+  - { type: short, v: 32767, op: '/', q: 32767 }
+  - { type: short, v: -32768, op: '/', q: -1 }
+
+  - { type: int, v: 2147483647, op: '/', q: 1 }
+  - { type: int, v: 2147483647, op: '/', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '/', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '/', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '/', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '/', q: -1 }
+
+  - { type: float, v: 3.4023235e+38, op: '/', q: 1.0 }
+  - { type: float, v: 3.4023235e+38, op: '/', q: 3.4023235e+38 }
+  - { type: float, v: -3.4023235e+38, op: '/', q: -1.0 }
+
+  - { type: double, v: 1.7976931348623157e+308, op: '/', q: 1.0 }
+  - { type: double, v: 1.7976931348623157e+308, op: '/', q: 1.7976931348623157e+308 }
+  - { type: double, v: -1.7976931348623157e+308, op: '/', q: -1.0 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '/', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '/', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '/', q: "c'\\uFFFF'" }
+
+  - { type: byte, v: 127, op: '%', q: 1 }
+  - { type: byte, v: 127, op: '%', q: 127 }
+  - { type: byte, v: -128, op: '%', q: -1 }
+
+  - { type: short, v: 32767, op: '%', q: 1 }
+  - { type: short, v: 32767, op: '%', q: 32767 }
+  - { type: short, v: -32768, op: '%', q: -1 }
+
+  - { type: int, v: 2147483647, op: '%', q: 1 }
+  - { type: int, v: 2147483647, op: '%', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '%', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '%', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '%', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '%', q: -1 }
+
+  - { type: float, v: 3.4023235e+38, op: '%', q: 1.0 }
+  - { type: float, v: 3.4023235e+38, op: '%', q: 3.4023235e+38 }
+  - { type: float, v: -3.4023235e+38, op: '%', q: -1.0 }
+
+  - { type: double, v: 1.7976931348623157e+308, op: '%', q: 1.0 }
+  - { type: double, v: 1.7976931348623157e+308, op: '%', q: 1.7976931348623157e+308 }
+  - { type: double, v: -1.7976931348623157e+308, op: '%', q: -1.0 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '%', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '%', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '%', q: "c'\\uFFFF'" }
+
+  - { type: byte, v: 127, op: '<<', q: 1 }
+  - { type: byte, v: 127, op: '<<', q: 127 }
+  - { type: byte, v: -128, op: '<<', q: -1 }
+
+  - { type: short, v: 32767, op: '<<', q: 1 }
+  - { type: short, v: 32767, op: '<<', q: 32767 }
+  - { type: short, v: -32768, op: '<<', q: -1 }
+
+  - { type: int, v: 2147483647, op: '<<', q: 1 }
+  - { type: int, v: 2147483647, op: '<<', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '<<', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '<<', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '<<', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '<<', q: -1 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '<<', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '<<', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '<<', q: "c'\\uFFFF'" }
+
+  - { type: byte, v: 127, op: '>>', q: 1 }
+  - { type: byte, v: 127, op: '>>', q: 127 }
+  - { type: byte, v: -128, op: '>>', q: -1 }
+
+  - { type: short, v: 32767, op: '>>', q: 1 }
+  - { type: short, v: 32767, op: '>>', q: 32767 }
+  - { type: short, v: -32768, op: '>>', q: -1 }
+
+  - { type: int, v: 2147483647, op: '>>', q: 1 }
+  - { type: int, v: 2147483647, op: '>>', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '>>', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '>>', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '>>', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '>>', q: -1 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '>>', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '>>', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '>>', q: "c'\\uFFFF'" }
+
+  - { type: byte, v: 127, op: '>>>', q: 1 }
+  - { type: byte, v: 127, op: '>>>', q: 127 }
+  - { type: byte, v: -128, op: '>>>', q: -1 }
+
+  - { type: short, v: 32767, op: '>>>', q: 1 }
+  - { type: short, v: 32767, op: '>>>', q: 32767 }
+  - { type: short, v: -32768, op: '>>>', q: -1 }
+
+  - { type: int, v: 2147483647, op: '>>>', q: 1 }
+  - { type: int, v: 2147483647, op: '>>>', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '>>>', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '>>>', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '>>>', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '>>>', q: -1 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '>>>', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '>>>', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '>>>', q: "c'\\uFFFF'" }
+
+  - { type: byte, v: 127, op: '&', q: 1 }
+  - { type: byte, v: 127, op: '&', q: 127 }
+  - { type: byte, v: -128, op: '&', q: -1 }
+
+  - { type: short, v: 32767, op: '&', q: 1 }
+  - { type: short, v: 32767, op: '&', q: 32767 }
+  - { type: short, v: -32768, op: '&', q: -1 }
+
+  - { type: int, v: 2147483647, op: '&', q: 1 }
+  - { type: int, v: 2147483647, op: '&', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '&', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '&', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '&', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '&', q: -1 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '&', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '&', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '&', q: "c'\\uFFFF'" }
+
+  - { type: boolean, v: 'true', op: '&', q: 'true' }
+  - { type: boolean, v: 'true', op: '&', q: 'false' }
+  - { type: boolean, v: 'false', op: '&', q: 'true' }
+
+  - { type: byte, v: 127, op: '|', q: 1 }
+  - { type: byte, v: 127, op: '|', q: 127 }
+  - { type: byte, v: -128, op: '|', q: -1 }
+
+  - { type: short, v: 32767, op: '|', q: 1 }
+  - { type: short, v: 32767, op: '|', q: 32767 }
+  - { type: short, v: -32768, op: '|', q: -1 }
+
+  - { type: int, v: 2147483647, op: '|', q: 1 }
+  - { type: int, v: 2147483647, op: '|', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '|', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '|', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '|', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '|', q: -1 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '|', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '|', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '|', q: "c'\\uFFFF'" }
+
+  - { type: boolean, v: 'false', op: '|', q: 'false' }
+  - { type: boolean, v: 'true', op: '|', q: 'false' }
+  - { type: boolean, v: 'false', op: '|', q: 'true' }
+
+  - { type: byte, v: 127, op: '^', q: 1 }
+  - { type: byte, v: 127, op: '^', q: 127 }
+  - { type: byte, v: -128, op: '^', q: -1 }
+
+  - { type: short, v: 32767, op: '^', q: 1 }
+  - { type: short, v: 32767, op: '^', q: 32767 }
+  - { type: short, v: -32768, op: '^', q: -1 }
+
+  - { type: int, v: 2147483647, op: '^', q: 1 }
+  - { type: int, v: 2147483647, op: '^', q: 2147483647 }
+  - { type: int, v: -2147483648, op: '^', q: -1 }
+
+  - { type: long, v: 9223372036854775807, op: '^', q: 1 }
+  - { type: long, v: 9223372036854775807, op: '^', q: 9223372036854775807 }
+  - { type: long, v: -9223372036854775808, op: '^', q: -1 }
+
+  - { type: char, v: "c'\\uFFFF'", op: '^', q: "c'\\u0001'" }
+  - { type: char, v: "c'\\uFFFF'", op: '^', q: "c'\\uFFFF'" }
+  - { type: char, v: "c'\\u0000'", op: '^', q: "c'\\uFFFF'" }
+
+  - { type: boolean, v: 'true', op: '^', q: 'true' }
+  - { type: boolean, v: 'true', op: '^', q: 'false' }
+  - { type: boolean, v: 'false', op: '^', q: 'true' }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "types/ets_array.h"
 #include "types/ets_box_primitive.h"
@@ -34,7 +33,7 @@
 
 namespace ark::ets::intrinsics {
 
-EtsVoid *ValueAPISetFieldObject(EtsObject *obj, EtsLong i, EtsObject *val)
+void ValueAPISetFieldObject(EtsObject *obj, EtsLong i, EtsObject *val)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -44,7 +43,6 @@ EtsVoid *ValueAPISetFieldObject(EtsObject *obj, EtsLong i, EtsObject *val)
     auto typeClass = objHandle.GetPtr()->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
     objHandle.GetPtr()->SetFieldObject(fieldObject, valHandle.GetPtr());
-    return EtsVoid::GetInstance();
 }
 
 template <typename T>
@@ -63,55 +61,47 @@ void SetFieldValue(EtsObject *obj, EtsLong i, T val)
     objHandle.GetPtr()->SetFieldPrimitive<T>(fieldObject, val);
 }
 
-EtsVoid *ValueAPISetFieldBoolean(EtsObject *obj, EtsLong i, EtsBoolean val)
+void ValueAPISetFieldBoolean(EtsObject *obj, EtsLong i, EtsBoolean val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByte(EtsObject *obj, EtsLong i, EtsByte val)
+void ValueAPISetFieldByte(EtsObject *obj, EtsLong i, EtsByte val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldShort(EtsObject *obj, EtsLong i, EtsShort val)
+void ValueAPISetFieldShort(EtsObject *obj, EtsLong i, EtsShort val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldChar(EtsObject *obj, EtsLong i, EtsChar val)
+void ValueAPISetFieldChar(EtsObject *obj, EtsLong i, EtsChar val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldInt(EtsObject *obj, EtsLong i, EtsInt val)
+void ValueAPISetFieldInt(EtsObject *obj, EtsLong i, EtsInt val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldLong(EtsObject *obj, EtsLong i, EtsLong val)
+void ValueAPISetFieldLong(EtsObject *obj, EtsLong i, EtsLong val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldFloat(EtsObject *obj, EtsLong i, EtsFloat val)
+void ValueAPISetFieldFloat(EtsObject *obj, EtsLong i, EtsFloat val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldDouble(EtsObject *obj, EtsLong i, EtsDouble val)
+void ValueAPISetFieldDouble(EtsObject *obj, EtsLong i, EtsDouble val)
 {
     SetFieldValue(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameObject(EtsObject *obj, EtsString *name, EtsObject *val)
+void ValueAPISetFieldByNameObject(EtsObject *obj, EtsString *name, EtsObject *val)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -122,7 +112,6 @@ EtsVoid *ValueAPISetFieldByNameObject(EtsObject *obj, EtsString *name, EtsObject
     auto typeClass = objHandle.GetPtr()->GetClass();
     auto fieldObject = typeClass->GetFieldIDByName(nameHandle.GetPtr()->GetMutf8().c_str());
     objHandle.GetPtr()->SetFieldObject(fieldObject, valHandle.GetPtr());
-    return EtsVoid::GetInstance();
 }
 
 template <typename T>
@@ -142,52 +131,44 @@ void SetFieldByNameValue(EtsObject *obj, EtsString *name, T val)
     objHandle.GetPtr()->SetFieldPrimitive<T>(fieldObject, val);
 }
 
-EtsVoid *ValueAPISetFieldByNameBoolean(EtsObject *obj, EtsString *name, EtsBoolean val)
+void ValueAPISetFieldByNameBoolean(EtsObject *obj, EtsString *name, EtsBoolean val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameByte(EtsObject *obj, EtsString *name, EtsByte val)
+void ValueAPISetFieldByNameByte(EtsObject *obj, EtsString *name, EtsByte val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameShort(EtsObject *obj, EtsString *name, EtsShort val)
+void ValueAPISetFieldByNameShort(EtsObject *obj, EtsString *name, EtsShort val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameChar(EtsObject *obj, EtsString *name, EtsChar val)
+void ValueAPISetFieldByNameChar(EtsObject *obj, EtsString *name, EtsChar val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameInt(EtsObject *obj, EtsString *name, EtsInt val)
+void ValueAPISetFieldByNameInt(EtsObject *obj, EtsString *name, EtsInt val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameLong(EtsObject *obj, EtsString *name, EtsLong val)
+void ValueAPISetFieldByNameLong(EtsObject *obj, EtsString *name, EtsLong val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameFloat(EtsObject *obj, EtsString *name, EtsFloat val)
+void ValueAPISetFieldByNameFloat(EtsObject *obj, EtsString *name, EtsFloat val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetFieldByNameDouble(EtsObject *obj, EtsString *name, EtsDouble val)
+void ValueAPISetFieldByNameDouble(EtsObject *obj, EtsString *name, EtsDouble val)
 {
     SetFieldByNameValue(obj, name, val);
-    return EtsVoid::GetInstance();
 }
 
 EtsObject *ValueAPIGetFieldObject(EtsObject *obj, EtsLong i)
@@ -331,7 +312,7 @@ EtsLong ValueAPIGetArrayLength(EtsObject *obj)
     return arrHandle->GetLength();
 }
 
-EtsVoid *ValueAPISetElementObject(EtsObject *obj, EtsLong i, EtsObject *val)
+void ValueAPISetElementObject(EtsObject *obj, EtsLong i, EtsObject *val)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
@@ -339,7 +320,6 @@ EtsVoid *ValueAPISetElementObject(EtsObject *obj, EtsLong i, EtsObject *val)
     VMHandle<EtsObject> valHandle(coroutine, val->GetCoreType());
 
     arrHandle.GetPtr()->Set(i, valHandle.GetPtr());
-    return EtsVoid::GetInstance();
 }
 
 template <typename P, typename T>
@@ -357,52 +337,44 @@ void SetElement(EtsObject *obj, EtsLong i, T val)
     }
 }
 
-EtsVoid *ValueAPISetElementBoolean(EtsObject *obj, EtsLong i, EtsBoolean val)
+void ValueAPISetElementBoolean(EtsObject *obj, EtsLong i, EtsBoolean val)
 {
     SetElement<EtsBooleanArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetElementByte(EtsObject *obj, EtsLong i, EtsByte val)
+void ValueAPISetElementByte(EtsObject *obj, EtsLong i, EtsByte val)
 {
     SetElement<EtsByteArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetElementShort(EtsObject *obj, EtsLong i, EtsShort val)
+void ValueAPISetElementShort(EtsObject *obj, EtsLong i, EtsShort val)
 {
     SetElement<EtsShortArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetElementChar(EtsObject *obj, EtsLong i, EtsChar val)
+void ValueAPISetElementChar(EtsObject *obj, EtsLong i, EtsChar val)
 {
     SetElement<EtsCharArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetElementInt(EtsObject *obj, EtsLong i, EtsInt val)
+void ValueAPISetElementInt(EtsObject *obj, EtsLong i, EtsInt val)
 {
     SetElement<EtsIntArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetElementLong(EtsObject *obj, EtsLong i, EtsLong val)
+void ValueAPISetElementLong(EtsObject *obj, EtsLong i, EtsLong val)
 {
     SetElement<EtsLongArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetElementFloat(EtsObject *obj, EtsLong i, EtsFloat val)
+void ValueAPISetElementFloat(EtsObject *obj, EtsLong i, EtsFloat val)
 {
     SetElement<EtsFloatArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
-EtsVoid *ValueAPISetElementDouble(EtsObject *obj, EtsLong i, EtsDouble val)
+void ValueAPISetElementDouble(EtsObject *obj, EtsLong i, EtsDouble val)
 {
     SetElement<EtsDoubleArray>(obj, i, val);
-    return EtsVoid::GetInstance();
 }
 
 EtsObject *ValueAPIGetElementObject(EtsObject *obj, EtsLong i)

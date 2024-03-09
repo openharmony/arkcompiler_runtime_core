@@ -8,6 +8,11 @@ std/core/SortInternalTestLong.ets
 std/core/std_core_array_filter_byte_array_func_byte.ets
 # #15439
 std/core/std_core_array_sort_long_array_int_int.ets
+# #14513
+std/core/SortInternalTestLong.ets
+# #15683
+escompat/escompat_regexp_replace_String_String.ets
+
 # Timeouts. Will be fixed when generics accept primitives as type arguments
 std/core/SortInternalTestShort.ets
 std/core/SortInternalTestInt.ets

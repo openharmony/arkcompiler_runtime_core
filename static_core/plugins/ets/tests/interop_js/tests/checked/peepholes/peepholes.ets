@@ -130,7 +130,7 @@ function js_load_and_cast_bool(): int {
 //! INST_NEXT       "Intrinsic.JSRuntimeSetPropertyString"
 //! BC_METHOD       "ETSGLOBAL.js_store_str"
 //! INST_COUNT      /call.*JSRuntime.getPropertyJSValue:std.interop.js.JSValue;std.core.String;std.interop.js.JSValue;/, 1
-//! INST_COUNT      /call.*JSRuntime.setPropertyString:std.interop.js.JSValue;std.core.String;std.core.String;std.core.void;/, 1
+//! INST_COUNT      /call.*JSRuntime.setPropertyString:std.interop.js.JSValue;std.core.String;std.core.String;/, 1
 //! INST_NOT        /JSRuntime.setPropertyJSValue/
 //! RUN             entry: "check_js_store"
 

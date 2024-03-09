@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,8 +42,6 @@ inline constexpr std::array<std::string_view, 2> ATTR_ABSTRACT_METHOD = {ATTR_AB
 
 inline constexpr std::string_view TYPE_OBJECT = "std.core.Object";
 inline constexpr std::string_view TYPE_BOXED_PREFIX = "std.core.";
-inline constexpr std::string_view TYPE_VOID = "std.core.void";
-inline constexpr std::string_view TYPE_VOID_FIELD = "void_instance";
 
 inline constexpr std::string_view FUNCTION_GET_OBJECTS_FOR_CCTOR = "std.core.TypeCreatorCtx.getObjectsArrayForCCtor";
 inline constexpr std::string_view TYPE_TYPE_CREATOR_CTX =

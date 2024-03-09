@@ -20,7 +20,6 @@
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/napi_env_scope.h"
 #include "plugins/ets/runtime/types/ets_string.h"
-#include "plugins/ets/runtime/types/ets_void.h"
 #include "runtime/include/class_linker-inl.h"
 
 namespace ark::ets::interop::js {
@@ -132,9 +131,6 @@ static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj
 
     // NOTE(kprokopenko): awful solution, see #14765
     if (etsJsValue->AsObject() == ctx->GetUndefinedObject()) {
-        if (Class::FromClassObject(clsObj->GetCoreType()) == ctx->GetVoidClass()) {
-            return reinterpret_cast<EtsObject *>(EtsVoid::GetInstance());
-        }
         return etsJsValue->AsObject();
     }
 

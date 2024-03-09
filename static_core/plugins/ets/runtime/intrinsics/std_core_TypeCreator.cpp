@@ -35,7 +35,6 @@
 #include "types/ets_primitives.h"
 #include "types/ets_string.h"
 #include "types/ets_typeapi_create_panda_constants.h"
-#include "types/ets_void.h"
 #include "types/ets_type.h"
 #include "types/ets_typeapi.h"
 #include "types/ets_typeapi_create.h"
@@ -160,10 +159,9 @@ EtsLong TypeAPITypeCreatorCtxCreate()
     return reinterpret_cast<ssize_t>(ret);
 }
 
-EtsVoid *TypeAPITypeCreatorCtxDestroy(EtsLong ctx)
+void TypeAPITypeCreatorCtxDestroy(EtsLong ctx)
 {
     Runtime::GetCurrent()->GetInternalAllocator()->Delete(PtrFromLong<TypeCreatorCtx>(ctx));
-    return EtsVoid::GetInstance();
 }
 
 EtsString *TypeAPITypeCreatorCtxCommit(EtsLong ctxPtr, EtsArray *objects)
@@ -502,11 +500,7 @@ EtsString *TypeAPITypeCreatorCtxMethodAddBodyDefault(EtsLong methodPtr)
     if (ret.IsVoid()) {
         fn.AddInstruction(pandasm::Create_RETURN_VOID());
     } else if (ret.IsObject()) {
-        if (ret.GetDescriptor() == panda_file_items::class_descriptors::VOID) {
-            fn.AddInstruction(pandasm::Create_LDSTATIC_OBJ(m->Ctx()->GetRefVoidInstanceName()));
-        } else {
-            fn.AddInstruction(pandasm::Create_LDA_NULL());
-        }
+        fn.AddInstruction(pandasm::Create_LDA_NULL());
         fn.AddInstruction(pandasm::Create_RETURN_OBJ());
         // return EtsString::CreateFromMUtf8("can't make default return for object type");
     } else if (ret.IsFloat32()) {

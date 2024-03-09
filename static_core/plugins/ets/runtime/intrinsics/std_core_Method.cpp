@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,6 @@
 #include "types/ets_type_comptime_traits.h"
 #include "types/ets_typeapi_create_panda_constants.h"
 #include "types/ets_typeapi_method.h"
-#include "types/ets_void.h"
 #include "runtime/include/value-inl.h"
 
 namespace ark::ets::intrinsics {
@@ -78,9 +77,10 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth
     if (res.IsReference()) {
         return EtsObject::FromCoreType(res.GetAs<ObjectHeader *>());
     }
+
     if (meth->GetReturnValueType() == EtsType::VOID) {
         // NOTE(kprokopenko): remove reinterpret_cast when void is synced with runtime
-        return reinterpret_cast<EtsObject *>(EtsVoid::GetInstance());
+        return reinterpret_cast<EtsObject *>(EtsCoroutine::GetCurrent()->GetUndefinedObject());
     }
 
     ASSERT(res.IsPrimitive());

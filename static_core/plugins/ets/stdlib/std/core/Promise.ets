@@ -161,7 +161,7 @@ export final class Promise<out T> {
 
     static resolve(): Promise<void> {
         let p = new Promise<void>();
-        p.resolveImpl(Void);
+        p.resolveImpl(undefined);
         return p;
     }
 

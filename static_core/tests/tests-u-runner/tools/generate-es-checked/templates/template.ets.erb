@@ -96,9 +96,6 @@ function __value_is_same(a: NullishType, b: NullishType): boolean {
   if (runtime.sameValue(a, b)) {
     return true;
   }
-  if (a instanceof void || b instanceof void) {
-    return true;
-  }
   if (a instanceof Number && b instanceof Number) {
       let a1: number = a as Object as Number
       let b1: number = b as Object as Number
