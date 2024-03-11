@@ -51,6 +51,7 @@
 // Suppress warning about forward Pass declaration defined in another namespace
 #include <llvm/Pass.h>
 #include <llvm/Support/Debug.h>
+#include <llvm/Support/ThreadPool.h>
 
 /* Be careful this file also includes elf.h, which has a lot of defines */
 #include "aot/aot_builder/llvm_aot_builder.h"
@@ -64,6 +65,7 @@ static constexpr int32_t MAX_DEPTH = 32;
 using ark::compiler::LLVMIrConstructor;
 
 namespace {
+
 void MarkAsInlineObject(llvm::GlobalObject *globalObject)
 {
     globalObject->addMetadata(ark::llvmbackend::LLVMArkInterface::FUNCTION_MD_INLINE_MODULE,
@@ -278,16 +280,31 @@ WrappedModule LLVMAotCompiler::CreateModule(uint32_t moduleId)
     auto ttriple = GetTripleForArch(GetArch());
     auto llvmContext = std::make_unique<llvm::LLVMContext>();
     auto module = std::make_unique<llvm::Module>("panda-llvmaot-module", *llvmContext);
-    auto layout = targetMachine_->createDataLayout();
+    auto options = InitializeLLVMCompilerOptions();
+    // clang-format off
+    auto targetMachine = cantFail(ark::llvmbackend::TargetMachineBuilder {}
+                                .SetCPU(GetCPUForArch(GetArch()))
+                                .SetOptLevel(static_cast<llvm::CodeGenOpt::Level>(options.optlevel))
+                                .SetFeatures(GetFeaturesForArch(GetArch()))
+                                .SetTriple(ttriple)
+                                .Build());
+    // clang-format on
+    auto layout = targetMachine->createDataLayout();
     module->setDataLayout(layout);
     module->setTargetTriple(ttriple.getTriple());
     auto debugData = std::make_unique<DebugDataBuilder>(module.get(), filename_);
-    auto arkInterface = std::make_unique<LLVMArkInterface>(runtime_, ttriple, aotBuilder_);
+    auto arkInterface = std::make_unique<LLVMArkInterface>(runtime_, ttriple, aotBuilder_, &lock_);
     arkInterface.get()->CreateRequiredIntrinsicFunctionTypes(*llvmContext.get());
     LLVMIrConstructor::InsertArkFrameInfo(module.get(), GetArch());
     LLVMIrConstructor::ProvideSafepointPoll(module.get(), arkInterface.get(), GetArch());
-    WrappedModule wrappedModule {std::move(llvmContext), std::move(module), std::move(arkInterface),
-                                 std::move(debugData), moduleId};
+    WrappedModule wrappedModule {
+        std::move(llvmContext),    //
+        std::move(module),         //
+        std::move(targetMachine),  //
+        std::move(arkInterface),   //
+        std::move(debugData)       //
+    };
+    wrappedModule.SetId(moduleId);
 
     PrepareAotGot(&wrappedModule);
     return wrappedModule;
@@ -331,18 +348,9 @@ LLVMAotCompiler::LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::
     if (arch == Arch::AARCH64) {
         SetLLVMOption("aarch64-enable-ptr32", true);
     }
-    // clang-format off
-    targetMachine_ = cantFail(ark::llvmbackend::TargetMachineBuilder {}
-                            .SetCPU(GetCPUForArch(arch))
-                            .SetOptLevel(static_cast<llvm::CodeGenOpt::Level>(llvmCompilerOptions.optlevel))
-                            .SetFeatures(GetFeaturesForArch(GetArch()))
-                            .SetTriple(ttriple)
-                            .Build());
-    // clang-format on
-    spreader_ =
-        std::make_unique<FixedCountSpreader>(runtime_, g_options.GetLlvmMethodsPerModule(), [this](uint32_t moduleId) {
-            return std::make_shared<WrappedModule>(CreateModule(moduleId));
-        });
+    spreader_ = std::make_unique<FixedCountSpreader>(
+        runtime_, g_options.GetLlvmaotMethodsPerModule(),
+        [this](uint32_t moduleId) { return std::make_shared<WrappedModule>(CreateModule(moduleId)); });
 }
 
 /* static */
@@ -448,6 +456,40 @@ ark::compiler::CompiledMethod LLVMAotCompiler::AdaptCode(ark::Method *method, Sp
     return compiledMethod;
 }
 
+ArkAotLinker::RoDataSections LLVMAotCompiler::LinkModule(WrappedModule *wrappedModule, ArkAotLinker *linker,
+                                                         AotBuilderOffsets *offsets)
+{
+    exitOnErr_(linker->LoadObject(wrappedModule->TakeObjectFile()));
+    exitOnErr_(linker->RelocateSections(offsets->GetSectionAddresses(), offsets->GetMethodOffsets(),
+                                        wrappedModule->GetModuleId()));
+    const auto &methodPtrs = aotBuilder_->GetMethods();
+    const auto &headers = aotBuilder_->GetMethodHeaders();
+    ASSERT((methodPtrs.size() == headers.size()) && (methodPtrs.size() >= methods_.size()));
+    if (wrappedModule->GetMethods().empty()) {
+        return {};
+    }
+    auto methodsIt = wrappedModule->GetMethods().begin();
+
+    for (size_t i = 0; i < headers.size(); ++i) {
+        if (methodsIt == wrappedModule->GetMethods().end()) {
+            break;
+        }
+        if (methodPtrs[i].GetMethod() != *methodsIt) {
+            continue;
+        }
+        auto methodName = wrappedModule->GetLLVMArkInterface()->GetUniqMethodName(*methodsIt);
+        auto functionSection = linker->GetLinkedFunctionSection(methodName);
+        Span<const uint8_t> code(functionSection.GetMemory(), functionSection.GetSize());
+        auto compiledMethod = AdaptCode(static_cast<Method *>(*methodsIt), code);
+        if (g_options.IsLlvmDumpCodeinfo()) {
+            DumpCodeInfo(compiledMethod);
+        }
+        aotBuilder_->AdjustMethod(compiledMethod, i);
+        methodsIt++;
+    }
+    return linker->GetLinkedRoDataSections();
+}
+
 void LLVMAotCompiler::CompileAll()
 {
     // No need to do anything if we have no methods
@@ -455,55 +497,34 @@ void LLVMAotCompiler::CompileAll()
         return;
     }
     ASSERT_PRINT(!compiled_, "Cannot compile twice");
+
     auto modules = spreader_->GetModules();
-    std::for_each(modules.begin(), modules.end(), [this](auto module) -> void { CompileModule(*module); });
-
-    auto offsets = CollectAotBuilderOffsets(modules);
-
-    std::vector<ark::compiler::RoData> roDatas;
-    for (auto &wrappedModule : modules) {
-        auto mid = wrappedModule->GetModuleId();
-        size_t functionHeaderSize = compiler::CodeInfo::GetCodeOffset(GetArch());
-        ArkAotLinker linker {functionHeaderSize};
-        exitOnErr_(linker.LoadObject(wrappedModule->TakeObjectFile()));
-        exitOnErr_(linker.RelocateSections(offsets.GetSectionAddresses(), offsets.GetMethodOffsets(), mid));
-        const auto &methodPtrs = aotBuilder_->GetMethods();
-        const auto &headers = aotBuilder_->GetMethodHeaders();
-        ASSERT((methodPtrs.size() == headers.size()) && (methodPtrs.size() >= methods_.size()));
-        if (wrappedModule->GetMethods().empty()) {
-            continue;
-        }
-        auto methodsIt = wrappedModule->GetMethods().begin();
-
-        for (size_t i = 0; i < headers.size(); ++i) {
-            if (methodsIt == wrappedModule->GetMethods().end()) {
-                break;
-            }
-            if (methodPtrs[i].GetMethod() != *methodsIt) {
-                continue;
-            }
-            auto methodName = wrappedModule->GetLLVMArkInterface()->GetUniqMethodName(*methodsIt);
-            auto functionSection = linker.GetLinkedFunctionSection(methodName);
-            Span<const uint8_t> code(functionSection.GetMemory(), functionSection.GetSize());
-            auto compiledMethod = AdaptCode(static_cast<Method *>(*methodsIt), code);
-            if (g_options.IsLlvmDumpCodeinfo()) {
-                DumpCodeInfo(compiledMethod);
-            }
-            aotBuilder_->AdjustMethod(compiledMethod, i);
-            methodsIt++;
-        }
-        auto newRodatas = linker.GetLinkedRoDataSections();
-        for (auto &item : newRodatas) {
-            roDatas.push_back(ark::compiler::RoData {item.ContentToVector(), item.GetName() + std::to_string(mid),
-                                                     item.GetAlignment()});
+    uint32_t numThreads = g_options.GetLlvmaotThreads();
+    if (numThreads == 1U || modules.size() <= 1U) {
+        std::for_each(modules.begin(), modules.end(), [this](auto module) -> void { CompileModule(*module); });
+    } else {
+        llvm::ThreadPool threadPool {llvm::hardware_concurrency(numThreads)};
+        for (auto &module : modules) {
+            threadPool.async([this](auto it) -> void { CompileModule(*it); }, module);
         }
     }
 
+    std::vector<ark::compiler::RoData> roDatas;
+    auto offsets = CollectAotBuilderOffsets(modules);
+    for (auto &wrappedModule : modules) {
+        size_t functionHeaderSize = compiler::CodeInfo::GetCodeOffset(GetArch());
+        ArkAotLinker linker {functionHeaderSize};
+        auto newRodatas = LinkModule(wrappedModule.get(), &linker, &offsets);
+        for (auto &item : newRodatas) {
+            roDatas.push_back(ark::compiler::RoData {item.ContentToVector(),
+                                                     item.GetName() + std::to_string(wrappedModule->GetModuleId()),
+                                                     item.GetAlignment()});
+        }
+    }
     compiled_ = true;
 
     std::sort(roDatas.begin(), roDatas.end(),
               [](const compiler::RoData &a, const compiler::RoData &b) -> bool { return a.name < b.name; });
-
     aotBuilder_->SetRoDataSections(std::move(roDatas));
 }
 
@@ -626,19 +647,35 @@ void LLVMAotCompiler::CompileModule(WrappedModule &module)
     auto arkInterface = module.GetLLVMArkInterface().get();
     auto llvmIrModule = module.GetModule().get();
 
+    auto &targetMachine = module.GetTargetMachine();
+    LLVMOptimizer llvmOptimizer {compilerOptions, arkInterface, targetMachine};
+
+    // Dumps require lock to be not messed up between different modules compiled in parallel.
+    // NB! When ark is built with TSAN there are warnings coming from libLLVM.so.
+    // They do not fire in tests because we do not run parallel compilation in tests.
+    // We have to use suppression file, to run parallel compilation under tsan
+
+    {  // Dump before optimization
+        llvm::sys::ScopedLock scopedLock {lock_};
+        llvmOptimizer.DumpModuleBefore(llvmIrModule);
+    }
+
+    // Optimize IR
+    llvmOptimizer.OptimizeModule(llvmIrModule);
+
+    {  // Dump after optimization
+        llvm::sys::ScopedLock scopedLock {lock_};
+        llvmOptimizer.DumpModuleAfter(llvmIrModule);
+    }
+
     // clang-format off
-    LLVMOptimizer(compilerOptions, arkInterface, targetMachine_).OptimizeModule(llvmIrModule);
-    MIRCompiler mirCompiler {targetMachine_, [&arkInterface](InsertingPassManager *manager) -> void {
+    MIRCompiler mirCompiler {targetMachine, [&arkInterface](InsertingPassManager *manager) -> void {
                                 manager->InsertBefore(&llvm::FEntryInserterID, CreateFrameLoweringPass(arkInterface));
                             }};
     // clang-format on
+
+    // Create machine code
     auto file = exitOnErr_(mirCompiler.CompileModule(*llvmIrModule));
-
-    if (g_options.IsLlvmDumpObj()) {
-        std::string fileName = "llvm-output-" + std::to_string(compiledModules_) + ".o";
-        file->WriteTo(fileName);
-    }
-
     if (file->HasSection(".llvm_stackmaps")) {
         auto section = file->GetSection(".llvm_stackmaps");
         module.GetCodeInfoProducer()->SetStackMap(section.GetMemory(), section.GetSize());
@@ -652,7 +689,6 @@ void LLVMAotCompiler::CompileModule(WrappedModule &module)
             }
         }
     }
-
     if (file->HasSection(".llvm_faultmaps")) {
         auto section = file->GetSection(".llvm_faultmaps");
         module.GetCodeInfoProducer()->SetFaultMaps(section.GetMemory(), section.GetSize());
@@ -668,8 +704,12 @@ void LLVMAotCompiler::CompileModule(WrappedModule &module)
         }
     }
 
+    if (g_options.IsLlvmDumpObj()) {
+        int32_t moduleNumber = compiledModules_++;
+        std::string fileName = "llvm-output-" + std::to_string(moduleNumber) + ".o";
+        file->WriteTo(fileName);
+    }
     module.SetCompiled(std::move(file));
-    compiledModules_++;
 }
 
 void LLVMAotCompiler::DumpCodeInfo(compiler::CompiledMethod &method) const

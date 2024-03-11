@@ -26,6 +26,7 @@
 #include "object_code/code_info_producer.h"
 
 #include <llvm/Object/StackMapParser.h>
+#include <llvm/Support/Mutex.h>
 
 namespace ark::compiler {
 class LLVMAotBuilder;
@@ -120,6 +121,9 @@ private:
 
     void CompileModule(WrappedModule &module);
 
+    ArkAotLinker::RoDataSections LinkModule(WrappedModule *wrappedModule, ArkAotLinker *linker,
+                                            AotBuilderOffsets *offsets);
+
     void AddInlineMethodByDepth(WrappedModule &module, ark::compiler::Graph *caller,
                                 compiler::RuntimeInterface::MethodPtr method, int32_t depth);
 
@@ -141,7 +145,8 @@ private:
 
     ark::compiler::RuntimeInterface *runtime_;
     std::unique_ptr<Spreader> spreader_;
-    uint32_t compiledModules_ {0};
+    std::atomic<uint32_t> compiledModules_ {0};
+    llvm::sys::Mutex lock_ {};
 };
 }  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_AOT_COMPILER_H

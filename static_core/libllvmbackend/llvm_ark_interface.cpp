@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,8 +88,8 @@ AotData GetAotDataFromBuilder(const class ark::panda_file::File *file, AotBuilde
 }
 
 ark::llvmbackend::LLVMArkInterface::LLVMArkInterface(RuntimeInterface *runtime, llvm::Triple triple,
-                                                     AotBuilder *aotBuilder)
-    : runtime_(runtime), triple_(std::move(triple)), aotBuilder_(aotBuilder)
+                                                     AotBuilder *aotBuilder, llvm::sys::Mutex *lock)
+    : runtime_(runtime), triple_(std::move(triple)), aotBuilder_(aotBuilder), lock_ {lock}
 {
     ASSERT(runtime != nullptr);
 }
@@ -115,32 +115,19 @@ const char *LLVMArkInterface::GetThreadRegister() const
     }
 }
 
-llvm::Value *LLVMArkInterface::GetOffsetForIntfInlineCache(llvm::CallInst *callInst) const
+int32_t LLVMArkInterface::CreateIntfInlineCacheSlotId(const llvm::Function *caller) const
 {
-    auto func = callInst->getFunction();
-    auto builder = llvm::IRBuilder<>(callInst);
-    auto slotId = GetIntfInlineCacheId(func);
-    auto aotGot = func->getParent()->getGlobalVariable("__aot_got");
-    auto arrayType = llvm::ArrayType::get(builder.getInt64Ty(), 0);
-    auto offset = builder.CreateConstInBoundsGEP2_64(arrayType, aotGot, 0, slotId);
-    return offset;
-}
-
-uint64_t LLVMArkInterface::GetIntfInlineCacheId(const llvm::Function *caller) const
-{
+    llvm::sys::ScopedLock scopedLock {*lock_};
     auto callerOriginFile = functionOrigins_.lookup(caller);
     ASSERT_PRINT(callerOriginFile != nullptr,
                  std::string("No origin for function = '") + caller->getName().str() +
-                     "'. Use RememberFunctionOrigin to store the origin before calling GetIntfInlineCacheId");
+                     "'. Use RememberFunctionOrigin to store the origin before calling CreateIntfInlineCacheId");
     auto aotData = GetAotDataFromBuilder(callerOriginFile, aotBuilder_);
     uint64_t intfInlineCacheIndex = aotData.GetIntfInlineCacheIndex();
-    return aotData.GetIntfInlineCacheId(intfInlineCacheIndex);
-}
-
-void LLVMArkInterface::IncrementIntfInlineCacheIndex() const
-{
-    uint64_t *index = aotBuilder_->GetIntfInlineCacheIndex();
-    *index = *index + 1;
+    int32_t slot = aotData.GetIntfInlineCacheSlotId(intfInlineCacheIndex);
+    intfInlineCacheIndex++;
+    aotData.SetIntfInlineCacheIndex(intfInlineCacheIndex);
+    return slot;
 }
 
 const char *LLVMArkInterface::GetFramePointerRegister() const
@@ -602,6 +589,7 @@ int32_t LLVMArkInterface::GetPltSlotId(const llvm::Function *caller, const llvm:
     ASSERT(caller != nullptr);
     ASSERT(callee != nullptr);
 
+    llvm::sys::ScopedLock scopedLock {*lock_};
     auto callerOriginFile = functionOrigins_.lookup(caller);
     ASSERT_PRINT(callerOriginFile != nullptr,
                  std::string("No origin for function = '") + caller->getName().str() +
@@ -613,6 +601,7 @@ int32_t LLVMArkInterface::GetClassIndexInAotGot(const llvm::Function *caller, ui
 {
     ASSERT(caller != nullptr);
 
+    llvm::sys::ScopedLock scopedLock {*lock_};
     auto callerOriginFile = functionOrigins_.lookup(caller);
     ASSERT_PRINT(callerOriginFile != nullptr,
                  std::string("No origin for function = '") + caller->getName().str() +

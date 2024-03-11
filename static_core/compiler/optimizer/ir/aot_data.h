@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,12 +84,12 @@ public:
     intptr_t GetClassSlotOffset(uint64_t pc, uint32_t klassId, bool init);
     intptr_t GetCommonSlotOffset(uint64_t pc, uint32_t id);
     intptr_t GetStringSlotOffset(uint64_t pc, uint32_t stringId);
-    uint64_t GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t index);
+    uint64_t GetInfInlineCacheSlotOffset(uint64_t pc, uint64_t cacheIdx);
 
     int32_t GetClassSlotId(uint32_t klassId);
     int32_t GetStringSlotId(uint32_t stringId);
     int32_t GetPltSlotId(uint32_t methodId);
-    int32_t GetIntfInlineCacheId(uint64_t cacheIdx);
+    int32_t GetIntfInlineCacheSlotId(uint64_t cacheIdx);
 
     AddressType GetCodeOffset() const
     {

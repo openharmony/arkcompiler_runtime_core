@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "object_code/code_info_producer.h"
 
 #include <llvm/IR/Module.h>
+#include <llvm/Target/TargetMachine.h>
 
 #include <vector>
 
@@ -30,8 +31,14 @@ namespace ark::llvmbackend {
 class WrappedModule {
 public:
     explicit WrappedModule(std::unique_ptr<llvm::LLVMContext> llvmContext, std::unique_ptr<llvm::Module> module,
+                           std::unique_ptr<llvm::TargetMachine> targetMachine,
                            std::unique_ptr<ark::llvmbackend::LLVMArkInterface> arkInterface,
-                           std::unique_ptr<ark::llvmbackend::DebugDataBuilder> debugData, uint32_t moduleId);
+                           std::unique_ptr<ark::llvmbackend::DebugDataBuilder> debugData);
+
+    void SetId(uint32_t id)
+    {
+        moduleId_ = id;
+    }
 
     NO_COPY_SEMANTIC(WrappedModule);
 
@@ -53,6 +60,8 @@ public:
 
     const std::unique_ptr<llvm::Module> &GetModule();
 
+    const std::unique_ptr<llvm::TargetMachine> &GetTargetMachine();
+
     const std::unique_ptr<ark::llvmbackend::LLVMArkInterface> &GetLLVMArkInterface();
 
     const std::unique_ptr<ark::llvmbackend::DebugDataBuilder> &GetDebugData();
@@ -73,12 +82,13 @@ private:
     // Do not move llvmContext_ below module, the context must be destroyed after module
     std::unique_ptr<llvm::LLVMContext> llvmContext_;
     std::unique_ptr<llvm::Module> module_;
+    std::unique_ptr<llvm::TargetMachine> targetMachine_;
     std::unique_ptr<ark::llvmbackend::CreatedObjectFile> objectFile_;
     std::unique_ptr<ark::llvmbackend::LLVMArkInterface> arkInterface_;
     std::unique_ptr<ark::llvmbackend::DebugDataBuilder> debugData_;
     std::unique_ptr<ark::llvmbackend::CodeInfoProducer> codeInfoProducer_;
     std::vector<ark::compiler::RuntimeInterface::MethodPtr> methods_;
-    uint32_t moduleId_;
+    uint32_t moduleId_ {0};
 };
 
 }  // namespace ark::llvmbackend

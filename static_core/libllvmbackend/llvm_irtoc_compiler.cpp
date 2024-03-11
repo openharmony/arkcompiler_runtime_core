@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ LLVMIrtocCompiler::LLVMIrtocCompiler(ark::compiler::RuntimeInterface *runtime, a
     : LLVMCompiler(arch),
       methods_(allocator->Adapter()),
       filename_(std::move(filename)),
-      arkInterface_(runtime, GetTripleForArch(arch), nullptr)
+      arkInterface_(runtime, GetTripleForArch(arch), nullptr, nullptr)
 {
     InitializeSpecificLLVMOptions(arch);
     auto llvmCompilerOptions = InitializeLLVMCompilerOptions();
@@ -160,7 +160,9 @@ void LLVMIrtocCompiler::CompileAll()
         << "Do not use '--llvm-dump-obj' in irtoc mode. Instead, look at the object file from '--irtoc-output-llvm' "
            "option value";
 
+    optimizer_->DumpModuleBefore(module_.get());
     optimizer_->OptimizeModule(module_.get());
+    optimizer_->DumpModuleAfter(module_.get());
     debugData_->Finalize();
     objectFile_ = exitOnErr_(mirCompiler_->CompileModule(*module_));
 }
