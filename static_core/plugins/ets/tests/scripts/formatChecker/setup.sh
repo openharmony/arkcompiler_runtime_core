@@ -17,8 +17,8 @@
 
 set -e
 
-SCRIPT=$(readlink -e $BASH_SOURCE)
-SCRIPT_DIR=$(dirname $SCRIPT)
+SCRIPT=$(readlink -e "$BASH_SOURCE")
+SCRIPT_DIR=$(dirname "$SCRIPT")
 
 # This script installs all dependencies for formatChecker 
 # by creating a virtualenv
@@ -31,7 +31,7 @@ function version() {
 MIN_PYTHON_VERSION="3.8.0"
 CURRENT_PYTHON_VERSION=$(python3 -c "import platform; print(platform. python_version())")
 
-if [ $(version $CURRENT_PYTHON_VERSION) -lt $(version $MIN_PYTHON_VERSION) ]; then
+if [ $(version "$CURRENT_PYTHON_VERSION") -lt $(version $MIN_PYTHON_VERSION) ]; then
     echo "Python version must be greater than $MIN_PYTHON_VERSION"
     exit
 fi
@@ -39,7 +39,7 @@ fi
 # Cheking venv existance
 sudo apt install python3-venv -yyy
 
-pushd $SCRIPT_DIR/../formatChecker
+pushd "${SCRIPT_DIR}/../formatChecker"
 
 python3 -m venv .venv
 source .venv/bin/activate

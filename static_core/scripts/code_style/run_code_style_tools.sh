@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,7 +27,7 @@ set -exu
 FILE_NAME=${1}
 
 CLANG_FORMAT_BIN="clang-format-14"
-SCRIPT_DIR="$(dirname $(realpath ${0}))"
+SCRIPT_DIR="$(dirname $(realpath "${0}"))"
 
 if [ ! -f "${FILE_NAME}" ]; then
     echo "FATAL: Input file '${FILE_NAME}' is not found"
@@ -38,7 +38,7 @@ fi
 diff -u --color=auto \
     --label="${FILE_NAME} (original)" \
     --label="${FILE_NAME} (reformatted)" \
-    "${FILE_NAME}" <(${CLANG_FORMAT_BIN} ${FILE_NAME})
+    "${FILE_NAME}" <(${CLANG_FORMAT_BIN} "${FILE_NAME}")
 
 # Run additional checks
 SCRIPTS_DIR="${SCRIPT_DIR}/../extras/code_style/"

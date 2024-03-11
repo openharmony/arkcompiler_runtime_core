@@ -35,7 +35,7 @@ esac
 done
 
 if [ "$BUILD_PANDA" = true ]; then
-    cd $PANDA_BINARY_ROOT
+    cd "$PANDA_BINARY_ROOT"
     make -j
     cd -
 fi
@@ -65,8 +65,8 @@ else
 fi
 
 TEMP_DIR=$(pwd)/benchmark_coverage_${PAOC_MODE_NAME}_${TARGET_NAME}
-mkdir -p $TEMP_DIR
-cd $TEMP_DIR
+mkdir -p "$TEMP_DIR"
+cd "$TEMP_DIR"
 
 PANDASM=$PANDA_BINARY_ROOT/bin/ark_asm
 PAOC=$PANDA_BINARY_ROOT/bin/ark_aot
@@ -80,10 +80,10 @@ MAX_BYTECODE_SIZE=40000
 IGNORE_FUNCTIONS=$PANDA_ROOT/compiler/tools/ignore_checked_coverage.txt
 LOG_ERROR=$PANDA_BINARY_ROOT/compiler/coverage/log_compiler_error_${PAOC_MODE}_${TARGET_ARCH}.txt
 HTML=$PANDA_BINARY_ROOT/compiler/coverage/BenchmarkCoverage_${PAOC_MODE}_${TARGET_ARCH}.html
-mkdir -p $PANDA_BINARY_ROOT/compiler/coverage
+mkdir -p "${PANDA_BINARY_ROOT}/compiler/coverage"
 
-[ -e "$HTML" ] && rm $HTML
-[ -e "$LOG_ERROR" ] && rm $LOG_ERROR
+[ -e "$HTML" ] && rm "$HTML"
+[ -e "$LOG_ERROR" ] && rm "$LOG_ERROR"
 
 critical_compiler_failures=()
 not_compiled_benchmarks=()
@@ -91,7 +91,7 @@ not_compiled_benchmarks=()
 # Checks if a test is in the ignore list:
 function check_critical_failure() {
     status=0
-    local filtered_ignore_list=$(grep "^IGNORE.*$1" $IGNORE_FUNCTIONS) || status=$?
+    local filtered_ignore_list=$(grep "^IGNORE.*$1" "$IGNORE_FUNCTIONS") || status=$?
     # Check if the ignore list contains lines with current benchmark/CTS-test name:
     if [ "${status}" -ne 0 ]; then
         critical_compiler_failures+=( "$1:$name" )
@@ -115,8 +115,8 @@ function check_critical_failure() {
 
 function separate_method_name() {
     if [[ "$1" == *\.* ]]; then
-        method_name=$(echo $1 | rev | cut -f 1 -d '.' | rev)
-        class_name=$(echo $1 | rev | cut -f 2- -d '.' | rev)
+        method_name=$(echo "$1" | rev | cut -f 1 -d '.' | rev)
+        class_name=$(echo "$1" | rev | cut -f 2- -d '.' | rev)
     else
         class_name="_GLOBAL"
         method_name=$1
@@ -128,13 +128,13 @@ function calculate_benchmark_coverage() {
     local all_compiled=0
     local all_assert=0
 
-    echo "<header><h1>Benchmark coverage statistic</h1></header>" >> $HTML
+    echo "<header><h1>Benchmark coverage statistic</h1></header>" >> "$HTML"
 
-    for benchmark in $(find $BENCHMARKS/*\.pa -maxdepth 0 -exec basename -s .pa {} \;); do
+    for benchmark in $(find "$BENCHMARKS"/*\.pa -maxdepth 0 -exec basename -s .pa {} \;); do
         # Сhecking that benchmark has compiled
-        if $PANDASM $BENCHMARKS/$benchmark.pa $benchmark.abc
+        if $PANDASM "$BENCHMARKS"/"$benchmark".pa "$benchmark".abc
         then
-            local method_names=$(grep "^[.]function" $BENCHMARKS/$benchmark.pa \
+            local method_names=$(grep "^[.]function" "${BENCHMARKS}/${benchmark}".pa \
                 | grep -v "<[^>]*external[^>]*>" | cut -f3 -d' ' | cut -f1 -d'(')
             local functions=0
             local compiled=0
@@ -144,15 +144,15 @@ function calculate_benchmark_coverage() {
             for name in $method_names; do
                 let "functions+=1"
                 # Get class and method names
-                separate_method_name $name
+                separate_method_name "$name"
                 local tmp_file=$benchmark-$class_name-$method_name.tmp
-                rm -f $tmp_file
+                rm -f "$tmp_file"
                 local compiler_status=0
                 $PAOC --paoc-panda-files="$benchmark.abc" --compiler-regex="$class_name::$method_name" \
-                        --compiler-ignore-failures=false --paoc-mode=$PAOC_MODE \
+                        --compiler-ignore-failures=false --paoc-mode="$PAOC_MODE" \
                         --boot-panda-files="$ARKSTDLIB" --load-runtimes="core" \
                         --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE \
-                        --compiler-cross-arch=$TARGET_ARCH --log-level=debug --log-components=compiler > $tmp_file 2>&1 || \
+                        --compiler-cross-arch="$TARGET_ARCH" --log-level=debug --log-components=compiler > "$tmp_file" 2>&1 || \
                     compiler_status=$?
                 if [ "$compiler_status" -eq 0 ]; then
                     let "compiled+=1"
@@ -168,25 +168,25 @@ function calculate_benchmark_coverage() {
                         func_status+=( "assert" )
                     fi
                     # Checking that the benchmark function should be built and not have asserts
-                    check_critical_failure $benchmark
+                    check_critical_failure "$benchmark"
                     # Information for reproducing the error
-                    echo "Benchmark=$benchmark" >> $LOG_ERROR
-                    echo "Function=$name" >> $LOG_ERROR
-                    echo "Status=${func_status[-1]}" >> $LOG_ERROR
-                    echo "Reproduce:" >> $LOG_ERROR
-                    echo "$PANDASM $BENCHMARKS/$benchmark.pa $benchmark.abc" >> $LOG_ERROR
-                    echo -n "$PAOC --paoc-panda-files=\"$benchmark.abc\" --paoc-mode=$PAOC_MODE" >> $LOG_ERROR
-                    echo -n " --compiler-regex=\"$class_name::$method_name\"" >> $LOG_ERROR
-                    echo -n " --boot-panda-files=\"$ARKSTDLIB\" --load-runtimes=\"core\"" >> $LOG_ERROR
-                    echo -n " --compiler-ignore-failures=false" >> $LOG_ERROR
-                    echo -n " --compiler-cross-arch=$TARGET_ARCH" >> $LOG_ERROR
-                    echo -n " --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE" >> $LOG_ERROR
-                    echo " --log-level=debug --log-components=compiler" >> $LOG_ERROR
-                    echo "" >> $LOG_ERROR
+                    echo "Benchmark=$benchmark" >> "$LOG_ERROR"
+                    echo "Function=$name" >> "$LOG_ERROR"
+                    echo "Status=${func_status[-1]}" >> "$LOG_ERROR"
+                    echo "Reproduce:" >> "$LOG_ERROR"
+                    echo "$PANDASM $BENCHMARKS/$benchmark.pa $benchmark.abc" >> "$LOG_ERROR"
+                    echo -n "$PAOC --paoc-panda-files=\"$benchmark.abc\" --paoc-mode=$PAOC_MODE" >> "$LOG_ERROR"
+                    echo -n " --compiler-regex=\"$class_name::$method_name\"" >> "$LOG_ERROR"
+                    echo -n " --boot-panda-files=\"$ARKSTDLIB\" --load-runtimes=\"core\"" >> "$LOG_ERROR"
+                    echo -n " --compiler-ignore-failures=false" >> "$LOG_ERROR"
+                    echo -n " --compiler-cross-arch=$TARGET_ARCH" >> "$LOG_ERROR"
+                    echo -n " --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE" >> "$LOG_ERROR"
+                    echo " --log-level=debug --log-components=compiler" >> "$LOG_ERROR"
+                    echo "" >> "$LOG_ERROR"
                 fi
-                rm -f $tmp_file
+                rm -f "$tmp_file"
             done
-            rm -f $benchmark.abc
+            rm -f "$benchmark".abc
 
             # Benchmark status
             if [ $assert -ne 0 ] || [ $compiled -eq 0 ]; then
@@ -202,30 +202,30 @@ function calculate_benchmark_coverage() {
                 functions = $functions,
                 compiled = $compiled,
                 assert = $assert,
-                coverage = $coverage%</p>" >> $HTML
+                coverage = $coverage%</p>" >> "$HTML"
 
             # Names benchmark functions
             echo "<table cellpadding=\"5\"><tr>
-                <th align=\"center\">functions</th>" >> $HTML
+                <th align=\"center\">functions</th>" >> "$HTML"
             for name in $method_names; do
-                echo "<td align=\"center\">$name</td>" >> $HTML
+                echo "<td align=\"center\">$name</td>" >> "$HTML"
             done
 
             # Statuses of benchmark functions
-            echo "<tr><th align=\"center\">status</th>" >> $HTML
+            echo "<tr><th align=\"center\">status</th>" >> "$HTML"
             for status in "${func_status[@]}"; do
-                echo "<td align=\"center\" bgcolor=" >> $HTML
+                echo "<td align=\"center\" bgcolor=" >> "$HTML"
                 if [ "$status" == "compiled" ]; then
-                    echo "\"#d7e7a9\">compiled" >> $HTML
+                    echo "\"#d7e7a9\">compiled" >> "$HTML"
                 elif [ "$status" == "ir_builder" ]; then
-                    echo "\"salmon\">ir_builder" >> $HTML
+                    echo "\"salmon\">ir_builder" >> "$HTML"
                 elif [ "$status" == "optimizations" ]; then
-                    echo "\"salmon\">optimizations" >> $HTML
+                    echo "\"salmon\">optimizations" >> "$HTML"
                 else
-                    echo "\"#F5001D\">assert" >> $HTML
+                    echo "\"#F5001D\">assert" >> "$HTML"
                 fi
             done
-            echo "</table>" >> $HTML
+            echo "</table>" >> "$HTML"
 
             all_functions=$((all_functions+$functions))
             all_compiled=$((all_compiled+$compiled))
@@ -247,12 +247,12 @@ function calculate_assembly_tests_coverage() {
 
     # CTS-assembly test
     echo "<header><h1>CTS-ASSEMBLY TESTS</h1></header>
-        <table cellpadding=\"5\">" >> $HTML
+        <table cellpadding=\"5\">" >> "$HTML"
 
-    for test in $(ls $SMALL_TESTS | cut -f1 -d'.'); do
+    for test in $(ls "$SMALL_TESTS" | cut -f1 -d'.'); do
         # Сhecking that tests has compiled
-        if $PANDASM $SMALL_TESTS/$test.pa $test.abc; then
-            local method_names=$(grep "^[.]function" $SMALL_TESTS/$test.pa | grep -v "<[^>]*external[^>]*>\|<[^>]*noimpl[^>]*>" | cut -f3 -d' ' | cut -f1 -d'(')
+        if $PANDASM "${SMALL_TESTS}/${test}.pa" "${test}.abc"; then
+            local method_names=$(grep "^[.]function" "${SMALL_TESTS}/${test}.pa" | grep -v "<[^>]*external[^>]*>\|<[^>]*noimpl[^>]*>" | cut -f3 -d' ' | cut -f1 -d'(')
             local functions=0
             local compiled=0
             local assert=0
@@ -262,10 +262,10 @@ function calculate_assembly_tests_coverage() {
 
                 local is_cctor=1
                 local is_ctor=1
-                grep -q "${name}()\s*<.*cctor.*>" $SMALL_TESTS/$test.pa || local is_cctor=$(($?^1))
-                grep -q "${name}(.*)\s*<.*ctor.*>" $SMALL_TESTS/$test.pa || local is_ctor=$(($?^1))
+                grep -q "${name}()\s*<.*cctor.*>" "${SMALL_TESTS}/${test}.pa" || local is_cctor=$(($?^1))
+                grep -q "${name}(.*)\s*<.*ctor.*>" "${SMALL_TESTS}/${test}.pa" || local is_ctor=$(($?^1))
                 # Get class and method names
-                separate_method_name $name
+                separate_method_name "$name"
                 local method_name=$method_name
                 if [ "$is_cctor" -eq 1 ]; then
                     local method_name=".cctor"
@@ -276,14 +276,14 @@ function calculate_assembly_tests_coverage() {
                 local boot_panda_files=$ARKSTDLIB
 
                 local tmp_file=$test-$class_name-$method_name.tmp
-                rm -f $tmp_file
+                rm -f "$tmp_file"
                 local compiler_status=0
-                $PAOC --paoc-panda-files=$test.abc --compiler-regex="$class_name::$method_name" \
-                                    --compiler-ignore-failures=false --paoc-mode=$PAOC_MODE \
+                $PAOC --paoc-panda-files="$test".abc --compiler-regex="$class_name::$method_name" \
+                                    --compiler-ignore-failures=false --paoc-mode="$PAOC_MODE" \
                                     --boot-panda-files="$boot_panda_files" \
                                     --load-runtimes="$load_runtimes" \
-                                    --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE \
-                                    --compiler-cross-arch=$TARGET_ARCH --log-level=debug --log-components=compiler > $tmp_file 2>&1 || \
+                                    --compiler-max-bytecode-size="$MAX_BYTECODE_SIZE" \
+                                    --compiler-cross-arch="$TARGET_ARCH" --log-level=debug --log-components=compiler > "$tmp_file" 2>&1 || \
                 compiler_status=$?
                 if [ "$compiler_status" -eq 0 ]; then
                     let "compiled+=1"
@@ -297,30 +297,30 @@ function calculate_assembly_tests_coverage() {
                         local test_status="assert"
                     fi
                     # Checking that the benchmark function should be built and not have asserts
-                    check_critical_failure $test
+                    check_critical_failure "$test"
                     # Information for reproducing the error
-                    echo "CTS-assembly test=$test" >> $LOG_ERROR
-                    echo "Function=$name" >> $LOG_ERROR
-                    echo "Status=$test_status" >> $LOG_ERROR
-                    echo "Reproduce:" >> $LOG_ERROR
-                    echo "$PANDASM $SMALL_TESTS/$test.pa $test.abc" >> $LOG_ERROR
-                    echo -n "$PAOC --paoc-panda-files=\"$test.abc\" --paoc-mode=$PAOC_MODE" >> $LOG_ERROR
-                    echo -n " --compiler-regex=\"$class_name::$method_name\"" >> $LOG_ERROR
-                    echo -n " --compiler-ignore-failures=false" >> $LOG_ERROR
-                    echo -n " --boot-panda-files=\"$boot_panda_files\"" >> $LOG_ERROR
-                    echo -n " --load-runtimes=\"$load_runtimes\"" >> $LOG_ERROR
-                    echo -n " --compiler-cross-arch=$TARGET_ARCH" >> $LOG_ERROR
-                    echo -n " --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE" >> $LOG_ERROR
-                    echo " --log-level=debug --log-components=compiler --compiler-log=all" >> $LOG_ERROR
-                    echo "" >> $LOG_ERROR
+                    echo "CTS-assembly test=$test" >> "$LOG_ERROR"
+                    echo "Function=$name" >> "$LOG_ERROR"
+                    echo "Status=$test_status" >> "$LOG_ERROR"
+                    echo "Reproduce:" >> "$LOG_ERROR"
+                    echo "$PANDASM $SMALL_TESTS/$test.pa $test.abc" >> "$LOG_ERROR"
+                    echo -n "$PAOC --paoc-panda-files=\"$test.abc\" --paoc-mode=$PAOC_MODE" >> "$LOG_ERROR"
+                    echo -n " --compiler-regex=\"$class_name::$method_name\"" >> "$LOG_ERROR"
+                    echo -n " --compiler-ignore-failures=false" >> "$LOG_ERROR"
+                    echo -n " --boot-panda-files=\"$boot_panda_files\"" >> "$LOG_ERROR"
+                    echo -n " --load-runtimes=\"$load_runtimes\"" >> "$LOG_ERROR"
+                    echo -n " --compiler-cross-arch=$TARGET_ARCH" >> "$LOG_ERROR"
+                    echo -n " --compiler-max-bytecode-size=$MAX_BYTECODE_SIZE" >> "$LOG_ERROR"
+                    echo " --log-level=debug --log-components=compiler --compiler-log=all" >> "$LOG_ERROR"
+                    echo "" >> "$LOG_ERROR"
                 fi
-                rm -f $tmp_file
+                rm -f "$tmp_file"
             done
-            rm -f $test.abc
+            rm -f "$test.abc"
 
             local indent=$(($all_tests % 10))
             if [ $indent -eq 0 ]; then
-                echo "<tr>" >> $HTML
+                echo "<tr>" >> "$HTML"
             fi
 
             # Test status
@@ -332,16 +332,16 @@ function calculate_assembly_tests_coverage() {
                 local background="#d7e7a9"
                 let "success_tests+=1"
             fi
-            echo "<td align=\"center\" bgcolor=$background>$test</td>" >> $HTML
+            echo "<td align=\"center\" bgcolor=$background>$test</td>" >> "$HTML"
 
             let "all_tests+=1"
         fi
     done
-    echo "</table>" >> $HTML
+    echo "</table>" >> "$HTML"
 
     # CTS-assembly tests report
     local coverage=$(($success_tests * 100 / $all_tests))
-    echo "<h4>Coverage tests = $coverage%</h4>" >> $HTML
+    echo "<h4>Coverage tests = $coverage%</h4>" >> "$HTML"
     echo "CTS-assembly tests coverage = $coverage%"
 }
 
@@ -352,7 +352,7 @@ echo "<!DOCTYPE html>
         <style>table, th, td {border: 1px solid black; border-collapse: collapse;}</style>
         <title>Benchmark coverage statistic</title>
     </head>
-    <body>" >> $HTML
+    <body>" >> "$HTML"
 
 calculate_benchmark_coverage
 
@@ -372,9 +372,9 @@ if [ ${#critical_compiler_failures[@]} -ne 0 ]; then
     exit 1
 fi
 
-echo "<h3>Assembler failed to build the following benchmarks:</h3>" >> $HTML
+echo "<h3>Assembler failed to build the following benchmarks:</h3>" >> "$HTML"
 for benchmark in "${not_compiled_benchmarks[@]}"; do
-    echo "<p>$benchmark</p>" >> $HTML
+    echo "<p>$benchmark</p>" >> "$HTML"
 done
 
 
@@ -413,4 +413,4 @@ echo  "<h3>Benchmark status</h3>
             </tr>
         </table>
     </body>
-</html>" >> $HTML
+</html>" >> "$HTML"

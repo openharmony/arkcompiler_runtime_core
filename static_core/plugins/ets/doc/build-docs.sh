@@ -14,6 +14,8 @@
 #
 # Script for building documentation bundle from Sphinx *.rst documents
 # TODO(igelhaus): Provision sphinx-build in the main bootstrap script.
+#
+# shellcheck disable=SC2086
 
 set -e
 
@@ -220,7 +222,7 @@ mkdir -p "${BUILD_DIR}"
 
 if [[ "${BUILD_SPEC}" == "yes" ]]; then
     echo "spec: Validating ${SCRIPT_DIR}/spec"
-    python3 ${SCRIPT_DIR}/validate-spec.py ${SCRIPT_DIR}/spec
+    python3 "${SCRIPT_DIR}/validate-spec.py" "${SCRIPT_DIR}/spec"
     build_sphinx_document spec "${SCRIPT_DIR}/spec"
 fi
 
@@ -231,7 +233,7 @@ if [[ "${BUILD_COOKBOOK}" == "yes" ]]; then
         VALIDATE_RECIPES_OPTIONS="${VALIDATE_RECIPES_OPTIONS} --check-code"
     fi
 
-    ${SCRIPT_DIR}/validate-recipes \
+    "${SCRIPT_DIR}/validate-recipes" \
         ${VALIDATE_RECIPES_OPTIONS} \
         --recipes="${SCRIPT_DIR}/cookbook/recipes.rst"
 

@@ -15,10 +15,17 @@
 if [[ -z $1 ]]; then
     echo "Usage: $0 <sources>"
     echo "    <sources> path where the sources to be checked are located"
+    echo
+    echo "    The script launches shellcheck and bashate tools against all *sh"
+    echo "    scripts found in the specified folder."
+    echo "    For bashate, all rules are checked by default except E006 and E042"
+    echo "    One can set BASHATE_IGNORE_RULES variable to skip oher rules."
+    echo "    For shellcheck, a prefedined setof rules is checked (see comments in the script)."
+    echo "    One can set SHELLCHECK_INCLLUDE_RULES variable to check custom set of rules"
     exit 1
 fi
 
-root_dir=$(realpath $1)
+root_dir=$(realpath "$1")
 # For shellcheck, we only enable certain rules
 # - SC1068 - no spaces  round +=/=
 # - SC1106 - correctness of string/arithmetic comparisons
@@ -35,6 +42,7 @@ root_dir=$(realpath $1)
 # - SC2066 - stream merge order
 # - SC2067 - find-exec usage
 # - SC2081 - square/single brackets usage
+# - SC2086 - Double quotes for vaiables
 # - SC2088 - Tilde usage
 # - SC2093 - exec usage
 # - SC2115 - safe var usage in rm
@@ -50,9 +58,8 @@ root_dir=$(realpath $1)
 # - SC2253 - Safe chmod
 SHELLCHECK_RULES=${SHELLCHECK_INCLLUDE_RULES:-"SC1068,SC1106,SC1133,\
 SC2002,SC2003,SC2006,SC2010,SC2024,SC2034,SC2041,SC2045,SC2064,SC2066,\
-SC2067,SC2081,SC2088,SC2093,SC2115,SC2142,SC2144,SC2148,SC2152,SC2164,\
-SC2166,SC2172,SC2173,SC2222,SC2253"
-}
+SC2067,SC2081,SC2086,SC2088,SC2093,SC2115,SC2142,SC2144,SC2148,SC2152,\
+SC2164,SC2166,SC2172,SC2173,SC2222,SC2253"}
 
 # For bashate, we enable all rules and only exclude several ones
 # - E006 is 'Line Too Long' which should be additionally adjusted for us
@@ -75,11 +82,13 @@ if [ ! -z "$SKIP_FOLDERS" ]; then
 fi
 
 while read file_to_check; do
-    echo "=== checking ${file_to_check} ==="
-    bashate-mod-ds -i ${BASHATE_RULES} "${file_to_check}"
+    bashate-mod-ds -i "${BASHATE_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
-    shellcheck -i ${SHELLCHECK_RULES} "${file_to_check}"
+    shellcheck -i "${SHELLCHECK_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
 done <<<$(find "${root_dir}" -name "*.sh" -type f | grep -v "${skip_options}")
+
+num_checked=$(find "${root_dir}" -name "*.sh" -type f | grep -c -v "${skip_options}")
+echo "Checked ${num_checked} files"
 
 exit ${EXIT_CODE}

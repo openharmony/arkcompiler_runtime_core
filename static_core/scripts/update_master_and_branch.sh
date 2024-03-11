@@ -20,7 +20,7 @@ set -euo pipefail
 
 # get current branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-echo $BRANCH
+echo "$BRANCH"
 
 function repeats() {
     local command=$1
@@ -30,7 +30,7 @@ function repeats() {
     done
     # checkout to current branch
     if [[ "${BRANCH}" != "master" ]]; then
-        git checkout $BRANCH
+        git checkout "$BRANCH"
         echo "the command \"$command\" failed, checkout to the source branch \"$BRANCH\""
     fi
     return 1
@@ -53,7 +53,7 @@ echo "git push origin master succeeded"
 if [[ "${BRANCH}" = "master" ]]; then
     echo "current branch is master"
 else
-    git checkout $BRANCH
+    git checkout "$BRANCH"
     echo "git checkout $BRANCH succeeded"
 
     git rebase master

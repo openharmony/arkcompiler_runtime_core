@@ -17,8 +17,8 @@ set -e
 # arg1 - path to panda_root
 function git_hash() {
     if git --version &> /dev/null ; then
-        if git -C $1 rev-parse &> /dev/null ; then
-            echo $(git -C $1 rev-parse HEAD)
+        if git -C "$1" rev-parse &> /dev/null ; then
+            echo $(git -C "$1" rev-parse HEAD)
         else
             echo ""
         fi
@@ -36,7 +36,7 @@ fi
 ROOT_DIR=$1
 INPUT=$2
 OUTPUT=$3
-HASH=$(git_hash $ROOT_DIR)
+HASH=$(git_hash "$ROOT_DIR")
 
 if [ -z "$HASH" ]; then
     python3 "$ROOT_DIR/gn/build/cmake_configure_file.py" "$INPUT" "$OUTPUT"

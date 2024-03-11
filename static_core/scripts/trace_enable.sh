@@ -45,7 +45,7 @@ function category_disable() {
 
 function start_trace() {
     echo "Warning: If the PandaVM aborted while writting trace, try to enlarge the trace buffer size here."
-    echo $BUFF_SIZE > $TRACKING_PATH/buffer_size_kb
+    echo "$BUFF_SIZE" > $TRACKING_PATH/buffer_size_kb
     echo 'global' > $TRACKING_PATH/trace_clock
     echo 'nop' > $TRACKING_PATH/current_tracer
     echo 0 > $TRACKING_PATH/options/overwrite
@@ -56,8 +56,8 @@ function start_trace() {
 }
 
 function dump_trace() {
-    cat $TRACKING_PATH/trace > $OUTPUT
-    chmod o+w $OUTPUT
+    cat $TRACKING_PATH/trace > "$OUTPUT"
+    chmod o+w "$OUTPUT"
     clear_trace
 }
 
@@ -107,7 +107,7 @@ trap sigint_handler INT # Tracing will be interrupted on SIGINT
 start_trace
 echo "Tracing has started. Press ^C to finish"
 
-sleep $TIME_TO_WAIT
+sleep "$TIME_TO_WAIT"
 
 stop_trace
 echo "Stopped by timeout"

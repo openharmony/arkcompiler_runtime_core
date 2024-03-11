@@ -58,6 +58,6 @@ if [ "${HAS_ISA}" ];then
 fi
 
 for TEMPLATE_ARG in "$@"; do
-    TARGET_FILE=$(basename $TEMPLATE_ARG .erb)
-    ${CMD} --template ${TEMPLATE_ARG} --data ${DATA} --output ${OUTPUT}/${TARGET_FILE} --require ${REQUIRE}
+    TARGET_FILE=$(basename "$TEMPLATE_ARG" .erb)
+    ${CMD} --template "${TEMPLATE_ARG}" --data "${DATA}" --output "${OUTPUT}/${TARGET_FILE}" --require "${REQUIRE}"
 done

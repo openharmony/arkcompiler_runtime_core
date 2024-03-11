@@ -35,7 +35,7 @@ ETS_FRONTEND_URL=git@gitee.com:${GITEE_USER}/arkcompiler_ets_frontend.git
 # clone ets_runtime to plugins/cmascript
 cd plugins
 echo "Clone: $ETS_RUNTIME_URL"
-git clone $ETS_RUNTIME_URL ecmascript
+git clone "$ETS_RUNTIME_URL" ecmascript
 
 
 # clone ets_frontend to es2panda
@@ -47,7 +47,7 @@ if [[ "${GITEE_USER}" != "openharmony-sig" ]]; then
 fi
 
 echo "Clone: $ETS_FRONTEND_URL"
-git clone $ETS_FRONTEND_URL es2panda
+git clone "$ETS_FRONTEND_URL" es2panda
 
 if [[ "${GITEE_USER}" != "openharmony-sig" ]]; then
     cd es2panda
