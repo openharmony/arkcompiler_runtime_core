@@ -2053,13 +2053,18 @@ MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &r
     ASSERT(IsCardTableClear(cardTable));
     auto visitor = [cardTable, &minDirtyAddr, &maxDirtyAddr, &remsetSize, &refsChecker](Region *r,
                                                                                         const MemRange &range) {
+        // The proper DEFAULT_REGION_SIZE value is 256_KB, that value allows card caching of already processed
+        // memory ranges, the following code will not work with a different DEFAULT_REGION size
+        constexpr uint64_t EXPECTED_DEFAULT_REGION_SIZE = 256_KB;
+        static_assert(DEFAULT_REGION_SIZE == EXPECTED_DEFAULT_REGION_SIZE, "Unsupported default region size");
+
         // Use the card table to mark the ranges we already processed.
         // Each card is uint8_t. Use it as a bitmap. Set bit means the corresponding memory
         // range is processed.
         CardTable::CardPtr card = cardTable->GetCardPtr(range.GetStartAddress());
         uintptr_t cardAddr = cardTable->GetCardStartAddress(card);
-        size_t memSize = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
-        size_t bitIdx = (range.GetStartAddress() - cardAddr) / memSize;
+        constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
+        size_t bitIdx = (range.GetStartAddress() - cardAddr) / MEM_SIZE;
         if ((card->GetCard() & (1U << bitIdx)) == 0) {
             card->SetCard(card->GetCard() | (1U << bitIdx));
             if (minDirtyAddr > cardAddr) {
