@@ -667,6 +667,14 @@ bool LLVMIrConstructor::EmitCompressSixteenUtf16ToUtf8CharsUsingSimd(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitReverseBytes(Inst *inst)
+{
+    ASSERT(IsSafeCast(inst, 0));
+    auto result = builder_.CreateUnaryIntrinsic(llvm::Intrinsic::bswap, GetInputValue(inst, 0), nullptr);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
 bool LLVMIrConstructor::EmitMemoryFenceFull([[maybe_unused]] Inst *inst)
 {
     CreateMemoryFence(memory_order::FULL);
@@ -848,6 +856,36 @@ bool LLVMIrConstructor::EmitWriteTlabStatsSafe(Inst *inst)
     auto addr = GetInputValue(inst, 0);
     auto size = GetInputValue(inst, 1);
     CreateEntrypointCall(RuntimeInterface::EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE, inst, {addr, size});
+
+    return true;
+}
+
+bool LLVMIrConstructor::EmitExpandU8U16(Inst *inst)
+{
+    auto input = GetInputValue(inst, 0);
+    ASSERT(input->getType()->getScalarSizeInBits() == 32U);  // has to be f32
+
+    auto srcTy = llvm::VectorType::get(builder_.getInt8Ty(), 4U, false);
+    auto dstTy = llvm::VectorType::get(builder_.getInt16Ty(), 4U, false);
+
+    auto val = builder_.CreateBitCast(input, srcTy);
+    auto result = builder_.CreateZExt(val, dstTy);
+    ValueMapAdd(inst, result);
+
+    return true;
+}
+
+bool LLVMIrConstructor::EmitReverseHalfWords(Inst *inst)
+{
+    auto input = GetInputValue(inst, 0);
+    ASSERT(input->getType()->getScalarSizeInBits() == 64U);  // has to be f64
+    auto srcTy = llvm::VectorType::get(builder_.getInt16Ty(), 4U, false);
+    auto val = builder_.CreateBitCast(input, srcTy);
+
+    const llvm::SmallVector<int, 4> indices = {3, 2, 1, 0};
+    auto result = builder_.CreateShuffleVector(val, indices);
+    ValueMapAdd(inst, result);
+
     return true;
 }
 

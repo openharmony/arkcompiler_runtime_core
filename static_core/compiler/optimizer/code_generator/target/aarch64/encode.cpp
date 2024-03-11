@@ -977,6 +977,18 @@ void Aarch64Encoder::EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr,
     GetMasm()->St1(vixlVreg1, dst);
 }
 
+void Aarch64Encoder::EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src)
+{
+    GetMasm()->Uxtl(VixlVReg(dst).V8H(), VixlVReg(src).V8B());
+}
+
+void Aarch64Encoder::EncodeReverseHalfWords(Reg dst, Reg src)
+{
+    ASSERT(src.GetSize() == dst.GetSize());
+
+    GetMasm()->rev64(VixlVReg(dst).V4H(), VixlVReg(src).V4H());
+}
+
 bool Aarch64Encoder::CanEncodeBitCount()
 {
     return true;

@@ -54,6 +54,7 @@ private:
     bool EmitTailCall(Inst *inst);
     bool EmitCompressEightUtf16ToUtf8CharsUsingSimd(Inst *inst);
     bool EmitCompressSixteenUtf16ToUtf8CharsUsingSimd(Inst *inst);
+    bool EmitReverseBytes(Inst *inst);
     bool EmitMemoryFenceFull(Inst *inst);
     bool EmitMemoryFenceRelease(Inst *inst);
     bool EmitMemoryFenceAcquire(Inst *inst);
@@ -70,6 +71,8 @@ private:
     bool EmitStringGetCharsTlab(Inst *inst);
     bool EmitStringHashCode(Inst *inst);
     bool EmitWriteTlabStatsSafe(Inst *inst);
+    bool EmitExpandU8U16(Inst *inst);
+    bool EmitReverseHalfWords(Inst *inst);
 
 public:
     llvm::Value *GetMappedValue(Inst *inst, DataType::Type type);

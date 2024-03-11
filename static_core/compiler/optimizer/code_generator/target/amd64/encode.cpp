@@ -2291,6 +2291,8 @@ void Amd64Encoder::EncodeReverseBytes(Reg dst, Reg src)
 {
     ASSERT(src.GetSize() > BYTE_SIZE);
     ASSERT(src.GetSize() == dst.GetSize());
+    ASSERT(src.IsValid());
+    ASSERT(dst.IsValid());
 
     if (src != dst) {
         GetMasm()->mov(ArchReg(dst), ArchReg(src));
@@ -2302,6 +2304,22 @@ void Amd64Encoder::EncodeReverseBytes(Reg dst, Reg src)
     } else {
         GetMasm()->bswap(ArchReg(dst));
     }
+}
+
+void Amd64Encoder::EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src)
+{
+    GetMasm()->pmovzxbw(ArchVReg(dst), ArchVReg(src));
+}
+
+/* Attention: the encoder belows operates on vector registers not GPRs */
+void Amd64Encoder::EncodeReverseHalfWords(Reg dst, Reg src)
+{
+    ASSERT(src.GetSize() == dst.GetSize());
+    ASSERT(src.IsValid());
+    ASSERT(dst.IsValid());
+
+    constexpr unsigned MASK = 0x1b;  // reverse mask: 00 01 10 11
+    GetMasm()->pshuflw(ArchVReg(dst), ArchVReg(src), MASK);
 }
 
 bool Amd64Encoder::CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, [[maybe_unused]] bool signedCompare)

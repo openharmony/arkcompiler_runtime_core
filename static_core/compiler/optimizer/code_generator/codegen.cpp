@@ -286,6 +286,7 @@ void Codegen::IntrinsicSaveTlabStatsSafe([[maybe_unused]] IntrinsicInst *inst, [
 }
 
 #ifdef INTRINSIC_SLOW_PATH_ENTRY_ENABLED
+// NOLINTNEXTLINE(readability-function-size)
 void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
 {
     switch (inst->GetIntrinsicId()) {
@@ -330,6 +331,16 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
             break;
         case RuntimeInterface::IntrinsicId::INTRINSIC_WRITE_TLAB_STATS_SAFE:
             IntrinsicSaveTlabStatsSafe(inst, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
+            break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_BYTES_U64:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_BYTES_U32:
+            GetEncoder()->EncodeReverseBytes(dst, src[0]);
+            break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_HALF_WORDS:
+            GetEncoder()->EncodeReverseHalfWords(dst, src[0]);
+            break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_EXPAND_U8_TO_U16:
+            GetEncoder()->EncodeUnsignedExtendBytesToShorts(dst, src[0]);
             break;
         default:
             UNREACHABLE();
@@ -2420,7 +2431,12 @@ void Codegen::CreateStringHashCode([[maybe_unused]] IntrinsicInst *inst, Reg dst
     }
     slowPath->BindBackLabel(GetEncoder());
 }
-
+void Codegen::CreateStringCompareTo([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto str1 = src[FIRST_OPERAND];
+    auto str2 = src[SECOND_OPERAND];
+    CallFastPath(inst, EntrypointId::STRING_COMPARE_TO, dst, {}, str1, str2);
+}
 #include "intrinsics_codegen.inl"
 
 void Codegen::CreateBuiltinIntrinsic(IntrinsicInst *inst)

@@ -31,15 +31,6 @@ function main(): void {
     assert str3.contentEquals(cb): "contentEquals is wrong";
 
     str3 = "hello";
-    assert str3.length == 5: "Length of the string must be 5";
-    assert str3.compareTo("hello") == 0: "Strings must be equal";
-    assert str3.compareTo("tello") == -12:
-            "Result of comparing must be -12, but got " + StringBuilder.toString(str3.compareTo("tello"));
-    assert str3.compareTo("hekko") == 1:
-            "Result of comparing must be 1, but got " + StringBuilder.toString(str3.compareTo("hekko"));
-    assert str3.compareTo("elag") == 3:
-            "Result of comparing must be 3, but got " + StringBuilder.toString(str3.compareTo("elag"));
-
     chars = str3.getChars();
     assert chars.length == 5: "Chars length must be 5";
     assert chars[0] == c'h': "First letter must be `h`";

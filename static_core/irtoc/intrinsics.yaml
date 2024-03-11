@@ -208,3 +208,65 @@ intrinsics:
       args: []
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
   description: calls WriteTlabStats function from inside the IrToc
+
+- name: ReverseBytesU64
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitReverseBytes
+  signature:
+      ret: u64
+      args: [ u64 ]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Reverse bytes in dword
+
+- name: ReverseBytesU32
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitReverseBytes
+  signature:
+      ret: u32
+      args: [ u32 ]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Reverse bytes in word
+
+- name: ReverseHalfWords
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitReverseHalfWords
+  signature:
+      ret: f64
+      args: [ f64 ]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Reverse half-words in the double word
+
+- name: ExpandU8ToU16
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitExpandU8U16
+  signature:
+      ret: f64
+      args: [ f64 ]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Expand the the lower 4 u8 into 4 u16
+
+

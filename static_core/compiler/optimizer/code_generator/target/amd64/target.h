@@ -322,8 +322,10 @@ public:
     void EncodeRoundToPInf([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src) override;
     void EncodeReverseBytes(Reg dst, Reg src) override;
     void EncodeReverseBits(Reg dst, Reg src) override;
+    void EncodeReverseHalfWords(Reg dst, Reg src) override;
     void EncodeFpToBits(Reg dst, Reg src) override;
     void EncodeMoveBitsRaw(Reg dst, Reg src) override;
+    void EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src) override;
 
     bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare) override;
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;

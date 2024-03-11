@@ -28,6 +28,9 @@ case "$ARGUMENT" in
     --paoc-mode=*)
     PAOC_MODE="--paoc-mode=${ARGUMENT#*=}"
     ;;
+    --prefix=*)
+    PANDA_RUN_PREFIX="${ARGUMENT#*=}"
+    ;;
     -compiler-options=*)
     OPTIONS="${ARGUMENT#*=}"
     ;;
@@ -45,7 +48,7 @@ if [ -z "$PANDA_BINARY_ROOT" ]; then
     exit 1
 fi
 
-${PANDA_BINARY_ROOT}/bin/ark_aot --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc \
+${PANDA_RUN_PREFIX} ${PANDA_BINARY_ROOT}/bin/ark_aot --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc \
                     --paoc-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc  \
                     --compiler-ignore-failures=false $PAOC_MODE $PAOC_REGEX --load-runtimes="ets" \
                     $TARGET_ARCH ${OPTIONS}  --paoc-output=${PAOC_OUTPUT}
