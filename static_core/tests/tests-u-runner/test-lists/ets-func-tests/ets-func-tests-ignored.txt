@@ -785,14 +785,6 @@ std/core/std_core_array_map_short_array_func_short.ets
 std/core/std_core_array_map_float_array_func_float_int_float_array.ets
 std/core/std_core_array_map_long_array_func_long_int_long_array.ets
 
-### Related to (reverted) builtin void type
-### StdLib is not testing corectly after the void revert
-std/core/TypeCreateClassTest.ets
-std/core/TypeCreateErasedBodyTest.ets
-std/core/TypeCreateInterfaceTest.ets
-std/core/TypeCreatePrimitiveNameTest.ets
-### End StdLib is not testing corectly after the void revert
-### End of Related to (reverted) builtin void type
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 ### Issue 1661
