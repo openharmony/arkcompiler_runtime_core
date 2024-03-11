@@ -18,7 +18,6 @@
 
 # fails in JIT mode with --opt-level=0
 02.lexical_elements/09.literals/08.undefined_literal/undef_literal1.ets
-03.types/08.reference_types/04.never_type/never_class_instance_5.ets
 04.names_declarations_and_scopes/04.scopes/interface_level1.ets
 04.names_declarations_and_scopes/04.scopes/interface_level2.ets
 07.expressions/09.field_access_expressions/safe_field_access_0.ets

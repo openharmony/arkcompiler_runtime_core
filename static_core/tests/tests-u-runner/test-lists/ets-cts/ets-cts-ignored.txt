@@ -985,11 +985,6 @@
 11.enumerations/03.enumeration_operations/enum_member_name4.ets
 11.enumerations/03.enumeration_operations/enum_member_name5.ets
 
-# es2panda fails: panda:14368 Expected CTE on casting to never
-03.types/08.reference_types/04.never_type/never_class_instance_neg_0.ets
-03.types/08.reference_types/04.never_type/never_class_instance_neg_17.ets
-# end of es2panda fails
-
 # es2panda fails: panda:14545 es2panda aborts on casting union type value with unboxing
 03.types/08.reference_types/11.union_types/ut_27.ets
 # es2panda fails: panda#14496 Compiler takes two methods with different rest parameters as the same
