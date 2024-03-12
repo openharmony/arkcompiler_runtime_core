@@ -27,6 +27,58 @@ namespace ark::ets::intrinsics::helpers {
         return (result);                         \
     }
 
+namespace parse_helpers {
+
+template <typename ResultType>
+struct ParseResult {
+    ResultType value;
+    uint8_t *pointerPosition;
+    bool isError = false;
+};
+
+ParseResult<int32_t> ParseExponent(const uint8_t *start, const uint8_t *end, uint8_t radix, uint32_t flags)
+{
+    constexpr int32_t MAX_EXPONENT = INT32_MAX / 2;
+
+    auto p = const_cast<uint8_t *>(start);
+    char exponentSign = '+';
+    int32_t additionalExponent = 0;
+    bool undefinedExponent = false;
+    ++p;
+    if (p == end) {
+        undefinedExponent = true;
+    }
+
+    if (!undefinedExponent && (*p == '+' || *p == '-')) {
+        exponentSign = static_cast<char>(*p);
+        ++p;
+        if (p == end) {
+            undefinedExponent = true;
+        }
+    }
+    if (!undefinedExponent) {
+        uint8_t digit;
+        while ((digit = ToDigit(*p)) < radix) {
+            if (additionalExponent > MAX_EXPONENT / radix) {
+                additionalExponent = MAX_EXPONENT;
+            } else {
+                additionalExponent = additionalExponent * static_cast<int32_t>(radix) + static_cast<int32_t>(digit);
+            }
+            if (++p == end) {
+                break;
+            }
+        }
+    } else if ((flags & flags::ERROR_IN_EXPONENT_IS_NAN) != 0) {
+        return {0, p, true};
+    }
+    if (exponentSign == '-') {
+        return {-additionalExponent, p, false};
+    }
+    return {additionalExponent, p, false};
+}
+
+}  // namespace parse_helpers
+
 double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, uint32_t flags)
 {
     // 1. skip space and line terminal
@@ -176,41 +228,14 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     auto pEnd = p;
 
     // 9. parse 'e/E' with '+/-'
-    char exponentSign = '+';
-    int additionalExponent = 0;
-    constexpr int MAX_EXPONENT = INT32_MAX / 2;
     if (radix == DECIMAL && (p != end && (*p == 'e' || *p == 'E'))) {
-        bool undefinedExponent = false;
-        ++p;
-        if (p == end) {
-            undefinedExponent = true;
-        }
-
-        // 10. parse exponent number
-        if (!undefinedExponent && (*p == '+' || *p == '-')) {
-            exponentSign = static_cast<char>(*p);
-            ++p;
-            if (p == end) {
-                undefinedExponent = true;
-            }
-        }
-        if (!undefinedExponent) {
-            uint8_t digit;
-            while ((digit = ToDigit(*p)) < radix) {
-                if (additionalExponent > static_cast<int>(MAX_EXPONENT / radix)) {
-                    additionalExponent = MAX_EXPONENT;
-                } else {
-                    additionalExponent = additionalExponent * static_cast<int>(radix) + static_cast<int>(digit);
-                }
-                if (++p == end) {
-                    break;
-                }
-            }
-        } else if ((flags & flags::ERROR_IN_EXPONENT_IS_NAN) != 0) {
+        auto parseExponentResult = parse_helpers::ParseExponent(p, end, radix, flags);
+        if (parseExponentResult.isError) {
             return NAN_VALUE;
         }
+        p = parseExponentResult.pointerPosition;
+        exponent += parseExponentResult.value;
     }
-    exponent += (exponentSign == '-' ? -additionalExponent : additionalExponent);
     if (!ignoreTrailing && GotoNonspace(&p, end)) {
         return NAN_VALUE;
     }
