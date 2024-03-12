@@ -219,7 +219,6 @@ void LLVMAotCompiler::RunArkPasses(ark::compiler::Graph *graph)
     graph->RunPass<compiler::ChecksElimination>();
     graph->RunPass<compiler::Inlining>(true);
     graph->RunPass<compiler::Cleanup>(false);
-    graph->RunPass<compiler::OptimizeMemoryBarriers>();
 #ifndef NDEBUG
     if (ark::compiler::g_options.IsCompilerCheckGraph() && ark::compiler::g_options.IsCompilerCheckFinal()) {
         ark::compiler::GraphChecker(graph, "LLVM").Check();

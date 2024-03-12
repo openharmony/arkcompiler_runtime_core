@@ -22,6 +22,7 @@
 #include "passes/gc_intrusion.h"
 #include "passes/gc_intrusion_check.h"
 #include "passes/intrinsics_lowering.h"
+#include "passes/mem_barriers.h"
 #include "passes/gep_propagation.h"
 #include "passes/panda_runtime_lowering.h"
 #include "passes/prune_deopt.h"
@@ -224,6 +225,7 @@ void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
         if (!isIrtocMode) {
             AddPassIf(functionPm, passes::PruneDeopt());
             AddPassIf(functionPm, passes::ArkGVN(arkInterface_));
+            AddPassIf(functionPm, passes::MemBarriers(arkInterface_));
             AddPassIf(functionPm, passes::IntrinsicsLowering(arkInterface_));
             AddPassIf(functionPm, passes::PandaRuntimeLowering(arkInterface_));
             AddPassIf(functionPm, passes::InsertSafepoints(), options_.useSafepoint);
