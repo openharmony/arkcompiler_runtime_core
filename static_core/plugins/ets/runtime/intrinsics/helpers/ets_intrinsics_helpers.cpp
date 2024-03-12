@@ -33,14 +33,17 @@ template <typename ResultType>
 struct ParseResult {
     ResultType value;
     uint8_t *pointerPosition;
-    bool isError = false;
+    bool isSuccess = false;
 };
 
-ParseResult<int32_t> ParseExponent(const uint8_t *start, const uint8_t *end, uint8_t radix, uint32_t flags)
+ParseResult<int32_t> ParseExponent(const uint8_t *start, const uint8_t *end, const uint8_t radix, const uint32_t flags)
 {
     constexpr int32_t MAX_EXPONENT = INT32_MAX / 2;
-
     auto p = const_cast<uint8_t *>(start);
+    if (radix == 0) {
+        return {0, p, false};
+    }
+
     char exponentSign = '+';
     int32_t additionalExponent = 0;
     bool undefinedExponent = false;
@@ -69,12 +72,12 @@ ParseResult<int32_t> ParseExponent(const uint8_t *start, const uint8_t *end, uin
             }
         }
     } else if ((flags & flags::ERROR_IN_EXPONENT_IS_NAN) != 0) {
-        return {0, p, true};
+        return {0, p, false};
     }
     if (exponentSign == '-') {
-        return {-additionalExponent, p, false};
+        return {-additionalExponent, p, true};
     }
-    return {additionalExponent, p, false};
+    return {additionalExponent, p, true};
 }
 
 }  // namespace parse_helpers
@@ -230,7 +233,7 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     // 9. parse 'e/E' with '+/-'
     if (radix == DECIMAL && (p != end && (*p == 'e' || *p == 'E'))) {
         auto parseExponentResult = parse_helpers::ParseExponent(p, end, radix, flags);
-        if (parseExponentResult.isError) {
+        if (!parseExponentResult.isSuccess) {
             return NAN_VALUE;
         }
         p = parseExponentResult.pointerPosition;
