@@ -138,4 +138,28 @@ TEST_F(EtsInteropScenariosJsToEts, Test_generic_type_as_return_value)
     ASSERT_EQ(ret, true);
 }
 
+TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_optional_primitive_explicit)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_arg_type_optional_primitive_explicit");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_optional_primitive_default)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_arg_type_optional_primitive_default");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_primitive)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_arg_type_primitive");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_primitive)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_return_type_primitive");
+    ASSERT_EQ(ret, true);
+}
+
 }  // namespace ark::ets::interop::js::testing

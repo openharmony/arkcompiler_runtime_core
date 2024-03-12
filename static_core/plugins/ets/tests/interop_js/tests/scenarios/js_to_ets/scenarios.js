@@ -152,6 +152,21 @@ function functionDefaultFloatParameterFunction(arg = FLOAT_VALUE) {
   // transpiled from Typescript code: function default_float_parameter_function(arg: JSValue = FLOAT_VALUE): JSValue{
 }
 
+function functionArgTypeOptionalPrimitive(arg) {
+  if (typeof arg !== 'undefined') {
+    return arg;
+  }
+  return INT_VALUE;
+}
+
+function functionArgTypePrimitive(arg) {
+  return arg;
+}
+
+function functionReturnTypePrimitive() {
+  return true;
+}
+
 exports.standaloneFunctionJs = standaloneFunctionJs;
 exports.ClassWithMethodJs = ClassWithMethodJs;
 exports.newInterfaceWithMethod = newInterfaceWithMethod;
@@ -173,3 +188,6 @@ exports.functionDefaultParameterFunction = functionDefaultParameterFunction;
 exports.functionDefaultIntParameterFunction = functionDefaultIntParameterFunction;
 exports.functionDefaultStringParameterFunction = functionDefaultStringParameterFunction;
 exports.functionDefaultFloatParameterFunction = functionDefaultFloatParameterFunction;
+exports.functionArgTypeOptionalPrimitive = functionArgTypeOptionalPrimitive;
+exports.functionArgTypePrimitive = functionArgTypePrimitive;
+exports.functionReturnTypePrimitive = functionReturnTypePrimitive;
