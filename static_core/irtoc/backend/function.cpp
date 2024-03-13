@@ -60,13 +60,6 @@ Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAl
 
     MakeGraphImpl();
 
-#ifdef PANDA_COMPILER_DEBUG_INFO
-    // need to fix other archs
-    if (arch == Arch::X86_64) {
-        GetGraph()->SetLineDebugInfoEnabled();
-    }
-#endif
-
     if (GetGraph()->GetMode().IsNative()) {
         compiler::InPlaceCompilerTaskRunner taskRunner;
         taskRunner.GetContext().SetGraph(GetGraph());
