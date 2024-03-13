@@ -1609,7 +1609,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Returns a string representing the specified array and its elements.
+     * Returns a locale string representing the specified array and its elements.
      *
      * @returns string representation
      */

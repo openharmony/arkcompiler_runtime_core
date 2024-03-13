@@ -1042,7 +1042,7 @@ export function toLocaleString(self: boolean[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */
@@ -2443,7 +2443,7 @@ export function toLocaleString(self: byte[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */
@@ -3844,7 +3844,7 @@ export function toLocaleString(self: short[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */
@@ -5245,7 +5245,7 @@ export function toLocaleString(self: int[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */
@@ -6646,7 +6646,7 @@ export function toLocaleString(self: long[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */
@@ -8047,7 +8047,7 @@ export function toLocaleString(self: float[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */
@@ -9456,7 +9456,7 @@ export function toLocaleString(self: double[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */
@@ -10865,7 +10865,7 @@ export function toLocaleString(self: char[], locales: Object): string {
 }
 
 /**
- * Returns a string representing the specified array and its elements.
+ * Returns a locale string representing the specified array and its elements.
  *
  * @returns string representation
  */

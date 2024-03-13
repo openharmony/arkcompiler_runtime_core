@@ -15,7 +15,7 @@
 
 package escompat;
 
-class ArrayLikeIterator<T> implements Iterator<T> {
+class ArrayLikeIterator<T> implements IterableIterator<T> {
     private base: ArrayLike<T>
     private index: number = 0
 
@@ -36,7 +36,7 @@ export interface ArrayLike<T> extends Iterable<T> {
 
     get length(): number
 
-    iterator(): Iterator<T> {
+    iterator(): IterableIterator<T> {
         return new ArrayLikeIterator<T>(this)
     }
 }
