@@ -12,11 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/*---
- desc: 13.06.03 Re-Export Directives
- name: 13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15393/module1/src/issue15393_02
- tags: [not-a-test, compile-only]
- ---*/
 
-export {num} from './issue15393_01'
+/*---
+desc: 13.compilation_units_packages_and_modules\13.06.export_directives\13.06.03.re-export_directives\issue15371
+name: issue15371_06.ets
+tags: 
+files: [./issue15371_03.ets]
+---*/
+
+import { boo } from './issue15371_03'
+import { bar } from './issue15371_03'
+
+function main(): void {
+  assert boo() == 0
+  assert bar(3) == 9
+}

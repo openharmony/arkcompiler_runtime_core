@@ -12,11 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/*---
- desc: 13.06.03 Re-Export Directives
- name: 13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15393/module1/src/issue15393_01
- tags: [not-a-test, compile-only]
- ---*/
 
-export type num = number
+/*---
+desc: 13.compilation_units_packages_and_modules\13.06.export_directives\13.06.03.re-export_directives\issue15371
+name: issue15371_03.ets
+tags: [not-a-test, compile-only]
+files: ['./issue15371_01.ets', './issue15371_02.ets']
+---*/
+
+export * from './issue15371_01'
+export * from './issue15371_02'

@@ -389,6 +389,7 @@ spec/import_export/03.import_directives/t_isnt_exported_but_var_of_t_exported.et
 spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_01.ets
 spec/import_export/07.export_directives/03.re-export_directives/re-export_directive_02.ets
 spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_04.ets
+spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_06.ets
 ### Issue 14658
 spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
@@ -797,3 +798,9 @@ std/containers/BuiltinArrayMapTest.ets
 ### Issue 1661
 spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_03.ets
 ### Issue 1661 end
+
+### Negative tests
+spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_04.ets
+spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_05.ets
+
+

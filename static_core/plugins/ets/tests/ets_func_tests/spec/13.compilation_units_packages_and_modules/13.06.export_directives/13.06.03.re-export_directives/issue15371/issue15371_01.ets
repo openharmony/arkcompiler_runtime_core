@@ -12,11 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/*---
- desc: 13.06.03 Re-Export Directives
- name: 13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15393/module1/src/issue15393_04
- tags: [not-a-test, compile-only]
- ---*/
 
-export {num} from '../../module1/src/issue15393_02'
+/*---
+desc: 13.compilation_units_packages_and_modules\13.06.export_directives\13.06.03.re-export_directives\issue15371
+name: issue15371_01.ets
+tags: [not-a-test, compile-only]
+---*/
+
+export function foo(n: number): number{
+  return n*2;
+} 
+
+export function bar(n: number): number{
+  return n*3;
+}
+
