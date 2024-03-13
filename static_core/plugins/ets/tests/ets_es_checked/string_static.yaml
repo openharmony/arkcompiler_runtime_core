@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+category: StringStatic
 sub:
-  - category: StringStatic
-    sub:
+  - sub:
       - method: String.fromCharCode
         params: []
         rest:

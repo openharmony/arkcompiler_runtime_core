@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+category: Array
 sub:
-  - category: Array
-    self:
+  - self:
       - Array.of<number>(0, -0.0, 4, 1, 2, -1, Infinity, 11, -Infinity, 1, 21, 111, NaN, -NaN, 0, -0.0)
       - Array.of<number>(0, -0.0, 4, 1, 2, -1, 1, 21, 111, 0, -0.0)
       - Array.of<number>()

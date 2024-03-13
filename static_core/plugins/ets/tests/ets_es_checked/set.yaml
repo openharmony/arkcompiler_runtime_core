@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+category: Set
 sub:
-  - category: Set
-    self_type: Iterable<number>
+  - self_type: Iterable<number>
     self:
       - new Set<number>()
       - new Set<number>(Array.of<number>(+0, NaN, Infinity))

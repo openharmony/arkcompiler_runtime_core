@@ -12,6 +12,8 @@
 # limitations under the License.
 
 # excluded due to future milestone
+
+category: JSON
 excluded: true
 
 top_scope: |
@@ -25,8 +27,7 @@ top_scope: |
   }
 
 sub:
-  - category: JSON
-    expr: JSON.stringify(pars)
+  - expr: JSON.stringify(pars)
     setup: |
       const nums: number[] = [NaN, Infinity, -Infinity, 0, 0.0, -0.0]
     params:

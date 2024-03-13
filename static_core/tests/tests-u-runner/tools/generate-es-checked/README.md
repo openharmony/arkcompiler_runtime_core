@@ -28,7 +28,9 @@ RubyExpr = String
 ArkTSType = String
 
 File
-  = (top_scope?: String) * Tree
+  = Tree
+  * top_scope?: String
+  * category?: String
 
 Tree
   = Description
@@ -41,7 +43,6 @@ Description
 
 CommonDescription
   = excluded?: Bool
-  * category?: String
   * self_type?: ArkTSType
   * self?: Array String | null
   * setup?: String

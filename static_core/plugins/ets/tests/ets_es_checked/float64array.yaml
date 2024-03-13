@@ -13,9 +13,10 @@
 
 #-Infinity as number,  NaN as number, -NaN as number, Infinity as number
 
+category: Float64Array
+
 sub:
-  - category: Float64Array
-    self:
+  - self:
       - |
         ((): Float64Array => { let b: number[] = [-Infinity as number, Infinity as number, -NaN as number, NaN as number, 0 as number, 4 as number, 1 as number, 2.1 as number, -1 as number, 11 as number, 1 as number, 21 as number, 111 as number, 300 as number, -300 as number, -2.2 as number]; let a = new Float64Array(b.length); a.set(b); return a; })()
     self_type: Iterable<number>
