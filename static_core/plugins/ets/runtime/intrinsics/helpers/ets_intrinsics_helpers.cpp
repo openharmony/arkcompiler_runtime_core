@@ -32,7 +32,7 @@ namespace parse_helpers {
 template <typename ResultType>
 struct ParseResult {
     ResultType value;
-    uint8_t *pointerPosition;
+    uint8_t *pointerPosition = nullptr;
     bool isSuccess = false;
 };
 
