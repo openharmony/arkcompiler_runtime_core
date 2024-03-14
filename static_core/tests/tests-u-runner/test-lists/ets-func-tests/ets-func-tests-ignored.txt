@@ -230,11 +230,6 @@ spec/16.Support_for_GUI_Programming/callable-classes/type-call-instantiate_7.ets
 ### issue 14539
 ### End of Feature: Callable classes
 
-### Start never issues
-### Issue 14472
-spec/never_type/useWithLambdaAndUnion.ets
-### Negative test
-### End never issues
 ### Feature: Null safety tests
 ### Issue 14510
 spec/nullables/nullable-function-result_2.ets
