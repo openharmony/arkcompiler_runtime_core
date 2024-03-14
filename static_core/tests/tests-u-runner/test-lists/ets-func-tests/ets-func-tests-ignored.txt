@@ -219,7 +219,6 @@ spec/undefined-type/complex-type.ets
 ###### End Issue 14108
 ###### Issue 14035
 spec/undefined-type/define/define-class-member-as-question-and-assign.ets
-spec/undefined-type/define/define-class-member-as-question.ets
 ###### End Issue 14035
 ###### Issue 13874
 spec/undefined-type/array-of-type_0.ets
@@ -252,13 +251,13 @@ spec/nullables/nullable-method-default-param_5.ets
 spec/nullables/nullable-method-default-param_8.ets
 ### End Issue 14510
 ### Issue 14495
-spec/nullables/nullable-method-param_0.ets
 spec/nullables/nullable-function-default-param_6.ets
 spec/nullables/nullable-function-default-param_7.ets
 spec/nullables/nullable-lambda-default-param_1.ets
 spec/nullables/nullable-lambda-default-param_4.ets
 spec/nullables/nullable-lambda-default-param_6.ets
 spec/nullables/nullable-method-default-param_7.ets
+spec/nullables/nullable-method-param_0.ets
 spec/nullables/nullable-method-result_0.ets
 ### End Issue 14495
 ### Issue 14584
@@ -283,12 +282,8 @@ spec/generic/issue14700_ArrayBackedConstructorWithobject.ets
 spec/generic/issue15089_05.ets
 spec/generic/issue15089_06.ets
 spec/generic/issue15089_08.ets
-### Issue 15623
-spec/generic/issue15380_0.ets
 ### Issue 15380
-spec/generic/issue15380_1.ets
 spec/generic/issue15380_2.ets
-spec/generic/issue15380_3.ets
 ### End of Generic
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)
@@ -333,6 +328,7 @@ std/core/std_core_string_String_split_RegExp_int.ets
 std/core/std_core_string_String_split_RegExp_number.ets
 ### Issue 15306
 std/core/std_core_string_String_replace_RegExp_String.ets
+std/core/std_core_string_String_replaceAll_RegExp_String.ets
 ### Issue 14343
 spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_03.ets
 spec/import_export/07.export_directives/03.re-export_directives/re_export_all_2.ets
@@ -407,10 +403,12 @@ spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch_2.ets
 ### End of Issue 14040
 ### End of Annotations
-### Issue 14738 begin
-spec/bigint/bigint-arithmetic-comparison-18.ets
-spec/bigint/bigint-arithmetic-comparison-19.ets
-### Issue 14738 end
+
+### Issue I8MB96 begin
+spec/bigint/bigint-arithmetic-expr-4-operands-3.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-4.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-5.ets
+### Issue I8MB96 end
 ### Issue 14907 begin
 spec/bigint/bigint-arithmetic-add-2-operands-union.ets
 spec/bigint/bigint-arithmetic-div-2-operands-union.ets
@@ -487,10 +485,6 @@ spec/expressions/compound_assignment_03_simple_assign_short_mult_long.ets
 spec/expressions/compound_assignment_03_simple_assign_short_mult_number.ets
 ### Issue 15726
 spec/07.expressions/05.array_literal/01.type_inference_from_context/issue14062_8.ets
-### Issue 15723
-spec/07.expressions/17.instanceof_expression/issue15723.ets
-###
-
 ### Issue 14536: usage of === with primitive types
 spec/expressions/equality/equality_primitive_01_byte_equal_byte.ets
 spec/expressions/equality/equality_primitive_01_byte_equal_byte_016.ets
@@ -561,9 +555,6 @@ spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interf
 spec/interfaces_overriding/interface_overriding_06.ets
 ### End of Interfaces overriding
 ### Overriding issues
-### Issue 15571
-spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_01.ets
-spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_02.ets
 ### Issue 15572
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
@@ -620,8 +611,6 @@ spec/generic/callFromAsyncLambda.ets
 
 ### Class constructor inheritance
 ### Issue 14720
-spec/09.classes/constructor-inheritance/issue14720_0.ets
-spec/09.classes/constructor-inheritance/issue14720_1.ets
 spec/09.classes/constructor-inheritance/issue14720_2.ets
 spec/09.classes/constructor-inheritance/issue14720_4.ets
 spec/09.classes/constructor-inheritance/issue14720_5.ets
