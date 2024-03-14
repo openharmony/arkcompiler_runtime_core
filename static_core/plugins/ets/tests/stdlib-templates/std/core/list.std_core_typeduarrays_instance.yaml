@@ -14,20 +14,20 @@
 - {
     objectType: "Uint8Array",
     primitiveType: "number",
-    primitiveSizeBytes: Uint8Array.BYTES_PER_ELEMENT as int,
+    primitiveSizeBytes: 1,
     data: "[0, 18, 37, 72, 121, 180, 221, 255]"
 }
 
 - {
     objectType: "Uint16Array",
     primitiveType: "number",
-    primitiveSizeBytes: Uint16Array.BYTES_PER_ELEMENT as int,
+    primitiveSizeBytes: 2,
     data: "[0, 10234, 21445, 32760, 43690, 55321, 65504, 65535]"
 }
 
 - {
     objectType: "Uint32Array",
     primitiveType: "number",
-    primitiveSizeBytes: Uint32Array.BYTES_PER_ELEMENT as int,
+    primitiveSizeBytes: 4,
     data: "[0, 1073741824, 2147483648, 3221225472, 3758096384, 4026531840, 4160749568, 4294967295]"
 }

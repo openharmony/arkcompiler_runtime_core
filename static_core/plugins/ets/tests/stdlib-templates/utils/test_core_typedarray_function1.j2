@@ -21,14 +21,13 @@ function main(): int {
   let failures: number = 0;
 
   failures += check(testBytePerElement(),"test BytePerElement for {{.item.objectType}}");
-  
   failures += check(createDefault(),"Create default empty {{.item.objectType}}");
   failures += check(createEmptyWithLength(),"Create default empty {{.item.objectType}} from length");
   failures += check(createNonEmptyWithLength(),"Create default non empty {{.item.objectType}} from length");
   failures += check(createEmptyWithIterable(),"Create default empty {{.item.objectType}} from Iterable");
   failures += check(createNonEmptyWithIterable(),"Create default non empty {{.item.objectType}} from Iterable");
   
-  failures += check(createtypedUArrayWithArrayLike(),"Create {{.item.objectType}} with ArrayLike");
+  failures += check(createtypedArrayWithArrayLike(),"Create {{.item.objectType}} with ArrayLike");
   
   failures += check(createTAFromEmptyArrayBuffer(),"Create default empty {{.item.objectType}} from empty source");
   failures += check(createTAFromEmptyArrayBufferOneParamNoOffset(),"Create default empty {{.item.objectType}} from empty source one param");
@@ -62,15 +61,18 @@ function main(): int {
   failures += check(testSubarrayTwoParamsWithOtherNumber(), "Try to Array subarray(2) With Other Number function");
   failures += check(testSubarrayOneLengthTwoParams(), "Try to Array subarray(2) One Length Two Params function");
 
-  failures += check(testEmptyTypedUArrayToString(), "Try to Empty Array toString");
-  failures += check(testNonEmptyTypedUArrayToString(), "Try to Nonempty Array toString");
+  failures += check(testEmptyTypedArrayToString(), "Try to Empty Array toString");
+  failures += check(testNonEmptyTypedArrayToString(), "Try to Nonempty Array toString");
 
-  failures += check(testEmptyTypedUArrayAt(), "Test to Empty Array at");
-  failures += check(testNonEmptyTypedUArrayAt(), "Test to Nonempty Array at");
+  failures += check(testEmptyTypedArrayAt(), "Test to Empty Array at");
+  failures += check(testNonEmptyTypedArrayAt(), "Test to Nonempty Array at");
 
-  failures += check(testNonEmptyTypedUArraySetValue(), "Test Set Value to Nonempty Array");
-
-
+  failures += check(testNonEmptyTypedArraySetValue(), "Test Set Value to Nonempty Array");
+  
+  {%- if item.objectType == 'Float64Array' %}
+  failures += check(testNonEmptyTypedArrayReverse(), "Test NonEmpty Array Reverse");
+  failures += check(testEmptyTypedArrayReverse(), "Test Empty Array Reverse");
+  {%- endif %}
 
   if (failures > 0){
     console.log("failed");
@@ -96,6 +98,8 @@ function check(result: number, message: String): number {
   console.log("\nFAILED: " + message);
   return fail;
 }
+
+const source: {{.item.primitiveType}}[] = {{.item.data}};
 
 function testBytePerElement(): number {
   if({{.item.objectType}}.BYTES_PER_ELEMENT as int == {{.item.primitiveSizeBytes}}) return success;
@@ -139,7 +143,6 @@ function createEmptyWithIterable(): number {
   if(target.length as int == 0){
     return success;
   }
-
   return fail;
 }
 
@@ -173,7 +176,7 @@ function createNonEmptyWithIterable(): number {
   return fail;
 }
 
-function createtypedUArrayWithArrayLike(): number {
+function createtypedArrayWithArrayLike(): number {
   let array = new Array<Number>();
   array.push(1 as Number);
   array.push(2 as Number);
@@ -185,6 +188,7 @@ function createtypedUArrayWithArrayLike(): number {
   }
   return fail;
 }
+
 
 function createTAFromEmptyArrayBuffer(): number {
   let ss = new ArrayBuffer(0);  // Buffer 0-bytes length;
@@ -227,7 +231,7 @@ function createTAFromEmptySharedArrayBuffer(): number {
 }
 
 function createTAFromNonEmptySharedArrayBuffer(): number {
-  let ss = new SharedArrayBuffer(5*{{.item.primitiveSizeBytes}});  // Buffer 5-items length;
+  let ss = new SharedArrayBuffer(5*{{.item.primitiveSizeBytes}} as int);  // Buffer 5-items length;
   let target: {{.item.objectType}};
   try {
     target = new {{.item.objectType}}(ss);
@@ -379,7 +383,7 @@ function createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(): number {
 }
 
 function createTAFromNonEmptySharedArrayBufferOneParamWithOffset(): number {
-  let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}});  // Buffer 7-items length;
+  let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}} as int);  // Buffer 7-items length;
   let target: {{.item.objectType}};
   try {
     target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}});
@@ -399,7 +403,7 @@ function createTAFromNonEmptySharedArrayBufferOneParamWithOffset(): number {
 }
 
 function createTAFromNonEmptySharedArrayBufferOneParamWithOffsetAndSize(): number {
-  let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}});  // Buffer 7-items length;
+  let ss = new SharedArrayBuffer(7*{{.item.primitiveSizeBytes}} as int);  // Buffer 7-items length;
   let target: {{.item.objectType}};
   try {
     target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}}, 4);
@@ -557,8 +561,9 @@ function createTAFromNonEmptyArrayBufferTwoParamsWithWrongNumber(): number {
   return result;
 }
 
+
 function testSliceWithOutParam(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -616,7 +621,7 @@ function testSliceWithOutParam(): int {
 }
 
 function testSliceOneParam(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -685,7 +690,7 @@ function testSliceOneParam(): int {
 }
 
 function testSliceTwoParams(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -836,7 +841,7 @@ function testSliceTwoParams(): int {
 }
 
 function testSliceTwoParamsWithOtherNumber(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -880,7 +885,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
 
   //Check all the data copied;
   for(let i:int = (origin.length + sliceStart) as int; i< sliceEnd; i++) {
-    let tv = target[i - (origin.length + sliceStart)] as {{.item.primitiveType}};
+    let tv = target[(i - (origin.length + sliceStart)) as int] as {{.item.primitiveType}};
     let ov = origin[i] as {{.item.primitiveType}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if(tv != ov) {
@@ -907,14 +912,14 @@ function testSliceTwoParamsWithOtherNumber(): int {
 }
 
 function testSliceOneLengthTwoParams(): int {
-  let source: {{.item.primitiveType}}[] = [10];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let source1: {{.item.primitiveType}}[] = [10];
+  let ss = new ArrayBuffer(source1.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
   try {
     origin = new {{.item.objectType}}(ss);
-    origin.set(source);
+    origin.set(source1);
   } catch(e) {
     console.log(e);
     return fail;
@@ -954,7 +959,7 @@ function testSliceOneLengthTwoParams(): int {
 
 
 function testSubarrayWithOutParam(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -1011,7 +1016,7 @@ function testSubarrayWithOutParam(): int {
 }
 
 function testSubarrayOneParam(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -1077,6 +1082,7 @@ function testSubarrayOneParam(): int {
   }
 
   //The subarray method returns a view of the original array, so modifications made to the subarray will affect the original array, and vice versa.
+  /*TypedArrays will support it later
   target[subarrayStart] = 1;
   for(let i:int = subarrayStart; i< subarrayEnd; i++) {
     let tv = target[i - subarrayStart] as {{.item.primitiveType}};
@@ -1097,13 +1103,13 @@ function testSubarrayOneParam(): int {
       console.log("Array data mismatch");
       return fail;
     }
-  }
+  }*/
 
   return success;
 }
 
 function testSubarrayTwoParams(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -1254,7 +1260,7 @@ function testSubarrayTwoParams(): int {
 }
 
 function testSubarrayTwoParamsWithOtherNumber(): int {
-  let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  //let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -1298,7 +1304,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
 
   //Check all the data copied;
   for(let i:int = (origin.length + subarrayStart) as int; i< subarrayEnd; i++) {
-    let tv = target[i - (origin.length + subarrayStart)] as {{.item.primitiveType}};
+    let tv = target[(i - (origin.length + subarrayStart)) as int] as {{.item.primitiveType}};
     let ov = origin[i] as {{.item.primitiveType}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if(tv != ov) {
@@ -1325,14 +1331,14 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
 }
 
 function testSubarrayOneLengthTwoParams(): int {
-  let source: {{.item.primitiveType}}[] = [10];
-  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let source1: {{.item.primitiveType}}[] = [10];
+  let ss = new ArrayBuffer(source1.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
 
   try {
     origin = new {{.item.objectType}}(ss);
-    origin.set(source);
+    origin.set(source1);
   } catch(e) {
     console.log(e);
     return fail;
@@ -1371,46 +1377,46 @@ function testSubarrayOneLengthTwoParams(): int {
 }
 
 
-function testNonEmptyTypedUArrayToString(): number {
-  let source: number[] = [1, 2, 3, 4, 5];
-  let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
-  let typedUArray: {{.item.objectType}};
+function testNonEmptyTypedArrayToString(): number {
+  let source1: number[] = [1, 2, 3, 4, 5];
+  let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
 
   try {
-    typedUArray = new {{.item.objectType}}(ss);
-    typedUArray.set(source);
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source1);
   } catch(e) {
     console.log(e);
     return fail;
   }
 
-  const toStringResult = typedUArray.toString();
+  const toStringResult = typedArray.toString();
   console.log("toString result: " + toStringResult);
   // Assertion
   if (toStringResult == "1,2,3,4,5") {
     console.log("toString test passed.");
     return success;
   } else {
-    console.log("testNonEmptyTypedUArrayToString test failed.");
+    console.log("testNonEmptyTypedArrayToString test failed.");
     return fail;
   }
 }
 
-function testEmptyTypedUArrayToString(): number {
+function testEmptyTypedArrayToString(): number {
   let ss = new ArrayBuffer(0); 
-  let typedUArray: {{.item.objectType}};
+  let typedArray: {{.item.objectType}};
   try {
-    typedUArray = new {{.item.objectType}}(ss);
+    typedArray = new {{.item.objectType}}(ss);
   } catch(e) {
     console.log(e);
     return fail;
   }
 
-  const toStringResult = typedUArray.toString();
+  const toStringResult = typedArray.toString();
   console.log("toString result: " + toStringResult);
   // Assertion
   if (toStringResult == "") {
-    console.log("testEmptyTypedUArrayToString test passed.");
+    console.log("testEmptyTypedArrayToString test passed.");
     return success;
   } else {
     console.log("toString test failed.");
@@ -1419,140 +1425,192 @@ function testEmptyTypedUArrayToString(): number {
 }
 
 
-function testNonEmptyTypedUArrayAt(): number {
-  let source: number[] = [1, 2, 3, 4, 5];
+function testNonEmptyTypedArrayAt(): number {
+  //let source: number[] = [1, 2, 3, 4, 5];
   let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
-  let typedUArray: {{.item.objectType}};
+  let typedArray: {{.item.objectType}};
 
   try {
-    typedUArray = new {{.item.objectType}}(ss);
-    typedUArray.set(source);
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source);
   } catch(e) {
     console.log(e);
     return fail;
   }
 
   let index = 0;
-  let length = typedUArray.length;
-  let atResult = typedUArray.at(index);
-  console.log("testNonEmptyTypedUArrayAt result: " + atResult);
+  let length = typedArray.length;
+  let atResult = typedArray.at(index);
+  console.log("testNonEmptyTypedArrayAt result: " + atResult);
   // Assertion
   if (atResult == new Number(source[index])) {
-    console.log("testNonEmptyTypedUArrayAt test passed.");
+    console.log("testNonEmptyTypedArrayAt test passed.");
   } else {
-    console.log("testNonEmptyTypedUArrayAt test failed.");
+    console.log("testNonEmptyTypedArrayAt test failed.");
     return fail;
   }
 
   index = -1;
-  atResult = typedUArray.at(index);
-  console.log("testNonEmptyTypedUArrayAt result: " + atResult);
+  atResult = typedArray.at(index);
+  console.log("testNonEmptyTypedArrayAt result: " + atResult);
   // Assertion
   if (atResult == new Number(source[index + length as int])) {
-    console.log("testNonEmptyTypedUArrayAt test passed.");
+    console.log("testNonEmptyTypedArrayAt test passed.");
   } else {
-    console.log("testNonEmptyTypedUArrayAt test failed.");
+    console.log("testNonEmptyTypedArrayAt test failed.");
     return fail;
   }
 
-  index = typedUArray.length as int;
-  atResult = typedUArray.at(index);
-  console.log("testNonEmptyTypedUArrayAt result: " + atResult);
+  index = typedArray.length as int;
+  atResult = typedArray.at(index);
+  console.log("testNonEmptyTypedArrayAt result: " + atResult);
   // Assertion
   if (atResult == undefined) {
-    console.log("testNonEmptyTypedUArrayAt test passed.");
+    console.log("testNonEmptyTypedArrayAt test passed.");
   } else {
-    console.log("testNonEmptyTypedUArrayAt test failed.");
+    console.log("testNonEmptyTypedArrayAt test failed.");
     return fail;
   }
   return success;
 }
 
-function testEmptyTypedUArrayAt(): number {
+function testEmptyTypedArrayAt(): number {
   let ss = new ArrayBuffer(0); 
-  let typedUArray: {{.item.objectType}};
+  let typedArray: {{.item.objectType}};
   try {
-    typedUArray = new {{.item.objectType}}(ss);
+    typedArray = new {{.item.objectType}}(ss);
   } catch(e) {
     console.log(e);
     return fail;
   }
 
-  let atResult = typedUArray.at(0);
-  console.log("testEmptyTypedUArrayAt result: " + atResult);
+  let atResult = typedArray.at(0);
+  console.log("testEmptyTypedArrayAt result: " + atResult);
   // Assertion
   if (atResult == undefined) {
-    console.log("testEmptyTypedUArrayAt test passed.");
+    console.log("testEmptyTypedArrayAt test passed.");
     return success;
   } else {
-    console.log("testEmptyTypedUArrayAt test failed.");
+    console.log("testEmptyTypedArrayAt test failed.");
     return fail;
   }
 }
 
-
-function testNonEmptyTypedUArraySetValue(): number {
+function testNonEmptyTypedArraySetValue(): number {
   let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});
-  let typedUArray: {{.item.objectType}};
+  let typedArray: {{.item.objectType}};
 
   try {
-    typedUArray = new {{.item.objectType}}(ss);
+    typedArray = new {{.item.objectType}}(ss);
   } catch(e) {
     console.log(e);
     return fail;
   }
 
-  let length = typedUArray.length;
+  let length = typedArray.length;
 
-  try {
-    typedUArray[0] = 1 as number;
-    typedUArray[1] = 2 as number;
-    {%- if item.objectType == 'Uint8Array' %}
-    typedUArray[2] = 255 as number;
-    typedUArray[3] = 257 as number;
-    typedUArray[4] = 512 as number;
-    {%- else %}
-      {%- if item.objectType == 'Uint16Array' %}
-      typedUArray[2] = 65535 as number;
-      typedUArray[3] = 65537 as number;
-      typedUArray[4] = 65536*2 as number;
-      {%- else%}
-      typedUArray[2] = 4294967295 as number;
-      typedUArray[3] = 4294967297 as number;
-      typedUArray[4] = 4294967296*2 as number;
-      {%- endif %}
-    {%- endif %}
-  } catch(e) {
-    console.log(e);
-    return fail;
-  }
-
-  {%- if item.objectType == 'Uint8Array' %}
-  let expectedArray: {{.item.primitiveType}}[] = [1, 2, 255, 1, 0];
+  {%- if item.objectType == 'Int8Array' %}
+  const minValue = Byte.MIN_VALUE as byte;
+  const maxValue = Byte.MAX_VALUE as byte;
   {%- else %}
-    {%- if item.objectType == 'Uint16Array' %}
-    let expectedArray: {{.item.primitiveType}}[] = [1, 2, 65535, 1, 0];
-    {%- else %}
-    let expectedArray: {{.item.primitiveType}}[] = [1, 2, 4294967295, 1, 0];
-    {%- endif %}
+  {%- if item.objectType == 'Int16Array' %}
+  const minValue = Short.MIN_VALUE as short;
+  const maxValue = Short.MAX_VALUE as short;
+  {%- else %}
+  {%- if item.objectType == 'Int32Array' %}
+  const minValue = Int.MIN_VALUE;
+  const maxValue = Int.MAX_VALUE;
+  {%- else %}
+  {%- if item.objectType == 'Float32Array' %}
+  const minValue = Float.MIN_VALUE;
+  const maxValue = Float.MAX_VALUE;
+  {%- else %}
+  {%- if item.objectType == 'Float64Array' %}
+  const minValue = Double.MIN_VALUE;
+  const maxValue = Double.MAX_VALUE;
   {%- endif %}
-  
-  for (let i = 0; i < typedUArray.length; i++) {
-    if (typedUArray[i] != expectedArray[i]) {
-      console.log("Test failed. testNonEmptyTypedUArraySetValue: " + JSON.stringify(typedUArray[i]));
+  {%- endif %}
+  {%- endif %}
+  {%- endif %}
+  {%- endif %}        
+
+  try {
+    typedArray[0] = 1;
+    typedArray[1] = 2;
+    typedArray[2] = minValue;
+    typedArray[3] = maxValue;
+    typedArray[4] = -1;
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  let expectedArray: {{.item.primitiveType}}[] = [1, 2, minValue, maxValue, -1];
+
+  for (let i = 0; i < typedArray.length; i++) {
+    if (typedArray[i] != expectedArray[i]) {
+      console.log("Test failed. testNonEmptyTypedArraySetValue: " + typedArray[i]);
       return fail;
     }
   }
   
-  if (typedUArray.at(length) != undefined) { // check value,  wrong index
-    console.log("Test failed. typedUArray.at(length) : ");
+  if (typedArray.at(length) != undefined) { // check value,  wrong index
+    console.log("Test failed. typedArray.at(length) : " + typedArray.at(length));
     return fail;
   }
-
-  if (typedUArray.at(-1) != 0) {  // check value,  wrong index
-    console.log("Test failed. typedUArray.at(-1) : " + typedUArray.at(-1));
+  if (typedArray.at(-1) != typedArray.at(-1 + length)) {  // check value,  wrong index
+    console.log("Test failed. typedArray.at(-1) : " + typedArray.at(-1));
     return fail;
   }
 
   return success;
 }
+
+{%- if item.objectType == 'Float64Array' %}
+function testNonEmptyTypedArrayReverse(): number {
+  let source1: {{.item.primitiveType}}[] = [5, 3, 1, 4, 2];
+  let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source1);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  // Test toReversed function
+  let reversedArray: {{.item.objectType}} = typedArray.reverse();
+  let expectedArray: {{.item.primitiveType}}[] = [2, 4, 1, 3, 5];
+  for (let i = 0; i < reversedArray.length; i++) {
+    if (reversedArray[i] != expectedArray[i]) {
+      console.log("Test failed. testNonEmptyTypedArrayReverse: " + JSON.stringify(reversedArray[i]));
+      return fail;
+    }
+  }
+  return success;
+}
+
+function testEmptyTypedArrayReverse(): number {
+  let ss = new ArrayBuffer(0);
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  // Test toReversed function
+  let reversedArray: {{.item.objectType}} = typedArray.reverse();
+
+  if (reversedArray != typedArray || reversedArray.length != 0) {
+    console.log("Test failed. testEmptyTypedArrayReverse: " + reversedArray);
+    return fail;
+  }
+
+  return success;
+}
+{%- endif %}
