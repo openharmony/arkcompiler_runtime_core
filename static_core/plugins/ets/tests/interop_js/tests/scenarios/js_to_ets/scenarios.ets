@@ -18,7 +18,8 @@ import { standaloneFunctionJs, ClassWithMethodJs, newInterfaceWithMethod, ClassW
     functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
     functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
     functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
-    genericTypeReturnValue } from "/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js"
+    genericTypeReturnValue, functionArgTypeOptionalPrimitive, functionArgTypePrimitive,
+    functionReturnTypePrimitive } from "/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js"
 
 function Test_standalone_function_call(): boolean {
     return standaloneFunctionJs() as int == 1;
@@ -122,4 +123,22 @@ function Test_generic_type_as_parameter(): boolean {
 
 function Test_generic_type_as_return_value(): boolean {
     return genericTypeReturnValue(1) as int == 1;
+}
+
+function Test_function_arg_type_optional_primitive_explicit(): boolean {
+    return functionArgTypeOptionalPrimitive(1) as int == 1;
+}
+
+function Test_function_arg_type_optional_primitive_default(): boolean {
+    return functionArgTypeOptionalPrimitive() as int == 1;
+}
+
+function Test_function_arg_type_primitive(): boolean {
+    let arg: int = 1;
+    return functionArgTypePrimitive(arg) as int == 1;
+}
+
+function Test_function_return_type_primitive(): boolean {
+    let res: boolean = functionReturnTypePrimitive() as boolean;
+    return typeof res === "boolean";
 }

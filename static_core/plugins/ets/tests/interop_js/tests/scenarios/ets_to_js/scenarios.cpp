@@ -115,4 +115,25 @@ TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_define_for_parame
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_parameter_undefine.js"));
 }
 
+// NOTE (splatov) #15925 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_optional_primitive_explicit)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_optional_primitive_explicit.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_optional_primitive_default)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_optional_primitive_default.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_primitive)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_primitive.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_return_type_primitive)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_return_type_primitive.js"));
+}
+
 }  // namespace ark::ets::interop::js::testing

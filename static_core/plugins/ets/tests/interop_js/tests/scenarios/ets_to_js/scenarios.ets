@@ -114,6 +114,18 @@ function default_undefined_parameter_function(arg: JSValue|undefined = undefined
     return arg;
 }
 
+function function_arg_type_optional_primitive(arg?: Number): Number | undefined {
+    return arg;
+}
+
+function function_arg_type_primitive(arg: number): number {
+    return arg;
+}
+
+function function_return_type_primitive(): number {
+    return 1;
+}
+
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
