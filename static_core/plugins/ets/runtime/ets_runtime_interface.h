@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,25 @@ public:
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
+    bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override;
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
     bool IsMethodStringBuilderToString(MethodPtr method) const override;
+    bool IsMethodStringBuilderAppend(MethodPtr method) const override;
+    bool IsClassStringBuilder(ClassPtr klass) const override;
+    uint32_t GetClassOffsetObjectsArray(MethodPtr method) const override;
+    uint32_t GetClassOffsetObject(MethodPtr method) const override;
+    bool IsFieldStringBuilderBuffer(FieldPtr field) const override;
+    bool IsFieldStringBuilderIndex(FieldPtr field) const override;
+    FieldPtr GetFieldStringBuilderBuffer(ClassPtr klass) const override;
+    FieldPtr GetFieldStringBuilderIndex(ClassPtr klass) const override;
+    FieldPtr GetFieldStringBuilderLength(ClassPtr klass) const override;
+    FieldPtr GetFieldStringBuilderCompress(ClassPtr klass) const override;
     bool IsIntrinsicStringBuilderToString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppendString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppend(IntrinsicId id) const override;
     IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId(compiler::DataType::Type type) const override;
     IntrinsicId GetStringBuilderConcatStringsIntrinsicId() const override;
+    IntrinsicId GetStringIsCompressedIntrinsicId() const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;

@@ -55,6 +55,8 @@ static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle)
     auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), 2 * bufLen);
     // Copy the old buffer data
     bufHandle->CopyDataTo(newBuf);
+    EVENT_SB_BUFFER_REALLOC(ManagedThread::GetCurrent()->GetId(), newBuf, newBuf->GetLength(), newBuf->GetElementSize(),
+                            newBuf->ObjectSize());
     return newBuf;
 }
 

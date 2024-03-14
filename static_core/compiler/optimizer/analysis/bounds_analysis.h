@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,8 @@ public:
 
     bool IsMoreOrEqual(const BoundsRange &range) const;
 
+    bool IsWithin(const BoundsRange &range) const;
+
     bool IsNotNegative() const;
 
     bool IsNegative() const;
@@ -123,8 +125,10 @@ public:
     static RangePair TryNarrowBoundsByCC(ConditionCode cc, RangePair const &ranges);
 
     static std::optional<int64_t> AddWithOverflowCheck(int64_t left, int64_t right);
+    static std::optional<uint64_t> AddWithOverflowCheck(uint64_t left, uint64_t right);
 
     static std::optional<int64_t> MulWithOverflowCheck(int64_t left, int64_t right);
+    static std::optional<uint64_t> MulWithOverflowCheck(uint64_t left, uint64_t right);
 
     static std::optional<int64_t> DivWithOverflowCheck(int64_t left, int64_t right);
 

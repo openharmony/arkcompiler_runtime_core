@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -291,6 +291,11 @@ bool BoundsRange::IsMore(const BoundsRange &range) const
 bool BoundsRange::IsMoreOrEqual(const BoundsRange &range) const
 {
     return left_ >= range.GetRight();
+}
+
+bool BoundsRange::IsWithin(const BoundsRange &range) const
+{
+    return left_ > range.GetLeft() && right_ < range.GetRight();
 }
 
 bool BoundsRange::IsNotNegative() const
@@ -612,6 +617,18 @@ std::optional<int64_t> BoundsRange::AddWithOverflowCheck(int64_t left, int64_t r
     return std::nullopt;
 }
 
+std::optional<uint64_t> BoundsRange::AddWithOverflowCheck(uint64_t left, uint64_t right)
+{
+    if (right == 0) {
+        return left;
+    }
+    if (left <= (UINT64_MAX - right)) {
+        // No overflow.
+        return left + right;
+    }
+    return std::nullopt;
+}
+
 /// Return (left * right) or if overflows or underflows return nullopt of range type.
 std::optional<int64_t> BoundsRange::MulWithOverflowCheck(int64_t left, int64_t right)
 {
@@ -626,6 +643,18 @@ std::optional<int64_t> BoundsRange::MulWithOverflowCheck(int64_t left, int64_t r
     }
     if ((right > 0 && left > 0) || (right < 0 && left < 0)) {
         return std::nullopt;
+    }
+    return std::nullopt;
+}
+
+std::optional<uint64_t> BoundsRange::MulWithOverflowCheck(uint64_t left, uint64_t right)
+{
+    if (left == 0 || right == 0) {
+        return 0;
+    }
+    if (left <= (UINT64_MAX / right)) {
+        // No overflow.
+        return left * right;
     }
     return std::nullopt;
 }

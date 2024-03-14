@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,14 @@
 #include "optimizer/ir/inst.h"
 
 #include "optimizer/optimizations/cleanup.h"
+#include "optimizer/optimizations/string_builder_utils.h"
 
 namespace ark::compiler {
+
+constexpr size_t ARG_IDX_0 = 0;
+constexpr size_t ARG_IDX_1 = 1;
+constexpr size_t ARG_IDX_2 = 2;
+constexpr size_t ARG_IDX_3 = 3;
 
 SimplifyStringBuilder::SimplifyStringBuilder(Graph *graph)
     : Optimization(graph),
@@ -96,39 +102,10 @@ void SimplifyStringBuilder::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
 }
 
-bool SimplifyStringBuilder::IsMethodStringBuilderConstructorWithStringArg(Inst *inst) const
-{
-    if (inst->GetOpcode() != Opcode::CallStatic) {
-        return false;
-    }
-
-    auto call = inst->CastToCallStatic();
-    if (call->IsInlined()) {
-        return false;
-    }
-
-    auto runtime = GetGraph()->GetRuntime();
-    return runtime->IsMethodStringBuilderConstructorWithStringArg(call->GetCallMethod());
-}
-
-bool SimplifyStringBuilder::IsMethodStringBuilderToString(Inst *inst) const
-{
-    if (inst->IsStaticCall() || inst->IsVirtualCall()) {
-        auto callInst = static_cast<CallInst *>(inst);
-        return !callInst->IsInlined() &&
-               GetGraph()->GetRuntime()->IsMethodStringBuilderToString(callInst->GetCallMethod());
-    }
-    if (inst->IsIntrinsic()) {
-        auto intrinsic = inst->CastToIntrinsic();
-        return GetGraph()->GetRuntime()->IsIntrinsicStringBuilderToString(intrinsic->GetIntrinsicId());
-    }
-    return false;
-}
-
 InstIter SimplifyStringBuilder::SkipToStringBuilderConstructorWithStringArg(InstIter begin, InstIter end)
 {
     return std::find_if(std::move(begin), std::move(end),
-                        [this](auto inst) { return IsMethodStringBuilderConstructorWithStringArg(inst); });
+                        [](auto inst) { return IsMethodStringBuilderConstructorWithStringArg(inst); });
 }
 
 bool IsDataFlowInput(Inst *inst, Inst *input)
@@ -182,7 +159,7 @@ void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
 
         // Look for StringBuilder usages within current basic block
         auto nextInst = block->Insts().end();
-        bool removeCtor = true;
+        bool removeInstance = true;
         for (++inst; inst != block->Insts().end(); ++inst) {
             // Skip SaveState instructions
             if ((*inst)->IsSaveState()) {
@@ -206,22 +183,21 @@ void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
 
             // Process usages of StringBuilder instance:
             // replace toString()-calls until we met something else
-            if (IsMethodStringBuilderToString(*inst)) {
+            if (IsStringBuilderToString(*inst)) {
                 (*inst)->ReplaceUsers(arg);
                 (*inst)->ClearFlag(compiler::inst_flags::NO_DCE);
                 COMPILER_LOG(DEBUG, SIMPLIFY_SB)
                     << "Remove StringBuilder toString()-call (id=" << (*inst)->GetId() << ")";
                 isApplied_ = true;
             } else {
-                removeCtor = false;
+                removeInstance = false;
                 break;
             }
         }
 
-        // Remove StringBuilder constructor unless it has usages
-        if (removeCtor && !IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
-            ctorCall->ClearFlag(compiler::inst_flags::NO_DCE);
-            COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Remove StringBuilder constructor (id=" << ctorCall->GetId() << ")";
+        // Remove StringBuilder instance unless it has usages
+        if (removeInstance && !IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
+            RemoveStringBuilderInstance(instance);
             isApplied_ = true;
         }
 
@@ -230,25 +206,10 @@ void SimplifyStringBuilder::OptimizeStringBuilderToString(BasicBlock *block)
     }
 }
 
-bool SimplifyStringBuilder::IsMethodStringBuilderDefaultConstructor(Inst *inst) const
-{
-    if (inst->GetOpcode() != Opcode::CallStatic) {
-        return false;
-    }
-
-    auto call = inst->CastToCallStatic();
-    if (call->IsInlined()) {
-        return false;
-    }
-
-    auto runtime = GetGraph()->GetRuntime();
-    return runtime->IsMethodStringBuilderDefaultConstructor(call->GetCallMethod());
-}
-
 InstIter SimplifyStringBuilder::SkipToStringBuilderDefaultConstructor(InstIter begin, InstIter end)
 {
     return std::find_if(std::move(begin), std::move(end),
-                        [this](auto inst) { return IsMethodStringBuilderDefaultConstructor(inst); });
+                        [](auto inst) { return IsMethodStringBuilderDefaultConstructor(inst); });
 }
 
 IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(Inst *lhs, Inst *rhs, DataType::Type type,
@@ -259,17 +220,10 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(Inst *lhs, Inst *rhs
     ASSERT(concatIntrinsic->RequireState());
 
     concatIntrinsic->SetType(type);
-    concatIntrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), ARGS_NUM_3);
-
-    concatIntrinsic->AddInputType(lhs->GetType());
-    concatIntrinsic->AddInputType(rhs->GetType());
-
-    concatIntrinsic->AppendInput(lhs);
-    concatIntrinsic->AppendInput(rhs);
-
     auto saveStateClone = CopySaveState(GetGraph(), saveState);
-    concatIntrinsic->AddInputType(saveStateClone->GetType());
-    concatIntrinsic->AppendInput(saveStateClone);
+    concatIntrinsic->SetInputs(
+        GetGraph()->GetAllocator(),
+        {{lhs, lhs->GetType()}, {rhs, rhs->GetType()}, {saveStateClone, saveStateClone->GetType()}});
 
     return concatIntrinsic;
 }
@@ -324,7 +278,7 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
             }
             auto intrinsic = inst->CastToIntrinsic();
             match.appendIntrinsics[match.appendCount++] = intrinsic;
-        } else if (IsMethodStringBuilderToString(inst)) {
+        } else if (IsStringBuilderToString(inst)) {
             toStringCallsCount++;
             match.toStringCall = *begin;
         } else {
@@ -335,22 +289,6 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
     // Supported case: number of toString-calls is one,
     // number of append calls is between 2 and 4
     return toStringCallsCount == 1 && match.appendCount > 1;
-}
-
-void InsertBeforeWithSaveState(Inst *inst, Inst *before)
-{
-    if (inst->RequireState()) {
-        before->InsertBefore(inst->GetSaveState());
-    }
-    before->InsertBefore(inst);
-}
-
-void InsertAfterWithSaveState(Inst *inst, Inst *after)
-{
-    after->InsertAfter(inst);
-    if (inst->RequireState()) {
-        after->InsertAfter(inst->GetSaveState());
-    }
 }
 
 void SimplifyStringBuilder::FixBrokenSaveStates(Inst *source, Inst *target)
@@ -449,20 +387,7 @@ void SimplifyStringBuilder::ReplaceWithIntrinsic(const ConcatenationMatch &match
 
 void SimplifyStringBuilder::Cleanup(const ConcatenationMatch &match)
 {
-    auto &appendIntrinsics = match.appendIntrinsics;
-
-    for (auto appendIntrinsic : appendIntrinsics) {
-        if (appendIntrinsic != nullptr) {
-            appendIntrinsic->ClearFlag(compiler::inst_flags::NO_DCE);
-        }
-    }
-
-    match.ctorCall->ClearFlag(compiler::inst_flags::NO_DCE);
-    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Remove StringBuilder constructor (id=" << match.ctorCall->GetId() << ")";
-
-    match.toStringCall->ClearFlag(compiler::inst_flags::NO_DCE);
-    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Remove StringBuilder toString()-call (id=" << match.toStringCall->GetId()
-                                     << ")";
+    RemoveStringBuilderInstance(match.instance);
 }
 
 void SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
@@ -508,15 +433,6 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
             }
         }
     } while (isAppliedLocal);
-
-    // Reset markers
-    InstIter inst = block->Insts().begin();
-    while ((inst = SkipToStringBuilderDefaultConstructor(inst, block->Insts().end())) != block->Insts().end()) {
-        auto ctorCall = (*inst)->CastToCallStatic();
-        auto instance = ctorCall->GetInput(0).GetInst();
-        instance->ResetMarker(visited);
-        ++inst;
-    }
 }
 
 void SimplifyStringBuilder::ConcatenationLoopMatch::TemporaryInstructions::Clear()
@@ -544,134 +460,20 @@ void SimplifyStringBuilder::ConcatenationLoopMatch::Clear()
     preheader.ctorCall = nullptr;
     preheader.appendAccValue = nullptr;
 
-    loop.appendIntrinsics.clear();
+    loop.appendInstructions.clear();
     temp.clear();
     exit.toStringCall = nullptr;
-}
-
-bool SimplifyStringBuilder::IsIntrinsicStringBuilderAppend(Inst *inst) const
-{
-    if (!inst->IsIntrinsic()) {
-        return false;
-    }
-
-    auto runtime = GetGraph()->GetRuntime();
-    return runtime->IsIntrinsicStringBuilderAppend(inst->CastToIntrinsic()->GetIntrinsicId());
-}
-
-using FindInputPredicate = std::function<bool(Input &input)>;
-bool HasInput(Inst *inst, const FindInputPredicate &predicate)
-{
-    // Check if any instruction input satisfy predicate
-
-    auto found = std::find_if(inst->GetInputs().begin(), inst->GetInputs().end(), predicate);
-    return found != inst->GetInputs().end();
-}
-
-bool HasInputPhiRecursively(Inst *inst, Marker visited, const FindInputPredicate &predicate)
-{
-    // Check if any instruction input satisfy predicate
-    // All Phi-instruction inputs are checked recursively
-
-    if (HasInput(inst, predicate)) {
-        return true;
-    }
-
-    inst->SetMarker(visited);
-
-    for (auto &input : inst->GetInputs()) {
-        auto inputInst = input.GetInst();
-        if (!inputInst->IsPhi()) {
-            continue;
-        }
-        if (inputInst->IsMarked(visited)) {
-            continue;
-        }
-        if (HasInputPhiRecursively(inputInst, visited, predicate)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void ResetInputMarkersRecursively(Inst *inst, Marker visited)
-{
-    // Reset marker for an instruction and all it's inputs recursively
-
-    if (inst->IsMarked(visited)) {
-        inst->ResetMarker(visited);
-
-        for (auto &input : inst->GetInputs()) {
-            auto inputInst = input.GetInst();
-            if (inputInst->IsMarked(visited)) {
-                ResetInputMarkersRecursively(inputInst, visited);
-            }
-        }
-    }
-}
-
-using FindUserPredicate = std::function<bool(User &user)>;
-bool HasUser(Inst *inst, const FindUserPredicate &predicate)
-{
-    // Check if instruction is used in a context defined by predicate
-
-    auto found = std::find_if(inst->GetUsers().begin(), inst->GetUsers().end(), predicate);
-    return found != inst->GetUsers().end();
-}
-
-bool HasUserPhiRecursively(Inst *inst, Marker visited, const FindUserPredicate &predicate)
-{
-    // Check if instruction is used in a context defined by predicate
-    // All Phi-instruction users are checked recursively
-
-    if (HasUser(inst, predicate)) {
-        return true;
-    }
-
-    inst->SetMarker(visited);
-
-    for (auto &user : inst->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (!userInst->IsPhi()) {
-            continue;
-        }
-        if (userInst->IsMarked(visited)) {
-            continue;
-        }
-        if (HasUserPhiRecursively(userInst, visited, predicate)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void ResetUserMarkersRecursively(Inst *inst, Marker visited)
-{
-    // Reset marker for an instruction and all it's users recursively
-
-    if (inst->IsMarked(visited)) {
-        inst->ResetMarker(visited);
-
-        for (auto &user : inst->GetUsers()) {
-            auto userInst = user.GetInst();
-            if (userInst->IsMarked(visited)) {
-                ResetUserMarkersRecursively(userInst, visited);
-            }
-        }
-    }
 }
 
 bool SimplifyStringBuilder::HasAppendUsersOnly(Inst *inst) const
 {
     MarkerHolder visited {inst->GetBasicBlock()->GetGraph()};
-    bool found = HasUserPhiRecursively(inst, visited.GetMarker(), [inst, this](auto &user) {
+    bool found = HasUserPhiRecursively(inst, visited.GetMarker(), [inst](auto &user) {
         bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == inst->GetBasicBlock()->GetLoop();
         bool isSaveState = user.GetInst()->IsSaveState();
         bool isPhi = user.GetInst()->IsPhi();
-        bool isAppendIntrinsic = IsIntrinsicStringBuilderAppend(user.GetInst());
-        return sameLoop && !isSaveState && !isPhi && !isAppendIntrinsic;
+        bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
+        return sameLoop && !isSaveState && !isPhi && !isAppendInstruction;
     });
     ResetUserMarkersRecursively(inst, visited.GetMarker());
     return !found;
@@ -682,19 +484,18 @@ bool IsCheckCastWithoutUsers(Inst *inst)
     return inst->GetOpcode() == Opcode::CheckCast && !inst->HasUsers();
 }
 
-bool SimplifyStringBuilder::HasPhiOrAppendUsersOnly(Inst *inst, Marker appendIntrinsicVisited) const
+bool SimplifyStringBuilder::HasPhiOrAppendUsersOnly(Inst *inst, Marker appendInstructionVisited) const
 {
     MarkerHolder phiVisited {GetGraph()};
     bool found = HasUserPhiRecursively(
-        inst, phiVisited.GetMarker(),
-        [loop = inst->GetBasicBlock()->GetLoop(), appendIntrinsicVisited, this](auto &user) {
+        inst, phiVisited.GetMarker(), [loop = inst->GetBasicBlock()->GetLoop(), appendInstructionVisited](auto &user) {
             bool sameLoop = user.GetInst()->GetBasicBlock()->GetLoop() == loop;
             bool isSaveState = user.GetInst()->IsSaveState();
             bool isCheckCast = IsCheckCastWithoutUsers(user.GetInst());
             bool isPhi = user.GetInst()->IsPhi();
-            bool isVisited = user.GetInst()->IsMarked(appendIntrinsicVisited);
-            bool isAppendIntrinsic = IsIntrinsicStringBuilderAppend(user.GetInst());
-            return sameLoop && !isSaveState && !isCheckCast && !isPhi && !(isAppendIntrinsic && isVisited);
+            bool isVisited = user.GetInst()->IsMarked(appendInstructionVisited);
+            bool isAppendInstruction = IsStringBuilderAppend(user.GetInst());
+            return sameLoop && !isSaveState && !isCheckCast && !isPhi && !(isAppendInstruction && isVisited);
         });
     return !found;
 }
@@ -718,7 +519,7 @@ bool SimplifyStringBuilder::ConcatenationLoopMatch::IsInstanceHoistable() const
         return false;
     }
 
-    if (loop.appendIntrinsics.empty()) {
+    if (loop.appendInstructions.empty()) {
         return false;
     }
 
@@ -735,9 +536,9 @@ bool SimplifyStringBuilder::IsInstanceHoistable(const ConcatenationLoopMatch &ma
 }
 
 bool SimplifyStringBuilder::IsToStringHoistable(const ConcatenationLoopMatch &match,
-                                                Marker appendIntrinsicVisited) const
+                                                Marker appendInstructionVisited) const
 {
-    return HasPhiOrAppendUsersOnly(match.exit.toStringCall, appendIntrinsicVisited);
+    return HasPhiOrAppendUsersOnly(match.exit.toStringCall, appendInstructionVisited);
 }
 
 SaveStateInst *FindPreHeaderSaveState(Loop *loop)
@@ -811,33 +612,22 @@ BasicBlock *GetLoopPostExit(Loop *loop)
     return nullptr;
 }
 
-IntrinsicInst *SimplifyStringBuilder::CreateStringBuilderAppendIntrinsic(Inst *instance, Inst *arg)
+IntrinsicInst *SimplifyStringBuilder::CreateIntrinsicStringBuilderAppendString(Inst *instance, Inst *arg,
+                                                                               SaveStateInst *saveState)
 {
     auto appendIntrinsic = GetGraph()->CreateInstIntrinsic(
-        GetGraph()->GetRuntime()->ConvertTypeToStringBuilderAppendIntrinsicId(arg->GetType()));
+        GetGraph()->GetRuntime()->ConvertTypeToStringBuilderAppendIntrinsicId(DataType::REFERENCE));
     ASSERT(appendIntrinsic->RequireState());
 
     appendIntrinsic->SetType(instance->GetType());
-    appendIntrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), ARGS_NUM_3);
-
-    appendIntrinsic->AddInputType(instance->GetType());
-    appendIntrinsic->AddInputType(arg->GetType());
-
-    appendIntrinsic->AppendInput(instance);
-    appendIntrinsic->AppendInput(arg);
+    appendIntrinsic->SetInputs(
+        GetGraph()->GetAllocator(),
+        {{instance, instance->GetType()}, {arg, arg->GetType()}, {saveState, saveState->GetType()}});
 
     return appendIntrinsic;
 }
 
-Inst *SkipSingleUserCheckInstruction(Inst *inst)
-{
-    if (inst->IsCheck() && inst->HasSingleUser()) {
-        inst = inst->GetUsers().Front().GetInst();
-    }
-    return inst;
-}
-
-void SimplifyStringBuilder::NormalizeStringBuilderAppendIntrinsicUsers(Inst *instance, SaveStateInst *saveState)
+void SimplifyStringBuilder::NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState)
 {
     [[maybe_unused]] Inst *ctorCall = nullptr;
 
@@ -848,14 +638,11 @@ void SimplifyStringBuilder::NormalizeStringBuilderAppendIntrinsicUsers(Inst *ins
             ASSERT(ctorCall == nullptr);
             ctorCall = userInst;
             auto ctorArg = ctorCall->GetInput(1).GetInst();
-            auto appendIntrinsic = CreateStringBuilderAppendIntrinsic(instance, ctorArg);
-            ASSERT(appendIntrinsic->RequireState());
-            appendIntrinsic->AddInputType(saveState->GetType());
-            appendIntrinsic->AppendInput(saveState);
+            CreateIntrinsicStringBuilderAppendString(instance, ctorArg, saveState);
         } else if (IsMethodStringBuilderDefaultConstructor(userInst)) {
             ASSERT(ctorCall == nullptr);
             ctorCall = userInst;
-        } else if (IsIntrinsicStringBuilderAppend(userInst)) {
+        } else if (IsStringBuilderAppend(userInst)) {
             // StringBuilder append-call returns 'this' (instance)
             // Replace all users of append-call by instance for simplicity
             userInst->ReplaceUsers(instance);
@@ -864,18 +651,17 @@ void SimplifyStringBuilder::NormalizeStringBuilderAppendIntrinsicUsers(Inst *ins
     ASSERT(ctorCall != nullptr);
 }
 
-ArenaVector<IntrinsicInst *> SimplifyStringBuilder::FindStringBuilderAppendIntrinsics(Inst *instance)
+ArenaVector<Inst *> SimplifyStringBuilder::FindStringBuilderAppendInstructions(Inst *instance)
 {
-    ArenaVector<IntrinsicInst *> inputAppendIntrinsics {GetGraph()->GetAllocator()->Adapter()};
+    ArenaVector<Inst *> appendInstructions {GetGraph()->GetAllocator()->Adapter()};
     for (auto &user : instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-        if (IsIntrinsicStringBuilderAppend(userInst)) {
-            auto intrinsic = userInst->CastToIntrinsic();
-            inputAppendIntrinsics.push_back(intrinsic);
+        if (IsStringBuilderAppend(userInst)) {
+            appendInstructions.push_back(userInst);
         }
     }
 
-    return inputAppendIntrinsics;
+    return appendInstructions;
 }
 
 void RemoveFromInstructionInputs(ArenaVector<std::pair<Inst *, size_t>> &inputDescriptors)
@@ -926,13 +712,45 @@ void SimplifyStringBuilder::RemoveFromAllExceptPhiInputs(Inst *inst)
     RemoveFromInstructionInputs(inputDescriptors_);
 }
 
-void SimplifyStringBuilder::ReconnectStringBuilderCascade(Inst *instance, Inst *inputInst, Inst *appendIntrinsic,
+void SimplifyStringBuilder::RemoveStringBuilderInstance(Inst *instance)
+{
+    ASSERT(!HasUser(instance, [](auto &user) {
+        auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
+        auto hasUsers = userInst->HasUsers();
+        auto isSaveState = userInst->IsSaveState();
+        auto isCtorCall = IsMethodStringBuilderDefaultConstructor(userInst) ||
+                          IsMethodStringBuilderConstructorWithStringArg(userInst) ||
+                          IsMethodStringBuilderConstructorWithCharArrayArg(userInst);
+        auto isAppendInstruction = IsStringBuilderAppend(userInst);
+        auto isToStringCall = IsStringBuilderToString(userInst);
+        return !(isSaveState || isCtorCall || ((isAppendInstruction || isToStringCall) && !hasUsers));
+    }));
+
+    RemoveFromSaveStateInputs(instance);
+
+    for (auto &user : instance->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (userInst->IsCheck()) {
+            auto checkUserInst = SkipSingleUserCheckInstruction(userInst);
+            checkUserInst->GetBasicBlock()->RemoveInst(checkUserInst);
+        }
+
+        userInst->GetBasicBlock()->RemoveInst(userInst);
+        COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Remove StringBuilder user instruction (id=" << userInst->GetId() << ")";
+    }
+
+    ASSERT(!instance->HasUsers());
+    instance->GetBasicBlock()->RemoveInst(instance);
+    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Remove StringBuilder instance (id=" << instance->GetId() << ")";
+}
+
+void SimplifyStringBuilder::ReconnectStringBuilderCascade(Inst *instance, Inst *inputInst, Inst *appendInstruction,
                                                           SaveStateInst *saveState)
 {
     // Reconnect all append-calls of input_instance to instance instruction
 
     // Check if input of append-call is toString-call
-    if (inputInst->GetBasicBlock() != appendIntrinsic->GetBasicBlock() || !IsMethodStringBuilderToString(inputInst)) {
+    if (inputInst->GetBasicBlock() != appendInstruction->GetBasicBlock() || !IsStringBuilderToString(inputInst)) {
         return;
     }
 
@@ -946,21 +764,21 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascade(Inst *instance, Inst *
 
     instructionsStack_.push(inputInstance);
 
-    NormalizeStringBuilderAppendIntrinsicUsers(inputInstance, saveState);
-    for (auto inputAppendIntrinsic : FindStringBuilderAppendIntrinsics(inputInstance)) {
-        inputAppendIntrinsic->SetInput(0, instance);
-        inputAppendIntrinsic->SetSaveState(saveState);
+    NormalizeStringBuilderAppendInstructionUsers(inputInstance, saveState);
+    for (auto inputAppendInstruction : FindStringBuilderAppendInstructions(inputInstance)) {
+        inputAppendInstruction->SetInput(0, instance);
+        inputAppendInstruction->SetSaveState(saveState);
 
-        if (inputAppendIntrinsic->GetBasicBlock() != nullptr) {
-            inputAppendIntrinsic->GetBasicBlock()->EraseInst(inputAppendIntrinsic, true);
+        if (inputAppendInstruction->GetBasicBlock() != nullptr) {
+            inputAppendInstruction->GetBasicBlock()->EraseInst(inputAppendInstruction, true);
         }
-        appendIntrinsic->InsertAfter(inputAppendIntrinsic);
+        appendInstruction->InsertAfter(inputAppendInstruction);
 
-        for (auto &input : inputAppendIntrinsic->GetInputs()) {
+        for (auto &input : inputAppendInstruction->GetInputs()) {
             if (input.GetInst()->IsSaveState()) {
                 continue;
             }
-            FixBrokenSaveStates(input.GetInst(), inputAppendIntrinsic);
+            FixBrokenSaveStates(input.GetInst(), inputAppendInstruction);
         }
     }
 
@@ -979,7 +797,7 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascade(Inst *instance, Inst *
     inputInstance->ClearFlag(compiler::inst_flags::NO_DCE);
 
     // Cleanup instructions we don't need anymore
-    appendIntrinsic->GetBasicBlock()->RemoveInst(appendIntrinsic);
+    appendInstruction->GetBasicBlock()->RemoveInst(appendInstruction);
     RemoveFromSaveStateInputs(inputToStringCall);
     inputToStringCall->ClearFlag(compiler::inst_flags::NO_DCE);
 }
@@ -1011,12 +829,13 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascades(const ConcatenationLo
         instructionsStack_.pop();
 
         // For each append-call of current StringBuilder instance
-        for (auto appendIntrinsic : FindStringBuilderAppendIntrinsics(instance)) {
-            for (auto &input : appendIntrinsic->GetInputs()) {
+        for (auto appendInstruction : FindStringBuilderAppendInstructions(instance)) {
+            for (auto &input : appendInstruction->GetInputs()) {
                 auto inputInst = input.GetInst();
 
                 // Reconnect append-calls of cascading instance
-                ReconnectStringBuilderCascade(instance, inputInst, appendIntrinsic, appendIntrinsic->GetSaveState());
+                ReconnectStringBuilderCascade(instance, inputInst, appendInstruction,
+                                              appendInstruction->GetSaveState());
             }
         }
     }
@@ -1385,13 +1204,13 @@ void SimplifyStringBuilder::CleanupPhiInstructionInputs(Loop *loop)
 
 bool SimplifyStringBuilder::HasNotHoistedUser(PhiInst *phi)
 {
-    return HasUser(phi, [phi, this](auto &user) {
+    return HasUser(phi, [phi](auto &user) {
         auto userInst = user.GetInst();
         bool isSelf = userInst == phi;
         bool isSaveState = userInst->IsSaveState();
-        bool isRemovedAppendIntrinsic =
-            IsIntrinsicStringBuilderAppend(userInst) && !userInst->GetFlag(compiler::inst_flags::NO_DCE);
-        return !isSelf && !isSaveState && !isRemovedAppendIntrinsic;
+        bool isRemovedAppendInstruction =
+            IsStringBuilderAppend(userInst) && !userInst->GetFlag(compiler::inst_flags::NO_DCE);
+        return !isSelf && !isSaveState && !isRemovedAppendInstruction;
     });
 }
 
@@ -1445,7 +1264,7 @@ void SimplifyStringBuilder::MatchStringBuilderUsage(Inst *instance, StringBuilde
             usage.ctorCall = userInst;
         } else if (IsMethodStringBuilderDefaultConstructor(userInst)) {
             usage.ctorCall = userInst;
-        } else if (IsIntrinsicStringBuilderAppend(userInst)) {
+        } else if (IsStringBuilderAppend(userInst)) {
             // StringBuilder append-call returns 'this' (instance)
             // Replace all users of append-call by instance for simplicity
             userInst->ReplaceUsers(instance);
@@ -1455,9 +1274,9 @@ void SimplifyStringBuilder::MatchStringBuilderUsage(Inst *instance, StringBuilde
 
     for (auto &user : instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-        if (IsIntrinsicStringBuilderAppend(userInst)) {
-            usage.appendIntrinsics.push_back(userInst->CastToIntrinsic());
-        } else if (IsMethodStringBuilderToString(userInst)) {
+        if (IsStringBuilderAppend(userInst)) {
+            usage.appendInstructions.push_back(userInst);
+        } else if (IsStringBuilderToString(userInst)) {
             usage.toStringCalls.push_back(userInst);
         }
     }
@@ -1478,7 +1297,7 @@ bool SimplifyStringBuilder::HasToStringCallInput(PhiInst *phi) const
 {
     MarkerHolder visited {GetGraph()};
     bool found = HasInputPhiRecursively(phi, visited.GetMarker(),
-                                        [this](auto &input) { return IsMethodStringBuilderToString(input.GetInst()); });
+                                        [](auto &input) { return IsStringBuilderToString(input.GetInst()); });
     ResetInputMarkersRecursively(phi, visited.GetMarker());
     return found;
 }
@@ -1492,7 +1311,7 @@ bool SimplifyStringBuilder::HasInputInst(Inst *inputInst, Inst *inst) const
     return found;
 }
 
-bool SimplifyStringBuilder::HasAppendIntrinsicUser(Inst *inst) const
+bool SimplifyStringBuilder::HasAppendInstructionUser(Inst *inst) const
 {
     for (auto &user : inst->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
@@ -1500,7 +1319,7 @@ bool SimplifyStringBuilder::HasAppendIntrinsicUser(Inst *inst) const
             continue;
         }
 
-        if (IsIntrinsicStringBuilderAppend(userInst)) {
+        if (IsStringBuilderAppend(userInst)) {
             return true;
         }
     }
@@ -1524,7 +1343,7 @@ bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi) const
     //      20 CallStatic std.core.StringBuilder::toString sb, ss
     //      ...
 
-    return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && HasAppendIntrinsicUser(phi);
+    return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && HasAppendInstructionUser(phi);
 }
 
 ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
@@ -1556,39 +1375,6 @@ ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
     return instructionsVector_;
 }
 
-void SimplifyStringBuilder::ResetMarkersDFS(Inst *inst, Loop *loop, Marker visited)
-{
-    // Reset markers set in StringBuilderUsagesDFS function
-
-    if (inst->GetBasicBlock()->GetLoop() != loop || !inst->IsMarked(visited)) {
-        return;
-    }
-
-    inst->ResetMarker(visited);
-
-    for (auto &user : inst->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (userInst->IsPhi() && userInst->IsMarked(visited)) {
-            ResetMarkersDFS(userInst, loop, visited);
-        }
-
-        if (!IsIntrinsicStringBuilderAppend(userInst)) {
-            continue;
-        }
-
-        ASSERT(userInst->GetInputsCount() > 1);
-        auto instance = userInst->GetDataFlowInput(0);
-        if (instance->GetBasicBlock()->GetLoop() == loop) {
-            StringBuilderUsage usage {nullptr, nullptr, GetGraph()->GetAllocator()};
-            MatchStringBuilderUsage(instance, usage);
-
-            if (usage.toStringCalls[0]->IsMarked(visited)) {
-                ResetMarkersDFS(usage.toStringCalls[0], loop, visited);
-            }
-        }
-    }
-}
-
 void SimplifyStringBuilder::StringBuilderUsagesDFS(Inst *inst, Loop *loop, Marker visited)
 {
     // Recursively traverse current instruction users, and collect all the StringBuilder usages met
@@ -1606,13 +1392,13 @@ void SimplifyStringBuilder::StringBuilderUsagesDFS(Inst *inst, Loop *loop, Marke
             StringBuilderUsagesDFS(userInst, loop, visited);
         }
 
-        if (!IsIntrinsicStringBuilderAppend(userInst)) {
+        if (!IsStringBuilderAppend(userInst)) {
             continue;
         }
 
-        auto intrinsic = userInst->CastToIntrinsic();
-        ASSERT(intrinsic->GetInputsCount() > 1);
-        auto instance = intrinsic->GetDataFlowInput(0);
+        auto appendInstruction = userInst;
+        ASSERT(appendInstruction->GetInputsCount() > 1);
+        auto instance = appendInstruction->GetDataFlowInput(0);
         if (instance->GetBasicBlock()->GetLoop() == loop) {
             StringBuilderUsage usage {nullptr, nullptr, GetGraph()->GetAllocator()};
             MatchStringBuilderUsage(instance, usage);
@@ -1640,12 +1426,11 @@ const ArenaVector<SimplifyStringBuilder::StringBuilderUsage> &SimplifyStringBuil
     Marker visited = usageMarker.GetMarker();
 
     StringBuilderUsagesDFS(accValue, accValue->GetBasicBlock()->GetLoop(), visited);
-    ResetMarkersDFS(accValue, accValue->GetBasicBlock()->GetLoop(), visited);
 
     return usages_;
 }
 
-bool SimplifyStringBuilder::AllUsersAreVisitedAppendIntrinsics(Inst *inst, Marker appendIntrinsicVisited)
+bool SimplifyStringBuilder::AllUsersAreVisitedAppendInstructions(Inst *inst, Marker appendInstructionVisited)
 {
     bool allUsersVisited = true;
     for (auto &user : inst->GetUsers()) {
@@ -1656,14 +1441,14 @@ bool SimplifyStringBuilder::AllUsersAreVisitedAppendIntrinsics(Inst *inst, Marke
         if (IsCheckCastWithoutUsers(userInst)) {
             continue;
         }
-        allUsersVisited &= IsIntrinsicStringBuilderAppend(userInst);
-        allUsersVisited &= userInst->IsMarked(appendIntrinsicVisited);
+        allUsersVisited &= IsStringBuilderAppend(userInst);
+        allUsersVisited &= userInst->IsMarked(appendInstructionVisited);
     }
     return allUsersVisited;
 }
 
 Inst *SimplifyStringBuilder::UpdateIntermediateValue(const StringBuilderUsage &usage, Inst *intermediateValue,
-                                                     Marker appendIntrinsicVisited)
+                                                     Marker appendInstructionVisited)
 {
     // Update intermediate value with toString-call of the current StringBuilder usage, if all its append-call users
     // were already visited
@@ -1687,10 +1472,10 @@ Inst *SimplifyStringBuilder::UpdateIntermediateValue(const StringBuilderUsage &u
 
         if (userInst->IsPhi()) {
             ++usersCount;
-            allUsersVisited &= AllUsersAreVisitedAppendIntrinsics(userInst, appendIntrinsicVisited);
-        } else if (IsIntrinsicStringBuilderAppend(userInst)) {
+            allUsersVisited &= AllUsersAreVisitedAppendInstructions(userInst, appendInstructionVisited);
+        } else if (IsStringBuilderAppend(userInst)) {
             ++usersCount;
-            allUsersVisited &= userInst->IsMarked(appendIntrinsicVisited);
+            allUsersVisited &= userInst->IsMarked(appendInstructionVisited);
         } else {
             break;
         }
@@ -1715,7 +1500,7 @@ Inst *SimplifyStringBuilder::UpdateIntermediateValue(const StringBuilderUsage &u
 
 void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match,
                                                        Inst *accValue, Inst *intermediateValue,
-                                                       Marker appendIntrinsicVisited)
+                                                       Marker appendInstructionVisited)
 {
     // Split all the instructions of a given StringBuilder usage into groups (substructures of ConcatenationLoopMatch):
     //  'temp' group - temporary instructions to be erased from loop
@@ -1727,25 +1512,25 @@ void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage 
     temp.instance = usage.instance;
     temp.ctorCall = usage.ctorCall;
 
-    for (auto appendIntrinsic : usage.appendIntrinsics) {
-        ASSERT(appendIntrinsic->GetInputsCount() > 1);
-        auto appendArg = appendIntrinsic->GetDataFlowInput(1);
+    for (auto appendInstruction : usage.appendInstructions) {
+        ASSERT(appendInstruction->GetInputsCount() > 1);
+        auto appendArg = appendInstruction->GetDataFlowInput(1);
         if ((appendArg->IsPhi() && IsDataFlowInput(appendArg, intermediateValue)) || appendArg == intermediateValue ||
             appendArg == accValue) {
             // Append-call needs to be removed, if its argument is either accumulated value, or intermediate value;
             // or intermediate value is data flow input of argument
 
             if (temp.appendAccValue == nullptr) {
-                temp.appendAccValue = appendIntrinsic;
+                temp.appendAccValue = appendInstruction;
             } else {
                 // Does not look like string concatenation pattern
                 temp.Clear();
                 break;
             }
-            appendIntrinsic->SetMarker(appendIntrinsicVisited);
+            appendInstruction->SetMarker(appendInstructionVisited);
         } else {
             // Keep append-call inside loop otherwise
-            match.loop.appendIntrinsics.push_back(appendIntrinsic);
+            match.loop.appendInstructions.push_back(appendInstruction);
         }
     }
 
@@ -1755,7 +1540,7 @@ void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage 
 }
 
 Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match,
-                                                        Marker appendIntrinsicVisited)
+                                                        Marker appendInstructionVisited)
 {
     // Split all the instructions of a given StringBuilder usage into groups (substructures of ConcatenationLoopMatch):
     //  'preheader' group - instructions to be hoisted to preheader block
@@ -1776,14 +1561,14 @@ Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage
             continue;
         }
 
-        if (!IsIntrinsicStringBuilderAppend(userInst)) {
+        if (!IsStringBuilderAppend(userInst)) {
             continue;
         }
 
         // Check if append-call needs to be hoisted or kept inside loop
-        auto appendIntrinsic = userInst->CastToIntrinsic();
-        ASSERT(appendIntrinsic->GetInputsCount() > 1);
-        auto appendArg = appendIntrinsic->GetDataFlowInput(1);
+        auto appendInstruction = userInst;
+        ASSERT(appendInstruction->GetInputsCount() > 1);
+        auto appendArg = appendInstruction->GetDataFlowInput(1);
         if (appendArg->IsPhi() && IsPhiAccumulatedValue(appendArg->CastToPhi())) {
             // Append-call needs to be hoisted, if its argument is accumulated value
             auto phiAppendArg = appendArg->CastToPhi();
@@ -1798,12 +1583,12 @@ Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage
 
             match.initialValue = initialValue;
             match.accValue = phiAppendArg;
-            match.preheader.appendAccValue = appendIntrinsic;
+            match.preheader.appendAccValue = appendInstruction;
 
-            appendIntrinsic->SetMarker(appendIntrinsicVisited);
+            appendInstruction->SetMarker(appendInstructionVisited);
         } else {
             // Keep append-call inside loop otherwise
-            match.loop.appendIntrinsics.push_back(appendIntrinsic);
+            match.loop.appendInstructions.push_back(appendInstruction);
         }
     }
 
@@ -1825,8 +1610,8 @@ const ArenaVector<SimplifyStringBuilder::ConcatenationLoopMatch> &SimplifyString
 
     matches_.clear();
 
-    MarkerHolder appendIntrinsicMarker {GetGraph()};
-    Marker appendIntrinsicVisited = appendIntrinsicMarker.GetMarker();
+    MarkerHolder appendInstructionMarker {GetGraph()};
+    Marker appendInstructionVisited = appendInstructionMarker.GetMarker();
 
     // Accumulated value (acc_value) is a phi-instruction holding concatenation result between loop iterations, and
     // final result after loop completes
@@ -1847,25 +1632,25 @@ const ArenaVector<SimplifyStringBuilder::ConcatenationLoopMatch> &SimplifyString
 
             if (match.preheader.instance == nullptr) {
                 // First StringBuilder instance are set to be hoisted
-                intermediateValue = MatchHoistableInstructions(*usage, match, appendIntrinsicVisited);
+                intermediateValue = MatchHoistableInstructions(*usage, match, appendInstructionVisited);
             } else {
                 // All other StringBuilder instances are set to be removed as temporary
-                MatchTemporaryInstructions(*usage, match, accValue, intermediateValue, appendIntrinsicVisited);
-                intermediateValue = UpdateIntermediateValue(*usage, intermediateValue, appendIntrinsicVisited);
+                MatchTemporaryInstructions(*usage, match, accValue, intermediateValue, appendInstructionVisited);
+                intermediateValue = UpdateIntermediateValue(*usage, intermediateValue, appendInstructionVisited);
             }
         }
 
-        if (IsInstanceHoistable(match) && IsToStringHoistable(match, appendIntrinsicVisited)) {
+        if (IsInstanceHoistable(match) && IsToStringHoistable(match, appendInstructionVisited)) {
             matches_.push_back(match);
         }
 
         // Reset markers
         if (match.preheader.appendAccValue != nullptr) {
-            match.preheader.appendAccValue->ResetMarker(appendIntrinsicVisited);
+            match.preheader.appendAccValue->ResetMarker(appendInstructionVisited);
         }
         for (auto &temp : match.temp) {
             if (temp.appendAccValue != nullptr) {
-                temp.appendAccValue->ResetMarker(appendIntrinsicVisited);
+                temp.appendAccValue->ResetMarker(appendInstructionVisited);
             }
         }
     }
@@ -1913,4 +1698,5 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
     }
     Cleanup(loop);
 }
+
 }  // namespace ark::compiler

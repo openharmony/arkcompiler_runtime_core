@@ -152,6 +152,7 @@ options:
     - split-resolver
     - scheduler
     - simplify-sb
+    - reserve-sb-buffer
     - try-catch-resolving
     - vn-opt
     - bridges-ss
@@ -208,6 +209,12 @@ options:
   type: bool
   default: true
   description: Enable Simplify StringBuilder Pass
+  tags: [perf]
+
+- name: compiler-reserve-string-builder-buffer
+  type: bool
+  default: true
+  description: Enable Reserve StringBuilder Buffer Pass
   tags: [perf]
 
 - name: compiler-checks-elimination

@@ -361,6 +361,11 @@ public:
         return false;
     }
 
+    virtual bool IsMethodStringBuilderConstructorWithCharArrayArg([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual bool IsMethodStringBuilderDefaultConstructor([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -372,6 +377,56 @@ public:
     }
 
     virtual FieldPtr GetInteropConstantPoolOffsetField([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
+    virtual bool IsMethodStringBuilderAppend([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
+    virtual bool IsClassStringBuilder([[maybe_unused]] ClassPtr klass) const
+    {
+        return false;
+    }
+
+    virtual uint32_t GetClassOffsetObjectsArray([[maybe_unused]] MethodPtr method) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual uint32_t GetClassOffsetObject([[maybe_unused]] MethodPtr method) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual bool IsFieldStringBuilderBuffer([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual bool IsFieldStringBuilderIndex([[maybe_unused]] FieldPtr field) const
+    {
+        return false;
+    }
+
+    virtual FieldPtr GetFieldStringBuilderBuffer([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
+    virtual FieldPtr GetFieldStringBuilderIndex([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
+    virtual FieldPtr GetFieldStringBuilderLength([[maybe_unused]] ClassPtr klass) const
+    {
+        return nullptr;
+    }
+
+    virtual FieldPtr GetFieldStringBuilderCompress([[maybe_unused]] ClassPtr klass) const
     {
         return nullptr;
     }
@@ -1159,6 +1214,11 @@ public:
     }
 
     virtual IntrinsicId GetStringBuilderConcatStringsIntrinsicId() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual IntrinsicId GetStringIsCompressedIntrinsicId() const
     {
         UNREACHABLE();
     }

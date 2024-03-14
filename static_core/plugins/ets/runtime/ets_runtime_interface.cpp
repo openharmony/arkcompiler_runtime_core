@@ -150,6 +150,12 @@ bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithStringArg(MethodPt
            MethodCast(method)->GetProto().GetSignature() == "(Lstd/core/String;)V";
 }
 
+bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const
+{
+    return MethodCast(method)->IsConstructor() && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
+           MethodCast(method)->GetProto().GetSignature() == "([C)V";
+}
+
 bool EtsRuntimeInterface::IsMethodStringBuilderDefaultConstructor(MethodPtr method) const
 {
     return MethodCast(method)->IsConstructor() && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
@@ -160,6 +166,62 @@ bool EtsRuntimeInterface::IsMethodStringBuilderToString(MethodPtr method) const
 {
     return GetMethodFullName(method, false) == "std.core.StringBuilder::toString" &&
            MethodCast(method)->GetProto().GetSignature() == "()Lstd/core/String;";
+}
+
+bool EtsRuntimeInterface::IsMethodStringBuilderAppend(MethodPtr method) const
+{
+    return GetMethodFullName(method, false) == "std.core.StringBuilder::append";
+}
+
+bool EtsRuntimeInterface::IsClassStringBuilder(ClassPtr klass) const
+{
+    return ClassCast(klass)->GetName() == "std.core.StringBuilder";
+}
+
+uint32_t EtsRuntimeInterface::GetClassOffsetObjectsArray(MethodPtr method) const
+{
+    auto pf = MethodCast(method)->GetPandaFile();
+    return pf->GetClassId(utf::CStringAsMutf8("[Lstd/core/Object;")).GetOffset();
+}
+
+uint32_t EtsRuntimeInterface::GetClassOffsetObject(MethodPtr method) const
+{
+    auto pf = MethodCast(method)->GetPandaFile();
+    return pf->GetClassId(utf::CStringAsMutf8("std.core.Object")).GetOffset();
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderBuffer(ClassPtr klass) const
+{
+    ASSERT(IsClassStringBuilder(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("buf"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderIndex(ClassPtr klass) const
+{
+    ASSERT(IsClassStringBuilder(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("index"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderLength(ClassPtr klass) const
+{
+    ASSERT(IsClassStringBuilder(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("length"));
+}
+
+EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderCompress(ClassPtr klass) const
+{
+    ASSERT(IsClassStringBuilder(klass));
+    return ClassCast(klass)->GetInstanceFieldByName(utf::CStringAsMutf8("compress"));
+}
+
+bool EtsRuntimeInterface::IsFieldStringBuilderBuffer(FieldPtr field) const
+{
+    return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == "buf";
+}
+
+bool EtsRuntimeInterface::IsFieldStringBuilderIndex(FieldPtr field) const
+{
+    return IsClassStringBuilder(FieldCast(field)->GetClass()) && GetFieldName(field) == "index";
 }
 
 bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const
@@ -175,9 +237,17 @@ bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppendString(IntrinsicId id) c
 bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppend(IntrinsicId id) const
 {
     switch (id) {
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_FLOAT:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_DOUBLE:
+            return true;
         case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_LONG:
             return true;
         case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_INT:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_BYTE:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_SHORT:
             return true;
         case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_CHAR:
             return true;
@@ -198,10 +268,18 @@ EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::ConvertTypeToStringBuilder
             return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_BOOL;
         case compiler::DataType::INT8:
             return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_CHAR;
+        case compiler::DataType::UINT8:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_BYTE;
+        case compiler::DataType::INT16:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_SHORT;
         case compiler::DataType::INT32:
             return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_INT;
         case compiler::DataType::INT64:
             return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_LONG;
+        case compiler::DataType::FLOAT64:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_DOUBLE;
+        case compiler::DataType::FLOAT32:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_FLOAT;
         case compiler::DataType::REFERENCE:
             return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING;
         default:
@@ -215,4 +293,8 @@ EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderConcatStri
     return IntrinsicId::INTRINSIC_STD_CORE_STRING_BUILDER_CONCAT_STRINGS;
 }
 
+EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringIsCompressedIntrinsicId() const
+{
+    return IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_COMPRESSED;
+}
 }  // namespace ark::ets
