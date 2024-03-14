@@ -1238,9 +1238,9 @@ bool Inlining::CheckTooBigMethodCanBeInlined(const CallInst *callInst, InlineCon
     return true;
 }
 
-bool Inlining::CheckDepthLimit(const CallInst *callInst, InlineContext *ctx)
+bool Inlining::CheckDepthLimit(InlineContext *ctx)
 {
-    size_t recInlinedCount = std::count(inlinedStack_.begin(), inlinedStack_.end(), callInst->GetCallMethod());
+    size_t recInlinedCount = std::count(inlinedStack_.begin(), inlinedStack_.end(), ctx->method);
     if ((recInlinedCount >= g_options.GetCompilerInliningRecursiveCallsLimit()) ||
         (inlinedStack_.size() >= MAX_CALL_DEPTH)) {
         LOG_INLINING(DEBUG) << "Recursive-calls-depth limit reached, method: '"
@@ -1266,7 +1266,7 @@ bool Inlining::CheckMethodCanBeInlined(const CallInst *callInst, InlineContext *
         return false;
     }
 
-    if (!CheckDepthLimit(callInst, ctx)) {
+    if (!CheckDepthLimit(ctx)) {
         return false;
     }
 

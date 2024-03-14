@@ -159,6 +159,7 @@ class ESCheckedTestPreparationStep(TestPreparationStep):
             capture_output=True,
             encoding=sys.stdout.encoding,
             check=False,
+            errors='replace',
         )
         if res.returncode != 0:
             Log.default(_LOGGER,
