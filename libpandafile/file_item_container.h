@@ -111,6 +111,11 @@ public:
 
     void DumpItemsStat(std::ostream &os) const;
 
+    uint32_t caculateRoundUpSize(uint32_t before, uint32_t after)
+    {
+        return after - before;
+    }
+
     std::unordered_map<std::string, StringItem *> *GetStringMap()
     {
         return &string_map_;
@@ -564,6 +569,11 @@ private:
     std::list<std::unique_ptr<BaseItem>>::iterator items_end_;
     std::list<std::unique_ptr<BaseItem>>::iterator code_items_end_;
     std::list<std::unique_ptr<BaseItem>>::iterator debug_items_end_;
+
+    // Get Roundup Alignment Size
+    std::unordered_map<std::string, size_t> items_round_up_size_;
+    uint32_t foreign_item_roundup_size_ {0};
+    uint32_t line_number_item_roundup_size_ {0};
 
     BaseItem *end_;
     size_t indexed_item_count_ {0};

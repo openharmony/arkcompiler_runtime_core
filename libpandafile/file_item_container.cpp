@@ -420,10 +420,13 @@ void ItemContainer::DeduplicateItems(bool computeLayout)
 
 uint32_t ItemContainer::ComputeLayout()
 {
+    uint32_t original_offset = 0;
     uint32_t num_classes = class_map_.size();
     uint32_t num_literalarrays = literalarray_map_.size();
     uint32_t class_idx_offset = sizeof(File::Header);
     uint32_t cur_offset = class_idx_offset + (num_classes + num_literalarrays) * ID_SIZE;
+    items_round_up_size_.clear();
+    foreign_item_roundup_size_ = 0;
 
     UpdateOrderIndexes();
 
@@ -435,25 +438,33 @@ uint32_t ItemContainer::ComputeLayout()
     cur_offset += index_section_item_.GetSize();
 
     for (auto &item : foreign_items_) {
+        original_offset = cur_offset;
         cur_offset = RoundUp(cur_offset, item->Alignment());
+        foreign_item_roundup_size_ += caculateRoundUpSize(original_offset, cur_offset);
         item->SetOffset(cur_offset);
         item->ComputeLayout();
         cur_offset += item->GetSize();
     }
 
     for (auto &item : items_) {
+        const auto &name = item->GetName();
+
         if (!item->NeedsEmit()) {
             continue;
         }
 
+        original_offset = cur_offset;
         cur_offset = RoundUp(cur_offset, item->Alignment());
+        items_round_up_size_[name] += caculateRoundUpSize(original_offset, cur_offset);
         item->SetOffset(cur_offset);
         item->ComputeLayout();
         cur_offset += item->GetSize();
     }
 
     // Line number program should be last because it's size is known only after deduplication
+    original_offset = cur_offset;
     cur_offset = RoundUp(cur_offset, line_number_program_index_item_.Alignment());
+    line_number_item_roundup_size_ = caculateRoundUpSize(original_offset, cur_offset);
     line_number_program_index_item_.SetOffset(cur_offset);
     line_number_program_index_item_.ComputeLayout();
     cur_offset += line_number_program_index_item_.GetSize();
@@ -714,11 +725,12 @@ std::map<std::string, size_t> ItemContainer::GetStat()
 
     stat["header_item"] = sizeof(File::Header);
     stat["class_idx_item"] = class_map_.size() * ID_SIZE;
-    stat["line_number_program_idx_item"] = line_number_program_index_item_.GetNumItems() * ID_SIZE;
+    stat["line_number_program_idx_item"] = line_number_program_index_item_.GetNumItems() * ID_SIZE
+                                           + line_number_item_roundup_size_;
     stat["literalarray_idx"] = literalarray_map_.size() * ID_SIZE;
 
     stat["index_section_item"] = index_section_item_.GetSize();
-    stat["foreign_item"] = GetForeignSize();
+    stat["foreign_item"] = GetForeignSize() + foreign_item_roundup_size_;
 
     size_t num_ins = 0;
     size_t codesize = 0;
@@ -739,6 +751,10 @@ std::map<std::string, size_t> ItemContainer::GetStat()
             num_ins += static_cast<CodeItem *>(item.get())->GetNumInstructions();
             codesize += static_cast<CodeItem *>(item.get())->GetCodeSize();
         }
+    }
+
+    for (const auto &[name, round_up_size] : items_round_up_size_) {
+        stat[name] += round_up_size;
     }
     stat["instructions_number"] = num_ins;
     stat["codesize"] = codesize;
