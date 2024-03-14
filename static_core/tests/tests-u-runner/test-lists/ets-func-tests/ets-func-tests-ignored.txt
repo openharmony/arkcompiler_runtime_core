@@ -103,11 +103,6 @@ spec/unions/union_compare_02_04.ets
 ### Issue 14259
 spec/unions/union_assignment_11.ets
 ### Issue 15312
-spec/unions/union_assignment_01.ets
-spec/unions/union_assignment_02.ets
-spec/unions/union_binary_01.ets
-spec/unions/union_binary_03.ets
-spec/unions/union_plus_01.ets
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
@@ -374,11 +369,7 @@ spec/import_export/07.export_directives/03.re-export_directives/re_export_direct
 spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
-### Issue 15312
-std/core/std_core_string_String_fromCharCode_008.ets
-std/core/std_core_string_String_search_String_005.ets
 ### Issue 15693
-std/core/std_core_string_String_localeCompare_string_005.ets
 std/core/std_core_string_String_match_RegExp.ets
 std/core/std_core_string_String_match_String.ets
 std/core/std_core_string_String_fromCharCode_009.ets
