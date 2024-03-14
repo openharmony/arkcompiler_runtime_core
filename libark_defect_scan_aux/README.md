@@ -28,7 +28,7 @@ flowchart LR;
 
 ### 3.1 支持平台说明
 
-安全扫描工具当前仅支持在Linux平台上编译和使用，暂不支持Windows/Mac平台。
+安全扫描工具当前支持在Linux/MacOS平台上编译和运行，以及在Linux平台上交叉编译能够在Windows平台上运行的可执行程序。
 
 ### 3.2 自定义代码
 
@@ -36,11 +36,47 @@ flowchart LR;
 
 ### 3.3 编译命令
 
+#### Linux
 ```
-./build.sh --product-name rk3568 --build-target ark_host_linux_defectscanaux_lib --build-target ark_host_linux_defectscanaux_unittest
+./build.sh --product-name rk3568 --build-target ark_host_linux_defectscanaux_unittest
 ```
 
-`out/rk3568/clang_x64/arkcompiler/runtime_core`目录下会生成`libark_defect_scan_aux.so`以及该示例文件对应的可执行程序文件。
+`out/rk3568/clang_x64/arkcompiler/runtime_core`目录下会生成示例文件对应的可执行程序文件。
+
+#### Windows
+```
+./build.sh --product-name rk3568 --build-target ark_host_win_defectscanaux_unittest
+```
+
+`out/rk3568/mingw_x86_64/arkcompiler/runtime_core`目录下会生成示例文件对应的可执行程序文件。
+
+#### Mac M1
+```
+cd ${OpenHarmony}
+
+./prebuilts/build-tools/darwin-arm64/bin/gn gen ./out/mac_arm64 \
+--root=. \
+--dotfile=./arkcompiler/toolchain/build/compile_script/.gn \
+--args="target_os=\"mac\" target_cpu=\"arm64\" is_debug=false"
+
+./prebuilts/build-tools/darwin-arm64/bin/ninja  -d keeprsp -C out/mac_arm64 ark_host_defectscanaux_tools -k 1
+```
+
+`out/mac_arm64/arkcompiler/runtime_core`目录下会生成示例文件对应的可执行程序文件。
+
+#### Mac x64
+```
+cd ${OpenHarmony}
+
+./prebuilts/build-tools/darwin-x86/bin/gn gen ./out/mac_x64 \
+--root=. \
+--dotfile=./arkcompiler/toolchain/build/compile_script/.gn \
+--args="target_os=\"mac\" target_cpu=\"x64\" is_debug=false"
+
+./prebuilts/build-tools/darwin-x86/bin/ninja  -d keeprsp -C out/mac_x64 ark_host_defectscanaux_tools -k 1
+```
+
+`out/mac_x64/arkcompiler/runtime_core/`目录下会生成示例文件对应的可执行程序文件。
 
 ### 3.4 如何生成`abc`文件
 
@@ -54,6 +90,7 @@ flowchart LR;
 
 将需要扫描的`abc`文件放到示例代码中指定的文件路径后，执行示例代码对应的可执行程序即可。
 
+以 Linux 为例
 ```shell
 cd out/rk3568/clang_x64/arkcompiler/runtime_core
 ./defect_scan_aux_demo

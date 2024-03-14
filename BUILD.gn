@@ -294,22 +294,44 @@ concat_yamls("concat_inst_templates_yamls") {
   add_yamls = inst_templates_yamls
 }
 
+group("ark_host_defectscanaux_tools") {
+  deps = []
+  if (host_os == "linux") {
+    deps += [
+      ":ark_host_linux_defectscanaux_unittest",
+      ":ark_host_win_defectscanaux_unittest",
+    ]
+  } else if (host_os == "mac") {
+    deps += [ ":ark_host_mac_defectscanaux_unittest" ]
+  }
+}
+
+group("ark_host_linux_defectscanaux_unittest") {
+  deps = []
+  if (host_os == "linux") {
+    deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo(${host_toolchain})" ]
+  }
+}
+
+group("ark_host_win_defectscanaux_unittest") {
+  deps = []
+  if (host_os == "linux") {
+    deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo($build_root/toolchain/mingw:mingw_x86_64)" ]
+  }
+}
+
+group("ark_host_mac_defectscanaux_unittest") {
+  deps = []
+  if (host_os == "mac") {
+    if (host_cpu == "arm64") {
+      deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo($build_root/toolchain/mac:clang_arm64)" ]
+    } else {
+      deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo($build_root/toolchain/mac:clang_x64)" ]
+    }
+  }
+}
+
 if (!ark_standalone_build) {
-  group("ark_host_linux_defectscanaux_lib") {
-    deps = []
-    if (host_os == "linux") {
-      deps += [ "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux(${host_toolchain})" ]
-    }
-  }
-
-  group("ark_host_linux_defectscanaux_unittest") {
-    testonly = true
-    deps = []
-    if (host_os == "linux") {
-      deps += [ "$ark_root/libark_defect_scan_aux/tests/unittest:defect_scan_aux_demo(${host_toolchain})" ]
-    }
-  }
-
   group("runtime_core_unittest") {
     testonly = true
     deps = [
