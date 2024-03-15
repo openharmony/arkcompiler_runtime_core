@@ -65,6 +65,7 @@ components:
   - name: atomics
   - name: es2panda
   - name: static_linker
+  - name: task_manager
 
 dfx_components:
   - name: common

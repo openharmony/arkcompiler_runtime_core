@@ -17,8 +17,6 @@
 
 namespace ark::taskmanager {
 
-Task::Task(TaskProperties properties, RunnerCallback runner) : properties_(properties), runner_(std::move(runner)) {}
-
 /* static */
 Task Task::Create(TaskProperties properties, RunnerCallback runner)
 {
@@ -34,7 +32,9 @@ TaskProperties Task::GetTaskProperties() const
 void Task::RunTask()
 {
     ASSERT(!IsInvalid());
+    lifeTimeScope_.IndicateTaskExecutionStart();
     runner_();
+    lifeTimeScope_.IndicateTaskExecutionEnd();
 }
 
 void Task::MakeInvalid()

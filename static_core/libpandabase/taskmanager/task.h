@@ -18,6 +18,8 @@
 
 #include "libpandabase/macros.h"
 #include "libpandabase/globals.h"
+#include "libpandabase/utils/time.h"
+#include "libpandabase/utils/logger.h"
 #include <functional>
 #include <ostream>
 #include <array>
@@ -101,6 +103,52 @@ private:
 
 constexpr auto INVALID_TASK_PROPERTIES = TaskProperties(TaskType::UNKNOWN, VMType::UNKNOWN, TaskExecutionMode::UNKNOWN);
 
+/**
+ * @brief TaskLifeTimeStorage structure used to save and log life time of task and execution time.
+ * It's methods doesn't works on release build.
+ */
+class TaskLifeTimeStorage {
+public:
+    NO_COPY_SEMANTIC(TaskLifeTimeStorage);
+    DEFAULT_MOVE_SEMANTIC(TaskLifeTimeStorage);
+
+    /// @brief Created structure and save creation time
+    PANDA_PUBLIC_API TaskLifeTimeStorage()  // NOLINT(modernize-use-equals-default)
+    {
+#ifndef NDEBUG
+        creationTime_ = time::GetCurrentTimeInMicros(true);
+#endif
+    }
+
+    /// @brief Saves start time of execution. Use this method before task execution start
+    PANDA_PUBLIC_API void IndicateTaskExecutionStart()
+    {
+#ifndef NDEBUG
+        startExecutionTime_ = time::GetCurrentTimeInMicros(true);
+#endif
+    }
+
+    /// @brief Logs life time and execution time of task. Use this method after thar execution finish
+    PANDA_PUBLIC_API void IndicateTaskExecutionEnd()
+    {
+#ifndef NDEBUG
+        ASSERT(startExecutionTime_ != 0)
+        auto finishExecutionTime = time::GetCurrentTimeInMicros(true);
+        LOG(DEBUG, TASK_MANAGER) << "Task life time: " << finishExecutionTime - creationTime_
+                                 << "µs; Task execution time: " << finishExecutionTime - startExecutionTime_ << "µs; ";
+#endif
+    }
+
+    PANDA_PUBLIC_API ~TaskLifeTimeStorage() = default;
+
+private:
+#ifndef NDEBUG
+    // Time points for logs
+    size_t creationTime_ {0};
+    size_t startExecutionTime_ {0};
+#endif
+};
+
 class Task {
 public:
     PANDA_PUBLIC_API Task() = default;
@@ -137,10 +185,11 @@ public:
     PANDA_PUBLIC_API ~Task() = default;
 
 private:
-    Task(TaskProperties properties, RunnerCallback runner);
+    Task(TaskProperties properties, RunnerCallback runner) : properties_(properties), runner_(std::move(runner)) {}
 
     TaskProperties properties_ {INVALID_TASK_PROPERTIES};
     RunnerCallback runner_ {nullptr};
+    TaskLifeTimeStorage lifeTimeScope_;
 };
 
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskType type);

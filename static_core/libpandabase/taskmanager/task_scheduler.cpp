@@ -68,6 +68,8 @@ TaskQueueId TaskScheduler::RegisterQueue(internal::SchedulableTaskQueueInterface
 {
     os::memory::LockHolder lockHolder(taskSchedulerStateLock_);
     ASSERT(!start_);
+    LOG(DEBUG, TASK_MANAGER) << "TaskScheduler: Register task queue with {" << queue->GetTaskType() << ", "
+                             << queue->GetVMType() << "}";
     TaskQueueId id(queue->GetTaskType(), queue->GetVMType());
     if (UNLIKELY(taskQueues_.find(id) != taskQueues_.end())) {
         return INVALID_TASKQUEUE_ID;
@@ -84,10 +86,11 @@ void TaskScheduler::Initialize()
     ASSERT(!start_);
     selector_.Init();
     start_ = true;
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: creates " << workersCount_ << " threads";
+    LOG(DEBUG, TASK_MANAGER) << "TaskScheduler: creates " << workersCount_ << " threads";
     // Starts all workers
     for (size_t i = 0; i < workersCount_; i++) {
         workers_.push_back(new WorkerThread("TSWorker_" + std::to_string(i + 1UL)));
+        LOG(DEBUG, TASK_MANAGER) << "TaskScheduler: created thread with name " << workers_.back()->GetWorkerName();
     }
     // Set names of workers and get them info about other ones
     for (auto *worker : workers_) {
@@ -119,7 +122,6 @@ void TaskScheduler::StealTaskFromOtherWorker(WorkerThread *taskReceiver)
 bool TaskScheduler::FillWithTasks(WorkerThread *worker)
 {
     ASSERT(start_);
-    LOG(DEBUG, RUNTIME) << worker->GetWorkerName() << ": FillWithTasks";
     os::memory::LockHolder lockHolder(taskSchedulerStateLock_);
     // If queue if empty we should go and wait until new task comes
     if (AreQueuesEmpty()) {
@@ -128,7 +130,7 @@ bool TaskScheduler::FillWithTasks(WorkerThread *worker)
         waitWorkersCount_.fetch_add(1, std::memory_order_acq_rel);
         while (AreQueuesEmpty()) {
             if (finish_) {
-                LOG(DEBUG, RUNTIME) << worker->GetWorkerName() << ": return queue without issues";
+                LOG(DEBUG, TASK_MANAGER) << worker->GetWorkerName() << ": finish execution";
                 return true;
             }
             queuesWaitCondVar_.TimedWait(&taskSchedulerStateLock_, TASK_WAIT_TIMEOUT);
@@ -160,7 +162,7 @@ size_t TaskScheduler::PutTasksInWorker(WorkerThread *worker, TaskQueueId selecte
     worker->TryDeleteRetiredPtrs();
     // Execute popping task form queue
     size_t queueTaskCount = queue->PopTasksToWorker(addTaskFunc, countToGet);
-    LOG(DEBUG, RUNTIME) << worker->GetWorkerName() << ": worker have gotten " << queueTaskCount << " tasks";
+    LOG(DEBUG, TASK_MANAGER) << worker->GetWorkerName() << ": get tasks " << queueTaskCount << "; ";
     return queueTaskCount;
 }
 
@@ -205,8 +207,10 @@ size_t TaskScheduler::HelpWorkersWithTasks(TaskProperties properties)
         executedTasksCount = StealAndExecuteOneTaskFromWorkers(properties);
     }
     if (UNLIKELY(executedTasksCount == 0)) {
+        LOG(DEBUG, TASK_MANAGER) << "Helper: got no tasks;";
         return 0;
     }
+    LOG(DEBUG, TASK_MANAGER) << "Helper: executed tasks: " << executedTasksCount << ";";
     taskStatistics_->IncrementCount(TaskStatus::POPPED, properties, executedTasksCount);
     // Atomic with acquire order reason: get correct value
     auto waitToFinish = waitToFinish_.load(std::memory_order_acquire);
@@ -276,10 +280,10 @@ void TaskScheduler::WaitForFinishAllTasksWithProperties(TaskProperties propertie
     }
     // Atomic with acq_rel order reason: other thread should see correct value
     waitToFinish_.fetch_sub(1, std::memory_order_acq_rel);
-    LOG(DEBUG, RUNTIME) << "After waiting tasks with properties: " << properties
-                        << " {added: " << taskStatistics_->GetCount(TaskStatus::ADDED, properties)
-                        << ", executed: " << taskStatistics_->GetCount(TaskStatus::EXECUTED, properties)
-                        << ", popped: " << taskStatistics_->GetCount(TaskStatus::POPPED, properties) << "}";
+    LOG(DEBUG, TASK_MANAGER) << "After waiting tasks with properties: " << properties
+                             << " {added: " << taskStatistics_->GetCount(TaskStatus::ADDED, properties)
+                             << ", executed: " << taskStatistics_->GetCount(TaskStatus::EXECUTED, properties)
+                             << ", popped: " << taskStatistics_->GetCount(TaskStatus::POPPED, properties) << "}";
     taskStatistics_->ResetCountersWithTaskProperties(properties);
 }
 
@@ -310,7 +314,7 @@ void TaskScheduler::Finalize()
         delete worker;
     }
     taskStatistics_->ResetAllCounters();
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: Finalized";
+    LOG(DEBUG, TASK_MANAGER) << "TaskScheduler: Finalized";
 }
 
 void TaskScheduler::IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue)
@@ -318,9 +322,11 @@ void TaskScheduler::IncrementCounterOfAddedTasks(TaskProperties properties, size
     taskStatistics_->IncrementCount(TaskStatus::ADDED, properties, ivalue);
 }
 
-void TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap)
+size_t TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap)
 {
+    size_t countOfTasks = 0;
     for (const auto &[properties, count] : counterMap) {
+        countOfTasks += count;
         taskStatistics_->IncrementCount(TaskStatus::EXECUTED, properties, count);
         // Atomic with acquire order reason: get correct value
         auto waitToFinish = waitToFinish_.load(std::memory_order_acquire);
@@ -329,6 +335,7 @@ void TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounterM
             finishTasksCondVar_.SignalAll();
         }
     }
+    return countOfTasks;
 }
 
 void TaskScheduler::SignalWorkers()
@@ -342,7 +349,6 @@ void TaskScheduler::SignalWorkers()
 
 internal::SchedulableTaskQueueInterface *TaskScheduler::GetQueue(TaskQueueId id) const
 {
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: GetTaskFromQueue()";
     internal::SchedulableTaskQueueInterface *queue = nullptr;
     auto taskQueuesIterator = taskQueues_.find(id);
     if (taskQueuesIterator == taskQueues_.end()) {
@@ -359,7 +365,6 @@ TaskScheduler::~TaskScheduler()
     // Check if all task queue was deleted
     ASSERT(taskQueues_.empty());
     delete taskStatistics_;
-    LOG(DEBUG, RUNTIME) << "TaskScheduler: ~TaskScheduler: All threads finished jobs";
 }
 
 }  // namespace ark::taskmanager
