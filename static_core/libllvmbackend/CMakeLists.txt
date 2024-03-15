@@ -52,6 +52,7 @@ set(SOURCES
         transforms/passes/inline_ir/remove_unused_functions.cpp
         transforms/passes/insert_safepoints.cpp
         transforms/passes/intrinsics_lowering.cpp
+        transforms/passes/mem_barriers.cpp
         transforms/passes/panda_runtime_lowering.cpp
         transforms/passes/prune_deopt.cpp
         transforms/llvm_optimizer.cpp

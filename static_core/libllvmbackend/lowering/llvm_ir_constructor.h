@@ -128,6 +128,7 @@ private:
                                          llvm::Value *y);
     llvm::Value *CreateFloatComparison(CmpInst *cmpInst, llvm::Value *x, llvm::Value *y);
     llvm::Value *CreateIntegerComparison(CmpInst *inst, llvm::Value *x, llvm::Value *y);
+    llvm::Value *CreateNewArrayWithRuntime(Inst *inst);
     llvm::Value *CreateNewObjectWithRuntime(Inst *inst);
     llvm::Value *CreateLoadMethodUsingVTable(llvm::Value *thiz, CallInst *call);
     llvm::Value *CreateResolveVirtualCall(Inst *inst, llvm::Value *thiz, uint32_t methodId);

@@ -1593,19 +1593,33 @@ llvm::Value *LLVMIrConstructor::CreateIntegerComparison(CmpInst *inst, llvm::Val
     return builder_.CreateSelect(lessThan, negativeOne, castComparisonResult);
 }
 
+llvm::Value *LLVMIrConstructor::CreateNewArrayWithRuntime(Inst *inst)
+{
+    auto type = GetInputValue(inst, 0);
+    auto size = ToSizeT(GetInputValue(inst, 1));
+    auto eid = RuntimeInterface::EntrypointId::CREATE_ARRAY;
+    auto result = CreateEntrypointCall(eid, inst, {type, size});
+    MarkAsAllocation(result);
+    if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
+        result->addFnAttr(llvm::Attribute::get(result->getContext(), "needs-mem-barrier"));
+    }
+    return result;
+}
+
 llvm::Value *LLVMIrConstructor::CreateNewObjectWithRuntime(Inst *inst)
 {
-    // Obtain Class
     auto initClass = GetInputValue(inst, 0);
     auto eid = RuntimeInterface::EntrypointId::CREATE_OBJECT_BY_CLASS;
-    auto runtimeCall = CreateEntrypointCall(eid, inst, {initClass});
-    auto newObjInst = inst->CastToNewObject();
-    auto srcInst = newObjInst->GetInput(0).GetInst();
+    auto result = CreateEntrypointCall(eid, inst, {initClass});
+    auto srcInst = inst->GetInput(0).GetInst();
     if (srcInst->GetOpcode() != Opcode::LoadAndInitClass ||
         GetGraph()->GetRuntime()->CanUseTlabForClass(srcInst->CastToLoadAndInitClass()->GetClass())) {
-        MarkAsAllocation(runtimeCall);
+        MarkAsAllocation(result);
     }
-    return runtimeCall;
+    if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
+        result->addFnAttr(llvm::Attribute::get(result->getContext(), "needs-mem-barrier"));
+    }
+    return result;
 }
 
 llvm::Value *LLVMIrConstructor::CreateLoadMethodUsingVTable(llvm::Value *thiz, CallInst *call)
@@ -3838,7 +3852,7 @@ void LLVMIrConstructor::VisitMultiArray(GraphVisitor *v, Inst *inst)
     auto result = ctor->CreateEntrypointCall(entrypointId, inst, args);
     ctor->MarkAsAllocation(result);
     if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
-        ctor->CreateMemoryFence(memory_order::RELEASE);
+        result->addFnAttr(llvm::Attribute::get(result->getContext(), "needs-mem-barrier"));
     }
     ctor->ValueMapAdd(inst, result);
 }
@@ -3882,11 +3896,8 @@ void LLVMIrConstructor::VisitNewArray(GraphVisitor *v, Inst *inst)
     auto arrayType = inst->CastToNewArray()->GetTypeId();
     auto runtime = ctor->GetGraph()->GetRuntime();
     auto maxTlabSize = runtime->GetTLABMaxSize();
-    llvm::CallInst *result;
     if (maxTlabSize == 0) {
-        auto entrypointId = RuntimeInterface::EntrypointId::CREATE_ARRAY;
-        result = ctor->CreateEntrypointCall(entrypointId, inst, {type, size});
-        ctor->MarkAsAllocation(result);
+        auto result = ctor->CreateNewArrayWithRuntime(inst);
         ctor->ValueMapAdd(inst, result);
         return;
     }
@@ -3903,18 +3914,16 @@ void LLVMIrConstructor::VisitNewArray(GraphVisitor *v, Inst *inst)
         arraySize = lenInst->CastToConstant()->GetIntValue() * elementSize + classArraySize;
         arraySize = (arraySize & ~(alignment - 1U)) + ((arraySize % alignment) != 0U ? alignment : 0U);
         if (arraySize > maxTlabSize) {
-            auto entrypointId = RuntimeInterface::EntrypointId::CREATE_ARRAY;
-            result = ctor->CreateEntrypointCall(entrypointId, inst, {type, size});
-            ctor->MarkAsAllocation(result);
+            auto result = ctor->CreateNewArrayWithRuntime(inst);
             ctor->ValueMapAdd(inst, result);
             return;
         }
     }
     auto eid = GetAllocateArrayTlabEntrypoint(elementSize);
-    result = ctor->CreateFastPathCall(inst, eid, {type, size});
+    auto result = ctor->CreateFastPathCall(inst, eid, {type, size});
     ctor->MarkAsAllocation(result);
     if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
-        ctor->CreateMemoryFence(memory_order::RELEASE);
+        result->addFnAttr(llvm::Attribute::get(result->getContext(), "needs-mem-barrier"));
     }
     ctor->ValueMapAdd(inst, result);
 }
@@ -3954,12 +3963,12 @@ void LLVMIrConstructor::VisitNewObject(GraphVisitor *v, Inst *inst)
     auto initClass = ctor->GetInputValue(inst, 0);
     auto klassSize = ctor->ToSizeT(ctor->builder_.getInt32(classSize));
     auto eid = RuntimeInterface::EntrypointId::ALLOCATE_OBJECT_TLAB;
-    auto runtimeCall = ctor->CreateFastPathCall(inst, eid, {initClass, klassSize});
-    ctor->MarkAsAllocation(runtimeCall);
+    auto result = ctor->CreateFastPathCall(inst, eid, {initClass, klassSize});
+    ctor->MarkAsAllocation(result);
     if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
-        ctor->CreateMemoryFence(memory_order::RELEASE);
+        result->addFnAttr(llvm::Attribute::get(result->getContext(), "needs-mem-barrier"));
     }
-    ctor->ValueMapAdd(inst, runtimeCall);
+    ctor->ValueMapAdd(inst, result);
 }
 
 void LLVMIrConstructor::VisitCallStatic(GraphVisitor *v, Inst *inst)
