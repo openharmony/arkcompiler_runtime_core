@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,14 +89,13 @@ private:
 
 class State : public StateIface<State> {
 public:
-    ALWAYS_INLINE inline State(ManagedThread *thread, const uint8_t *pc, Frame *frame,
-                               const void *const *dispatch_table)
+    ALWAYS_INLINE inline State(ManagedThread *thread, const uint8_t *pc, Frame *frame, const void *const *dispatchTable)
         : StateIface(frame)
     {
         SetInst(BytecodeInstruction(pc));
         SetFrame(frame);
         SetThread(thread);
-        SetDispatchTable(dispatch_table);
+        SetDispatchTable(dispatchTable);
     }
 
     ALWAYS_INLINE inline void UpdateState(const uint8_t *pc, Frame *frame)
@@ -132,9 +131,9 @@ public:
         return arch::regs::GetDispatchTable();
     }
 
-    ALWAYS_INLINE inline void SetDispatchTable(const void *const *dispatch_table)
+    ALWAYS_INLINE inline void SetDispatchTable(const void *const *dispatchTable)
     {
-        return arch::regs::SetDispatchTable(dispatch_table);
+        return arch::regs::SetDispatchTable(dispatchTable);
     }
 
     ALWAYS_INLINE inline ManagedThread *GetThread() const
@@ -149,28 +148,28 @@ public:
 
     ALWAYS_INLINE inline void SaveState()
     {
-        inst_spill_ = GetInst();
-        acc_spill_ = GetAcc();
-        fp_spill_ = arch::regs::GetFp();
-        m_fp_spill_ = arch::regs::GetMirrorFp();
-        thread_spill_ = GetThread();
+        instSpill_ = GetInst();
+        accSpill_ = GetAcc();
+        fpSpill_ = arch::regs::GetFp();
+        mFpSpill_ = arch::regs::GetMirrorFp();
+        threadSpill_ = GetThread();
     }
 
     ALWAYS_INLINE inline void RestoreState()
     {
-        SetInst(inst_spill_);
-        GetAcc() = acc_spill_;
-        arch::regs::SetFp(fp_spill_);
-        arch::regs::SetMirrorFp(m_fp_spill_);
-        SetThread(thread_spill_);
+        SetInst(instSpill_);
+        GetAcc() = accSpill_;
+        arch::regs::SetFp(fpSpill_);
+        arch::regs::SetMirrorFp(mFpSpill_);
+        SetThread(threadSpill_);
     }
 
 private:
-    BytecodeInstruction inst_spill_;
-    void *fp_spill_ {nullptr};
-    void *m_fp_spill_ {nullptr};
-    ManagedThread *thread_spill_ {nullptr};
-    AccVRegister acc_spill_;
+    BytecodeInstruction instSpill_;
+    void *fpSpill_ {nullptr};
+    void *mFpSpill_ {nullptr};
+    ManagedThread *threadSpill_ {nullptr};
+    AccVRegister accSpill_;
 };
 
 #else

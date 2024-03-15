@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -407,7 +407,8 @@ def check_headers_in_es2panda_sources(panda_dir):
     for root, dirs, files in os.walk(es2panda_dir):
         for file in files:
             file_path = os.path.join(root, file)
-            if ".h" not in file_path and ".cpp" not in file_path:
+            _, extension = os.path.splitext(file_path)
+            if extension != ".h" and extension != ".cpp":
                 continue
             source_file = open(file_path, "r")
             for line in source_file.readlines():
