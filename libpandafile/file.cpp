@@ -588,12 +588,6 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         return false;
     }
 
-    if (!CheckHeaderElementOffset(header->literalarray_idx_off, header->num_literalarrays, header->file_size)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file literalarray_idx_off " << header->literalarray_idx_off <<
-            " or num_literalarrays " << header->num_literalarrays;
-        return false;
-    }
-
     if (!CheckHeaderElementOffset<File::IndexHeader>(header->index_section_off, header->num_indexes,
         header->file_size)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file index_section_off " << header->index_section_off <<

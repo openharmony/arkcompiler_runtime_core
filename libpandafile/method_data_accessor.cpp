@@ -26,7 +26,9 @@ MethodDataAccessor::MethodDataAccessor(const File &panda_file, File::EntityId me
     proto_idx_ = helpers::Read<IDX_SIZE>(&sp);
 
     class_off_ = panda_file.ResolveClassIndex(method_id, class_idx_).GetOffset();
-    proto_off_ = panda_file.ResolveProtoIndex(method_id, proto_idx_).GetOffset();
+    if (proto_idx_ != MAX_INDEX_16) {
+        proto_off_ = panda_file.ResolveProtoIndex(method_id, proto_idx_).GetOffset();
+    }
 
     name_off_ = helpers::Read<ID_SIZE>(&sp);
     access_flags_ = helpers::ReadULeb128(&sp);

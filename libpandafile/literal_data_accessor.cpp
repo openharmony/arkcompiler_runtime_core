@@ -21,7 +21,9 @@ LiteralDataAccessor::LiteralDataAccessor(const File &panda_file, File::EntityId 
     : panda_file_(panda_file), literal_data_id_(literal_data_id)
 {
     literal_num_ = panda_file_.GetHeader()->num_literalarrays;
-    literal_data_sp_ = panda_file_.GetSpanFromId(literal_data_id_);
+    if (literal_num_ != INVALID_INDEX) {
+       literal_data_sp_ = panda_file_.GetSpanFromId(literal_data_id_);
+    }
 }
 
 }  // namespace panda::panda_file
