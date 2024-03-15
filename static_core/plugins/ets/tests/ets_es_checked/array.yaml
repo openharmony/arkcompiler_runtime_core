@@ -37,7 +37,6 @@ sub:
           (x: string, y: number, i: number): string => y + x + i
     sub:
       - method: "concat"
-        excluded: true # generics overriding is flaky
         rest:
           - combinationRest "Array.of<number>(1)", "Array.of<number>()", "Array.of<number>(NaN, 10, Infinity)"
       - method: values

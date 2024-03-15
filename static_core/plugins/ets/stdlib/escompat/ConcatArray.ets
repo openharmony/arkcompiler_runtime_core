@@ -18,7 +18,7 @@ package escompat;
 export interface ConcatArray<T> extends ArrayLike<T> {
     at(index: number): T | undefined;
 
-    join(separator: String | undefined): string;
+    join(separator?: String): string;
 
-    //slice(start?: Number, end?: Number): Array<T>;
+    slice(start?: Number, end?: Number): Array<T>;
 }

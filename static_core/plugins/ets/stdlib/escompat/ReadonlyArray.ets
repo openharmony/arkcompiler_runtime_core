@@ -18,7 +18,7 @@ package escompat;
 export interface ReadonlyArray<out T> extends ConcatArray<T> {
     // concat(...items: (T | ConcatArray<T>)[]): T[];
     // concat(...items: (T | ConcatArray<T>)[]): Array<T>;
-    // concat(...items: ConcatArray<T>[]): T[];
+    concat(...items: ConcatArray<T>[]): Array<T>;
     // Typing and previous overload have to cover it
 
     //entries(): IterableIterator<[number, T]>;
@@ -70,13 +70,15 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     forEach(callbackfn: (value: T, index: number) => void): void;
     forEach(callbackfn: (value: T) => void): void;
 
-    includes(searchElement: T, fromIndex: Number | undefined): boolean;
+    join(separator?: string): string;
 
-    indexOf(searchElement: T, fromIndex: Number | undefined): number;
+    includes(searchElement: T, fromIndex?: number): boolean;
 
-    //keys(): IterableIterator<number>;
+    indexOf(searchElement: T, fromIndex?: number): number;
 
-    lastIndexOf(searchElement: T, fromIndex: Number | undefined): number;
+    keys(): IterableIterator<number>;
+
+    lastIndexOf(searchElement: T, fromIndex?: number): number;
 
     map<U>(mapper: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U> { throw new Error("#15998") }
     map<U>(callbackfn: (value: T, index: number) => U): Array<U>;
@@ -105,6 +107,8 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     }
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
+
+    slice(start?: number, end?: number): Array<T>;
 
     // some(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): boolean;
     some(predicate: (value: T, index: number) => boolean): boolean;
