@@ -55,31 +55,31 @@ export class BigInt {
     }
 
     constructor(d: byte) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Byte).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: short) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Short).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: int) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Int).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: long) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Long).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: double) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Double).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
