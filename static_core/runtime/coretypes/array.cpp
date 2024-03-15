@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 namespace ark::coretypes {
 
 static Array *AllocateArray(ark::BaseClass *arrayClass, size_t elemSize, ArraySizeT length, ark::SpaceType spaceType,
-                            const PandaVM *vm = Thread::GetCurrent()->GetVM())
+                            bool pinned = false, const PandaVM *vm = Thread::GetCurrent()->GetVM())
 {
     size_t size = Array::ComputeSize(elemSize, length);
 
@@ -36,7 +36,8 @@ static Array *AllocateArray(ark::BaseClass *arrayClass, size_t elemSize, ArraySi
     }
     if (LIKELY(spaceType == ark::SpaceType::SPACE_TYPE_OBJECT)) {
         return static_cast<coretypes::Array *>(
-            vm->GetHeapManager()->AllocateObject(arrayClass, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent()));
+            vm->GetHeapManager()->AllocateObject(arrayClass, size, DEFAULT_ALIGNMENT, ManagedThread::GetCurrent(),
+                                                 mem::ObjectAllocatorBase::ObjMemInitPolicy::REQUIRE_INIT, pinned));
     }
     if (spaceType == ark::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
         return static_cast<coretypes::Array *>(vm->GetHeapManager()->AllocateNonMovableObject(
@@ -46,10 +47,11 @@ static Array *AllocateArray(ark::BaseClass *arrayClass, size_t elemSize, ArraySi
 }
 
 /* static */
-Array *Array::Create(ark::Class *arrayClass, const uint8_t *data, ArraySizeT length, ark::SpaceType spaceType)
+Array *Array::Create(ark::Class *arrayClass, const uint8_t *data, ArraySizeT length, ark::SpaceType spaceType,
+                     bool pinned)
 {
     size_t elemSize = arrayClass->GetComponentSize();
-    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType, pinned);
     if (UNLIKELY(array == nullptr)) {
         LOG(ERROR, RUNTIME) << "Failed to allocate array.";
         return nullptr;
@@ -67,10 +69,10 @@ Array *Array::Create(ark::Class *arrayClass, const uint8_t *data, ArraySizeT len
 }
 
 /* static */
-Array *Array::Create(ark::Class *arrayClass, ArraySizeT length, ark::SpaceType spaceType)
+Array *Array::Create(ark::Class *arrayClass, ArraySizeT length, ark::SpaceType spaceType, bool pinned)
 {
     size_t elemSize = arrayClass->GetComponentSize();
-    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType, pinned);
     if (array == nullptr) {
         return nullptr;
     }
@@ -85,11 +87,11 @@ Array *Array::Create(ark::Class *arrayClass, ArraySizeT length, ark::SpaceType s
 }
 
 /* static */
-Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, ark::SpaceType spaceType)
+Array *Array::Create(DynClass *dynarrayclass, ArraySizeT length, ark::SpaceType spaceType, bool pinned)
 {
     size_t elemSize = coretypes::TaggedValue::TaggedTypeSize();
     HClass *arrayClass = dynarrayclass->GetHClass();
-    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType);
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType, pinned);
     if (array == nullptr) {
         return nullptr;
     }
@@ -108,7 +110,7 @@ Array *Array::CreateTagged(const PandaVM *vm, ark::BaseClass *arrayClass, ArrayS
                            TaggedValue initValue)
 {
     size_t elemSize = coretypes::TaggedValue::TaggedTypeSize();
-    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType, vm);
+    auto *array = AllocateArray(arrayClass, elemSize, length, spaceType, false, vm);
     if (array == nullptr) {
         return nullptr;
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,7 +166,9 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignSize)
         void *mem = nullptr;
         Region *regionTo = PopFromRegionQueue<IS_ATOMIC, REGION_TYPE>();
         if (regionTo != nullptr) {
-            mem = regionTo->template Alloc<false>(alignSize);
+            // Here we need memory barrier to make the allocation visible
+            // in all threads before SetCurrentRegion
+            mem = regionTo->template Alloc<IS_ATOMIC>(alignSize);
             if (mem != nullptr) {
                 PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(regionTo);
                 return mem;
@@ -176,7 +178,9 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignSize)
         os::memory::LockHolder lock(this->regionLock_);
         regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, REGION_TYPE);
         if (LIKELY(regionTo != nullptr)) {
-            mem = regionTo->template Alloc<false>(alignSize);
+            // Here we need memory barrier to make the allocation visible
+            // in all threads before SetCurrentRegion
+            mem = regionTo->template Alloc<IS_ATOMIC>(alignSize);
             PushToRegionQueue<IS_ATOMIC, REGION_TYPE>(regionTo);
         }
 
@@ -187,8 +191,40 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegular(size_t alignSize)
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+void *RegionAllocator<AllocConfigT, LockConfigT>::AllocRegularPinned(size_t alignSize)
+{
+    static constexpr bool IS_ATOMIC = std::is_same_v<LockConfigT, RegionAllocatorLockConfig::CommonLock>;
+    void *mem = nullptr;
+    Region *regionTo = PopFromRegionQueue<IS_ATOMIC, RegionFlag::IS_PINNED>();
+    if (regionTo != nullptr) {
+        // Here we need memory barrier to make the allocation visible
+        // in all threads before SetCurrentRegion
+        mem = regionTo->template Alloc<IS_ATOMIC>(alignSize);
+        if (mem != nullptr) {
+            regionTo->PinObject();
+            PushToRegionQueue<IS_ATOMIC, RegionFlag::IS_PINNED>(regionTo);
+            return mem;
+        }
+    }
+
+    os::memory::LockHolder lock(this->regionLock_);
+    regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT>(REGION_SIZE, RegionFlag::IS_OLD);
+    if (LIKELY(regionTo != nullptr)) {
+        // Here we need memory barrier to make the allocation visible
+        // in all threads before SetCurrentRegion
+        mem = regionTo->Alloc<IS_ATOMIC>(alignSize);
+    }
+    if (mem != nullptr) {
+        regionTo->PinObject();
+        PushToRegionQueue<IS_ATOMIC, RegionFlag::IS_PINNED>(regionTo);
+    }
+
+    return mem;
+}
+
+template <typename AllocConfigT, typename LockConfigT>
 template <RegionFlag REGION_TYPE, bool UPDATE_MEMSTATS>
-void *RegionAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align)
+void *RegionAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align, bool pinned)
 {
     ASSERT(GetAlignmentInBytes(align) % GetAlignmentInBytes(DEFAULT_ALIGNMENT) == 0);
     size_t alignSize = AlignUp(size, GetAlignmentInBytes(align));
@@ -197,7 +233,11 @@ void *RegionAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment a
     // for nonmovable or large size object, allocate a seprate large region for it
     if (this->GetSpaceType() != SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT &&
         LIKELY(alignSize <= GetMaxRegularObjectSize())) {
-        mem = AllocRegular<REGION_TYPE>(alignSize);
+        if (pinned) {
+            mem = AllocRegularPinned(alignSize);
+        } else {
+            mem = AllocRegular<REGION_TYPE>(alignSize);
+        }
     } else {
         os::memory::LockHolder lock(this->regionLock_);
         Region *region = this->template CreateAndSetUpNewRegion<AllocConfigT>(
@@ -230,6 +270,15 @@ void RegionAllocator<AllocConfigT, LockConfigT>::UnpinObject(ObjectHeader *objec
     auto *region = ObjectToRegion(object);
     ASSERT(region != nullptr);
     region->UnpinObject();
+    if (!region->HasPinnedObjects()) {
+        static constexpr bool IS_ATOMIC = std::is_same_v<LockConfigT, RegionAllocatorLockConfig::CommonLock>;
+        PandaVector<Region *> *regionQueue = GetRegionQueuePointer<RegionFlag::IS_PINNED>();
+        os::memory::LockHolder<LockConfigT, IS_ATOMIC> lock(*GetQueueLock<RegionFlag::IS_PINNED>());
+        auto itRegion = std::find(regionQueue->begin(), regionQueue->end(), region);
+        if (itRegion != regionQueue->end()) {
+            regionQueue->erase(itRegion);
+        }
+    }
 }
 
 template <typename AllocConfigT, typename LockConfigT>

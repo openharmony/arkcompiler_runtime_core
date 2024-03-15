@@ -194,12 +194,12 @@ bool ObjectAllocatorG1<MT_MODE>::IsLive(const ObjectHeader *obj)
 
 template <MTModeT MT_MODE>
 void *ObjectAllocatorG1<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                                           ObjMemInitPolicy objInit)
+                                           ObjMemInitPolicy objInit, [[maybe_unused]] bool pinned)
 {
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
     if (LIKELY(alignedSize <= GetYoungAllocMaxSize())) {
-        mem = objectAllocator_->Alloc(size, align);
+        mem = objectAllocator_->Alloc(size, align, pinned);
     } else {
         mem = humongousObjectAllocator_->Alloc(size, DEFAULT_ALIGNMENT);
         // Humongous allocations have initialized memory by a default

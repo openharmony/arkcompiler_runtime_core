@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,23 +38,26 @@ public:
 
     PANDA_PUBLIC_API static String *CreateFromMUtf8(const uint8_t *mutf8Data, size_t mutf8Length, uint32_t utf16Length,
                                                     bool canBeCompressed, const LanguageContext &ctx, PandaVM *vm,
-                                                    bool movable = true);
+                                                    bool movable = true, bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t utf16Length,
                                                     bool canBeCompressed, const LanguageContext &ctx, PandaVM *vm,
-                                                    bool movable = true);
+                                                    bool movable = true, bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t utf16Length,
-                                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true);
+                                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true,
+                                                    bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromMUtf8(const uint8_t *mutf8Data, const LanguageContext &ctx, PandaVM *vm,
-                                                    bool movable = true);
+                                                    bool movable = true, bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Length,
-                                                   const LanguageContext &ctx, PandaVM *vm, bool movable = true);
+                                                   const LanguageContext &ctx, PandaVM *vm, bool movable = true,
+                                                   bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateFromUtf16(const uint16_t *utf16Data, uint32_t utf16Length,
-                                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true);
+                                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true,
+                                                    bool pinned = false);
 
     PANDA_PUBLIC_API static String *CreateEmptyString(const LanguageContext &ctx, PandaVM *vm);
 
@@ -333,7 +336,7 @@ protected:
     static bool CanBeCompressed(const uint16_t *utf16Data, uint32_t utf16Length);
     static void CopyUtf16AsMUtf8(const uint16_t *utf16From, uint8_t *mutf8To, uint32_t utf16Length);
     static String *AllocStringObject(size_t length, bool compressed, const LanguageContext &ctx, PandaVM *vm = nullptr,
-                                     bool movable = true);
+                                     bool movable = true, bool pinned = false);
 
 private:
     PANDA_PUBLIC_API static bool compressedStringsEnabled_;

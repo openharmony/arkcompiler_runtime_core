@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -177,7 +177,7 @@ public:
     ~RegionAllocator() override = default;
 
     template <RegionFlag REGION_TYPE = RegionFlag::IS_EDEN, bool UPDATE_MEMSTATS = true>
-    void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT);
+    void *Alloc(size_t size, Alignment align = DEFAULT_ALIGNMENT, bool pinned = false);
 
     template <typename T>
     T *AllocArray(size_t arrLength)
@@ -349,6 +349,14 @@ public:
         this->GetSpace()->SetDesiredEdenLength(edenLength);
     }
 
+    void AddPromotedRegionToQueueIfPinned(Region *region)
+    {
+        if (region->HasPinnedObjects()) {
+            ASSERT(region->HasFlag(RegionFlag::IS_PROMOTED));
+            PushToRegionQueue<false, RegionFlag::IS_PINNED>(region);
+        }
+    }
+
 private:
     // NOLINTNEXTLINE(readability-identifier-naming)
     template <bool atomic = true, RegionFlag REGION_TYPE>
@@ -487,7 +495,7 @@ private:
     os::memory::Mutex *GetQueueLock()
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
+        if constexpr (REGION_TYPE == RegionFlag::IS_OLD || REGION_TYPE == RegionFlag::IS_PINNED) {
             return &oldQueueLock_;
         }
         UNREACHABLE();
@@ -500,6 +508,8 @@ private:
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
             return &oldRegionQueue_;
+        } else if constexpr (REGION_TYPE == RegionFlag::IS_PINNED) {
+            return &pinnedRegionQueue_;
         }
         UNREACHABLE();
         return nullptr;
@@ -507,6 +517,7 @@ private:
 
     template <RegionFlag REGION_TYPE>
     void *AllocRegular(size_t alignSize);
+    void *AllocRegularPinned(size_t alignSize);
     TLAB *CreateTLABInRegion(Region *region, size_t size);
 
     Region fullRegion_;
@@ -514,6 +525,7 @@ private:
     Region *reservedRegion_ = nullptr;
     os::memory::Mutex oldQueueLock_;
     PandaVector<Region *> oldRegionQueue_;
+    PandaVector<Region *> pinnedRegionQueue_;
     // To store partially used Regions that can be reused later.
     ark::PandaMultiMap<size_t, Region *, std::greater<size_t>> retainedTlabs_;
     friend class test::RegionAllocatorTest;

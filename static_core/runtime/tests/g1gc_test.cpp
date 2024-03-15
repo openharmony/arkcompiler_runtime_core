@@ -1673,6 +1673,7 @@ static void PinUnpinTest(SpaceType requestedSpaceType, size_t objectSize = 1_KB)
         Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
         ASSERT_EQ(addressBeforeGc, handle.GetPtr()) << "Pinned object must not moved";
         g1Allocator->UnpinObject(handle.GetPtr());
+        ASSERT_FALSE(ObjectToRegion(handle.GetPtr())->HasPinnedObjects());
     }
     thread->ManagedCodeEnd();
     Runtime::Destroy();
@@ -1692,6 +1693,266 @@ TEST(G1GCPinnigTest, PinUnpinHumongousObjectTest)
 TEST(G1GCPinnigTest, PinUnpinNonMovableObjectTest)
 {
     PinUnpinTest(SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
+}
+
+class G1GCPromotePinnedRegionTest : public G1GCTest {
+public:
+    G1GCPromotePinnedRegionTest() : G1GCTest(CreateOptions())
+    {
+        thread_ = MTManagedThread::GetCurrent();
+        ASSERT(thread_ != nullptr);
+        thread_->ManagedCodeBegin();
+    }
+
+    NO_COPY_SEMANTIC(G1GCPromotePinnedRegionTest);
+    NO_MOVE_SEMANTIC(G1GCPromotePinnedRegionTest);
+
+    static RuntimeOptions CreateOptions()
+    {
+        RuntimeOptions options;
+        options.SetShouldLoadBootPandaFiles(false);
+        options.SetCompilerEnableJit(false);
+        options.SetShouldInitializeIntrinsics(false);
+        // GC options
+        constexpr size_t HEAP_SIZE_LIMIT_TEST = 16_MB;
+        options.SetRunGcInPlace(true);
+        options.SetGcType("g1-gc");
+        options.SetHeapSizeLimit(HEAP_SIZE_LIMIT_TEST);
+        options.SetGcTriggerType("debug-never");
+        options.SetG1NumberOfTenuredRegionsAtMixedCollection(0);
+        return options;
+    }
+
+    ~G1GCPromotePinnedRegionTest() override
+    {
+        thread_->ManagedCodeEnd();
+    }
+
+protected:
+    MTManagedThread *thread_;  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+TEST_F(G1GCPromotePinnedRegionTest, CompactingRegularStringObjectAndPromoteToMixedTLABRegionAndUnpin)
+{
+    auto *g1Allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+    {
+        [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+        constexpr size_t OBJECT_SIZE = 1_KB;
+        auto *addressBeforeGc = ObjectAllocator::AllocString(OBJECT_SIZE);
+        ASSERT_NE(addressBeforeGc, nullptr);
+        VMHandle<ObjectHeader> handle1(thread_, addressBeforeGc);
+        g1Allocator->PinObject(handle1.GetPtr());
+        // Run GC - promote pinned region
+        Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+        ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->IsMixedTLAB());
+        ASSERT_EQ(addressBeforeGc, handle1.GetPtr()) << "Pinned object must not moved";
+        g1Allocator->UnpinObject(handle1.GetPtr());
+        Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+    }
+}
+
+TEST_F(G1GCPromotePinnedRegionTest, PromoteTLABRegionToMixedTLABAndTestIsInAllocRangeMethod)
+{
+    auto *g1Allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    constexpr size_t OBJECT_SIZE = 1_KB;
+    auto *addressBeforeGc = ObjectAllocator::AllocString(OBJECT_SIZE);
+    auto *addressBeforeGc2 = ObjectAllocator::AllocString(OBJECT_SIZE);
+    ASSERT_NE(addressBeforeGc, nullptr);
+    ASSERT_NE(addressBeforeGc2, nullptr);
+    VMHandle<ObjectHeader> handle1(thread_, addressBeforeGc);
+    VMHandle<ObjectHeader> handle2(thread_, addressBeforeGc2);
+    g1Allocator->PinObject(handle1.GetPtr());
+    g1Allocator->PinObject(handle2.GetPtr());
+    // Run GC - promote pinned region
+    Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+    ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->IsMixedTLAB());
+    ASSERT_EQ(addressBeforeGc, handle1.GetPtr()) << "Pinned object must not moved";
+    ASSERT_TRUE(ObjectToRegion(handle2.GetPtr())->IsMixedTLAB());
+    ASSERT_EQ(addressBeforeGc2, handle2.GetPtr()) << "Pinned object must not moved";
+    ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->IsInAllocRange(handle1.GetPtr()));
+    auto *pinnedObj = ObjectAllocator::AllocString(OBJECT_SIZE, true);  // Pinned allocation
+    ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->IsInAllocRange(pinnedObj));
+    g1Allocator->UnpinObject(handle1.GetPtr());
+    Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+}
+
+class G1AllocatePinnedObjectTest : public G1GCPromotePinnedRegionTest {};
+
+TEST_F(G1AllocatePinnedObjectTest, AllocatePinnedRegularArrayAndCreatedNewPinnedRegion)
+{
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    constexpr size_t OBJ_ELEMENT_SIZE = 64;
+    size_t objectSize = 1_KB;
+    auto *arrayObj = ObjectAllocator::AllocArray(objectSize / OBJ_ELEMENT_SIZE, ClassRoot::ARRAY_I64, false, true);
+    ASSERT_NE(arrayObj, nullptr);
+    VMHandle<ObjectHeader> handle(thread_, arrayObj);
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasPinnedObjects());
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+}
+
+TEST_F(G1AllocatePinnedObjectTest, AllocatePinnedRegularStringAndCreatedNewPinnedRegion)
+{
+    auto *g1Allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    size_t objectSize = 128_KB;
+    auto *arrayObj = ObjectAllocator::AllocString(objectSize, true);
+    ASSERT_NE(arrayObj, nullptr);
+    VMHandle<ObjectHeader> handle(thread_, arrayObj);
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasPinnedObjects());
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+    g1Allocator->UnpinObject(handle.GetPtr());
+    size_t objectSize2 = 32_KB;
+    size_t sizeRegionBefore = ObjectToRegion(handle.GetPtr())->GetAllocatedBytes();
+    auto *arrayObj2 = ObjectAllocator::AllocString(objectSize2, true);
+    size_t sizeRegionAfter = ObjectToRegion(handle.GetPtr())->GetAllocatedBytes();
+    ASSERT_NE(arrayObj2, nullptr);
+    ASSERT_EQ(sizeRegionBefore, sizeRegionAfter);
+}
+
+TEST_F(G1AllocatePinnedObjectTest, AllocatePinnedRegularStringToNewPinnedRegion)
+{
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    size_t objectSize = 128_KB;
+    auto *strObj1 = ObjectAllocator::AllocString(objectSize, true);
+    ASSERT_NE(strObj1, nullptr);
+    VMHandle<ObjectHeader> handle(thread_, strObj1);
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasPinnedObjects());
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+    size_t sizeRegionBefore = ObjectToRegion(handle.GetPtr())->GetAllocatedBytes();
+    // Create new pinned object
+    size_t objectSize2 = 196_KB;
+    auto *strObj2 = ObjectAllocator::AllocString(objectSize2, true);
+    ASSERT_NE(strObj2, nullptr);
+    VMHandle<ObjectHeader> handle1(thread_, strObj2);
+    ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasPinnedObjects());
+    ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+    size_t sizeRegionAfter = ObjectToRegion(handle.GetPtr())->GetAllocatedBytes();
+    ASSERT_EQ(sizeRegionBefore, sizeRegionAfter);
+    ASSERT_NE(ObjectToRegion(handle.GetPtr()), ObjectToRegion(handle1.GetPtr()));
+}
+
+TEST_F(G1AllocatePinnedObjectTest, AllocatePinnedRegularStringToExistPinnedRegion)
+{
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    size_t objectSize = 32_KB;
+    auto *strObj1 = ObjectAllocator::AllocString(objectSize, true);
+    ASSERT_NE(strObj1, nullptr);
+    VMHandle<ObjectHeader> handle(thread_, strObj1);
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasPinnedObjects());
+    ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+    size_t sizeRegionBefore = ObjectToRegion(handle.GetPtr())->GetAllocatedBytes();
+    // Create new pinned object
+    size_t objectSize2 = 32_KB;
+    auto *strObj2 = ObjectAllocator::AllocString(objectSize2, true);
+    ASSERT_NE(strObj2, nullptr);
+    VMHandle<ObjectHeader> handle1(thread_, strObj2);
+    ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasPinnedObjects());
+    ASSERT_TRUE(ObjectToRegion(handle1.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+    size_t sizeRegionAfter = ObjectToRegion(handle.GetPtr())->GetAllocatedBytes();
+    ASSERT_NE(sizeRegionBefore, sizeRegionAfter);
+}
+
+TEST_F(G1AllocatePinnedObjectTest, AllocateRegularStringToExistPinnedRegion)
+{
+    auto *g1Allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    constexpr size_t OBJECT_SIZE =
+        AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.08F), DEFAULT_ALIGNMENT_IN_BYTES);
+    auto *addressBeforeGc = ObjectAllocator::AllocString(OBJECT_SIZE);
+    ASSERT_NE(addressBeforeGc, nullptr);
+    VMHandle<ObjectHeader> handle1(thread_, addressBeforeGc);
+    g1Allocator->PinObject(handle1.GetPtr());
+    size_t sizeRegionBefore = ObjectToRegion(handle1.GetPtr())->GetAllocatedBytes();
+    // Run GC - promote pinned region
+    Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+
+    ASSERT_EQ(addressBeforeGc, handle1.GetPtr()) << "Pinned object must not moved";
+    auto *pinnedObj = ObjectAllocator::AllocString(OBJECT_SIZE, true);  // Pinned allocation
+    VMHandle<ObjectHeader> handle3(thread_, pinnedObj);
+    size_t sizeRegionAfter = ObjectToRegion(handle1.GetPtr())->GetAllocatedBytes();
+    ASSERT_EQ(ObjectToRegion(handle3.GetPtr()), ObjectToRegion(handle1.GetPtr()));
+    ASSERT_TRUE(ObjectToRegion(handle3.GetPtr())->HasPinnedObjects());
+    ASSERT_TRUE(ObjectToRegion(handle3.GetPtr())->HasFlag(RegionFlag::IS_OLD));
+    ASSERT_NE(sizeRegionBefore, sizeRegionAfter);
+}
+
+TEST_F(G1AllocatePinnedObjectTest, AllocateRegularArray)
+{
+    auto *g1Allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+    [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread_);
+    constexpr size_t OBJECT_SIZE =
+        AlignUp(static_cast<size_t>(DEFAULT_REGION_SIZE * 0.08F), DEFAULT_ALIGNMENT_IN_BYTES);
+    auto *addressBeforeGc = ObjectAllocator::AllocString(OBJECT_SIZE);
+    ASSERT_NE(addressBeforeGc, nullptr);
+    VMHandle<ObjectHeader> handle1(thread_, addressBeforeGc);
+    g1Allocator->PinObject(handle1.GetPtr());
+    size_t sizeRegionBefore = ObjectToRegion(handle1.GetPtr())->GetAllocatedBytes();
+    // Run GC - promote pinned region
+    Runtime::GetCurrent()->GetPandaVM()->GetGC()->WaitForGCInManaged(GCTask(GCTaskCause::EXPLICIT_CAUSE));
+
+    ASSERT_EQ(addressBeforeGc, handle1.GetPtr()) << "Pinned object must not moved";
+    constexpr size_t OBJ_ELEMENT_SIZE = 64;
+    size_t objectSize = 1_KB;
+    auto *arrayObj = ObjectAllocator::AllocArray(objectSize / OBJ_ELEMENT_SIZE, ClassRoot::ARRAY_I64, false, true);
+    ASSERT_NE(arrayObj, nullptr);
+    VMHandle<ObjectHeader> handle3(thread_, arrayObj);
+    size_t sizeRegionAfter = ObjectToRegion(handle1.GetPtr())->GetAllocatedBytes();
+    ASSERT_EQ(ObjectToRegion(handle3.GetPtr()), ObjectToRegion(handle1.GetPtr()));
+    ASSERT_TRUE(ObjectToRegion(handle3.GetPtr())->HasPinnedObjects());
+    ASSERT_NE(sizeRegionBefore, sizeRegionAfter);
+}
+
+static void AllocatePinnedObjectTest(SpaceType requestedSpaceType, size_t objectSize = 1_KB)
+{
+    ASSERT_TRUE(IsHeapSpace(requestedSpaceType));
+    Runtime::Create(G1AllocatePinnedObjectTest::CreateOptions());
+    auto *thread = MTManagedThread::GetCurrent();
+    ASSERT_NE(thread, nullptr);
+    thread->ManagedCodeBegin();
+    auto *g1Allocator =
+        static_cast<ObjectAllocatorG1<> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+    {
+        [[maybe_unused]] HandleScope<ark::ObjectHeader *> scope(thread);
+        constexpr size_t OBJ_ELEMENT_SIZE = 64;
+        auto *addressBeforeGc =
+            ObjectAllocator::AllocArray(objectSize / OBJ_ELEMENT_SIZE, ClassRoot::ARRAY_I64,
+                                        requestedSpaceType == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT, true);
+        ASSERT_NE(addressBeforeGc, nullptr);
+        VMHandle<ObjectHeader> handle(thread, addressBeforeGc);
+        SpaceType objSpaceType =
+            PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(handle.GetPtr()));
+        ASSERT_EQ(objSpaceType, requestedSpaceType);
+        ASSERT_EQ(addressBeforeGc, handle.GetPtr());
+        if (requestedSpaceType == SpaceType::SPACE_TYPE_OBJECT) {
+            ASSERT_TRUE(ObjectToRegion(handle.GetPtr())->HasPinnedObjects());
+        }
+        g1Allocator->UnpinObject(handle.GetPtr());
+        ASSERT_FALSE(ObjectToRegion(handle.GetPtr())->HasPinnedObjects());
+    }
+    thread->ManagedCodeEnd();
+    Runtime::Destroy();
+}
+
+TEST(G1AllocateDifferentSpaceTypePinnedObjectTest, AllocatePinnedRegularObjectTest)
+{
+    AllocatePinnedObjectTest(SpaceType::SPACE_TYPE_OBJECT);
+}
+
+TEST(G1AllocateDifferentSpaceTypePinnedObjectTest, AllocatePinnedHumongousObjectTest)
+{
+    constexpr size_t HUMONGOUS_OBJECT_FOR_PINNING_SIZE = 4_MB;
+    AllocatePinnedObjectTest(SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT, HUMONGOUS_OBJECT_FOR_PINNING_SIZE);
+}
+
+TEST(G1AllocateDifferentSpaceTypePinnedObjectTest, AllocatePinnedNonMovableObjectTest)
+{
+    AllocatePinnedObjectTest(SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
 }
 
 // NOLINTEND(readability-magic-numbers)

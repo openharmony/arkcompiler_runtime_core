@@ -2184,12 +2184,13 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::ActualizeRemSets()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
-
+    auto *objectAllocator = this->GetG1ObjectAllocator();
     // Invalidate regions from collection set in all remsets
     for (Region *region : collectionSet_.Young()) {
         if (!region->HasFlag(RegionFlag::IS_PROMOTED)) {
             RemSet<>::template InvalidateRegion<false>(region);
         } else {
+            objectAllocator->AddPromotedRegionToQueueIfPinned(region);
             region->RmvFlag(RegionFlag::IS_PROMOTED);
         }
     }

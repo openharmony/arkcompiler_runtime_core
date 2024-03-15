@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ inline ObjectHeader *AllocNonMovableObject()
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions,-warnings-as-errors)
 class ObjectAllocator {
 public:
-    static coretypes::Array *AllocArray(size_t length, ClassRoot classRoot, bool nonmovable)
+    static coretypes::Array *AllocArray(size_t length, ClassRoot classRoot, bool nonmovable, bool pinned = false)
     {
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -61,16 +61,17 @@ public:
         if (nonmovable) {
             spaceType = SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT;
         }
-        return coretypes::Array::Create(klass, length, spaceType);
+        return coretypes::Array::Create(klass, length, spaceType, pinned);
     }
 
-    static coretypes::String *AllocString(size_t length)
+    static coretypes::String *AllocString(size_t length, bool pinned = false)
     {
         Runtime *runtime = Runtime::GetCurrent();
         LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
         PandaVector<uint8_t> data;
         data.resize(length);
-        return coretypes::String::CreateFromMUtf8(data.data(), length, length, true, ctx, runtime->GetPandaVM());
+        return coretypes::String::CreateFromMUtf8(data.data(), length, length, true, ctx, runtime->GetPandaVM(), true,
+                                                  pinned);
     }
 
     static ObjectHeader *AllocObjectInYoung()
