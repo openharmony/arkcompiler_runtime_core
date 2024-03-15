@@ -28,19 +28,19 @@ done
 
 exec 2>/dev/null
 
-$PANDA_BINARY_ROOT/bin-gtests/bytecodeopt_unit_tests
-if test -f "$PANDA_BINARY_ROOT/bin-gtests/bytecodeopt_unit_tests_java"; then
-    $PANDA_BINARY_ROOT/bin-gtests/bytecodeopt_unit_tests_java
+"${PANDA_BINARY_ROOT}/bin-gtests/bytecodeopt_unit_tests}"
+if test -f "${PANDA_BINARY_ROOT}/bin-gtests/bytecodeopt_unit_tests_java"; then
+    "${PANDA_BINARY_ROOT}/bin-gtests/bytecodeopt_unit_tests_java"
 fi
-if test -f "$PANDA_BINARY_ROOT/bin-gtests/bytecodeopt_unit_tests_ecma"; then
-    $PANDA_BINARY_ROOT/bin-gtests/bytecodeopt_unit_tests_ecma
+if test -f "${PANDA_BINARY_ROOT}/bin-gtests/bytecodeopt_unit_tests_ecma"; then
+    "${PANDA_BINARY_ROOT}/bin-gtests/bytecodeopt_unit_tests_ecma"
 fi
 
-gcov $PANDA_BINARY_ROOT/bytecode_optimizer/CMakeFiles/arkbytecodeopt.dir
+gcov "${PANDA_BINARY_ROOT}/bytecode_optimizer/CMakeFiles/arkbytecodeopt.dir"
 if [ -x "$(command -v gcovr)" ]; then
     echo "gcovr found"
     gcovr --version
-    gcovr -v -r $PANDA_ROOT/bytecode_optimizer -e $PANDA_ROOT/bytecode_optimizer/tests --object-directory=$PANDA_BINARY_ROOT --html-details --html -o report.html
+    gcovr -v -r "${PANDA_ROOT}/bytecode_optimizer" -e "${PANDA_ROOT}/bytecode_optimizer/tests" --object-directory="$PANDA_BINARY_ROOT" --html-details --html -o report.html
 else
     echo "gcovr not found"
     exit 1

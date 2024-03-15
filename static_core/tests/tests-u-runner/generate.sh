@@ -28,11 +28,12 @@ export PYTHONPATH=$PYTHONPATH:${ROOT_DIR}/tests/tests-u-runner
 GENERATOR=${ROOT_DIR}/tests/tests-u-runner/runner/plugins/ets/preparation_step.py
 GENERATOR_OPTIONS=$*
 
-source ${ROOT_DIR}/scripts/python/venv-utils.sh
+source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 activate_venv
 set +e
 
-python3 -B ${GENERATOR} ${GENERATOR_OPTIONS}
+# shellcheck disable=SC2086
+python3 -B "${GENERATOR}" ${GENERATOR_OPTIONS}
 EXIT_CODE=$?
 
 set -e

@@ -27,24 +27,24 @@ if [[ -z "$REPO_DIR" || -z "$GITEE_USER" ]]; then
     exit 1
 fi
 
-mkdir -p $REPO_DIR
+mkdir -p "$REPO_DIR"
 
 # Update REPO_DIR to full path
-REPO_DIR=$(readlink -f $REPO_DIR)
-FULL_SCRIPT_PATH=$(realpath ${BASH_SOURCE[0]})
+REPO_DIR=$(readlink -f "$REPO_DIR")
+FULL_SCRIPT_PATH=$(realpath "${BASH_SOURCE[0]}")
 
 cd "${REPO_DIR}"
 
 # clone arkcompiler_runtime_core repo
 CLONE_URL=git@gitee.com:${GITEE_USER}/arkcompiler_runtime_core.git
-echo 'CLONE_URL: ' $CLONE_URL
-git clone $CLONE_URL
+echo 'CLONE_URL: ' "$CLONE_URL"
+git clone "$CLONE_URL"
 
 echo "arkcompiler_runtime_core cloned successed"
 
 # set SCRIPT_DIR for running install_ecma_plugin.sh
 SCRIPT_DIR=$(cd -- "$(dirname -- "${FULL_SCRIPT_PATH}")" &> /dev/null && pwd)
-echo 'Script path: ' $SCRIPT_DIR
+echo "Script path: $SCRIPT_DIR"
 
 # install ecmascript plugin
 cd arkcompiler_runtime_core
@@ -53,6 +53,6 @@ if [[ "${GITEE_USER}" != "openharmony-sig" ]]; then
     echo "set upstream for arkcompiler_runtime_core to git@gitee.com:openharmony-sig/arkcompiler_runtime_core.git"
 fi
 
-$SCRIPT_DIR/install_ecma_plugin.sh $GITEE_USER
+"${SCRIPT_DIR}/install_ecma_plugin.sh" "$GITEE_USER"
 
 echo "ecmascript plugin installed"

@@ -23,28 +23,28 @@ set -euo pipefail
 REPO_DIR=${1:-$(pwd)}
 SCRIPT_DIR=$REPO_DIR/scripts
 
-echo 'Script path: ' $SCRIPT_DIR
-echo 'Repo path: ' $REPO_DIR
+echo "Script path: $SCRIPT_DIR"
+echo "Repo path: $REPO_DIR"
 
-# uopdate arkcompiler_runtime_core fork
+# update arkcompiler_runtime_core fork
 cd "${REPO_DIR}"
 echo "update arkcompiler_runtime_core"
 
-$SCRIPT_DIR/update_master_and_branch.sh
+"${SCRIPT_DIR}/update_master_and_branch.sh"
 echo "update arkcompiler_runtime_core succeeded"
 
-# uopdate arkcompiler_ets_runtime fork
+# update arkcompiler_ets_runtime fork
 ECMA_DIR=$REPO_DIR/plugins/ecmascript
 cd "${ECMA_DIR}"
 echo "update ecmascript"
 
-$SCRIPT_DIR/update_master_and_branch.sh
+"${SCRIPT_DIR}/update_master_and_branch.sh"
 echo "update ecmascript succeeded"
 
-# uopdate arkcompiler_ets_frontend fork
+# update arkcompiler_ets_frontend fork
 ES2PANDA_DIR=${ECMA_DIR}/es2panda
 cd "${ES2PANDA_DIR}"
 echo "update es2panda"
 
-$SCRIPT_DIR/update_master_and_branch.sh
+"${SCRIPT_DIR}/update_master_and_branch.sh"
 echo "update es2panda succeeded"

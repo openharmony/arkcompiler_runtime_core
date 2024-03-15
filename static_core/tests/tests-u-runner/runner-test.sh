@@ -18,7 +18,7 @@ ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
 
 RUNNER="${ROOT_DIR}/tests/tests-u-runner/runner_test.py"
 
-source ${ROOT_DIR}/scripts/python/venv-utils.sh
+source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 activate_venv
 set +e
 

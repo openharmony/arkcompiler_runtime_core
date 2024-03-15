@@ -24,7 +24,7 @@ if [ $# -ne 2 ]; then
     exit 1
 fi
 
-diff ${cross_values_1} ${cross_values_2}
+diff "${cross_values_1}" "${cross_values_2}"
 res=$?
 
 if [ ${res} -eq 1 ]; then

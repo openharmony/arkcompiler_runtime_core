@@ -14,7 +14,7 @@
 
 set -e
 
-DIR=$(cd $(dirname $0) && pwd)
+DIR=$(cd $(dirname "$0") && pwd)
 
 if [ $# -ge 3 ]; then
     TEST=$1
@@ -25,8 +25,8 @@ if [ $# -ge 3 ]; then
 
     echo "Running $DIR/.../pa/${TEST}"
 
-    $PANDA_RUN_PREFIX $PANDA_BUILD/bin/ark_asm $DIR/../pa/$TEST $BIN_TEST_DIR/$TEST.abc
-    LD_LIBRARY_PATH=$BIN_TEST_DIR/lib $PANDA_RUN_PREFIX $PANDA_BUILD/bin/ark --boot-panda-files=$PANDA_BUILD/plugins/ets/etsstdlib.abc --load-runtimes=ets --run-gc-in-place --gc-type=epsilon $BIN_TEST_DIR/$TEST.abc EtsNapiTests::main
+    $PANDA_RUN_PREFIX "$PANDA_BUILD/bin/ark_asm" "$DIR/../pa/$TEST" "$BIN_TEST_DIR/$TEST.abc"
+    LD_LIBRARY_PATH="$BIN_TEST_DIR/lib" $PANDA_RUN_PREFIX "$PANDA_BUILD/bin/ark" --boot-panda-files="$PANDA_BUILD/plugins/ets/etsstdlib.abc" --load-runtimes=ets --run-gc-in-place --gc-type=epsilon "$BIN_TEST_DIR/$TEST.abc" EtsNapiTests::main
 
 else
     echo "Usage test.sh <test_name> <panda_build_dir> <dir_to_save_bins> <PANDA_RUN_PREFIX>"

@@ -58,14 +58,15 @@ fi
 
 function run_tests() {
     echo "Run intrusive tests"
-    ${BUILD_TOOL} -k1 -j${NPROC_PER_JOB} ${BUILD_TARGETS}
+    # shellcheck disable=SC2086
+    ${BUILD_TOOL} -k1 -j"${NPROC_PER_JOB}" ${BUILD_TARGETS}
 }
 
 function clear_dir() {
     TARGET_DIR=$1
     if [[ -d $TARGET_DIR ]]; then
         if [[ "$CLEAR_BUILD_DIRS" = true ]]; then
-            rm -rf $TARGET_DIR
+            rm -rf "$TARGET_DIR"
         else
             echo "Directory $TARGET_DIR is not empty. Clear it or use flag -c"
             exit 1
@@ -99,20 +100,20 @@ if [[ -z "$2" ]]; then
     usage
 fi
 
-export ROOT_DIR=$(realpath $1)
-export ARTIFACTS_DIR=$(realpath $2)
+export ROOT_DIR=$(realpath "$1")
+export ARTIFACTS_DIR=$(realpath "$2")
 
 export TSAN_OPTIONS=${tsan_options}
 
 BUILD_DIR=$ARTIFACTS_DIR/build
 INTERMEDIATE_PANDA_DIR=$ARTIFACTS_DIR/instrumented
 CLADE_DIR=$BUILD_DIR/clade
-if ! mkdir -p ${BUILD_DIR}; then
+if ! mkdir -p "${BUILD_DIR}"; then
     echo "Cannot create build directory ${BUILD_DIR}"
     usage
 fi
 
-cd $BUILD_DIR
+cd "$BUILD_DIR"
 
 if [[ "$RUN_ONLY" = true ]]; then
     run_tests
@@ -121,26 +122,28 @@ fi
 
 echo "Copy sources into intermediate directory for instrumentation"
 
-clear_dir $CLADE_DIR
-clear_dir $INTERMEDIATE_PANDA_DIR
+clear_dir "$CLADE_DIR"
+clear_dir "$INTERMEDIATE_PANDA_DIR"
 
-cp -rL $ROOT_DIR $INTERMEDIATE_PANDA_DIR
+cp -rL "$ROOT_DIR" "$INTERMEDIATE_PANDA_DIR"
 
 echo "Configure build"
-if ! cmake $INTERMEDIATE_PANDA_DIR -GNinja -DPANDA_C2ABC_UPGRADE_LEGACY=true -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} ${CMAKE_OPTIONS}; then
+# shellcheck disable=SC2086
+if ! cmake "$INTERMEDIATE_PANDA_DIR" -GNinja -DPANDA_C2ABC_UPGRADE_LEGACY=true -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} ${CMAKE_OPTIONS}; then
     echo "Cannot configure build"
     exit 1
 fi
 
 echo "Build ARK and tests to create a commands graph"
-if ! clade -e CmdGraph --config '{"SrcGraph.requires":["CC","CXX"]}' ${BUILD_TOOL} -k1 -j${NPROC_PER_JOB} ${INSTRUMENTATION_TARGETS}; then
+# shellcheck disable=SC2086
+if ! clade -e CmdGraph --config '{"SrcGraph.requires":["CC","CXX"]}' ${BUILD_TOOL} -k1 -j"${NPROC_PER_JOB}" ${INSTRUMENTATION_TARGETS}; then
     echo "Cannot build ARK and tests to create a commands graph"
     exit 1
 fi
 
 echo "Run instrumentation"
 INSTRUMENTATOR=$INTERMEDIATE_PANDA_DIR/scripts/intrusive-testing/intrusive_instrumentator.py
-if ! python3 $INSTRUMENTATOR $INTERMEDIATE_PANDA_DIR $CLADE_DIR/cmds.txt $INTERMEDIATE_PANDA_DIR/${INTRUSIVE_TESTS_RELATIVE_DIR}; then
+if ! python3 "$INSTRUMENTATOR" "$INTERMEDIATE_PANDA_DIR" "${CLADE_DIR}/cmds.txt" "${INTERMEDIATE_PANDA_DIR}/${INTRUSIVE_TESTS_RELATIVE_DIR}"; then
     echo "Cannot run instrumentation"
     exit 1
 fi

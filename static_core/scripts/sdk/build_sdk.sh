@@ -73,8 +73,10 @@ function build_panda() {
         -DPANDA_WITH_ACCORD=OFF \
         -DPANDA_WITH_CANGJIE=OFF"
 
+    # shellcheck disable=SC2086
     cmake -B"$build_dir" ${COMMONS_CMAKE_ARGS[@]} $cmake_arguments
-    ninja -C"$build_dir" -j${CONCURRENCY} $ninja_targets
+    # shellcheck disable=SC2086
+    ninja -C"$build_dir" -j"${CONCURRENCY}" $ninja_targets
 }
 
 # Arguments: src, dst, file_list, include_pattern
