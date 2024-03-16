@@ -17,16 +17,20 @@
 
 namespace panda::abc2program {
 
-void AbcStringTable::AddStringId(uint32_t string_id)
+std::string AbcStringTable::GetStringById(uint32_t string_id) const
 {
-    AddStringId(string_id, abc_file_);
+    panda_file::File::EntityId entity_id(string_id);
+    return GetStringById(entity_id);
 }
 
-void AbcStringTable::AddStringId(uint32_t string_id, const panda_file::File &abc_file)
+std::string AbcStringTable::GetStringById(panda_file::File::EntityId entity_id) const
 {
-    if (&abc_file != &abc_file_) {
-        return;
-    }
+    panda_file::File::StringData sd = file_.GetStringData(entity_id);
+    return (reinterpret_cast<const char *>(sd.data));
+}
+
+void AbcStringTable::AddStringId(uint32_t string_id)
+{
     auto it = sting_id_set_.find(string_id);
     if (it != sting_id_set_.end()) {
         return;
@@ -34,30 +38,31 @@ void AbcStringTable::AddStringId(uint32_t string_id, const panda_file::File &abc
     sting_id_set_.insert(string_id);
 }
 
-std::string AbcStringTable::GetStringById(uint32_t string_id)
+void AbcStringTable::AddStringId(panda_file::File::EntityId entity_id)
 {
-    return GetStringById(string_id, abc_file_);
+    AddStringId(entity_id.GetOffset());
 }
 
-std::string AbcStringTable::GetStringById(uint32_t string_id, const panda_file::File &abc_file)
+std::set<std::string> AbcStringTable::GetStringSet() const
 {
-    panda_file::File::EntityId entity_id(string_id);
-    return GetStringById(entity_id, abc_file);
+    std::set<std::string> string_set;
+    for (uint32_t string_id : sting_id_set_) {
+        string_set.insert(GetStringById(string_id));
+    }
+    return string_set;
 }
 
-std::string AbcStringTable::GetStringById(panda_file::File::EntityId entity_id)
+void AbcStringTable::Dump(std::ostream &os) const
 {
-    return GetStringById(entity_id, abc_file_);
+    for (uint32_t string_id : sting_id_set_) {
+        DumpStringById(os, string_id);
+    }
 }
 
-std::string AbcStringTable::GetStringById(panda_file::File::EntityId entity_id, const panda_file::File &abc_file)
+void AbcStringTable::DumpStringById(std::ostream &os, uint32_t string_id) const
 {
-    return StringDataToString(abc_file.GetStringData(entity_id));
-}
-
-std::string AbcStringTable::StringDataToString(panda_file::File::StringData sd)
-{
-    return (reinterpret_cast<const char *>(sd.data));
+    os << "[offset:0x" << std::hex << string_id << ", name_value:"
+       << GetStringById(string_id) << "]" << std::endl;
 }
 
 } // namespace panda::abc2program

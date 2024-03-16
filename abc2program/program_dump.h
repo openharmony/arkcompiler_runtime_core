@@ -26,13 +26,33 @@ using LiteralTagToStringMap = std::unordered_map<panda_file::LiteralTag, std::st
 
 class PandasmProgramDumper {
 public:
-    PandasmProgramDumper(const panda_file::File &abc_file, AbcStringTable &abc_string_table)
-        : abc_file_(abc_file), abc_string_table_(abc_string_table) {}
-    void Dump(std::ostream &os, pandasm::Program &program);
-    void Dump(std::ostream &os, pandasm::Record &record);
-    void Dump(std::ostream &os, pandasm::Function &function);
-    void Dump(std::ostream &os, pandasm::Field &field);
+    PandasmProgramDumper(const panda_file::File &file, const AbcStringTable &string_table)
+        : file_(&file), string_table_(&string_table) {}
+    PandasmProgramDumper() {}
+    void Dump(std::ostream &os, const pandasm::Program &program) const;
+
 private:
+    bool HasNoAbcInput() const;
+    void DumpAbcFilePath(std::ostream &os) const;
+    void DumpProgramLanguage(std::ostream &os, const pandasm::Program &program) const;
+    void DumpLiteralArrayTable(std::ostream &os, const pandasm::Program &program) const;
+    void DumpLiteralArrayTableWithKey(std::ostream &os, const pandasm::Program &program) const;
+    void DumpLiteralArrayTableWithoutKey(std::ostream &os, const pandasm::Program &program) const;
+    void DumpLiteralArrayWithKey(std::ostream &os, const std::string &key,
+                                 const pandasm::LiteralArray &lit_array) const;
+    void DumpLiteralArrayContents(std::ostream &os) const;
+    void DumpRecordTable(std::ostream &os, const pandasm::Program &program) const;
+    void DumpRecord(std::ostream &os, const pandasm::Record &record) const;
+    bool DumpRecordMetaData(std::ostream &os, const pandasm::Record &record) const;
+    void DumpFieldList(std::ostream &os, const pandasm::Record &record) const;
+    void DumpField(std::ostream &os, const pandasm::Field &field) const;
+    void DumpFieldMetaData(std::ostream &os, const pandasm::Field &field) const;
+    void DumpRecordSourceFile(std::ostream &os, const pandasm::Record &record) const;
+    void DumpFunctionTable(std::ostream &os, const pandasm::Program &program) const;
+    void DumpFunction(std::ostream &os, const pandasm::Function &function) const;
+    void DumpStrings(std::ostream &os, const pandasm::Program &program) const;
+    void DumpStringsByStringTable(std::ostream &os, const AbcStringTable &string_table) const;
+    void DumpStringsByProgram(std::ostream &os, const pandasm::Program &program) const;
     std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
     std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
     template <typename T>
@@ -77,8 +97,8 @@ private:
                                       pandasm::LiteralArray::Literal &lit) const;
     static bool IsArray(const panda_file::LiteralTag &tag);
     static LiteralTagToStringMap literal_tag_to_string_map_;
-    const panda_file::File &abc_file_;
-    AbcStringTable &abc_string_table_;
+    const panda_file::File *file_ = nullptr;
+    const AbcStringTable *string_table_ = nullptr;
 };
 
 } // namespace panda::abc2program

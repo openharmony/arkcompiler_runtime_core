@@ -13,22 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef ABC2PROGRAM_ABC_LITERAL_ARRAY_PROCESSOR_H
-#define ABC2PROGRAM_ABC_LITERAL_ARRAY_PROCESSOR_H
+#ifndef ABC2PROGRAM_ABC2PROGRAM_DRIVER_H
+#define ABC2PROGRAM_ABC2PROGRAM_DRIVER_H
 
-#include "abc_file_entity_processor.h"
+#include <string>
+#include <assembly-program.h>
+#include "abc2program_compiler.h"
 
 namespace panda::abc2program {
 
-class AbcLiteralArrayProcessor : public AbcFileEntityProcessor {
+class Abc2ProgramDriver {
 public:
-    AbcLiteralArrayProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
-    void FillProgramData() override;
-
+    int Run(int argc, const char **argv);
+    bool Run(const std::string &input_file_path, const std::string &output_file_path);
+    bool Compile(const std::string &input_file_path);
+    const pandasm::Program &GetProgram();
 private:
-    std::unique_ptr<panda_file::LiteralDataAccessor> literal_data_accessor_;
-};
+    bool Dump(const std::string &output_file_path);
+    bool Compile(const std::string &input_file_path, pandasm::Program &program);
+    Abc2ProgramCompiler compiler_;
+    pandasm::Program program_;
+}; // class Abc2ProgramDriver
 
 } // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC_LITERAL_ARRAY_PROCESSOR_H
+#endif // ABC2PROGRAM_ABC2PROGRAM_DRIVER_H

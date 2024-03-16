@@ -16,25 +16,22 @@
 #ifndef ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 #define ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 
-#include <assembly-program.h>
-#include "abc_string_table.h"
-#include "file.h"
+#include "abc2program_key_data.h"
 
 namespace panda::abc2program {
 
 class AbcFileProcessor {
 public:
-    AbcFileProcessor(const panda_file::File &abc_file, AbcStringTable &abc_string_table, pandasm::Program &program)
-        : abc_file_(abc_file), abc_string_table_(abc_string_table), program_(program) {}
+    explicit AbcFileProcessor(Abc2ProgramKeyData &key_data);
     bool ProcessFile();
 
 private:
     void ProcessClasses();
-    void FillUpProgramStrings();
-    void FillUpProgramArrayTypes();
-    const panda_file::File &abc_file_;
-    AbcStringTable &abc_string_table_;
-    pandasm::Program &program_;
+    void FillProgramStrings();
+    Abc2ProgramKeyData &key_data_;
+    const panda_file::File *file_ = nullptr;
+    AbcStringTable *string_table_ = nullptr;
+    pandasm::Program *program_ = nullptr;
 };
 
 } // namespace panda::abc2program

@@ -18,16 +18,14 @@
 
 namespace panda::abc2program {
 
-AbcLiteralArrayProcessor::AbcLiteralArrayProcessor(panda_file::File::EntityId entity_id,
-                                                   const panda_file::File &abc_file,
-                                                   AbcStringTable &abc_string_table)
-    : AbcFileEntityProcessor(entity_id, abc_file, abc_string_table)
+AbcLiteralArrayProcessor::AbcLiteralArrayProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
+    : AbcFileEntityProcessor(entity_id, key_data)
 {
-    literal_data_accessor_ = std::make_unique<panda_file::LiteralDataAccessor>(abc_file_, entity_id_);
-    FillUpProgramData();
+    literal_data_accessor_ = std::make_unique<panda_file::LiteralDataAccessor>(*file_, entity_id_);
+    FillProgramData();
 }
 
-void AbcLiteralArrayProcessor::FillUpProgramData()
+void AbcLiteralArrayProcessor::FillProgramData()
 {
     log::Unimplemented(__PRETTY_FUNCTION__);
 }

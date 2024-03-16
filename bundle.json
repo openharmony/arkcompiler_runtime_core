@@ -64,6 +64,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/abc2program:abc2program_frontend_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/abc2program"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/assembler:libarkassembler_frontend_static",
                     "header": {
                         "header_files": [],

@@ -18,15 +18,14 @@
 
 namespace panda::abc2program {
 
-AbcDebugInfoProcessor::AbcDebugInfoProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                                             AbcStringTable &abc_string_table)
-    : AbcFileEntityProcessor(entity_id, abc_file, abc_string_table)
+AbcDebugInfoProcessor::AbcDebugInfoProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
+    : AbcFileEntityProcessor(entity_id, key_data)
 {
-    debug_info_data_accessor_ = std::make_unique<panda_file::DebugInfoDataAccessor>(abc_file_, entity_id_);
-    FillUpProgramData();
+    debug_info_data_accessor_ = std::make_unique<panda_file::DebugInfoDataAccessor>(*file_, entity_id_);
+    FillProgramData();
 }
 
-void AbcDebugInfoProcessor::FillUpProgramData()
+void AbcDebugInfoProcessor::FillProgramData()
 {
     log::Unimplemented(__PRETTY_FUNCTION__);
 }

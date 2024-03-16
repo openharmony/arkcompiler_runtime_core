@@ -19,6 +19,7 @@
 #include <set>
 #include <cstdint>
 #include <string>
+#include <iostream>
 #include <assembly-program.h>
 #include "file-inl.h"
 #include "file.h"
@@ -27,17 +28,17 @@ namespace panda::abc2program {
 
 class AbcStringTable {
 public:
-    explicit AbcStringTable(const panda_file::File &abc_file) : abc_file_(abc_file) {}
+    explicit AbcStringTable(const panda_file::File &file) : file_(file) {}
+    std::string GetStringById(uint32_t string_id) const;
+    std::string GetStringById(panda_file::File::EntityId entity_id) const;
     void AddStringId(uint32_t string_id);
-    void AddStringId(uint32_t string_id, const panda_file::File &abc_file);
-    std::string GetStringById(uint32_t string_id);
-    std::string GetStringById(panda_file::File::EntityId entity_id);
-    static std::string GetStringById(uint32_t string_id, const panda_file::File &abc_file);
-    static std::string GetStringById(panda_file::File::EntityId entity_id, const panda_file::File &abc_file);
-    static std::string StringDataToString(panda_file::File::StringData sd);
+    void AddStringId(panda_file::File::EntityId entity_id);
+    std::set<std::string> GetStringSet() const;
+    void Dump(std::ostream &os) const;
 
 private:
-    const panda_file::File &abc_file_;
+    void DumpStringById(std::ostream &os, uint32_t string_id) const;
+    const panda_file::File &file_;
     std::set<uint32_t> sting_id_set_;
 };
 

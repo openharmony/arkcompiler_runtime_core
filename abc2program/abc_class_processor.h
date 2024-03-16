@@ -24,14 +24,19 @@ namespace panda::abc2program {
 
 class AbcClassProcessor : public AbcFileEntityProcessor {
 public:
-    AbcClassProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                      AbcStringTable &abc_string_table);
-    void FillUpProgramData() override;
+    AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+    void FillProgramData() override;
 
 private:
-    void FillUpFunctionTable();
+    void FillRecord();
+    void FillRecordData(pandasm::Record &record);
+    void FillRecordSourceFile(pandasm::Record &record);
+    void FillRecordMetaData(pandasm::Record &record);
+    void FillRecordAttributes(pandasm::Record &record);
+    void FillRecordAnnotations(pandasm::Record &record);
+    void FillFields(pandasm::Record &record);
+    void FillFunctions();
     std::unique_ptr<panda_file::ClassDataAccessor> class_data_accessor_;
-    std::map<std::string, pandasm::Function> function_table_;
 };
 
 } // namespace panda::abc2program

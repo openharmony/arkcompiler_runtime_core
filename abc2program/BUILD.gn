@@ -20,7 +20,10 @@ config("abc2program_public_config") {
 abc2program_sources = [
   "$target_gen_dir/abc_inst_convert.cpp",
   "$target_gen_dir/abc_opcode_convert.cpp",
+  "$target_gen_dir/abc_type_convert.cpp",
   "abc2program_compiler.cpp",
+  "abc2program_driver.cpp",
+  "abc2program_key_data.cpp",
   "abc2program_log.cpp",
   "abc2program_options.cpp",
   "abc_annotation_processor.cpp",
@@ -28,7 +31,9 @@ abc2program_sources = [
   "abc_code_processor.cpp",
   "abc_debug_info_processor.cpp",
   "abc_field_processor.cpp",
+  "abc_file_entity_processor.cpp",
   "abc_file_processor.cpp",
+  "abc_file_utils.cpp",
   "abc_literal_array_processor.cpp",
   "abc_method_processor.cpp",
   "abc_string_table.cpp",
@@ -56,6 +61,7 @@ ohos_shared_library("abc2program") {
   configs = abc2program_configs
 
   deps = [
+    ":abc_type_convert_cpp",
     ":isa_gen_abc2program_abc_inst_convert_cpp",
     ":isa_gen_abc2program_abc_opcode_convert_cpp",
     "$ark_root/assembler:libarkassembler",
@@ -87,6 +93,7 @@ ohos_static_library("abc2program_frontend_static") {
   configs = abc2program_configs
 
   deps = [
+    ":abc_type_convert_cpp",
     ":isa_gen_abc2program_abc_inst_convert_cpp",
     ":isa_gen_abc2program_abc_opcode_convert_cpp",
     "$ark_root/assembler:libarkassembler_frontend_static",
@@ -141,4 +148,11 @@ ark_isa_gen("isa_gen_abc2program") {
     "$ark_root//assembler/asm_isapi.rb",
     "$ark_root//libpandafile/pandafile_isapi.rb",
   ]
+}
+
+ark_gen_file("abc_type_convert_cpp") {
+  template_file = "$ark_root/abc2program/common/abc_type_convert.cpp.erb"
+  data_file = "$ark_root/libpandafile/types.yaml"
+  requires = [ "$ark_root/libpandafile/types.rb" ]
+  output_file = "$target_gen_dir/abc_type_convert.cpp"
 }

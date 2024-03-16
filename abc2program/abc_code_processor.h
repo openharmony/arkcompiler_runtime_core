@@ -19,20 +19,20 @@
 #include <unordered_map>
 #include "abc_file_entity_processor.h"
 #include "common/abc_code_converter.h"
+#include "code_data_accessor-inl.h"
 
 namespace panda::abc2program {
 
 class AbcCodeProcessor : public AbcFileEntityProcessor {
 public:
-    AbcCodeProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                     AbcStringTable &abc_string_table, panda_file::File::EntityId method_id);
-    void FillUpProgramData() override;
+    AbcCodeProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data,
+                     panda_file::File::EntityId method_id);
+    void FillProgramData() override;
 
 private:
-    std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
     panda_file::File::EntityId method_id_;
     std::unique_ptr<panda_file::CodeDataAccessor> code_data_accessor_;
-    std::unique_ptr<AbcCodeConverter> abc_code_converter_;
+    std::unique_ptr<AbcCodeConverter> code_converter_;
     std::vector<pandasm::Ins> ins;
 }; // AbcCodeProcessor
 

@@ -24,9 +24,8 @@ namespace panda::abc2program {
 
 class AbcDebugInfoProcessor : public AbcFileEntityProcessor {
 public:
-    AbcDebugInfoProcessor(panda_file::File::EntityId entity_id, const panda_file::File &abc_file,
-                          AbcStringTable &abc_string_table);
-    void FillUpProgramData() override;
+    AbcDebugInfoProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+    void FillProgramData() override;
 
 private:
     std::unique_ptr<panda_file::DebugInfoDataAccessor> debug_info_data_accessor_;
