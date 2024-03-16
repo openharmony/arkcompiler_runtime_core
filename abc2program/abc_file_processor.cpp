@@ -63,6 +63,17 @@ void AbcFileProcessor::FillLiteralArrayTable()
     literal_data_accessor_ = std::make_unique<panda_file::LiteralDataAccessor>(*file_, file_->GetLiteralArraysId());
     const std::unordered_set<uint32_t> &literal_array_id_set = entity_container_.GetLiteralArrayIdSet();
     for (const auto &it : literal_array_id_set) {
+        bool is_module_literal_array =
+            entity_container_.GetModuleLiterals().find(it) != entity_container_.GetModuleLiterals().end();
+        if (is_module_literal_array) {
+            panda_file::File::EntityId module_literal_array_id(it);
+            module_data_accessor_ = std::make_unique<panda_file::ModuleDataAccessor>(*file_,
+                module_literal_array_id);
+            AbcModuleArrayProcessor module_array_processor(module_literal_array_id, entity_container_,
+                *module_data_accessor_);
+            module_array_processor.FillProgramData();
+            continue;
+        }
         panda_file::File::EntityId literal_array_id(it);
         AbcLiteralArrayProcessor literal_array_processor(literal_array_id, entity_container_, *literal_data_accessor_);
         literal_array_processor.FillProgramData();

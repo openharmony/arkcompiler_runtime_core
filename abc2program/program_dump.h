@@ -61,6 +61,9 @@ private:
     void DumpFunctionIns(std::ostream &os, const pandasm::Function &function);
     void DumpFunctionIns4PandaAssembly(std::ostream &os, const pandasm::Function &function);
     void DumpFunctionIns4EcmaScript(std::ostream &os, const pandasm::Function &function);
+    void DumpAnnotationData(std::ostream &os, const pandasm::AnnotationData &anno) const;
+    void DumpArrayValue(std::ostream &os, const pandasm::ArrayValue &array) const;
+    void DumpScalarValue(std::ostream &os, const pandasm::ScalarValue &scalar) const;
     void GetOriginalDumpIns(const pandasm::Function &function);
     pandasm::Ins DeepCopyIns(const pandasm::Ins &input) const;
     pandasm::Function::CatchBlock DeepCopyCatchBlock(const pandasm::Function::CatchBlock &catch_block) const;

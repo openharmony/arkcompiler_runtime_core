@@ -35,6 +35,7 @@ private:
     void FillFieldMetaData(pandasm::Field &field);
     void FillFieldAttributes(pandasm::Field &field);
     void FillFieldAnnotations(pandasm::Field &field);
+    void FillMetaDataValue(pandasm::Field &field);
     pandasm::Record &record_;
     AbcTypeConverter type_converter_;
     std::unique_ptr<panda_file::FieldDataAccessor> field_data_accessor_;

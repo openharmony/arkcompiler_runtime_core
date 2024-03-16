@@ -58,6 +58,25 @@ public:
 };
 
 /**
+ * @tc.name: abc2program_hello_world_test_field_metadata
+ * @tc.desc: get program field metadata.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_field_metadata, TestSize.Level1)
+{
+    for (const auto &it : prog_->record_table) {
+        if (it.first == "_ESModuleRecord") {
+            const pandasm::Record &record = it.second;
+            const std::vector<pandasm::Field> &field_list = record.field_list;
+            const pandasm::Field &field = field_list[0];
+            EXPECT_TRUE(field.type.GetPandasmName() == "u32");
+            EXPECT_TRUE(field.name.find("HelloWorld.js") != std::string::npos);
+        }
+    }
+}
+
+/**
  * @tc.name: abc2program_hello_world_test_lang
  * @tc.desc: get program language.
  * @tc.type: FUNC

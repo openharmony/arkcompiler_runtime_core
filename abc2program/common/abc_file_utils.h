@@ -31,6 +31,8 @@ constexpr uint32_t BITS_8_SHIFT = 8;
 constexpr std::string_view GLOBAL_TYPE_NAME = "_GLOBAL";
 constexpr std::string_view ARRAY_TYPE_PREFIX = "[";
 constexpr std::string_view ES_TYPE_ANNOTATION_NAME = "_ESTypeAnnotation";
+constexpr std::string_view ES_MODULE_RECORD = "_ESModuleRecord";
+constexpr std::string_view MODULE_RECORD_IDX = "moduleRecordIdx";
 constexpr std::string_view DOT = ".";
 
 // attribute constant
@@ -52,6 +54,7 @@ constexpr std::string_view DUMP_TITLE_STRING = "# STRING\n";
 constexpr std::string_view DUMP_TITLE_SEPARATOR = "# ====================\n";
 constexpr std::string_view DUMP_CONTENT_ECMASCRIPT = "ECMAScript";
 constexpr std::string_view DUMP_CONTENT_PANDA_ASSEMBLY = "PandaAssembly";
+constexpr std::string_view DUMP_CONTENT_SPACE = " ";
 constexpr std::string_view DUMP_CONTENT_TAB = "\t";
 constexpr std::string_view DUMP_CONTENT_SINGLE_ENDL = "\n";
 constexpr std::string_view DUMP_CONTENT_DOUBLE_ENDL = "\n\n";

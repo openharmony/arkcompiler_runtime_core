@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+import {a} from './a'
+import * as b from './b'
+export let c;
+export * from './d'
+export {e} from './e'
+
 class HelloWorld {
   str = 'HelloWorld';
 }

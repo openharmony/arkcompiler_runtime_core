@@ -110,7 +110,7 @@ void PandasmProgramDumper::DumpRecord(std::ostream &os, const pandasm::Record &r
 bool PandasmProgramDumper::DumpRecordMetaData(std::ostream &os, const pandasm::Record &record) const
 {
     if (record.metadata->IsForeign()) {
-        os << " " << DUMP_CONTENT_ATTR_EXTERNAL;
+        os << DUMP_CONTENT_SPACE << DUMP_CONTENT_ATTR_EXTERNAL;
         os << DUMP_CONTENT_SINGLE_ENDL;
         return false;
     }
@@ -128,14 +128,79 @@ void PandasmProgramDumper::DumpFieldList(std::ostream &os, const pandasm::Record
 
 void PandasmProgramDumper::DumpField(std::ostream &os, const pandasm::Field &field) const
 {
-    os << DUMP_CONTENT_TAB << field.type.GetPandasmName() << " " << field.name;
+    os << DUMP_CONTENT_TAB << field.type.GetPandasmName() << DUMP_CONTENT_SPACE << field.name;
     DumpFieldMetaData(os, field);
     os << DUMP_CONTENT_SINGLE_ENDL;
 }
 
 void PandasmProgramDumper::DumpFieldMetaData(std::ostream &os, const pandasm::Field &field) const
 {
-    log::Unimplemented(__PRETTY_FUNCTION__);
+    if (field.metadata->GetValue()) {
+        DumpScalarValue(os, *(field.metadata->GetValue()));
+    }
+    os << std::endl;
+}
+
+void PandasmProgramDumper::DumpAnnotationData(std::ostream &os, const pandasm::AnnotationData &anno) const
+{
+    os << DUMP_CONTENT_SPACE << anno.GetName() << DUMP_CONTENT_SINGLE_ENDL;
+    for (const auto &element : anno.GetElements()) {
+        os << DUMP_CONTENT_SPACE << element.GetName();
+        if (element.GetValue()->IsArray()) {
+            DumpArrayValue(os, *(element.GetValue()->GetAsArray()));
+        } else {
+            DumpScalarValue(os, *(element.GetValue()->GetAsScalar()));
+        }
+    }
+}
+
+void PandasmProgramDumper::DumpArrayValue(std::ostream &os, const pandasm::ArrayValue &array) const
+{
+    for (const auto &val : array.GetValues()) {
+        DumpScalarValue(os, val);
+    }
+}
+void PandasmProgramDumper::DumpScalarValue(std::ostream &os, const pandasm::ScalarValue &scalar) const
+{
+    switch (scalar.GetType()) {
+        case pandasm::Value::Type::U1:
+        case pandasm::Value::Type::I8:
+        case pandasm::Value::Type::U8:
+        case pandasm::Value::Type::I16:
+        case pandasm::Value::Type::U16:
+        case pandasm::Value::Type::I32:
+        case pandasm::Value::Type::U32:
+        case pandasm::Value::Type::I64:
+        case pandasm::Value::Type::U64:
+        case pandasm::Value::Type::STRING_NULLPTR: {
+            os << DUMP_CONTENT_SPACE << scalar.GetValue<uint64_t>();
+            break;
+        }
+        case pandasm::Value::Type::F32:
+            os << DUMP_CONTENT_SPACE << scalar.GetValue<float>();
+        case pandasm::Value::Type::F64: {
+            os << DUMP_CONTENT_SPACE << scalar.GetValue<double>();
+            break;
+        }
+        case pandasm::Value::Type::STRING:
+        case pandasm::Value::Type::METHOD:
+        case pandasm::Value::Type::ENUM:
+        case pandasm::Value::Type::LITERALARRAY: {
+            os << DUMP_CONTENT_SPACE << scalar.GetValue<std::string>();
+            break;
+        }
+        case pandasm::Value::Type::RECORD: {
+            pandasm::Type type = scalar.GetValue<pandasm::Type>();
+            os << DUMP_CONTENT_SPACE << type.GetComponentName() << DUMP_CONTENT_SPACE << type.GetName();
+            break;
+        }
+        case pandasm::Value::Type::ANNOTATION: {
+            DumpAnnotationData(os, scalar.GetValue<pandasm::AnnotationData>());
+            break;
+        }
+        default :
+            break;
+    }
 }
 
 void PandasmProgramDumper::DumpRecordSourceFile(std::ostream &os, const pandasm::Record &record) const
@@ -176,7 +241,7 @@ void PandasmProgramDumper::DumpFunctionHead(std::ostream &os, const pandasm::Fun
 
 void PandasmProgramDumper::DumpFunctionReturnType(std::ostream &os, const pandasm::Function &function) const
 {
-    os << function.return_type.GetPandasmName() << " ";
+    os << function.return_type.GetPandasmName() << DUMP_CONTENT_SPACE;
 }
 
 void PandasmProgramDumper::DumpFunctionName(std::ostream &os, const pandasm::Function &function) const
@@ -201,7 +266,7 @@ void PandasmProgramDumper::DumpFunctionParamAtIndex(std::ostream &os,
                                                     const pandasm::Function::Parameter &param,
                                                     size_t idx) const
 {
-    os << param.type.GetPandasmName() << " " << DUMP_CONTENT_FUNCTION_PARAM_NAME_PREFIX << idx;
+    os << param.type.GetPandasmName() << DUMP_CONTENT_SPACE << DUMP_CONTENT_FUNCTION_PARAM_NAME_PREFIX << idx;
 }
 
 void PandasmProgramDumper::DumpFunctionAttributes(std::ostream &os, const pandasm::Function &function) const
@@ -642,7 +707,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayU1(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<bool>(lit_array.literals_[i].value_)) << " ";
+        os << (std::get<bool>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -650,7 +715,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayU8(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (static_cast<uint16_t>(std::get<uint8_t>(lit_array.literals_[i].value_))) << " ";
+        os << (static_cast<uint16_t>(std::get<uint8_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -658,7 +723,8 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayI8(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (static_cast<int16_t>(bit_cast<int8_t>(std::get<uint8_t>(lit_array.literals_[i].value_)))) << " ";
+        os << (static_cast<int16_t>(bit_cast<int8_t>(std::get<uint8_t>(lit_array.literals_[i].value_)))) <<
+            DUMP_CONTENT_SPACE;
     }
 }
 
@@ -666,7 +732,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayU16(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<uint16_t>(lit_array.literals_[i].value_)) << " ";
+        os << (std::get<uint16_t>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -674,7 +740,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayI16(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (bit_cast<int16_t>(std::get<uint16_t>(lit_array.literals_[i].value_))) << " ";
+        os << (bit_cast<int16_t>(std::get<uint16_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -682,7 +748,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayU32(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<uint32_t>(lit_array.literals_[i].value_)) << " ";
+        os << (std::get<uint32_t>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -690,7 +756,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayI32(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (bit_cast<int32_t>(std::get<uint32_t>(lit_array.literals_[i].value_))) << " ";
+        os << (bit_cast<int32_t>(std::get<uint32_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -698,7 +764,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayU64(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<uint64_t>(lit_array.literals_[i].value_)) << " ";
+        os << (std::get<uint64_t>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -706,7 +772,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayI64(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (bit_cast<int64_t>(std::get<uint64_t>(lit_array.literals_[i].value_))) << " ";
+        os << (bit_cast<int64_t>(std::get<uint64_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -714,7 +780,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayF32(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<float>(lit_array.literals_[i].value_)) << " ";
+        os << (std::get<float>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
     }
 }
 
@@ -722,7 +788,7 @@ template <typename T>
 void PandasmProgramDumper::SerializeValues4ArrayF64(const pandasm::LiteralArray &lit_array, T &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << std::get<double>(lit_array.literals_[i].value_) << " ";
+        os << std::get<double>(lit_array.literals_[i].value_) << DUMP_CONTENT_SPACE;
     }
 }
 
