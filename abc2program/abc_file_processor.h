@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +16,23 @@
 #ifndef ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 #define ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 
-#include "abc2program_key_data.h"
+#include "common/abc2program_entity_container.h"
 
 namespace panda::abc2program {
 
 class AbcFileProcessor {
 public:
-    explicit AbcFileProcessor(Abc2ProgramKeyData &key_data);
-    bool ProcessFile();
+    explicit AbcFileProcessor(Abc2ProgramEntityContainer &entity_container);
+    bool FillProgramData();
 
 private:
-    void ProcessClasses();
-    void FillProgramStrings();
-    Abc2ProgramKeyData &key_data_;
+    void FillClassesData();
+    void FillLiteralArrayTable();
+    Abc2ProgramEntityContainer &entity_container_;
     const panda_file::File *file_ = nullptr;
     AbcStringTable *string_table_ = nullptr;
     pandasm::Program *program_ = nullptr;
+    std::unique_ptr<panda_file::LiteralDataAccessor> literal_data_accessor_;
 };
 
 } // namespace panda::abc2program

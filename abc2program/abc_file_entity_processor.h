@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,50 +16,50 @@
 #ifndef ABC2PROGRAM_ABC_FILE_ENTITY_PROCESSOR_H
 #define ABC2PROGRAM_ABC_FILE_ENTITY_PROCESSOR_H
 
-#include "abc2program_key_data.h"
+#include "common/abc2program_entity_container.h"
 #include "abc2program_log.h"
-#include "abc_file_utils.h"
+#include "common/abc_file_utils.h"
 
 namespace panda::abc2program {
 
 class AbcFileEntityProcessor {
 public:
-    AbcFileEntityProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+    AbcFileEntityProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container);
 
-    bool AddRecord(panda_file::File::EntityId class_id, const pandasm::Record &record)
+    bool AddRecord(const panda_file::File::EntityId &class_id, const pandasm::Record &record)
     {
-        return key_data_.AddRecord(class_id, record);
+        return entity_container_.AddRecord(class_id, record);
     }
 
-    bool AddFunction(panda_file::File::EntityId method_id, const pandasm::Function &function)
+    bool AddFunction(const panda_file::File::EntityId &method_id, const pandasm::Function &function)
     {
-        return key_data_.AddFunction(method_id, function);
+        return entity_container_.AddFunction(method_id, function);
     }
 
-    bool AddField(panda_file::File::EntityId field_id, const pandasm::Field &field)
+    bool AddField(const panda_file::File::EntityId &field_id, const pandasm::Field &field)
     {
-        return key_data_.AddField(field_id, field);
+        return entity_container_.AddField(field_id, field);
     }
 
-    const pandasm::Record *GetRecordById(panda_file::File::EntityId class_id) const
+    const pandasm::Record *GetRecordById(const panda_file::File::EntityId &class_id) const
     {
-        return key_data_.GetRecordById(class_id);
+        return entity_container_.GetRecordById(class_id);
     }
 
-    const pandasm::Function *GetFunctionById(panda_file::File::EntityId method_id) const
+    const pandasm::Function *GetFunctionById(const panda_file::File::EntityId &method_id) const
     {
-        return key_data_.GetFunctionById(method_id);
+        return entity_container_.GetFunctionById(method_id);
     }
 
-    const pandasm::Field *GetFieldById(panda_file::File::EntityId field_id) const
+    const pandasm::Field *GetFieldById(const panda_file::File::EntityId &field_id) const
     {
-        return key_data_.GetFieldById(field_id);
+        return entity_container_.GetFieldById(field_id);
     }
 
 protected:
     virtual void FillProgramData() = 0;
     panda_file::File::EntityId entity_id_;
-    Abc2ProgramKeyData &key_data_;
+    Abc2ProgramEntityContainer &entity_container_;
     const panda_file::File *file_ = nullptr;
     AbcStringTable *string_table_ = nullptr;
     pandasm::Program *program_ = nullptr;

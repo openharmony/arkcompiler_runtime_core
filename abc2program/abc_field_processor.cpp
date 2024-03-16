@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,12 @@
 
 namespace panda::abc2program {
 
-AbcFieldProcessor::AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data,
+AbcFieldProcessor::AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container,
                                      pandasm::Record &record)
-    : AbcFileEntityProcessor(entity_id, key_data), record_(record)
+    : AbcFileEntityProcessor(entity_id, entity_container), record_(record),
+      type_converter_(AbcTypeConverter(*string_table_))
 {
     field_data_accessor_ = std::make_unique<panda_file::FieldDataAccessor>(*file_, entity_id_);
-    type_converter_ = std::make_unique<AbcTypeConverter>(*string_table_);
-    FillProgramData();
 }
 
 void AbcFieldProcessor::FillProgramData()
@@ -56,7 +55,7 @@ void AbcFieldProcessor::FillFieldName(pandasm::Field &field)
 void AbcFieldProcessor::FillFieldType(pandasm::Field &field)
 {
     uint32_t field_type = field_data_accessor_->GetType();
-    field.type = type_converter_->FieldTypeToPandasmType(field_type);
+    field.type = type_converter_.FieldTypeToPandasmType(field_type);
 }
 
 void AbcFieldProcessor::FillFieldMetaData(pandasm::Field &field)

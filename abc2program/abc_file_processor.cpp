@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,26 +17,27 @@
 #include <iostream>
 #include "abc_class_processor.h"
 #include "abc2program_log.h"
-#include "abc_file_utils.h"
+#include "common/abc_file_utils.h"
+#include "abc_literal_array_processor.h"
 
 namespace panda::abc2program {
 
-AbcFileProcessor::AbcFileProcessor(Abc2ProgramKeyData &key_data) : key_data_(key_data)
+AbcFileProcessor::AbcFileProcessor(Abc2ProgramEntityContainer &entity_container) : entity_container_(entity_container)
 {
-    file_ = &(key_data_.GetAbcFile());
-    string_table_ = &(key_data_.GetAbcStringTable());
-    program_ = &(key_data_.GetProgram());
+    file_ = &(entity_container_.GetAbcFile());
+    string_table_ = &(entity_container_.GetAbcStringTable());
+    program_ = &(entity_container_.GetProgram());
 }
 
-bool AbcFileProcessor::ProcessFile()
+bool AbcFileProcessor::FillProgramData()
 {
     program_->lang = panda_file::SourceLang::ECMASCRIPT;
-    ProcessClasses();
-    FillProgramStrings();
+    FillClassesData();
+    FillLiteralArrayTable();
     return true;
 }
 
-void AbcFileProcessor::ProcessClasses()
+void AbcFileProcessor::FillClassesData()
 {
     const auto classes = file_->GetClasses();
     for (size_t i = 0; i < classes.size(); i++) {
@@ -49,13 +50,23 @@ void AbcFileProcessor::ProcessClasses()
             break;
         }
         panda_file::File::EntityId record_id(class_idx);
-        AbcClassProcessor classProcessor(record_id, key_data_);
+        if (file_->IsExternal(record_id)) {
+            continue;
+        }
+        AbcClassProcessor class_processor(record_id, entity_container_);
+        class_processor.FillProgramData();
     }
 }
 
-void AbcFileProcessor::FillProgramStrings()
+void AbcFileProcessor::FillLiteralArrayTable()
 {
-    program_->strings = string_table_->GetStringSet();
+    literal_data_accessor_ = std::make_unique<panda_file::LiteralDataAccessor>(*file_, file_->GetLiteralArraysId());
+    const std::unordered_set<uint32_t> &literal_array_id_set = entity_container_.GetLiteralArrayIdSet();
+    for (const auto &it : literal_array_id_set) {
+        panda_file::File::EntityId literal_array_id(it);
+        AbcLiteralArrayProcessor literal_array_processor(literal_array_id, entity_container_, *literal_data_accessor_);
+        literal_array_processor.FillProgramData();
+    }
 }
 
 } // namespace panda::abc2program

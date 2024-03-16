@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ bool Abc2ProgramDriver::Compile(const std::string &input_file_path)
 bool Abc2ProgramDriver::Compile(const std::string &input_file_path, pandasm::Program &program)
 {
     // abc file compile logic
+    input_file_path_ = input_file_path;
     if (!compiler_.OpenAbcFile(input_file_path)) {
         return false;
     }
@@ -55,7 +56,9 @@ bool Abc2ProgramDriver::Dump(const std::string &output_file_path)
     // program dump logic
     std::ofstream ofs;
     ofs.open(output_file_path, std::ios::trunc | std::ios::out);
-    PandasmProgramDumper dumper(compiler_.GetAbcFile(), compiler_.GetAbcStringTable());
+    PandasmProgramDumper dumper;
+    dumper.SetDumperSource(ProgramDumperSource::PANDA_ASSEMBLY);
+    dumper.SetAbcFilePath(input_file_path_);
     dumper.Dump(ofs, program_);
     ofs.close();
     return true;

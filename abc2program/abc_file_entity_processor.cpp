@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,13 @@
 
 namespace panda::abc2program {
 
-AbcFileEntityProcessor::AbcFileEntityProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
-    : entity_id_(entity_id), key_data_(key_data)
+AbcFileEntityProcessor::AbcFileEntityProcessor(panda_file::File::EntityId entity_id,
+                                               Abc2ProgramEntityContainer &entity_container)
+    : entity_id_(entity_id), entity_container_(entity_container)
 {
-    file_ = &(key_data_.GetAbcFile());
-    string_table_ = &(key_data_.GetAbcStringTable());
-    program_ = &(key_data_.GetProgram());
+    file_ = &(entity_container_.GetAbcFile());
+    string_table_ = &(entity_container_.GetAbcStringTable());
+    program_ = &(entity_container_.GetProgram());
 }
 
 }  // namespace panda::abc2program

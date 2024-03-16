@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,25 @@ namespace panda::abc2program {
 
 class AbcLiteralArrayProcessor : public AbcFileEntityProcessor {
 public:
-    AbcLiteralArrayProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+    AbcLiteralArrayProcessor(panda_file::File::EntityId entity_id,
+                             Abc2ProgramEntityContainer &entity_container,
+                             panda_file::LiteralDataAccessor &literal_data_accessor);
     void FillProgramData() override;
 
 private:
-    std::unique_ptr<panda_file::LiteralDataAccessor> literal_data_accessor_;
+    void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
+    template <typename T>
+    void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
+                              const panda_file::LiteralDataAccessor::LiteralValue &value) const;
+    void FillLiteralData(pandasm::LiteralArray *lit_array, const panda_file::LiteralDataAccessor::LiteralValue &value,
+                         const panda_file::LiteralTag &tag) const;
+    void FillLiteralData4Method(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                pandasm::LiteralArray::Literal &lit) const;
+    void FillLiteralData4LiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                      pandasm::LiteralArray::Literal &lit) const;
+    static bool IsLiteralTagArray(const panda_file::LiteralTag &tag);
+    panda_file::LiteralDataAccessor &literal_data_accessor_;
+    pandasm::LiteralArray literal_array_;
 };
 
 } // namespace panda::abc2program
