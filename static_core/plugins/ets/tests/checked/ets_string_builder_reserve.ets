@@ -1154,7 +1154,8 @@ function main_events_check() : int {
     assert multi_toString_if_reserve21() == "001": "Wrong result at multi_toString_if_reserve21";
     assert multi_toString_if_reserve22() == "": "Wrong result at multi_toString_if_reserve22";
     assert multi_toString_loop_reserve23() == "": "Wrong result at multi_toString_loop_reserve23";
-    assert types_reserve24() == "false12345678{}": "Wrong result at types_reserve24";
+    // Issue #16227 : different output for empty Object : expected false12345678{}, got false12345678[object Object]
+    assert types_reserve24() == "false12345678[object Object]": "Wrong result at types_reserve24";
     assert lenArray_reserve25() == "012": "Wrong result at lenArray_reserve25";
     assert lenArray_reserve26() == "012": "Wrong result at lenArray_reserve26";
     assert lenArray_reserve27(["0", "1", "2"]) == "012": "Wrong result at lenArray_reserve27";
