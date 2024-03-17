@@ -1,0 +1,43 @@
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+declare const exports: any;
+
+import { Lib2Class, Lib2Class2, IntAlias } from "./lib2";
+
+function _$init$_(): void { return {} as any; };
+(_$init$_ as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
+export {_$init$_};
+exports._$init$_ = _$init$_;
+_$init$_();
+
+class C {
+    public constructor() {};
+    public o1: Lib2Class = {} as any;
+    public o2: Lib2Class2 = {} as any;
+    public v1: number = {} as any;
+};
+(C as any) = (globalThis as any).Panda.getClass('LC;');
+export {C};
+exports.C = C;
+
+class DynObjWrapper {
+    public dynObj_: any = {} as any;
+    constructor() {};
+};
+(DynObjWrapper as any) = (globalThis as any).Panda.getClass('LDynObjWrapper;');
+export {DynObjWrapper};
+exports.DynObjWrapper = DynObjWrapper;
+

@@ -16,6 +16,12 @@
 package std.core;
 
 /**
+ * The maximum depth of printing nested objects
+ * Useful for cyclic linked objects
+ */
+const MAX_CONSOLE_PRINT_DEPTH: int = 10
+
+/**
  * Standard console, that provides access to standard output stream
  */
 export final class Console {
@@ -26,9 +32,8 @@ export final class Console {
      *
      * @param i value to print
      */
-    public print(i: Object): void {
-        let s: String = i.toString()
-        this.print(s)
+    public print(o: NullishType): void {
+        this.print(Value.of(o).toPrint(MAX_CONSOLE_PRINT_DEPTH))
     }
 
     /**
@@ -217,11 +222,14 @@ export final class Console {
      * @param i value to print
      */
     public log(...vals: NullishType[]): void {
-        const arr = new Array<NullishType>()
-        for (let i = 0; i < vals.length; i++) {
-            arr.push(vals[i])
+        const len = vals.length
+        for (let i = 0; i < len; i++) {
+            this.print(vals[i])
+            if (i != len - 1) {
+                this.print(", ")
+            }
         }
-        this.println(arr.join(' '))
+        this.println()
     }
 
     /**

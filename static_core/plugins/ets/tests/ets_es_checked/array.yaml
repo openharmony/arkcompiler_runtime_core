@@ -37,8 +37,7 @@ sub:
           (x: string, y: number, i: number): string => y + x + i
     sub:
       - method: "concat"
-        ignored: true # generics overriding is flaky
-        params: []
+        excluded: true # generics overriding is flaky
         rest:
           - combinationRest "Array.of<number>(1)", "Array.of<number>()", "Array.of<number>(NaN, 10, Infinity)"
       - method: values
@@ -46,11 +45,11 @@ sub:
       - method: entries
         ret_type: Iterable<[number, number]>
       - expr: self.length
-      - expr: |
+      - expr: "0.0"
+        setup: |
           ((): void => { self.length = pars })()
         params:
           - paramOf '0.0', '-1.0'
-        ignored: true  # 16028
       - method: at
         params:
           - paramOf(*default_inds)
@@ -104,7 +103,9 @@ sub:
           - paramOf(*default_inds)
         mandatory: 1
       - method: toString
-        params: []
+      - self:
+          - Array.of<string>(',', ',', '123')
+        method: toString
       - method: join
         params:
            - |
@@ -112,10 +113,42 @@ sub:
         mandatory: 0
       - method: reverse
       - method: sort
+        self:
+          - Array.of<number>(0, -0.0, 4, 1, 2, -1, 1, 21, 111, 0, -0.0)
+          - Array.of<number>(0.0, 2147483647, -0.0, -2147483648, Infinity, -Infinity)
+          - Array.of<number>(0, -0.0, 0.0, -0.0, 0, -0.0, 0.0, -0.0, 0, -0.0, 0.0, -0.0)
+        setup: |
+          const fn1 = (a: number, b: number): number => b - a
+          const fn2 = (a: number, b: number): number => a - b
+        params:
+          - paramOf 'fn1', 'fn2'
         mandatory: 0
-        # params:
-        #   - |
-        #     paramOf('(a: number, b: number): number => b - a')
+      - method: sort
+        self:
+          - Array.of<number | string | null | undefined>(0, -0.0, 4, 1, 2, -1, 1, 21, 111, 0, -0.0)
+        self_type: Array<number | string | null | undefined>
+        setup: |
+          const fn1 = (a: number | string | null | undefined, b: number | string | null | undefined): number => new String(a).length - new String(b).length
+        params:
+          - paramOf 'fn1'
+        mandatory: 0
+      # tests whenever sort is stable
+      - self:
+          - Array.of<number>(2, 4, 4, 13, 9, 4, 6, 0, 0, 3, 5, 15, 0, 20, 0, 5, 19, 15, 9, 6, 15, 17, 5, 17, 5, 7, 7, 7, 12, 8, 6, 14, 13, 2, 9, 17, 20, 4, 18, 4, 16, 1, 15, 11, 6, 4, 14, 7, 7, 18, 12, 20, 15, 0, 5, 9, 1, 15, 12, 7, 20, 18, 1, 4, 2)
+          - Array.of<number>(2, 14, 7, 7, 18, NaN, NaN, 15, 12, 7, 20, 18, 1, 4)
+        expr: self.sort(pars)
+        setup: |
+          const fn1 = (a: number, b: number): number => 0
+          const fn2 = (a: number, b: number): number => NaN
+        params:
+          - paramOf 'fn1', 'fn2'
+      - self_type: Array<Object | null | undefined>
+        self:
+          - Array.of<Object | null | undefined>(null, undefined, 1, "123", 'undefined', 'undefine', 'undefined1', 'null', 'nul', 'null1')
+        sub:
+          - method: toLocaleString
+          - method: sort
+            ret_type: Array<Object | null | undefined>
       - method: toReversed
       - method: toSorted
       - method: unshift
@@ -166,15 +199,61 @@ sub:
             ret_type: Iterable<Object | null | undefined>
           - method: keys
           - method: entries
-            ignored: true # es2panda parser fails
+            excluded: true # es2panda parser fails
             ret_type: Iterable<[number, Object | null | undefined]>
       - self: null
         sub:
-          - expr: Array.of<number>(1).length
-          - expr: Array.of<number>().length
+          - expr: Array.of<number>(pars).length
+            rest:
+              - combinationRest 1, 2, 3, 'NaN'
+          - expr: Array.of<number>(pars)
+            rest:
+              - combinationRest 1, 2, 3, 'NaN'
           - method: Array.of<number>
             rest:
               - combinationRest "NaN", "10.0", "Infinity"
             ret_type: Array<number>
-          - expr: Array.from<number>(Array.of<number>(1, 2, 3, NaN))
-          - expr: Array.from<number>(new Set<number>(Array.of<number>(1, 2, 3, NaN)))
+          - expr: Array.from<Number>([1 as Number, 2 as Number, 3 as Number])
+          - expr: Array.from<number>(pars)
+            params:
+              -
+                - Array.of<number>(1, 2, 3, NaN)
+                - new Set<number>(Array.of<number>(1, 2, 3, NaN))
+          - expr: Array.from<number, number>(pars)
+            params:
+              -
+                - Array.of<number>(1, 2, 3, NaN)
+                - new Set<number>(Array.of<number>(1, 2, 3, NaN))
+              -
+                - |
+                  (v: number, k: number): number => v * k
+                - |
+                  (v: number, k: number): number => v / (k + 1)
+          - expr: Array.from<number, string>(pars)
+            params:
+              -
+                - Array.of<number>(1, 2, 3, NaN)
+                - new Set<number>(Array.of<number>(1, 2, 3, NaN))
+              -
+                - |
+                  (v: number, k: number): string => '' + v + k
+          - expr: new Array<string>(pars)
+            rest:
+              - combinationRest ''.inspect, '123'.inspect, "!@#".inspect
+          - expr: Array.from<string>(pars)
+            params:
+              -
+                - |
+                  '\uD842'
+                - |
+                  '\uDFB7'
+                - |
+                  '\uD842a'
+                - |
+                  '\uDFB7b'
+                - |
+                  'b\uD842'
+                - |
+                  'a\uDFB7'
+                - |
+                  'a𠮷b'

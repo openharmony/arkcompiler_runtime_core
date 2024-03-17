@@ -15,19 +15,83 @@
 
 package std.core;
 
-export class ExceptionInInitializerError extends Error {
-    constructor() {
-        super();
-        this.name = "ExceptionInInitializerError";
+/**
+ * @class Represents an error that occurs when assertion fails.
+ */
+
+export class AssertionError extends Error {
+    readonly tmp_console = new Console();
+
+    //NOTE(kirill-mitkin): Used by frontend
+    constructor(message: String) {
+        this(message, undefined)
     }
 
-    constructor(s: String) {
-        super(s);
-        this.name = "ExceptionInInitializerError";
+    constructor(message?: String, options?: ErrorOptions) {
+        super("AssertionError", message, options)
+        this.tmp_console.log(message!);
     }
+}
 
-    constructor(s: String, cause: Object) {
-        super(s, cause);
-        this.name = "ExceptionInInitializerError";
+/**
+ * @class Represents an error that occurs when division by zero is performed.
+ */
+export class DivideByZeroError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("DivideByZeroError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when null pointer is dereferenced.
+ */
+export class NullPointerError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NullPointerError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when exception is thrown and not catched
+ */
+export class UncatchedExceptionError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("UncatchedExceptionError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when trying to interpret syntactically invalid code
+ */
+export class SyntaxError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("SyntaxError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when JSONValue can not be assigned to a type
+ */
+export class JSONTypeError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("JSONTypeError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when provided collection index is out of range
+ */
+export class RangeError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("RangeError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when array is oging to be indexed out of its bounds
+ */
+export final class ArrayIndexOutOfBoundsError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ArrayIndexOutOfBoundsError", message, options)
     }
 }

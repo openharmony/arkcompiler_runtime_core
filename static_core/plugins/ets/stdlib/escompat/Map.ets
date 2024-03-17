@@ -60,16 +60,14 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
      *
      * @param fn to apply
      */
-    //forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void;
-
-    // TODO(kprokopenko): uncomment when internal issue #14416 is fixed
+    forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void { throw new Error("15998") }
 
     /**
      * Returns elements from the Map as an keys Iterator
      *
      * @returns ValueIterator with map keys
      */
-    //keys(): IterableIterator<K>;
+    keys(): IterableIterator<K>;
 
     /**
      * Returns elements from the Map as an values Iterator
@@ -83,7 +81,7 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
      *
      * @returns an array of Entries
      */
-    //entries(): IterableIterator<[K, V]>;
+    entries(): IterableIterator<[K, V]>;
 }
 
 class MapEntry<K, V> extends Entry<K, V> {
@@ -214,7 +212,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns iterator with map keys
      */
-    /* override */ keys(): IterableIterator<K> {
+    override keys(): IterableIterator<K> {
         return this.s.mappedIterator<K>((x: ListNode): K => { return (x.val as MapEntry<K, V>).key as K })
     }
 
@@ -236,7 +234,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns an array of Entries
      */
-    /* override */ entries(): IterableIterator<[K, V]> {
+    override entries(): IterableIterator<[K, V]> {
         return this.s.mappedIterator<Object>((x: ListNode): Object => {
             const node = x.val as MapEntry<K, V>
             const r: [K, V] = [node.key, node.value]

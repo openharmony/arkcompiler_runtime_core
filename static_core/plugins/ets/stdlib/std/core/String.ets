@@ -23,7 +23,7 @@ type StringOrRegExp = String | RegExp
 /**
  * Unicode string
  */
-export class String extends Object implements Comparable<String>, JSONable<String> {
+export class String extends Object implements Comparable<String>, JSONable<String>, Iterable<String> {
 
     // The constructors below are implemented via initobj instruction
     /**
@@ -1079,6 +1079,16 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
     }
 
     /**
+     * The `toString()` method returns the string representation of the given String
+     * in the form of a copy of the original object.
+     *
+     * @returns a copy of the original String
+     */
+    public override toLocaleString(): String {
+        return this;
+    }
+
+    /**
      * The at() method takes an integer value and returns a new String consisting of the single UTF-16 code unit located
      * at the specified offset. This method allows for positive and negative integers. Negative integers count back from the last string character.
      *
@@ -1915,7 +1925,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         if (json instanceof JSONString) {
             return (json as JSONString).value
         }
-        throw new JSONTypeError("Cannot create String from JSON", json)
+        throw new JSONTypeError("Cannot create String from JSON", new ErrorOptions(json as Object))
     }
 
     /**
@@ -1927,4 +1937,33 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      */
     public native isCompressed(): boolean;
 
+    public override iterator(): IterableIterator<String> {
+        return new StringIterator(this)
+    }
+}
+
+class StringIterator implements IterableIterator<string> {
+    private s: String
+    private idx: int = 0
+
+    constructor(s: String) {
+        this.s = s
+    }
+
+    public override next(): IteratorResult<String> {
+        if (this.idx == this.s.getLength()) {
+            return new IteratorResult<String>()
+        }
+        let highValue: char = this.s.charAt(this.idx);
+        this.idx += 1
+        if (!Char.isHighSurrogate(highValue) || this.idx == this.s.getLength()) {
+            return new IteratorResult<String>(String.fromCharCode(highValue as number));
+        }
+        let lowValue: char = this.s.charAt(this.idx);
+        if (!Char.isLowSurrogate(lowValue)) {
+            return new IteratorResult<String>(String.fromCharCode(highValue as number));
+        }
+        this.idx += 1
+        return new IteratorResult<String>(String.fromCharCode(highValue as number, lowValue as number));
+    }
 }

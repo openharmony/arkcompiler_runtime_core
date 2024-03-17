@@ -316,7 +316,7 @@
  * @returns index of first element satisfying to fn, -1 if no such element
  */
 <%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> findLastIndex<%= this_generic %>(<%= this_arg %>fn: (element: <%= el_type %><%= lambda_params %>) => boolean): number {
-    for(let i = <%= this_len_int %> - 1; i >= 0; i--) {
+    for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
         if (fn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)) {
             return i
         }
@@ -340,7 +340,7 @@
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: <%= el_type %> = <%= get_unsafe.(this, '0') %>;
-    for(let i = 1; i < <%= this_len_int %>; i++) {
+    for (let i = 1; i < <%= this_len_int %>; i++) {
         acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
     }
     return acc
@@ -361,7 +361,7 @@
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 <%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> reduce<<%= this_generic_one %>U = <%= el_type %>>(<%= this_arg %>fn: (previousValue: U, currentValue: <%= el_type %><%= lambda_params %>) => U, initialValue: U): U {
     let acc = initialValue
-    for(let i = 0; i < <%= this_len_int %>; i++) {
+    for (let i = 0; i < <%= this_len_int %>; i++) {
         acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
     }
     return acc
@@ -383,7 +383,7 @@
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: <%= el_type %> = <%= get_unsafe.(this, "#{this_len_int} - 1") %>;
-    for(let i = <%= this_len_int %> - 2; i >= 0; i--) {
+    for (let i = <%= this_len_int %> - 2; i >= 0; i--) {
         acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
     }
     return acc
@@ -404,7 +404,7 @@
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 <%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> reduceRight<<%= this_generic_one %>U>(<%= this_arg %>fn: (a: U, b: <%= el_type %><%= lambda_params %>) => U, initVal: U): U {
     let acc = initVal
-    for(let i = <%= this_len_int %> - 1; i >= 0; i--) {
+    for (let i = <%= this_len_int %> - 1; i >= 0; i--) {
         acc = fn(acc, <%= get_unsafe.(this, 'i') %><%= lambda_args %>)
     }
     return acc
@@ -417,7 +417,8 @@
  */
 // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 <%= access_public %> <%= lambda_params_num >= 2 ? '' : override %> forEach<%= this_generic %>(<%= this_arg %>fn: (a: <%= el_type %><%= lambda_params %>) => void): void {
-    for(let i = 0; i < <%= this_len_int %>; i++) {
+    const len0 = <%= this_len_int %>;
+    for (let i = 0; i < len0; i++) {
         fn(<%= get_unsafe.(this, 'i') %><%= lambda_args %>)
     }
 }
@@ -588,7 +589,18 @@
  * @returns string representation
  */
 <%= access_public %> <%= override %> toLocaleString<%= this_generic %>(<%= this_arg %>): string {
-    return <%= this_call.('toLocaleString') %>new Object(), new Object())
+    const sb = new StringBuilder()
+    const len = <%= this_len_int %>;
+    for (let i = 0; i < len; i++) {
+        if (i != 0) {
+            sb.append(",")
+        }
+        let x: NullishType = <%= get_unsafe.(this, 'i') %>
+        if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
+            sb.append(x!.toLocaleString())
+        }
+    }
+    return sb.toString()
 }
 
 /**
@@ -787,7 +799,7 @@
  */
 <%= access_public %> toReversed<%= this_generic %>(<%= this_arg %>): <%= this_type %> {
     let arr = <%= make_buffer.(this_len_int) %>
-    for(let i = 0; i < <%= this_len_int %>; i++) {
+    for (let i = 0; i < <%= this_len_int %>; i++) {
         arr[<%= this_len_int %> - 1 - i] = <%= get_unsafe.(this, 'i') %>
     }
     return <%= from_buffer.('arr') %>

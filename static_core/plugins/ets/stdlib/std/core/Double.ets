@@ -50,12 +50,16 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Constructs a new Double instance with provided initial value
+     * Constructs a new Double instance from string
      *
-     * @param value the initial value
+     * @param value string that may contain a number
      */
     public constructor(value: String) {
-        this.value = Double.parseFloat(value);
+        this.value = Double.numberFromString(value);
+    }
+
+    public constructor(value: BigInt) {
+        this.value = Double.parseInt(value.toString())
     }
 
     /**
@@ -715,6 +719,27 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
         if (json instanceof JSONNumber) {
             return Double.valueOf((json as JSONNumber).value)
         }
-        throw new JSONTypeError("Cannot create Double from JSON", json)
+        throw new JSONTypeError("Cannot create Double from JSON", new ErrorOptions(json as Object))
     }
+
+
+    /**
+     * numberFromString(String) converts std.core.String to double
+     *
+     * @param s the string to convert
+     *
+     * @returns the result of conversion
+     *
+     * @note
+     * If arg is "+Infinity", "Infinity" or "-Infinity", return value is `inf` or `-inf` respectively.
+     * If arg is "+0" or "-0", return value is 0 or -0.
+     * If arg has leading zeroes, it's ignored: "0001.5" -> 1.5, "-0001.5" -> -1.5
+     * If arg starts from ".", leading zero is implied: ".5" -> 0.5, "-.5" -> -0.5
+     * If arg successfully parsed, trailing non-digits cause return value is NaN: "-.6ffg" -> -NaN
+     * If arg can not be parsed into a number, NaN is returned
+     *
+     *
+     * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number-constructor-number-value
+     */
+    private static native numberFromString(s: String): double;
 }

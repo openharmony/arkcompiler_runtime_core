@@ -15,21 +15,19 @@
 
 declare const exports: any;
 
-export type DoubleAlias = number;
+function _$init$_(): void { return {} as any; };
+(_$init$_ as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
+export {_$init$_};
+exports._$init$_ = _$init$_;
+_$init$_();
 
-class Lib2Class {
+class C {
+    public get x(): number { return {} as any; };
+    public set x(a: number) {};
     public val: number = {} as any;
     constructor() {};
 };
-(Lib2Class as any) = (globalThis as any).Panda.getClass('Llib2/Lib2Class;');
-export {Lib2Class};
-exports.Lib2Class = Lib2Class;
-
-class Lib2Class2 {
-    public val: number = {} as any;
-    constructor() {};
-};
-(Lib2Class2 as any) = (globalThis as any).Panda.getClass('Llib2/Lib2Class2;');
-export {Lib2Class2};
-exports.Lib2Class2 = Lib2Class2;
+(C as any) = (globalThis as any).Panda.getClass('LC;');
+export {C};
+exports.C = C;
 

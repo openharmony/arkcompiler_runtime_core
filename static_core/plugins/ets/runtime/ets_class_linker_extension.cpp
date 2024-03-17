@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
+#include "plugins/ets/runtime/ets_errors.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"

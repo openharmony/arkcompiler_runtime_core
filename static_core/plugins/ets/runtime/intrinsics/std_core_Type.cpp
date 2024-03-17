@@ -432,8 +432,8 @@ EtsString *TypeAPIGetInterface(EtsString *td, EtsLong i)
     auto type = classLinker->GetClass(td->GetMutf8().c_str());
     auto interfaces = type->GetRuntimeClass()->GetInterfaces();
     ASSERT(0 <= i && i <= (EtsLong)interfaces.size());
-    auto interType = EtsClass::FromRuntimeClass(interfaces[i]);
-    return EtsString::CreateFromMUtf8(interType->GetDescriptor());
+    auto ifaceType = EtsClass::FromRuntimeClass(interfaces[i]);
+    return EtsString::CreateFromMUtf8(ifaceType->GetDescriptor());
 }
 
 EtsInt TypeAPIGetFunctionAttributes([[maybe_unused]] EtsString *td)
@@ -599,6 +599,17 @@ EtsString *TypeAPIGetBaseType(EtsString *td)
         return EtsString::CreateFromMUtf8(classLinker->GetObjectClass()->GetDescriptor());
     }
     return EtsString::CreateFromMUtf8(baseClass->GetDescriptor());
+}
+
+EtsBoolean TypeAPIIsInheritedFrom(EtsString *ltd, EtsString *rtd)
+{
+    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    auto coro = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] EtsHandleScope scope {coro};
+    EtsHandle rtdHandle {coro, rtd};
+    EtsHandle lHandle {coro, classLinker->GetClass(ltd->GetMutf8().c_str())};
+    auto r = classLinker->GetClass(rtdHandle->GetMutf8().c_str());
+    return static_cast<EtsBoolean>(lHandle->GetRuntimeClass()->Implements(r->GetRuntimeClass()));
 }
 
 }  // namespace ark::ets::intrinsics

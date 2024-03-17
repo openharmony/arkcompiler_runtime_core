@@ -42,6 +42,13 @@ coretypes:
 - managed_class: std.debug.concurrency.AtomicFlag
   mirror_class: ark::ets::EtsAtomicFlag
 
+- managed_class: std.core.StackTraceElement
+  mirror_class: ark::ets::EtsStackTraceElement
+
+- managed_class: std.core.ErrorOptions
+  mirror_class: ark::ets::EtsErrorOptions
+
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -1314,6 +1321,16 @@ intrinsics:
       args: [f64]
     impl: ark::ets::intrinsics::StdCoreDoubleToFixed
 
+  - name: StdCoreDoubleNumberFromString
+    space: ets
+    class_name: std.core.Double
+    method_name: numberFromString
+    static: true
+    signature:
+      ret: f64
+      args: [ std.core.String ]
+    impl: ark::ets::intrinsics::StdCoreDoubleNumberFromString
+
   - name: StdDoubleIsNan
     space: ets
     class_name: std.core.Double
@@ -1398,8 +1415,8 @@ intrinsics:
       ret: std.core.Object[]
       args:
         - i32
+        - std.core.Object
     impl: ark::ets::intrinsics::StdCoreAllocGenericArray
-    set_flags: []
 
   - name: StdCoreBoolCopyTo
     space: ets
@@ -1568,6 +1585,18 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdCoreStackTraceLines
     clear_flags: [ no_dce ]
+
+  - name: StdCoreStackTraceProvisionStackTrace
+    space: ets
+    class_name: std.core.StackTrace
+    method_name: provisionStackTrace
+    static: true
+    signature:
+      ret: std.core.StackTraceElement[]
+      args: []
+    impl: ark::ets::intrinsics::StdCoreStackTraceProvisionStackTrace
+    clear_flags: [ no_dce ]
+
 
   - name: StdCoreExit
     space: ets
@@ -2410,6 +2439,17 @@ intrinsics:
       ret: void
       args: [ std.core.String, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::TypeAPISetStaticFieldValue
+
+  - name: TypeAPIIsInheritedFrom
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: TypeAPIIsInheritedFrom
+    static: true
+    signature:
+      ret: u1
+      args: [ std.core.String, std.core.String ]
+    impl: ark::ets::intrinsics::TypeAPIIsInheritedFrom
+    clear_flags: [ ]
 
   - name: TypeAPIGetFunctionAttributes
     space: ets

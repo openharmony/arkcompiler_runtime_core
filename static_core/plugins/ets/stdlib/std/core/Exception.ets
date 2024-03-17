@@ -21,8 +21,8 @@ package std.core;
  */
 export class Exception {
   private stackLines: String[];
+  message: String;
   private cause: Object;
-  private msg: String;
   private provisionStackTrace(): void {
     this.stackLines = stackTraceLines();
   }
@@ -31,7 +31,7 @@ export class Exception {
    * Constructs a new empty exception instance
    */
   constructor () {
-    this.msg = "";
+    this.message = "";
     this.cause = this;
     this.provisionStackTrace();
   }
@@ -42,7 +42,7 @@ export class Exception {
    * @param msg message of the exception
    */
   constructor(msg: String) {
-    this.msg = msg;
+    this.message = msg;
     this.cause = this;
     this.provisionStackTrace()
   }
@@ -55,7 +55,7 @@ export class Exception {
    * @param cause cause of the exception
    */
   constructor(msg: String, cause: Object) {
-    this.msg = msg;
+    this.message = msg;
     this.cause = cause;
     this.provisionStackTrace();
   }
@@ -69,8 +69,8 @@ export class Exception {
   override toString(): String {
     let s: String = "";
 
-    if (this.msg != "") {
-      s += this.msg + "\n";
+    if (this.message != "") {
+      s += this.message + "\n";
     }
 
     for (let i: int = (this.stackLines.length > 2 ? 2 : 0); i < this.stackLines.length; i++) {

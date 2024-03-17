@@ -44,22 +44,14 @@ cases:
       class BaseError extends Error {}
 
       class Er extends Error {
-          constructor() {
-              super();
-          }
-
-          constructor(s: String) {
-              super(s);
-          }
-
-          constructor(s: String, cause: Object) {
-              super(s, cause);
-          }
+        constructor(message?: String, options?: ErrorOptions) {
+            super("Er", message, options)
+        }
       }
 
     use: |-
       let cause = new BaseError();
-      let err: Er = new Er("msg", cause);
+      let err: Er = new Er("msg", new ErrorOptions(cause));
       try {
           if (1 != 2) throw err;
           return 1;

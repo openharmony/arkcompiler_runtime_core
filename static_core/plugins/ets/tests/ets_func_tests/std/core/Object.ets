@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,16 +26,24 @@ function main(): int {
 
     failures += test(objectHasOwnProperty(), "Object.hasOwnProperty");
 
+    failures += test(objectFromEntries(), "Object.fromEntries");
+
+    failures += test(objectAssign(), "Object.assign");
+
+    failures += test(objectToString(), "Object.toString");
+
+    failures += test(objectToLocaleString(), "Object.toLocaleString");
+
     return test(failures, "All tests run");
 }
 
-type Tuple = Object[]
+type Tuple = [string, NullishType]
 
 class Point2D {
     static axisnum: number = 2
     x: number
-    y: number
-    constructor (x_: number, y_: number) {
+    y: number | null
+    constructor (x_: number, y_: number | null) {
         this.x = x_
         this.y = y_
     }
@@ -43,8 +51,8 @@ class Point2D {
 
 class Point3D extends Point2D {
     static axisnum: number = 3
-    z: number
-    constructor (x_: number, y_: number, z_: number) {
+    z: number | undefined
+    constructor (x_: number, y_: number | null, z_: number | undefined) {
         super(x_, y_)
         this.z = z_
     }
@@ -63,20 +71,20 @@ function strArraysAreEqual(a: string[], b: string[]): boolean {
     return true
 }
 
-function objArraysAreEqual(a: Object[], b: Object[]): boolean {
+function objArraysAreEqual(a: NullishType[], b: NullishType[]): boolean {
     let alen = a.length
     if (alen != b.length) {
         return false
     }
     for (let i = 0; i < alen; i++) {
-        if (!(a[i].equals(b[i]))) {
+        if (!__runtimeEquals(a[i], b[i])) {
             return false
         }
     }
     return true
 }
 
-function tupleArraysAreEqual(a: Tuple[], b: Tuple[]): boolean {
+function tupleAreEqual(a: Tuple[], b: Tuple[]): boolean {
     let alen = a.length
     if (alen != b.length) {
         return false
@@ -85,14 +93,27 @@ function tupleArraysAreEqual(a: Tuple[], b: Tuple[]): boolean {
         if (a[i].length != b[i].length) {
             return false
         }
-        let aalen = a[i].length
-        for (let j = 0; j < aalen; j++) {
-            if (!(a[i][j].equals(b[i][j]))) {
-                return false
-            }
+        if (a[i][0] != b[i][0] || !__runtimeEquals(a[i][1], b[i][1])) {
+            return false
         }
     }
     return true
+}
+
+function mapAreEqual(a: Map<PropertyKey, NullishType>, b: Map<PropertyKey, NullishType>): boolean {
+    let alen = a.size
+    if (alen != b.size) {
+        return false
+    }
+    let areEqual: boolean = true
+    a.forEach((av: NullishType, k: PropertyKey) => {
+        const bv = b.get(k)
+        if (bv == undefined || !__runtimeEquals(av, bv)) {
+            areEqual = false
+            return
+        }
+    })
+    return areEqual
 }
 
 function objectKeys(): int {
@@ -152,13 +173,13 @@ function objectValues(): int {
     let arr: number[] = [10, 20, 30]
     let str: string = "abc"
 
-    let cl: Point2D = new Point3D(10, 20, 30)
+    let cl: Point2D = new Point3D(10, 20, undefined)
 
     let lambda: (a: number) => number = (a: number): number => {
         return a + 1
     }
 
-    let emptyArr: Object[] = []
+    let emptyArr: NullishType[] = []
 
     result += objArraysAreEqual(Object.values__(c), emptyArr) ? 0 : 1
     result += objArraysAreEqual(Object.values__(bo), emptyArr) ? 0 : 1
@@ -169,13 +190,13 @@ function objectValues(): int {
     result += objArraysAreEqual(Object.values__(fl), emptyArr) ? 0 : 1
     result += objArraysAreEqual(Object.values__(dou), emptyArr) ? 0 : 1
 
-    let arrVal: Object[] = [new Number(10), new Number(20), new Number(30)]
+    let arrVal: NullishType[] = [new Number(10), new Number(20), new Number(30)]
     result += objArraysAreEqual(Object.values__(arr), arrVal) ? 0 : 1
 
-    let strVal: Object[] = ["a" as string, "b" as string, "c" as string]
+    let strVal: NullishType[] = ["a" as string, "b" as string, "c" as string]
     result += objArraysAreEqual(Object.values__(str), strVal) ? 0 : 1
 
-    let clVal: Object[] = [new Number(10), new Number(20), new Number(30)]
+    let clVal: NullishType[] = [new Number(10), new Number(20), undefined]
     result += objArraysAreEqual(Object.values__(cl), clVal) ? 0 : 1
 
     result += objArraysAreEqual(Object.values__(lambda), emptyArr) ? 0 : 1
@@ -198,7 +219,7 @@ function objectEntries(): int {
     let arr: number[] = [10, 20, 30]
     let str: string = "abc"
 
-    let cl: Point2D = new Point3D(10, 20, 30)
+    let cl: Point2D = new Point3D(10, null, 30)
 
     let lambda: (a: number) => number = (a: number): number => {
         return a + 1
@@ -206,43 +227,34 @@ function objectEntries(): int {
 
     let emptyTuple: Tuple[] = new Tuple[0]
 
-    result += tupleArraysAreEqual(Object.entries(c), emptyTuple) ? 0 : 1
-    result += tupleArraysAreEqual(Object.entries(bo), emptyTuple) ? 0 : 1
-    result += tupleArraysAreEqual(Object.entries(bt), emptyTuple) ? 0 : 1
-    result += tupleArraysAreEqual(Object.entries(sh), emptyTuple) ? 0 : 1
-    result += tupleArraysAreEqual(Object.entries(i), emptyTuple) ? 0 : 1
-    result += tupleArraysAreEqual(Object.entries(lo), emptyTuple) ? 0 : 1
-    result += tupleArraysAreEqual(Object.entries(fl), emptyTuple) ? 0 : 1
-    result += tupleArraysAreEqual(Object.entries(dou), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(c), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(bo), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(bt), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(sh), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(i), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(lo), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(fl), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(dou), emptyTuple) ? 0 : 1
 
     let arrVal: Tuple[] = new Tuple[3]
-    arrVal[0] = new Object[2]
     arrVal[0] = ["0", new Number(10)]
-    arrVal[1] = new Object[2]
     arrVal[1] = ["1", new Number(20)]
-    arrVal[2] = new Object[2]
     arrVal[2] = ["2", new Number(30)]
-    result += tupleArraysAreEqual(Object.entries(arr), arrVal) ? 0 : 1
+    result += tupleAreEqual(Object.entries(arr), arrVal) ? 0 : 1
 
     let strVal: Tuple[] = new Tuple[3]
-    strVal[0] = new Object[2]
     strVal[0] = ["0", "a"]
-    strVal[1] = new Object[2]
     strVal[1] = ["1", "b"]
-    strVal[2] = new Object[2]
     strVal[2] = ["2", "c"]
-    result += tupleArraysAreEqual(Object.entries(str), strVal) ? 0 : 1
+    result += tupleAreEqual(Object.entries(str), strVal) ? 0 : 1
 
     let clVal: Tuple[] = new Tuple[3]
-    clVal[0] = new Object[2]
     clVal[0] = ["x", new Number(10)]
-    clVal[1] = new Object[2]
-    clVal[1] = ["y", new Number(20)]
-    clVal[2] = new Object[2]
+    clVal[1] = ["y", null]
     clVal[2] = ["z", new Number(30)]
-    result += tupleArraysAreEqual(Object.entries(cl), clVal) ? 0 : 1
+    result += tupleAreEqual(Object.entries(cl), clVal) ? 0 : 1
 
-    result += tupleArraysAreEqual(Object.entries(lambda), emptyTuple) ? 0 : 1
+    result += tupleAreEqual(Object.entries(lambda), emptyTuple) ? 0 : 1
 
     return result
 }
@@ -270,21 +282,21 @@ function objectGetOwnPropertyNames(): int {
 
     let emptyArr: string[] = []
 
-    result += strArraysAreEqual(Reflect.ownKeys(c), emptyArr) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(bo), emptyArr) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(bt), emptyArr) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(sh), emptyArr) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(i), emptyArr) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(lo), emptyArr) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(fl), emptyArr) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(dou), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(c), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(bo), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(bt), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(sh), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(i), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(lo), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(fl), emptyArr) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(dou), emptyArr) ? 0 : 1
 
-    result += strArraysAreEqual(Reflect.ownKeys(arr), ["0", "1", "2", "length"]) ? 0 : 1
-    result += strArraysAreEqual(Reflect.ownKeys(str), ["0", "1", "2", "length"]) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(arr), ["0", "1", "2", "length"]) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(str), ["0", "1", "2", "length"]) ? 0 : 1
 
-    result += strArraysAreEqual(Reflect.ownKeys(cl), ["x", "y", "z"]) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(cl), ["x", "y", "z"]) ? 0 : 1
 
-    result += strArraysAreEqual(Reflect.ownKeys(lambda), ["length", "name"]) ? 0 : 1
+    result += strArraysAreEqual(Object.getOwnPropertyNames(lambda), ["length", "name"]) ? 0 : 1
 
     return result
 }
@@ -305,6 +317,7 @@ function objectHasOwnProperty(): int {
     result += ((arr as Object).hasOwnProperty(3) == false) ? 0 : 1
     result += ((arr as Object).hasOwnProperty("length") == true) ? 0 : 1
     result += ((arr as Object).hasOwnProperty("qwerty") == false) ? 0 : 1
+    result += ((arr as Object).hasOwnProperty("toString") == false) ? 0 : 1
 
     result += (str.hasOwnProperty(0) == true) ? 0 : 1
     result += (str.hasOwnProperty(3) == false) ? 0 : 1
@@ -317,10 +330,70 @@ function objectHasOwnProperty(): int {
     result += (cl.hasOwnProperty("axisnum") == false) ? 0 : 1
     result += (cl.hasOwnProperty("asdasd") == false) ? 0 : 1
     result += (cl.hasOwnProperty(0) == false) ? 0 : 1
+    result += (cl.hasOwnProperty("toString") == false) ? 0 : 1
 
     result += ((lambda as Object).hasOwnProperty("length") == true) ? 0 : 1
     result += ((lambda as Object).hasOwnProperty("name") == true) ? 0 : 1
     result += ((lambda as Object).hasOwnProperty(0) == false) ? 0 : 1
+
+    return result
+}
+
+function objectFromEntries(): int {
+    let result: int = 0
+
+    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
+    let entries = new Map<PropertyKey, NullishType>()
+    entries.set("x", new Number(10))
+    entries.set("y", new Number(20))
+    entries.set("z", new Number(30))
+
+    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
+    let expected = new Map<PropertyKey, NullishType>()
+    expected.set("x", new Number(10))
+    expected.set("y", new Number(20))
+    expected.set("z", new Number(30))
+
+    result += mapAreEqual(Object.fromEntries(entries), expected) ? 0 : 1
+
+    return result
+}
+
+function objectAssign(): int {
+    let result: int = 0
+
+    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
+    let target = new Map<PropertyKey, NullishType>()
+
+    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
+    let expected1 = new Map<PropertyKey, NullishType>()
+    expected1.set("x", new Number(10))
+    expected1.set("y", new Number(20))
+
+    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
+    let expected2 = new Map<PropertyKey, NullishType>()
+    expected2.set("x", new Number(100))
+    expected2.set("y", new Number(200))
+    expected2.set("z", new Number(300))
+
+    result += mapAreEqual(Object.assign(target, new Point2D(10, 20)), expected1) ? 0 : 1
+    result += mapAreEqual(Object.assign(target, new Point2D(10, 20), new Point3D(100, 200, 300)), expected2) ? 0 : 1
+
+    return result
+}
+
+function objectToString(): int  {
+    let result: int = 0
+
+    result += (new Object().toString() == "[object Object]") ? 0 : 1
+
+    return result
+}
+
+function objectToLocaleString(): int  {
+    let result: int = 0
+
+    result += (new Object().toLocaleString() == "[object Object]") ? 0 : 1
 
     return result
 }

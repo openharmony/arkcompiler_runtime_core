@@ -15,391 +15,457 @@
 
 package std.core;
 
-// TODO(kprokopenko): remove when undefined becomes available; function to not use before declaration
-export function __undefined<T>(): T | null { return null }
+export type NullishType = Object | null | undefined
+export type NullableType = Object | null
 
-// TODO(shumilov-petr): Temporary solution
-type Tuple = Object[]
+export type PropertyKey = string
+
+export const ARRAY_LENGTH_MEMBER_NAME      = "length"
+export const FUNCTION_LENGTH_MEMBER_NAME   = "length"
+export const FUNCTION_NAME_MEMBER_NAME     = "name"
+
+export const OBJECT_TO_STRING_MEMBER_NAME: string          = "toString"
+export const OBJECT_TO_LOCALE_STRING_MEMBER_NAME: string   = "toLocaleString"
+export const OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME: string   = "hasOwnProperty"
+
+
+// Temporary aliases
+type EntryType = [PropertyKey, NullishType]
+type __Record<K, V> = Map<K, V>
+type RecordForObject = Map<PropertyKey, NullishType>
 
 /**
  * `object` is an alias for type `Object`
  */
-// export type object = Object;
+// export type object = Object // blocked by #14941
 
 /**
  * Common ancestor amongst all other classes
  */
 export class Object {
-  /**
-   * Constructs a new blank Object
-   */
-  constructor () {};
+    /**
+    * Constructs a new blank Object
+    */
+    constructor () {};
 
-  /**
-   * Converts this object to a string
-   *
-   * @returns result of the conversion
-   */
-  public toString(): String {
-    return Value.of(this).toString()
-  }
-
-  /**
-   * Returns a hash code (integer representation) for this instance
-   *
-   * @returns representation of this instance
-   */
-  public $_hashCode(): int {
-    return runtime.getHashCode(this);
-  }
-
-  /**
-   * Performs default reference equality comparison
-   *
-   * @param to object to be checked against
-   *
-   * @returns true if provided object and this instance have same references, false otherwise
-   */
-  public equals(to: NullishType): boolean {
-    return runtime.isSameReference(this, to);
-  }
-
-  /**
-   * Returns the names of the fields of an object
-   *
-   * @param o an object
-   *
-   * @returns an array of strings representing the given object's own string-keyed field keys.
-   */
-  public static keys(o: Object): string[] {
-    // Char, Boolean and Numeric types doesn't have keys
-    if (o instanceof Char ||
-        o instanceof Boolean ||
-        o instanceof Byte ||
-        o instanceof Short ||
-        o instanceof Int ||
-        o instanceof Long ||
-        o instanceof Float ||
-        o instanceof Double) {
-      return new string[0]
+    /**
+    * Converts this object to a string
+    *
+    * @returns result of the conversion
+    */
+    public toString(): String {
+        return Value.of(this).toString()
     }
-    // "Keys" for the string type is enumeration from 0 to str.length - 1
-    if (o instanceof String) {
-      let sv = o as string
-      let len = sv.getLength()
-      let res = new string[len]
-      for (let i = 0; i < len; i++) {
-        // TODO(shumilov-petr): need to apply more effective way for int to String conversion
-        res[i] = new Int(i).toString()
-      }
-      return res
+
+    /**
+    * Converts this object to locale-specific string representation
+    *
+    * @returns result of the conversion
+    */
+    public toLocaleString(): String {
+        return Value.of(this).toLocaleString()
     }
-    let t = Type.of(o)
-    if (t instanceof ClassType) {
-      let ct = t as ClassType
-      let fnum = ct.getFieldsNum()
-      let n: int = 0
-      for (let i = 0; i < fnum; i++) {
-        if (!ct.getField(i).isStatic()) {
-          n++
+
+    /**
+    * Returns a hash code (integer representation) for this instance
+    *
+    * @returns representation of this instance
+    */
+    public $_hashCode(): int {
+        return runtime.getHashCode(this);
+    }
+
+    /**
+    * Performs default reference equality comparison
+    *
+    * @param to object to be checked against
+    *
+    * @returns true if provided object and this instance have same references, false otherwise
+    */
+    public equals(to: NullishType): boolean {
+        return runtime.isSameReference(this, to);
+    }
+
+    /**
+    * Returns the names of the fields of an object
+    *
+    * @param o an object
+    *
+    * @returns an array of strings representing the given object's own string-keyed field keys.
+    */
+    public static keys(o: Object): string[] {
+        // Char, Boolean and Numeric types doesn't have keys
+        if (o instanceof Char ||
+            o instanceof Boolean ||
+            o instanceof Byte ||
+            o instanceof Short ||
+            o instanceof Int ||
+            o instanceof Long ||
+            o instanceof Float ||
+            o instanceof Double) {
+            return new string[0]
         }
-      }
-      let res = new string[n]
-      let j: int = 0
-      for (let i = 0; i < fnum; i++) {
-        let f = ct.getField(i)
-        if (!f.isStatic()) {
-          res[j] = f.getName()
-          j++
+        // "Keys" for the string type is enumeration from 0 to str.length - 1
+        if (o instanceof String) {
+            const sv = o as string
+            const len = sv.getLength()
+            if (len == 0) {
+                return new string[0]
+            }
+            let res = new string[len]
+            for (let i = 0; i < len; i++) {
+                // NOTE(shumilov-petr): need to apply more effective way for int to String conversion
+                res[i] = new Int(i).toString()
+            }
+            return res
         }
-      }
-      return res
-    } else if (t instanceof ArrayType) {
-      let av = Value.of(o) as ArrayValue
-      let len = av.getLength()
-      let res = new string[len as int]
-      for (let i = 0; i < len; i++) {
-        res[i] = new Int(i).toString()
-      }
-      return res
-    } else if (t instanceof LambdaType) {
-      return new string[0]
-    } else if (t instanceof EnumType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof UnionType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof TupleType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
+        const t = Type.of(o)
+        if (t instanceof ClassType) {
+            const ct = t as ClassType
+            const fnum = ct.getFieldsNum()
+            if (fnum == 0) {
+                return new string[0]
+            }
+            let n: int = 0
+            for (let i = 0; i < fnum; i++) {
+                if (!ct.getField(i).isStatic()) {
+                    n++
+                }
+            }
+            let res = new string[n]
+            let j: int = 0
+            for (let i = 0; i < fnum; i++) {
+                let f = ct.getField(i)
+                if (!f.isStatic()) {
+                    res[j] = f.getName()
+                    j++
+                }
+            }
+            return res
+        } else if (t instanceof ArrayType) {
+            const av = Value.of(o) as ArrayValue
+            const len = av.getLength()
+            if (len == 0) {
+                return new string[0]
+            }
+            let res = new string[len as int]
+            for (let i = 0; i < len; i++) {
+                // NOTE(shumilov-petr): need to apply more effective way for int to String conversion
+                res[i] = new Int(i).toString()
+            }
+            return res
+        } else if (t instanceof LambdaType) {
+            return new string[0]
+        } else if (t instanceof EnumType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof UnionType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof TupleType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        }
+        assert(false)
     }
-    assert(false)
-  }
 
-  /**
-   * Returns the values of the fields of an object
-   *
-   * @param o an object
-   *
-   * @returns an array containing the given object's own string-keyed field values
-   */
-  // TODO(shumilov-petr): Need to rename into `values`. Blocked by Object's childs
-  public static values__(o: Object): Object[] {
-    if (o instanceof Char ||
-        o instanceof Boolean ||
-        o instanceof Byte ||
-        o instanceof Short ||
-        o instanceof Int ||
-        o instanceof Long ||
-        o instanceof Float ||
-        o instanceof Double) {
-      return new Object[0]
+    /**
+    * Returns the values of the fields of an object
+    *
+    * @param o an object
+    *
+    * @returns an array containing the given object's own string-keyed field values
+    */
+    // NOTE(shumilov-petr): Need to rename into `values`. Blocked by Object's childs
+    public static values__(o: Object): NullishType[] {
+        if (o instanceof Char ||
+            o instanceof Boolean ||
+            o instanceof Byte ||
+            o instanceof Short ||
+            o instanceof Int ||
+            o instanceof Long ||
+            o instanceof Float ||
+            o instanceof Double) {
+            return new NullishType[0]
+        }
+        if (o instanceof String) {
+            const sv = o as string
+            const len = sv.getLength()
+            if (len == 0) {
+                return new NullishType[0]
+            }
+            let res = new NullishType[len]
+            for (let i = 0; i < len; i++) {
+                // NOTE(shumilov-petr): must be replaced by `sv.charAt(i) as string` when #15731 will be fixed
+                res[i] = new Char(sv.charAt(i)).toString()
+            }
+            return res
+        }
+        const t = Type.of(o)
+        if (t instanceof ClassType) {
+            const cv = Value.of(o) as ClassValue
+            if (cv.getFieldsNum() == 0) {
+                return new NullishType[0]
+            }
+            const keys = Object.keys(o)
+            const len = keys.length
+            let res = new NullishType[len]
+            for (let i = 0; i < len; i++) {
+                res[i] = cv.getFieldByName(keys[i]).getData()
+            }
+            return res
+        } else if (t instanceof ArrayType) {
+            const av = Value.of(o) as ArrayValue
+            const len = av.getLength()
+            if (len == 0) {
+                return new NullishType[0]
+            }
+            let res = new NullishType[len as int]
+            for (let i = 0; i < len; i++) {
+                res[i] = av.getElement(i).getData()
+            }
+            return res
+        } else if (t instanceof LambdaType) {
+            return new NullishType[0]
+        } else if (t instanceof EnumType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof UnionType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof TupleType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        }
+        assert(false)
     }
-    if (o instanceof String) {
-      let sv = o as string
-      let len = sv.getLength()
-      let res = new Object[len]
-      for (let i = 0; i < len; i++) {
-        res[i] = new StringBuilder().append(sv.charAt(i)).toString()
-      }
-      return res
-    }
-    let t = Type.of(o)
-    if (t instanceof ClassType) {
-      let cv = Value.of(o) as ClassValue
-      let keys = Object.keys(o)
-      let len = keys.length
-      let res = new Object[len]
-      for (let i = 0; i < len; i++) {
-        res[i] = cv.getFieldByName(keys[i]).getData()!
-      }
-      return res
-    } else if (t instanceof ArrayType) {
-      let av = Value.of(o) as ArrayValue
-      let len = av.getLength()
-      let res = new Object[len as int]
-      for (let i = 0; i < len; i++) {
-        res[i] = av.getElement(i).getData()!
-      }
-      return res
-    } else if (t instanceof LambdaType) {
-      return new Object[0]
-    } else if (t instanceof EnumType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof UnionType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof TupleType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    }
-    assert(false)
-  }
 
-  /**
-   * Returns an array of key/values of properties of an object
-   *
-   * @param o object that contains the fields
-   *
-   * @returns array representation of key/values
-   */
-  public static entries(o: Object): Tuple[] {
-    if (o instanceof Char ||
-        o instanceof Boolean ||
-        o instanceof Byte ||
-        o instanceof Short ||
-        o instanceof Int ||
-        o instanceof Long ||
-        o instanceof Float ||
-        o instanceof Double) {
-      return new Tuple[0]
+    /**
+    * Returns an array of key/values of properties of an object
+    *
+    * @param o object that contains the fields
+    *
+    * @returns array representation of key/value
+    */
+    public static entries(o: Object): EntryType[] {
+        if (o instanceof Char ||
+            o instanceof Boolean ||
+            o instanceof Byte ||
+            o instanceof Short ||
+            o instanceof Int ||
+            o instanceof Long ||
+            o instanceof Float ||
+            o instanceof Double) {
+            return new EntryType[0]
+        }
+        if (o instanceof String) {
+            const sv = o as string
+            const len = sv.getLength()
+            if (len == 0) {
+                return new EntryType[0]
+            }
+            let res = new EntryType[len]
+            for (let i = 0; i < len; i++) {
+                // NOTE(shumilov-petr): must be replaced by `sv.charAt(i) as string` when #15731 will be fixed
+                res[i] = [new Int(i).toString(), new Char(sv.charAt(i)).toString()]
+            }
+            return res
+        }
+        const t = Type.of(o)
+        if (t instanceof ClassType) {
+            const cv = Value.of(o) as ClassValue
+            if (cv.getFieldsNum() == 0) {
+                return new EntryType[0]
+            }
+            const keys = Object.keys(o)
+            const len = keys.length
+            let res = new EntryType[len]
+            for (let i = 0; i < len; i++) {
+                res[i] = [keys[i], cv.getFieldByName(keys[i]).getData()]
+            }
+            return res
+        } else if (t instanceof ArrayType) {
+            const av = Value.of(o) as ArrayValue
+            const len = av.getLength()
+            if (len == 0) {
+                return new EntryType[0]
+            }
+            let res = new EntryType[len as int]
+            for (let i = 0; i < len; i++) {
+                res[i] = [new Int(i).toString(), av.getElement(i).getData()]
+            }
+            return res
+        } else if (t instanceof LambdaType) {
+            return new EntryType[0]
+        } else if (t instanceof EnumType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof UnionType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof TupleType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        }
+        assert(false)
     }
-    if (o instanceof String) {
-      let sv = o as string
-      let len = sv.getLength()
-      let res = new Tuple[len]
-      for (let i = 0; i < len; i++) {
-        res[i] = new Object[2]
-        res[i][0] = new Int(i).toString()
-        res[i][1] = new StringBuilder().append(sv.charAt(i)).toString()
-      }
-      return res
-    }
-    let t = Type.of(o)
-    if (t instanceof ClassType) {
-      let cv = Value.of(o) as ClassValue
-      let keys = Object.keys(o)
-      let len = keys.length
-      let res = new Tuple[len]
-      for (let i = 0; i < len; i++) {
-        res[i] = new Object[2]
-        res[i][0] = keys[i]
-        res[i][1] = cv.getFieldByName(keys[i]).getData()!
-      }
-      return res
-    } else if (t instanceof ArrayType) {
-      let av = Value.of(o) as ArrayValue
-      let len = av.getLength()
-      let res = new Tuple[len as int]
-      for (let i = 0; i < len; i++) {
-        res[i] = new Object[2]
-        res[i][0] = new Int(i).toString()
-        res[i][1] = av.getElement(i).getData()!
-      }
-      return res
-    } else if (t instanceof LambdaType) {
-      return new Tuple[0]
-    } else if (t instanceof EnumType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof UnionType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof TupleType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    }
-    assert(false)
-  }
 
-  /**
-   * Returns the names of the own fields of an object
-   *
-   * @param o object that contains the own fields
-   *
-   * @returns array representation of names
-   */
-  public static getOwnPropertyNames(o: Object): string[] {
-    if (o instanceof Char ||
-        o instanceof Boolean ||
-        o instanceof Byte ||
-        o instanceof Short ||
-        o instanceof Int ||
-        o instanceof Long ||
-        o instanceof Float ||
-        o instanceof Double) {
-      return new string[0]
+    /**
+    * Returns the names of the own fields of an object
+    *
+    * @param o object that contains the own fields
+    *
+    * @returns array representation of names
+    */
+    public static getOwnPropertyNames(o: Object): string[] {
+        if (o instanceof Char ||
+            o instanceof Boolean ||
+            o instanceof Byte ||
+            o instanceof Short ||
+            o instanceof Int ||
+            o instanceof Long ||
+            o instanceof Float ||
+            o instanceof Double) {
+            return new string[0]
+        }
+        const t = Type.of(o)
+        if (t instanceof StringType || t instanceof ArrayType) {
+            const keys = Object.keys(o)
+            const len = keys.length
+            if (len == 0) {
+                return new string[0]
+            }
+            let res = new string[len + 1]
+            for (let i = 0; i < len; i++) {
+                res[i] = keys[i]
+            }
+            res[len] = ARRAY_LENGTH_MEMBER_NAME
+            return res
+        }
+        if (t instanceof ClassType) {
+            return Object.keys(o)
+        } else if (t instanceof LambdaType) {
+            return [FUNCTION_LENGTH_MEMBER_NAME, FUNCTION_NAME_MEMBER_NAME]
+        } else if (t instanceof EnumType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof UnionType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof TupleType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        }
+        assert(false)
     }
-    let t = Type.of(o)
-    if (t instanceof StringType || t instanceof ArrayType) {
-      let keys = Object.keys(o)
-      let len = keys.length
-      let res = new string[len + 1]
-      for (let i = 0; i < len; i++) {
-        res[i] = keys[i]
-      }
-      res[len] = "length"
-      return res
-    }
-    if (t instanceof ClassType) {
-      return Object.keys(o)
-    } else if (t instanceof LambdaType) {
-      return ["length", "name"]
-    } else if (t instanceof EnumType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof UnionType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof TupleType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    }
-    assert(false)
-  }
 
-  /**
-   * Determines whether an object has a field with the specified name
-   *
-   * @param key the string name of the field to test
-   *
-   * @returns true if the object has the specified field; false otherwise
-   */
-  public hasOwnProperty(key: string): boolean {
-    let keys = Object.getOwnPropertyNames(this)
-    let len = keys.length
-    for(let i = 0; i < len; i++) {
-      if (keys[i] == key) {
-        return true
-      }
+    /**
+    * Determines whether an object has a field with the specified name
+    *
+    * @param key the string name of the field to test
+    *
+    * @returns true if the object has the specified field; false otherwise
+    */
+    public hasOwnProperty(key: string): boolean {
+        const keys = Object.getOwnPropertyNames(this)
+        const len = keys.length
+        for(let i = 0; i < len; i++) {
+            if (keys[i] == key) {
+                return true
+            }
+        }
+        return false
     }
-    return false
-  }
 
-  /**
-   * Determines whether an object has a element with the specified index
-   *
-   * @param index the number index of the element to test
-   *
-   * @returns true if the object has the specified element; false otherwise
-   */
-  public hasOwnProperty(index: number): boolean {
-    if ((this) instanceof String) {
-      let sv = this as String
-      let len = sv.getLength()
-      let idx = index as long
-      return (0 <= idx && idx < len)
+    /**
+    * Determines whether an object has a element with the specified index
+    *
+    * @param index the number index of the element to test
+    *
+    * @returns true if the object has the specified element; false otherwise
+    */
+    public hasOwnProperty(index: number): boolean {
+        if ((this) instanceof String) {
+            const sv = this as String
+            const len = sv.getLength()
+            const idx = index as long
+            return (0 <= idx && idx < len)
+        }
+        const t = Type.of(this)
+        if (t instanceof ArrayType) {
+            const av = Value.of(this) as ArrayValue
+            const len = av.getLength()
+            const idx = index as long
+            return (0 <= idx && idx < len)
+        } else if (t instanceof EnumType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof UnionType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        } else if (t instanceof TupleType) {
+            // NOTE(shumilov-petr): Not implemented
+            throw new Error("Not implemented")
+        }
+        return false
     }
-    let t = Type.of(this)
-    if (t instanceof ArrayType) {
-      let av = Value.of(this) as ArrayValue
-      let len = av.getLength()
-      let idx = index as long
-      return (0 <= idx && idx < len)
-    } else if (t instanceof EnumType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof UnionType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
-    } else if (t instanceof TupleType) {
-      // TODO(shumilov-petr): Not implemented
-      throw new Error("Not implemented")
+
+    /**
+    * Determines whether an object has a field with the specified name
+    *
+    * @param target an object
+    *
+    * @param key the string name of the field to test
+    *
+    * @returns true if the object has the specified field; false otherwise
+    */
+    public static hasOwn(target: Object, key: string): boolean {
+        return target.hasOwnProperty(key)
     }
-    return false
-  }
 
-  /**
-   * Determines whether an object has a field with the specified name
-   *
-   * @param target an object
-   *
-   * @param key the string name of the field to test
-   *
-   * @returns true if the object has the specified field; false otherwise
-   */
-  public static hasOwn(target: Object, key: string): boolean {
-    return target.hasOwnProperty(key)
-  }
+    /**
+    * Determines whether an object has a element with the specified index
+    *
+    * @param target an object
+    *
+    * @param index the number index of the element to test
+    *
+    * @returns true if the object has the specified element; false otherwise
+    */
+    public static hasOwn(target: Object, index: number): boolean {
+        return target.hasOwnProperty(index)
+    }
 
-  /**
-   * Determines whether an object has a element with the specified index
-   *
-   * @param target an object
-   *
-   * @param index the number index of the element to test
-   *
-   * @returns true if the object has the specified element; false otherwise
-   */
-  public static hasOwn(target: Object, index: number): boolean {
-    return target.hasOwnProperty(index)
-  }
+    /**
+    * Transforms key-value pairs into a Record.
+    *
+    * @param entries a map containing key-value pairs
+    *
+    * @returns new Record whose properties are given by the entries of the map
+    */
+    public static fromEntries<T>(entries: Map<PropertyKey, T>): __Record<PropertyKey, T> {
+        // NOTE(shumilov-petr): Currently, semantics of this function is silly
+        // However, it changes when Record type will be supported by front-end
+        return entries
+    }
 
-  /**
-   * Same as `===` operator
-   *
-   * @param l left operand
-   *
-   * @param r right operand
-   *
-   * @returns true if and only if l === r
-   */
-  public static isWrongName(l: NullishType, r: NullishType): boolean {
-    return __runtimeEquals(l, r)
-  }
+    /**
+    * Copies all own properties from one or more source objects to a target Record.
+    *
+    * @param target target Record -- what to apply the sources' properties to
+    *
+    * @param source objects containing the properties you want to apply
+    *
+    * @returns the modified target Record
+    */
+    // NOTE(shumilov-petr): `RecordForObject` have to replaced into `Record<PropertyKey, NullishType>` (front-end will support it soon)
+    public static assign(target: RecordForObject,  ...source: Object[]): RecordForObject {
+        for (const s of source) {
+            const entries = Object.entries(s)
+            for (const e of entries) {
+                target.set(e[0], e[1])
+            }
+        }
+        return target
+    }
 }
-
-export type NullishType = Object | null | undefined
-export type NullableType = Object | null

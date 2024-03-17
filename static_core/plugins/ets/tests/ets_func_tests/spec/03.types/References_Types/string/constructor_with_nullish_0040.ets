@@ -20,10 +20,18 @@
 
 class A {
   str: String = "hello"
+
+  toString(): string {
+    return "{str: \"" + this.str + "\"}"
+  }
 }
 
 class A1 {
   str: String = "world"
+
+  toString(): string {
+    return "{str: \"" + this.str + "\"}"
+  }
 }
 
 type ANullish = A | undefined | null

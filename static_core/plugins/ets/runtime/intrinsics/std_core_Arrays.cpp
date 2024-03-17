@@ -55,9 +55,14 @@ static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t 
     }
 }
 
-extern "C" ObjectHeader *StdCoreAllocGenericArray(ets_int len)
+extern "C" ObjectHeader *StdCoreAllocGenericArray(ets_int len, EtsObject *sample)
 {
-    auto klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
+    EtsClass *klass;
+    if (sample != nullptr) {
+        klass = sample->GetClass()->GetComponentType();
+    } else {
+        klass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(EtsClassRoot::OBJECT);
+    }
     return EtsObjectArray::Create(klass, len)->GetCoreType();
 }
 

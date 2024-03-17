@@ -23,34 +23,34 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     //entries(): IterableIterator<[number, T]>;
 
-    every(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean;
+    every(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): boolean { throw new Error("#15998") }
     every(predicate: (value: T, index: number) => boolean): boolean;
     every(predicate: (value: T) => boolean): boolean;
     // every<S extends T>(predicate: (value: T, index: number, array: readonly T[]) => value is S, thisArg?: any): this is readonly S[];
     // Typing and previous overload have to cover it
 
-    filter(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): Array<T>;
+    filter(predicate: (value: T, index: number, array: ReadonlyArray<T>) => boolean): Array<T> { throw new Error("#15998") }
     filter(predicate: (value: T, index: number) => boolean): Array<T>;
     filter(predicate: (value: T) => boolean): Array<T>;
     // filter<S extends T>(predicate: (value: T, index: number, array: readonly T[]) => value is S, thisArg?: any): S[];
     // Typing and previous overload have to cover it
 
     // TODO(ivan-tyulyandin): blocked by undefined implementation
-    //find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
+    find(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined { throw new Error("#15998") }
     find(predicate: (value: T, index: number) => boolean): T | undefined;
     find(predicate: (value: T) => boolean): T | undefined;
     // find<S extends T>(predicate: (value: T, index: number, obj: readonly T[]) => value is S, thisArg?: any): S | undefined;
     // Typing and previous overload have to cover it
 
-    //findLast(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined;
+    findLast(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): T | undefined { throw new Error("#15998") }
     findLast(predicate: (value: T, index: number) => boolean): T | undefined;
     findLast(predicate: (value: T) => boolean): T | undefined;
 
-    //findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number;
+    findIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number { throw new Error("#15998") }
     findIndex(predicate: (value: T, index: number) => boolean): number;
     findIndex(predicate: (value: T) => boolean): number;
 
-    //findLastIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number;
+    findLastIndex(predicate: (value: T, index: number, obj: ReadonlyArray<T>) => boolean): number { throw new Error("#15998") }
     findLastIndex(predicate: (value: T, index: number) => boolean): number;
     findLastIndex(predicate: (value: T) => boolean): number;
 
@@ -66,7 +66,7 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     //     thisArg?: This,
     // ): U[];
 
-    //forEach(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => void): void;
+    forEach(action: (value: T, index: number, array: ReadonlyArray<T>) => void): void { throw new Error("#15998") }
     forEach(callbackfn: (value: T, index: number) => void): void;
     forEach(callbackfn: (value: T) => void): void;
 
@@ -78,23 +78,31 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
 
     lastIndexOf(searchElement: T, fromIndex: Number | undefined): number;
 
-    //map<U>(callbackfn: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U>;
+    map<U>(mapper: (value: T, index: number, array: ReadonlyArray<T>) => U): Array<U> { throw new Error("#15998") }
     map<U>(callbackfn: (value: T, index: number) => U): Array<U>;
     map<U>(callbackfn: (value: T) => U): Array<U>;
 
-    //reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
+    reduce(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T {
+        throw new Error("#15998")
+    }
     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T;
     reduce(callbackfn: (previousValue: T, currentValue: T) => T): T;
 
-    //reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    reduce<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U {
+        throw new Error("#15998")
+    }
     reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
     reduce<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
 
-    //reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T;
+    reduceRight(reducer: (previousValue: T, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => T): T {
+        throw new Error("#15998")
+    }
     reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T): T;
     reduceRight(callbackfn: (previousValue: T, currentValue: T) => T): T;
 
-    //reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U;
+    reduceRight<U>(reducer: (previousValue: U, currentValue: T, currentIndex: number, array: ReadonlyArray<T>) => U, initialValue: U): U {
+        throw new Error("#15998")
+    }
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number) => U, initialValue: U): U;
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U;
 
@@ -102,7 +110,8 @@ export interface ReadonlyArray<out T> extends ConcatArray<T> {
     some(predicate: (value: T, index: number) => boolean): boolean;
     some(predicate: (value: T) => boolean): boolean;
 
-    toLocaleString(): string;
+    // toLocaleString(): string;
+    // All objects in ArkTS have such method, no need to define it here
 
     // toString(): string;
     // All objects in ArkTS have such method, no need to define it here

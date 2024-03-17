@@ -235,7 +235,7 @@ export final class Promise<out T> {
         // length property of catchQueue Objet array represents its capacity, catchQueueSize represents its current size
         this.catchQueue = this.ensureCapacity(this.catchQueue, this.catchQueueSize);
         this.catchQueue![this.catchQueueSize] = job;
-        ++this.catchQueueSize;  
+        ++this.catchQueueSize;
     }
 
     public native awaitResolution(): T;

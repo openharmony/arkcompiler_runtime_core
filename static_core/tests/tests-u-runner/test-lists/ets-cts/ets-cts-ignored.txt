@@ -1464,9 +1464,6 @@
 07.expressions/25.equality_expressions/02.value_equality_operators/enum_equality_3.ets
 11.enumerations/01.enumeration_integer_values/enum_int_4.ets
 
-# 15299 Invalid Enum initialization value error
-11.enumerations/01.enumeration_integer_values/enum_int_1.ets
-
 # 14654 Cannot use constant expressions in enum initialization
 11.enumerations/01.enumeration_integer_values/enum_int_2.ets
 11.enumerations/01.enumeration_integer_values/enum_int_3.ets

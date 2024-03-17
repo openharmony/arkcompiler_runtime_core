@@ -515,6 +515,8 @@ inline constexpr uint32_t ALLOW_BINARY = 1U << 0U;
 inline constexpr uint32_t ALLOW_OCTAL = 1U << 1U;
 inline constexpr uint32_t ALLOW_HEX = 1U << 2U;
 inline constexpr uint32_t IGNORE_TRAILING = 1U << 3U;
+inline constexpr uint32_t EMPTY_IS_ZERO = 1U << 4U;
+inline constexpr uint32_t ERROR_IN_EXPONENT_IS_NAN = 1U << 5U;
 
 }  // namespace ark::ets::intrinsics::helpers::flags
 

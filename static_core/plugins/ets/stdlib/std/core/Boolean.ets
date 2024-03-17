@@ -231,6 +231,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
         } else if (json instanceof JSONTrue) {
             return Boolean.TRUE
         }
-        throw new JSONTypeError("Cannot create Boolean from JSON", json)
+        throw new JSONTypeError("Cannot create Boolean from JSON", new ErrorOptions(json as Object))
     }
 }

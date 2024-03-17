@@ -18,7 +18,7 @@ sub:
       - new Set<number>()
       - new Set<number>(Array.of<number>(+0, NaN, Infinity))
       - new Set<number>(Array.of<number>(-0, -Infinity))
-      - new Set<number>(Array.of<number>(-0, +0, -Infinity))
+      - new Set<number>(Array.of<number>(-0, +0, -Infinity, 1, 3))
     sub:
       - method: values
         ret_type: Iterable<number>
@@ -44,6 +44,16 @@ sub:
       - method: has
         params:
           - paramOf '+0', '-0', 'NaN', '1e-30'
+      - method: forEach
+        ret_type: void
+        params:
+          -
+            - |
+              (x: number): void => { self.delete(x) }
+            - |
+              (x: number): void => { self.add(x) }
+            - |
+              (x: number): void => { self.add(-x) }
       - self:
           - new Set<Object|null|undefined>(Array.of<Object|null|undefined>(null))
           - new Set<Object|null|undefined>(Array.of<Object|null|undefined>(undefined))
@@ -56,3 +66,21 @@ sub:
           - method: delete
             params:
               - paramOf 'null', 'undefined', '0'
+      - self: null
+        expr: new Set<string>(pars)
+        params:
+          -
+            - |
+              '\uD842'
+            - |
+              '\uDFB7'
+            - |
+              '\uD842a'
+            - |
+              '\uDFB7b'
+            - |
+              'b\uD842'
+            - |
+              'a\uDFB7'
+            - |
+              'a𠮷b'

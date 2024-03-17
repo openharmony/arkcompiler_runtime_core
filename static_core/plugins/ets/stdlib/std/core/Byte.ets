@@ -327,7 +327,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
                 return Byte.valueOf(num as byte)
             }
         }
-        throw new JSONTypeError("Cannot create Byte from JSON", json)
+        throw new JSONTypeError("Cannot create Byte from JSON", new ErrorOptions(json as Object))
     }
 
 }

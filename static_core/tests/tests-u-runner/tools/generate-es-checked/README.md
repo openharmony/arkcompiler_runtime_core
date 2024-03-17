@@ -28,7 +28,7 @@ RubyExpr = String
 ArkTSType = String
 
 File
-  = Tree
+  = (top_scope?: String) * Tree
 
 Tree
   = Description
@@ -40,10 +40,11 @@ Description
   * vars?: Map String YAMLObject
 
 CommonDescription
-  = ignored?: Bool
+  = excluded?: Bool
   * category?: String
   * self_type?: ArkTSType
   * self?: Array String | null
+  * setup?: String
 
 Endpoint
   = (method: String) * EndpointDescription
@@ -55,6 +56,11 @@ EndpointDescription
   * rest?: RubyExpr
   * mandatory?: UInt
   * ret_type?: ArkTSType
+  * special:? Array Special
+
+special
+  = match: RegExp
+  * action: "exclude" | "warn as error" | "silence warn" | "report"
 ```
 
 ## Configuration properties
@@ -67,31 +73,34 @@ EndpointDescription
   - `method` name of method to test
   - `expr` expression to test; if it contains word `pars`, it will be substituted with generated parameters
   - endpoint configuration:
-    - `params` list of ruby expressions for generating each parameter (i.e. functions that return lists of values)
+    - `params` list of either:
+      - ruby expressions for generating each parameter (i.e. functions that return lists of values)
+      - plain string representing all parameter values
     - `self` values of `this` for methods; plain string
+    - `setup` code to execute before running a test
     - `ret_type` type of returned expression
     - `mandatory` number of mandatory params (useful for optionals testing)
     - `rest` generator for rest parameters, `combinationRest` is most useful, as it yields all combinations of arguments
+    - `special` special cases array: match tested ts expression and handle it in a special way
 
 ## Internal features
 ### Types
-Types (`self_type`, `ret_type`) represent ArkTS types. Grammar:
+Types (`self_type`, `ret_type`) represent ArkTS types in ArkTS grammar:
 
 ```Haskell
 Type
   = "Array<" Type ">"
   | "Iterable<" Type ">"
-  | "[" (Type ",")* Type "]"
+  | "[" Type ("," Type)+ "]"
   | TrivialType
 
 TrivialType
-  = Ident
-  | Ident "<" (TrivialTypeInner ",")* ">"
-
-TrivialTypeInner
-  = TrivialType
-  | | "[" (TrivialTypeInner ",")* TrivialTypeInner "]"
+  = Ident ("<" (TrivialType ",")* ">")?
+  | TrivialType "|" TrivialType
+  | "[" TrivialType ("," TrivialType)+ "]"
 ```
+
+They are split into two categories, as `TrivialType` is interpreted as whole (string) and isn't used for destructuring result acquired from ts
 
 ### Test splitting
 - By default tests are split into multiple files to prevent es2panda segfault

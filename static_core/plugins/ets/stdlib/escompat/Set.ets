@@ -31,7 +31,7 @@ export interface ReadonlySet<T> extends Iterable<T> {
      *
      * @returns number of unique elements in the Set
      */
-    size(): number; // TODO(kprokopenko): must be a property
+    get size(): number;
 
     /**
      * Applies a function over all elements of the Set
@@ -52,15 +52,13 @@ export interface ReadonlySet<T> extends Iterable<T> {
      *
      * @param fn to apply; value2 is always same as value1
      */
-    forEach(fn: (value: T, value2: T, set: ReadonlySet<T>) => void): void;
-
-    // TODO(kprokopenko): uncomment when internal issue #14416 is fixed
+    forEach(fn: (value: T, value2: T, set: ReadonlySet<T>) => void): void { throw new Error("15998") }
 
     /**
      * Despite name, returns elements from the Set
      * @returns an iterable of the values in the set
      */
-    //keys(): IterableIterator<T>;
+    keys(): IterableIterator<T>;
 
     /**
      * Returns elements from the Set
@@ -72,7 +70,7 @@ export interface ReadonlySet<T> extends Iterable<T> {
     /**
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
-    //entries(): IterableIterator<[T, T]>;
+    entries(): IterableIterator<[T, T]>;
 }
 
 final class ListNode {
@@ -93,11 +91,11 @@ final class SetIterator<R> implements IterableIterator<R> {
     }
 
     override next(): IteratorResult<R> {
+        this.node = this.node.next
         if (__runtimeIsSameReference(this.node, this.tail)) {
             return new IteratorResult<R>()
         }
-        const res = new IteratorResult<R>(this.mapper(this.node) as R)
-        this.node = this.node.next
+        const res = new IteratorResult<R>(this.mapper(this.node))
         return res
     }
 
@@ -158,27 +156,17 @@ export final class Set<K> implements ReadonlySet<K> {
         return this.buckets[idx]
     }
 
-    internal static __asGeneric<T>(x: Object): (x: T) => void {
-        return x as (x: T) => void
-    }
-
     private rehash(): void {
-        const iter = new SetIterator<ListNode>(this.listRoot.next, this.listRoot, (x: ListNode): ListNode => x)
+        const iter = new SetIterator<ListNode>(this.listRoot, this.listRoot, (x: ListNode): ListNode => x)
         const oldSize = this.buckets.length
         for (let i = 0; i < oldSize; i++) {
             const a = this.buckets[i]
-            // TODO(kprokopenko): find a better solution
-            while (a.length != 0) {
-                a.pop()
-            }
+            a.length = 0
             this.buckets.push(new Array<ListNode>())
         }
-        const fn: (v: Object) => void = (v: Object): void => {
-            const x = v as ListNode
+        iteratorForEach<ListNode>(iter, (x: ListNode): void => {
             this.getBucket(x.val).push(x)
-        };
-        // internal issue #13655
-        iteratorForEach<ListNode>(iter, Set.__asGeneric<ListNode>(fn as Object))
+        })
     }
 
     /**
@@ -254,7 +242,7 @@ export final class Set<K> implements ReadonlySet<K> {
      *
      * @returns number of unique elements in the Set
      */
-    override get size(): number {
+    get size(): number {
         return this.sizeVal;
     }
 
@@ -295,14 +283,14 @@ export final class Set<K> implements ReadonlySet<K> {
     }
 
     internal mappedIterator<R>(fn: (n: ListNode) => R): IterableIterator<R> {
-        return new SetIterator<R>(this.listRoot.next, this.listRoot, fn)
+        return new SetIterator<R>(this.listRoot, this.listRoot, fn)
     }
 
     /**
      * Despite name, returns elements from the Set
      * @returns an iterable of the values in the set
      */
-    /* override */ keys(): IterableIterator<K> {
+    override keys(): IterableIterator<K> {
         return this.values()
     }
 
@@ -324,7 +312,7 @@ export final class Set<K> implements ReadonlySet<K> {
     /**
      * @returns an iterable of [v,v] pairs for every value `v` in the set.
      */
-    /* override */ entries(): IterableIterator<[K, K]> {
+    override entries(): IterableIterator<[K, K]> {
         return this.mappedIterator<Object>((x: ListNode): Object => {
             const v = x.val as K;
             const res: [K, K] = [v, v]
@@ -355,8 +343,7 @@ export final class Set<K> implements ReadonlySet<K> {
      *
      * @param fn to apply
      */
-    // fn should take Set instead of ReadonlySet, but blocked by #15096
-    override forEach(fn: (k: K, v: K, set: ReadonlySet<K>) => void): void {
+    override forEach(fn: (k: K, v: K, set: Set<K>) => void): void {
         iteratorForEach<K>(this.keys(), (x: K): void => fn(x, x, this))
     }
 }

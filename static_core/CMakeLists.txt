@@ -45,6 +45,8 @@ set(PANDA_BINARY_ROOT ${CMAKE_CURRENT_BINARY_DIR})
 set(PANDA_THIRD_PARTY_SOURCES_DIR ${PANDA_ROOT}/third_party)
 set(PANDA_THIRD_PARTY_CONFIG_DIR ${PANDA_ROOT}/cmake/third_party)
 
+add_definitions(-DBUILD_FOLDER="${CMAKE_CURRENT_BINARY_DIR}")
+
 # List for accumulation of all core gtests binary paths.
 # It's used by CI to archive these binaries into a single artifact
 # and send it to second stage where unit tests will use them.

@@ -258,10 +258,9 @@ final class TypeCreatorCtx {
             was = false
             const asArr = new Array<TypeCreator>()
 
-            const pushToArr: (creator: Object) => void = (creator: Object): void => {
-                asArr.push(creator as TypeCreator)
-            }
-            all.forEach(Set.__asGeneric<TypeCreator>(pushToArr as Object))
+            all.forEach((creator: TypeCreator): void => {
+                asArr.push(creator)
+            })
             for (let i = 0; i < asArr.length; i++) {
                 const el = asArr.$_get(i)
                 if (!visited.has(el)) {

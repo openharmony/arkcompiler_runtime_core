@@ -19,6 +19,9 @@
  ---*/
 
 class A {
+    toString(): string {
+        return "{}"
+    }
 }
 
 type ANullish = A | null | undefined

@@ -20,6 +20,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_extension.cpp
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
+    ${ETS_EXT_SOURCES}/ets_errors.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
     ${ETS_EXT_SOURCES}/ets_napi_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp
@@ -43,6 +44,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Promise.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_StackTrace.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Type.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_TypeCreator.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Method.cpp

@@ -325,6 +325,6 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
                 return Short.valueOf(num as short)
             }
         }
-        throw new JSONTypeError("Cannot create Short from JSON", json)
+        throw new JSONTypeError("Cannot create Short from JSON", new ErrorOptions(json as Object))
     }
 }

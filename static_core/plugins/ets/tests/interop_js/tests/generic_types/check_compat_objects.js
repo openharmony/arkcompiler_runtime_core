@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ function check_incorrect_ets_object() {
 
 // TODO(v.cherkashin): Enable when implemented
 // Check js/ets errors
-check_error_message(new ets.Error("ets Error message"), "ets Error message");
+check_error_message(new ets.Error("ets Error message", undefined), "ets Error message");
 // check_error_message(new Error("js Error message"), "js Error message");
 // check_error_message(new ets.TypeError("ets TypeError message"), "ets TypeError message");
 // check_error_message(new TypeError("js TypeError message"), "js TypeError message");

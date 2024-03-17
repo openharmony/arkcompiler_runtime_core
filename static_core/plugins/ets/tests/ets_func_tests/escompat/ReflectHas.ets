@@ -29,6 +29,9 @@ class Point2D {
         this.x = x_
         this.y = y_
     }
+    public norm(): number {
+        return this.x + this.y
+    }
 }
 
 class Point3D extends Point2D {
@@ -65,26 +68,39 @@ function reflectHas(): int {
         return a + 1
     }
 
-    result += (Reflect.hasOwn(arr, 0) == true) ? 0 : 1
-    result += (Reflect.hasOwn(arr, 3) == false) ? 0 : 1
-    result += (Reflect.hasOwn(arr, "length") == true) ? 0 : 1
-    result += (Reflect.hasOwn(arr, "qwerty") == false) ? 0 : 1
+    result += (Reflect.has(arr, 0) == true) ? 0 : 1
+    result += (Reflect.has(arr, 3) == false) ? 0 : 1
+    result += (Reflect.has(arr, "length") == true) ? 0 : 1
+    result += (Reflect.has(arr, "qwerty") == false) ? 0 : 1
+    result += (Reflect.has(arr, "toString") == true) ? 0 : 1
+    result += (Reflect.has(arr, "toLocaleString") == true) ? 0 : 1
+    result += (Reflect.has(arr, "keys") == false) ? 0 : 1
 
-    result += (Reflect.hasOwn(str, 0) == true) ? 0 : 1
-    result += (Reflect.hasOwn(str, 3) == false) ? 0 : 1
-    result += (Reflect.hasOwn(str, "length") == true) ? 0 : 1
-    result += (Reflect.hasOwn(str, "qwerty") == false) ? 0 : 1
+    result += (Reflect.has(str, 0) == true) ? 0 : 1
+    result += (Reflect.has(str, 3) == false) ? 0 : 1
+    result += (Reflect.has(str, "length") == true) ? 0 : 1
+    result += (Reflect.has(str, "qwerty") == false) ? 0 : 1
+    result += (Reflect.has(str, "toString") == true) ? 0 : 1
+    result += (Reflect.has(str, "hasOwnProperty") == true) ? 0 : 1
+    result += (Reflect.has(str, "entries") == false) ? 0 : 1
 
-    result += (Reflect.hasOwn(cl, "x") == true) ? 0 : 1
-    result += (Reflect.hasOwn(cl, "y") == true) ? 0 : 1
-    result += (Reflect.hasOwn(cl, "z") == true) ? 0 : 1
-    result += (Reflect.hasOwn(cl, "axisnum") == false) ? 0 : 1
-    result += (Reflect.hasOwn(cl, "asdasd") == false) ? 0 : 1
-    result += (Reflect.hasOwn(cl, 0) == false) ? 0 : 1
+    result += (Reflect.has(cl, "x") == true) ? 0 : 1
+    result += (Reflect.has(cl, "y") == true) ? 0 : 1
+    result += (Reflect.has(cl, "z") == true) ? 0 : 1
+    result += (Reflect.has(cl, "axisnum") == false) ? 0 : 1
+    result += (Reflect.has(cl, "asdasd") == false) ? 0 : 1
+    result += (Reflect.has(cl, 0) == false) ? 0 : 1
+    result += (Reflect.has(cl, "norm") == true) ? 0 : 1
+    result += (Reflect.has(cl, "toString") == true) ? 0 : 1
+    result += (Reflect.has(cl, "hasOwnProperty") == true) ? 0 : 1
+    result += (Reflect.has(cl, "getOwnPropertyNames") == false) ? 0 : 1
 
-    result += (Reflect.hasOwn(lambda, "length") == true) ? 0 : 1
-    result += (Reflect.hasOwn(lambda, "name") == true) ? 0 : 1
-    result += (Reflect.hasOwn(lambda, 0) == false) ? 0 : 1
+    result += (Reflect.has(lambda, "length") == true) ? 0 : 1
+    result += (Reflect.has(lambda, "name") == true) ? 0 : 1
+    result += (Reflect.has(lambda, 0) == false) ? 0 : 1
+    result += (Reflect.has(lambda, "toString") == true) ? 0 : 1
+    result += (Reflect.has(lambda, "toLocaleString") == true) ? 0 : 1
+    result += (Reflect.has(lambda, "hasOwnProperty") == true) ? 0 : 1
 
     return result
 }

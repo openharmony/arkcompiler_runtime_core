@@ -1,0 +1,60 @@
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+declare const exports: any;
+
+function _$init$_(): void { return {} as any; };
+(_$init$_ as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
+export {_$init$_};
+exports._$init$_ = _$init$_;
+_$init$_();
+
+function Identity<T>(x: T): T { return {} as any; };
+(Identity as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'Identity');
+export {Identity};
+exports.Identity = Identity;
+
+
+function ForEach<T extends Object>(a: T[], cb: (p1: T, p2: number) => void): void { return {} as any; };
+(ForEach as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'ForEach');
+export {ForEach};
+exports.ForEach = ForEach;
+
+
+class GenericClass<T extends Object> {
+    public identity(x: T): T { return {} as any; };
+    constructor() {};
+};
+(GenericClass as any) = (globalThis as any).Panda.getClass('LGenericClass;');
+export {GenericClass};
+exports.GenericClass = GenericClass;
+
+export interface IGeneric0<T> {
+    I0Method(a: T): T;
+}
+
+export interface IGeneric1<T> {
+    I1Method(a: T): T;
+}
+
+class BaseGeneric<T, U> {
+    public c: T = {} as any;
+    public d: U = {} as any;
+    public constructor(c: T, d: U) {};
+};
+(BaseGeneric as any) = (globalThis as any).Panda.getClass('LBaseGeneric;');
+export {BaseGeneric};
+exports.BaseGeneric = BaseGeneric;
+

@@ -23,13 +23,14 @@ require 'open3'
 require 'fileutils'
 require 'optparse'
 require 'set'
+require 'etc'
 
 require_relative 'src/types'
 require_relative 'src/value_dumper'
 
 $options = {
     :'chunk-size' => 200,
-    :proc => 8,
+    :proc => [Etc.nprocessors, 1].max,
     :'ts-node' => ['npx', 'ts-node'],
     :'filter' => /.*/
 }
@@ -52,7 +53,7 @@ $optparse = OptionParser.new do |opts|
     opts.on '--out=DIR', String, 'path to .ets files output directory'
     opts.on '--tmp=DIR', String, 'path to temporary directory (where to output .ts and .json files)'
     opts.on '--chunk-size=NUM', Integer, 'amout of tests in a single file'
-    opts.on '--proc=PROC', Integer, 'number of ruby threads to use, defaults to 8' do |v|
+    opts.on '--proc=PROC', Integer, 'number of ruby threads to use, defaults to max available' do |v|
         $options[:proc] = [v, 1].max
     end
     opts.on '--ts-node=PATH', String, 'colon (:) separated list of prefix arguments to run ts-node, defaults to npx:ts-node' do |v|
@@ -125,9 +126,17 @@ class ThreadPool
 end
 
 class Generator
-    attr_reader :test_count, :tests_failed, :test_files, :tests_ignored
+    attr_reader :test_count, :tests_failed, :test_files, :tests_excluded
 
     NODE_RETRIES = 5
+
+    module SpecialAction
+        # value is priority, greater value = higher priority
+        SILENCE_WARN = -1
+        REPORT = 0
+        WARN_AS_ERROR = 1
+        EXCLUDE = 2
+    end
 
     def initialize(filter_pattern)
         @filter_pattern = filter_pattern
@@ -142,7 +151,7 @@ class Generator
         @test_count = 0
         @test_files = 0
         @tests_failed = 0
-        @tests_ignored = 0
+        @tests_excluded = 0
 
         check_node_version
     end
@@ -165,13 +174,8 @@ class Generator
         end
     end
 
-    def process(sub)
-        old_conf = deep_copy(@conf)
+    def parse_non_endpoint_conf(sub)
         conf = @conf
-        if sub["ignored"]
-            @tests_ignored += 1
-            return
-        end
         if sub["category"]
             conf.category += sub["category"] + "_"
         end
@@ -179,12 +183,28 @@ class Generator
             conf.self = sub["self"]
             conf.self_type = sub["self_type"]
         end
+        if sub.has_key?("setup")
+            conf.setup = sub["setup"]
+        end
         (sub["vars"] || {}).each { |k, v|
             conf.vars[k] = v
         }
         (sub["sub"] || []).each { |s|
             process(s)
         }
+    end
+
+    def process(sub)
+        if sub["top_scope"]
+            @conf.top_scope = sub["top_scope"]
+        end
+        old_conf = deep_copy(@conf)
+        if sub["excluded"]
+            @tests_excluded += 1
+            return
+        end
+        parse_non_endpoint_conf sub
+        conf = @conf
         if sub["method"] || sub["expr"]
             conf.ret_type = sub["ret_type"]
             if sub["expr"]
@@ -195,10 +215,36 @@ class Generator
                 is_expr = false
             end
             return if not (@filter_pattern =~ name)
+            conf.special = (sub["special"] || [OpenStruct.new({ :match => ".*", :action => "report" })]).map { |s|
+                r = OpenStruct.new
+                r.match = Regexp.new s["match"]
+                r.action = case s["action"].strip
+                    when "report"
+                        SpecialAction::REPORT
+                    when "exclude"
+                        SpecialAction::EXCLUDE
+                    when "warn as error"
+                        SpecialAction::WARN_AS_ERROR
+                    when "silence warn"
+                        SpecialAction::SILENCE_WARN
+                    else
+                        raise "unknown action #{s["action"].strip}"
+                    end
+                r
+            }
             mandatory = sub["mandatory"]
             mandatory ||= -1
             rest = (sub["rest"] || ["emptyRest"]).map { |p| eval(p, conf.vars.instance_eval { binding }) }
-            pars = (sub["params"] || []).map { |p| eval(p, conf.vars.instance_eval { binding }) }
+            pars = (sub["params"] || []).map { |p|
+                if p.kind_of? String
+                    eval(p, conf.vars.instance_eval { binding })
+                elsif p.kind_of? Array
+                    raise "parameter must be either String (ruby expr) or array of String (plain values)" if !p.all? { |t| t.kind_of? String }
+                    ScriptClass::paramOf(*p.map { |x| x.strip })
+                else
+                    raise "invalid parameter"
+                end
+            }
             tests = @tests_by_name[name] || []
             @tests_by_name[name] = tests
             add = []
@@ -222,6 +268,9 @@ class Generator
                     pars.ts = pars.ts[1..]
                     pars.ets = pars.ets[1..]
                 end
+                if push.conf.setup
+                    push.conf.setup = push.conf.setup.gsub(/\bpars\b/, pars.ts.join(', '))
+                end
                 if is_expr
                     push.ts.expr = sub["expr"].gsub(/\bpars\b/, pars.ts.join(', '))
                     push.ets.expr = sub["expr"].gsub(/\bpars\b/, pars.ets.join(', '))
@@ -238,8 +287,6 @@ class Generator
     end
 
     def run()
-        running = Set.new
-        deleted = Set.new
         thread_pool = ThreadPool.new($options[:proc])
         @tests_by_name.each { |k, v|
             thread_pool.run(k, v) do |k, v|
@@ -261,16 +308,24 @@ class Generator
     end
 
     def run_test(k, test_cases)
+        test_cases = test_cases.filter { |t|
+            !t.conf.special.any? { |s|
+                if s.action == SpecialAction::EXCLUDE && s.match =~ t.ts.expr
+                    @tests_excluded += 1
+                    true
+                else
+                    false
+                end
+            }
+        }
         @test_count += test_cases.size
         test_cases.each_slice($options[:'chunk-size']).with_index { |test_cases_current_chunk, chunk_id|
-            puts "#{k} #{chunk_id}"
             @test_files += 1
 
             # ts part
             ts_path = File.join $options[:tmp], "#{k}#{chunk_id}.ts"
             buf = $template_ts.result(binding)
             File.write ts_path, buf
-            puts "run  ts for #{k} #{chunk_id}"
             # NOTE retries are a workaround for https://github.com/nodejs/node/issues/51555
             stdout_str = ""
             errors = []
@@ -299,13 +354,16 @@ class Generator
                 get_command_output("#{panda_build}/bin/es2panda", "--extension=ets", "--opt-level=2", "--output", abc_path, ets_path)
                 res = get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "ETSGLOBAL::main")
                 res.strip!
+                puts "✔ executed ets #{k} #{chunk_id}"
                 if res.size != 0
-                    puts "✔✔✔ ets for #{k} #{chunk_id}\n#{res.gsub(/^/, "\t")}"
+                    puts res.gsub(/^/, "\t")
                 end
+            else
+                puts "✔ generated #{k} #{chunk_id}"
             end
         }
     rescue
-        raise $!.class, "ruby: failed #{k}: #{$!}"
+        raise $!.class, "ruby: failed #{k}"
     end
 
     def gen_params(types_supp, rest_supp: [], mandatory: -1)
@@ -359,7 +417,7 @@ puts "total tests: #{gen.test_count}"
 if $options[:'run-ets']
     puts "failed files: #{gen.tests_failed}/#{gen.test_files}"
 end
-puts "ignored subtrees: #{gen.tests_ignored}"
+puts "excluded subtrees: #{gen.tests_excluded}"
 
 if gen.tests_failed != 0
     puts "Some of tests failed"

@@ -45,3 +45,27 @@ sub:
       - method: get
         params:
           - paramOf(*default_keys)
+      - method: forEach
+        ret_type: void
+        params:
+          -
+            - |
+              (v: string, k: number): void => { self.set(-k, v + v) }
+      - expr: valsArr
+        setup: |
+          let valsArr = Array.of<string>()
+          self.forEach((v: string, k: number): void => { valsArr.push(v) })
+      - expr: valsArr
+        setup: |
+          let valsArr = Array.of<string>()
+          let s1: ReadonlyMap<number, string> = self
+          s1.forEach((v: string, k: number): void => { valsArr.push(v) })
+      - self: null
+        expr: new Map<number, string>(pars)
+        ret_type: Iterable<[number, string]>
+        params:
+          -
+            - |
+              Array.of<[number, string]>([0, ""] as [number, string])
+            - |
+              new Set<[number, string]>(Array.of<[number, string]>([0, "123"] as [number, string], [0, "132"] as [number, string], [0, "312"] as [number, string]))

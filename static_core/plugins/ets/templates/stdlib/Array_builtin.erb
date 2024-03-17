@@ -27,7 +27,7 @@ function checkRange(arrLen: int, startIndex: int, endIndex: int): boolean {
     return ((0 <= startIndex) && (startIndex <= endIndex) && (endIndex <= arrLen));
 }
 
-native function __alloc_array<T>(len: int): T[]
+native function __alloc_array<T>(len: int, ofType: Object | null): T[]
 
 class BuiltinArrayKeysIterator implements IterableIterator<number> {
     private len: int
@@ -60,7 +60,6 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 % ctx.override = ''
 % ctx.get_unsafe = Proc.new { |t, i| "#{t}[#{i}]" }
 % ctx.set_unsafe = Proc.new { |t, i, v| "#{t}[#{i}] = #{v}" }
-% ctx.this_call = Proc.new { |f| "#{f}(self, " }
 % ctx.arr_method_call = Proc.new { |t, f| "#{f}(#{t}, " }
 % primitive_types = ['boolean', 'byte', 'short', 'int', 'long', 'float', 'double', 'char']
 % # NOTE(kprokopenko): primitive_types + ['T']
@@ -73,8 +72,10 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 %   ctx.clone_this = 'cloneArray(self)'
 %   ctx.make_buffer = Proc.new { |l, elt|
 %     elt ||= ctx.el_type
-%     if ['T', 'U'].include?(elt)
-%       "__alloc_array<#{elt}>(#{l})"
+%     if elt == 'T'
+%       "__alloc_array<#{elt}>(#{l}, self)"
+%     elsif elt == 'U'
+%       "__alloc_array<#{elt}>(#{l}, null)"
 %     else
 %       "new #{elt}[#{l}]"
 %     end
@@ -89,6 +90,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
 %     ctx.this_iterator_generic = '<T>'
 %     ctx.this_generic_one = 'T, '
 %   end
+% ctx.this_call = Proc.new { |f| "#{f}#{ctx.this_generic}(self, " }
 function cloneArray<%= ctx.this_generic %>(self: <%= ctx.this_type %>): <%= ctx.this_type %> {
     const ret = <%= ctx.make_buffer.('self.length') %>;;
     for (let i = 0; i < self.length; i++) {
@@ -97,19 +99,22 @@ function cloneArray<%= ctx.this_generic %>(self: <%= ctx.this_type %>): <%= ctx.
     return <%= ctx.from_buffer.('ret') %>;
 }
 % template = ERB.new(File.read("Array_common.erb"), nil, '%', eoutvar: '_sub01')
-<%= template.result(ctx.instance_eval { binding }).gsub(/,\s*\)/, ')') %>
+<%= template.result(ctx.instance_eval { binding }) %>
 % template = ERB.new(File.read("Array_map.erb"), nil, '%', eoutvar: '_sub02')
 % primitive_types.each { |mapped|
 %   ctx.mapped_type = mapped
 %   ctx.map_generic = ctx.this_generic
-<%# template.result(ctx.instance_eval { binding }).gsub(/, \)/, ')') %>
+<%# template.result(ctx.instance_eval { binding }) %>
 % }
+
+% ctx.mapped_type = ctx.el_type
+% ctx.map_generic = ctx.this_generic
+<%= template.result(ctx.instance_eval { binding }) %>
 
 % ctx.mapped_type = 'U'
 % ctx.map_generic = "<#{ctx.this_generic_one}U>"
-<%= template.result(ctx.instance_eval { binding }).gsub(/,\s*\)/, ')') %>
+<%# template.result(ctx.instance_eval { binding }) %>
 
-% if el_type != 'T'
 /**
  * Constructs a new `Array` instance and populates it with
  * portion of a given array, filtered down to just the elements from the
@@ -139,7 +144,6 @@ export function filter<%= ctx.this_generic %>(<%= ctx.this_arg %>fn: (v: <%= ctx
     }
     return <%= ctx.from_buffer.('res') %>;
 }
-% end
 
 export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <%= ctx.this_type %>, ...more: <%= ctx.this_type %>[]): <%= ctx.this_type %> {
     const lnMin = self.length + fst.length;
@@ -168,12 +172,12 @@ export function concat<%= ctx.this_generic %>(self: <%= ctx.this_type %>, fst: <
  * @param comparator function that defines the sort order.
  *
  * @note Mutating method
- *
- * NOTE clarify UTF-16 or UTF-8
  */
 export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <%= ctx.el_type %>, b: <%= ctx.el_type %>) => number): <%= ctx.this_return_type %> {
-    sort_subarray(self, 0, self.length, (l: <%= ctx.el_type %>, r: <%= ctx.el_type %>): boolean => {
-        return comparator(l, r) < 0;
+%   sort_elem_type = ctx.el_type == 'T' ? 'NullishType' : ctx.el_type
+%   from_sort_elem_type = ctx.el_type == 'T' ? ' as T' : ''
+    sort_subarray(self<%= ctx.el_type == 'T' ? ' as NullishType[]' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
+        return comparator(l<%= from_sort_elem_type %>, r <%= from_sort_elem_type %>) < 0;
     });
     return self;
 }
@@ -187,8 +191,8 @@ export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>comparator: (a: <
  */
 export function sort<%= ctx.this_generic %>(<%= ctx.this_arg %>): <%= ctx.this_return_type %> {
 % if !primitive_types.include?(ctx.el_type)
-    sort_subarray(self, 0, self.length, (l: <%= ctx.el_type %>, r: <%= ctx.el_type %>): boolean => {
-        return new String(l) < new String(r);
+    sort_subarray(self<%= ctx.el_type == 'T' ? ' as NullishType[]' : '' %>, 0, self.length, (l: <%= sort_elem_type %>, r: <%= sort_elem_type %>): boolean => {
+        return new String(l).compareTo(new String(r)) < 0;
     });
 % else
     sort(self, 0, self.length);
@@ -204,3 +208,82 @@ export function keys<%= ctx.this_generic %>(self: <%= ctx.this_type %>): Iterabl
 <%= template.result(ctx.instance_eval { binding }).gsub(/[ \t]+$/, '') %>
 
 % }
+
+function builtin_insertion_sort<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        if (comp(tmp, arr[startIndex]) as int < 0) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let pos = i
+            while (comp(tmp, arr[pos - 1]) as int < 0) {
+                arr[pos] = arr[pos - 1]
+                pos--
+            }
+            arr[pos] = tmp
+        }
+    }
+}
+
+function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: int, to: T[], toStart: int, comp: (lhs: T, rhs: T) => number): void {
+    let startIndex2 = midIndex
+    while (startIndex < midIndex && startIndex2 < endIndex) {
+        if (comp(arr[startIndex], arr[startIndex2]) as int <= 0) {
+            to[toStart++] = arr[startIndex++]
+        } else {
+            to[toStart++] = arr[startIndex2++]
+        }
+    }
+
+    while (startIndex < midIndex) {
+        to[toStart++] = arr[startIndex++]
+    }
+    while (startIndex2 < endIndex) {
+        to[toStart++] = arr[startIndex2++]
+    }
+}
+
+export function sort_stable<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+    if (endIndex <= startIndex) {
+        return;
+    }
+    const INS_SORT_DELTA = 16
+    for (let i = startIndex; i < endIndex; i += INS_SORT_DELTA ) {
+        builtin_insertion_sort<T>(arr, i, min(i + INS_SORT_DELTA , endIndex), comp)
+    }
+
+    let prevSize = INS_SORT_DELTA
+
+    const delta = endIndex - startIndex
+    const initialArr = arr
+    let buf = __alloc_array<T>(delta, arr)
+    let buf0 = 0
+    let arr0 = startIndex
+    while (prevSize < delta) {
+        for (let strt = 0; strt < delta; strt += 2 * prevSize) {
+            const mid = strt + prevSize
+            if (mid >= delta) {
+                break
+            }
+            const end = min(mid + prevSize, delta)
+            perform_merge(arr, strt + arr0, mid + arr0, end + arr0, buf, strt + buf0, comp)
+        }
+        const tmp = arr
+        arr = buf
+        buf = tmp
+        const buf0Tmp = buf0
+        buf0 = arr0
+        arr0 = buf0Tmp
+
+        prevSize *= 2
+    }
+
+    if (!runtime.isSameReference(arr, initialArr)) {
+        for (let i = 0; i < delta; i++) {
+            initialArr[startIndex + i] = arr[i + arr0]
+        }
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,20 +16,12 @@
 package std.interop.js;
 
 export final class JSError extends Error {
-    constructor() {
-        super();
-    }
-
     constructor(value: JSValue) {
-        super("", value);
-    }
-
-    constructor(msg: String) {
-        super(msg);
+        this("", value);
     }
 
     constructor(msg: String, value: JSValue) {
-        super(msg, value);
+        super("JSError", msg, new ErrorOptions(value as Object));
     }
 
     public getValue(): JSValue {

@@ -63,6 +63,8 @@ native function TypeAPIGetInterface(td: TypeDesc, i: long): TypeDesc
 
 native function TypeAPISetStaticFieldValue(ownerTD: TypeDesc, name: string, val: NullishType): void
 
+native function TypeAPIIsInheritedFrom(ltd: TypeDesc, rtd:TypeDesc): boolean
+
 /*
     Function (Lambda or Method) type intrinsics
 */
@@ -83,7 +85,7 @@ native function TypeAPIGetArrayElementType(td: TypeDesc): TypeDesc
 
 native function TypeAPIMakeArrayInstance(td: TypeDesc, len: long): Object
 
-// TODO(shumilov-petr): replace to enum, enum not available now
+// NOTE(shumilov-petr): replace to enum, enum not available now
 export class TypeKind {
     public static readonly NONE: byte       = 0x0
     public static readonly VOID: byte       = 0x1
@@ -117,7 +119,7 @@ export class TypeKind {
 // 5 lower bits stores kind's id
 const TypeKindMask: byte = (1 << 6) - 1
 
-// TODO(shumilov-petr): replace to enum, enum not available now
+// NOTE(shumilov-petr): replace to enum, enum not available now
 export class ValueTypeDesc {
     public static readonly BOOLEAN: TypeDesc   = "Z"
     public static readonly BYTE: TypeDesc      = "B"
@@ -153,25 +155,26 @@ export class Attributes {
 }
 
 export class AccessModifier {
-    public static readonly PUBLIC       = 0
-    public static readonly PRIVATE      = 1
-    public static readonly PROTECTED    = 2
+    public static readonly PUBLIC: byte       = 0
+    public static readonly PRIVATE: byte      = 1
+    public static readonly PROTECTED: byte    = 2
 
     private constructor() {}
 }
 
 /**
- * Represents abstract Type
+ * Runtime ArkTS type representation
  */
 export abstract class Type extends Object {
     internal td: TypeDesc
 
+
     /**
-     * Resolves type by its type descriptor
+     * Resolves type by descriptor
      *
      * @param td type descriptor
      *
-     * @returns instance with corresponging type descriptor
+     * @returns instance of appropriate type or null if resolving is failed
      */
     public static resolve(td: TypeDesc): Type | null {
         let kind = TypeAPIGetTypeKind(td) & TypeKindMask
@@ -219,7 +222,7 @@ export abstract class Type extends Object {
             case TypeKind.ENUM:
                 return new EnumType(td)
             default:
-                // TODO(shumilov-petr): unknown type, need error
+                // NOTE(shumilov-petr): unknown type, need error
                 assert(false)
         }
     }
@@ -767,7 +770,7 @@ export final class CharType extends Type {
      *
      * @returns name of type
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -850,7 +853,7 @@ export final class BooleanType extends Type {
      *
      * @returns name of type
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -933,7 +936,7 @@ export final class ByteType extends Type {
      *
      * @returns name of type
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -1019,7 +1022,7 @@ export final class ShortType extends Type {
      *
      * @returns name of type
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -1113,7 +1116,7 @@ export final class IntType extends Type {
      *
      * @returns type name
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -1207,7 +1210,7 @@ export final class LongType extends Type {
      *
      * @returns type name
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -1301,7 +1304,7 @@ export final class FloatType extends Type {
      *
      * @returns name of type
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -1395,7 +1398,7 @@ export final class DoubleType extends Type {
      *
      * @returns name of type
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public override getName(): string {
         if (this.isValue) {
             return ""
@@ -1492,7 +1495,7 @@ export final class ClassType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return "class{...}"
     }
 
@@ -1576,7 +1579,7 @@ export final class ClassType extends Type {
      *
      * @returns ith Field
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public getField(i: long): Field {
         return TypeAPIGetField(this.td, i)
     }
@@ -1594,7 +1597,7 @@ export final class ClassType extends Type {
      *
      * @returns Field instance with this name
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public getFieldByName(name: string): Field {
         return TypeAPIGetFieldByName(this.td, name)
     }
@@ -1630,7 +1633,7 @@ export final class ClassType extends Type {
      *
      * @returns ith method
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public getMethod(i: long): Method {
         return TypeAPIGetMethod(this.td, i)
     }
@@ -1654,7 +1657,7 @@ export final class ClassType extends Type {
      *
      * @returns {@link Method} instance representing ith constructor
      */
-    //TODO(kirill-mitkin): add error
+    //NOTE(kirill-mitkin): add error
     public getConstructor(i: long): Method {
         return TypeAPIGetConstructor(this.td, i)
     }
@@ -1679,7 +1682,7 @@ export final class ClassType extends Type {
     }
 
     public hasField(name: string): boolean {
-        // TODO(shumilov-petr): may be faster if implement via intrinsic
+        // NOTE(shumilov-petr): may be faster if implement via intrinsic
         let fnum = this.getFieldsNum()
         for (let i = 0; i < fnum; i++) {
             if (this.getField(i).getName() == name) {
@@ -1695,7 +1698,7 @@ export final class ClassType extends Type {
      * @returns number of type parameters
      */
     public getTypeParametersNum(): long {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("Not implemented")
     }
 
@@ -1706,10 +1709,10 @@ export final class ClassType extends Type {
      *
      * @throws error then i greater then number of type parameters
      *
-     * @returns TODO(kirill-mitkin): we cannot return concrete type in this method
+     * @returns NOTE(kirill-mitkin): we cannot return concrete type in this method
      */
     public getTypeParameter(i: long): Type {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("Not implemented")
     }
 
@@ -1870,7 +1873,7 @@ export final class InterfaceType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return "interface{...}"
     }
 
@@ -1946,7 +1949,7 @@ export final class InterfaceType extends Type {
      * @returns number of type parameters
      */
     public getTypeParametersNum(): long {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("Not implemented")
     }
 
@@ -1957,10 +1960,10 @@ export final class InterfaceType extends Type {
      *
      * @throws error then i greater then number of type parameters
      *
-     * @returns TODO(kirill-mitkin): we cannot return concrete type in this method
+     * @returns NOTE(kirill-mitkin): we cannot return concrete type in this method
      */
     public getTypeParameter(i: long): Type {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("Not implemented")
     }
 
@@ -1968,37 +1971,7 @@ export final class InterfaceType extends Type {
         if (this.equals(expected)) {
             return true
         }
-        // BFS
-        let queue = new Array<InterfaceType>()
-        let used = new Array<Long>()
-        // Pointer to current start (first) element of queue
-        let qfront: int = 0
-
-        queue.push(this)
-        used.push(new Long(this.getId()))
-
-        while ((queue.length - qfront) > 0) {
-            let iface = queue.at(qfront)!
-            qfront++
-
-            let sifacesNum = iface.getInterfacesNum()
-            for (let i = 0; i < sifacesNum; i++) {
-                // siface -- super interface
-                let siface = iface.getInterface(i)
-
-                if (siface.equals(expected)) {
-                    return true
-                }
-
-                let sifaceId = new Long(siface.getId())
-                // if is not in used?
-                if (used.indexOf(sifaceId) == -1) {
-                    used.push(sifaceId)
-                    queue.push(siface)
-                }
-            }
-        }
-        return false
+        return TypeAPIIsInheritedFrom(this.td, expected.td)
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -2074,7 +2047,7 @@ export final class ArrayType extends Type {
             case TypeKind.UNION:
                 return new ArrayType(td, elemTD)
             default:
-                // TODO(shumilov-petr): need throw exception
+                // NOTE(shumilov-petr): need throw exception
                 assert(false)
         }
     }
@@ -2344,7 +2317,7 @@ export abstract class FunctionType extends Type {
      * @returns number of type parameters
      */
     public getTypeParametersNum(): long {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return 0
     }
 
@@ -2355,10 +2328,10 @@ export abstract class FunctionType extends Type {
      *
      * @throws error then i greater then number of type parameters
      *
-     * @returns TODO(kirill-mitkin): we cannot return concrete type in this method
+     * @returns NOTE(kirill-mitkin): we cannot return concrete type in this method
      */
     public getTypeParameter(i: long): Type {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 }
@@ -2370,17 +2343,26 @@ export final class LambdaType extends FunctionType {
     }
 
     public override getLiteral(): string {
-        // TODO(shumilov-petr): not implemented
-        return "$lambda_signature"
+        let sb = new StringBuilder("(")
+        const paramsNum = this.getParametersNum()
+        for (let i = 0; i < paramsNum; ++i) {
+            sb.append(this.getParameter(i).toString())
+            if (i != paramsNum - 1) {
+                sb.append(", ")
+            }
+        }
+        sb.append("): ")
+        sb.append(this.getResultType().toString())
+        return sb.toString()
     }
 
     /**
-     * Make instance of function with this function type
+     * Make an instance of LambdaType
      *
-     * @returns instance with this function type
+     * @returns LambdaType instance
      */
     public make(): Object {
-        // TODO(kprokopenko): not implemented
+        // NOTE(kprokopenko): not implemented
         throw new Error("Not implemented")
     }
 
@@ -2416,7 +2398,7 @@ export final class LambdaType extends FunctionType {
         if (!this.assignableFrom(objType)) {
             throw new Error("invalid conversion")
         }
-        // TODO(shumilov-petr): Need to use Create API
+        // NOTE(shumilov-petr): Need to use Create API
         throw new Error("todo(kprokopenko): unequal labmda type conversion")
     }
 }
@@ -2428,8 +2410,21 @@ export final class MethodType extends FunctionType {
     }
 
     public override getLiteral(): string {
-        // TODO(shumilov-petr): not implemented
-        return "$method_signature"
+        let sb = new StringBuilder("(this: ")
+        sb.append(this.getReceiverType().toString())
+        const paramsNum = this.getParametersNum()
+        if (paramsNum > 0) {
+            sb.append(", ")
+        }
+        for (let i = 0; i < paramsNum; ++i) {
+            sb.append(this.getParameter(i).toString())
+            if (i != paramsNum - 1) {
+                sb.append(", ")
+            }
+        }
+        sb.append("): ")
+        sb.append(this.getResultType().toString())
+        return sb.toString()
     }
 
     public getReceiverType(): Type {
@@ -2488,7 +2483,7 @@ export final class StringType extends Type {
      * @returns type name
      */
     public override getName(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return ""
     }
 
@@ -2498,7 +2493,7 @@ export final class StringType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return "string"
     }
 
@@ -2575,7 +2570,7 @@ export final class EnumType extends Type {
      * @returns type name
      */
     public override getName(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return ""
     }
 
@@ -2585,7 +2580,7 @@ export final class EnumType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return "enum {...}"
     }
 
@@ -2597,32 +2592,32 @@ export final class EnumType extends Type {
      * @returns true if object also has EnumType and their names are the same
      */
     public override equals(to: NullishType): boolean {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return false
     }
 
     public getConstantsNum(): long {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return 0
     }
 
     public getConstant(i: long): EnumConstant {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 
     public getConstantByName(name: string): EnumConstant {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 
     public create(consts: EnumConstant[]): EnumType {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 
     public make(constantName: string): Object {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 
@@ -2696,7 +2691,7 @@ export final class UnionType extends Type {
      * @returns type name
      */
     public override getName(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return ""
     }
 
@@ -2706,17 +2701,17 @@ export final class UnionType extends Type {
      * @returns type literal
      */
     public override getLiteral(): string {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return "(... | ...)"
     }
 
     public getCasesNum(): long {
-        // TODO(kirill-mitkin): not implemented
+        // NOTE(kirill-mitkin): not implemented
         return 0
     }
 
     public getCase(i: long): UnionCase {
-        // TODO(kirill-mitkin): not implemented
+        // NOTE(kirill-mitkin): not implemented
         throw new Error("Not implemented")
     }
 
@@ -2728,17 +2723,17 @@ export final class UnionType extends Type {
      * @returns true if object also has UnionType and their cases are the same
      */
     public override equals(to: NullishType): boolean {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         return false
     }
 
     public make(default: Type): Object {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 
     public make(default: Value): Object {
-        // TODO(shumilov-petr): not implemented
+        // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 
