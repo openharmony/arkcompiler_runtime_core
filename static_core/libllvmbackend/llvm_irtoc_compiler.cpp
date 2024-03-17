@@ -27,6 +27,7 @@
 #include "mir_compiler.h"
 
 #include "lowering/llvm_ir_constructor.h"
+#include "transforms/passes/check_tail_calls.h"
 #include "transforms/passes/inline_ir/patch_return_handler_stack_adjustment.h"
 
 #include <llvm/Bitcode/BitcodeReader.h>
@@ -66,9 +67,11 @@ LLVMIrtocCompiler::LLVMIrtocCompiler(ark::compiler::RuntimeInterface *runtime, a
     // clang-format on
     mirCompiler_ =
         std::make_unique<MIRCompiler>(targetMachine_, [this](ark::llvmbackend::InsertingPassManager *manager) -> void {
+            manager->InsertBefore(&llvm::EarlyTailDuplicateID, ark::llvmbackend::CreateCheckTailCallsPass());
             manager->InsertBefore(&llvm::FEntryInserterID,
                                   ark::llvmbackend::CreatePatchReturnHandlerStackAdjustmentPass(&arkInterface_));
         });
+
     optimizer_ = std::make_unique<ark::llvmbackend::LLVMOptimizer>(llvmCompilerOptions, &arkInterface_,
                                                                    mirCompiler_->GetTargetMachine());
     InitializeModule();

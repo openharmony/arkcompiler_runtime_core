@@ -16,7 +16,7 @@
 # wrapper over the library function to avoid
 # the prologue bloating in the caller
 function(:MemmoveInterposer,
-          params: {dst: 'ptr', src: 'ptr', size: 'u32', dummy1: 'u32', dummy2: 'u32'},
+          params: {dst: 'ptr', src: 'ptr', size: 'u32'},
           mode: [:FastPath]) {
     Call(dst, src, size).Method("memmove").ptr
     ReturnVoid().void
@@ -29,9 +29,8 @@ function(:MemmoveInterposer,
 #end
 # inputs:
 # src_start is len in bytes
-# src_end and dst_start are dummies
 function(:TryBigCopy,
-          params: {dst_data: 'ptr', src_data: 'ptr', len: 'u32', dummy1: 'u32', dummy2: 'u32'},
+          params: {dst_data: 'ptr', src_data: 'ptr', len: 'u32'},
           regalloc_set: $regmask,
           regmap: $full_regmap,
           mode: [:FastPath]) {
@@ -51,8 +50,8 @@ function(:TryBigCopy,
         LiveOut(dst_data).DstReg(regmap[:arg0]).ptr
         LiveOut(src_data).DstReg(regmap[:arg1]).ptr
         LiveOut(len_bytes).DstReg(regmap[:arg2]).u32
-        entrypoint_id = get_entrypoint_offset("MEMMOVE_INTERPOSER")
-        Intrinsic(:TAIL_CALL).AddImm(entrypoint_id).Terminator.void
+        ep_offset = get_entrypoint_offset("MEMMOVE_INTERPOSER")
+        Intrinsic(:TAIL_CALL).AddImm(ep_offset).MethodAsImm("MemmoveInterposer").Terminator.void
         Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     }
 

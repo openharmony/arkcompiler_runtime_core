@@ -40,7 +40,10 @@ private:
     bool EmitStringEquals(Inst *inst);
     bool EmitStringBuilderBool(Inst *inst);
     bool EmitStringBuilderChar(Inst *inst);
-    bool EmitStringBuilderAppendString(Inst *inst);
+    bool EmitStringBuilderString(Inst *inst);
+    bool EmitStringConcat2(Inst *inst);
+    bool EmitStringConcat3(Inst *inst);
+    bool EmitStringConcat4(Inst *inst);
     bool EmitIsInf(Inst *inst);
     bool EmitUnreachable(Inst *inst);
     bool EmitNothing(Inst *inst);
@@ -178,6 +181,7 @@ private:
 
     ArenaVector<llvm::Value *> GetArgumentsForCall(llvm::Value *callee, CallInst *call, bool skipFirst = false);
     ArenaVector<llvm::Value *> GetIntrinsicArguments(llvm::FunctionType *intrinsicFunctionType, IntrinsicInst *inst);
+    void SetIntrinsicParamAttrs(llvm::CallInst *call, IntrinsicInst *inst, llvm::ArrayRef<llvm::Value *> args);
 
     llvm::StringRef GetRuntimeFunctionName(RuntimeCallId id);
     llvm::FunctionType *GetFunctionTypeForCall(CallInst *call);

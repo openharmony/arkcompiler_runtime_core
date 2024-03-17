@@ -63,7 +63,7 @@ entrypoints:
   signature:
   - void
   - const ark::ObjectHeader*
-  - ark::Class *
+  - ark::Class*
 
 - name: CheckCastInterface
   entrypoint: CheckCastInterfaceEntrypoint
@@ -72,7 +72,7 @@ entrypoints:
   signature:
   - void
   - const ark::ObjectHeader*
-  - ark::Class *
+  - ark::Class*
 
 - name: CheckStoreArrayReference
   entrypoint: CheckStoreArrayReferenceEntrypoint
@@ -336,7 +336,7 @@ entrypoints:
   bridge: entrypoint
   properties: []
   signature:
-  - void*
+  - ark::Class*
   - const ark::Method*
   - ark::FileEntityId
 
@@ -345,7 +345,7 @@ entrypoints:
   bridge: none
   properties: []
   signature:
-  - void*
+  - ark::Class*
   - const ark::Method*
   - ark::FileEntityId
 
@@ -423,7 +423,7 @@ entrypoints:
   properties: []
   signature:
   - void
-  - void const *
+  - void const*
   - size_t
 
 - name: WriteTlabStatsNoBridge
@@ -432,7 +432,7 @@ entrypoints:
   properties: []
   signature:
   - void
-  - void const *
+  - void const*
   - size_t
 
 - name: LockObject
@@ -535,7 +535,7 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - void*
+    - ark::Class*
     - void*
 
 - name: ClassInitResolver
@@ -543,7 +543,7 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - void*
+    - ark::Class*
     - void*
 
 - name: CallVirtualResolver
@@ -792,7 +792,7 @@ entrypoints:
     - ark::ObjectHeader*
     - void*
 
-- name: StringBuilderStringUsualBridge
+- name: StringBuilderStringUsual
   entrypoint: CoreStringBuilderString
   bridge: entrypoint
   properties: []
@@ -810,7 +810,7 @@ entrypoints:
     - ark::ObjectHeader*
     - uint16_t
 
-- name: StringBuilderCharUsualBridge
+- name: StringBuilderCharUsual
   entrypoint: CoreStringBuilderChar
   bridge: entrypoint
   properties: []
@@ -828,7 +828,7 @@ entrypoints:
     - ark::ObjectHeader*
     - uint8_t
 
-- name: StringBuilderBoolUsualBridge
+- name: StringBuilderBoolUsual
   entrypoint: CoreStringBuilderBool
   bridge: entrypoint
   properties: []
@@ -860,7 +860,7 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - uint32_t                   # resulting hashcode
+    - uint32_t                 # resulting hashcode
     - ark::coretypes::String*  # src string
 
 - name: StringHashCodeCompressed
@@ -868,7 +868,7 @@ entrypoints:
   bridge: none
   properties: [irtoc]
   signature:
-    - uint32_t                   # resulting hashcode
+    - uint32_t                 # resulting hashcode
     - ark::coretypes::String*  # src string
 
 - name: CreateStringFromStringTlab
@@ -909,10 +909,10 @@ entrypoints:
   properties: [irtoc]
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint32_t                   # offset
-    - uint32_t                   # length
+    - uint32_t                 # offset
+    - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - void*                      # string class pointer
+    - ark::Class*              # string class pointer
 
 - name: CreateStringFromCharArrayTlabCompressed
   entrypoint: CreateStringFromCharArrayTlabCompressed
@@ -920,10 +920,10 @@ entrypoints:
   properties: [irtoc]
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint32_t                   # offset
-    - uint32_t                   # length
+    - uint32_t                 # offset
+    - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - void*                      # string class pointer
+    - ark::Class*              # string class pointer
 
 - name: CreateStringFromCharArraySlowPath
   entrypoint: CreateStringFromCharsWithOffsetEntrypoint
@@ -931,21 +931,21 @@ entrypoints:
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint32_t                   # offset
-    - uint32_t                   # length
+    - uint32_t                 # offset
+    - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::ObjectHeader*       # string class pointer
+    - ark::Class*              # string class pointer
 
-- name: CreateStringFromCharArrayOddSaved
+- name: CreateStringFromCharArrayUsual
   entrypoint: CreateStringFromCharsWithOffsetEntrypoint
-  bridge: odd_saved
+  bridge: entrypoint
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint32_t                   # offset
-    - uint32_t                   # length
+    - uint32_t                 # offset
+    - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::ObjectHeader*       # string class pointer
+    - ark::Class*              # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayTlab
   entrypoint: CreateStringFromZeroBasedCharArrayTlab
@@ -953,19 +953,19 @@ entrypoints:
   properties: [irtoc]
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint32_t                   # length
+    - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - void*                      # string class pointer
+    - ark::Class*              # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayTlabCompressed
   entrypoint: CreateStringFromZeroBasedCharArrayTlabCompressed
   bridge: none
   properties: [irtoc]
   signature:
-    - ark::coretypes::String*   # resulting string
-    - uint32_t                    # length
-    - ark::ObjectHeader*        # u16 array
-    - void*                       # string class pointer
+    - ark::coretypes::String*  # resulting string
+    - uint32_t                 # length
+    - ark::ObjectHeader*       # u16 array
+    - ark::Class*              # string class pointer
 
 - name: CreateStringFromZeroBasedCharArraySlowPath
   entrypoint: CreateStringFromCharsZeroOffsetEntrypoint
@@ -973,9 +973,9 @@ entrypoints:
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint32_t                   # length
+    - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::ObjectHeader*       # string class pointer
+    - ark::Class*              # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayOddSaved
   entrypoint: CreateStringFromCharsZeroOffsetEntrypoint
@@ -983,9 +983,9 @@ entrypoints:
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
-    - uint32_t                   # length
+    - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::ObjectHeader*       # string class pointer
+    - ark::Class*              # string class pointer
 
 - name: SubStringFromStringTlab
   entrypoint: SubStringFromStringTlab
@@ -994,8 +994,8 @@ entrypoints:
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
+    - int32_t                  # begin index
+    - int32_t                  # end index
 
 - name: SubStringFromStringTlabCompressed
   entrypoint: SubStringFromStringTlabCompressed
@@ -1004,8 +1004,8 @@ entrypoints:
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
+    - int32_t                  # begin index
+    - int32_t                  # end index
 
 - name: SubStringFromStringSlowPath
   entrypoint: SubStringFromStringEntrypoint
@@ -1014,8 +1014,8 @@ entrypoints:
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
+    - int32_t                  # begin index
+    - int32_t                  # end index
 
 - name: SubStringFromStringOddSaved
   entrypoint: SubStringFromStringEntrypoint
@@ -1024,8 +1024,8 @@ entrypoints:
   signature:
     - ark::coretypes::String*  # resulting string
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
+    - int32_t                  # begin index
+    - int32_t                  # end index
 
 - name: StringGetCharsTlab
   entrypoint: StringGetCharsTlab
@@ -1034,9 +1034,9 @@ entrypoints:
   signature:
     - ark::coretypes::Array*   # resulting array of utf16 chars
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
-    - void*                      # Array u16 class pointer
+    - int32_t                  # begin index
+    - int32_t                  # end index
+    - ark::Class*              # Array u16 class pointer
 
 - name: StringGetCharsTlabCompressed
   entrypoint: StringGetCharsTlabCompressed
@@ -1045,9 +1045,9 @@ entrypoints:
   signature:
     - ark::coretypes::Array*   # resulting array of utf16 chars
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
-    - void*                      # Array u16 class pointer
+    - int32_t                  # begin index
+    - int32_t                  # end index
+    - ark::Class*              # Array u16 class pointer
 
 - name: StringGetCharsSlowPath
   entrypoint: StringGetCharsEntrypoint
@@ -1056,20 +1056,20 @@ entrypoints:
   signature:
     - ark::coretypes::Array*   # resulting array of utf16 chars
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
-    - ark::ObjectHeader*       # Array u16 class pointer
+    - int32_t                  # begin index
+    - int32_t                  # end index
+    - ark::Class*              # Array u16 class pointer
 
-- name: StringGetCharsOddSaved
+- name: StringGetCharsUsual
   entrypoint: StringGetCharsEntrypoint
-  bridge: odd_saved
+  bridge: entrypoint
   properties: []
   signature:
     - ark::coretypes::Array*   # resulting array of utf16 chars
     - ark::ObjectHeader*       # src string
-    - int32_t                    # begin index
-    - int32_t                    # end index
-    - ark::ObjectHeader*       # Array u16 class pointer
+    - int32_t                  # begin index
+    - int32_t                  # end index
+    - ark::Class*              # Array u16 class pointer
 
 - name: MemmoveInterposer        # "bridge" to avoid generating the excessive prologue
   entrypoint: MemmoveInterposer
@@ -1079,8 +1079,6 @@ entrypoints:
     - void
     - void*
     - void*
-    - uint32_t
-    - uint32_t
     - uint32_t
 
 - name: ArrayCopyTo_1b
@@ -1140,8 +1138,36 @@ entrypoints:
     - void*
     - void*
     - int32_t
-    - int32_t
-    - int32_t
+
+- name: StringConcat2Tlab
+  entrypoint: StringConcat2Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat3Tlab
+  entrypoint: StringConcat3Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+
+- name: StringConcat4Tlab
+  entrypoint: StringConcat4Tlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
 - name: StringConcat2SlowPath
   entrypoint: CoreStringConcat2
@@ -1162,16 +1188,6 @@ entrypoints:
     - ark::coretypes::String*
     - ark::coretypes::String*
 
-- name: StringConcat3OddSaved
-  entrypoint: CoreStringConcat3
-  bridge: odd_saved
-  properties: []
-  signature:
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-    - ark::coretypes::String*
-
 - name: StringConcat4SlowPath
   entrypoint: CoreStringConcat4
   bridge: slow_path
@@ -1183,32 +1199,32 @@ entrypoints:
     - ark::coretypes::String*
     - ark::coretypes::String*
 
-- name: StringConcat2Tlab
-  entrypoint: StringConcat2Tlab
-  bridge: none
-  properties: [irtoc]
+- name: StringConcat2Usual
+  entrypoint: CoreStringConcat2
+  bridge: entrypoint
+  properties: []
   signature:
-    - void*
-    - void*
-    - void*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
-- name: StringConcat3Tlab
-  entrypoint: StringConcat3Tlab
-  bridge: none
-  properties: [irtoc]
+- name: StringConcat3OddSaved
+  entrypoint: CoreStringConcat3
+  bridge: odd_saved
+  properties: []
   signature:
-    - void*
-    - void*
-    - void*
-    - void*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
 
-- name: StringConcat4Tlab
-  entrypoint: StringConcat4Tlab
-  bridge: none
-  properties: [irtoc]
+- name: StringConcat4Usual
+  entrypoint: CoreStringConcat4
+  bridge: entrypoint
+  properties: []
   signature:
-    - void*
-    - void*
-    - void*
-    - void*
-    - void*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*
+    - ark::coretypes::String*

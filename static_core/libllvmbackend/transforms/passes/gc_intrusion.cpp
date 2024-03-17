@@ -502,6 +502,15 @@ void GcIntrusion::RewriteWithGc(CallInst *call, GcRefLiveness *liveness, SetVect
     gcCall->setCallingConv(call->getCallingConv());
     gcContext->orderMap.FindAndConstruct(gcCall).second = gcContext->orderMap.lookup(call) - 1;
 
+    for (size_t i = 0; i < callArgs.size(); i++) {
+        if (call->getParamAttr(i, llvm::Attribute::SExt).isValid()) {
+            gcCall->addParamAttr(llvm::GCStatepointInst::CallArgsBeginPos + i, llvm::Attribute::SExt);
+        }
+        if (call->getParamAttr(i, llvm::Attribute::ZExt).isValid()) {
+            gcCall->addParamAttr(llvm::GCStatepointInst::CallArgsBeginPos + i, llvm::Attribute::ZExt);
+        }
+    }
+
     if (call->hasFnAttr("use-ark-spills")) {
         gcCall->addFnAttr(call->getFnAttr("use-ark-spills"));
     }

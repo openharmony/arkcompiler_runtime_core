@@ -61,6 +61,7 @@ public:
     using MethodId = uint32_t;
     using StringPtr = void *;
     using ClassPtr = void *;
+    using ThreadPtr = void *;
     using IdType = uint32_t;
     using FieldId = uint32_t;
     using StringId = uint32_t;
@@ -1442,7 +1443,12 @@ public:
         return nullptr;
     }
 
-    virtual void SetCurrentThread([[maybe_unused]] Thread *thread) const
+    virtual void SetCurrentThread([[maybe_unused]] ThreadPtr thread) const
+    {
+        UNREACHABLE();
+    }
+
+    virtual ThreadPtr GetCurrentThread() const
     {
         UNREACHABLE();
     }

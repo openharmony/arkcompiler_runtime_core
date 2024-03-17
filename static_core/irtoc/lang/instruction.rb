@@ -132,6 +132,15 @@ class IRInstruction
     send(setter, index)
   end
 
+  def MethodAsImm(name)
+    index = @bb.function.external_funcs.index(name)
+    if index.nil?
+        index = @bb.function.external_funcs.size
+        @bb.function.external_funcs << name
+    end
+    AddImm(index)
+  end
+
   def emit_ir
     opc = opcode()
     Output << "// #{self.to_s}"

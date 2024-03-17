@@ -170,7 +170,7 @@ function(:IntfInlineCache,
         Return(method_real).ptr
     } Else {
         # --> slow path
-        method_slow := Intrinsic(:SLOW_PATH_ENTRY, method, obj, callee_id, cacheaddr).AddImm(Constants::RESOLVE_VIRTUAL_CALL_AOT).AddImm(Constants::RESOLVE_VIRTUAL_CALL_AOT).Terminator.ptr
+        method_slow := Intrinsic(:SLOW_PATH_ENTRY, method, obj, callee_id, cacheaddr).AddImm(Constants::RESOLVE_VIRTUAL_CALL_AOT).MethodAsImm("ResolveVirtualCallAotBridge").Terminator.ptr
         Intrinsic(:UNREACHABLE).Terminator.void
     }
 }

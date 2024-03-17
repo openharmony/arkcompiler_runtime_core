@@ -238,7 +238,7 @@ extern "C" coretypes::String *CreateStringFromCharsEntrypoint(ObjectHeader *obj)
 
 extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t offset, uint32_t length,
                                                                         ObjectHeader *obj,
-                                                                        [[maybe_unused]] ObjectHeader *stringKlass)
+                                                                        [[maybe_unused]] Class *stringKlass)
 {
     BEGIN_ENTRYPOINT();
     auto vm = ManagedThread::GetCurrent()->GetVM();
@@ -252,7 +252,7 @@ extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t
 }
 
 extern "C" coretypes::String *CreateStringFromCharsZeroOffsetEntrypoint(uint32_t length, ObjectHeader *obj,
-                                                                        [[maybe_unused]] ObjectHeader *stringKlass)
+                                                                        [[maybe_unused]] Class *stringKlass)
 {
     BEGIN_ENTRYPOINT();
     auto vm = ManagedThread::GetCurrent()->GetVM();
@@ -282,7 +282,7 @@ extern "C" coretypes::String *SubStringFromStringEntrypoint(ObjectHeader *obj, i
 }
 
 extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t begin, int32_t end,
-                                                      [[maybe_unused]] ObjectHeader *arrayKlass)
+                                                      [[maybe_unused]] Class *stringKlass)
 {
     BEGIN_ENTRYPOINT();
 
@@ -441,7 +441,7 @@ extern "C" ObjectHeader *ResolveClassObjectEntrypoint(const Method *caller, File
     return klass->GetManagedObject();
 }
 
-extern "C" void *ResolveClassEntrypoint(const Method *caller, FileEntityId typeId)
+extern "C" Class *ResolveClassEntrypoint(const Method *caller, FileEntityId typeId)
 {
     BEGIN_ENTRYPOINT();
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
@@ -450,7 +450,7 @@ extern "C" void *ResolveClassEntrypoint(const Method *caller, FileEntityId typeI
         HandlePendingException();
         UNREACHABLE();
     }
-    return reinterpret_cast<void *>(klass);
+    return klass;
 }
 
 extern "C" coretypes::String *ResolveStringEntrypoint(const Method *caller, FileEntityId id)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,16 +122,32 @@
 
 .macro BRIDGE_SELECTOR name, notcompiled_entry, compiled_entry
 .global \name
+#ifdef PANDA_WITH_HIDDEN_SYMBOLS
+.hidden \name
+.hidden \notcompiled_entry
+.hidden \compiled_entry
+#else
+.protected \name
+.protected \notcompiled_entry
+.protected \compiled_entry
+#endif
 TYPE_FUNCTION(\name)
 \name:
     movb MANAGED_THREAD_FRAME_KIND_OFFSET(%THREAD_REG), %r10b
     testb %r10b, %r10b
-    jnz \compiled_entry@plt
-    jmp \notcompiled_entry@plt
+    jnz \compiled_entry
+    jmp \notcompiled_entry
 .endm
 
 .macro RUNTIME_CALL_CHECKER name, entry
 .global \name
+#ifdef PANDA_WITH_HIDDEN_SYMBOLS
+.hidden \name
+.hidden \entry
+#else
+.protected \name
+.protected \entry
+#endif
 TYPE_FUNCTION(\name)
 \name:
     CFI_STARTPROC
@@ -145,7 +161,7 @@ TYPE_FUNCTION(\name)
 
     movq $0, MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET(%THREAD_REG)
 
-    call \entry@plt
+    call \entry
 
     movq %r12, MANAGED_THREAD_RUNTIME_CALL_ENABLED_OFFSET(%THREAD_REG)
     popq %r12
@@ -195,7 +211,7 @@ TYPE_FUNCTION(\name)
 
 1:
     // call to BoundaryFrame bridge
-    call \entry@plt
+    call \entry
 
     // ManagedThread._frame = parent frame pointer
     movq %rbp, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
@@ -222,7 +238,7 @@ TYPE_FUNCTION(\name)
 .endif
     addq $(BRIDGE_FRAME_SIZE - 8), %rsp
     CFI_ADJUST_CFA_OFFSET(-(BRIDGE_FRAME_SIZE - 8))
-    jmp ThrowNativeExceptionBridge@plt
+    jmp ThrowNativeExceptionBridge
     CFI_RESTORE_STATE
 
 3:
@@ -233,6 +249,13 @@ TYPE_FUNCTION(\name)
 
 .macro ENTRYPOINT name, entry, paramsnum, ret_type
 .global \name
+#ifdef PANDA_WITH_HIDDEN_SYMBOLS
+.hidden \name
+.hidden \entry
+#else
+.protected \name
+.protected \entry
+#endif
 TYPE_FUNCTION(\name)
 \name:
     CFI_STARTPROC
@@ -250,6 +273,13 @@ TYPE_FUNCTION(\name)
 
 .macro ENTRYPOINT_SLOW_PATH name, entry, paramsnum, ret_type
 .global \name
+#ifdef PANDA_WITH_HIDDEN_SYMBOLS
+.hidden \name
+.hidden \entry
+#else
+.protected \name
+.protected \entry
+#endif
 TYPE_FUNCTION(\name)
 \name:
     CFI_STARTPROC
@@ -262,6 +292,13 @@ TYPE_FUNCTION(\name)
 
 .macro MethodEntrypointStub name, entry, notcompiled
 .global \name
+#ifdef PANDA_WITH_HIDDEN_SYMBOLS
+.hidden \name
+.hidden \entry
+#else
+.protected \name
+.protected \entry
+#endif
 TYPE_FUNCTION(\name)
 \name:
     CFI_STARTPROC
@@ -308,7 +345,7 @@ TYPE_FUNCTION(\name)
     subq $0x48, %rsp
     CFI_ADJUST_CFA_OFFSET(9 * 8)
 
-    call \entry@plt
+    call \entry
     // we're not going to return back here
 
 .L\notcompiled:
@@ -316,7 +353,7 @@ TYPE_FUNCTION(\name)
     CFI_DEF_CFA(rsp, 8)
     subq $0x8, %rsp
     CFI_ADJUST_CFA_OFFSET(8)
-    call \entry@plt
+    call \entry
     addq $0x8, %rsp
     CFI_ADJUST_CFA_OFFSET(-8)
     ret

@@ -574,10 +574,15 @@ public:
 
     bool IsGcValidForFastPath(SourceLanguage lang) const;
 
-    void SetCurrentThread(Thread *thread) const override
+    void SetCurrentThread(ThreadPtr thread) const override
     {
         ASSERT(thread != Thread::GetCurrent());
-        Thread::SetCurrent(thread);
+        Thread::SetCurrent(static_cast<ark::Thread *>(thread));
+    }
+
+    ThreadPtr GetCurrentThread() const override
+    {
+        return Thread::GetCurrent();
     }
 
 private:

@@ -99,6 +99,13 @@ bool LLVMIrConstructor::EmitStringBuilderAppendLong(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitStringBuilderAppendString(Inst *inst)
+{
+    auto result = CreateStringBuilderAppendString(inst);
+    ValueMapAdd(inst, result);
+    return true;
+}
+
 llvm::Value *LLVMIrConstructor::CreateStringBuilderAppendLong(Inst *inst)
 {
     auto sb = GetInputValue(inst, 0);
@@ -107,4 +114,130 @@ llvm::Value *LLVMIrConstructor::CreateStringBuilderAppendLong(Inst *inst)
     auto offset = GetGraph()->GetRuntime()->GetArrayU16ClassPointerTlsOffset(GetGraph()->GetArch());
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
     return CreateFastPathCall(inst, eid, {sb, value, klass});
+}
+
+llvm::Value *LLVMIrConstructor::CreateStringBuilderAppendString(Inst *inst)
+{
+    auto sb = GetInputValue(inst, 0);
+    auto str = GetInputValue(inst, 1);
+    auto *strInst = inst->GetInput(1).GetInst();
+    auto eidNull = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_NULL_STRING;
+    auto eid = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_STRING;
+    if (strInst->IsNullPtr()) {
+        return CreateEntrypointCall(eidNull, inst, {sb});
+    }
+    auto maybeNull = !IsInstNotNull(strInst);
+    auto branchWeights = llvm::MDBuilder(func_->getContext())
+                             .createBranchWeights(llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT,
+                                                  llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT);
+    auto contBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_cont"), func_);
+    auto slowPathBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_slow_path"), func_);
+    auto curBb = GetCurrentBasicBlock();
+
+    SetCurrentBasicBlock(contBb);
+    auto result = builder_.CreatePHI(sb->getType(), maybeNull ? 4U : 3U);
+
+    SetCurrentBasicBlock(curBb);
+    if (maybeNull) {
+        StringBuilderAppendStringNull(inst, result, contBb);
+    }
+
+    auto fastBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_fast_check"), func_);
+    auto sbBufferOffset =
+        builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), sb, RuntimeInterface::GetSbBufferOffset());
+    auto sbBuffer = builder_.CreateLoad(builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE), sbBufferOffset);
+    auto bufferLengthOffset = builder_.CreateConstInBoundsGEP1_32(
+        builder_.getInt8Ty(), sbBuffer, GetGraph()->GetRuntime()->GetArrayLengthOffset(GetGraph()->GetArch()));
+    auto bufferLength = builder_.CreateLoad(builder_.getInt32Ty(), bufferLengthOffset);
+    auto sbIndexOffset =
+        builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), sb, RuntimeInterface::GetSbIndexOffset());
+    auto sbIndex = builder_.CreateLoad(builder_.getInt32Ty(), sbIndexOffset);
+    auto iCmp = builder_.CreateICmpULT(sbIndex, bufferLength);
+    builder_.CreateCondBr(iCmp, fastBb, slowPathBb, branchWeights);
+
+    SetCurrentBasicBlock(fastBb);
+    StringBuilderAppendStringMain(inst, sbIndexOffset, sbIndex, sbBuffer, contBb);
+    result->addIncoming(sb, GetCurrentBasicBlock());
+
+    SetCurrentBasicBlock(slowPathBb);
+    auto slowPath = CreateEntrypointCall(eid, inst, {sb, str});
+    builder_.CreateBr(contBb);
+    result->addIncoming(sb, fastBb);
+    result->addIncoming(slowPath, slowPathBb);
+    SetCurrentBasicBlock(contBb);
+    return result;
+}
+
+void LLVMIrConstructor::StringBuilderAppendStringNull(Inst *inst, llvm::PHINode *result, llvm::BasicBlock *contBb)
+{
+    auto sb = GetInputValue(inst, 0);
+    auto str = GetInputValue(inst, 1);
+    auto eidNull = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_NULL_STRING;
+    auto nullBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_null"), func_);
+    auto bufCheckBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_buffer_check"), func_);
+    auto strNull = builder_.CreateICmpEQ(str, llvm::Constant::getNullValue(str->getType()));
+    builder_.CreateCondBr(strNull, nullBb, bufCheckBb);
+
+    SetCurrentBasicBlock(nullBb);
+    auto resultNull = CreateEntrypointCall(eidNull, inst, {sb});
+    result->addIncoming(resultNull, nullBb);
+    builder_.CreateBr(contBb);
+
+    SetCurrentBasicBlock(bufCheckBb);
+}
+
+void LLVMIrConstructor::StringBuilderAppendStringMain(Inst *inst, llvm::Value *sbIndexOffset, llvm::Value *sbIndex,
+                                                      llvm::Value *sbBuffer, llvm::BasicBlock *contBb)
+{
+    auto sb = GetInputValue(inst, 0);
+    auto str = GetInputValue(inst, 1);
+    auto runtime = GetGraph()->GetRuntime();
+    auto arch = GetGraph()->GetArch();
+
+    auto mainBb = llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_main"), func_);
+    auto checkCompressedBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_check_compressed"), func_);
+    auto setCompressedBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_set_compressed"), func_);
+    auto insertStringBb =
+        llvm::BasicBlock::Create(func_->getContext(), CreateBasicBlockName(inst, "sb_str_insert_string"), func_);
+
+    auto strLengthOffset =
+        builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), str, runtime->GetStringLengthOffset(arch));
+    auto strLength = builder_.CreateLoad(builder_.getInt32Ty(), strLengthOffset);
+    auto strLengthShr = builder_.CreateLShr(strLength, builder_.getInt32(1));
+    auto strLengthZero = builder_.CreateICmpEQ(strLengthShr, builder_.getInt32(0));
+    builder_.CreateCondBr(strLengthZero, contBb, mainBb);
+
+    SetCurrentBasicBlock(mainBb);
+    auto sbStrLengthOffset =
+        builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), sb, RuntimeInterface::GetSbLengthOffset());
+    auto sbStrLength = builder_.CreateLoad(builder_.getInt32Ty(), sbStrLengthOffset);
+    builder_.CreateStore(builder_.CreateAdd(sbStrLength, strLengthShr), sbStrLengthOffset);
+    auto isCompressed = builder_.CreateTrunc(strLength, builder_.getInt1Ty());
+    builder_.CreateCondBr(isCompressed, checkCompressedBb, insertStringBb);
+
+    SetCurrentBasicBlock(checkCompressedBb);
+    auto sbCompressOffset =
+        builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), sb, RuntimeInterface::GetSbCompressOffset());
+    auto sbCompress = builder_.CreateLoad(builder_.getInt8Ty(), sbCompressOffset);
+    auto sbCompressZero = builder_.CreateICmpEQ(sbCompress, llvm::Constant::getNullValue(builder_.getInt8Ty()));
+    builder_.CreateCondBr(sbCompressZero, insertStringBb, setCompressedBb);
+
+    SetCurrentBasicBlock(setCompressedBb);
+    builder_.CreateStore(llvm::Constant::getNullValue(builder_.getInt8Ty()), sbCompressOffset);
+    builder_.CreateBr(insertStringBb);
+
+    SetCurrentBasicBlock(insertStringBb);
+    auto shiftValue = DataType::ShiftByType(DataType::REFERENCE, GetGraph()->GetArch());
+    auto sbIndexShift = builder_.CreateShl(sbIndex, builder_.getInt32(shiftValue));
+    auto sbDataOffset = builder_.CreateAdd(sbIndexShift, builder_.getInt32(runtime->GetArrayDataOffset(arch)));
+    auto sbDataInsertPoint = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), sbBuffer, sbDataOffset);
+    builder_.CreateStore(builder_.CreateAdd(sbIndex, builder_.getInt32(1)), sbIndexOffset);
+    CreatePreWRB(inst, sbDataInsertPoint);
+    builder_.CreateStore(str, sbDataInsertPoint);
+    CreatePostWRB(inst, sbBuffer, sbDataOffset, str);
+    builder_.CreateBr(contBb);
 }
