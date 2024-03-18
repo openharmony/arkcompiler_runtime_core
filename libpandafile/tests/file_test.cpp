@@ -164,6 +164,14 @@ HWTEST(File, OpenPandaFileFromMemory, testing::ext::TestSize.Level0)
 
     pf = OpenPandaFileFromMemory(nullptr, 1U);
     EXPECT_EQ(pf, nullptr);
+
+    std::string tag = "ArkTS Code";
+    pf = OpenPandaFileFromMemory(nullptr, -1, tag);
+    EXPECT_EQ(pf, nullptr);
+
+    tag = "";
+    pf = OpenPandaFileFromMemory(nullptr, 1U, tag);
+    EXPECT_EQ(pf, nullptr);
 }
 
 HWTEST(File, OpenPandaFileFromSecureMemory, testing::ext::TestSize.Level0)
