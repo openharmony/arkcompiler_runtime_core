@@ -65,22 +65,32 @@ regression/12581_custom_class_Engine_array.ets
 
 ### Union issues
 ### literal types not supported yet
-spec/unions/union_literal_02.ets
-spec/unions/union_assignment_12_01.ets
-spec/unions/union_assignment_12_02.ets
-spec/unions/union_assignment_12_03.ets
+spec/03.types/References_Types/unions/union_literal_02.ets
+spec/03.types/References_Types/unions/union_assignment_12_01.ets
+spec/03.types/References_Types/unions/union_assignment_12_02.ets
+spec/03.types/References_Types/unions/union_assignment_12_03.ets
 ### undefined not supported yet
-spec/unions/union_generics_03.ets
+spec/03.types/References_Types/unions/union_generics_03.ets
 ### generics + unions not everything supported yet
-spec/unions/union_generics_01.ets
-spec/unions/union_generics_02.ets
+spec/03.types/References_Types/unions/union_generics_01.ets
+spec/03.types/References_Types/unions/union_generics_02.ets
 ### Negative tests
-spec/unions/union_cast_n_01.ets
-spec/unions/union_cast_n_02.ets
-spec/unions/union_cast_n_03.ets
-spec/unions/union_compare_n_10.ets
-spec/unions/union_param_n_01.ets
-spec/unions/union_param_n_02.ets
+spec/03.types/References_Types/unions/union_cast_n_01.ets
+spec/03.types/References_Types/unions/union_cast_n_02.ets
+spec/03.types/References_Types/unions/union_cast_n_03.ets
+# panda#15005: skip to stabilize fe_dev_202312
+spec/03.types/References_Types/unions/union_compare_02_05.ets
+spec/03.types/References_Types/unions/union_compare_02_07.ets
+spec/03.types/References_Types/unions/union_compare_06.ets
+# End of panda#15005
+spec/03.types/References_Types/unions/union_compare_n_10.ets
+spec/03.types/References_Types/unions/union_param_n_01.ets
+spec/03.types/References_Types/unions/union_param_n_02.ets
+### Issue 14165
+spec/03.types/References_Types/unions/union_compare_02_04.ets
+### Issue 15312
+### Issue 15965, 14165
+spec/03.types/References_Types/unions/union_compare_02_02.ets
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
