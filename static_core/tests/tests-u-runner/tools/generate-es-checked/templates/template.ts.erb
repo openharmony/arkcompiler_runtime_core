@@ -44,6 +44,19 @@ function preparePersist(x: any): any {
   if (typeof x[Symbol.iterator] === 'function') {
     return Array.from<any>(x).map(preparePersist)
   }
+  if (x instanceof DataView) {
+    const arr = new Array<number>()
+    for (let i = 0; i < x.byteLength; i++) {
+      arr.push(x.getUint8(i))
+    }
+    return arr;
+  }
+  if (typeof x === "bigint") {
+    return {
+      "__kind": "bigint",
+      "data": x.toString()
+    }
+  }
   return x;
 }
 
@@ -85,9 +98,16 @@ const numPrec = (k: any, v: any) => {
     }
     const x = new DataView(new ArrayBuffer(8))
     x.setFloat64(0, v, true)
+    const bi = x.getBigUint64(0, true)
+    const arr = new Array<number>()
+    for (let i = 0; i < x.byteLength; i++) {
+      const byte = (bi / (1n << BigInt(i * 8))) % 256n
+      arr.push(Number(byte))
+    }
+    const toPut = arr.map((b, i) => `(0x${b.toString(16).padStart(2, '0')} as long) << ${i * 8}`)
     return {
       "__kind": "num",
-      "data": `0x${x.getBigUint64(0, true).toString(16).padStart(16, '0')}`,
+      "data": toPut.join(' | '),
       "dbg": v.toFixed(100).replace(/(\.[0-9]*[1-9]+)(0*)$/, '$1')
     }
   }

@@ -62,6 +62,9 @@ module ESChecker
             if value_is_string rb_obj
                 return { :kind => :trivial, :str => "string" }
             end
+            if rb_obj.kind_of?(Hash) && rb_obj["__kind"] == "bigint"
+                return { :kind => :trivial, :str => "bigint" }
+            end
             if rb_obj.kind_of?(Array)
                 if rb_obj.size == 0
                     return { :kind => :array, :el => { :kind => :trivial, :str => "Object|null|undefined" } }
