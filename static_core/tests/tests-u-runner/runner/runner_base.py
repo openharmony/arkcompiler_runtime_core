@@ -52,7 +52,7 @@ def load_list(test_root: str, test_list_path: str) -> List[str]:
         for line in file:
             test, _ = get_test_and_comment_from_line(line.strip(" \n"))
             if test is not None:
-                result.append(path.join(test_root, test))
+                result.append(path.normpath(path.join(test_root, test)))
 
     return result
 
@@ -70,7 +70,7 @@ def get_test_and_comment_from_line(line: str) -> Tuple[Optional[str], Optional[s
 
 
 def correct_path(root: Path, test_list: str) -> str:
-    return path.abspath(test_list) if path.exists(test_list) else path.join(root, test_list)
+    return path.abspath(test_list) if path.exists(test_list) else path.normpath(path.join(root, test_list))
 
 
 _LOGGER = logging.getLogger("runner.runner_base")
@@ -93,16 +93,16 @@ def run_test(test: Test) -> Test:
 class Runner(ABC):
     def __init__(self, config: Config, name: str) -> None:
         # TODO(vpukhov): adjust es2panda path
-        default_ets_arktsconfig = path.join(
+        default_ets_arktsconfig = path.normpath(path.join(
             config.general.build,
             "tools", "es2panda", "generated", "arktsconfig.json"
-        )
+        ))
         if not path.exists(default_ets_arktsconfig):
-            default_ets_arktsconfig = path.join(
+            default_ets_arktsconfig = path.normpath(path.join(
                 config.general.build,
                 "gen",  # for GN build
                 "tools", "es2panda", "generated", "arktsconfig.json"
-            )
+            ))
 
         # Roots:
         # directory where test files are located - it's either set explicitly to the absolute value
@@ -267,7 +267,7 @@ class Runner(ABC):
         glob_expression = path.join(directory, f"**/*.{extension}")
         test_files.extend(fnmatch.filter(
             glob(glob_expression, recursive=True),
-            path.join(directory, self.config.test_lists.filter)
+            path.normpath(path.join(directory, self.config.test_lists.filter))
         ))
         if self.config.test_lists.groups.chapters:
             test_files = self.__filter_by_chapters(directory, test_files, extension)

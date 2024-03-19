@@ -35,14 +35,17 @@ class RunnerJSParser(RunnerJS):
 
         symlink_es2panda_test = Path(config.general.static_core_root) / "tools" / "es2panda" / "test"
         if symlink_es2panda_test.exists():
-            es2panda_test = symlink_es2panda_test
+            es2panda_test = symlink_es2panda_test.resolve()
         else:
             es2panda_test = Path(config.general.static_core_root).parent.parent / 'ets_frontend' / 'ets2panda' / 'test'
             if not es2panda_test.exists():
                 raise Exception(f'There is no path {es2panda_test}')
         self.default_list_root = es2panda_test / 'test-lists'
 
-        self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
+        if self.list_root:
+            self.list_root = self.list_root
+        else:
+            self.list_root = path.normpath(path.join(self.default_list_root, self.name))
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         self.test_root = es2panda_test if self.test_root is None else self.test_root
@@ -74,7 +77,7 @@ class RunnerJSParser(RunnerJS):
         ])
 
     def add_directory(self, directory: str, extension: str, flags: List[str]) -> None:
-        new_dir = path.join(self.test_root, directory)
+        new_dir = path.normpath(path.join(self.test_root, directory))
         super().add_directory(new_dir, extension, flags)
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSParser:
