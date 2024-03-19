@@ -2126,3 +2126,5 @@
 # 16623: cannot call static method from abstract class
 09.classes/06.method_declarations/01.static_methods/static_method_in_abstract_class_1.ets
 # end of es2panda failure
+# es2panda: 15945: The test failed because of a different error. The check for this case is not implemented yet
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_5.ets
