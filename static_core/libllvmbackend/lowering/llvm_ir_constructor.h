@@ -365,6 +365,7 @@ protected:
     static void VisitCheckCast(GraphVisitor *v, Inst *inst);
     static void VisitLoadType(GraphVisitor *v, Inst *inst);
     static void VisitUnresolvedLoadType(GraphVisitor *v, Inst *inst);
+    static void VisitGetInstanceClass(GraphVisitor *v, Inst *inst);
     static void VisitThrow(GraphVisitor *v, Inst *inst);
     static void VisitCatchPhi(GraphVisitor *v, Inst *inst);
     static void VisitLoadRuntimeClass(GraphVisitor *v, Inst *inst);

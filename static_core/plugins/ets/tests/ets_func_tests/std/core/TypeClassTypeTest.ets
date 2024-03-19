@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,7 @@ function testFields(ct: ClassType): int {
     let failures = 0
     for (let i = 0; i < ct.getFieldsNum(); ++i) {
         let field = ct.getField(i);
-        failures += test(ct.getFieldByName(field.getName()) == field, "   " + field.getName() + " field")
+        failures += test(ct.getFieldByName(field.getName()).equals(field), "   " + field.getName() + " field")
     }
     return failures
 }
@@ -110,7 +110,7 @@ function testAllFieldsAreOwn(ct: ClassType): int {
     let failures = test(ct.getOwnFieldsNum() == ct.getFieldsNum(), "   OwnFieldsNum == FieldsNum")
     for (let i = 0; i < ct.getOwnFieldsNum(); ++i) {
         let field = ct.getOwnField(i);
-        failures += test(ct.getFieldByName(field.getName()) == field, "  " + field.getName())
+        failures += test(ct.getFieldByName(field.getName()).equals(field), "  " + field.getName())
     }
     return failures
 }
@@ -129,8 +129,8 @@ function testPoint(): int {
     let pt = Type.of(new Point()) as ClassType
 
     return test(pt.getName() == "Point",                                    "ClassName: Point") +
-            test(pt.hasEmptyConstructor(),                                 "   doesn't have empty constuctor") +
-            test(pt.getBaseType() == ObjectType,                            "   base type is ObjectType") +
+            test(pt.hasEmptyConstructor(),                                  "   doesn't have empty constuctor") +
+            test(pt.getBaseType().equals(ObjectType),                       "   base type is ObjectType") +
             test(pt.getInterfacesNum() == 1,                                "   1 Interface:") +
             test(pt.getInterface(0).getName() == "Serializable",            "        Serializable interface") +
             test(pt.getFieldsNum() == 2,                                    "   2 Fields:") +
@@ -162,9 +162,9 @@ function testPoint3D(): int {
             test(pt.hasField("state"),                                      "       state field") +
             test(pt.hasField("ZERO"),                                       "       ZERO field") +
             test(pt.getOwnFieldsNum() == 3,                                 "   3 Own Fields:") +
-            test(pt.getOwnField(0) == pt.getFieldByName("ZERO"),            "       ZERO field") +
-            test(pt.getOwnField(1) == pt.getFieldByName("z"),               "       z field") +
-            test(pt.getOwnField(2) == pt.getFieldByName("state"),           "       state field") +
+            test(pt.getOwnField(0).equals(pt.getFieldByName("ZERO")),       "       ZERO field") +
+            test(pt.getOwnField(1).equals(pt.getFieldByName("z")),          "       z field") +
+            test(pt.getOwnField(2).equals(pt.getFieldByName("state")),      "       state field") +
             test(pt.getMethodsNum() == 2 + ObjectType.getMethodsNum(),      "   2 Methods:") +
             testClassExtendsObject(pt) +
             test(findMethodByName(pt, "add") != null,                       "       Point.add method") +

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ function testInterfaceTypeC(): int {
     let iat = ict.getInterface(0)
     return  test(ict.getName() == "C",                           "InterfaceName: C") +
             test(ict.getInterfacesNum() == 1,                   "   1 Interfaces:") +
-            test(ict.getInterface(0) == iat,                    "       A interface") +
+            test(ict.getInterface(0).equals(iat),               "       A interface") +
             test(ict.getMethodsNum() == 2,                      "   2 Methods:") +
             test(findMethodByName(ict, "doA") != null,          "       doA method") +
             test(findMethodByName(ict, "doC") != null,          "       doC method")
@@ -89,8 +89,8 @@ function testInterfaceTypeD(): int {
     let ict = idt.getInterface(1)
     return test(idt.getName() == "D",                   "InterfaceName: D") +
             test(idt.getInterfacesNum() == 2,           "   2 Interfaces:") +
-            test(idt.getInterface(0) == ibt,            "       B interface") +
-            test(idt.getInterface(1) == ict,            "       C interface") +
+            test(idt.getInterface(0).equals(ibt),       "       B interface") +
+            test(idt.getInterface(1).equals(ict),       "       C interface") +
             test(idt.getMethodsNum() == 4,              "   4 Methods:") +
             test(findMethodByName(idt, "doA") != null,  "       doA method") +
             test(findMethodByName(idt, "doB") != null,  "       doB method") +

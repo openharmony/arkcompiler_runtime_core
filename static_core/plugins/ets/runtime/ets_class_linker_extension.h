@@ -63,9 +63,9 @@ public:
 
     void FreeClass(Class *klass) override;
 
-    bool InitializeClass([[maybe_unused]] Class *klass) override;
+    bool InitializeClass(Class *klass) override;
 
-    const void *GetNativeEntryPointFor([[maybe_unused]] Method *method) const override;
+    const void *GetNativeEntryPointFor(Method *method) const override;
 
     bool CanThrowException([[maybe_unused]] const Method *method) const override
     {
@@ -80,19 +80,31 @@ public:
     Class *FromClassObject(ark::ObjectHeader *obj) override;
     size_t GetClassObjectSizeFromClassSize(uint32_t size) override;
 
+    void InitializeBuiltinClasses();
+
     Class *GetObjectClass()
     {
-        return objectClass_;
+        return GetClassRoot(ClassRoot::OBJECT);
     }
 
     Class *GetUndefinedClass() const
     {
-        return internalUndefinedClass_;
+        return undefinedClass_;
     }
 
     Class *GetPromiseClass()
     {
         return promiseClass_;
+    }
+
+    Class *GetBigIntClass()
+    {
+        return bigintClass_;
+    }
+
+    Class *GetArrayAsListIntClass()
+    {
+        return arrayAsListIntClass_;
     }
 
     Class *GetArrayBufferClass()
@@ -187,7 +199,9 @@ private:
 
     Class *CreateClassRoot(const uint8_t *descriptor, ClassRoot root);
 
-    bool CacheClass(Class **classForCache, const char *descriptor);
+    Class *CacheClass(std::string_view descriptor, bool forceInit = false);
+    template <typename F>
+    Class *CacheClass(std::string_view descriptor, F const &setup, bool forceInit = false);
 
     class ErrorHandler : public ClassLinkerErrorHandler {
     public:
@@ -198,7 +212,9 @@ private:
     LanguageContext langCtx_ {nullptr};
     mem::HeapManager *heapManager_ {nullptr};
 
-    // Box classes
+    // Cached classes
+    Class *undefinedClass_ = nullptr;
+    // std.core box classes
     Class *boxBooleanClass_ = nullptr;
     Class *boxByteClass_ = nullptr;
     Class *boxCharClass_ = nullptr;
@@ -207,20 +223,17 @@ private:
     Class *boxLongClass_ = nullptr;
     Class *boxFloatClass_ = nullptr;
     Class *boxDoubleClass_ = nullptr;
-
-    // Cached classes
-    Class *objectClass_ = nullptr;
-    Class *internalUndefinedClass_ = nullptr;
+    // std.core
+    Class *bigintClass_ = nullptr;
     Class *promiseClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;
-
+    Class *arrayAsListIntClass_ = nullptr;
     // Cached type API classes
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;
     Class *typeapiParameterClass_ = nullptr;
-
-    // Escompat classes
+    // escompat
     Class *sharedMemoryClass_ = nullptr;
 };
 

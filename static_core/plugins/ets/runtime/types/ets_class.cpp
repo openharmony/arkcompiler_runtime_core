@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,27 +79,6 @@ EtsField *EtsClass::GetFieldByIndex(uint32_t i)
 EtsField *EtsClass::GetOwnFieldByIndex(uint32_t i)
 {
     return EtsField::FromRuntimeField(&GetRuntimeClass()->GetFields()[i]);
-}
-
-EtsField *EtsClass::GetFieldByName(EtsString *name)
-{
-    auto coroutine = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-    VMHandle<EtsString> expectedName(coroutine, name->GetCoreType());
-
-    EtsField *res = nullptr;
-    EnumerateBaseClasses([&](EtsClass *c) {
-        auto fields = c->GetRuntimeClass()->GetFields();
-        for (auto &f : fields) {
-            auto etsField = EtsField::FromRuntimeField(&f);
-            if (etsField->GetNameString()->StringsAreEqual(expectedName.GetPtr()->AsObject())) {
-                res = etsField;
-                return true;
-            }
-        }
-        return false;
-    });
-    return res;
 }
 
 EtsMethod *EtsClass::GetDirectMethod(const char *name, const char *signature)
@@ -451,6 +430,11 @@ void EtsClass::SetFinalizable()
     flags_ = flags_ | IS_CLASS_FINALIZABLE;
     ASSERT(IsFinalizable() && IsReference());
 }
+void EtsClass::SetValueTyped()
+{
+    flags_ = flags_ | IS_VALUE_TYPED;
+    ASSERT(IsValueTyped());
+}
 
 bool EtsClass::IsSoftReference() const
 {
@@ -482,11 +466,10 @@ bool EtsClass::IsFinalizable() const
     return (flags_ & IS_CLASS_FINALIZABLE) != 0;
 }
 
-void EtsClass::Initialize(EtsArray *ifTable, EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType)
+void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType)
 {
     ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
 
-    SetIfTable(ifTable);
     SetName(nullptr);
     SetSuperClass(superClass);
 
@@ -496,19 +479,9 @@ void EtsClass::Initialize(EtsArray *ifTable, EtsClass *superClass, uint16_t acce
     }
 
     if (superClass != nullptr) {
-        if (superClass->IsSoftReference()) {
-            flags |= IS_SOFT_REFERENCE;
-        } else if (superClass->IsWeakReference()) {
-            flags |= IS_WEAK_REFERENCE;
-        } else if (superClass->IsPhantomReference()) {
-            flags |= IS_PHANTOM_REFERENCE;
-        }
-        if (superClass->IsFinalizerReference()) {
-            flags |= IS_FINALIZE_REFERENCE;
-        }
-        if (superClass->IsFinalizable()) {
-            flags |= IS_CLASS_FINALIZABLE;
-        }
+        static constexpr uint32_t COPIED_MASK =
+            IS_SOFT_REFERENCE | IS_WEAK_REFERENCE | IS_PHANTOM_REFERENCE | IS_FINALIZE_REFERENCE | IS_CLASS_FINALIZABLE;
+        flags |= superClass->GetFlags() & COPIED_MASK;
     }
     if ((flags & IS_CLASS_FINALIZABLE) == 0) {
         if (IsClassFinalizable(this)) {
@@ -534,11 +507,6 @@ EtsClass *EtsClass::GetComponentType() const
         return nullptr;
     }
     return FromRuntimeClass(componentType);
-}
-
-void EtsClass::SetIfTable(EtsArray *array)
-{
-    GetObjectHeader()->SetFieldObject(GetIfTableOffset(), reinterpret_cast<ObjectHeader *>(array));
 }
 
 void EtsClass::SetName(EtsString *name)
@@ -597,8 +565,8 @@ EtsField *EtsClass::GetStaticFieldIDByName(const char *name, const char *sig)
 EtsField *EtsClass::GetDeclaredFieldIDByName(const char *name)
 {
     return reinterpret_cast<EtsField *>(GetRuntimeClass()->FindDeclaredField([name](const ark::Field &field) -> bool {
-        auto *jfield = EtsField::FromRuntimeField(&field);
-        return ::strcmp(jfield->GetName(), name) == 0;
+        auto *efield = EtsField::FromRuntimeField(&field);
+        return ::strcmp(efield->GetName(), name) == 0;
     }));
 }
 

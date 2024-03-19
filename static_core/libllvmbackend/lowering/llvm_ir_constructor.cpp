@@ -4438,6 +4438,15 @@ void LLVMIrConstructor::VisitUnresolvedLoadType(GraphVisitor *v, Inst *inst)
     ctor->ValueMapAdd(inst, result);
 }
 
+void LLVMIrConstructor::VisitGetInstanceClass(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    auto object = ctor->GetInputValue(inst, 0);
+    auto klass = ctor->CreateLoadClassFromObject(object);
+    ctor->ValueMapAdd(inst, klass);
+}
+
 void LLVMIrConstructor::VisitThrow(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);

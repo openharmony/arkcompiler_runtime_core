@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include <cstdint>
 #include "libpandabase/utils/utils.h"
 #include "compiler_logger.h"
+#include "optimizer/ir/datatype.h"
 #include "optimizer/ir_builder/inst_builder.h"
 #include "optimizer/ir_builder/ir_builder.h"
 #include "optimizer/ir/inst.h"
@@ -180,6 +181,26 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::
     AddInstruction(saveState);
     AddInstruction(nullCheck);
     AddInstruction(intrinsic);
+}
+
+void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
+{
+    auto pc = GetPc(bcInst->GetAddress());
+
+    Inst *obj1 = GetDefinition(bcInst->GetVReg(0));
+    Inst *obj2 = GetDefinition(bcInst->GetVReg(1));
+
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc,
+                                                     RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_EQUALS);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+
+    intrinsic->AppendInput(obj1);
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AppendInput(obj2);
+    intrinsic->AddInputType(DataType::REFERENCE);
+
+    AddInstruction(intrinsic);
+    UpdateDefinitionAcc(intrinsic);
 }
 
 }  // namespace ark::compiler

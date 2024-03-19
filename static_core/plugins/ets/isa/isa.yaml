@@ -19,6 +19,10 @@ namespaces:
   - namespace: ets
     quickening: false
 
+verification:
+  - tag: v2_obj_or_null
+    description: Second operand contains a reference to an object or null.
+
 groups:
   - title: ETS launch instructions
     description: >
@@ -217,3 +221,20 @@ groups:
         prefix: ets
         acc: inout:ref->i32
         format: [pref_op_none]
+
+  - title: Check if two references are loosely equal
+    description: >
+      Check if two references are loosely equal
+    verification:
+      - v1_obj_or_null
+      - v2_obj_or_null
+      - acc_type
+    exceptions:
+      - x_none
+    namespace: ets
+    instructions:
+      - sig: ets.equals v1:in:ref, v2:in:ref
+        prefix: ets
+        acc: out:i32
+        format: [pref_op_v1_4_v2_4]
+        intrinsic_name: INTRINSIC_COMPILER_ETS_EQUALS

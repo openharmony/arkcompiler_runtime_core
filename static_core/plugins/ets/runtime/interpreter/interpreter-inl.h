@@ -27,6 +27,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 
 namespace ark::ets {
@@ -480,11 +481,42 @@ public:
         LOG_INST() << "ets.isundefined";
 
         ObjectHeader *obj = this->GetAcc().GetReference();
-        this->GetAcc().Set(obj == GetCoro()->GetUndefinedObject() ? 1 : 0);
+        this->GetAccAsVReg().SetPrimitive(obj == GetCoro()->GetUndefinedObject());
+        this->template MoveToNextInst<FORMAT, true>();
+    }
+
+    template <BytecodeInstruction::Format FORMAT>
+    ALWAYS_INLINE void HandleEtsEquals()
+    {
+        uint16_t v1 = this->GetInst().template GetVReg<FORMAT, 0>();
+        uint16_t v2 = this->GetInst().template GetVReg<FORMAT, 1>();
+
+        LOG_INST() << "ets.equals v" << v1 << ", v" << v2;
+
+        ObjectHeader *obj1 = this->GetFrame()->GetVReg(v1).GetReference();
+        ObjectHeader *obj2 = this->GetFrame()->GetVReg(v2).GetReference();
+
+        bool res = EtsReferenceEquals(GetCoro(), EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2));
+        this->GetAccAsVReg().SetPrimitive(res);
         this->template MoveToNextInst<FORMAT, true>();
     }
 
 private:
+    ALWAYS_INLINE bool IsNull(ObjectHeader *obj)
+    {
+        return obj == nullptr;
+    }
+
+    ALWAYS_INLINE bool IsUndefined(ObjectHeader *obj)
+    {
+        return obj == GetCoro()->GetUndefinedObject();
+    }
+
+    ALWAYS_INLINE bool IsNullish(ObjectHeader *obj)
+    {
+        return IsNull(obj) || IsUndefined(obj);
+    }
+
     ALWAYS_INLINE EtsCoroutine *GetCoro() const
     {
         return EtsCoroutine::CastFromThread(this->GetThread());

@@ -93,22 +93,22 @@ function testMethodType(): int {
 
     return  test(serializeMethodType.getParametersNum() == 0,           "   0 Parameters") +
             test(serializeMethodType.getResultType() == StringType.REF, "   has String result type") +
-            test(serializeMethodType.getReceiverType() == pt,           "   has Point receiver type") +
+            test(serializeMethodType.getReceiverType().equals(pt),      "   has Point receiver type") +
             test(addMethodType.getParametersNum() == 1,                 "   1 parameter:") +
-            test(addMethodType.getParameter(0).getType() == pt,         "       Point parameter") +
-            test(addMethodType.getResultType() == pt,                   "   has Point result type") +
-            test(addMethodType.getReceiverType() == pt,                 "   has Point receiver type") +
+            test(addMethodType.getParameter(0).getType().equals(pt),    "       Point parameter") +
+            test(addMethodType.getResultType().equals(pt),              "   has Point result type") +
+            test(addMethodType.getReceiverType().equals(pt),            "   has Point receiver type") +
             test(cType.getParametersNum() == 1,                         "   1 Parameter") +
             test(cType.getParameter(0).getType() == IntType.VAL,        "       int parameter") +
             test(cType.getResultType() == VoidType.REF,                 "   has void result type") +
-            test(cType.getReceiverType() == hwt,                        "   has HTMLWriter receiver type") +
+            test(cType.getReceiverType().equals(hwt),                   "   has HTMLWriter receiver type") +
             test(getterType.getParametersNum() == 0,                    "   0 Parameters") +
             test(getterType.getResultType() == IntType.VAL,             "   has int result type") +
-            test(getterType.getReceiverType() == hwt,                   "   has HTMLWriter receiver type") +
+            test(getterType.getReceiverType().equals(hwt),              "   has HTMLWriter receiver type") +
             test(setterType.getParametersNum() == 1,                    "   1 Parameter") +
             test(setterType.getParameter(0).getType() == IntType.VAL,   "       int parameter") +
             test(setterType.getResultType() == VoidType.REF,            "   has void result type") +
-            test(setterType.getReceiverType() == hwt,                   "   has HTMLWriter receiver type")
+            test(setterType.getReceiverType().equals(hwt),              "   has HTMLWriter receiver type")
 }
 
 function testMethod() {

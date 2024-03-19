@@ -16,8 +16,30 @@
 #include "compiler/optimizer/optimizations/peepholes.h"
 #include "compiler/optimizer/ir/analysis.h"
 #include "compiler/optimizer/ir/runtime_interface.h"
+#include "compiler/optimizer/optimizations/const_folding.h"
 
 namespace ark::compiler {
+
+static void ReplaceWithCompareEQ(IntrinsicInst *intrinsic)
+{
+    auto input0 = intrinsic->GetInput(0).GetInst();
+    auto input1 = intrinsic->GetInput(1).GetInst();
+
+    auto bb = intrinsic->GetBasicBlock();
+    auto graph = bb->GetGraph();
+
+    auto compare = graph->CreateInst(Opcode::Compare)->CastToCompare();
+    compare->SetCc(ConditionCode::CC_EQ);
+    compare->SetType(intrinsic->GetType());
+    ASSERT(input0->GetType() == input1->GetType());
+    compare->SetOperandsType(input0->GetType());
+
+    compare->SetInput(0, input0);
+    compare->SetInput(1, input1);
+    bb->InsertAfter(compare, intrinsic);
+    intrinsic->ReplaceUsers(compare);
+}
+
 bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     // Replaces
@@ -28,20 +50,7 @@ bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
     auto input0 = intrinsic->GetInput(0).GetInst();
     auto input1 = intrinsic->GetInput(1).GetInst();
     if (input0->IsNullPtr() || input1->IsNullPtr()) {
-        auto bb = intrinsic->GetBasicBlock();
-        auto graph = bb->GetGraph();
-
-        auto compare = graph->CreateInst(Opcode::Compare)->CastToCompare();
-        compare->SetCc(ConditionCode::CC_EQ);
-        compare->SetType(intrinsic->GetType());
-        ASSERT(input0->GetType() == input1->GetType());
-        compare->SetOperandsType(input0->GetType());
-
-        compare->SetInput(0, input0);
-        compare->SetInput(1, input1);
-        bb->InsertAfter(compare, intrinsic);
-        intrinsic->ReplaceUsers(compare);
-
+        ReplaceWithCompareEQ(intrinsic);
         return true;
     }
 
@@ -207,6 +216,57 @@ bool Peepholes::PeepholeStObjByName([[maybe_unused]] GraphVisitor *v, IntrinsicI
     if (TryInsertCallInst<true>(intrinsic, klassPtr, rawField)) {
         return true;
     }
+    return false;
+}
+
+static void ReplaceWithCompareNullish(IntrinsicInst *intrinsic, Inst *input)
+{
+    auto bb = intrinsic->GetBasicBlock();
+    auto graph = bb->GetGraph();
+
+    auto compareNull = graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateNullPtr(),
+                                                DataType::REFERENCE, ConditionCode::CC_EQ);
+    auto compareUndef =
+        graph->CreateInstCompare(DataType::BOOL, intrinsic->GetPc(), input, graph->GetOrCreateUndefinedInst(),
+                                 DataType::REFERENCE, ConditionCode::CC_EQ);
+
+    auto orInst = graph->CreateInstOr(DataType::BOOL, intrinsic->GetPc(), compareNull, compareUndef);
+
+    bb->InsertAfter(compareNull, intrinsic);
+    bb->InsertAfter(compareUndef, compareNull);
+    bb->InsertAfter(orInst, compareUndef);
+
+    intrinsic->ReplaceUsers(orInst);
+}
+
+bool Peepholes::PeepholeEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    auto input0 = intrinsic->GetInput(0).GetInst();
+    auto input1 = intrinsic->GetInput(1).GetInst();
+
+    const auto isNullish = [](Inst *inst) { return inst->IsNullPtr() || inst->IsLoadUndefined(); };
+    if (input0 == input1 || (isNullish(input0) && isNullish(input1))) {
+        intrinsic->ReplaceUsers(ConstFoldingCreateIntConst(intrinsic, 1));
+        return true;
+    }
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer()) {
+        return false;
+    }
+    if (isNullish(input0) || isNullish(input1)) {
+        auto nonNullishInput = isNullish(input0) ? input1 : input0;
+        ReplaceWithCompareNullish(intrinsic, nonNullishInput);
+        return true;
+    }
+
+    auto klass1 = GetClassPtrForObject(intrinsic, 0);
+    auto klass2 = GetClassPtrForObject(intrinsic, 1);
+    if ((klass1 != nullptr && !graph->GetRuntime()->IsClassValueTyped(klass1)) ||
+        (klass2 != nullptr && !graph->GetRuntime()->IsClassValueTyped(klass2))) {
+        ReplaceWithCompareEQ(intrinsic);
+        return true;
+    }
+    // NOTE(vpukhov): #16340 try ObjectTypePropagation
     return false;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License"
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -163,4 +163,13 @@ static void VisitLoadUndefined(GraphVisitor *visitor, Inst *inst)
     } else {
         enc->result_.emplace_back(pandasm::Create_ETS_MOVUNDEFINED(inst->GetDstReg()));
     }
+}
+
+static void VisitEtsEquals(GraphVisitor *visitor, Inst *inst)
+{
+    auto *enc = static_cast<BytecodeGen *>(visitor);
+    auto v0 = inst->GetSrcReg(0);
+    auto v1 = inst->GetSrcReg(1);
+    enc->result_.emplace_back(pandasm::Create_ETS_EQUALS(v0, v1));
+    DoSta(inst->GetDstReg(), enc->result_);
 }

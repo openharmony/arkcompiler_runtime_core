@@ -82,7 +82,6 @@ public:
     EtsField *GetFieldByIndex(uint32_t i);
 
     EtsField *GetFieldIDByOffset(uint32_t fieldOffset);
-    EtsField *GetFieldByName(EtsString *name);
     PANDA_PUBLIC_API EtsField *GetFieldIDByName(const char *name, const char *sig = nullptr);
 
     EtsField *GetOwnFieldByIndex(uint32_t i);
@@ -337,15 +336,19 @@ public:
         return reinterpret_cast<EtsClass *>(reinterpret_cast<uintptr_t>(cls) - GetRuntimeClassOffset());
     }
 
+    static EtsClass *FromClassObject(ObjectHeader *obj)
+    {
+        ASSERT(obj->ClassAddr<Class>()->IsClassClass());
+        return reinterpret_cast<EtsClass *>(ToUintPtr(obj) - GetHeaderOffset());
+    }
+
     static EtsClass *GetPrimitiveClass(EtsString *primitiveName);
 
-    void Initialize(EtsArray *ifTable, EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType);
+    void Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType);
 
     void SetComponentType(EtsClass *componentType);
 
     EtsClass *GetComponentType() const;
-
-    void SetIfTable(EtsArray *array);
 
     void SetName(EtsString *name);
 
@@ -383,12 +386,18 @@ public:
     void SetFinalizeReference();
     void SetPhantomReference();
     void SetFinalizable();
+    void SetValueTyped();
 
     [[nodiscard]] bool IsSoftReference() const;
     [[nodiscard]] bool IsWeakReference() const;
     [[nodiscard]] bool IsFinalizerReference() const;
     [[nodiscard]] bool IsPhantomReference() const;
     [[nodiscard]] bool IsFinalizable() const;
+
+    [[nodiscard]] bool IsValueTyped() const
+    {
+        return (GetFlags() & IS_VALUE_TYPED) != 0;
+    }
 
     /// True if class inherited from Reference, false otherwise
     [[nodiscard]] bool IsReference() const;
@@ -397,11 +406,6 @@ public:
     ~EtsClass() = delete;
     NO_COPY_SEMANTIC(EtsClass);
     NO_MOVE_SEMANTIC(EtsClass);
-
-    static constexpr size_t GetIfTableOffset()
-    {
-        return MEMBER_OFFSET(EtsClass, ifTable_);
-    }
 
     static constexpr size_t GetNameOffset()
     {
@@ -416,6 +420,16 @@ public:
     static constexpr size_t GetFlagsOffset()
     {
         return MEMBER_OFFSET(EtsClass, flags_);
+    }
+
+    static constexpr size_t GCRefFieldsOffset()
+    {
+        return GetHeaderOffset() + sizeof(header_);
+    }
+
+    static constexpr size_t GCRefFieldsNum()
+    {
+        return (GetFlagsOffset() - GCRefFieldsOffset()) / sizeof(ObjectPointerType);
     }
 
 private:
@@ -444,13 +458,15 @@ private:
     /// Class override Object.finalize() or any of his ancestors, and implementation is not trivial.
     constexpr static uint32_t IS_CLASS_FINALIZABLE = 1U << 22U;
 
+    constexpr static uint32_t IS_VALUE_TYPED = 1U << 23U;
+
     ark::ObjectHeader header_;  // EtsObject
 
     // ets.Class fields BEGIN
-    FIELD_UNUSED ObjectPointer<EtsArray> ifTable_;     // Class[]
+    // Reference fields START
     FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
-
+    // Reference fields END
     FIELD_UNUSED uint32_t flags_;
     // ets.Class fields END
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,11 @@ function testLambdaType(): int {
     let fooType = Type.of(foo) as LambdaType
     let foo2Type = Type.of(foo2) as LambdaType
 
-    return test(fooType.getParametersNum() == 0,               "   0 Parameters") +
-            test(fooType.getResultType() == baseType,           "   Base result type") +
-            test(foo2Type.getParametersNum() == 1,              "   1 Parameter") +
-            test(foo2Type.getParameter(0).getType() == baseType,"       base type param") +
-            test(foo2Type.getResultType() == derivedType,       "   Derived result type")
+    return test(fooType.getParametersNum() == 0,                      "   0 Parameters") +
+            test(fooType.getResultType().equals(baseType),            "   Base result type") +
+            test(foo2Type.getParametersNum() == 1,                    "   1 Parameter") +
+            test(foo2Type.getParameter(0).getType().equals(baseType), "       base type param") +
+            test(foo2Type.getResultType().equals(derivedType),        "   Derived result type")
 }
 
 function main(): int {

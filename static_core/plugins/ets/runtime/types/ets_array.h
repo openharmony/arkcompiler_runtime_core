@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,10 +118,11 @@ protected:
     }
 };
 
-class EtsObjectArray : public EtsArray {
+template <typename Component>
+class EtsTypedObjectArray : public EtsArray {
 public:
-    static EtsObjectArray *Create(EtsClass *objectClass, uint32_t length,
-                                  ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT)
+    static EtsTypedObjectArray *Create(EtsClass *objectClass, uint32_t length,
+                                       ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         // Generate Array class name  "[L<object_class>;"
@@ -131,10 +132,10 @@ public:
         if (arrayClass == nullptr) {
             return nullptr;
         }
-        return EtsArray::Create<EtsObjectArray>(arrayClass, length, spaceType);
+        return EtsArray::Create<EtsTypedObjectArray>(arrayClass, length, spaceType);
     }
 
-    void Set(uint32_t index, EtsObject *element)
+    void Set(uint32_t index, Component *element)
     {
         if (element == nullptr) {
             SetImpl<ObjectHeader *>(index, nullptr);
@@ -143,18 +144,18 @@ public:
         }
     }
 
-    PANDA_PUBLIC_API EtsObject *Get(uint32_t index)
+    PANDA_PUBLIC_API Component *Get(uint32_t index)
     {
-        return reinterpret_cast<EtsObject *>(
-            GetImpl<std::invoke_result_t<decltype(&EtsObject::GetCoreType), EtsObject>>(index));
+        return reinterpret_cast<Component *>(
+            GetImpl<std::invoke_result_t<decltype(&Component::GetCoreType), Component>>(index));
     }
 
-    static EtsObjectArray *FromCoreType(ObjectHeader *objectHeader)
+    static EtsTypedObjectArray *FromCoreType(ObjectHeader *objectHeader)
     {
-        return reinterpret_cast<EtsObjectArray *>(objectHeader);
+        return reinterpret_cast<EtsTypedObjectArray *>(objectHeader);
     }
 
-    void CopyDataTo(EtsObjectArray *dst)
+    void CopyDataTo(EtsTypedObjectArray *dst)
     {
         ASSERT(dst != nullptr);
         ASSERT(GetLength() <= dst->GetLength());
@@ -172,12 +173,12 @@ public:
         }
     }
 
-    EtsObjectArray() = delete;
-    ~EtsObjectArray() = delete;
+    EtsTypedObjectArray() = delete;
+    ~EtsTypedObjectArray() = delete;
 
 private:
-    NO_COPY_SEMANTIC(EtsObjectArray);
-    NO_MOVE_SEMANTIC(EtsObjectArray);
+    NO_COPY_SEMANTIC(EtsTypedObjectArray);
+    NO_MOVE_SEMANTIC(EtsTypedObjectArray);
 
     using WordType = uintptr_t;
     using AtomicWord = std::atomic<WordType>;
@@ -207,6 +208,8 @@ private:
         }
     }
 };
+
+using EtsObjectArray = EtsTypedObjectArray<EtsObject>;
 
 template <class ClassType, EtsClassRoot ETS_CLASS_ROOT>
 class EtsPrimitiveArray : public EtsArray {

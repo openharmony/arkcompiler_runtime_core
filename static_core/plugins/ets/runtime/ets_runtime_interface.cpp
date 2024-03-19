@@ -297,4 +297,10 @@ EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringIsCompressedIntri
 {
     return IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_COMPRESSED;
 }
+
+bool EtsRuntimeInterface::IsClassValueTyped(ClassPtr klass) const
+{
+    return EtsClass::FromRuntimeClass(ClassCast(klass))->IsValueTyped();
+}
+
 }  // namespace ark::ets

@@ -17,17 +17,20 @@
 //! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ETSGLOBAL::main"
 //! METHOD        "ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic"
-//! PASS_AFTER    "Inline"
-//! INST_NOT      "CallVirtual "
-//! INST_NOT      "Intrinsic"
+//! INST_NOT      /CallVirtual/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /Intrinsic/
+//! INST_NOT      /CallVirtual/
 
 //! CHECKER       Runtime equals AOT
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_AOT       options: "--compiler-regex='.*main.*'"
 //! METHOD        "ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
-//! INST_NOT      "Intrinsic"
+//! INST_NOT      /CallVirtual/
+//! PASS_AFTER    "ChecksElimination"
+//! INST_NOT      /Intrinsic/
+//! INST_NOT      /CallVirtual/
 //! RUN           entry: "ETSGLOBAL::main"
 
 function main(): int {

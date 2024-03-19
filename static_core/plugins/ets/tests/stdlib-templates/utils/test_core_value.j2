@@ -45,6 +45,6 @@ function printTestVerdict(flag: int, testName: String) {
 }
 
 function checkTestResult(actual: Type, expected: Type) : int {
-   if (actual == expected) return 0;
+   if (actual.equals(expected)) return 0;
    return 1;
 }
