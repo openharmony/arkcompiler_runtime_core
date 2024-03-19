@@ -111,7 +111,7 @@ public:
 
     void DumpItemsStat(std::ostream &os) const;
 
-    uint32_t caculateRoundUpSize(uint32_t before, uint32_t after)
+    uint32_t CalculateRoundUpSize(uint32_t before, uint32_t after)
     {
         return after - before;
     }

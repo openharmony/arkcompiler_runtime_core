@@ -440,7 +440,7 @@ uint32_t ItemContainer::ComputeLayout()
     for (auto &item : foreign_items_) {
         original_offset = cur_offset;
         cur_offset = RoundUp(cur_offset, item->Alignment());
-        foreign_item_roundup_size_ += caculateRoundUpSize(original_offset, cur_offset);
+        foreign_item_roundup_size_ += CalculateRoundUpSize(original_offset, cur_offset);
         item->SetOffset(cur_offset);
         item->ComputeLayout();
         cur_offset += item->GetSize();
@@ -455,7 +455,7 @@ uint32_t ItemContainer::ComputeLayout()
 
         original_offset = cur_offset;
         cur_offset = RoundUp(cur_offset, item->Alignment());
-        items_round_up_size_[name] += caculateRoundUpSize(original_offset, cur_offset);
+        items_round_up_size_[name] += CalculateRoundUpSize(original_offset, cur_offset);
         item->SetOffset(cur_offset);
         item->ComputeLayout();
         cur_offset += item->GetSize();
@@ -464,7 +464,7 @@ uint32_t ItemContainer::ComputeLayout()
     // Line number program should be last because it's size is known only after deduplication
     original_offset = cur_offset;
     cur_offset = RoundUp(cur_offset, line_number_program_index_item_.Alignment());
-    line_number_item_roundup_size_ = caculateRoundUpSize(original_offset, cur_offset);
+    line_number_item_roundup_size_ = CalculateRoundUpSize(original_offset, cur_offset);
     line_number_program_index_item_.SetOffset(cur_offset);
     line_number_program_index_item_.ComputeLayout();
     cur_offset += line_number_program_index_item_.GetSize();
