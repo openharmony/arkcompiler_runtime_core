@@ -1942,4 +1942,12 @@
 
 # es2panda: the specification changed
 09.classes/05.field_declarations/01.static_fields/static_field_declaration_n3.ets
+
+# es2panda: As the standard says the long type should be allowed to use in array operations
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_access_n_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_access_n_3.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_creation_n_0.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_creation_n_1.ets
+06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_creation_n_3.ets
+07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_6.ets
 # end of es2panda fails
