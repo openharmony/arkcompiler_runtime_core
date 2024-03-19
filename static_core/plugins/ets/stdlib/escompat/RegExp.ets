@@ -339,37 +339,41 @@ export class RegExp extends Object {
     }
 
     /**
-     * Constructs a new RegExp using pattern
-     *
-     * @param pattern description of a pattern
-     */
-    public constructor(pattern: String) {
-        this(pattern, "")
-    }
-
-    /**
      * Constructs a new RegExp using pattern and flags
      *
      * @param pattern description of a pattern
      *
      * @param flags description of flags to be used
      */
-    public constructor(pattern: String, flags: String) {
-        this.pattern_ = pattern
-        this.flags_ = flags
-        this.source_ = RegExp.escapePattern(pattern)
-        this.compile()
+    public constructor(pattern: String, flags?: String) {
+        this.init(pattern, flags)
     }
 
     /**
-     * Constructs a new RegExp by other RegExp
+     * Constructs a new RegExp by other RegExp. It uses other RegExp's flags if flags aren't provided
      *
      * @param regexp other regexp
+     *
+     * @param flags description of flags to be used
      */
-    public constructor(regexp: RegExp) {
-        this(regexp.pattern_, regexp.flags)
+    public constructor(regexp: RegExp, flags?: String) {
+        this.init(regexp.pattern_, __runtimeEquals(flags, undefined) ? regexp.flags : flags!)
     }
 
+    /**
+     * Constructs a new RegExp by RegExp or string
+     *
+     * @param regexp other regexp
+     *
+     * @param flags description of flags to be used
+     */
+    public constructor(regexp: RegExp | String, flags?: String) {
+        if (regexp instanceof String) {
+            this.init(regexp as String, flags)
+        } else {
+            this.init(regexp as RegExp, flags)
+        }
+    }
 
     /**
      * Compiles a regular expression
@@ -383,9 +387,9 @@ export class RegExp extends Object {
      *
      * @param flags any combination of flag values
      */
-    public compile(pattern : String, flags: String): RegExp {
+    public compile(pattern: String, flags?: String): RegExp {
         this.pattern_ = pattern
-        this.flags_ = flags
+        this.flags_ = __runtimeEquals(flags, undefined) ? "" : flags!
         this.source_ = RegExp.escapePattern(pattern)
         return this.compile()
     }
@@ -679,5 +683,30 @@ export class RegExp extends Object {
         }
         let s = pattern.replaceAll("/", "\\/")
         return s.replaceAll("\\", "\\")
+    }
+
+    /**
+     * Inits regexp from pattern and flags
+     *
+     * @param pattern description of a pattern
+     *
+     * @param flags description of flags to be used
+     */
+    private init(pattern: String, flags?: String) {
+        this.pattern_ = pattern
+        this.flags_ = __runtimeEquals(flags, undefined) ? "" : flags!
+        this.source_ = RegExp.escapePattern(pattern)
+        this.compile()
+    }
+
+    /**
+     * Inits regexp from RegExp. It uses regexp's flags if flags aren't provided
+     *
+     * @param regexp other regexp
+     *
+     * @param flags description of flags to be used
+     */
+    private init(regexp: RegExp, flags?: String) {
+        this.init(regexp.pattern_, __runtimeEquals(flags, undefined) ? regexp.flags : flags!)
     }
 }
