@@ -1242,10 +1242,6 @@
 17.experimental_features/12.trailing_lambda/trlambda_func_3.ets
 # end
 
-# #15610 undefined default array value
-17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_15.ets
-#
-
 #15664
 #
 
