@@ -44,13 +44,13 @@ export function parseInt(s: String, radix: int): number {
  * @returns result of parsing
  */
 export function parseInt(s: String, radix: number): number {
-    return Double.parseInt(s, radix as int);
+    return Double.parseInt(s, radix);
 }
 
 /**
- * Parses integer number from `String`
+ * Parses integer number from `String` with specified radix
  *
- * This function is an equivalent to @link{<Double.parseInt(s)>}
+ * This function is an equivalent to @link{<Double.parseInt(s, radix)>}
  *
  * @returns result of parsing
  */

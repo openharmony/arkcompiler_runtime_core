@@ -550,6 +550,28 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     */
     public static native parseFloat(s: String): double;
 
+    /**
+     * parseInt(String, int) parses from String an integer of specified radix
+     *
+     * @param s the string to convert
+     * @param r the radix of conversion; should be [2, 36]; 0 assumed to be 10
+     *
+     * @returns the result of parsing
+     *
+     * @note
+     * If args ("10", 1) -> thrown ArgumentOutOfRangeException, ("10", 37) -> thrown ArgumentOutOfRangeException
+     * If args ("10", 2) -> 2
+     * If args ("10", 10) -> 10, ("10", 0) -> 10
+     * If args ("ff", 16) -> 255
+     * etc.
+     *
+     * @remark
+     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
+     *
+     * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
+     *
+    */
+    public static native parseIntCore(s: String, r: int): double;
 
     /**
      * parseInt(String, int) parses from String an integer of specified radix
@@ -572,7 +594,42 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
      *
     */
-    public static native parseInt(s: String, r: int): double;
+    public static parseInt(s: String, r: double): double {
+        if ((r < 2.0 || r > 36.0) && r != 0.0) {
+            return NaN;
+        } else {
+            return Double.parseIntCore(s, r as int);
+        }
+    }
+
+    /**
+     * parseInt(String, int) parses from String an integer of specified radix
+     *
+     * @param s the string to convert
+     * @param r the radix of conversion; should be [2, 36]; 0 assumed to be 10
+     *
+     * @returns the result of parsing
+     *
+     * @note
+     * If args ("10", 1) -> thrown ArgumentOutOfRangeException, ("10", 37) -> thrown ArgumentOutOfRangeException
+     * If args ("10", 2) -> 2
+     * If args ("10", 10) -> 10, ("10", 0) -> 10
+     * If args ("ff", 16) -> 255
+     * etc.
+     *
+     * @remark
+     * Implemented as native function,  @see `parseInt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#663).
+     *
+     * ECMA reference: https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number.parseint
+     *
+    */
+    public static parseInt(s: String, r: int): double {
+        if ((r < 2 || r > 36) && r != 0.0) {
+            return NaN;
+        } else {
+            return Double.parseIntCore(s, r);
+        }
+    }
 
     /**
      * parseInt(String) parses from String an integer of radix 10
@@ -583,7 +640,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
     */
     public static parseInt(s: String): double {
-        return Double.parseInt(s, 10);
+        return Double.parseIntCore(s, -1 as int);
     }
 
     /**
