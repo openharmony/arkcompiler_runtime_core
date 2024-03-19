@@ -32,7 +32,7 @@ arkverifier_configs = [
 ohos_executable("ark_verifier") {
   sources = arkverifier_sources
 
-  deps = [ "$ark_root/libpandafile:libarkfile_static" ]
+  deps = [ "$ark_root/libpandafile:libarkfile_static_verifier" ]
 
   external_deps = []
   if (enable_hilog) {
@@ -56,7 +56,7 @@ libarkverifier_sources = [
 ohos_shared_library("libarkverifier") {
   sources = libarkverifier_sources
 
-  deps = [ "$ark_root/libpandafile:libarkfile_static" ]
+  deps = [ "$ark_root/libpandafile:libarkfile_static_verifier" ]
   external_deps = []
   if (enable_hilog) {
     external_deps += [ "hilog:libhilog" ]

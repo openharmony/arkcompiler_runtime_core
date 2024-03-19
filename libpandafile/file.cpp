@@ -607,7 +607,7 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
 
 void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename)
 {
-#ifdef FUZZ_TEST
+#ifdef FATAL_AS_ERROR
 #define LOG_LEVEL ERROR
 #else
 #define LOG_LEVEL FATAL

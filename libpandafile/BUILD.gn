@@ -32,13 +32,29 @@ config("arkfile_public_config") {
   }
 
   if (use_libfuzzer) {
-    defines += [ "FUZZ_TEST" ]
+    defines += [ "FATAL_AS_ERROR" ]
   }
 }
 
 config("arkfile_fuzz_config") {
   configs = [ "$build_root/config/compiler:exceptions" ]
   defines = [ "SUPPORT_KNOWN_EXCEPTION" ]
+}
+
+config("arkfile_verifier_config") {
+  include_dirs = [
+    "$ark_root/libpandafile",
+    "$ark_root/libziparchive",
+    "$target_gen_dir",
+    "$target_gen_dir/include",
+  ]
+
+  defines = []
+  if (is_ohos && !is_standard_system) {
+    defines += [ "ENABLE_FULL_FILE_FIELDS" ]
+  }
+
+  defines += [ "FATAL_AS_ERROR" ]
 }
 
 libarkfile_sources = [
@@ -115,6 +131,26 @@ ohos_source_set("libarkfile_static_fuzz") {
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
+}
+
+source_set("libarkfile_static_verifier") {
+  sources = libarkfile_sources
+
+  public_configs = [
+    "$ark_root:ark_config",
+    "$ark_root/libpandabase:arkbase_public_config",
+    ":arkfile_verifier_config",
+  ]
+
+  deps = [
+    ":arkfile_header_deps",
+    "$ark_root/libpandabase:libarkbase_static",
+    "$ark_root/libziparchive:libarkziparchive_static",
+  ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  public_external_deps = [ "zlib:shared_libz" ]
 }
 
 ohos_shared_library("libarkfile") {
