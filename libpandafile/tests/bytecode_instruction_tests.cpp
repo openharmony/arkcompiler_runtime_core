@@ -24,7 +24,7 @@
 
 namespace panda::test {
 
-TEST(BytecodeInstruction, Parse)
+TEST(BytecodeInstructionV4_IMM4, Parse)
 {
     // V4_IMM4
     {
@@ -42,7 +42,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V4_IMM4, 0>()), 0xf);
         EXPECT_EQ((inst.GetImm<BytecodeInstruction::Format::V4_IMM4, 0>()), 0x2);
     }
+}
 
+TEST(BytecodeInstructionIMM8, Parse)
+{
     // IMM8
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0xff};
@@ -74,7 +77,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V8_IMM8, 0>()), 0xf2);
         EXPECT_EQ((inst.GetImm<BytecodeInstruction::Format::V8_IMM8, 0>()), 0x12);
     }
+}
 
+TEST(BytecodeInstructionIMM16, Parse)
+{
     // IMM16
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0x12, 0xff};
@@ -106,7 +112,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V8_IMM16, 0>()), 0xff);
         EXPECT_EQ((inst.GetImm<BytecodeInstruction::Format::V8_IMM16, 0>()), static_cast<int16_t>(0xf212));
     }
+}
 
+TEST(BytecodeInstructionIMM32, Parse)
+{
     // IMM32
     {
         const uint8_t bytecode[] = {0x00, 0x34, 0xf2, 0x12, 0x10, 0xff};
@@ -138,7 +147,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V8_IMM32, 0>()), 0xaa);
         EXPECT_EQ((inst.GetImm<BytecodeInstruction::Format::V8_IMM32, 0>()), static_cast<int32_t>(0xf1f21234));
     }
+}
 
+TEST(BytecodeInstructionIMM64, Parse)
+{
     // IMM64
     {
         const uint8_t bytecode[] = {0x00, 0x9a, 0x78, 0x56, 0x34, 0xf2, 0x12, 0x10, 0x4, 0xff};
@@ -170,7 +182,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V8_IMM64, 0>()), 0xab);
         EXPECT_EQ((inst.GetImm<BytecodeInstruction::Format::V8_IMM64, 0>()), static_cast<int64_t>(0xab1012f23456789a));
     }
+}
 
+TEST(BytecodeInstructionV4_V4, Parse)
+{
     // V4_V4
     {
         const uint8_t bytecode[] = {0x00, 0xba, 0xff};
@@ -179,7 +194,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V4_V4, 0>()), 0xa);
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V4_V4, 1>()), 0xb);
     }
+}
 
+TEST(BytecodeInstructionV8, Parse)
+{
     // V8
     {
         const uint8_t bytecode[] = {0x00, 0xab, 0xff};
@@ -196,7 +214,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V8_V8, 0>()), 0xab);
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V8_V8, 1>()), 0xcd);
     }
+}
 
+TEST(BytecodeInstructionV16, Parse)
+{
     // V16_V16
     {
         const uint8_t bytecode[] = {0x00, 0xcd, 0xab, 0xf1, 0xee, 0xff};
@@ -205,7 +226,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V16_V16, 0>()), 0xabcd);
         EXPECT_EQ((inst.GetVReg<BytecodeInstruction::Format::V16_V16, 1>()), 0xeef1);
     }
+}
 
+TEST(BytecodeInstructionID32, Parse)
+{
     // ID32
     {
         const uint8_t bytecode[] = {0x00, 0xf1, 0xee, 0xcd, 0xab, 0xff};
@@ -213,7 +237,10 @@ TEST(BytecodeInstruction, Parse)
         EXPECT_EQ(static_cast<uint8_t>(inst.GetOpcode()), 0x00);
         EXPECT_EQ((inst.GetId<BytecodeInstruction::Format::ID32, 0>()), BytecodeId(0xabcdeef1));
     }
+}
 
+TEST(BytecodeInstructionID16, Parse)
+{
     // V4_V4_ID16
     {
         const uint8_t bytecode[] = {0x00, 0x21, 0xf1, 0xee, 0xcd, 0xab, 0xff};
@@ -254,9 +281,9 @@ TEST(BytecodeInstruction, JumpTo)
     EXPECT_EQ(static_cast<uint8_t>(next.GetOpcode()), bytecode[2]);
 }
 
-TEST(BytecodeInstructionSafe, Parse)
-{
-    // Positive tests
+// Positive tests
+TEST(BytecodeInstructionSafeIMM4_P, Parse)
+{   
     // V4_IMM4
     {
         const uint8_t bytecode[] = {0x00, 0xa1, 0xff};
@@ -273,7 +300,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V4_IMM4, 0>()), 0xf);
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V4_IMM4, 0>()), 0x2);
     }
+}
 
+TEST(BytecodeInstructionSafeIMM8_P, Parse)
+{   
     // IMM8
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0xff};
@@ -305,7 +335,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V8_IMM8, 0>()), 0xf2);
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM8, 0>()), 0x12);
     }
+}
 
+TEST(BytecodeInstructionSafeIMM16_P, Parse)
+{   
     // IMM16
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0x12, 0xff};
@@ -337,7 +370,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V8_IMM16, 0>()), 0xff);
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM16, 0>()), static_cast<int16_t>(0xf212));
     }
+}
 
+TEST(BytecodeInstructionSafeIMM32_P, Parse)
+{   
     // IMM32
     {
         const uint8_t bytecode[] = {0x00, 0x34, 0xf2, 0x12, 0x10, 0xff};
@@ -369,7 +405,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V8_IMM32, 0>()), 0xaa);
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM32, 0>()), static_cast<int32_t>(0xf1f21234));
     }
+}
 
+TEST(BytecodeInstructionSafeIMM64_P, Parse)
+{   
     // IMM64
     {
         const uint8_t bytecode[] = {0x00, 0x9a, 0x78, 0x56, 0x34, 0xf2, 0x12, 0x10, 0x4, 0xff};
@@ -402,7 +441,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM64, 0>()),
                   static_cast<int64_t>(0xab1012f23456789a));
     }
+}
 
+TEST(BytecodeInstructionSafeV4_P, Parse)
+{   
     // V4_V4
     {
         const uint8_t bytecode[] = {0x00, 0xba, 0xff};
@@ -411,7 +453,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V4_V4, 0>()), 0xa);
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V4_V4, 1>()), 0xb);
     }
+}
 
+TEST(BytecodeInstructionSafeV8_P, Parse)
+{   
     // V8
     {
         const uint8_t bytecode[] = {0x00, 0xab, 0xff};
@@ -428,7 +473,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V8_V8, 0>()), 0xab);
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V8_V8, 1>()), 0xcd);
     }
+}
 
+TEST(BytecodeInstructionSafeV16_P, Parse)
+{  
     // V16_V16
     {
         const uint8_t bytecode[] = {0x00, 0xcd, 0xab, 0xf1, 0xee, 0xff};
@@ -437,7 +485,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V16_V16, 0>()), 0xabcd);
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V16_V16, 1>()), 0xeef1);
     }
+}
 
+TEST(BytecodeInstructionSafeID16_P, Parse)
+{  
     // ID32
     {
         const uint8_t bytecode[] = {0x00, 0xf1, 0xee, 0xcd, 0xab, 0xff};
@@ -476,9 +527,12 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V4_V4_V4_V4_ID16, 0x3>()), 0x4);
         EXPECT_EQ((inst.GetId<BytecodeInstructionSafe::Format::V4_V4_V4_V4_ID16, 0>()), BytecodeId(0xeef1));
     }
+}
 
-    // Negative tests
+// Negative tests
 
+TEST(BytecodeInstructionSafeIMM4_N, Parse)
+{  
     // V4_IMM4
     {
         const uint8_t bytecode[] = {0x00};
@@ -497,7 +551,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V4_IMM4, 0>()), 0);
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeIMM8_N, Parse)
+{ 
     // IMM8
     {
         const uint8_t bytecode[] = {0x00};
@@ -528,7 +585,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM8, 0>()), static_cast<int8_t>(0));
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeIMM16_N, Parse)
+{ 
     // IMM16
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0xff};
@@ -550,7 +610,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM16, 0>()), 0xf2);
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeIMM32_N, Parse)
+{ 
     // IMM32
     {
         const uint8_t bytecode[] = {0x00, 0x34, 0xf2, 0x12, 0xff};
@@ -572,7 +635,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM32, 0>()), 0x12f234);
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeIMM64_N, Parse)
+{ 
     // IMM64
     {
         const uint8_t bytecode[] = {0x00, 0x9a, 0x78, 0x56, 0x34, 0xf2, 0x12, 0x10, 0xff};
@@ -594,7 +660,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetImm<BytecodeInstructionSafe::Format::V8_IMM64, 0>()), 0x12f23456789a);
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeV4_N, Parse)
+{ 
     // V4_V4
     {
         const uint8_t bytecode[] = {0x00};
@@ -606,7 +675,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V4_V4, 1>()), 0);
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeV8_N, Parse)
+{ 
     // V8
     {
         const uint8_t bytecode[] = {0x00};
@@ -628,7 +700,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V8_V8, 1>()), 0);
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeV16_N, Parse)
+{ 
     // V16_V16
     {
         const uint8_t bytecode[] = {0x00, 0xcd, 0xab, 0xf1, 0xff};
@@ -640,7 +715,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetVReg<BytecodeInstructionSafe::Format::V16_V16, 1>()), 0xf1);
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeID32_N, Parse)
+{ 
     // ID32
     {
         const uint8_t bytecode[] = {0x00, 0xf1, 0xee, 0xcd, 0xff};
@@ -650,7 +728,10 @@ TEST(BytecodeInstructionSafe, Parse)
         EXPECT_EQ((inst.GetId<BytecodeInstructionSafe::Format::ID32, 0>()), BytecodeId(0xcdeef1));
         EXPECT_FALSE(inst.IsValid());
     }
+}
 
+TEST(BytecodeInstructionSafeID16_N, Parse)
+{ 
     // V4_V4_ID16
     {
         const uint8_t bytecode[] = {0x00, 0x21, 0xf1, 0xee};
