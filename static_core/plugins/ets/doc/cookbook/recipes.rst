@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -1362,42 +1362,6 @@ to specify explicitly.
         console.log(s)
     }
 
-.. _R049:
-
-|CB_R| Use generic functions instead of generic arrow functions
----------------------------------------------------------------
-
-|CB_RULE| ``arkts-no-generic-lambdas``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: LambdaWithTypeParameters
-
-|CB_ERROR|
-
-|LANG| does not support generic arrow functions. Use normal generic functions
-instead.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    let generic_arrow_func = <T extends String> (x: T) => { return x }
-
-    generic_arrow_func("string")
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    function generic_func<T extends String>(x: T): T {
-        return x
-    }
-
-    generic_func<String>("string")
-
 .. _R050:
 
 |CB_R| Class literals are not supported
@@ -1922,8 +1886,8 @@ to check whether certain class members exist.
 
 .. _R069:
 
-|CB_R| Destructuring assignment is not supported
-------------------------------------------------
+|CB_R| Destructuring assignment is partially supported
+------------------------------------------------------
 
 |CB_RULE| ``arkts-no-destruct-assignment``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1933,32 +1897,38 @@ to check whether certain class members exist.
 
 |CB_ERROR|
 
-|LANG| does not support destructuring assignment. Use other idioms (e.g.,
-a temporary variable, where applicable) for replacement.
+|LANG| supports destructuring assignment for arrays and tuples. Object
+destructuring and spread operator are not supported, use other idioms
+(e.g., a temporary variable, where applicable) for replacement.
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    let [one, two] = [1, 2]; // semicolon is required here
-    [one, two] = [two, one]
+    let one, two;
+    [one, two] = [1, 2];
+    [one, two] = [two, one];
 
     let head, tail
     [head, ...tail] = [1, 2, 3, 4]
+
+    class Point {
+        x: number = 0.0
+        y: number = 0.0
+    }
+
+    let x: number, y: number;
+    ({x, y} = new Point()); // parentheses are required here
 
 |CB_OK|
 ~~~~~~~
 
 .. code-block:: typescript
 
-    let arr: number[] = [1, 2]
-    let one = arr[0]
-    let two = arr[1]
-
-    let tmp = one
-    one = two
-    two = tmp
+    let one, two;
+    [one, two] = [1, 2];
+    [one, two] = [two, one];
 
     let data: Number[] = [1, 2, 3, 4]
     let head = data[0]
@@ -1966,6 +1936,15 @@ a temporary variable, where applicable) for replacement.
     for (let i = 1; i < data.length; ++i) {
         tail.push(data[i])
     }
+
+    class Point {
+        x: number = 0.0
+        y: number = 0.0
+    }
+
+    let p = new Point()
+    let x = p.x
+    let y = p.y
 
 .. _R071:
 
@@ -2017,8 +1996,8 @@ a function call, are of course allowed.
 
 .. _R074:
 
-|CB_R| Destructuring variable declarations are not supported
-------------------------------------------------------------
+|CB_R| Destructuring variable declarations are partially supported
+------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-destruct-decls``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2028,7 +2007,8 @@ a function call, are of course allowed.
 
 |CB_ERROR|
 
-|LANG| does not support destructuring variable declarations. This is a dynamic
+|LANG| supports destructuring variable declarations for arrays and tuples.
+Object destructuring and spread operator are not supported. This is a dynamic
 feature relying on structural compatibility. In addition, names in destructuring
 declarations must be equal to properties within destructured classes.
 
@@ -2036,6 +2016,8 @@ declarations must be equal to properties within destructured classes.
 ~~~~~~~~
 
 .. code-block:: typescript
+
+    let [one, two] = [1, 2]; // semicolon is required here
 
     class Point {
         x: number = 0.0
@@ -2052,6 +2034,8 @@ declarations must be equal to properties within destructured classes.
 ~~~~~~~
 
 .. code-block:: typescript
+
+    let [one, two] = [1, 2]; // semicolon is required here
 
     class Point {
         x: number = 0.0
@@ -2333,8 +2317,8 @@ explicitly.
 
 .. _R091:
 
-|CB_R| Destructuring parameter declarations are not supported
--------------------------------------------------------------
+|CB_R| Destructuring parameter declarations are partially supported
+-------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-destruct-params``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2344,13 +2328,21 @@ explicitly.
 
 |CB_ERROR|
 
-|LANG| requires parameters to be passed directly to the function, and
-local names to be assigned manually.
+|LANG| supports unpacking arrays and tuples passed as function parameters.
+Unpacking properties from objects is not supported, |LANG| requires parameters
+to be passed directly to the function, and local names to be assigned manually.
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
+
+    function drawPoint([x, y] = [0, 0]) {
+        console.log(x)
+        console.log(y)
+    }
+
+    drawPoint([1, 2])
 
     function drawText({ text = "", location: [x, y] = [0, 0], bold = false }) {
         console.log(text)
@@ -2365,6 +2357,13 @@ local names to be assigned manually.
 ~~~~~~~
 
 .. code-block:: typescript
+
+    function drawPoint([x, y] = [0, 0]) {
+        console.log(x)
+        console.log(y)
+    }
+
+    drawPoint([1, 2])
 
     function drawText(text: String, location: number[], bold: boolean) {
         let x = location[0]
@@ -3181,37 +3180,6 @@ accessed through the ``*`` syntax.
 
     import * as m from "path/to/module"
 
-.. _R120:
-
-|CB_R| ``import default as ...`` is not supported
--------------------------------------------------
-
-|CB_RULE| ``arkts-no-import-default-as``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: DefaultImport
-    :fix: Replace with explicit import
-
-|CB_ERROR|
-
-|LANG| does not support ``import default as ...`` syntax.
-Use explicit ``import ... from ...`` instead.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    import { default as d } from "mod"
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    import d from "mod"
-
 .. _R121:
 
 |CB_R| ``require`` and ``import`` assignment are not supported
@@ -3977,9 +3945,9 @@ the following APIs is prohibited:
 Properties and functions of the global object: ``eval``
 
 ``Object``: ``__proto__``, ``__defineGetter__``, ``__defineSetter__``,
-``__lookupGetter__``, ``__lookupSetter__``, ``assign``, ``create``,
+``__lookupGetter__``, ``__lookupSetter__``, ``create``,
 ``defineProperties``, ``defineProperty``, ``freeze``,
-``fromEntries``, ``getOwnPropertyDescriptor``, ``getOwnPropertyDescriptors``,
+``getOwnPropertyDescriptor``, ``getOwnPropertyDescriptors``,
 ``getOwnPropertySymbols``, ``getPrototypeOf``,
 ``hasOwnProperty``, ``is``, ``isExtensible``, ``isFrozen``,
 ``isPrototypeOf``, ``isSealed``, ``preventExtensions``,
@@ -3994,7 +3962,13 @@ Properties and functions of the global object: ``eval``
 ``handler.defineProperty()``, ``handler.deleteProperty()``, ``handler.get()``,
 ``handler.getOwnPropertyDescriptor()``, ``handler.getPrototypeOf()``,
 ``handler.has()``, ``handler.isExtensible()``, ``handler.ownKeys()``,
-``handler.preventExtensions()``, ``handler.set()``, ``handler.setPrototypeOf()``
+``handler.preventExtensions()``, ``handler.set()``,
+``handler.setPrototypeOf()``
+
+The following APIs is partially supported:
+
+``Object.assign(target: Record<string, Object | null | undefined>,``
+``...source: Object[]): Record<string, Object | null | undefined>``
 
 |CB_SEE|
 ~~~~~~~~

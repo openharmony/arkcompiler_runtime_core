@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+    Copyright (c) 2021-2024 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -18,7 +18,7 @@ Enumerations
 .. meta:
     frontend_status: Done
 
-An enumeration type *enum* specifies a distinct type with an associated set
+An enumeration type ``enum`` specifies a distinct type with an associated set
 of named constants that define its possible values:
 
 .. code-block:: abnf
@@ -50,8 +50,8 @@ Qualification by type is mandatory to access the enumeration constant:
 If enumeration type is exported, then all enumeration constants are
 exported along with the mandatory qualification.
 
-For example, if *Color* is exported, then all constants like *Color.Red*
-are exported along with the mandatory qualification *Color*.
+For example, if *Color* is exported, then all constants like ``Color.Red``
+are exported along with the mandatory qualification ``Color``.
 
 .. index::
    qualification
@@ -70,10 +70,10 @@ is set implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
 A compile-time error occurs if ``integer`` and ``string`` type enumeration
 constants are combined in one enumeration.
 
-Any enumeration constant is of the *enumeration* type. The implicit conversion
+Any enumeration constant is of type ``enumeration``. The implicit conversion
 (see :ref:`Enumeration to Int Conversions`, :ref:`Enumeration to String Conversions`)
-of the enumeration constant to types *integer* or *string* depends on the type
-of enumeration.
+of the enumeration constant to integer types or type *string* depends on the
+type of enumeration.
 
 In addition, all enumeration constant names must be unique. Otherwise,
 a compile-time error occurs.
@@ -106,7 +106,7 @@ Enumeration Integer Values
 .. meta:
     frontend_status: Done
 
-The integer value of an *enum* constant is set implicitly if an enumeration
+The integer value of an ``enum`` constant is set implicitly if an enumeration
 constant specifies no value.
 
 A constant expression of type ``int``---a signed 32-bit integer (see
@@ -183,7 +183,7 @@ Enumeration Operations
 .. meta:
     frontend_status: Partly
 
-The value of an enumeration constant can be converted to type *string* by
+The value of an enumeration constant can be converted to type ``string`` by
 using the method ``toString``:
 
 .. index::

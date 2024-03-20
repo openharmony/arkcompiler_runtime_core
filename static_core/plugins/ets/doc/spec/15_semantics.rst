@@ -38,11 +38,11 @@ Subtyping
 
 The *subtype* relationships are binary relationships of types.
 
-The subtyping relation of *S* as a subtype of *T* is recorded as *S* <: *T*.
+The subtyping relation of *S* as a subtype of *T* is recorded as ``S<:T``.
 It means that any object of type *S* can be safely used in any context
 in place of an object of type *T*.
 
-By the definition of *S* <: *T*, type *T* belongs to the set of *supertypes*
+By the definition of ``S<:T``, type *T* belongs to the set of *supertypes*
 of type *S*. The set of *supertypes* includes all *direct supertypes* (see
 below), and all their respective *supertypes*.
 
@@ -61,13 +61,13 @@ closure over the direct supertype relation.
 are **all** of the following:
 
 -  The direct superclass of *C* (as mentioned in its extension clause, see
-   :ref:`Class Extension Clause`) or type *Object* if *C* has no extension
+   :ref:`Class Extension Clause`) or type ``Object`` if *C* has no extension
    clause specified.
 
 -  The direct superinterfaces of *C* (as mentioned in the implementation
    clause of *C*, see :ref:`Class Implementation Clause`).
 
--  Type *Object* if *C* is an interface type with no direct superinterfaces
+-  Type ``Object`` if *C* is an interface type with no direct superinterfaces
    (see :ref:`Superinterfaces and Subinterfaces`).
 
 
@@ -85,15 +85,15 @@ are **all** of the following:
    class extension
    subinterface
 
-*Direct supertypes* of the generic type *C* <*F*:sub:`1`,..., *F*:sub:`n`>
-(for a generic class or interface type declaration *C* <*F*:sub:`1`,..., *F*:sub:`n`>
+*Direct supertypes* of the generic type ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
+(for a generic class or interface type declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
 with *n*>0) are **all** of the following:
 
--  The direct superclass of *C* <*F*:sub:`1`,..., *F*:sub:`n`>.
+-  The direct superclass of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
 
--  The direct superinterfaces of *C* <*F*:sub:`1`,..., *F*:sub:`n`>.
+-  The direct superinterfaces of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
 
--  Type *Object* if *C* <*F*:sub:`1`,..., *F*:sub:`n`> is a generic
+-  Type ``Object`` if ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> is a generic
    interface type with no direct superinterfaces.
 
 
@@ -114,6 +114,107 @@ constraint of that type parameter.
 
 |
 
+.. _Variance:
+
+Variance
+********
+
+.. meta:
+    frontend_status: Done
+
+Variance is how subtyping between class types relates to subtyping between
+class member signatures (types of parameters, return type).
+
+Variance for generic type arguments is descirbed in :ref:`Type Argument Variance`.
+
+Variance can be of three kinds:
+
+-  Invariance,
+-  Covariance, and
+-  Contravariance.
+
+.. _Invariance:
+
+Invariance
+==========
+
+.. meta:
+    frontend_status: Done
+
+*Invariance* refers to the ability to use the originally-specified type as a
+derived one.
+
+
+.. _Covariance:
+
+Covariance
+==========
+
+.. meta:
+    frontend_status: Done
+
+*Covariance* is the ability to use a type that is more specific than originally
+specified.
+
+.. _Contravariance:
+
+Contravariance
+==============
+
+.. meta:
+    frontend_status: Done
+
+*Contravariance* is the ability to use a type that is more general than
+originally specified.
+
+Examples
+========
+
+The examples below illustrate valid and invalid usages of variance.
+Let class ``Base`` be defined as follows:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      method_one(p: Base): Base {}
+      method_two(p: Derived): Base {}
+      method_three(p: Derived): Derived {}
+   }
+
+Then the code below is valid:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Derived extends Base {
+      // invariance: parameter type and return type are unchanged
+      override method_one(p: Base): Base {}  
+
+      // covariance for the return type  
+      override method_two(p: Derived): Derived {}
+
+      // contravariance for parameter types
+      override method_three(p: Base): Derived {} 
+   }
+
+The following code causes compile-time errors:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Derived extends Base {
+
+      // covariance for parameter types is prohibited
+      override method_one(p: Derived): Base {} 
+
+      // contravariance for the return type is prohibited
+      override method_tree(p: Derived): Base {}
+   }
+
+
+|
+
 .. _Override-Equivalent Signatures:
 
 Override-Equivalent Signatures
@@ -124,26 +225,29 @@ Override-Equivalent Signatures
 
 Two functions, methods, or constructors *M* and *N* have the *same signature*
 if their names, type parameters (if any, see :ref:`Generic Declarations`), and
-formal parameter types are the same---after the formal parameter types of
-*N* are adapted to type parameters of *M*.
+formal parameter types are the same after the formal parameter types of *N*
+are adapted to type parameters of *M*.
 
-Formal definition for *the same signatures* is given below:
+Two signatures in the following example are *the same signatures*:
 
-M < *T*:sub:`1`, ... *T*:sub:`Mm` > ( *U*:sub:`1` , ... *U*:sub:`Mn` ): *R*:sub:`M`
+``M`` < ``T``:sub:`1` ``, ... T``:sub:`k` > (``U``:sub:`1` ``, ... U``:sub:`p`) ``:R``:sub:`M`
 
-N < *T*:sub:`1`, ... *T*:sub:`Nm` > ( *U*:sub:`1` , ... *U*:sub:`Nn` ): *R*:sub:`N`
+``N`` < ``P``:sub:`1` ``, ... P``:sub:`n` > (``S``:sub:`1` ``, ... S``:sub:`q`) ``:R``:sub:`N`
 
-- Mm = Nm and for any i in 1 .. Mm => Constraint ( *T*:sub:`Mi` ) fits Constraint ( *T*:sub:`Ni` )
-- Mn = Nn and for any i in 1 .. Mn => Constraint ( *U*:sub:`Mi` ) fits Constraint ( *U*:sub:`Ni` )
+---if all conditions below are satisfied:
 
-  * where Constraint of any type except type parameter returns the type itself, and
-  * *fits* means the following:
+- `k = n`;
+- For any `i` in 1 .. k, Constraint (*T*:sub:`i`) fits Constraint (*P*:sub:`i`);
+- `p = q`;
+- For any `j` in 1 .. p, Constraint (*U*:sub:`j`) fits Constraint (*S*:sub:`j`).
 
-    - The types are identical;
-    - The data value sets of the first and the second ones have an intersection
-      that leads to potential call ambiguities; or
-    - Type T and rest parameters of T[] have a potential ambiguity.
+In this example, Constraint of any type except type parameter returns the type
+itself, and *fits* means that the types:
 
+  - Are identical;
+  - Are different but the intersection of the data sets of the first
+    and the second type is empty; or
+  - Do not have forms like *T* and rest parameters of ``T[]``.
 
 .. code-block:: typescript
 
@@ -151,9 +255,8 @@ N < *T*:sub:`1`, ... *T*:sub:`Nm` > ( *U*:sub:`1` , ... *U*:sub:`Nn` ): *R*:sub:
     type T2 = A | C
     // Types T1 and T2 fit each other as their data values have intersection with data values of type A
 
-
 Signatures *S*:sub:`1` and *S*:sub:`2` are *override-equivalent* only if
-*S*:sub:`1` and *S*:sub:`2` are the same.
+*S*:sub:`1` and *S*:sub:`2` are identical.
 
 A compile-time error occurs if:
 
@@ -169,6 +272,7 @@ A compile-time error occurs if:
 The examples below illustrate the concept:
 
 .. code-block:: typescript
+   :linenos:
 
    // The same signatures
 
@@ -238,13 +342,13 @@ Signature *S*:sub:`1` with *n* parameters is compatible with the signature
 
 -  *n <= m*;
 -  All *n* parameter types in *S*:sub:`2` are compatible (see :ref:`Type Compatibility`)
-   with parameter types in the same positions in *S*:sub:`1`; and
+   with parameter types in the same positions in *S*:sub:`1` (*contravariance*); and
 -  All *S*:sub:`2` parameters in positions from *m - n* up to *m* are optional
    (see :ref:`Optional Parameters`).
 
 A return type, if available, is present in both signatures, and the return
 type of *S*:sub:`1` is compatible (see :ref:`Type Compatibility`) with the
-return type of *S*:sub:`2`.
+return type of *S*:sub:`2` (*covariance*).
 
 |
 
@@ -255,11 +359,11 @@ Overload Signature Compatibility
 
 If several functions, methods, or constructors share the same body
 (implementation) or the same method with no implementation in an interface,
-then all first signatures without body must *fit* the last signature with or
-without the actual implementation for the interface method. Otherwise, a
+then all first signatures without body must *fit* into the last signature with
+or without the actual implementation for the interface method. Otherwise, a
 compile-time error occurs.
 
-Signature *S*:sub:`1` with *n* parameters *fits* signature *S*:sub:`2`
+Signature *S*:sub:`1` with *n* parameters *fits* into signature *S*:sub:`2`
 if:
 
 - *S*:sub:`1` has *n* parameters, *S*:sub:`2` has *m* parameters; and:
@@ -360,7 +464,7 @@ logic to operands of non-Boolean types, while the result of an operation (see
 :ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`,
 :ref:`Logical Complement`) is kept boolean.
 Depending on the kind of the value type, the value of any valid expression can
-be handled as *true* or *false* as described in the table below:
+be handled as ``true`` or ``false`` as described in the table below:
 
 .. index::
    extended conditional expression
@@ -378,43 +482,38 @@ be handled as *true* or *false* as described in the table below:
    falsy
    value type
 
-+-----------------+-------------------+--------------------+----------------------+
-| Value Type      | When *false*      | When *true*        | |LANG| Code          |
-+=================+===================+====================+======================+
-| string          | empty string      | non-empty string   | s.length == 0        |
-+-----------------+-------------------+--------------------+----------------------+
-| boolean         | false             | true               | x                    |
-+-----------------+-------------------+--------------------+----------------------+
-| enum            | enum constant     | enum constant      | x.getValue()         |
-|                 | treated as 'false'| treated as 'true'  |                      |
-+-----------------+-------------------+--------------------+----------------------+
-| number          | 0 or NaN          | any other number   | n != 0 && n != NaN   |
-| (double/float)  |                   |                    |                      |
-+-----------------+-------------------+--------------------+----------------------+
-| any integer type| == 0              | != 0               | i != 0               |
-+-----------------+-------------------+--------------------+----------------------+
-| char            | == 0              | != 0               | c != c'0'            |
-+-----------------+-------------------+--------------------+----------------------+
-| let T - is any non-nullish type                                                 |
-+-----------------+-------------------+--------------------+----------------------+
-| T | null        | == null           | != null            | x != null            |
-+-----------------+-------------------+--------------------+----------------------+
-| T | undefined   | == undefined      | != undefined       | x != undefined       |
-+-----------------+-------------------+--------------------+----------------------+
-| T | undefined   | == undefined or   | != undefined and   | x != undefined &&    |
-| | null          | == null           | != null            | x != null            |
-+-----------------+-------------------+--------------------+----------------------+
-| Boxed primitive | primitive type is | primitive type is  | new Boolean(true) == |
-| type (Boolean,  | false             | true               | true                 |
-| Char, Int ...)  |                   |                    | new Int (0) == 0     |
-+-----------------+-------------------+--------------------+----------------------+
-| any other       | never             | always             | new SomeType != null |
-| nonNullish type |                   |                    |                      |
-+-----------------+-------------------+--------------------+----------------------+
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| Value Type                           | When ``false``                         | When ``true``                     | |LANG| Code                     |
++======================================+========================================+===================================+=================================+
+| ``string``                           | empty string                           | non-empty string                  | ``s.length == 0``               |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``boolean``                          | ``false``                              | true                              | ``x``                           |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``enum``                             | ``enum`` constant treated as ``false`` | enum constant treated as ``true`` | ``x.getValue()``                |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``number`` (``double``/``float``)    | *0* or ``NaN``                         | any other number                  | ``n != 0 && n != NaN``          |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| any integer type                     | ``== 0``                               | ``!= 0``                          | ``i != 0``                      |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``char``                             | ``== 0``                               | ``!= 0``                          | ``c != c'0'``                   |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| let T - is any nonNullish type                                                                                                                      |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``T | null``                         | ``== null``                            | ``!= null``                       | ``x != null``                   |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``T | undefined``                    | ``== undefined``                       | ``!= undefined``                  | ``x != undefined``              |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| ``T | undefined | null``             | ``== undefined`` or ``== null``        | ``!= undefined`` and ``!= null``  | ``x != undefined && x != null`` |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| Boxed primitive type                 | primitive type is ``false``            | primitive type is ``true``        | ``new Boolean(true) == true``   |
+| (``Boolean``, ``Char``, ``Int`` ...) |                                        |                                   | ``new Int (0) == 0``            |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+| any other nonNullish type            | ``never``                              | ``always``                        | ``new SomeType != null``        |
++--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
 
 The example below illustrates the way this approach works in practice. Any
-*nonzero* number is handled as *true*. The loop continues until it becomes
-*zero* that is handled as *false*:
+``nonzero`` number is handled as ``true``. The loop continues until it becomes
+``zero`` that is handled as ``false``:
 
 .. code-block:: typescript
    :linenos:

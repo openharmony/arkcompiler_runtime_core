@@ -29,7 +29,7 @@ Undefined is Not a Universal Value
 **********************************
 
 |LANG| raises a compile-time or a runtime error in many cases, in which
-|TS| uses *undefined* as runtime value.
+|TS| uses ``undefined`` as runtime value.
 
 .. code-block:: typescript
    :linenos:
@@ -47,10 +47,11 @@ Undefined is Not a Universal Value
 Numeric Semantics
 *****************
 
-|TS| has a single numeric type *number* that handles both integer and real
-     numbers.
-|LANG| interprets *number* as a variety of |LANG| types depending on the
-     context, and calculations can produce different results:
+|TS| has a single numeric type ``number`` that handles both integer and real
+numbers.
+
+|LANG| interprets ``number`` as a variety of |LANG| types. Calculations depend
+on the context and can produce different results:
 
 .. code-block:: typescript
    :linenos:
@@ -58,7 +59,6 @@ Numeric Semantics
     let n = 1
        // |TS|: treats 'n' as having type number
        // |LANG|: treats 'n' as having type int to reach max code performance
-
 
     console.log(n / 2)
        // |TS|: will print 0.5 - floating-point division is used
@@ -70,12 +70,13 @@ Numeric Semantics
 Covariant Overriding
 ********************
 
-|TS| if non-existing property is accessed from some object during program
-     execution |TS| runtime may handle such situations due to its object
-     runtime model.
-|LANG| allows to generate high efficient code which relies on objects'
-     layout known at compile-time. Thus type-safety violations are prevented
-     by the compiler generating compile-time errors.
+The |TS| object runtime model enables |TS| to handle situations where a
+non-existing property is accessed from some object during program execution.
+
+|LANG| allows generating highly efficient code that relies on an objects'
+layout known at compile time. Covariant overriding (see :ref:`Covariance`)
+is prohibited because type-safety violations are prevented
+by compiler-generated compile-time errors:
 
 .. code-block:: typescript
    :linenos:
@@ -108,18 +109,18 @@ Covariant Overriding
 Differences in Math.pow
 ***********************
 
-The function *Math.pow* in |LANG| conforms to the latest IEEE 754-2019 standard,
-and the following calls:
+The function ``Math.pow`` in |LANG| conforms to the latest IEEE 754-2019
+standard, and the following calls:
 
-- *Math.pow(1, Infinity)*
-- *Math.pow(-1, Infinity)*
-- *Math.pow(1, -Infinity)*
-- *Math.pow(-1, -Infinity)*
+- ``Math.pow(1, Infinity)``
+- ``Math.pow(-1, Infinity)``
+- ``Math.pow(1, -Infinity)``
+- ``Math.pow(-1, -Infinity)``
 
 ---produce the result *1* (one).
 
-The function *Math.pow* in |TS| conforms to the outdated 2008 version of the
-standard, and the same calls produce *NaN*.
+The function ``Math.pow`` in |TS| conforms to the outdated 2008 version of the
+standard, and the same calls produce ``NaN``.
 
 .. index::
    IEEE 754

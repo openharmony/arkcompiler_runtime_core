@@ -69,7 +69,7 @@ feature can be used for GUI programming (:ref:`Support for GUI Programming`).
 
 Section :ref:`Enumeration Methods` adds methods to declarations of the
 enumeration types. Such methods can help in some kinds of manipulations
-with *enums*.
+with ``enums``.
 
 .. index::
    implementation
@@ -82,8 +82,8 @@ with *enums*.
 
 Section :ref:`Exceptions` discusses the powerful, commonly used mechanism for
 the processing of various kinds of unexpected events and situations that break
-the ‘ordinary’ program logic. There are constructs to raise ("*throw*")
-exceptions, "*catch*" them along the dynamic sequence of function calls, and
+the *ordinary* program logic. There are constructs to raise (``throw``)
+exceptions, *catch* them along the dynamic sequence of function calls, and
 handle them. Some support for exceptions is also provided by the classes from
 the standard library (see :ref:`Standard Library`).
 
@@ -139,11 +139,11 @@ that is appropriate for independent teams to work in parallel.
 *Package* is the language construct that combines a number of declarations,
 and makes them parts of an independent compilation unit.
 
-The *export* and *import* features are used to organize communication
-between *packages*. An entity exported from one package becomes known to---
-and accessible in---another package which imports that feature. Various
+The *export* and *import* features are used to organize communication between
+*packages*. An entity exported from one package becomes known to---and
+accessible in---another package which imports that feature. Various
 options are provided to simplify export/import, e.g., by defining
-non-exported, i.e., ‘*internal*’ declarations that are not accessible from
+non-exported, i.e., ``internal`` declarations that are not accessible from
 the outside of the package.
 
 In addition, |LANG| supports the *package* initialization semantics that
@@ -169,8 +169,9 @@ described below, and in greater detail in :ref:`Declaration-Site Variance`.
 Normally, two different argument types that specialize a generic class are
 handled as different and unrelated types (*invariance*). |LANG| proposes
 to extend the rule, and to allow such specializations become base classes and
-derived classes (*covariance*), or vice versa (*contravariance*), depending on
-the relationship of inheritance between argument types.
+derived classes (*covariance* :ref:`Covariance`), or vice versa
+(*contravariance* :ref:`Contravariance`), depending on the relationship of
+inheritance between argument types.
 
 Special markers are used to specify the *declaration-site variance*.
 The markers are to be added to generic parameter declarations.
@@ -207,11 +208,11 @@ Character Literals
 .. meta:
     frontend_status: Done
 
-A *char literal* represents the following:
+A ``char literal`` represents the following:
 
 -  A value with a single character; or
--  A single escape sequence preceded by the characters 'single quote' (U+0027)
-   and 'c' (U+0063), and followed by a 'single quote' U+0027).
+-  A single escape sequence preceded by the characters *single quote* (U+0027)
+   and '*c*' (U+0063), and followed by a *single quote* U+0027).
 
 |
 
@@ -236,7 +237,7 @@ The examples are presented below:
       c'\x7F'
       c'\u0000'
 
-*Character Literals* are of type *char*.
+``Character Literals`` are of type ``char``.
 
 .. index::
    char literal
@@ -255,39 +256,42 @@ Character Type and Operations
 .. meta:
     frontend_status: Partly
 
-+---------+----------------------------------+--------------------------+
-| Type    | Type's Set of Values             | Corresponding Class Type |
-+=========+==================================+==========================+
-| *char*  | Symbols with codes from \U+0000  | *Char*                   |
-|         | to \U+FFFF inclusive, that is,   |                          |
-|         | from 0 to 65,535                 |                          |
-+---------+----------------------------------+--------------------------+
++-----------+----------------------------------+------------------------------+
+| **Type**  | **Type's Set of Values**         | **Corresponding Class Type** |
++===========+==================================+==============================+
+| ``char``  | Symbols with codes from \U+0000  | *Char*                       |
+|           | to \U+FFFF inclusive, that is,   |                              |
+|           | from *0* to *65,535*             |                              |
++-----------+----------------------------------+------------------------------+
 
 |LANG| provides a number of operators to act on character values as discussed
 below.
 
--  Comparison operators that produce a value of type *boolean*:
+-  Comparison operators that produce a value of type ``boolean``:
 
-   +  Character comparison operators '<', '<=', '>', and '>=' (see :ref:`Numerical Comparison Operators`);
-   +  Character equality operators '==' and '!=' (see :ref:`Value Equality for Characters`);
+   +  Character comparison operators '``<``', '``<=``', '``>``', and '``>=``'
+      (see :ref:`Numerical Comparison Operators`);
+   +  Character equality operators '``==``' and '``!=``' (see
+      :ref:`Value Equality for Characters`);
 
--  Character operators that produce a value of type *char*;
+-  Character operators that produce a value of type ``char``;
 
-   + Unary plus '+' and minus '-' operators (see :ref:`Unary Plus` and :ref:`Unary Minus`);
-   + Additive operators '+' and '-' (see :ref:`Additive Expressions`);
-   + Increment operator '++' used as prefix (see :ref:`Prefix Increment`) or
-     postfix (see :ref:`Postfix Increment`);
-   + Decrement operator '--' used as prefix (see :ref:`Prefix Decrement`) or
-     postfix (see :ref:`Postfix Decrement`);
+   + Unary plus '``+``' and minus '``-``' operators (see :ref:`Unary Plus` and
+     :ref:`Unary Minus`);
+   + Additive operators '``+``' and '``-``' (see :ref:`Additive Expressions`);
+   + Increment operator '``++``' used as prefix (see :ref:`Prefix Increment`)
+     or postfix (see :ref:`Postfix Increment`);
+   + Decrement operator '``--``' used as prefix (see :ref:`Prefix Decrement`)
+     or postfix (see :ref:`Postfix Decrement`);
 
--  Conditional operator '?:' (see :ref:`Conditional Expressions`);
--  The string concatenation operator '+' (see :ref:`String Concatenation`) that,
-   if one operand is ``string`` and the other is ``character``, converts the
-   character operand to a string, and then creates a concatenation of the
+-  Conditional operator '``?:``' (see :ref:`Conditional Expressions`);
+-  The string concatenation operator '``+``' (see :ref:`String Concatenation`)
+   that, if one operand is ``string`` and the other is ``character``, converts
+   the character operand to a string, and then creates a concatenation of the
    two strings as a new ``string``.
 
-The class *Char* provides constructors, methods, and constants
-that are parts of the |LANG| standard library (see :ref:`Standard Library`).
+The class ``Char`` provides constructors, methods, and constants that are
+parts of the |LANG| standard library (see :ref:`Standard Library`).
 
 .. index::
    char
@@ -339,22 +343,22 @@ provide some initial values (see :ref:`Array Literal`).
       let x = new number[2][2] // create 2x2 matrix
 
 An *array creation expression* creates an object that is a new array with the
-elements of the type specified by *typeReference*.
+elements of the type specified by ``typeReference``.
 
-The type of each *dimensionExpression* must be convertible (see
+The type of each ``dimensionExpression`` must be convertible (see
 :ref:`Primitive Types Conversions`) to an integer type. Otherwise,
 a :index:`compile-time error` occurs.
 
-A numeric conversion (see :ref:`Primitive Types Conversions`) is
-performed on each *dimensionExpression* to ensure that the resultant type
-is *int*. Otherwise, :index:`compile-time error` occurs.
+A numeric conversion (see :ref:`Primitive Types Conversions`) is performed
+on each ``dimensionExpression`` to ensure that the resultant type is ``int``.
+Otherwise, :index:`compile-time error` occurs.
 
-A :index:`compile-time error` occurs if any *dimensionExpression* is a
+A :index:`compile-time error` occurs if any ``dimensionExpression`` is a
 constant expression that is evaluated at compile time to a negative integer
 value.
 
-If the type of any *dimensionExpression* is number or other floating-point
-type, and its fractional part is different from 0, then errors occur as
+If the type of any ``dimensionExpression`` is number or other floating-point
+type, and its fractional part is different from '0', then errors occur as
 follows:
 
 - Runtime error, if the situation is identified during program execution; and
@@ -374,10 +378,10 @@ follows:
       }
 
 
-A :index:`compile-time error` occurs if *typeReference* refers to a class
-that does not contain an accessible parameterless constructor or constructor
-with all parameters of the second form of optional parameters
-(see :ref:`Optional Parameters`), or if *typeReference* has no a default value:
+A :index:`compile-time error` occurs if ``typeReference`` refers to a class
+that does not contain an accessible parameterless constructor, or constructor
+with all parameters of the second form of optional parameters (see
+:ref:`Optional Parameters`), or if ``typeReference`` has no a default value:
 
 .. code-block:: typescript
    :linenos:
@@ -421,11 +425,11 @@ as follows:
    the expressions to the right of it are not evaluated.
 
 #. The values of dimension expressions are checked. If the value of any
-   *dimExpr* expression is less than zero, then *NegativeArraySizeException*
+   ``dimExpr`` expression is less than zero, then ``NegativeArraySizeException``
    is thrown.
 
 #. Space for the new array is allocated. If the available space is not
-   sufficient to allocate the array, then *OutOfMemoryError* is thrown,
+   sufficient to allocate the array, then ``OutOfMemoryError`` is thrown,
    and the evaluation of the array creation expression completes abruptly.
 
 #. When a one-dimensional array is created, each element of that array
@@ -460,10 +464,10 @@ Indexable Types
 .. meta:
     frontend_status: None
 
-If a class or an interface declares one or two functions with names *$_get* and
-*$_set*, and signatures *(index: Type1): Type2* and *(index: Type1, value: Type2)*
-respectively, then an indexing expression (see :ref:`Indexing Expression`) can
-be applied to variables of such types:
+If a class or an interface declares one or two functions with names ``$_get``
+and ``$_set``, and signatures *(index: Type1): Type2* and *(index: Type1,
+value: Type2)* respectively, then an indexing expression (see
+:ref:`Indexing Expression`) can be applied to variables of such types:
 
 .. code-block:: typescript
    :linenos:
@@ -489,7 +493,6 @@ expression (see :ref:`Indexing Expression`) is available:
     getClass = getClass[0]
     getClass[0] = getClass // Error - no $_set function available
 
-
     class ClassWithSet {
        $_set (index: number, value: ClassWithSet) { }
     }
@@ -497,7 +500,7 @@ expression (see :ref:`Indexing Expression`) is available:
     setClass = setClass[0] // Error - no $_get function available
     setClass[0] = setClass 
 
-Type *string* can be used as a type of the index parameter:
+Type ``string`` can be used as a type of the index parameter:
 
 .. code-block:: typescript
    :linenos:
@@ -512,14 +515,14 @@ Type *string* can be used as a type of the index parameter:
     x["index string"] = x 
        // This notation implies a call: x.$_set ("index string", x)
 
-Functions *$_get* and *$_set* are ordinary functions with compiler-known
+Functions ``$_get`` and ``$_set`` are ordinary functions with compiler-known
 signatures. The functions can be used like any other function.
 The functions can be abstract or defined in an interface and implemented later.
 The functions can be overridden and provide a dynamic dispatch for the indexing
 expression evaluation (see :ref:`Indexing Expression`). They can be used in
 generic classes and interfaces for better flexibility.
 
-A compile-time error occurs if these functions are marked as *async*.
+A compile-time error occurs if these functions are marked as ``async``.
 
 .. code-block:: typescript
    :linenos:
@@ -568,8 +571,9 @@ A class or an interface can be made *iterable*, meaning that their instances
 can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
 A type is *iterable* if it declares a parameterless function with name
-*$_iterator* and signature *(): ITER*, where *ITER* is a type that implements
-*Iterator* interface defined in the standard library (see :ref:`Standard Library`).
+``$_iterator`` and signature ``(): ITER``, where ``ITER`` is a type that
+implements ``Iterator`` interface defined in the standard library (see
+:ref:`Standard Library`).
 
 The example below defines *iterable* class *C*:
 
@@ -602,8 +606,8 @@ The example below defines *iterable* class *C*:
             console.log(x) 
           }
 
-In the example above, class *C* function *$_iterator* returns
-*CIterator<string>*, which implements *Iterator<string>*. If executed,
+In the example above, class *C* function ``$_iterator`` returns
+``CIterator<string>``, which implements ``Iterator<string>``. If executed,
 this code prints out the following:
 
 .. code-block:: typescript
@@ -613,15 +617,15 @@ this code prints out the following:
     "c"
 
 
-The function *$_iterator* is an ordinary function with a compiler-known
+The function ``$_iterator`` is an ordinary function with a compiler-known
 signature. The function can be used like any other function. It can be
 abstract or defined in an interface to be implemented later.
 
-A compile-time error occurs if this function is marked as *async*.
+A compile-time error occurs if this function is marked as ``async``.
 
 **Note**: To support the code compatible with |TS|, the name of the function
-*$_iterator* can be written as [*Symbol.iterator*]. In this case, the class
-*iterable* looks as follows:
+``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the class
+``iterable`` looks as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -633,7 +637,7 @@ A compile-time error occurs if this function is marked as *async*.
         }
       }
 
-The use of the name [*Symbol.iterator*] is considered deprecated.
+The use of the name ``[Symbol.iterator]`` is considered deprecated.
 It can be removed in the future versions of the language.
 
 |
@@ -681,18 +685,18 @@ Multiple Catch Clauses in Try Statements
 .. meta:
     frontend_status: Done
 
-When an exception or an error is thrown in the ``try`` block, or in a *throwing*
-or *rethrowing* function (see :ref:`Throwing Functions` and
+When an exception or an error is thrown in the ``try`` block, or in a
+*throwing* or *rethrowing* function (see :ref:`Throwing Functions` and
 :ref:`Rethrowing Functions`) called from the ``try`` block, the control is
-transferred to the first '``catch``' clause if the statement has at least one
-'``catch``' clause that can catch that exception or error. If no '``catch``'
-clause is found, then *exception* or *error* is propagated to the surrounding
+transferred to the first ``catch`` clause if the statement has at least one
+``catch`` clause that can catch that exception or error. If no ``catch``
+clause is found, then exception or error is propagated to the surrounding
 scope.
 
 **Note**: An exception handled within a *non-throwing* function (see
 :ref:`Non-Throwing Functions`) is never propagated outside that function.
 
-A *catch* clause has two parts:
+A ``catch`` clause has two parts:
 
 -  An exception parameter that provides access to the object associated
    with the exception or the error occurred; and
@@ -713,19 +717,19 @@ A *catch* clause has two parts:
    exception parameter
    access
 
-*Default catch clause* is a '``catch``' clause with the exception parameter type
-omitted. Such a '``catch``' clause handles any exception or error that is not
+*Default catch clause* is a ``catch`` clause with the exception parameter type
+omitted. Such a ``catch`` clause handles any exception or error that is not
 handled by any previous clause. The type of that parameter is of the class
-*Object*.
+``Object``.
 
 A :index:`compile-time error` occurs if:
 
--  The default '``catch``' clause is not the last '``catch``' clause in a
+-  The default ``catch`` clause is not the last ``catch`` clause in a
    ``try`` statement.
 
 -  The type reference of an exception parameter (if any) is neither the
-   class *Exception* or *Error*, nor a class derived from *Exception* or
-   *Error*.
+   class ``Exception`` or ``Error``, nor a class derived from ``Exception`` or
+   ``Error``.
 
 .. code-block:: typescript
    :linenos:
@@ -758,16 +762,15 @@ A :index:`compile-time error` occurs if:
    derived class
 
 All exceptions that the ``try`` block can throw are caught by the function
-'process'. Special handling is provided for the *ZeroDivisor* exception,
-and the handling of other *exceptions* and *errors* is different.
+*process*. Special handling is provided for the ``ZeroDivisor`` exception,
+and the handling of other exceptions and errors is different.
 
-`''Catch''` clauses do not handle every possible *exception* or *error*
-that can be thrown by the code in the ``try`` block. If no '``catch``' clause
-can handle the situation, then *exception* or *error* is propagated to
-the surrounding scope.
+``Catch`` clauses do not handle every possible exception or error that can
+be thrown by the code in the ``try`` block. If no ``catch`` clause can handle
+the situation, then exception or error is propagated to the surrounding scope.
 
 **Note**: If a ``try`` statement (*default catch clause*) is placed inside a
-*non-throwing* function (see :ref:`Non-Throwing Functions`), then *exception*
+*non-throwing* function (see :ref:`Non-Throwing Functions`), then exception
 is never propagated.
 
 .. index::
@@ -778,15 +781,16 @@ is never propagated.
    default catch clause
    non-throwing function
 
-If a '``catch``' clause contains a block that corresponds to a parameter of the
-*error*', then it can only handle that *error*.
+If a ``catch`` clause contains a block that corresponds to a parameter of the
+error, then it can only handle that error.
 
-The type of the '``catch``' clause parameter in a *default catch clause* is
-omitted. The '``catch``' clause can handle any *exceptions* or *errors*
-unhandled by the previous clauses.
+The type of the ``catch`` clause parameter in a *default catch clause* is
+omitted. The ``catch`` clause can handle any exceptions or errors unhandled
+by the previous clauses.
 
-The type of a '``catch``' clause parameter (if any) must be of the class
-*Error* or *Exception*, or of another class derived from *Exception* or *Error*.
+The type of a ``catch`` clause parameter (if any) must be of the class
+``Error`` or ``Exception``, or of another class derived from ``Exception``
+or ``Error``.
 
 .. index::
    exception
@@ -807,8 +811,8 @@ The type of a '``catch``' clause parameter (if any) must be of the class
         catch (x: DivideByZeroError) { return MaxInt }
       }
 
-A '``catch``' clause handles the *DivideByZeroError* at runtime. Other errors
-are propagated to the surrounding scope if no '``catch``' clause is found.
+A ``catch`` clause handles the ``DivideByZeroError`` at runtime. Other errors
+are propagated to the surrounding scope if no ``catch`` clause is found.
 
 .. index::
    catch clause
@@ -828,7 +832,7 @@ are propagated to the surrounding scope if no '``catch``' clause is found.
     frontend_status: Done
 
 An ``assert`` statement can have one or two expressions. The first expression
-is of type *boolean*; the optional second expression is of type *string*. A
+is of type ``boolean``; the optional second expression is of type ``string``. A
 :index:`compile-time error` occurs if the types of the expressions fail to match.
 
 .. code-block:: abnf
@@ -848,9 +852,9 @@ language allows having assertions either *enabled* or *disabled*.
    string
 
 The execution of the *enabled* assertion starts from the evaluation of the
-*boolean* expression. An error is thrown if the expression evaluates to
+``boolean`` expression. An error is thrown if the expression evaluates to
 ``false``. The second expression is then evaluated (if provided). Its
-value passes as the *error* argument.
+value passes as the ``error`` argument.
 
 The execution of the *disabled* assertion has no effect whatsoever.
 
@@ -916,7 +920,7 @@ different signatures that are not *override-equivalent* (see
 An overloaded function name causes no compile-time error on its own.
 
 No specific relationship is required between the return types, or between the
-'``throws``' clauses of the two functions with the same name but different
+``throws`` clauses of the two functions with the same name but different
 signatures that are not *override-equivalent*.
 
 When calling a function, the number of actual arguments (and any explicit type
@@ -957,7 +961,7 @@ An *overloaded* method name cannot cause a :index:`compile-time error`
 on its own.
 
 If the signatures of two methods with the same name are not *override-equivalent*,
-then the return types of those methods, or the '``throws``' or '``rethrows``'
+then the return types of those methods, or the ``throws`` or ``rethrows``
 clauses of those methods can have any kind of relationship.
 
 A number of actual arguments, explicit type arguments, and compile-time types
@@ -999,7 +1003,7 @@ such method name is considered *overloaded*.
 
 However, this causes no :index:`compile-time error` on its own, because no
 specific relationship is required between the return types, or between the
-'``throws``' clauses of the two methods.
+``throws`` clauses of the two methods.
 
 .. index::
    interface method overriding
@@ -1114,9 +1118,9 @@ Native Functions
 .. meta:
     frontend_status: Done
 
-A *native* function implemented in a platform-dependent code is typically
+A ``native`` function implemented in a platform-dependent code is typically
 written in another programming language (e.g., *C*). A compile-time error
-occurs if a *native* function has a body.
+occurs if a ``native`` function has a body.
 
 .. index::
    native function
@@ -1134,7 +1138,7 @@ Native Methods
 .. meta:
     frontend_status: Done
 
-*Native* methods are the methods implemented in a platform-dependent code
+``Native`` methods are the methods implemented in a platform-dependent code
 written in another programming language (e.g., *C*).
 
 A :index:`compile-time error` occurs if:
@@ -1142,7 +1146,7 @@ A :index:`compile-time error` occurs if:
 -  A method declaration contains the keyword ``abstract`` along with the
    keyword ``native``.
 
--  A *native* method has a body (see :ref:`Method Body`) that is a block
+-  A ``native`` method has a body (see :ref:`Method Body`) that is a block
    instead of a simple semicolon or empty body.
 
 .. index::
@@ -1179,10 +1183,10 @@ A class may be declared *final* to prevent its extension. A class declared
 *final* cannot have subclasses, and no method of a *final* class can be
 overridden.
 
-If a class type *F* expression is declared *final*, then
-only a class *F* object can be its value.
+If a class type *F* expression is declared *final*, then only a class *F*
+object can be its value.
 
-A :index:`compile-time error` occurs if the '``extends``' clause of a class
+A :index:`compile-time error` occurs if the ``extends`` clause of a class
 declaration contains another class that is *final*.
 
 .. index::
@@ -1252,7 +1256,7 @@ Default Method Declarations
         'private'? identifier signature block
         ;
 
-A default method can be explicitly declared *private* in an interface body.
+A default method can be explicitly declared ``private`` in an interface body.
 
 A block of code that represents the body of a default method in an interface
 provides a default implementation for any class if such class does not override
@@ -1285,11 +1289,11 @@ the method that implements the interface.
         | 'private'? 'static' identifier signature block
         ;
 
-A *static* method in an interface body can be explicitly declared *private*.
+A ``static`` method in an interface body can be explicitly declared ``private``.
 
-*Static* interface method calls refer to no particular object.
+``Static`` interface method calls refer to no particular object.
 
-In contrast to default methods, *static* interface methods are not instance
+In contrast to default methods, ``static`` interface methods are not instance
 methods.
 
 .. index::
@@ -1303,10 +1307,10 @@ methods.
    
 A :index:`compile-time error` occurs if:
 
--  The body of a *static* method attempts to use the keywords ``this`` or 
+-  The body of a ``static`` method attempts to use the keywords ``this`` or
    ``super``.
 
--  The header or body of a *static* method of an interface contains the
+-  The header or body of a ``static`` method of an interface contains the
    name of any surrounding declaration’s type parameter.
 
 .. index::
@@ -1367,11 +1371,11 @@ specified in the extension function declaration.
         ;
 
 The keyword ``this`` inside an extension function corresponds to the receiver
-object (i.e., *typeReference* before the dot).
+object (i.e., ``typeReference`` before the dot).
 
-Class or interface referred by typeReference, and *private* or *protected*
+Class or interface referred by typeReference, and ``private`` or ``protected``
 members are not accessible within the bodies of their *extension functions*.
-Only *public* members can be accessed:
+Only ``public`` members can be accessed:
 
 .. index::
    keyword this
@@ -1413,7 +1417,7 @@ Only *public* members can be accessed:
      }
 
 *Extension functions* are top-level functions that can call one other.
-The form of such calls depends on whether *static* was or was not used while
+The form of such calls depends on whether ``static`` was or was not used while
 declaring. This affects the kind of receiver to be used for the call:
 
 -  A *static extension function* requires the name of type (class or interface).
@@ -1608,7 +1612,7 @@ In case of other ambiguities (e.g., when a function or method call has the
 last parameter, which can be optional, of a function type), a syntax
 production that starts with '{' following the function or method call is
 handled as the *trailing lambda*.
-If other semantics is needed, then the semicolon ';' separator can be used.
+If other semantics is needed, then the semicolon '``;``' separator can be used.
 It means that the function or the method is to be called without the last
 argument (see :ref:`Optional Parameters`).
 
@@ -1671,9 +1675,9 @@ Enumeration Super Type
 .. meta:
     frontend_status: Partly
 
-Any *enum* type has class type *Object* as its supertype. This allows
-polymorphic assignments into *Object* type variables. The *instanceof* check
-can be used to get enumeration variable back by applying the '*as*' conversion:
+Any ``enum`` type has class type ``Object`` as its supertype. This allows
+polymorphic assignments into ``Object`` type variables. The ``instanceof`` check
+can be used to get enumeration variable back by applying the ``as`` conversion:
 
 .. code-block:: typescript
    :linenos:
@@ -1707,8 +1711,8 @@ Enumeration Types Conversions
     frontend_status: Partly
 
 Every *enum* type is compatible (see :ref:`Type Compatibility`) with type
-*Object* (see :ref:`Enumeration SuperType`). Every variable of *enum* type can
-thus be assigned into a variable of type *Object*.
+``Object`` (see :ref:`Enumeration SuperType`). Every variable of ``enum`` type
+can thus be assigned into a variable of type ``Object``.
 
 .. index::
    enum type
@@ -1731,9 +1735,9 @@ Enumeration Methods
 
 Several static methods are available to handle each enumeration type as follows:
 
--  'values()' returns an array of enumeration constants in the order of
+-  ``values()`` returns an array of enumeration constants in the order of
    declaration.
--  'getValueOf(name: string)' returns an enumeration constant with the given
+-  ``getValueOf(name: string)`` returns an enumeration constant with the given
    name, or throws an error if no constant with such name exists.
 
 .. index::
@@ -1754,10 +1758,10 @@ Several static methods are available to handle each enumeration type as follows:
 
 There is an additional method for instances of any enumeration type:
 
--  'valueOf()' returns an *int* or *string* value of an enumeration constant
-   depending on the type of the enumeration constant.
+-  ``valueOf()`` returns an ``int`` or ``string`` value of an enumeration
+   constant depending on the type of the enumeration constant.
 
--  'getName()' returns the name of an enumeration constant.
+-  ``getName()`` returns the name of an enumeration constant.
 
 .. code-block:: typescript
    :linenos:
@@ -1767,7 +1771,7 @@ There is an additional method for instances of any enumeration type:
       console.log(c.valueOf()) // prints 10
       console.log(c.getName()) // prints Green
 
-**Note**: ``c.toString()`` returns the same value as ``c.getValue().toString()``.
+**Note**: ``c.toString()`` returns the same value as ``c.valueOf().toString()``.
 
 .. index::
    instance
@@ -1788,8 +1792,8 @@ Exceptions
 .. meta:
     frontend_status: Done
 
-*Exception* is the base class of all exceptions. *Exception* is used to
-define a new exception, or any class derived from the *Exception* as the
+``Exception`` is the base class of all exceptions. ``Exception`` is used to
+define a new exception, or any class derived from the ``Exception`` as the
 base of a class:
 
 .. code-block:: typescript
@@ -1803,14 +1807,14 @@ base of a class:
    Exception
 
 A :index:`compile-time error` occurs if a generic class is a direct or
-indirect subclass of *Exception*.
+indirect subclass of ``Exception``.
 
-An *exception* is thrown explicitly with the ``throw`` statement.
+An exception is thrown explicitly with the ``throw`` statement.
 
-When an *exception* is thrown, the surrounding piece of code is to handle it by
+When an exception is thrown, the surrounding piece of code is to handle it by
 correcting the problem, trying an alternative approach, or informing the user.
 
-An *exception* can  be  processed in two ways:
+An exception can  be  processed in two ways:
 
 -  Propagating the exception from a function to the code that calls that
    function (see :ref:`Throwing Functions`);
@@ -1868,7 +1872,7 @@ it is called. The propagation of an *exception* occurs if:
 
 
 In the example below, the function call is not enclosed in a ``try``
-statement; any exception raised by *canThrow* function is propagated:
+statement; any exception raised by ``canThrow`` function is propagated:
 
 .. index::
    throwing function
@@ -1887,8 +1891,8 @@ statement; any exception raised by *canThrow* function is propagated:
 
 
 In the example below, the ``try`` statement can catch only ``this`` exceptions.
-Any exception raised by *canThrow* function---except for *MyException* itself,
-and any exception derived from *MyException*---is propagated:
+Any exception raised by ``canThrow`` function---except for ``MyException``
+itself, and any exception derived from ``MyException``---is propagated:
 
 .. index::
    try statement
@@ -1925,7 +1929,7 @@ A :index:`compile-time error` occurs if not **all** of the following
 requirements are met:
 
 -  The call of a *throwing function* is enclosed in a ``try`` statement;
--  The enclosing ``try`` statement has a default '``catch``' clause.
+-  The enclosing ``try`` statement has a default ``catch`` clause.
 
 .. index::
    non-throwing function
@@ -1984,9 +1988,9 @@ not handled by a ``try`` statement within that body. A function with unhandled
    throw statement
 
 Both a *throwing* and a *non-throwing* function can be an argument of a
-*rethrowing function* *foo* that is being called.
+*rethrowing function* ``foo`` that is being called.
 
-If a *throwing function* is an argument, then the calling of *foo* can
+If a *throwing function* is an argument, then the calling of ``foo`` can
 throw an exception.
 
 This rule is exception-free, i.e., a *non-throwing* function used as a call
@@ -2013,15 +2017,15 @@ argument cannot throw an exception:
 
 A call is exception-free if:
 
--  Function *foo* has several parameters of a function type marked
-   with *throws*; and
--  All actual arguments of the call to *foo* are non-throwing.
+-  Function ``foo`` has several parameters of a function type marked
+   with ``throws``; and
+-  All actual arguments of the call to ``foo`` are non-throwing.
 
 However, the call can raise an exception, and is handled as any other
 *throwing function* call if at least one of the actual function arguments
 is *throwing*.
 
-It implies that a call to *foo* within the body of a *non-throwing* function
+It implies that a call to ``foo`` within the body of a *non-throwing* function
 must be guaranteed with a ``try-catch`` statement:
 
 .. index::
@@ -2118,8 +2122,8 @@ Coroutines
 .. meta:
     frontend_status: Partly
 
-A function or lambda can be a *coroutine*. |LANG| supports **basic coroutines**,
-**structured coroutines**, and **communication channels**.
+A function or lambda can be a *coroutine*. |LANG| supports *basic coroutines*,
+*structured coroutines*, and *communication channels*.
 Basic coroutines are used to create and launch a coroutine; the result is then
 to be awaited.
 
@@ -2179,7 +2183,7 @@ Lambda is used in a launch expression as follows:
    lambda
    launch expression
 
-The result of the launch expression is of type *Promise<T>*, where *T* is the
+The result of the launch expression is of type ``Promise<T>``, where *T* is the
 return type of the function being called:
 
 .. code-block:: typescript
@@ -2190,12 +2194,12 @@ return type of the function being called:
       let resfoo = launch foo()
       let resbar = launch bar()
 
-In the example above the type of *resfoo* is *Promise<int>*, and the
-type of *resbar* is *Promise<void>*.
+In the example above the type of ``resfoo`` is ``Promise<int>``, and the
+type of ``resbar`` is ``Promise<void>``.
 
 Similarly to |TS|, |LANG| supports the launching of a coroutine by calling
-the function *async* (see :ref:`Async Functions`). No restrictions apply as to
-from what scope to call the function *async*:
+the function ``async`` (see :ref:`Async Functions`). No restrictions apply as
+to from what scope to call the function ``async``:
 
 .. index::
    launch expression
@@ -2223,7 +2227,7 @@ Awaiting a Coroutine
 .. meta:
     frontend_status: Done
 
-The expressions *await* and *wait* are used while a previously launched
+The expressions ``await`` and ``wait`` are used while a previously launched
 coroutine finishes and returns a value:
 
 .. code-block:: abnf
@@ -2232,7 +2236,7 @@ coroutine finishes and returns a value:
         'await' expression
         ;
 
-A :index:`compile-time error` occurs if the expression type is not *Promise<T>*.
+A :index:`compile-time error` occurs if the expression type is not ``Promise<T>``.
 
 .. index::
    expression await
@@ -2264,24 +2268,24 @@ If the coroutine result must be ignored, then the expression statement
 
 |
 
-.. _The Promise T Class:
+.. _Promise<T> Class:
 
-The Promise<T> Class
+``Promise<T>`` Class
 ====================
 
 .. meta:
     frontend_status: Partly
 
-The class *Promise<T>* represents the values returned by launch expressions.
+The class ``Promise<T>`` represents the values returned by launch expressions.
 It belongs to the essential kernel packages of the standard library (see
 :ref:`Standard Library`), and thus it is imported by default and may be used
 without any qualification.
 
 The following methods are used as follows:
 
--  *then* takes two arguments (the first argument is the callback used if the
+-  ``then`` takes two arguments (the first argument is the callback used if the
    promise is fulfilled, and the second if it is rejected), and returns
-   *Promise<U>*.
+   ``Promise<U>``.
 
 .. index::
    class
@@ -2300,16 +2304,15 @@ The following methods are used as follows:
         <T>(val: T) : Promise<U>, rejectCallback : (err: Object)
         : Promise<U>)
 
--  *catch* is the alias for *Promise<T>*.then<U>((value: T) : U => {},
-   onRejected).
+-  ``catch`` is the alias for ``Promise<T>.then<U>((value: T) : U => {}``, ``onRejected)``.
 
 .. code-block:: typescript
 
         Promise<U> Promise<T>::catch<U>(rejectCallback : (err:
             Object) : Promise<U>)
 
--  *finally* takes one argument (the callback called after *promise* is either
-   fulfilled or rejected) and returns *Promise<T>*.
+-  ``finally`` takes one argument (the callback called after ``promise`` is
+   either fulfilled or rejected) and returns ``Promise<T>``.
 
 .. index::
    alias
@@ -2350,25 +2353,25 @@ standard library (see :ref:`Standard Library`).
 
 .. _Async Functions:
 
-Async Functions
-===============
+``Async`` Functions
+===================
 
 .. meta:
     frontend_status: Partly
 
-The function *async* is an implicit coroutine that can be called as a
+The function ``async`` is an implicit coroutine that can be called as a
 regular function.
 
-The return type of an *async* function must be *Promise<T>* (see
-:ref:`The Promise T Class`).
-Returning values of types *Promise<T>* and *T* from the function *async*
+The return type of an ``async`` function must be ``Promise<T>`` (see
+:ref:`Promise<T> Class`).
+Returning values of types ``Promise<T>`` and *T* from the function ``async``
 is allowed.
 
 Using return statement without an expression is allowed if the return type
-is *Promise<void>*.
+is ``Promise<void>``.
 *No-argument* return statement can be added implicitly as the last statement
 of the function body if there is no explicit return statement in a function
-with the return type *Promise<void>*.
+with the return type ``Promise<void>``.
 
 **Note**: Using this annotation is not recommended because this type of
 functions is only supported for the sake of backward |TS| compatibility.
@@ -2466,11 +2469,11 @@ Internal Access Modifier
 .. meta:
     frontend_status: Partly
 
-The modifier *internal* indicates that a class member, a constructor, or
+The modifier ``internal`` indicates that a class member, a constructor, or
 an interface member is accessible within its compilation unit only.
-If the compilation unit is a package (see :ref:`Packages`), then *internal*
+If the compilation unit is a package (see :ref:`Packages`), then ``internal``
 members can be used in any *package module*. If the compilation unit is a
-separate module (see :ref:`Separate Modules`), then *internal* members can be
+separate module (see :ref:`Separate Modules`), then ``internal`` members can be
 used within this module.
 
 .. index::
@@ -2547,14 +2550,14 @@ global variable).
 Sub-Entity Binding
 ==================
 
-The import bindings '*qualifiedName*' (that consists of at least two
-identifiers) or '*qualifiedName* as A' bind a sub-entity to the declaration
+The import bindings ``qualifiedName`` (that consists of at least two
+identifiers) or ``qualifiedName as A`` bind a sub-entity to the declaration
 scope of the current module.
 
-'L' is a *static* entity and the last identifier in the '*qualifiedName* A.B.L'.
-L’s *public* access modifier is defined in the class or interface denoted in the
-previous part of the '*qualifiedName*'. 'L' is accessible regardless of the
-export status of the class or the interface it belongs to.
+'*L*' is a ``static`` entity and the last identifier in the ``qualifiedName A.B.L``.
+The ``public`` access modifier of '*L*' is defined in the class or interface
+denoted in the previous part of the ``qualifiedName``. '*L*' is accessible
+regardless of the export status of the class or the interface it belongs to.
 
 An entity (or—in the case of overloaded methods—entities) is bound by its
 original name, or by an alias (if the alias is set). In the latter case, the
@@ -2587,10 +2590,10 @@ The following module can be considered an example:
         }
       }
 
-The table below illustrates the import of this module:
+The import of this module is illustrated in the table below:
 
 +-----------------------------------+-+--------------------------------------+
-| Import                            | | Usage                                |
+| **Import**                        | | **Usage**                            |
 +===================================+=+======================================+
 | .. code-block:: typescript        | | .. code-block:: typescript           |
 |                                   | |                                      |
@@ -2602,6 +2605,12 @@ The table below illustrates the import of this module:
 |                                   | |     let y = new A() // Error: 'A' is |
 |                                   | |        not accessible                |
 +-----------------------------------+-+--------------------------------------+
+
+(table cont'd)
+
++-----------------------------------+-+--------------------------------------+
+| **Import**                        | | **Usage**                            |
++===================================+=+======================================+
 | .. code-block:: typescript        | | .. code-block:: typescript           |
 |                                   | |                                      |
 |     import {A.B.L as X} from ".." | |     if (X == 0) { ... }              |
@@ -2629,8 +2638,8 @@ simple names. This feature is to be used only for migration.
 All Static Sub-Entities Binding
 ===============================
 
-The import binding '*qualifiedName.\** ' binds all *public static* sub-entities
-of the entity denoted by the *qualifiedName* to the declaration scope of the
+The import binding ``qualifiedName.*`` binds all ``public static`` sub-entities
+of the entity denoted by the ``qualifiedName`` to the declaration scope of the
 current module.
 
 The following module can be considered an example:
@@ -2697,12 +2706,12 @@ Import and Overloading of Function Names
 
 While importing functions, the following situations can occur:
 
--  **Overloading**, where different imported functions have the same name
+-  *Overloading*, where different imported functions have the same name
    but different signatures, or a function (functions) of the current module
    and an imported function (functions) have the same name but different
    signatures.
 
--  **Shadowing**, where a function (functions) of the current module and an
+-  *Shadowing*, where a function (functions) of the current module and an
    imported function (functions) have the same name and signature.
 
 
@@ -2726,7 +2735,7 @@ Overloading of Function Names
 .. meta:
     frontend_status: Done
 
-**Overloading** is the situation when a compilation unit has access to several
+*Overloading* is the situation when a compilation unit has access to several
 functions with the same names (regardless of where such functions are declared).
 The code can use all such functions if they have distinguishable signatures
 (i.e., the functions are not override-equivalent):
@@ -2768,7 +2777,7 @@ Shadowing of Function Names
 .. meta:
     frontend_status: Done
 
-**Shadowing** is the :index:`compile-time error` that occurs if an imported
+*Shadowing* is the :index:`compile-time error` that occurs if an imported
 function is identical to the function declared in the current compilation
 unit (the same names and override-equivalent signatures), i.e., the
 declarations are duplicated.
@@ -2824,11 +2833,11 @@ Optionally, a type parameter can have keywords ``in`` or ``out`` (a
 **Note**: This description of variance modifiers is preliminary. The details
 are to be specified in the future versions of |LANG|.
 
-Type parameters with the keyword ``out`` are *covariant*, and can be used in
-the out-position only.
+Type parameters with the keyword ``out`` are *covariant* :ref:`Covariance`, and
+can be used in the out-position only.
 
-Type parameters with the keyword ``in`` are *contravariant*, and can be used
-in the in-position only.
+Type parameters with the keyword ``in`` are *contravariant*
+:ref:`Contravariance`, and can be used in the in-position only.
 
 Type parameters with no variance modifier are implicitly *invariant*, and can
 occur in any position.
@@ -2853,8 +2862,8 @@ variance of the corresponding type parameter *F* defines the subtyping between
 *T<A>* and *T<B>* (in the case of declaration-site variance with two different
 types *A* <: *B*) as follows:
 
--  Covariant (*out F*): *T<A>* <: *T<B>*;
--  Contravariant (*in F*): *T<A>* :> *T<B>*;
+-  Covariant :ref:`Covariance` (*out F*): *T<A>* <: *T<B>*;
+-  Contravariant :ref:`Contravariance` (*in F*): *T<A>* :> *T<B>*;
 -  Invariant (default) (*F*).
 
 .. index::

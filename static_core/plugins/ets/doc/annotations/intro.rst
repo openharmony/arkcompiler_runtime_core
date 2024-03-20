@@ -10,39 +10,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-
-.. _Contributors:
-
-Contributors
+Introduction
 ############
 
-  Nedoria Aleksei
+An *annotation* is a language feature that is used to attach metadata to code.
 
-  Bronnikov Georgy
-  
-  Gavrin Evgeny
-
-  Kanatov Alexey
-
-  Pavlyuk Alexander
-
-  Polyakov Alexander
-  
-  Rubanov Vladimir
-
-  Soldatov Anton
-
-  Solomennikov Dmitry
-
-  Trubenkov Dmitrii
-
-  Velikanov Michael
-
-  Zouev Evgeniy
+The document specifies *user-defined annotations*.
+It also describes difference between *annotations* and *decorators* (see :ref:`TS Decorators`).
 
 
-.. raw:: pdf
-
-   PageBreak
-
+|
 

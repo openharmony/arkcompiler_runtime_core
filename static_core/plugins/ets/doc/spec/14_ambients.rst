@@ -51,7 +51,7 @@ Ambient functions, methods, and constructors have no bodies.
         )
         ;
 
-A compile-time error occurs if the modifier '*declare*' is used in a context
+A compile-time error occurs if the modifier *declare* is used in a context
 that is already ambient:
 
 .. code-block:: typescript
@@ -149,7 +149,7 @@ Ambient function declarations cannot specify function bodies.
     declare function bar(y: number = 1): void // compile-time error
     
 
-**Note**: The modifier 'async' cannot be used in an ambient context.
+**Note**: The modifier ``async`` cannot be used in an ambient context.
 
 .. index::
    ambient function

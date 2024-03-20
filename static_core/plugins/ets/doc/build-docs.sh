@@ -110,14 +110,6 @@ function build_sphinx_document()
     echo "${target}: Building HTML"
     sphinx-build ${build_options} -b html "${src_dir}" "${BUILD_DIR}/${target}-html"
 
-    if [[ "${target}" == "stdlib" ]]; then
-        echo "${target}: Building StdLib PDF"
-        local build_dir_pdf="${BUILD_DIR}/${target}-pdf"
-        sphinx-build ${build_options} -t ispdf -b pdf "${src_dir}" "${build_dir_pdf}"
-        mv "${build_dir_pdf}"/*.pdf "${BUILD_DIR}"
-        return
-    fi
-
     # NB! Markdown for the spec is not skipped (mark-up too complex)
     if [[ "${target}" != "spec" ]]; then
         echo "${target}: Building Markdown"
@@ -127,7 +119,7 @@ function build_sphinx_document()
 
     echo "${target}: Building LaTeX and PDF"
     local build_dir_latex="${BUILD_DIR}/${target}-latex"
-    sphinx-build ${build_options} -b latex "${src_dir}" "${build_dir_latex}"
+    sphinx-build ${build_options} -t ispdf -b latex "${src_dir}" "${build_dir_latex}"
     pushd "${build_dir_latex}"
         latexmk -f -silent -pdf -dvi- -ps- *.tex || true
         mv *.pdf "${BUILD_DIR}"

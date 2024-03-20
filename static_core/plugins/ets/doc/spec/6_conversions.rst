@@ -36,7 +36,7 @@ is called a *standalone expression*:
         expr // no target type is expected
     }
 
-Otherwise, the expression is a *non-standalone expression*:
+Otherwise, the expression is *non-standalone*:
 
 .. code-block:: typescript
    :linenos:
@@ -96,9 +96,9 @@ Contexts can be of the following kinds:
 -  :ref:`Assignment-like Contexts` where the expression value is bound to a
    variable.
 
--  :ref:`String Operator Contexts` with ``string`` concatenation (`+` operator).
+-  :ref:`String Operator Contexts` with ``string`` concatenation (operator ``+``).
 
--  :ref:`Numeric Operator Contexts` with all numeric operators (`+`, `-`, etc.).
+-  :ref:`Numeric Operator Contexts` with all numeric operators (``+``, ``-``, etc.).
 
 -  :ref:`Casting Contexts and Conversions`. i.e., the conversion of an
    expression value to a type explicitly specified by a cast expression (see
@@ -210,41 +210,40 @@ String Operator Contexts
 .. meta:
     frontend_status: Done
 
-*String context* applies only to a non-*string* operand of the binary ``+``
-operator if the other operand is a *string*. 
+*String context* applies only to a non-*string* operand of the binary operator
+``+`` if the other operand is ``string``.
 
-*String conversion* for a non-*string* operand is evaluated as follows:
+*String conversion* for a non-``string`` operand is evaluated as follows:
 
 -  The operand of nullish type that has a nullish value is converted as
    described below:
 
-     - The operand ``null`` is converted to string *null*.
-     - The operand ``undefined`` is converted to string *undefined*.
+     - The operand ``null`` is converted to string ``null``.
+     - The operand ``undefined`` is converted to string ``undefined``.
 
--  An operand of *reference* type or *enum* type is converted by applying the
-   method call *toString()*.
+-  An operand of a reference type or ``enum`` type is converted by applying the
+   method call ``toString()``.
 
--  An operand of *integer* type (see :ref:`Integer Types and Operations`)
-   is converted to type *string* with a value that represents the operand in
+-  An operand of an integer type (see :ref:`Integer Types and Operations`)
+   is converted to type ``string`` with a value that represents the operand in
    the decimal form;
 
--  An operand of *floating-point* type (see :ref:`Floating-Point Types and Operations`) 
-   is converted to type *string* with a value that represents the operand in the
-   decimal form (without the loss of information);
+-  An operand of a floating-point type (see :ref:`Floating-Point Types and Operations`) 
+   is converted to type ``string`` with a value that represents the operand in
+   the decimal form (without the loss of information);
 
--  An operand of type *boolean* is converted to type *string* with the values
-   ``true`` or ``false``;
+-  An operand of type ``boolean`` is converted to type ``string`` with the
+   values ``true`` or ``false``;
 
--  An operand of type *char* is converted by using :ref:`Character to String Conversions`;
+-  An operand of type ``char`` is converted by using :ref:`Character to String Conversions`;
 
--  An operand of an enumeration type (see :ref:`Enumerations`)
-   is converted to type *string*
-   with the value of the corresponding enumeration constant
-   if values of enumeration are of type *string*.
+-  An operand of enumeration type (see :ref:`Enumerations`) is converted to
+   type ``string`` with the value of the corresponding enumeration constant
+   if values of enumeration are of type ``string``.
 
 If there is no applicable conversion, then a compile-time error occurs.
 
-The target type in this context is always *string*:
+The target type in this context is always ``string``:
 
 .. code-block:: typescript
    :linenos:
@@ -257,7 +256,7 @@ The target type in this context is always *string*:
     console.log("string is " + x) // prints "string is null"
     let c = "X"
     console.log("char is " + c) // prints "char is X"
-    
+
 |
 
 .. _Numeric Operator Contexts:
@@ -268,16 +267,15 @@ Numeric Operator Contexts
 .. meta:
     frontend_status: Partly
 
-*Numeric contexts* apply to the operands of an arithmetic operator.
-*Numeric contexts* use combinations of predefined numeric types conversions
+Numeric contexts apply to the operands of an arithmetic operator.
+Numeric contexts use combinations of predefined numeric types conversions
 (see :ref:`Primitive Types Conversions`), and ensure that each argument
 expression can be converted to target type *T* while the arithmetic
 operation for the values of type *T* is being defined.
 
-An operand of an enumeration type (see :ref:`Enumerations`) 
-can be used in the *numeric context* 
-if values of this enumeration are of type *int*.
-The type of this operand is assumed to be *int*.
+An operand of an enumeration type (see :ref:`Enumerations`) can be used in
+the numeric context if values of this enumeration are of type ``int``.
+The type of this operand is assumed to be ``int``.
 
 
 .. index::
@@ -355,7 +353,7 @@ and rely on the application of *casting conversions*.
 *Casting conversion* is the conversion of an operand in a cast expression to
 an explicitly specified *target type* by using one of the following:
 
-- identity conversion, if the *target type* is the same as the expression type;
+- Identity conversion, if the *target type* is the same as the expression type;
 - :ref:`Implicit Conversions`;
 - :ref:`Numeric Casting Conversions`;
 - :ref:`Narrowing Reference Casting Conversions`;
@@ -369,7 +367,7 @@ Numeric Casting Conversions
 ===========================
 
 A *numeric casting conversion* occurs if the *target type* and the expression
-type are both *numeric* or *char*:
+type are both ``numeric`` or ``char``:
 
 .. code-block:: typescript
    :linenos:
@@ -381,10 +379,10 @@ type are both *numeric* or *char*:
 
 These conversions never cause runtime errors.
 
-Numeric casting conversion of an operand of type *double* to target type
-*float* is performed in compliance with the IEEE 754 rounding rules.
+Numeric casting conversion of an operand of type ``double`` to target type
+``float`` is performed in compliance with the IEEE 754 rounding rules.
 
-A double NaN is converted to a float NaN.
+A double ``NaN`` is converted to a float ``NaN``.
 
 A double infinity is converted to the same-signed floating-point infinity.
 This conversion can lose precision or range, resulting in the following:
@@ -392,16 +390,16 @@ This conversion can lose precision or range, resulting in the following:
 -  Float zero from a nonzero double; and
 -  Float infinity from a finite double.
 
-A numeric casting conversion of a *floating-point* type operand to types
-*short*, *byte*, or *char* is performed in the following two steps:
+A numeric casting conversion of a floating-point type operand to types
+``short``, ``byte``, or ``char`` is performed in the following two steps:
 
-- First, the casting conversion to *int* is done;
-- Then, the *int* operand is casted to the target type.
+- First, the casting conversion to ``int`` is done;
+- Then, the ``int`` operand is casted to the target type.
 
-A numeric casting conversion of a *floating-point* type operand to
-target types *long* or *int* is performed by the following rules:
+A numeric casting conversion of a floating-point type operand to
+target types ``long`` or ``int`` is performed by the following rules:
 
-- If the operand is *NaN*, then the result is 0 (zero).
+- If the operand is ``NaN``, then the result is 0 (zero).
 - If the operand is positive infinity, or if the operand is too large for the
   target type, then the result is the largest representable value of the target
   type.
@@ -409,7 +407,7 @@ target types *long* or *int* is performed by the following rules:
   the target type, then the result is the smallest representable value of
   the target type.
 - Otherwise, the result is the value that rounds toward zero by using IEEE 754
-  '*round-toward-zero*' mode.
+  *round-toward-zero* mode.
 
 .. index::
    IEEE 754
@@ -448,6 +446,9 @@ supertype (superclass or superinterface) to a subclass or subinterface:
     let b: Base = new Derived()
     let d: Derived = b as Derived
 
+Compile-time errors for this conversion are the same as in
+:ref:`InstanceOf Expression`.
+
 A runtime error occurs (**TBD: name it**) during these conversion if the
 type of a converted expression cannot be converted to the *target type*:
 
@@ -471,11 +472,14 @@ Casting Conversions from Union
 A *casting conversion from union* converts an expression of union type to one
 of the types of the union, or to a type that is derived from such one type.
 
-For union type *U* = *T*:sub:`1` | ... | *T*:sub:`N`, the *casting conversion
-from union* converts an expression of type *U* to some type *TT* (*target type*).
+For union type ``U = T``:sub:`1` ``| ... | T``:sub:`N`, the *casting conversion
+from union* converts an expression of type ``U`` to some type ``TT`` (*target type*).
 
-A compile-time error occurs if the target type *TT* is not one of *T*:sub:`i`,
-and not derived from one of *T*:sub:`i`.
+.. 
+   line 472 initially was *U* = *T*:sub:`1` | ... | *T*:sub:`N`
+
+A compile-time error occurs if the target type ``TT`` is not one of ``T``:sub:`i`,
+and not derived from one of ``T``:sub:`i`.
 
 .. code-block:: typescript
    :linenos:
@@ -499,8 +503,8 @@ and not derived from one of *T*:sub:`i`.
     }
 
 
-These conversions can cause a runtime error (**TBD: name it**) if the
-runtime type of an expression is not the *target type*.
+These conversions can cause a runtime error (**TBD: name it**) if the runtime
+type of an expression is not the *target type*.
 
 |
 
@@ -557,44 +561,40 @@ Widening Primitive Conversions
 .. meta:
     frontend_status: Partly
 
-*Widening primitive conversions* converts the following:
+*Widening primitive conversions* convert the following:
 
 - Values of a smaller numeric type to a larger type (see
   :ref:`Numeric Types Hierarchy`);
 
-- Values of type *byte* to type *char* (see :ref:`Character Type and Operations`);
+- Values of type ``byte`` to type ``char`` (see :ref:`Character Type and Operations`);
 
-- Values of type *char* to types  *int*, *long*, *float*, and *double*;
+- Values of type ``char`` to types ``int``, ``long``, ``float``, and ``double``;
 
-- Values of an *enumeration* type to types  *int*, *long*, *float*, and
-  *double* (if enumeration constants of this type are of type *int*).
+- Values of an *enumeration* type to types ``int``, ``long``, ``float``, and
+  ``double`` (if enumeration constants of this type are of type ``int``).
 
-+------------------+------------------------------+
-| From             | To                           |
-+==================+==============================+
-| *byte*           | *short*, *int*, *long*,      |
-|                  | *float*, *double*, or *char* |
-+------------------+------------------------------+
-| *short*          | *int*, *long*, *float*, or   |
-|                  | *double*                     |
-+------------------+------------------------------+
-| *int*            | *long*, *float*, or *double* |
-+------------------+------------------------------+
-| *long*           | *float* or *double*          |
-+------------------+------------------------------+
-| *float*          | *double*                     |
-+------------------+------------------------------+
-| *char*           | *int*, *long*, *float*,      |
-|                  | or *double*                  |
-+------------------+------------------------------+
-| *enumeration*    | *int*, *long*, *float*,      |
-|                  | or *double*                  |
-+------------------+------------------------------+
++------------------+------------------------------------------------------------------+
+| From             | To                                                               |
++==================+==================================================================+
+| ``byte``         | ``short``, ``int``, ``long``, ``float``, ``double``, or ``char`` |
++------------------+------------------------------------------------------------------+
+| ``short``        | ``int``, ``long``, ``float``, or ``double``                      |
++------------------+------------------------------------------------------------------+
+| ``int``          | ``long``, ``float``, or ``double``                               |
++------------------+------------------------------------------------------------------+
+| ``long``         | ``float`` or ``double``                                          |
++------------------+------------------------------------------------------------------+
+| ``float``        | ``double``                                                       |
++------------------+------------------------------------------------------------------+
+| ``char``         | ``int``, ``long``, ``float``, or ``double``                      |
++------------------+------------------------------------------------------------------+
+| ``enumeration``  | ``int``, ``long``, ``float``, or ``double``                      |
++------------------+------------------------------------------------------------------+
 
 These conversions cause no loss of information about the overall magnitude of
 a numeric value. Some least significant bits of the value can be lost only in
-conversions from *integer* type to *floating-point* type if the IEEE 754
-'*round-to-nearest*' mode is used correctly. The resultant floating-point value
+conversions from an integer type to a floating-point type if the IEEE 754
+*round-to-nearest* mode is used correctly. The resultant floating-point value
 is properly rounded to the integer value.
 
 *Widening primitive conversions* never cause runtime errors.
@@ -618,8 +618,8 @@ is properly rounded to the integer value.
 Constant Narrowing Integer Conversions
 ======================================
 
-*Constant narrowing integer conversion* converts an expression of an *integer*
-type or of type *char* to a value of a smaller *integer* type provided that:
+*Constant narrowing integer conversion* converts an expression of integer
+types or of type ``char`` to a value of a smaller integer type provided that:
 
 - The expression is a constant expression (see :ref:`Constant Expressions`);
 - The value of the expression fits into the range of the smaller type.
@@ -648,11 +648,11 @@ Boxing Conversions
 corresponding reference type.
 
 If the unboxed *target type* is larger than the expression type, then a
-*widening primitive conversion* is performed as the first step
-of a *boxing conversion* of numeric types and type *char*.
+*widening primitive conversion* is performed as the first step of a *boxing
+conversion* of numeric types and type ``char``.
 
-For example, a *boxing conversion* converts *i* of primitive value type *int*
-into a reference *n* of class type *Number*:
+For example, a *boxing conversion* converts *i* of primitive value type ``int``
+into a reference *n* of class type ``Number``:
 
 .. code-block:: typescript
    :linenos:
@@ -663,7 +663,7 @@ into a reference *n* of class type *Number*:
     let c: char = 'a'
     let l: Long = c // char -> long  -> Long
 
-These conversions can cause *OutOfMemoryError* thrown if the storage
+These conversions can cause ``OutOfMemoryError`` thrown if the storage
 available for the creation of a new instance of the reference type is
 not sufficient.
 
@@ -687,10 +687,10 @@ a corresponding primitive type.
 
 If the *target type* is larger than the unboxed expression type, then a
 *widening primitive conversion* is performed as the second step of
-the *unboxing conversion* of numeric types and type *char*.
+the *unboxing conversion* of numeric types and type ``char``.
 
-For example, the *unboxing conversion* converts *i* of reference type *Int*
-into type  *long*:
+For example, the *unboxing conversion* converts *i* of reference type ``Int``
+into type ``long``:
 
 .. code-block:: typescript
    :linenos:
@@ -714,7 +714,7 @@ Widening Union Conversions
 
 .. meta:
     frontend_status: None
-    
+
 There are three options of *widening union conversions*:
 
 - Conversion from a union type to a wider union type;
@@ -724,15 +724,18 @@ There are three options of *widening union conversions*:
 
 These conversions never cause runtime errors.
 
-Union type *U* (*U*:sub:`1` | ... | *U*:sub:`n`) can be converted into a
-different union type *V* (*V*:sub:`1` | ... | *V*:sub:`m`) if the following
+Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted into a
+different union type ``V`` (``V``:sub:`1` ``| ... | V``:sub:`m`) if the following
 is true after normalization (see :ref:`Union Types Normalization`):
 
-  - For every type *U*:sub:`i` (*i* in 1..n-normalized) there is at least one
-    type *V*:sub:`j` (*i* in 1..m-normalized), when *U*:sub:`i` is compatible
-    with *V*:sub:`j` (see :ref:`Type Compatibility`).
-  - For every value *U*:sub:`i` there is a value *V*:sub:`j`, when
-    *U*:sub:`i` == *V*:sub:`j`.
+..
+   lines 724 764  initially was *U*:sub:`1` | ... | *U*:sub:`n` line  725 initially was *V*:sub:`1` | ... | *V*:sub:`m`
+
+  - For every type ``U``:sub:`i` (*i* in 1..n-normalized) there is at least one
+    type ``V``:sub:`j` (*i* in 1..m-normalized), when ``U``:sub:`i` is compatible
+    with ``V``:sub:`j` (see :ref:`Type Compatibility`).
+  - For every value ``U``:sub:`i` there is a value ``V``:sub:`j`, when
+    ``U``:sub:`i` == ``V``:sub:`j`.
 
 **Note**: If union type normalization issues a single type or value, then
 this type or value is used instead of the initial set of union types or values.
@@ -761,8 +764,8 @@ This concept is illustrated by the example below:
     u5 = u4 // compile-time error as Base is not compatible with both
        // Derived1 and Derived2
 
-Non-union type *T* can be converted to union type *U* = *U*:sub:`1` | ... | *U*:sub:`n`
-if *T* is compatible with one of *U*:sub:`i` types.
+Non-union type ``T`` can be converted to union type ``U`` = ``U``:sub:`1` ``| ... | U``:sub:`n`
+if ``T`` is compatible with one of ``U``:sub:`i` types.
 
 .. code-block:: typescript
    :linenos:
@@ -771,9 +774,9 @@ if *T* is compatible with one of *U*:sub:`i` types.
     u = "aa" // ok
     u = true // compile-time error
 
-Union type *U* (*U*:sub:`1` | ... | *U*:sub:`n`) can be converted into
-non-union type *T* if each *U*:sub:`i` is a literal that can be implicitly
-converted to type *T*.
+Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted into
+non-union type ``T`` if each ``U``:sub:`i` is a literal that can be implicitly
+converted to type ``T``.
 
 .. code-block:: typescript
    :linenos:
@@ -853,7 +856,7 @@ with the widening style of the type of array elements as shown below:
       let ba: Base[] = da /* Derived[] is assigned into Base[] */
     }
 
-This array assignment can cause *ArrayStoreError* at runtime if an object
+This array assignment can cause ``ArrayStoreError`` at runtime if an object
 of incorrect type is included in the array. The runtime system performs
 runtime checks to ensure type-safety as show below:
 
@@ -865,8 +868,8 @@ runtime checks to ensure type-safety as show below:
     class AnotherDerived extends Base {}
     function foo (da: Derived[]) {
       let ba: Base[] = da // Derived[] is assigned into Base[]
-      ba[0] = new AnotherDerived() // This assignment of array
-          element will cause  *ArrayStoreError*
+      ba[0] = new AnotherDerived() /* This assignment of array
+          element will cause  *ArrayStoreError* */
     }
 
 
@@ -883,9 +886,9 @@ runtime checks to ensure type-safety as show below:
 Character to String Conversions
 ===============================
 
-*Character to string conversion* converts a value of type *char* to type
-*string*. The resultant new string has the length equal to 1. The converted
-*char* is the single element of the new string:
+*Character to string conversion* converts a value of type ``char`` to type
+``string``. The resultant new string has the length equal to 1. The converted
+``char`` is the single element of the new string:
 
 .. code-block:: typescript
    :linenos:
@@ -893,7 +896,7 @@ Character to String Conversions
     let c: char = c'X' 
     let s: string = c // s contains "X"
 
-This conversion can cause *OutOfMemoryError* thrown if the storage available
+This conversion can cause ``OutOfMemoryError`` thrown if the storage available
 for the creation of a new string is not sufficient.
 
 |
@@ -904,10 +907,11 @@ Constant String to Character Conversions
 ========================================
 
 *Constant string to character conversion* converts an expression of type
-*string* to *char* type. The initial *string* type expression must be a constant
-expression (see :ref:`Constant Expressions`) with a length equal to 1.
+``string`` to type ``char``. The initial type ``string`` expression must be a
+constant expression (see :ref:`Constant Expressions`) with a length equal to 1.
 
-The resultant *char* is the first character of the converted *string*.
+The resultant ``char`` is the first and only character of the converted
+``string``.
 
 This conversion never causes runtime errors.
 
@@ -924,8 +928,8 @@ Function Types Conversions
 *Function types conversion* is the conversion of one function type to another.
 A *function types conversion* is valid if the following conditions are met:
 
-- Parameter types are converted by using contravariance.
-- Return types are converted by using covariance.
+- Parameter types are converted by using *contravariance* :ref:`Contravariance`.
+- Return types are converted by using *covariance* :ref:`Covariance`.
 
 See :ref:`Type Compatibility` for details.
 
@@ -986,6 +990,28 @@ A compile-time error occurs if a *throwing function* value is assigned to a
 
 |
 
+.. _Tuple Types Conversions:
+
+Tuple Types Conversions
+=======================
+
+.. meta:
+    frontend_status: None
+
+*Tuple types conversion* is the conversion of one tuple type to another.
+
+Tuple type ``T`` = [``T``:sub:`1`, ``T``:sub:`2`, ``...``, ``T``:sub:`n`] can be
+converted into tuple type ``U`` = [``U``:sub:`1`, ``U``:sub:`2`, ``...``, ``U``:sub:`m`]
+if the following conditions are met:
+
+- Tuple types have the same number of elements, thus n == m.
+- Every *T*:sub:`i` is identical to *U*:sub:`1` for any *i* in ``1 .. n``.
+
+.. - Every *T*:sub:`i` is compatible (see :ref:`Type Compatibility`) to *U*:sub:`i` for i in 1 .. n.
+
+
+|
+
 .. _Enumeration to Int Conversions:
 
 Enumeration to Int Conversions
@@ -994,8 +1020,8 @@ Enumeration to Int Conversions
 .. meta:
     frontend_status: None
 
-A value of an *enumeration* type is converted to type *int*
-if enumeration constants of this type are of type *int*.
+A value of an *enumeration* type is converted to type ``int``
+if enumeration constants of this type are of type ``int``.
 
 This conversion never causes runtime errors.
 
@@ -1016,8 +1042,8 @@ Enumeration to String Conversions
 .. meta:
     frontend_status: None
 
-A value of *enumeration* type is converted to type *string*
-if enumeration constants of this type are of type *string*.
+A value of ``enumeration`` type is converted to type ``string`` if enumeration
+constants of this type are of type ``string``.
 
 This conversion never causes runtime errors.
 

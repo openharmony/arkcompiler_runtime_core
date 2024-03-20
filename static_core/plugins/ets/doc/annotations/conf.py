@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
@@ -28,7 +27,7 @@ import sphinx_common_conf
 
 # -- Project information -----------------------------------------------------
 
-project = u'{p} Tutorial'.format(p=sphinx_common_conf.project)
+project = u'{p} Annotations'.format(p=sphinx_common_conf.project)
 author = sphinx_common_conf.author
 copyright = sphinx_common_conf.copyright
 version = sphinx_common_conf.version

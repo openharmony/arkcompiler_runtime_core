@@ -10,39 +10,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+==================
+|LANG| Annotations
+==================
 
-.. _Contributors:
+.. toctree::
+   :numbered:
+   :maxdepth: 2
 
-Contributors
-############
-
-  Nedoria Aleksei
-
-  Bronnikov Georgy
-  
-  Gavrin Evgeny
-
-  Kanatov Alexey
-
-  Pavlyuk Alexander
-
-  Polyakov Alexander
-  
-  Rubanov Vladimir
-
-  Soldatov Anton
-
-  Solomennikov Dmitry
-
-  Trubenkov Dmitrii
-
-  Velikanov Michael
-
-  Zouev Evgeniy
-
-
-.. raw:: pdf
-
-   PageBreak
-
-
+   /intro
+   /annotations
+   /decorators

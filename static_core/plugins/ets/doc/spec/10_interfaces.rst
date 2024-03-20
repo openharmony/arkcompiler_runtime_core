@@ -40,7 +40,7 @@ type that:
    class
    interface
 
-Interfaces cannot be instantiated directly.
+Creating an instance of interface type is not possible.
 
 Interfaces can be *top-level* and local (see :ref:`Local Classes And Interfaces`).
 
@@ -75,7 +75,7 @@ interface. The class or one of its superclasses must be actually
 declared to implement the interface. Otherwise such class is not
 considered to implement the interface.
 
-Interfaces without *interfaceExtendsClause* have class *Object* as their
+Interfaces without ``interfaceExtendsClause`` have class ``Object`` as their
 supertype (see :ref:`Object Class Type`). It enables assignments on the basis
 of reference types conversions (see :ref:`Widening Reference Conversions`).
 
@@ -124,7 +124,7 @@ An *interface declaration* specifies a new named reference type:
 
 The *identifier* in an interface declaration specifies the interface name.
 
-An interface declaration with *typeParameters* introduces a new generic
+An interface declaration with ``typeParameters`` introduces a new generic
 interface in :ref:`Generic Declarations`.
 
 The scope of an interface declaration is defined in :ref:`Scopes`.
@@ -151,12 +151,11 @@ Superinterfaces and Subinterfaces
 .. meta:
     frontend_status: Done
 
-An interface declared with an *extends* clause extends all other named
+An interface declared with an ``extends`` clause extends all other named
 interfaces, and thus inherits all their members. Such other named interfaces
-are *direct superinterfaces* of a declared interface.
-
-A class that *implements* the declared interface also implements all the
-interfaces that the interface *extends*.
+are *direct superinterfaces* of a declared interface. A class that *implements*
+the declared interface also implements all the interfaces that the interface
+*extends*.
 
 .. index::
    superinterface
@@ -170,18 +169,18 @@ interfaces that the interface *extends*.
 
 A compile-time error occurs if:
 
--  *typeReference* in the *extends* clause of an interface declaration
+-  ``typeReference`` in the ``extends`` clause of an interface declaration
    names an interface type that is not accessible (see :ref:`Scopes`).
--  Type arguments of *typeReference* denote a parameterized type that
+-  Type arguments of ``typeReference`` denote a parameterized type that
    is not well-formed (see :ref:`Generic Instantiations`).
--  There is a cycle in *extends* graph.
--  At least one of *typeReference*'s is an alias of one of primitive or
+-  There is a cycle in ``extends`` graph.
+-  At least one ``typeReference`` is an alias of one of primitive or
    enum types.
 -  Any type argument is a wildcard type.
 
 
-Each *typeReference* in the *extends* clause of an interface declaration must
-name an accessible interface type (see :ref:`Scopes`). Otherwise, a
+Each ``typeReference`` in the ``extends`` clause of an interface declaration
+must name an accessible interface type (see :ref:`Scopes`). Otherwise, a
 compile-time error occurs.
 
 .. index::
@@ -199,22 +198,22 @@ compile-time error occurs.
    extends clause
    interface type
 
-If an interface declaration (possibly generic) *I* <*F*:sub:`1`,...,
-*F*:sub:`n`> (:math:`n\geq{}0`) contains an *extends* clause, then the
-*direct superinterfaces* of the interface type *I* <*F*:sub:`1`,...,
-*F*:sub:`n`> are the types given in the *extends* clause of the declaration
+If an interface declaration (possibly generic) ``I`` <``F``:sub:`1` ``,...,
+F``:sub:`n`> (:math:`n\geq{}0`) contains an ``extends`` clause, then the
+*direct superinterfaces* of the interface type ``I`` <``F``:sub:`1` ``,...,
+F``:sub:`n`> are the types given in the ``extends`` clause of the declaration
 of *I*.
 
-The *direct superinterfaces* of the parameterized interface type *I*
-<*T*:sub:`1`,..., *T*:sub:`n`> are all types *J*
-<*U*:sub:`1`:math:`\theta{}`,..., *U*:sub:`k`:math:`\theta{}`>, if:
+The *direct superinterfaces* of the parameterized interface type ``I``
+<``T``:sub:`1` ``,..., T``:sub:`n`> are all types ``J``
+<``U``:sub:`1`:math:`\theta{}` ``,..., U``:sub:`k`:math:`\theta{}`>, if:
 
--  *T*:sub:`i` (:math:`1\leq{}i\leq{}n`) is the type of a generic interface
-   declaration *I* <*F*:sub:`1`,..., *F*:sub:`n`> (:math:`n > 0`);
--  *J* <*U*:sub:`1`,..., *U*:sub:`k`> is a direct superinterface of
-   *I* <*F*:sub:`1`,..., *F*:sub:`n`>; and
+-  ``T``:sub:`i` (:math:`1\leq{}i\leq{}n`) is the type of a generic interface
+   declaration ``I`` <``F``:sub:`1` ``,..., F``:sub:`n`> (:math:`n > 0`);
+-  ``J`` <``U``:sub:`1` ``,..., U``:sub:`k`> is a direct superinterface of
+   ``I`` <``F``:sub:`1` ``,..., F``:sub:`n`>; and
 -  :math:`\theta{}` is the substitution
-   [*F*:sub:`1` := *T*:sub:`1`,..., *F*:sub:`n` := *T*:sub:`n`].
+   [``F``:sub:`1` ``:= T``:sub:`1` ``,..., F``:sub:`n` ``:= T``:sub:`n`].
 
 .. index::
    interface declaration
@@ -246,9 +245,9 @@ The interface *K* is a superinterface of the interface *I* if:
    subinterface
 
 There is no single interface to which all interfaces are extensions (unlike
-class *Object* to which every class is an extension).
+class ``Object`` to which every class is an extension).
 
-If the *extends* clause of *I* mentions *T* as a superinterface, or as a
+If the ``extends`` clause of *I* mentions *T* as a superinterface, or as a
 qualifier in the fully qualified form of a superinterface name, then the
 interface *I* *directly depends* on type *T*.
 
@@ -263,7 +262,7 @@ Moreover, the interface *I* *depends* on a reference type *T* if:
 
 A compile-time error occurs if an interface depends on itself.
 
-*ClassCircularityError* is thrown if circularly declared interfaces
+``ClassCircularityError`` is thrown if circularly declared interfaces
 are detected as interfaces and loaded at runtime.
 
 .. index::
@@ -325,24 +324,24 @@ An interface without a direct superinterface implicitly declares the following:
 
    -  Abstract-member method *m* (see :ref:`Interface Method Declarations`)
       with signature *s*;
-   -  Return type *r* and '``throws``' clause *t* that correspond to each *public*
-      instance method *m* with signature *s*;
-   -  Return type *r* and '``throws``' clause *t* declared in *Object* (see
+   -  Return type *r* and ``throws`` clause *t* that correspond to each
+      ``public`` instance method *m* with signature *s*;
+   -  Return type *r* and ``throws`` clause *t* declared in ``Object`` (see
       :ref:`Object Class Type`);
 
 
 ---if the interface does not explicitly declare an abstract method (see
 :ref:`Interface Method Declarations`) with the same signature and return
-type, and a compatible '``throws``' clause.
+type, and a compatible ``throws`` clause.
 
 
 A compile-time error occurs if the interface explicitly declares:
 
-   -  Method *m* that *Object* declares as *final*.
+   -  Method *m* that ``Object`` declares as ``final``.
    -  A method with a signature that is override-equivalent (see
-      :ref:`Signatures`) to the *Object*’s *public* method, but is not
+      :ref:`Signatures`) to the ``Object``’s ``public`` method, but is not
       *abstract*, and has a different return type or an incompatible
-      '``throws``' clause.
+      ``throws`` clause.
 
 .. index::
    interface member
@@ -408,11 +407,11 @@ An interface property can be defined in the form of a field or an accessor
 If a property is defined in the form of a field, then it implicitly defines
 the following:
 
--  A getter, if a field is marked as *readonly*;
+-  A getter, if a field is marked as ``readonly``;
 -  Otherwise, both a getter and a setter with the same name.
 
-If *'?'* is used after the name of the property, then its actual type is
-*type* | *undefined*.
+If '``?``' is used after the name of the property, then its actual type is
+``type | undefined``.
 
 
 .. index::
@@ -460,7 +459,7 @@ An ordinary interface method declaration that specifies the method's name and
 signature is called *abstract*.
 
 As experimental features, an interface method can have a body (see
-:ref:`Default Method Declarations`) and be *static* (see :ref:`Static Method Declarations`).
+:ref:`Default Method Declarations`) and be ``static`` (see :ref:`Static Method Declarations`).
 
 .. index::
    interface method declaration
@@ -478,7 +477,7 @@ As experimental features, an interface method can have a body (see
         | interfaceStaticMethodDeclaration
         ;
 
-The methods declared within interface bodies are implicitly *public*.
+The methods declared within interface bodies are implicitly ``public``.
 
 A compile-time error occurs if the body of an interface declares:
 
@@ -568,7 +567,6 @@ signature.
    compile-time error
    call
    overload signature
-   optional parameter
    overload signature compatibility
 
 |
@@ -604,13 +602,13 @@ direct superinterfaces if **all** of the following is true:
    overriding
    method declaration
 
-An interface does not inherit *private* or *static* methods from its
+An interface does not inherit ``private`` or ``static`` methods from its
 superinterfaces.
 
 A compile-time error occurs if:
 
--  The interface *I* declares a *private* or *static* method *m*;
--  The signature of *m* is compatible with the *public* instance method
+-  The interface *I* declares a ``private`` or ``static`` method *m*;
+-  The signature of *m* is compatible with the ``public`` instance method
    :math:`m'` in a superinterface of *I* (see :ref:`Compatible Signature`); and
 -  :math:`m'` is otherwise accessible to code in *I*.
 
@@ -644,7 +642,7 @@ if **all** of the following is true:
 -  *I* does not inherit *m*:sub:`J`;
 -  The signature of *m*:sub:`I` is compatible with (see
    :ref:`Compatible Signature`) the signature of *m*:sub:`J`; and
--  *m*:sub:`J` is *public*.
+-  *m*:sub:`J` is ``public``.
 
 .. index::
    overriding
@@ -671,7 +669,7 @@ The following kinds of relationships are described in :ref:`Requirements in Over
 
 -  The relationship between the return type of an interface and that of any
    overridden interface method.
--  The relationship between the '``throws``' clause of an interface method and
+-  The relationship between the ``throws`` clause of an interface method and
    that of any overridden interface method.
 -  The relationship between the signatures of an interface method and that
    of any overridden interface method.
@@ -679,7 +677,7 @@ The following kinds of relationships are described in :ref:`Requirements in Over
    of any overridden interface method.
 
 A compile-time error occurs if a default method is override-equivalent to a
-non-*private* method of the class *Object*. Any class that implements
+non-``private`` method of the class ``Object``. Any class that implements
 interface must inherit the method's own implementation.
 
 .. index::
@@ -713,7 +711,7 @@ inherited by *I*.
 However, the interface *I* inherits all methods that are abstract.
 
 A compile-time error occurs if one of the inherited methods for every other
-inherited method is not return-type-substitutable. A '``throws``' clause causes
+inherited method is not return-type-substitutable. A ``throws`` clause causes
 no error in such cases.
 
 The same method declaration can use multiple paths of inheritance from an
