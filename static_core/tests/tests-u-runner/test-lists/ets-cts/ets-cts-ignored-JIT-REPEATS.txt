@@ -1,0 +1,4 @@
+# panda#15976
+02.lexical_elements/09.literals/05.string_literals/codepoints.ets
+# panda#15887
+06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_8.ets
