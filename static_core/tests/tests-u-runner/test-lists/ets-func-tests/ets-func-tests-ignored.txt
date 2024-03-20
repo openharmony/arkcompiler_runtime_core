@@ -21,6 +21,11 @@ std/core/std_core_typeduarrays__Uint8Array.ets
 std/core/std_core_typeduarrays__Uint16Array.ets
 std/core/std_core_typeduarrays__Uint32Array.ets
 ### Issue I8PRJS end
+### Issue I98LJ0 begin
+std/core/std_core_typeduarrays_function1__Uint8Array.ets
+std/core/std_core_typeduarrays_function1__Uint16Array.ets
+std/core/std_core_typeduarrays_function1__Uint32Array.ets
+### Issue I98LJ0 end
 # #14724
 std/core/std_core_typedarrays__BigInt64Array.ets
 ### Issue 11474 ###
