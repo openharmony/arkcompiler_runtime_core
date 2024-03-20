@@ -1168,7 +1168,7 @@ Type ``void``
 =============
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Type ``void`` has no instances (no values). It is typically used as the
 return type if a function or a method returns no value:
@@ -1530,6 +1530,7 @@ Union Types
 .. meta:
    frontend_status: Partly
    todo: support literal in union
+   todo: implement using common fields and methods, fix related issues
 
 .. code-block:: abnf
 
@@ -1666,6 +1667,10 @@ type:
 Union Types Normalization
 -------------------------
 
+.. meta:
+   frontend_status: Partly
+   todo: depends on literal types, maybe issues can occure for now
+
 Union types normalization allows minimizing the number of types and literals
 within a union type, while keeping the type's safety. Some types or literals
 can also be replaced for more general types.
@@ -1776,6 +1781,9 @@ and handling the type inference for array literals (see
 
 ``Keyof`` Types
 ---------------
+
+.. meta:
+   frontend_status: None
 
 A special form of union types are ``keyof`` types built by using the keyword
 ``keyof``. The keyword ``keyof`` is applied to the class or interface type (see

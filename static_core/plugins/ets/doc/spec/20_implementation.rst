@@ -16,7 +16,8 @@ Implementation Details
 ######################
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
+    todo: Implement Type.for in stdlib
 
 Important implementation details are discussed in this section.
 
@@ -24,6 +25,9 @@ Important implementation details are discussed in this section.
 
 Import Path Lookup
 ******************
+
+.. meta:
+    frontend_status: Done
 
 If an import path ``<some path>/name`` is resolved to a path in the folder
 "name", then  the compiler executes the following lookup sequence:
@@ -42,6 +46,9 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 
 How to Get Type Via Reflection
 ******************************
+
+.. meta:
+    frontend_status: None
 
 The |LANG| standard library (see :ref:`Standard Library`) provides a pseudo
 generic static method ``Type.for<T>()`` to be processed by the compiler in a

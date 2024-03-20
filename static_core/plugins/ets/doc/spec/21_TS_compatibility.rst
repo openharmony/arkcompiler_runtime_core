@@ -28,6 +28,9 @@ between |LANG| and |TS|.
 Undefined is Not a Universal Value
 **********************************
 
+.. meta:
+    frontend_status: Done
+
 |LANG| raises a compile-time or a runtime error in many cases, in which
 |TS| uses ``undefined`` as runtime value.
 
@@ -46,6 +49,9 @@ Undefined is Not a Universal Value
 
 Numeric Semantics
 *****************
+
+.. meta:
+    frontend_status: Done
 
 |TS| has a single numeric type ``number`` that handles both integer and real
 numbers.
@@ -69,6 +75,9 @@ on the context and can produce different results:
 
 Covariant Overriding
 ********************
+
+.. meta:
+    frontend_status: Done
 
 The |TS| object runtime model enables |TS| to handle situations where a
 non-existing property is accessed from some object during program execution.
@@ -108,6 +117,9 @@ by compiler-generated compile-time errors:
 
 Differences in Math.pow
 ***********************
+
+.. meta:
+    frontend_status: Done
 
 The function ``Math.pow`` in |LANG| conforms to the latest IEEE 754-2019
 standard, and the following calls:

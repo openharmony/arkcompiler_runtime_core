@@ -858,6 +858,9 @@ of a value. The *null literal* is, by definition, the only value of type
 ``Undefined`` Literal
 =====================
 
+.. meta:
+    frontend_status: Done
+
 *Undefined literal* is the only literal to denote a reference with a value
 that is not defined. *Undefined literal* is the only value of type
 ``undefined`` (see :ref:`Type undefined`). It is represented by the keyword

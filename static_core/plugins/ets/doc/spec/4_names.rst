@@ -420,6 +420,9 @@ Type Alias Declaration
 
 .. meta:
     frontend_status: Partly
+    todo: implement recursive type alias feature
+    todo: type alias can be as local declaration now, but the spec says it can be only topDeclaration
+    todo: type alias name shouldn't be handled as variable name (eg: type foo = Double; let foo : int = 0 --> now error)
 
 Type aliases enable using meaningful and concise notations by providing the
 following:
@@ -932,7 +935,7 @@ Parameter List
 
 .. meta:
     frontend_status: Partly
-    todo: implement readonly parameters
+    todo: implement readonly parameters - #14468
 
 A signature contains a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
@@ -1316,6 +1319,7 @@ Function Overload Signatures
 
 .. meta:
     frontend_status: None
+    todo: implement TS overload signature #16181
 
 The |LANG| language allows specifying a function that can have several
 *overload signatures* with the same name followed by one implementation

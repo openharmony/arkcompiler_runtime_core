@@ -820,6 +820,7 @@ Object Literal
 
 .. meta:
     frontend_status: Partly
+    todo: implement object literal for interfaces - #13947
 
 An *object literal* is an expression that can be used to create a class
 instance, and to provide some initial values. In some cases it is more
@@ -1208,6 +1209,10 @@ initialized class instance if so do all name-value pairs.
 
 Spread Expression
 *****************
+
+.. meta:
+    frontend_status: None
+    todo: implement this new feature - #14107
 
 .. code-block:: abnf
 
@@ -1759,6 +1764,11 @@ and the following set of semantic checks must be performed:
 Function or Method Selection
 ============================
 
+.. meta:
+    frontend_status: Partly
+    todo: adapt the implementation to the latest specification (handle rest, union, functional types properly)
+    todo: make the ISA/assembler/runtime handle union types without collision - eg foo(arg: A|B) and foo(arg: C|D)
+
 Function or method selection is the process of choosing functions or methods
 that are applicable for a function or a method call. The choosing algorithm
 is described below:
@@ -1903,6 +1913,7 @@ Function Call Expression
 
 .. meta:
     frontend_status: Partly
+    todo: Adapt recent spec changes in "Function or Method Selection" section to the es2panda implementation
 
 A *function call expression* is used to call a function (see
 :ref:`Function Types`) or a lambda expression (see :ref:`Lambda Expressions`):
@@ -2031,6 +2042,7 @@ Indexing Expression
 
 .. meta:
     frontend_status: Partly
+    todo: finish array indexing expressions
 
 An indexing expression is used to access elements of arrays (see
 :ref:`Array Types`) and ``Record`` instances (see :ref:`Record Utility Type`).
@@ -2094,6 +2106,7 @@ Array Indexing Expression
 
 .. meta:
     frontend_status: Partly
+    todo: implement floating point index support - #14001
 
 For array indexing, the *index expression* must be of a numeric type.
 
@@ -2304,7 +2317,7 @@ Chaining Operator
 *****************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The *chaining operator* '``?.``' is used to effectively access values of
 nullish types. It can be used in the following contexts:
@@ -2514,7 +2527,7 @@ If the ``as`` cast cannot be performed during program execution, then
 *************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 .. code-block:: abnf
 
@@ -4224,6 +4237,7 @@ Equality Expressions
 
 .. meta:
     frontend_status: Partly
+    todo: adapt latest specification changes
 
 Equality expressions use *equality operators* '``==``', '``===``', '``!=``',
 and '``!==``':
@@ -4305,6 +4319,7 @@ Value Equality for Numeric Types
 
 .. meta:
     frontend_status: Partly
+    todo: adapt latest specification changes
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operands of a value equality operator if
@@ -4414,6 +4429,7 @@ Value Equality for Booleans
 
 .. meta:
     frontend_status: Partly
+    todo: adapt latest specification changes
 
 The operation is a *boolean equality* if each operand is of type ``boolean`` or
 ``Boolean``.
@@ -4451,6 +4467,7 @@ Value Equality for Characters
 
 .. meta:
     frontend_status: Partly
+    todo: adapt latest specification changes
 
 The operation is a *character equality* if each operand is of type ``char``
 or ``Char``.
@@ -4485,6 +4502,10 @@ of '``!=``' is ``false``. Otherwise, the result is ``true``.
 
 Equality with ``null`` or ``undefined``
 =======================================
+
+.. meta:
+    frontend_status: None
+    todo: adapt latest specification changes
 
 Any entity can be compared to ``null`` by using the operators ``==`` and ``!=``.
 This comparison can return ``true`` only for the entities of *nullable* types
@@ -4533,6 +4554,7 @@ Reference Equality
 
 .. meta:
     frontend_status: Partly
+    todo: adapt latest specification changes
 
 The reference equality compares two reference type operands.
 
@@ -4855,8 +4877,7 @@ Assignment
 **********
 
 .. meta:
-    frontend_status: Partly
-    todo: nullable field access
+    frontend_status: Done
 
 All *assignment operators* group right-to-left (i.e., :math:`a=b=c` means
 :math:`a=(b=c)`---and thus the value of *c* is assigned to *b*, and then
@@ -5752,6 +5773,9 @@ the implementation can require the addition of a local variable as follows:
 
 Dynamic Import Expression
 *************************
+
+.. meta:
+    frontend_status: None
 
 *Dynamic import expression* allows loading a compilation unit asynchronously
 and dynamically.

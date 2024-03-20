@@ -113,6 +113,7 @@ Assignment-like Contexts
 
 .. meta:
     frontend_status: Partly
+    todo: Need to adapt es2panda implementation after assignment and call contexts are unified
 
 *Assignment-like contexts* include the following:
 
@@ -265,7 +266,7 @@ Numeric Operator Contexts
 *************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Numeric contexts apply to the operands of an arithmetic operator.
 Numeric contexts use combinations of predefined numeric types conversions
@@ -420,6 +421,9 @@ target types ``long`` or ``int`` is performed by the following rules:
 Narrowing Reference Casting Conversions
 =======================================
 
+.. meta:
+    frontend_status: Done
+
 A *narrowing reference casting conversion* converts an expression of a
 supertype (superclass or superinterface) to a subclass or subinterface:
 
@@ -541,6 +545,9 @@ chosen for the expression).
 Primitive Types Conversions
 ===========================
 
+.. meta:
+    frontend_status: Done
+
 A *primitive type conversion* is one of the following:
 
 - :ref:`Widening Primitive Conversions`;
@@ -559,7 +566,7 @@ Widening Primitive Conversions
 ==============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 *Widening primitive conversions* convert the following:
 
@@ -618,6 +625,9 @@ is properly rounded to the integer value.
 Constant Narrowing Integer Conversions
 ======================================
 
+.. meta:
+    frontend_status: Done
+
 *Constant narrowing integer conversion* converts an expression of integer
 types or of type ``char`` to a value of a smaller integer type provided that:
 
@@ -642,7 +652,7 @@ Boxing Conversions
 ==================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 *Boxing conversions* handle primitive type expressions as expressions of a
 corresponding reference type.
@@ -680,7 +690,7 @@ Unboxing Conversions
 ====================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 *Unboxing conversions* handle reference type expressions as expressions of
 a corresponding primitive type.
@@ -713,7 +723,8 @@ Widening Union Conversions
 ==========================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
+    todo: adapt it after literal types are implemented
 
 There are three options of *widening union conversions*:
 
@@ -797,7 +808,7 @@ Widening Reference Conversions
 ==============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A *widening reference conversion* handles any subtype as a supertype.
 It requires no special action at runtime, and never causes an error.
@@ -886,6 +897,9 @@ runtime checks to ensure type-safety as show below:
 Character to String Conversions
 ===============================
 
+.. meta:
+    frontend_status: None
+
 *Character to string conversion* converts a value of type ``char`` to type
 ``string``. The resultant new string has the length equal to 1. The converted
 ``char`` is the single element of the new string:
@@ -906,6 +920,9 @@ for the creation of a new string is not sufficient.
 Constant String to Character Conversions
 ========================================
 
+.. meta:
+    frontend_status: None
+
 *Constant string to character conversion* converts an expression of type
 ``string`` to type ``char``. The initial type ``string`` expression must be a
 constant expression (see :ref:`Constant Expressions`) with a length equal to 1.
@@ -923,7 +940,7 @@ Function Types Conversions
 ==========================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 *Function types conversion* is the conversion of one function type to another.
 A *function types conversion* is valid if the following conditions are met:
@@ -996,7 +1013,7 @@ Tuple Types Conversions
 =======================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 *Tuple types conversion* is the conversion of one tuple type to another.
 

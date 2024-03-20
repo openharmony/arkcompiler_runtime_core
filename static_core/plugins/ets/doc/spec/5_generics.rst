@@ -376,7 +376,7 @@ Type Parameter Default
 **********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Type parameters of generic types can have defaults. This situation allows
 dropping a type argument when a particular type of instantiation is used.
@@ -427,6 +427,10 @@ The examples below illustrate this for both classes and functions:
 Type Arguments
 **************
 
+.. meta:
+    frontend_status: Partly
+    todo: implement "Type Argument Variance" fully
+
 Type arguments can be reference types or wildcards.
 
 If a value type is specified as a type argument in the generic instantiation,
@@ -474,6 +478,10 @@ function.
 
 Type Argument Variance
 ======================
+
+.. meta:
+    frontend_status: Partly
+    todo: implement semantic, now in/out is only parsed and ignored
 
 The variance for type arguments can be specified with wildcards (*use-site
 variance*). It allows changing type variance of an *invariant* type parameter.
@@ -699,7 +707,8 @@ Record Utility Type
 ===================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
+    todo: implement record indexing - #13845
 
 Type ``Record<K, V>`` constructs a container that maps keys (of type *K*)
 to values (of type *V*).

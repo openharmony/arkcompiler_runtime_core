@@ -255,6 +255,7 @@ Character Type and Operations
 
 .. meta:
     frontend_status: Partly
+    todo: need to adapt the implementation to the latest specification
 
 +-----------+----------------------------------+------------------------------+
 | **Type**  | **Type's Set of Values**         | **Corresponding Class Type** |
@@ -416,6 +417,7 @@ Runtime Evaluation of Array Creation Expressions
 
 .. meta:
     frontend_status: Partly
+    todo: initialize array elements properly - #14963, #15610
 
 The evaluation of an array creation expression at runtime is performed
 as follows:
@@ -462,7 +464,7 @@ Indexable Types
 ***************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 If a class or an interface declares one or two functions with names ``$_get``
 and ``$_set``, and signatures *(index: Type1): Type2* and *(index: Type1,
@@ -565,7 +567,9 @@ Iterable Types
 **************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
+    todo: Implement [Symbol.iterator]() alias for $_iterator()
+    todo: fix segfault on the example in the spec
 
 A class or an interface can be made *iterable*, meaning that their instances
 can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
@@ -1673,7 +1677,7 @@ Enumeration Super Type
 **********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: None
 
 Any ``enum`` type has class type ``Object`` as its supertype. This allows
 polymorphic assignments into ``Object`` type variables. The ``instanceof`` check
@@ -2121,6 +2125,7 @@ Coroutines
 
 .. meta:
     frontend_status: Partly
+    todo: rename valueOf(string) to getValueOf(string), implement valueOf()
 
 A function or lambda can be a *coroutine*. |LANG| supports *basic coroutines*,
 *structured coroutines*, and *communication channels*.
@@ -2274,7 +2279,7 @@ If the coroutine result must be ignored, then the expression statement
 ====================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The class ``Promise<T>`` represents the values returned by launch expressions.
 It belongs to the essential kernel packages of the standard library (see
@@ -2332,12 +2337,18 @@ The following methods are used as follows:
 Structured Coroutines
 =====================
 
+.. meta:
+    frontend_status: None
+
 |
 
 .. _Channels Classes:
 
 Channels Classes
 ================
+
+.. meta:
+    frontend_status: None
 
 *Channels* are used to send data between coroutines.
 
@@ -2357,7 +2368,7 @@ standard library (see :ref:`Standard Library`).
 ===================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The function ``async`` is an implicit coroutine that can be called as a
 regular function.
@@ -2393,6 +2404,7 @@ Packages
 
 .. meta:
     frontend_status: Partly
+    todo: Implement compiling a package module as a single compilation unit - #16267
 
 One or more *package modules* form a package:
 
@@ -2468,6 +2480,7 @@ Internal Access Modifier
 
 .. meta:
     frontend_status: Partly
+    todo: Implement in libpandafile, implement semantic, now it is parsed and ignored - #16088
 
 The modifier ``internal`` indicates that a class member, a constructor, or
 an interface member is accessible within its compilation unit only.
@@ -2511,6 +2524,9 @@ used within this module.
 Package Initializer
 ===================
 
+.. meta:
+    frontend_status: None
+
 Among all *package modules* there can be one to contain a code that performs
 initialization of global variables across all package modules. The appropriate
 syntax is presented below:
@@ -2549,6 +2565,9 @@ global variable).
 
 Sub-Entity Binding
 ==================
+
+.. meta:
+    frontend_status: None
 
 The import bindings ``qualifiedName`` (that consists of at least two
 identifiers) or ``qualifiedName as A`` bind a sub-entity to the declaration
@@ -2637,6 +2656,9 @@ simple names. This feature is to be used only for migration.
 
 All Static Sub-Entities Binding
 ===============================
+
+.. meta:
+    frontend_status: None
 
 The import binding ``qualifiedName.*`` binds all ``public static`` sub-entities
 of the entity denoted by the ``qualifiedName`` to the declaration scope of the
@@ -2827,6 +2849,10 @@ Generics Experimental
 Declaration-Site Variance
 =========================
 
+.. meta:
+    frontend_status: Partly
+    todo: Implement semantic checks, now in/out modifiers are only parsed ang ignored.
+
 Optionally, a type parameter can have keywords ``in`` or ``out`` (a
 *variance modifier*, which specifies the variance of the type parameter).
 
@@ -2888,6 +2914,9 @@ NonNullish Type Parameter
 
 .. meta:
     frontend_status: Partly
+
+.. meta:
+    frontend_status: None
 
 When some generic class has a type parameter with nullish union type constraint
 then a special syntax for the type annotation can be used to get a non-nullish

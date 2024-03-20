@@ -182,6 +182,7 @@ Enumeration Operations
 
 .. meta:
     frontend_status: Partly
+    todo: implement missing features and refactor with lowering - #14443, #14654, #16165
 
 The value of an enumeration constant can be converted to type ``string`` by
 using the method ``toString``:
