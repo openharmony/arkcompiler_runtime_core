@@ -254,10 +254,14 @@ extern "C" int StdMathImul(double val, double val2)
 
 extern "C" double StdMathFround(double val)
 {
-    if (std::isnan(std::abs(val))) {
+    if (std::isnan(val)) {
         return std::numeric_limits<float>::quiet_NaN();
     }
 
     return static_cast<float>(val);
+}
+extern "C" double StdMathHypot(double val1, double val2)
+{
+    return std::hypot(val1, val2);
 }
 }  // namespace ark::ets::intrinsics

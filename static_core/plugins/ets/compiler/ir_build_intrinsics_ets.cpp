@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,17 @@ void InstBuilder::BuildStdRuntimeEquals(const BytecodeInstruction *bcInst, bool 
                                       GetArgDefinition(bcInst, 2, accRead), DataType::REFERENCE, ConditionCode::CC_EQ);
     AddInstruction(cmp);
     UpdateDefinitionAcc(cmp);
+}
+
+void InstBuilder::BuildSignbitIntrinsic(const BytecodeInstruction *bcInst, bool accRead)
+{
+    auto bitcast = GetGraph()->CreateInstBitcast(DataType::INT64, GetPc(bcInst->GetAddress()),
+                                                 GetArgDefinition(bcInst, 0, accRead), DataType::FLOAT64);
+    constexpr auto SHIFT = 63;
+    auto res =
+        GetGraph()->CreateInstShr(DataType::INT64, GetPc(bcInst->GetAddress()), bitcast, FindOrCreateConstant(SHIFT));
+    AddInstruction(bitcast, res);
+    UpdateDefinitionAcc(res);
 }
 
 }  // namespace ark::compiler
