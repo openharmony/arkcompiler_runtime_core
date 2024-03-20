@@ -18,12 +18,12 @@ package escompat;
 /**
  * Either ArrayBuffer or SharedArrayBuffer
  */
-// TODO(kprokopenko): make abstract after abstract overloads get to work
+// NOTE (kprokopenko): make abstract after abstract overloads get to work
 /* abstract */ class Buffer {
     /* abstract */ getByteLength(): int { throw new Error("abstract"); }
     /* abstract */ at(i: int): byte { throw new Error("abstract"); }
     /* abstract */ set(i: int, b: byte) { throw new Error("abstract"); }
-    // TODO(egor-porsev): should be slice(int, int) without an extra 'sliceInternal' method. This is a workaround for #13402
+    // NOTE (egor-porsev): should be slice(int, int) without an extra 'sliceInternal' method. This is a workaround for #13402
     /* abstract */ sliceInternal(begin: int, end: int): Buffer { throw new Error("abstract"); }
 }
 
@@ -177,7 +177,7 @@ export class ArrayBuffer extends Buffer
      *
      * @param newLen new length
      */
-    //TODO: return undefined
+    //NOTE: return undefined
     public resize(newLen : int): void {
         let newData = new byte[newLen]
         let size = min(newLen, this.data.length)
@@ -195,7 +195,7 @@ export class ArrayBuffer extends Buffer
 }
 
 /**
- * Internal non-movable memory of a SharedArrayBuffer  
+ * Internal non-movable memory of a SharedArrayBuffer
  */
 class SharedMemory {
     private data: byte[]
@@ -218,13 +218,13 @@ class SharedMemory {
     }
 
     internal native atomicAddI8(index: int, value: byte): byte;
-    
+
     internal native atomicAndI8(index: int, value: byte): byte;
 
     internal native atomicCompareExchangeI8(index: int, expectedValue: byte, replacementValue: byte): byte;
 
     internal native atomicExchangeI8(index: int, value: byte): byte;
-    
+
     internal native atomicLoadI8(index: int): byte;
 
     internal native atomicOrI8(index: int, value: byte): byte;
@@ -350,3 +350,5 @@ export class SharedArrayBuffer extends Buffer {
         throw new Error("not implemented");
     }
 }
+
+export type ArrayBufferLike = ArrayBuffer | SharedArrayBuffer

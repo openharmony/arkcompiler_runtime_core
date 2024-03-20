@@ -2118,6 +2118,17 @@ intrinsics:
 # std.core.Runtime #
 ####################
 
+  - name: StdRuntimeGetPlatformIsLittleEndian
+    space: ets
+    class_name: escompat.ETSGLOBAL
+    method_name: RuntimeGetPlatformIsLittleEndian
+    static: true
+    signature:
+      ret: u1
+      args: [  ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeGetPlatformIsLittleEndian
+    clear_flags: [ ]
+
   - name: StdCoreRuntimeIsSameReference
     space: ets
     class_name: std.core.Runtime
