@@ -107,10 +107,10 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 11.0.2.0
+version: 12.0.0.0
 
 # 0 is default value, alaways reflects to the newest version
-api_version_map: [[0, 11.0.2.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0]]
+api_version_map: [[0, 12.0.0.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.0.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.
@@ -837,6 +837,16 @@ groups:
       - sig: callruntime.ldsendableclass imm
         acc: out:top
         opcode_idx: [0x08]
+        format: [pref_op_imm_16]
+        prefix: callruntime
+      - sig: callruntime.ldsendableexternalmodulevar imm
+        acc: out:top
+        opcode_idx: [0x09]
+        format: [pref_op_imm_8]
+        prefix: callruntime
+      - sig: callruntime.wideldsendableexternalmodulevar imm
+        acc: out:top
+        opcode_idx: [0x0a]
         format: [pref_op_imm_16]
         prefix: callruntime
 
