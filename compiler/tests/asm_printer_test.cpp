@@ -206,7 +206,7 @@ public:
         return curr_stream_;
     }
 
-    void SetTestName(std::string name)
+    void SetTestName(const std::string &name)
     {
         test_name_ = name;
     }

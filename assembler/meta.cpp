@@ -214,7 +214,8 @@ static Expected<ScalarValue, Metadata::Error> CreateValue(
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::AnnotationElementBuilder::AddValue(
-    std::string_view value, const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotation_id_map)
+    const std::string_view &value,
+    const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotation_id_map)
 {
     ASSERT(type_.has_value());
 
@@ -251,7 +252,7 @@ std::optional<Metadata::Error> AnnotationMetadata::Store(std::string_view attrib
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::MeetExpRecordAttribute(std::string_view attribute,
-                                                                          std::string_view value)
+                                                                          const std::string_view &value)
 {
     if (IsParseAnnotationElement() && !annotation_element_builder_.IsCompleted()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -265,7 +266,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpRecordAttribute(std::s
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::MeetExpIdAttribute(std::string_view attribute,
-                                                                      std::string_view value)
+                                                                      const std::string_view &value)
 {
     if (!IsParseAnnotation() || IsParseAnnotationElement()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -285,7 +286,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpIdAttribute(std::strin
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementNameAttribute(std::string_view attribute,
-                                                                               std::string_view value)
+                                                                               const std::string_view &value)
 {
     if (!IsParseAnnotation()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -304,8 +305,8 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementNameAttribute(s
     return {};
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementTypeAttribute(std::string_view attribute,
-                                                                               std::string_view value)
+std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementTypeAttribute(
+    std::string_view attribute, const std::string_view &value)
 {
     if (!IsParseAnnotationElement()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -324,8 +325,8 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementTypeAttribute(s
     return {};
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementArrayComponentTypeAttribute(std::string_view attribute,
-                                                                                             std::string_view value)
+std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementArrayComponentTypeAttribute(
+    std::string_view attribute, const std::string_view &value)
 {
     if (!IsParseAnnotationElement()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -350,7 +351,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementArrayComponentT
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementValueAttribute(std::string_view attribute,
-                                                                                std::string_view value)
+                                                                                const std::string_view &value)
 {
     if (!IsParseAnnotationElement()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +

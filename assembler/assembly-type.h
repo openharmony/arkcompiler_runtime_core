@@ -35,7 +35,7 @@ public:
     DEFAULT_COPY_SEMANTIC(Type);
     ~Type() = default;
 
-    Type(std::string_view component_name, size_t rank, bool ignore_primitive = false)
+    Type(const std::string_view &component_name, size_t rank, bool ignore_primitive = false)
         : component_name_(component_name), rank_(rank)
     {
         name_ = GetName(component_name_, rank_);
@@ -154,7 +154,7 @@ public:
         return type_id_ == panda_file::Type::TypeId::VOID;
     }
 
-    static panda_file::Type::TypeId GetId(std::string_view name, bool ignore_primitive = false);
+    static panda_file::Type::TypeId GetId(const std::string_view &name, bool ignore_primitive = false);
 
     bool operator==(const Type &type) const
     {

@@ -48,32 +48,33 @@ public:
     }
 
 protected:
-    bool IsAnnotationRecordAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationRecordAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationIdAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationIdAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementNameAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementNameAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementTypeAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementArrayComponentTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementArrayComponentTypeAttribute(
+        [[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementValueAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementValueAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
@@ -93,32 +94,33 @@ protected:
 
 class FieldMetadata : public pandasm::FieldMetadata {
 protected:
-    bool IsAnnotationRecordAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationRecordAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationIdAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationIdAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementNameAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementNameAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementTypeAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementArrayComponentTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementArrayComponentTypeAttribute(
+        [[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementValueAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementValueAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
@@ -138,32 +140,33 @@ protected:
 
 class FunctionMetadata : public pandasm::FunctionMetadata {
 protected:
-    bool IsAnnotationRecordAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationRecordAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationIdAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationIdAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementNameAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementNameAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementTypeAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementArrayComponentTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementArrayComponentTypeAttribute(
+        [[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementValueAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementValueAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
@@ -183,32 +186,33 @@ protected:
 
 class ParamMetadata : public pandasm::ParamMetadata {
 protected:
-    bool IsAnnotationRecordAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationRecordAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationIdAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationIdAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementNameAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementNameAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementTypeAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementArrayComponentTypeAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementArrayComponentTypeAttribute(
+        [[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
 
-    bool IsAnnotationElementValueAttribute([[maybe_unused]] std::string_view attribute) const override
+    bool IsAnnotationElementValueAttribute([[maybe_unused]] const std::string_view &attribute) const override
     {
         return false;
     }
