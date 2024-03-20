@@ -99,6 +99,8 @@ of this expression can not be evaluated in compile-time.
 An *user-defined annotation* must be defined at top-level,
 otherwise a compile-time error occurs.
 
+An *user-defined annotation* can not be extended (inheritance is not supported). 
+
 The name of an *user-defined annotation* can not coincide with a name of other entity.
 
 .. code-block:: typescript
@@ -109,13 +111,15 @@ The name of an *user-defined annotation* can not coincide with a name of other e
     class Position {/*body*/} // compile-time error: duplicate identifier
 
 An annotation declaration does not define a type, so a type alias
-can not be applied to the annotation:
+can not be applied to the annotation and it can not be used as an interface:
 
 .. code-block:: typescript
    :linenos:
 
     @interface Position {}
     type Pos = Position // compile-time error
+    
+    class A implements Position {} // compile-time error
 
 |
 
@@ -156,9 +160,6 @@ and to define the values of annotation properties:
         '(' ObjectLiteralExpression? ')'
         ;
 
-The current version of the language allows to use annotations only
-for class declarations and method declarations.
-
 An annotation declaration is presented in the example below:
 
 .. code-block:: typescript
@@ -184,6 +185,29 @@ Annotation usage is presented in the example below:
     @MyAnno()
     class C3 {/*body*/}
 
+The current version of the language allows to use annotations only
+for non-abstract class declarations and non-abstract method declarations.
+Otherwise, a compile-time error occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+    @MyAnno()
+    function foo() {/*body*/} // compile-time error
+    
+    @MyAnno()
+    abstract class A {} // compile-time error
+
+Repeatable annotations 
+(applying the same annotation more then once to the enitity)
+are not supported:
+
+.. code-block:: typescript
+   :linenos:
+
+    @ClassPreamble({authorName: "John"})
+    @ClassPreamble({authorName: "Bob"}) // compile-time error
+    class C {/*body*/}    
 
 The order of properties does not matter in an annotation usage:
 
@@ -203,7 +227,6 @@ Otherwise, a compile-time error occurs:
 
     @ClassPreamble() // compile-time error, authorName is not defined
     class C1 {/*body*/}
-
 
 If a field of an array type is defined for an annotation, then the array
 literal syntax is used to set its value:
@@ -237,14 +260,22 @@ if there is no need to set annotation properties:
 Exporting and Importing Annotations
 ===================================
 
-An annotation can be exported and imported in the same way as any other program entity
-with some restrictions, see below.
+An annotation can be exported and imported, 
+only few forms of export and import directives are supported.
+
+To export an annotation its declaration must be marked with ``export`` keyword:
 
 .. code-block:: typescript
    :linenos:
 
     // a.ets
     export @interface MyAnno {}
+
+An annotation can be imported as part of the imported module. In this case
+it is accessed by qualified name:
+
+.. code-block:: typescript
+   :linenos:
 
     // b.ets
     import * as ns from "./a"
@@ -291,7 +322,8 @@ The following cases are forbidden for annotations:
 Annotations in .d.ets Files
 ===========================
 
-Annotations can be defined in .d.ets and used if imported.
+Annotations can be defined in .d.ets file
+and used in the same file or any other module if imported.
 
 .. code-block:: typescript
    :linenos:
@@ -305,9 +337,11 @@ Annotations can be defined in .d.ets and used if imported.
     @MyAnno
     class C {/*body*/}
 
-
-A compile-time error occurs if an annotation
-is applied to an ambient declaration:
+If an annotation is applied to an ambient declaration in .d.ets file
+(see the example below),
+it is not automatically applied to the declaration that implements
+this ambient declaration.
+It is up to the developer to apply it to the implementation declaration.
 
 .. code-block:: typescript
    :linenos:
@@ -315,11 +349,7 @@ is applied to an ambient declaration:
     // a.d.ets
     export @interface MyAnno {}
     
-    @MyAnno // compile-time error
+    @MyAnno
     declare class C {}
 
-The reason is that ambient declarations do not introduce new entities
-but provide type information for entities that exist somewhere else, and
-are included in a program by external means. As a result, applying an
-annotation to an ambient declaration makes no sense as it has no influence
-on a "real" entity.
+
