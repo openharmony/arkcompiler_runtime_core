@@ -283,7 +283,7 @@ TEST(BytecodeInstruction, JumpTo)
 
 // Positive tests
 TEST(BytecodeInstructionSafeIMM4_P, Parse)
-{   
+{
     // V4_IMM4
     {
         const uint8_t bytecode[] = {0x00, 0xa1, 0xff};
@@ -303,7 +303,7 @@ TEST(BytecodeInstructionSafeIMM4_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM8_P, Parse)
-{   
+{
     // IMM8
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0xff};
@@ -338,7 +338,7 @@ TEST(BytecodeInstructionSafeIMM8_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM16_P, Parse)
-{   
+{
     // IMM16
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0x12, 0xff};
@@ -373,7 +373,7 @@ TEST(BytecodeInstructionSafeIMM16_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM32_P, Parse)
-{   
+{
     // IMM32
     {
         const uint8_t bytecode[] = {0x00, 0x34, 0xf2, 0x12, 0x10, 0xff};
@@ -408,7 +408,7 @@ TEST(BytecodeInstructionSafeIMM32_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM64_P, Parse)
-{   
+{
     // IMM64
     {
         const uint8_t bytecode[] = {0x00, 0x9a, 0x78, 0x56, 0x34, 0xf2, 0x12, 0x10, 0x4, 0xff};
@@ -444,7 +444,7 @@ TEST(BytecodeInstructionSafeIMM64_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeV4_P, Parse)
-{   
+{
     // V4_V4
     {
         const uint8_t bytecode[] = {0x00, 0xba, 0xff};
@@ -456,7 +456,7 @@ TEST(BytecodeInstructionSafeV4_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeV8_P, Parse)
-{   
+{
     // V8
     {
         const uint8_t bytecode[] = {0x00, 0xab, 0xff};
@@ -476,7 +476,7 @@ TEST(BytecodeInstructionSafeV8_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeV16_P, Parse)
-{  
+{
     // V16_V16
     {
         const uint8_t bytecode[] = {0x00, 0xcd, 0xab, 0xf1, 0xee, 0xff};
@@ -488,7 +488,7 @@ TEST(BytecodeInstructionSafeV16_P, Parse)
 }
 
 TEST(BytecodeInstructionSafeID16_P, Parse)
-{  
+{
     // ID32
     {
         const uint8_t bytecode[] = {0x00, 0xf1, 0xee, 0xcd, 0xab, 0xff};
@@ -532,7 +532,7 @@ TEST(BytecodeInstructionSafeID16_P, Parse)
 // Negative tests
 
 TEST(BytecodeInstructionSafeIMM4_N, Parse)
-{  
+{
     // V4_IMM4
     {
         const uint8_t bytecode[] = {0x00};
@@ -554,7 +554,7 @@ TEST(BytecodeInstructionSafeIMM4_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM8_N, Parse)
-{ 
+{
     // IMM8
     {
         const uint8_t bytecode[] = {0x00};
@@ -588,7 +588,7 @@ TEST(BytecodeInstructionSafeIMM8_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM16_N, Parse)
-{ 
+{
     // IMM16
     {
         const uint8_t bytecode[] = {0x00, 0xf2, 0xff};
@@ -613,7 +613,7 @@ TEST(BytecodeInstructionSafeIMM16_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM32_N, Parse)
-{ 
+{
     // IMM32
     {
         const uint8_t bytecode[] = {0x00, 0x34, 0xf2, 0x12, 0xff};
@@ -638,7 +638,7 @@ TEST(BytecodeInstructionSafeIMM32_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeIMM64_N, Parse)
-{ 
+{
     // IMM64
     {
         const uint8_t bytecode[] = {0x00, 0x9a, 0x78, 0x56, 0x34, 0xf2, 0x12, 0x10, 0xff};
@@ -663,7 +663,7 @@ TEST(BytecodeInstructionSafeIMM64_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeV4_N, Parse)
-{ 
+{
     // V4_V4
     {
         const uint8_t bytecode[] = {0x00};
@@ -678,7 +678,7 @@ TEST(BytecodeInstructionSafeV4_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeV8_N, Parse)
-{ 
+{
     // V8
     {
         const uint8_t bytecode[] = {0x00};
@@ -703,7 +703,7 @@ TEST(BytecodeInstructionSafeV8_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeV16_N, Parse)
-{ 
+{
     // V16_V16
     {
         const uint8_t bytecode[] = {0x00, 0xcd, 0xab, 0xf1, 0xff};
@@ -718,7 +718,7 @@ TEST(BytecodeInstructionSafeV16_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeID32_N, Parse)
-{ 
+{
     // ID32
     {
         const uint8_t bytecode[] = {0x00, 0xf1, 0xee, 0xcd, 0xff};
@@ -731,7 +731,7 @@ TEST(BytecodeInstructionSafeID32_N, Parse)
 }
 
 TEST(BytecodeInstructionSafeID16_N, Parse)
-{ 
+{
     // V4_V4_ID16
     {
         const uint8_t bytecode[] = {0x00, 0x21, 0xf1, 0xee};

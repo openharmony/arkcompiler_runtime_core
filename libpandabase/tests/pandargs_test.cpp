@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 
 namespace panda::test {
-    
+
 static const bool REF_DEF_BOOL = false;
 static const int REF_DEF_INT = 0;
 static const double REF_DEF_DOUBLE = 1.0;
@@ -36,8 +36,14 @@ PandArg<uint32_t> PAU32("uint32", REF_DEF_UINT32, "Sample uint32 argument");
 PandArg<uint64_t> PAU64("uint64", REF_DEF_UINT64, "Sample uint64 argument");
 PandArg<arg_list_t> PALD("dlist", REF_DEF_DLIST, "Sample delimiter list argument", ":");
 PandArg<arg_list_t> PAL("list", REF_DEF_LIST, "Sample list argument");
+
+// The numbers -100 and 100 are used to initialize the range of the variable PAIR
 PandArg<int> PAIR("rint", REF_DEF_INT, "Integer argument with range", -100, 100);
+
+// The numbers 0 and 1000000000 are used to initialize the range of the variable PAUR32
 PandArg<uint32_t> PAUR32("ruint32", REF_DEF_UINT64, "uint32 argument with range", 0, 1000000000);
+
+// The numbers 0 and 100000000000 are used to initialize the range of the variable PAUR64
 PandArg<uint64_t> PAUR64("ruint64", REF_DEF_UINT64, "uint64 argument with range", 0, 100000000000);
 
 PandArgParser PA_PARSER;
@@ -861,10 +867,18 @@ HWTEST(libpandargs, TestAll, testing::ext::TestSize.Level0)
 }
 
 PandArg<bool> SUB_BOOL_ARG("bool", false, "Sample boolean argument");
+
+// The number 12 is the default parameter for variable SUB_INT_ARG
 PandArg<int> SUB_INT_ARG("int", 12, "Sample integer argument");
+
+// The number 123.45 is the default parameter for variable SUB_DOUBLE_ARG
 PandArg<double> SUB_DOUBLE_ARG("double", 123.45, "Sample rational argument");
+
 PandArg<std::string> SUB_STRING_ARG("string", "Hello", "Sample string argument");
+
+// The number 123 is the default parameter for variable INT_ARG
 PandArg<int> INT_ARG("global_int", 123, "Global integer argument");
+
 PandArgCompound PARENT("compound", "Sample boolean argument", {
     &SUB_BOOL_ARG, &SUB_INT_ARG, &SUB_DOUBLE_ARG, &SUB_STRING_ARG});
 
@@ -986,7 +1000,7 @@ HWTEST(libpandargs, GetHelpString, testing::ext::TestSize.Level0)
     ASSERT_TRUE(g_parser.Add(&g_pai));
     ASSERT_TRUE(g_parser.PushBackTail(&g_pas));
     ASSERT_TRUE(g_parser.Add(&g_pac));
-    
+
     std::string ref_string = "--" + g_pab.GetName() + ": " + g_pab.GetDesc() + "\n";
     ref_string += "--" + g_pac.GetName() + ": " + g_pac.GetDesc() + "\n";
     ref_string += "  Sub arguments:\n";
