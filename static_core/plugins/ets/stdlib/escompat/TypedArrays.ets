@@ -99,7 +99,7 @@ export final class Int8Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -119,7 +119,7 @@ export final class Int8Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Int8Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -281,7 +281,7 @@ export final class Int8Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-    
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -295,7 +295,7 @@ export final class Int8Array implements Iterable<Number> {
         }
         return val
     }
-    
+
 
     /**
      * Assigns val as element on index.
@@ -401,7 +401,7 @@ export final class Int8Array implements Iterable<Number> {
         return this.getUnsafe(index) as number
     }
 
-    
+
     /**
      * Returns an instance of primitive type at passed index.
      *
@@ -731,7 +731,7 @@ export final class Int8Array implements Iterable<Number> {
         }
     }
 
-    
+
     /**
      * Copies all elements of arr to the current Int8Array.
      *
@@ -789,7 +789,7 @@ export final class Int8Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.includes(e as byte, 0 as int)
         }
-        return this.includes(e as byte, fromIndex!.intValue())
+        return this.includes(e as byte, fromIndex.intValue())
     }
 
     /**
@@ -807,14 +807,14 @@ export final class Int8Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return false;
             }
-            if (tmp!.byteValue() == e) {
+            if (tmp.byteValue() == e) {
                 return true
             }
         }
         return false
     }
 
-    
+
     /**
      * Checks if specified argument is in Int8Array
      *
@@ -839,7 +839,7 @@ export final class Int8Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.indexOf(e as byte, 0)
         }
-        return this.indexOf(e as byte, fromIndex!.intValue())
+        return this.indexOf(e as byte, fromIndex.intValue())
     }
 
     /**
@@ -867,14 +867,14 @@ export final class Int8Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.byteValue() == e) {
+            if (tmp.byteValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Returns index of specified element
      *
@@ -932,7 +932,7 @@ export final class Int8Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.lastIndexOf(val as byte, 0 as int)
         }
-        return this.lastIndexOf(val as byte, fromIndex!.intValue()) as number
+        return this.lastIndexOf(val as byte, fromIndex.intValue()) as number
     }
 
     /**
@@ -974,14 +974,14 @@ export final class Int8Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.byteValue() == val) {
+            if (tmp.byteValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Moves backwards and search val.
      *
@@ -1338,7 +1338,7 @@ export final class Int8Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
     /**
      * Checks that all elements of Int8Array satisfy the passed function
      *
@@ -1490,7 +1490,7 @@ export final class Int8Array implements Iterable<Number> {
             */
         }
         return this
-    } 
+    }
 
     /**
      * Checks that at least one element of Int8Array satisfies the passed function
@@ -1710,7 +1710,7 @@ export final class Int8Array implements Iterable<Number> {
             if (val == undefined) {
                 return undefined
             }
-            if (fn(val!.valueOf(), i as number, this)) {
+            if (fn(val.valueOf(), i as number, this)) {
                 return val
             }
         }
@@ -2054,7 +2054,7 @@ export final class Int16Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -2081,7 +2081,7 @@ export final class Int16Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Int16Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -2243,7 +2243,7 @@ export final class Int16Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-    
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -2257,7 +2257,7 @@ export final class Int16Array implements Iterable<Number> {
         }
         return val
     }
-    
+
 
     /**
      * Assigns val as element on index.
@@ -2363,7 +2363,7 @@ export final class Int16Array implements Iterable<Number> {
         return this.getUnsafe(index) as number
     }
 
-    
+
     /**
      * Returns an instance of primitive type at passed index.
      *
@@ -2693,7 +2693,7 @@ export final class Int16Array implements Iterable<Number> {
         }
     }
 
-    
+
     /**
      * Copies all elements of arr to the current Int16Array.
      *
@@ -2751,7 +2751,7 @@ export final class Int16Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.includes(e as short, 0 as int)
         }
-        return this.includes(e as short, fromIndex!.intValue())
+        return this.includes(e as short, fromIndex.intValue())
     }
 
     /**
@@ -2769,14 +2769,14 @@ export final class Int16Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return false;
             }
-            if (tmp!.shortValue() == e) {
+            if (tmp.shortValue() == e) {
                 return true
             }
         }
         return false
     }
 
-    
+
     /**
      * Checks if specified argument is in Int16Array
      *
@@ -2801,7 +2801,7 @@ export final class Int16Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.indexOf(e as short, 0)
         }
-        return this.indexOf(e as short, fromIndex!.intValue())
+        return this.indexOf(e as short, fromIndex.intValue())
     }
 
     /**
@@ -2829,14 +2829,14 @@ export final class Int16Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.shortValue() == e) {
+            if (tmp.shortValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Returns index of specified element
      *
@@ -2894,7 +2894,7 @@ export final class Int16Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.lastIndexOf(val as short, 0 as int)
         }
-        return this.lastIndexOf(val as short, fromIndex!.intValue()) as number
+        return this.lastIndexOf(val as short, fromIndex.intValue()) as number
     }
 
     /**
@@ -2936,14 +2936,14 @@ export final class Int16Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.shortValue() == val) {
+            if (tmp.shortValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Moves backwards and search val.
      *
@@ -3300,7 +3300,7 @@ export final class Int16Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
     /**
      * Checks that all elements of Int16Array satisfy the passed function
      *
@@ -3452,7 +3452,7 @@ export final class Int16Array implements Iterable<Number> {
             */
         }
         return this
-    } 
+    }
 
     /**
      * Checks that at least one element of Int16Array satisfies the passed function
@@ -3672,7 +3672,7 @@ export final class Int16Array implements Iterable<Number> {
             if (val == undefined) {
                 return undefined
             }
-            if (fn(val!.valueOf(), i as number, this)) {
+            if (fn(val.valueOf(), i as number, this)) {
                 return val
             }
         }
@@ -4020,7 +4020,7 @@ export final class Int32Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -4047,7 +4047,7 @@ export final class Int32Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Int32Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -4209,7 +4209,7 @@ export final class Int32Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-    
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -4223,7 +4223,7 @@ export final class Int32Array implements Iterable<Number> {
         }
         return val
     }
-    
+
 
     /**
      * Assigns val as element on index.
@@ -4303,7 +4303,7 @@ export final class Int32Array implements Iterable<Number> {
         return this.getUnsafe(index) as number
     }
 
-    
+
     /**
      * Returns an instance of primitive type at passed index.
      *
@@ -4633,7 +4633,7 @@ export final class Int32Array implements Iterable<Number> {
         }
     }
 
-    
+
     /**
      * Copies all elements of arr to the current Int32Array.
      *
@@ -4691,7 +4691,7 @@ export final class Int32Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.includes(e as int, 0 as int)
         }
-        return this.includes(e as int, fromIndex!.intValue())
+        return this.includes(e as int, fromIndex.intValue())
     }
 
     /**
@@ -4709,14 +4709,14 @@ export final class Int32Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return false;
             }
-            if (tmp!.intValue() == e) {
+            if (tmp.intValue() == e) {
                 return true
             }
         }
         return false
     }
 
-    
+
     /**
      * Checks if specified argument is in Int32Array
      *
@@ -4741,7 +4741,7 @@ export final class Int32Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.indexOf(e as int, 0)
         }
-        return this.indexOf(e as int, fromIndex!.intValue())
+        return this.indexOf(e as int, fromIndex.intValue())
     }
 
     /**
@@ -4769,14 +4769,14 @@ export final class Int32Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.intValue() == e) {
+            if (tmp.intValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Returns index of specified element
      *
@@ -4834,7 +4834,7 @@ export final class Int32Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.lastIndexOf(val as int, 0 as int)
         }
-        return this.lastIndexOf(val as int, fromIndex!.intValue()) as number
+        return this.lastIndexOf(val as int, fromIndex.intValue()) as number
     }
 
     /**
@@ -4876,14 +4876,14 @@ export final class Int32Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.intValue() == val) {
+            if (tmp.intValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Moves backwards and search val.
      *
@@ -5240,7 +5240,7 @@ export final class Int32Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
     /**
      * Checks that all elements of Int32Array satisfy the passed function
      *
@@ -5392,7 +5392,7 @@ export final class Int32Array implements Iterable<Number> {
             */
         }
         return this
-    } 
+    }
 
     /**
      * Checks that at least one element of Int32Array satisfies the passed function
@@ -5612,7 +5612,7 @@ export final class Int32Array implements Iterable<Number> {
             if (val == undefined) {
                 return undefined
             }
-            if (fn(val!.valueOf(), i as number, this)) {
+            if (fn(val.valueOf(), i as number, this)) {
                 return val
             }
         }
@@ -5960,7 +5960,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -5987,7 +5987,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / BigInt64Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -6149,7 +6149,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         this.byteOffset = 0
     }
 
-    
+
     internal zeroIfInfinity(val: BigInt): BigInt {
         if ((val.getLong() == Infinity) || (val.getLong() == -Infinity)) {
             return new BigInt(0)
@@ -6163,7 +6163,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         }
         return val
     }
-    
+
 
     /**
      * Assigns val as element on index.
@@ -6269,7 +6269,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         return new BigInt(this.getUnsafe(index))
     }
 
-    
+
     /**
      * Returns an instance of primitive type at passed index.
      *
@@ -6599,7 +6599,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         }
     }
 
-    
+
     /**
      * Copies all elements of arr to the current BigInt64Array.
      *
@@ -6657,7 +6657,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         if (fromIndex == undefined) {
             return this.includes(e.getLong(), 0 as int)
         }
-        return this.includes(e.getLong(), fromIndex!.intValue())
+        return this.includes(e.getLong(), fromIndex.intValue())
     }
 
     /**
@@ -6675,14 +6675,14 @@ export final class BigInt64Array implements Iterable<BigInt> {
             if (tmp == undefined) {
                 return false;
             }
-            if (tmp!.getLong() == e) {
+            if (tmp.getLong() == e) {
                 return true
             }
         }
         return false
     }
 
-    
+
     /**
      * Checks if specified argument is in BigInt64Array
      *
@@ -6707,7 +6707,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         if (fromIndex == undefined) {
             return this.indexOf(e.getLong(), 0)
         }
-        return this.indexOf(e.getLong(), fromIndex!.intValue())
+        return this.indexOf(e.getLong(), fromIndex.intValue())
     }
 
     /**
@@ -6735,14 +6735,14 @@ export final class BigInt64Array implements Iterable<BigInt> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.getLong() == e) {
+            if (tmp.getLong() == e) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Returns index of specified element
      *
@@ -6800,7 +6800,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         if (fromIndex == undefined) {
             return this.lastIndexOf(val.getLong(), 0 as int)
         }
-        return this.lastIndexOf(val.getLong(), fromIndex!.intValue()) as number
+        return this.lastIndexOf(val.getLong(), fromIndex.intValue()) as number
     }
 
     /**
@@ -6842,14 +6842,14 @@ export final class BigInt64Array implements Iterable<BigInt> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.getLong() == val) {
+            if (tmp.getLong() == val) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Moves backwards and search val.
      *
@@ -7206,7 +7206,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
     }
 
     /// === with element lambda functions ===
-    
+
     /**
      * Checks that all elements of BigInt64Array satisfy the passed function
      *
@@ -7358,7 +7358,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
             */
         }
         return this
-    } 
+    }
 
     /**
      * Checks that at least one element of BigInt64Array satisfies the passed function
@@ -7578,7 +7578,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
             if (val == undefined) {
                 return undefined
             }
-            if (fn(val!, i as number, this)) {
+            if (fn(val, i as number, this)) {
                 return val
             }
         }
@@ -7926,7 +7926,7 @@ export final class Float32Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -7953,7 +7953,7 @@ export final class Float32Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Float32Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -8115,7 +8115,7 @@ export final class Float32Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-    
+
 
     /**
      * Assigns val as element on index.
@@ -8218,7 +8218,7 @@ export final class Float32Array implements Iterable<Number> {
         return this.getUnsafe(index) as number
     }
 
-    
+
     /**
      * Returns an instance of primitive type at passed index.
      *
@@ -8546,7 +8546,7 @@ export final class Float32Array implements Iterable<Number> {
         }
     }
 
-    
+
     /**
      * Copies all elements of arr to the current Float32Array.
      *
@@ -8604,7 +8604,7 @@ export final class Float32Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.includes(e as float, 0 as int)
         }
-        return this.includes(e as float, fromIndex!.intValue())
+        return this.includes(e as float, fromIndex.intValue())
     }
 
     /**
@@ -8622,14 +8622,14 @@ export final class Float32Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return false;
             }
-            if (tmp!.floatValue() == e) {
+            if (tmp.floatValue() == e) {
                 return true
             }
         }
         return false
     }
 
-    
+
     /**
      * Checks if specified argument is in Float32Array
      *
@@ -8654,7 +8654,7 @@ export final class Float32Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.indexOf(e as float, 0)
         }
-        return this.indexOf(e as float, fromIndex!.intValue())
+        return this.indexOf(e as float, fromIndex.intValue())
     }
 
     /**
@@ -8682,14 +8682,14 @@ export final class Float32Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.floatValue() == e) {
+            if (tmp.floatValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Returns index of specified element
      *
@@ -8747,7 +8747,7 @@ export final class Float32Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.lastIndexOf(val as float, 0 as int)
         }
-        return this.lastIndexOf(val as float, fromIndex!.intValue()) as number
+        return this.lastIndexOf(val as float, fromIndex.intValue()) as number
     }
 
     /**
@@ -8789,14 +8789,14 @@ export final class Float32Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.floatValue() == val) {
+            if (tmp.floatValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-    
+
     /**
      * Moves backwards and search val.
      *
@@ -9153,7 +9153,7 @@ export final class Float32Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
     /**
      * Checks that all elements of Float32Array satisfy the passed function
      *
@@ -9305,7 +9305,7 @@ export final class Float32Array implements Iterable<Number> {
             */
         }
         return this
-    } 
+    }
 
     /**
      * Checks that at least one element of Float32Array satisfies the passed function
@@ -9525,7 +9525,7 @@ export final class Float32Array implements Iterable<Number> {
             if (val == undefined) {
                 return undefined
             }
-            if (fn(val!.valueOf(), i as number, this)) {
+            if (fn(val.valueOf(), i as number, this)) {
                 return val
             }
         }
@@ -9873,7 +9873,7 @@ export final class Float64Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -9900,7 +9900,7 @@ export final class Float64Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Float64Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -10062,7 +10062,7 @@ export final class Float64Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-    
+
 
     /**
      * Assigns val as element on index.
@@ -10140,7 +10140,7 @@ export final class Float64Array implements Iterable<Number> {
         return this.getUnsafe(index) as number
     }
 
-    
+
     /**
      * Returns an instance of primitive type at passed index.
      *
@@ -10413,7 +10413,7 @@ export final class Float64Array implements Iterable<Number> {
         }
     }
 
-    
+
 
     /**
      * Copies all elements of arr to the current Float64Array.
@@ -10463,7 +10463,7 @@ export final class Float64Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.includes(e as double, 0 as int)
         }
-        return this.includes(e as double, fromIndex!.intValue())
+        return this.includes(e as double, fromIndex.intValue())
     }
 
     /**
@@ -10481,14 +10481,14 @@ export final class Float64Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return false;
             }
-            if (tmp!.doubleValue() == e) {
+            if (tmp.doubleValue() == e) {
                 return true
             }
         }
         return false
     }
 
-    
+
 
     /**
      * Returns index of specified element
@@ -10503,7 +10503,7 @@ export final class Float64Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.indexOf(e as double, 0)
         }
-        return this.indexOf(e as double, fromIndex!.intValue())
+        return this.indexOf(e as double, fromIndex.intValue())
     }
 
     /**
@@ -10531,14 +10531,14 @@ export final class Float64Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.doubleValue() == e) {
+            if (tmp.doubleValue() == e) {
                 return i
             }
         }
         return -1
     }
 
-    
+
 
     /**
      * Joins data to a string
@@ -10586,7 +10586,7 @@ export final class Float64Array implements Iterable<Number> {
         if (fromIndex == undefined) {
             return this.lastIndexOf(val as double, 0 as int)
         }
-        return this.lastIndexOf(val as double, fromIndex!.intValue()) as number
+        return this.lastIndexOf(val as double, fromIndex.intValue()) as number
     }
 
     /**
@@ -10628,14 +10628,14 @@ export final class Float64Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1
             }
-            if (tmp!.doubleValue() == val) {
+            if (tmp.doubleValue() == val) {
                 return i
             }
         }
         return -1
     }
 
-    
+
 
     /**
     * Creates a new Float64Array using initializer
@@ -10982,7 +10982,7 @@ export final class Float64Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
     /**
      * Checks that all elements of Float64Array satisfy the passed function
      *
@@ -11134,7 +11134,7 @@ export final class Float64Array implements Iterable<Number> {
             */
         }
         return this
-    } 
+    }
 
     /**
      * Checks that at least one element of Float64Array satisfies the passed function
@@ -11354,7 +11354,7 @@ export final class Float64Array implements Iterable<Number> {
             if (val == undefined) {
                 return undefined
             }
-            if (fn(val!.valueOf(), i as number, this)) {
+            if (fn(val.valueOf(), i as number, this)) {
                 return val
             }
         }

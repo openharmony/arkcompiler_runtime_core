@@ -93,7 +93,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         this.buffer = new ArrayBuffer(this.byteLengthInt)
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, Uint8ClampedArray.clamp(arr.at(i)!.intValue()))
+            this.setUnsafe(i, Uint8ClampedArray.clamp(arr.$_get(i).intValue()))
         }
     }
 
@@ -109,7 +109,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -129,7 +129,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Uint8ClampedArray.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -947,7 +947,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1 as number
             }
-            if (tmp!.intValue() == val) {
+            if (tmp.intValue() == val) {
                 return i as number
             }
         }
@@ -1315,7 +1315,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
 
     /**
      * Checks that all elements of Uint8ClampedArray satisfy the passed function
@@ -1990,7 +1990,7 @@ export class Uint8Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -2010,7 +2010,7 @@ export class Uint8Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Uint8Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -2167,7 +2167,7 @@ export class Uint8Array implements Iterable<Number> {
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
     }
-    
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -2845,7 +2845,7 @@ export class Uint8Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1 as number
             }
-            if (tmp!.intValue() == val) {
+            if (tmp.intValue() == val) {
                 return i as number
             }
         }
@@ -3213,7 +3213,7 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
 
     /**
      * Checks that all elements of Uint8Array satisfy the passed function
@@ -3882,7 +3882,7 @@ export class Uint16Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -3909,7 +3909,7 @@ export class Uint16Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Uint16Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -4066,7 +4066,7 @@ export class Uint16Array implements Iterable<Number> {
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
     }
-    
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -4744,7 +4744,7 @@ export class Uint16Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1 as number
             }
-            if (tmp!.intValue() == val) {
+            if (tmp.intValue() == val) {
                 return i as number
             }
         }
@@ -5112,7 +5112,7 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
 
     /**
      * Checks that all elements of Uint16Array satisfy the passed function
@@ -5781,7 +5781,7 @@ export class Uint32Array implements Iterable<Number> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -5808,7 +5808,7 @@ export class Uint32Array implements Iterable<Number> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / Uint32Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -5965,7 +5965,7 @@ export class Uint32Array implements Iterable<Number> {
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
     }
-    
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -6669,7 +6669,7 @@ export class Uint32Array implements Iterable<Number> {
             if (tmp == undefined) {
                 return -1 as number
             }
-            if (tmp!.longValue() == val) {
+            if (tmp.longValue() == val) {
                 return i as number
             }
         }
@@ -7037,7 +7037,7 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-    
+
 
     /**
      * Checks that all elements of Uint32Array satisfy the passed function
@@ -7706,7 +7706,7 @@ export class BigUint64Array implements Iterable<BigInt> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -7733,7 +7733,7 @@ export class BigUint64Array implements Iterable<BigInt> {
 
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / BigUint64Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -7890,7 +7890,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
     }
-    
+
     internal zeroIfInfinity(val: BigInt): BigInt {
         if ((val.getULong() == Infinity) || (val.getULong() == -Infinity)) {
             return new BigInt(0)
@@ -8594,7 +8594,7 @@ export class BigUint64Array implements Iterable<BigInt> {
             if (tmp == undefined) {
                 return -1 as number
             }
-            if (tmp!.getULong() == val) {
+            if (tmp.getULong() == val) {
                 return i as number
             }
         }
@@ -8962,7 +8962,7 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /// === with element lambda functions ===
-    
+
 
     /**
      * Checks that all elements of BigUint64Array satisfy the passed function
