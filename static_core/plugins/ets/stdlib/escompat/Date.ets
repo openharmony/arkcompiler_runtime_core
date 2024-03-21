@@ -47,6 +47,12 @@ const dayCountInYear: int = 365;
 /** Days in a leap year */
 const dayCountInLeapYear: int = 366;
 
+/** Months in a year */
+const monthCountPerYear: int = 12;
+
+/** Max possible count of days in month */
+const maxDaysInMonth = 31;
+
 /**
  * This gives a range of 8,640,000,000,000,000 milliseconds
  * to either side of 01 January, 1970 UTC.
@@ -415,32 +421,133 @@ export final class Date {
      *
      * @returns A number representing the milliseconds elapsed since January 1, 1970, 00:00:00 UTC
      * and the date obtained by parsing the given string representation of a date.
-     * If the argument doesn't represent a valid date, `InvalidDate` exception is thrown.
+     * If the argument doesn't represent a valid date, `InvalidDate` error is thrown.
      */
     private static parseDateFromString(dateStr: String): number {
+        const dateStrLen = dateStr.length as int;
+        if (dateStrLen < 4) {
+            return 0;
+        }
+        if (dateStrLen > 35) {
+            throw new InvalidDate();
+        }
+
         let date = new Date();
-        let sub = dateStr.substring(0, 4);
-        let val = Double.parseInt(sub, 10) as int;
-        date.setUTCFullYear(val);
-        sub = dateStr.substring(5, 7);
-        val = Double.parseInt(sub, 10) as int;
-        date.setUTCMonth(val);
-        sub = dateStr.substring(8, 10);
-        val = Double.parseInt(sub, 10) as int;
-        date.setUTCDate(val as byte);
-        sub = dateStr.substring(11, 13);
-        val = Double.parseInt(sub, 10) as int;
-        date.setUTCHours(val as byte);
-        sub = dateStr.substring(14, 16);
-        val = Double.parseInt(sub, 10) as int;
-        date.setUTCMinutes(val as byte);
-        sub = dateStr.substring(17, 19);
-        val = Double.parseInt(sub, 10) as int;
-        date.setUTCSeconds(val as byte);
-        sub = dateStr.substring(20, 23);
-        val = Double.parseInt(sub, 10) as int;
-        date.setUTCMilliseconds(val as byte);
-        return date.valueOf();
+
+        let timeZone = date.TZOffset * msPerSecond;
+        if (dateStrLen < 5) {
+            timeZone = 0;
+        }
+
+        const years = Date.parseIfContains(dateStr, 0, 4);
+        const months = Date.parseIfContains(dateStr, 5, 7);
+        const days = Date.parseIfContains(dateStr, 8, 10);
+        const hours = Date.parseIfContains(dateStr, 11, 13);
+        const minutes = Date.parseIfContains(dateStr, 14, 16);
+        const seconds = Date.parseIfContains(dateStr, 17, 19);
+        const milliseconds = Date.parseIfContains(dateStr, 20, 23);
+
+        date.setUTCFullYear(years);
+        if (months != Date.UNSUCCESSFUL_PARSING) {
+            if (months > monthCountPerYear || months <= 0) {
+                throw new InvalidDate();
+            }
+            date.setUTCMonth((months - 1) as int);
+        } else {
+            date.setUTCMonth(0 as int);
+        }
+        if (days != Date.UNSUCCESSFUL_PARSING) {
+            if (days > maxDaysInMonth || days <= 0) {
+                throw new InvalidDate();
+            }
+            date.setUTCDate((days - 1) as byte);
+        } else {
+            date.setUTCDate(0 as byte);
+        }
+        if (hours != Date.UNSUCCESSFUL_PARSING) {
+            if (hours > hoursPerDay || hours < 0) {
+                throw new InvalidDate();
+            }
+            date.setUTCHours(hours as byte);
+        } else {
+            date.setUTCHours(0 as byte);
+        }
+        if (minutes != Date.UNSUCCESSFUL_PARSING) {
+            if (minutes >= minutesPerHour || minutes < 0) {
+                throw new InvalidDate();
+            }
+            date.setUTCMinutes(minutes as byte);
+        } else {
+            date.setUTCMinutes(0 as byte);
+        }
+        if (seconds != Date.UNSUCCESSFUL_PARSING) {
+            if (seconds >= secondsPerMinute || seconds < 0) {
+                throw new InvalidDate();
+            }
+            date.setUTCSeconds(seconds as byte);
+        } else {
+            date.setUTCSeconds(0 as byte);
+        }
+        if (milliseconds != Date.UNSUCCESSFUL_PARSING) {
+            if (milliseconds >= msPerSecond || milliseconds < 0) {
+                throw new InvalidDate();
+            }
+            date.setUTCMilliseconds(milliseconds as short);
+        } else {
+            date.setUTCMilliseconds(0 as short);
+        }
+        if (dateStrLen > 23) {
+            timeZone = 0;
+            let timeZoneSign = 0;
+            let timeZoneSignChar = c'+';
+            try {
+                timeZoneSignChar = dateStr.at(23);
+            } catch (e) {}
+            if (timeZoneSignChar == c'-') {
+                timeZoneSign = -1;
+            } else if (timeZoneSignChar == c'+') {
+                timeZoneSign = 1;
+            } else {
+                throw new InvalidDate();
+            }
+            const timeZoneHours = Date.parseIfContains(dateStr, 24, 26);
+            const timeZoneMinutes = Date.parseIfContains(dateStr, 27, 29);
+            const timeZoneSeconds = Date.parseIfContains(dateStr, 30, 32);
+            const timeZoneSecondsFraction = Date.parseIfContains(dateStr, 33, min(36, dateStrLen) as int);
+            if (timeZoneHours != Date.UNSUCCESSFUL_PARSING) {
+                if (timeZoneHours < 0 || timeZoneHours >= hoursPerDay) {
+                    throw new InvalidDate();
+                }
+                timeZone += timeZoneHours * msPerHour;
+            }
+            if (timeZoneMinutes != Date.UNSUCCESSFUL_PARSING) {
+                if (timeZoneMinutes < 0 || timeZoneMinutes >= minutesPerHour) {
+                    throw new InvalidDate();
+                }
+                timeZone += timeZoneMinutes * msPerMinute;
+            }
+            if (timeZoneSeconds != Date.UNSUCCESSFUL_PARSING) {
+                if (timeZoneSeconds < 0 || timeZoneSeconds >= secondsPerMinute) {
+                    throw new InvalidDate();
+                }
+                timeZone += timeZoneSeconds * msPerSecond;
+            }
+            if (timeZoneSecondsFraction != Date.UNSUCCESSFUL_PARSING) {
+                let timeZoneMillis = timeZoneSecondsFraction;
+                if (dateStrLen == 32) {
+                    timeZoneMillis *= 100;
+                } else if (dateStrLen == 33) {
+                    timeZoneMillis *= 10;
+                }
+                if (timeZoneSecondsFraction < 0) {
+                    throw new InvalidDate();
+                }
+                timeZone += timeZoneSecondsFraction;
+            }
+
+            timeZone *= timeZoneSign;
+        }
+        return date.valueOf() - timeZone;
     }
     /**
      * Default constructor.
@@ -2054,4 +2161,16 @@ export final class Date {
         this.ms += this.TZOffset * 60 * msPerSecond;
         return s;
     }
+
+    /**
+     * Parses int from substring if indexes are in string
+     */
+    private static parseIfContains(dateStr: String, begin: int, end: int): int {
+        if (dateStr.length >= end && begin < end) {
+            return Double.parseInt(dateStr.substring(begin, end)) as int;
+        }
+        return Date.UNSUCCESSFUL_PARSING;
+    }
+
+    private static readonly UNSUCCESSFUL_PARSING: int = -1;
 }

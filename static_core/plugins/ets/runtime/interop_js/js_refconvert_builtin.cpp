@@ -80,7 +80,7 @@ namespace {
 
 namespace descriptors = panda_file_items::class_descriptors;
 
-constexpr const ets_proxy::EtsClassWrapper::OverloadsMap *NO_OVERLOADS = nullptr;
+[[maybe_unused]] constexpr const ets_proxy::EtsClassWrapper::OverloadsMap *NO_OVERLOADS = nullptr;
 constexpr const char *NO_MIRROR = nullptr;
 
 class CompatConvertorsRegisterer {
@@ -154,7 +154,6 @@ private:
             std::make_tuple("Lstd/core/NegativeArraySizeException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalMonitorStateException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
             std::make_tuple("Lstd/core/IllegalArgumentException;", NO_MIRROR, &W_EXCEPTION_OVERLOADS),
-            std::make_tuple("Lstd/core/InvalidDate;", NO_MIRROR, NO_OVERLOADS),
         };
         for (const auto &[descr, mirror, ovl] : STD_EXCEPTIONS_LIST) {
             RegisterClass(descr, mirror, ovl);

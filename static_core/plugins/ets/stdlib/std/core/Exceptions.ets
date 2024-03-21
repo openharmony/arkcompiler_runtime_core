@@ -422,9 +422,3 @@ export class ExceptionInInitializerError extends Exception {
         super(s, cause);
     }
 }
-
-
-/**
- * Represents exception that is thrown when Date is malformed
- */
-export final class InvalidDate extends Exception {}
