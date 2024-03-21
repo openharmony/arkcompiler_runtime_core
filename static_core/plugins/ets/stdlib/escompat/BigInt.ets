@@ -115,8 +115,20 @@ export final class BigInt {
     }
 
     internal getLong(): long {
-        const s = "BigInt.getLong: not implemented"
-        return 0
+        let val = this.clone()
+        let bts = val.asBytes()
+        let len = val.length()
+        let res: long = 0;
+
+        for (let i = 0; i < len; i++) {
+            res = res << 8
+            res += bts.at(i)
+        }
+        if (this.negative()) {
+            res *= -1
+        }
+
+        return res
     }
 
     public equals(to: BigInt): boolean {

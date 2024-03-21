@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_shared_memory.h"
+#include "plugins/ets/runtime/types/ets_shared_memory-inl.h"
 
 namespace ark::ets {
 
@@ -93,24 +94,6 @@ size_t EtsSharedMemory::GetLength()
     return arrayPtr->GetLength();
 }
 
-int8_t EtsSharedMemory::GetElement(uint32_t index)
-{
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *arrayPtr = reinterpret_cast<EtsByteArray *>(
-        ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_)));
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
-    return arrayPtr->Get(index);
-}
-
-void EtsSharedMemory::SetElement(uint32_t index, int8_t element)
-{
-    auto *currentCoro = EtsCoroutine::GetCurrent();
-    auto *arrayPtr = reinterpret_cast<EtsByteArray *>(
-        ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_)));
-    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
-    arrayPtr->Set(index, element);
-}
-
 namespace {
 
 std::string PrintWaiters(EtsHandle<EtsSharedMemory> &buffer)
@@ -136,7 +119,7 @@ IntegerType AssembleFromBytes(EtsSharedMemory &mem, uint32_t index, uint32_t (*g
     UIntegerType value = 0;
     for (uint32_t i = 0; i < sizeof(IntegerType); i++) {
         auto curByteIndex = getByteIndex(index, i);
-        auto curByte = bit_cast<UIntegerType>(static_cast<IntegerType>(mem.GetElement(curByteIndex)));
+        auto curByte = bit_cast<UIntegerType>(static_cast<IntegerType>(mem.GetElement<int8_t>(curByteIndex)));
         value |= curByte << (8U * i);
     }
     return bit_cast<IntegerType>(value);

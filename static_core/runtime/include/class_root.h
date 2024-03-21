@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_CLASS_ROOT_H_
-#define PANDA_RUNTIME_CLASS_ROOT_H_
+#ifndef PANDA_RUNTIME_CLASS_ROOT_H
+#define PANDA_RUNTIME_CLASS_ROOT_H
 
 namespace ark {
 
@@ -53,4 +53,4 @@ enum class ClassRoot {
 
 }  // namespace ark
 
-#endif  // PANDA_RUNTIME_CLASS_ROOT_H_
+#endif  // PANDA_RUNTIME_CLASS_ROOT_H

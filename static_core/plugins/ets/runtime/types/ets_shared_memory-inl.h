@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,62 @@
 
 namespace ark::ets {
 
-template <typename F>
-std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, const F &f)
+template <typename T>
+T EtsSharedMemory::GetElement(uint32_t index)
+{
+    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
+    if constexpr (std::is_same_v<T, int8_t>) {
+        return reinterpret_cast<EtsByteArray *>(obj)->Get(index);
+    } else if constexpr (std::is_same_v<T, int16_t>) {
+        return reinterpret_cast<EtsShortArray *>(obj)->Get(index);
+    } else if constexpr (std::is_same_v<T, int32_t>) {
+        return reinterpret_cast<EtsIntArray *>(obj)->Get(index);
+    } else if constexpr (std::is_same_v<T, int64_t>) {
+        return reinterpret_cast<EtsLongArray *>(obj)->Get(index);
+    } else if constexpr (std::is_same_v<T, uint8_t>) {
+        return reinterpret_cast<EtsBooleanArray *>(obj)->Get(index);
+    } else if constexpr (std::is_same_v<T, uint16_t>) {
+        return reinterpret_cast<EtsCharArray *>(obj)->Get(index);
+    } else if constexpr (std::is_same_v<T, uint32_t>) {
+        return reinterpret_cast<EtsUintArray *>(obj)->Get(index);
+    } else if constexpr (std::is_same_v<T, uint64_t>) {
+        return reinterpret_cast<EtsUlongArray *>(obj)->Get(index);
+    } else {
+        UNREACHABLE();
+    }
+}
+
+template <typename T>
+void EtsSharedMemory::SetElement(uint32_t index, T element)
+{
+    ASSERT_PRINT(index < GetLength(), "SharedMemory index out of bounds");
+    auto *currentCoro = EtsCoroutine::GetCurrent();
+    auto *obj = ObjectAccessor::GetObject(currentCoro, this, MEMBER_OFFSET(EtsSharedMemory, array_));
+    if constexpr (std::is_same_v<T, int8_t>) {
+        reinterpret_cast<EtsByteArray *>(obj)->Set(index, element);
+    } else if constexpr (std::is_same_v<T, int16_t>) {
+        reinterpret_cast<EtsShortArray *>(obj)->Set(index, element);
+    } else if constexpr (std::is_same_v<T, int32_t>) {
+        reinterpret_cast<EtsIntArray *>(obj)->Set(index, element);
+    } else if constexpr (std::is_same_v<T, int64_t>) {
+        reinterpret_cast<EtsLongArray *>(obj)->Set(index, element);
+    } else if constexpr (std::is_same_v<T, uint8_t>) {
+        reinterpret_cast<EtsBooleanArray *>(obj)->Set(index, element);
+    } else if constexpr (std::is_same_v<T, uint16_t>) {
+        reinterpret_cast<EtsCharArray *>(obj)->Set(index, element);
+    } else if constexpr (std::is_same_v<T, uint32_t>) {
+        reinterpret_cast<EtsUintArray *>(obj)->Set(index, element);
+    } else if constexpr (std::is_same_v<T, uint64_t>) {
+        reinterpret_cast<EtsUlongArray *>(obj)->Set(index, element);
+    } else {
+        UNREACHABLE();
+    }
+}
+
+template <typename T, typename F>
+std::pair<T, T> EtsSharedMemory::ReadModifyWrite(int32_t index, const F &f)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(coroutine);
@@ -34,9 +88,9 @@ std::pair<int8_t, int8_t> EtsSharedMemory::ReadModifyWriteI8(int32_t index, cons
     os::memory::LockHolder lock(coroutine->GetPandaVM()->GetAtomicsMutex());
     ScopedManagedCodeThread m(coroutine);
 
-    auto oldValue = thisHandle->GetElement(index);
+    auto oldValue = thisHandle->GetElement<T>(index);
     auto newValue = f(oldValue);
-    thisHandle->SetElement(index, newValue);
+    thisHandle->SetElement<T>(index, newValue);
 
     return std::pair(oldValue, newValue);
 }

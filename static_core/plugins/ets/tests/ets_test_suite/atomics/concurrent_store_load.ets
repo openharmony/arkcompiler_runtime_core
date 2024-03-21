@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-let RESULT = 10 as byte
+let RESULT = 10 as long
 
-let arr: Int8Array
+let arr: BigInt64Array
 
 function main() {
-    let buf = new SharedArrayBuffer(4);
-    arr = new Int8Array(buf, 0, 1);
+    let buf = new SharedArrayBuffer(8);
+    arr = new BigInt64Array(buf, 0, 1);
 
     launch incrementer()
 
