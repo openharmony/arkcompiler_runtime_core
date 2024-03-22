@@ -22,7 +22,6 @@
         "ram": "",
         "deps": {
             "components": [
-                "bounds_checking_function",
                 "ets_runtime",
                 "hilog",
                 "napi"
