@@ -14,27 +14,22 @@
  */
 
 /*---
-desc: 09.classes/constructor-inheritance
-tags: []
----*/
+ desc: 10.06 Interface Method Declarations
+ name: 10.interfaces/10.06.interface_method _declarations/10.06.02_inheritance_and_overriding/interface_overriding_07
+ tags: []
+ ---*/
 
- class Base {
-    age: int;
-    constructor(param: int = 42) {
-        this.age = param;
+interface A {
+  get length(): number
+}
+
+class C implements A {
+    get length(): number {
+        return 0;
     }
- }
+}
 
- class Derive extends Base {
-    constructor(param: int = 42) {
-        super();
-    }
- }
-
- function main(): void {
-    let b = new Derive();
-    assert b.age == 42;
-
-    b = new Derive(100);
-    assert b.age == 42;
- }
+function main() {
+    const c: C = new C()
+    assert c.length == 0
+}

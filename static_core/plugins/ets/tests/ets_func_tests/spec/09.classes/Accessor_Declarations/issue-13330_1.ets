@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,27 +14,36 @@
  */
 
 /*---
-desc: 09.classes/constructor-inheritance
+
+name: issue-13330_1.ets
 tags: []
 ---*/
 
- class Base {
-    age: int;
-    constructor(param: int = 42) {
-        this.age = param;
+let accessCounter = 0;
+
+class Base {
+    get base(): int {
+        accessCounter++;
+        return 41;
     }
- }
+}
 
- class Derive extends Base {
-    constructor(param: int = 42) {
-        super();
+class Derive extends Base {
+
+    get derive(): int {
+        return this.base + 1;
     }
- }
+}
 
- function main(): void {
-    let b = new Derive();
-    assert b.age == 42;
+function main(): void {
+    accessCounter = 0;
+    let vv = new Derive();
 
-    b = new Derive(100);
-    assert b.age == 42;
- }
+    assert vv.base == 41;
+    assert accessCounter == 1;
+    assert vv.derive == 42;
+    assert accessCounter == 2;
+
+
+
+}

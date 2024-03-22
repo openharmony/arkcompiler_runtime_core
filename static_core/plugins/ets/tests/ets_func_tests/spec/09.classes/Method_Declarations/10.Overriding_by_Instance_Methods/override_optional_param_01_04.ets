@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,27 +14,24 @@
  */
 
 /*---
-desc: 09.classes/constructor-inheritance
+desc: 9.6.10 Overriding by Instance Methods
+name: 09.classes/09.06.method_declarations/09.06.10.overriding_by_instance_methods/override_optional_param_01
 tags: []
 ---*/
 
- class Base {
-    age: int;
-    constructor(param: int = 42) {
-        this.age = param;
+class A<T> {
+    returnHello(a: T, op?: T): T {
+        return a;
     }
- }
+}
 
- class Derive extends Base {
-    constructor(param: int = 42) {
-        super();
+class B<T> extends A<T> {
+    returnHello(a: T, op?: T): T {
+        return a;
     }
- }
+}
 
- function main(): void {
-    let b = new Derive();
-    assert b.age == 42;
-
-    b = new Derive(100);
-    assert b.age == 42;
- }
+function main(): void {
+    let b: A<string> = new B<string>()
+    assert b.returnHello("hello", "world") == "hello"
+}

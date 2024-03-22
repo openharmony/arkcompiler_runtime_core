@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,27 @@
  * limitations under the License.
  */
 
-/*---
-desc: 09.classes/constructor-inheritance
-tags: []
----*/
+ /*---
 
- class Base {
-    age: int;
-    constructor(param: int = 42) {
-        this.age = param;
-    }
+ name: issue-15142_0.ets
+ tags: []
+ ---*/
+
+ interface GetAndSet {
+    get value(): int
+    set value(val: int);
  }
 
- class Derive extends Base {
-    constructor(param: int = 42) {
-        super();
-    }
+
+
+ class Provider implements GetAndSet {
+    value: int = 3;
+
  }
 
  function main(): void {
-    let b = new Derive();
-    assert b.age == 42;
-
-    b = new Derive(100);
-    assert b.age == 42;
+    let test = new Provider();
+    assert test.value == 3;
+    test.value = 4;
+    assert test.value == 4;
  }
