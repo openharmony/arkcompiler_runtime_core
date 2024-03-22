@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_INSPECTOR_SERVER_ENDPOINT_H
-#define PANDA_TOOLING_INSPECTOR_SERVER_ENDPOINT_H
+#ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_ENDPOINT_BASE_H
+#define PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_ENDPOINT_BASE_H
 
-#include "endpoint.h"
+#include "endpoint_base.h"
 #include "server.h"
 
-#include "websocketpp/server.hpp"
+#include <functional>
 
 namespace ark::tooling::inspector {
-template <typename Config>
+// Base class for server endpoints implementations.
+// Provides callbacks to be executed during client connections handling.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ServerEndpoint : public Endpoint<websocketpp::server<Config>>, public Server {
+class ServerEndpointBase : public EndpointBase, public Server {
 public:
-    ServerEndpoint() noexcept;
-
     void OnValidate(std::function<void()> &&handler) override
     {
         onValidate_ = std::move(handler);
@@ -51,11 +50,11 @@ public:
                 std::function<void(const std::string &sessionId, JsonObjectBuilder &result, const JsonObject &params)>
                     &&handler) override;
 
-private:
-    std::function<void()> onValidate_ = []() {};
-    std::function<void()> onOpen_ = []() {};
-    std::function<void()> onFail_ = []() {};
+protected:
+    std::function<void()> onValidate_ = []() {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    std::function<void()> onOpen_ = []() {};      // NOLINT(misc-non-private-member-variables-in-classes)
+    std::function<void()> onFail_ = []() {};      // NOLINT(misc-non-private-member-variables-in-classes)
 };
 }  // namespace ark::tooling::inspector
 
-#endif  // PANDA_TOOLING_INSPECTOR_SERVER_ENDPOINT_H
+#endif  // PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_ENDPOINT_BASE_H

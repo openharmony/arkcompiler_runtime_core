@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart
         return;
     }
 
+    // acquire lock to later release it either in `OnOpen` or `OnFail` callbacks
     inspectorServer_.OnValidate([this]() NO_THREAD_SAFETY_ANALYSIS {
         ASSERT(!connecting_);  // NOLINT(bugprone-lambda-function-name)
         debuggerEventsLock_.WriteLock();

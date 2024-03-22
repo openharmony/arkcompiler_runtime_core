@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_INSPECTOR_ASIO_SERVER_H
-#define PANDA_TOOLING_INSPECTOR_ASIO_SERVER_H
+#ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_SERVER_H
+#define PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_SERVER_H
 
 #include "asio_config.h"
 #include "server_endpoint.h"
@@ -27,11 +27,6 @@ namespace ark::tooling::inspector {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class AsioServer final : public ServerEndpoint<AsioConfig> {
 public:
-    bool Poll() override
-    {
-        return endpoint_.poll() != 0;
-    }
-
     bool RunOne() override
     {
         return endpoint_.run_one() != 0;
@@ -47,4 +42,4 @@ private:
 };
 }  // namespace ark::tooling::inspector
 
-#endif  // PANDA_TOOLING_INSPECTOR_ASIO_SERVER_H
+#endif  // PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_SERVER_H

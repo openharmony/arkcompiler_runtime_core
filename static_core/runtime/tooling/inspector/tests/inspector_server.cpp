@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 #include "gtest/gtest.h"
 
 #include "common.h"
+#include "connection/server.h"
 #include "types/location.h"
 #include "inspector_server.h"
-#include "server.h"
 #include "utils/json_builder.h"
 #include "json_object_matcher.h"
 #include "runtime.h"
@@ -60,10 +60,6 @@ public:
                 (const std::string &method_call,
                  std::function<void(const std::string &, JsonObjectBuilder &, const JsonObject &)> &&handler));
 
-    bool Poll() override
-    {
-        return true;
-    };
     bool RunOne() override
     {
         return true;

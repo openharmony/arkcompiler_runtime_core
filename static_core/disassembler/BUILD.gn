@@ -59,7 +59,6 @@ arkdisassembler_sources = [
 arkdisassembler_sources += plugin_arkdisassembler_sources
 
 arkdisassembler_configs = [
-  sdk_libc_secshared_config,
   ":arkdisassembler_public_config",
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
@@ -67,7 +66,7 @@ arkdisassembler_configs = [
   "$ark_root/libpandafile:arkfile_public_config",
 ]
 
-ohos_shared_library("arkdisassembler") {
+ohos_shared_library("arktsdisassembler") {
   sources = arkdisassembler_sources
 
   include_dirs = [
@@ -86,8 +85,9 @@ ohos_shared_library("arkdisassembler") {
     "$ark_root/assembler:libarktsassembler",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:libarktsfile",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_ext_dep ]
 
   output_extension = "so"
   if (is_mingw) {
@@ -116,13 +116,15 @@ ohos_static_library("arktsdisassembler_frontend_static") {
     "$ark_root/assembler:libarktsassembler_frontend_static",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_ext_dep ]
+
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }
 
-ohos_executable("ark_disasm") {
+ohos_executable("arkts_disasm") {
   sources = [ "disasm.cpp" ]
 
   include_dirs = [
@@ -131,7 +133,6 @@ ohos_executable("ark_disasm") {
   ]
 
   configs = [
-    sdk_libc_secshared_config,
     "$ark_root:ark_config",
     "$ark_root/assembler:arkassembler_public_config",
     "$ark_root/libpandabase:arkbase_public_config",

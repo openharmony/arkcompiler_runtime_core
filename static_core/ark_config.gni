@@ -72,20 +72,24 @@ enable_relayout_profile = false
 vixl_with_panda = true
 
 sdk_libc_secshared_dep = ""
+sdk_libc_secshared_ext_dep = ""
 sdk_libc_secshared_config = ""
 
 if (ark_standalone_build) {
   sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secshared"
+  sdk_libc_secshared_ext_dep = "securec:libc_secshared"
   sdk_libc_secshared_config =
       "$ark_third_party_root/securec:libsec_public_config"
 
   if (is_mingw || is_mac || is_linux) {
     sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secstatic"
+    sdk_libc_secshared_ext_dep = "securec:libc_secstatic"
   }
 } else {
   # For OpenHarmony build, always link with the static lib:
   sdk_libc_secshared_dep =
       "$ark_third_party_root/bounds_checking_function:libsec_static"
+  sdk_libc_secshared_ext_dep = "bounds_checking_function:libsec_static"
   sdk_libc_secshared_config =
       "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 }
