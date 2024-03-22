@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,19 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/generic_02
-
+name: 05.generics/genericTypeArgumentWithDefaultParameterValue_06
+tags: [compile-only, negative]
 ---*/
 
-class A {}
-interface B<T1=A> {}
-class C<T2=B> {}
+class A<T0, T1=string, T2> {
+    data0: T0
+    data1: T1
+    data2: T2
+}
+
+function main() : void {
+    let a: A<Int, Long>
+}
+
+
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,20 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/generic_01
-tags: []
+name: 05.generics/wrongUsingInT
+tags: [negative, compile-only]
 ---*/
 
-function foo<T>(arg1: T): void {
-    const cb: (arg: T) => void = (arg: T) => {
-        assert arg instanceof string;
+class A<in T> {
+    private array: T[];
+
+    constructor(array: T[]) {
+        this.array = array;
     }
-    cb(arg1);
+
+    getAll(): T[] {
+        return this.array;
+    }
 }
 
-function main(): void {
-    foo<string>("F");
-}
+function main(): void {}

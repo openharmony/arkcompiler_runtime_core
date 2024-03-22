@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,20 +15,25 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/wrongUsingInT
-tags: [negative, compile-only]
+name: 05.generics/usingInT
+tags: []
 ---*/
 
-class A<in T> {
-    private array: T[];
+class A {
+    private x: string;
 
-    constructor(array: T[]) {
-        this.array = array;
-    }
-
-    getAll(): T[] {
-        return this.array;
+    constructor(arg: string) {
+        this.x = arg;
     }
 }
 
-function main(): void {}
+class B<in T> {
+    method1(arg: T): void {
+        assert(arg instanceof A);
+    }
+}
+
+function main(): void {
+    let b = new B<A>();
+    b.method1(new A("1"));
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,32 +15,36 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/callFromAsyncLambda
+name: 05.generics/genericTypeArgumentWithDefaultParameterValue_06
 tags: []
 ---*/
 
-type fooAsyncLambda = () => Promise<void>
+class Helper {}
 
-class Getter {
-    get<T>(args: T): T {
-        return args;
+class A<T> {
+    data: T
+    isData: boolean
+    constructor(isData: boolean) {
+        this.isData = isData
     }
+}
 
-    get<T>(args: T[]): T[] {
-        return args;
+class B<T> {
+    data: T
+    constructor(data: T) {
+        this.data = data
+    }
+    foo<T>(isData: boolean = false): A<T> {
+        return new A<T>(isData)
     }
 }
 
 function main(): void {
-    let getter = new Getter();
-    let arr: Int[] = [0, 1, 2];
-    let foo: fooAsyncLambda = async (): Promise<void> => {
-        let str = getter.get<string>("F");
-        assert str instanceof string;
-
-        let arr2: Int[] = getter.get<Int>(arr);
-        assert arr2 instanceof Object;
-        assert arr2[0] instanceof Int;
-    }
-    await foo();
+    let b = new B<String>("hello")
+    let a = b.foo<Helper>(false);
+    assert a instanceof A
+    assert a.isData == false
+    a.data = new Helper()
+    assert a.data instanceof Helper
 }
+

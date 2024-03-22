@@ -265,22 +265,55 @@ spec/nullables/nullable-lambda-default-param_5.ets
 
 ### Generic issues
 ### Issue 14751
-spec/generic/issue14751.ets
+spec/05.Generics/issue14751.ets
 ### Issue 14752
-spec/generic/issue14752.ets
+spec/05.Generics/issue14752.ets
+### Issue 14498
+spec/05.Generics/generic_03.ets
 ### Issue 14510
-spec/generic/generic_02.ets
+spec/05.Generics/generic_02.ets
 ### Issue 14542
 ### Negative tests
-spec/generic/wrongUsingInT.ets
+spec/05.Generics/wrongUsingInT.ets
+### Issue 14656
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_05.ets
 ### Issue 14941
-spec/generic/issue14700_ArrayBackedConstructorWithobject.ets
+spec/05.Generics/issue14700_ArrayBackedConstructorWithobject.ets
 ### Issue 15089
-spec/generic/issue15089_05.ets
-spec/generic/issue15089_06.ets
-spec/generic/issue15089_08.ets
+spec/05.Generics/issue15089_05.ets
+spec/05.Generics/issue15089_06.ets
+spec/05.Generics/issue15089_08.ets
+### Issue 15623
+spec/05.Generics/issue15380_0.ets
 ### Issue 15380
-spec/generic/issue15380_2.ets
+spec/05.Generics/issue15380_1.ets
+spec/05.Generics/issue15380_2.ets
+spec/05.Generics/issue15380_3.ets
+=======
+spec/05.generic/issue14751.ets
+### Issue 14752
+spec/05.generic/issue14752.ets
+### Issue 14498
+spec/05.generic/generic_03.ets
+### Issue 14510
+spec/05.generic/generic_02.ets
+### Issue 14542
+### Negative tests
+spec/05.generic/wrongUsingInT.ets
+### Issue 14656
+spec/05.generic/genericTypeArgumentWithDefaultParameterValue_05.ets
+### Issue 14941
+spec/05.generic/issue14700_ArrayBackedConstructorWithobject.ets
+### Issue 15089
+spec/05.generic/issue15089_05.ets
+spec/05.generic/issue15089_06.ets
+spec/05.generic/issue15089_08.ets
+### Issue 15623
+spec/05.generic/issue15380_0.ets
+### Issue 15380
+spec/05.generic/issue15380_1.ets
+spec/05.generic/issue15380_2.ets
+spec/05.generic/issue15380_3.ets
 ### End of Generic
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)
@@ -536,7 +569,7 @@ spec/tuples/tuple_as_param_default_1.ets
 ### Issue I909BB end
 
 ### VariableHasEnclosingScopeForAll, VariableHasScopeForAll
-spec/generic/callFromAsyncLambda.ets
+spec/05.Generics/callFromAsyncLambda.ets
 ###
 
 ### Class constructor inheritance
@@ -608,22 +641,27 @@ spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_000
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0004.ets
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0005.ets
 ### Issue 16535 end
-
-
 ### Issue 1661
 spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_03.ets
 ### Issue 1661 end
-
-
-
-****
-
-
-
-
-
-
-
-
-
-
+### Issue 16434 begin
+spec/05.Generics/callFromAsyncLambda.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_00.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_01.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_02.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_03.ets
+### Issue 16434 end
+### Issue 16696 begin
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_04.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_05.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_00.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_01.ets
+spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_02.ets
+spec/05.Generics/issue14751.ets
+spec/05.Generics/issue14752.ets
+spec/05.Generics/issue15089_05.ets
+spec/05.Generics/issue15089_06.ets
+spec/05.Generics/issue15089_08.ets
+spec/05.Generics/issue15380_2.ets
+spec/05.Generics/wrongUsingInT.ets
+###  Issue 16696 end

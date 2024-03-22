@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/genericTypeArgumentWithDefaultParameterValue_04
+name: 05.generics/genericTypeArgumentWithDefaultParameterValue_03
 tags: []
 ---*/
 
@@ -34,7 +34,7 @@ class B<T> {
     constructor(data: T) {
         this.data = data
     }
-    foo<T>(isData: boolean = false): A<T> {
+    foo<T>(isData: boolean): A<T> {
         return new A<T>(isData)
     }
 }
