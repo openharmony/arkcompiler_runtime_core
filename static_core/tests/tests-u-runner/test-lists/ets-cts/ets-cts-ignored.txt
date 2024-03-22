@@ -1364,6 +1364,10 @@
 07.expressions/18.ensure-not-nullish_expression/undefined_3.ets
 07.expressions/18.ensure-not-nullish_expression/undefined_4.ets
 
+# 16156 Waiting for the full implementation of smartcasts
+07.expressions/18.ensure-not-nullish_expression/undefined_2.ets
+17.experimental_features/09.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods4.ets
+
 # 16022 Failed compilation of Enumeration-Operations
 11.enumerations/03.enumeration_operations/enum_type_methods_valueof.ets
 #
