@@ -510,7 +510,7 @@ Implementing Interface Properties
 =================================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A class must implement all properties from all interfaces (see
 :ref:`Implementing Interface Properties`) which are defined as a getter, a
@@ -777,6 +777,10 @@ class body of *C*:
 Internal Access Modifier
 ========================
 
+.. meta:
+    frontend_status: Partly
+    todo: Implement in libpandafile, implement semantic, now it is parsed and ignored - #16088
+
 The modifier ``internal`` is described in the chapter Experimental Features
 (see :ref:`Internal Access Modifier Experimental`).
 
@@ -854,9 +858,7 @@ Field Declarations
 ******************
 
 .. meta:
-    frontend_status: Partly
-    todo: issue when accessing hidden super class property using super
-    todo: more work - when interface fields are implemented
+    frontend_status: Done
 
 *Field declarations* represent data members in class instances.
 Fields are actually class instance variables (see :ref:`Variable Declarations`).
@@ -1351,6 +1353,10 @@ Native methods are described in the chapter Experimental Features (see
 
 Method Overload Signatures
 ==========================
+
+.. meta:
+    frontend_status: None
+    todo: implement TS overload signature #16181
 
 |LANG| allows specifying a method that has several *overload signatures*,
 i.e., several method headers that have the same name followed by one
@@ -2074,6 +2080,7 @@ Constructor Overload Signatures
 
 .. meta:
     frontend_status: None
+    todo: implement TS overload signature #16181
 
 |LANG| allows specifying a constructor that can be called in different ways by
 providing *overload signatures*, i.e., several constructor headers which are
@@ -2503,6 +2510,9 @@ the superclass:
 
 Local Classes and Interfaces
 ****************************
+
+.. meta:
+    frontend_status: Done
 
 Local classes and interfaces (see :ref:`Interfaces`) are declared within the
 body of a function, method, or any block delimited by balanced braces in a

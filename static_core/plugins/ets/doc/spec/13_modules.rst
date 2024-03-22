@@ -128,6 +128,7 @@ Compilation Units in Host System
 
 .. meta:
     frontend_status: Partly
+    todo: Implement compiling a package module as a single compilation unit - #16267
 
 Modules and packages are created and stored in a manner that is determined by a
 host system.
@@ -170,6 +171,7 @@ Import Directives
 
 .. meta:
     frontend_status: Partly
+    todo: implement type binding - #14586
 
 Import directives import entities exported from other compilation units, and
 provide such entities with bindings in the current module.
@@ -394,6 +396,9 @@ below in :ref:`Several Bindings for One Import Path`.
 Several Bindings for One Import Path
 ====================================
 
+.. meta:
+    frontend_status: Done
+
 The same bound entities can use several import bindings. The same bound
 entities can use one import directive, or several import directives with
 the same import path.
@@ -499,7 +504,7 @@ Default Import Binding
 ======================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Default import binding allows importing a declaration exported from some
 module as default export. Knowing the actual name of the declaration is not
@@ -533,6 +538,10 @@ import an entity initially exported as default.
 
 Type Binding
 ============
+
+.. meta:
+    frontend_status: None
+    todo: implement type binding - #14586
 
 Type import binding allows importing only the type declarations exported from
 some module or package. These declarations can be exported normally, or by
@@ -808,9 +817,8 @@ Export Directives
 *****************
 
 .. meta:
-    frontend_status: None
-    todo: Now all symbols are exported (not only one with export declaration) because of stdlib internal dependencies
-    todo: Fix stdlib and test, then restrict exporting everything
+    frontend_status: Partly
+    todo: implement type binding - #14586
 
 The *export directive* allows the following:
 
@@ -838,6 +846,10 @@ The *export directive* allows the following:
 
 Selective Export Directive
 ==========================
+
+.. meta:
+    frontend_status: Partly
+    todo: export with alias isn't work properly
 
 In addition, each exported declaration can be marked as *exported* by
 explicitly listing the names of exported declarations. Renaming is optional.
@@ -875,6 +887,10 @@ is not accessible in the modules that import this module.
 
 Export Type Directive
 =====================
+
+.. meta:
+    frontend_status: Partly
+    todo: implement type binding - #14586
 
 In addition to export that is attached to some declaration, a programmer can
 use the *export type* directive in order to do the following:
@@ -918,7 +934,8 @@ Re-Export Directive
 ===================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: export with alias isn't work properly
 
 In addition to exporting what is declared in the module, it is possible to
 re-export declarations that are part of other modules' export. Only

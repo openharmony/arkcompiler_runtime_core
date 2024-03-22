@@ -98,8 +98,7 @@ Interface Declarations
 **********************
 
 .. meta:
-    frontend_status: Partly
-    todo: inner interface, class, enum support
+    frontend_status: Done
 
 An *interface declaration* specifies a new named reference type:
 
@@ -278,7 +277,7 @@ Interface Body
 **************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 The body of an interface may declare members of the interface, i.e.,
 properties (see :ref:`Interface Declarations`) and methods (see
@@ -391,7 +390,7 @@ Interface Properties
 ********************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 An interface property can be defined in the form of a field or an accessor
 (a getter or a setter):
@@ -453,7 +452,8 @@ Interface Method Declarations
 *****************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+    todo: implement  TS overload signature - #16181
 
 An ordinary interface method declaration that specifies the method's name and
 signature is called *abstract*.
@@ -700,6 +700,9 @@ interface must inherit the method's own implementation.
 
 Interfaces Inheriting Methods with Override-Equivalent Signatures
 =================================================================
+
+.. meta:
+    frontend_status: Done
 
 An interface can inherit several methods with override-equivalent signatures
 (see :ref:`Override-Equivalent Signatures`).

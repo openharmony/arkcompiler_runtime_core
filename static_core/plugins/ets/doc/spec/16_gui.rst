@@ -775,6 +775,9 @@ A :index:`compile-time error` occurs if a callable type contains both the
 Callable Types with Invoke Method
 =================================
 
+.. meta:
+    frontend_status: Done
+
 The method ``invoke`` can have an arbitrary signature. It can be used in a
 *type call expression* in either case. If the signature has parameters, then
 the call must contain corresponding arguments.
@@ -795,6 +798,10 @@ the call must contain corresponding arguments.
 
 Callable Types with Instantiate Method
 ======================================
+
+.. meta:
+    frontend_status: Partly
+    todo: es2panda segfaults on the first example
 
 The method ``instantiate`` can have an arbitrary signature by itself.
 If it is to be used in a *type call expression*, then its first parameter
@@ -868,6 +875,9 @@ Additional Features
 Methods Returning ``this``
 ==========================
 
+.. meta:
+    frontend_status: Done
+
 A return type of an instance method of a class or a struct can be ``this``.
 It means that the return type is the class or struct type the method belongs to.
  
@@ -915,6 +925,9 @@ Otherwise, compile-time error occurs.
 
 Unary operator '$$'
 ===================
+
+.. meta:
+    frontend_status: None
 
 A prefix unary operator '``$$``' is used to pass primitive types by reference.
 It is added to |LANG| to support the legacy ArkUI code.
