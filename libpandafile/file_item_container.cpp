@@ -421,8 +421,9 @@ void ItemContainer::DeduplicateItems(bool computeLayout)
 uint32_t ItemContainer::ComputeLayout()
 {
     uint32_t num_classes = class_map_.size();
+    uint32_t num_literalarrays = literalarray_map_.size();
     uint32_t class_idx_offset = sizeof(File::Header);
-    uint32_t cur_offset = class_idx_offset + num_classes * ID_SIZE;
+    uint32_t cur_offset = class_idx_offset + (num_classes + num_literalarrays) * ID_SIZE;
 
     UpdateOrderIndexes();
 
@@ -571,13 +572,12 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    // reserve [num_literalarrays] field
-    if (!writer->Write<uint32_t>(INVALID_INDEX)) {
+    if (!writer->Write<uint32_t>(literalarray_map_.size())) {
         return false;
     }
 
-    // reserve [literalarray_idx_off] field
-    if (!writer->Write<uint32_t>(INVALID_OFFSET)) {
+    uint32_t literalarray_idx_offset = sizeof(File::Header) + class_map_.size() * ID_SIZE;
+    if (!writer->Write<uint32_t>(literalarray_idx_offset)) {
         return false;
     }
 
@@ -585,7 +585,7 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    size_t index_section_off = sizeof(File::Header) + class_map_.size() * ID_SIZE;
+    size_t index_section_off = literalarray_idx_offset + literalarray_map_.size() * ID_SIZE;
     return writer->Write<uint32_t>(index_section_off);
 }
 
@@ -646,6 +646,14 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems)
     // Write class idx
 
     for (auto &entry : class_map_) {
+        if (!writer->Write(entry.second->GetOffset())) {
+            return false;
+        }
+    }
+
+    // Write literalArray idx
+
+    for (auto &entry : literalarray_map_) {
         if (!writer->Write(entry.second->GetOffset())) {
             return false;
         }
