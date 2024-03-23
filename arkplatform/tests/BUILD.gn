@@ -28,10 +28,12 @@ host_unittest_action("ArkplatformTest") {
   deps = [
     "$ark_root/arkplatform:libarkplatform",
     "$ark_third_party_root/icu/icu4c:shared_icui18n",
-    sdk_libc_secshared_dep,
   ]
 
-  external_deps = [ "ets_runtime:libark_jsruntime" ]
+  external_deps = [
+    "ets_runtime:libark_jsruntime",
+    sdk_libc_secshared_dep,
+  ]
 }
 
 group("unittest") {

@@ -82,7 +82,7 @@ group("arkfile_header_deps") {
   ]
 }
 
-source_set("libarkfile_static") {
+ohos_source_set("libarkfile_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
@@ -91,11 +91,15 @@ source_set("libarkfile_static") {
     ":arkfile_header_deps",
     "$ark_root/libpandabase:libarkbase_static",
     "$ark_root/libziparchive:libarkziparchive_static",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
-source_set("libarkfile_static_fuzz") {
+ohos_source_set("libarkfile_static_fuzz") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
@@ -105,8 +109,12 @@ source_set("libarkfile_static_fuzz") {
     ":arkfile_header_deps",
     "$ark_root/libpandabase:libarkbase_static",
     "$ark_root/libziparchive:libarkziparchive_static",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_shared_library("libarkfile") {
@@ -124,7 +132,7 @@ ohos_shared_library("libarkfile") {
   subsystem_name = "arkcompiler"
 }
 
-source_set("libarkfile_frontend_set_static") {
+ohos_source_set("libarkfile_frontend_set_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
@@ -133,8 +141,12 @@ source_set("libarkfile_frontend_set_static") {
     ":arkfile_header_deps",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libziparchive:libarkziparchive_frontend_static",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_static_library("libarkfile_frontend_static") {

@@ -33,8 +33,9 @@ host_unittest_action("PlatformsTest") {
   deps = [
     "$ark_root/libpandabase:libarkbase_static",
     "//third_party/googletest:gmock_main",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   cflags = [ "-DWITH_MOCK" ]
 }

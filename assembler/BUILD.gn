@@ -17,7 +17,6 @@ config("arkassembler_public_config") {
     "$target_gen_dir",
     "$target_gen_dir/include",
     "$root_gen_dir/libpandabase",
-    "$ark_root",
     "$ark_root/plugins/ecmascript/assembler",
   ]
 
@@ -40,7 +39,6 @@ libarkassembler_sources = [
 ]
 
 libarkassembler_configs = [
-  sdk_libc_secshared_config,
   "$ark_root:ark_config",
   ":arkassembler_public_config",
   "$ark_root/libpandabase:arkbase_public_config",
@@ -67,7 +65,7 @@ foreach(plugin, enabled_plugins) {
   source_files = []
 }
 
-source_set("libarkassembler_static") {
+ohos_static_library("libarkassembler_static") {
   sources = libarkassembler_sources
 
   public_configs = libarkassembler_configs
@@ -83,10 +81,14 @@ source_set("libarkassembler_static") {
     ":isa_gen_libarkassembler_operand_types_print_h",
     "$ark_root/libpandabase:libarkbase_static",
     "$ark_root/libpandafile:libarkfile_static",
-    sdk_libc_secshared_dep,
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   deps += plugin_deps
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_shared_library("libarkassembler") {
@@ -105,7 +107,7 @@ ohos_shared_library("libarkassembler") {
   subsystem_name = "arkcompiler"
 }
 
-source_set("libarkassembler_frontend_set_static") {
+ohos_source_set("libarkassembler_frontend_set_static") {
   sources = libarkassembler_sources
 
   public_configs = libarkassembler_configs
@@ -121,10 +123,14 @@ source_set("libarkassembler_frontend_set_static") {
     ":isa_gen_libarkassembler_operand_types_print_h",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
-    sdk_libc_secshared_dep,
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   deps += plugin_deps
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_static_library("libarkassembler_frontend_static") {
@@ -135,7 +141,7 @@ ohos_static_library("libarkassembler_frontend_static") {
   subsystem_name = "arkcompiler"
 }
 
-source_set("ark_asm_static") {
+ohos_source_set("ark_asm_static") {
   sources = [ "pandasm.cpp" ]
 
   include_dirs = [
@@ -144,7 +150,6 @@ source_set("ark_asm_static") {
   ]
 
   public_configs = [
-    sdk_libc_secshared_config,
     ":arkassembler_public_config",
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
@@ -157,10 +162,15 @@ source_set("ark_asm_static") {
     "$ark_root/libpandafile:libarkfile_frontend_static",
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   libs = platform_libs
   if (!is_mac && !is_mingw) {
     ldflags = platform_ldflags
   }
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_executable("ark_asm") {

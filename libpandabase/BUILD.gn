@@ -173,18 +173,20 @@ group("arkbase_header_deps") {
   ]
 }
 
-libarkbase_deps = [
-  ":arkbase_header_deps",
-  sdk_libc_secshared_dep,
-]
+libarkbase_deps = [ ":arkbase_header_deps" ]
 
-source_set("libarkbase_static_fuzz") {
+ohos_source_set("libarkbase_static_fuzz") {
   sources = libarkbase_sources
 
   public_configs = libarkbase_configs
   public_configs += [ ":arkbase_fuzz_config" ]
 
   deps = libarkbase_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_source_set("libarkbase_static") {
@@ -193,6 +195,9 @@ ohos_source_set("libarkbase_static") {
   public_configs = libarkbase_configs
 
   deps = libarkbase_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
   external_deps = []
   if (enable_hilog) {
     external_deps += [ "hilog:libhilog" ]
@@ -204,6 +209,7 @@ ohos_source_set("libarkbase_static") {
 ohos_shared_library("libarkbase") {
   stack_protector_ret = false
   deps = [ ":libarkbase_static" ]
+  external_deps = [ sdk_libc_secshared_dep ]
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }
@@ -214,12 +220,17 @@ ohos_shared_library("libarkbase") {
   subsystem_name = "arkcompiler"
 }
 
-source_set("libarkbase_frontend_set_static") {
+ohos_source_set("libarkbase_frontend_set_static") {
   sources = libarkbase_sources
 
   public_configs = libarkbase_configs
 
   deps = libarkbase_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_static_library("libarkbase_frontend_static") {

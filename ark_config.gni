@@ -40,15 +40,13 @@ ark_enable_global_register_variables = true
 enable_bytecode_optimizer = true
 enable_relayout_profile = false
 
-sdk_libc_secshared_dep =
-    "$ark_third_party_root/bounds_checking_function:libsec_shared"
+sdk_libc_secshared_dep = "bounds_checking_function:libsec_shared"
 sdk_libc_secshared_config =
     "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 
 if (is_mingw || is_mac || is_linux || target_os == "ios" ||
     target_os == "android") {
-  sdk_libc_secshared_dep =
-      "$ark_third_party_root/bounds_checking_function:libsec_static"
+  sdk_libc_secshared_dep = "bounds_checking_function:libsec_static"
 }
 
 is_mob = !ark_standalone_build && !is_standard_system &&

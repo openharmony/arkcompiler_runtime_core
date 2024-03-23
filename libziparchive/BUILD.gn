@@ -25,7 +25,7 @@ config("arkziparchive_config") {
   ]
 }
 
-source_set("libarkziparchive_static") {
+ohos_source_set("libarkziparchive_static") {
   sources = [ "zip_archive.cpp" ]
 
   public_configs = [
@@ -35,16 +35,18 @@ source_set("libarkziparchive_static") {
     sdk_libc_secshared_config,
   ]
 
-  deps = [
-    "$ark_root/libpandabase:libarkbase_static",
-    sdk_libc_secshared_dep,
-  ]
+  deps = [ "$ark_root/libpandabase:libarkbase_static" ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   if (ark_standalone_build || is_arkui_x) {
     deps += [ "$ark_third_party_root/zlib:libz" ]
   } else {
     deps += [ "$ark_third_party_root/zlib:shared_libz" ]
   }
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_shared_library("libarkziparchive") {
@@ -62,7 +64,7 @@ ohos_shared_library("libarkziparchive") {
   subsystem_name = "arkcompiler"
 }
 
-source_set("libarkziparchive_frontend_set_static") {
+ohos_source_set("libarkziparchive_frontend_set_static") {
   sources = [ "zip_archive.cpp" ]
 
   public_configs = [
@@ -72,12 +74,14 @@ source_set("libarkziparchive_frontend_set_static") {
     sdk_libc_secshared_config,
   ]
 
-  deps = [
-    "$ark_root/libpandabase:libarkbase_frontend_static",
-    sdk_libc_secshared_dep,
-  ]
+  deps = [ "$ark_root/libpandabase:libarkbase_frontend_static" ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   deps += [ "$ark_third_party_root/zlib:libz" ]
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 ohos_static_library("libarkziparchive_frontend_static") {

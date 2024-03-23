@@ -62,8 +62,9 @@ host_unittest_action("AssemblerTest") {
     "$ark_root/libpandafile:libarkfile",
     "$ark_root/libziparchive:libarkziparchive",
     "//third_party/googletest:gtest_main",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 }
 
 group("host_unittest") {

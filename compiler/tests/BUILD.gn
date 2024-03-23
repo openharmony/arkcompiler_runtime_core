@@ -31,7 +31,6 @@ compiler_test_deps = [
   "$ark_root/compiler:libarkcompiler",
   "$ark_root/libpandabase:libarkbase",
   "$ark_root/libpandafile:libarkfile",
-  sdk_libc_secshared_dep,
 ]
 
 test_js_path = "//arkcompiler/runtime_core/compiler/tests/js/"
@@ -80,6 +79,8 @@ host_unittest_action("GraphInterfaceTest") {
   configs = compiler_test_configs
   deps = compiler_test_deps
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   test_abc_dir = rebase_path(target_out_dir)
 
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -94,6 +95,8 @@ host_unittest_action("DrawCfgToolTest") {
   sources = [ "draw_cfg_test.cpp" ]
   configs = compiler_test_configs
   deps = compiler_test_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   test_abc_dir = rebase_path(target_out_dir)
   tools_dir = rebase_path("$ark_root/compiler/tools")

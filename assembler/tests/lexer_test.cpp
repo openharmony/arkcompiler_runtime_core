@@ -17,8 +17,8 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include "../define.h"
-#include "../lexer.h"
+#include "define.h"
+#include "lexer.h"
 
 using namespace panda::pandasm;
 
