@@ -69,7 +69,7 @@ public:
 
     virtual ~Metadata() = default;
 
-    std::optional<Error> SetAttribute(std::string_view attribute)
+    std::optional<Error> SetAttribute(const std::string_view &attribute)
     {
         auto err = Validate(attribute);
         if (err) {
@@ -93,7 +93,7 @@ public:
         return set_attributes_.find(attribute) != set_attributes_.cend();
     }
 
-    std::optional<Error> SetAttributeValue(std::string_view attribute, std::string_view value)
+    std::optional<Error> SetAttributeValue(const std::string_view &attribute, const std::string_view &value)
     {
         auto err = Validate(attribute, value);
         if (err) {
@@ -221,32 +221,33 @@ protected:
 
     std::optional<Error> StoreValue(std::string_view attribute, std::string_view value) override;
 
-    virtual bool IsAnnotationRecordAttribute([[maybe_unused]] std::string_view attribute) const
+    virtual bool IsAnnotationRecordAttribute([[maybe_unused]] const std::string_view &attribute) const
     {
         return false;
     }
 
-    virtual bool IsAnnotationIdAttribute([[maybe_unused]] std::string_view attribute) const
+    virtual bool IsAnnotationIdAttribute([[maybe_unused]] const std::string_view &attribute) const
     {
         return false;
     }
 
-    virtual bool IsAnnotationElementTypeAttribute([[maybe_unused]] std::string_view attribute) const
+    virtual bool IsAnnotationElementTypeAttribute([[maybe_unused]] const std::string_view &attribute) const
     {
         return false;
     }
 
-    virtual bool IsAnnotationElementArrayComponentTypeAttribute([[maybe_unused]] std::string_view attribute) const
+    virtual bool IsAnnotationElementArrayComponentTypeAttribute(
+        [[maybe_unused]] const std::string_view &attribute) const
     {
         return false;
     }
 
-    virtual bool IsAnnotationElementNameAttribute([[maybe_unused]] std::string_view attribute) const
+    virtual bool IsAnnotationElementNameAttribute([[maybe_unused]] const std::string_view &attribute) const
     {
         return false;
     }
 
-    virtual bool IsAnnotationElementValueAttribute([[maybe_unused]] std::string_view attribute) const
+    virtual bool IsAnnotationElementValueAttribute([[maybe_unused]] const std::string_view &attribute) const
     {
         return false;
     }
@@ -254,7 +255,7 @@ protected:
 private:
     class AnnotationElementBuilder {
     public:
-        void Initialize(std::string_view name)
+        void Initialize(const std::string_view &name)
         {
             name_ = name;
             is_initialized_ = true;
@@ -281,7 +282,7 @@ private:
         }
 
         std::optional<Error> AddValue(
-            std::string_view value,
+            const std::string_view &value,
             const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotation_id_map);
 
         AnnotationElement CreateAnnotationElement()
@@ -341,7 +342,7 @@ private:
 
     class AnnotationBuilder {
     public:
-        void Initialize(std::string_view name)
+        void Initialize(const std::string_view &name)
         {
             name_ = name;
             is_initialized_ = true;
@@ -355,7 +356,7 @@ private:
             is_initialized_ = false;
         }
 
-        void SetId(std::string_view id)
+        void SetId(const std::string_view &id)
         {
             id_ = id;
         }
@@ -398,15 +399,18 @@ private:
         bool is_initialized_ {false};
     };
 
-    std::optional<Metadata::Error> MeetExpRecordAttribute(std::string_view attribute, std::string_view value);
-    std::optional<Metadata::Error> MeetExpIdAttribute(std::string_view attribute, std::string_view value);
-    std::optional<Metadata::Error> MeetExpElementNameAttribute(std::string_view attribute, std::string_view value);
-    std::optional<Metadata::Error> MeetExpElementTypeAttribute(std::string_view attribute, std::string_view value);
+    std::optional<Metadata::Error> MeetExpRecordAttribute(std::string_view attribute, const std::string_view &value);
+    std::optional<Metadata::Error> MeetExpIdAttribute(std::string_view attribute, const std::string_view &value);
+    std::optional<Metadata::Error> MeetExpElementNameAttribute(std::string_view attribute,
+                                                               const std::string_view &value);
+    std::optional<Metadata::Error> MeetExpElementTypeAttribute(std::string_view attribute,
+                                                               const std::string_view &value);
     std::optional<Metadata::Error> MeetExpElementArrayComponentTypeAttribute(std::string_view attribute,
-                                                                             std::string_view value);
-    std::optional<Metadata::Error> MeetExpElementValueAttribute(std::string_view attribute, std::string_view value);
+                                                                             const std::string_view &value);
+    std::optional<Metadata::Error> MeetExpElementValueAttribute(std::string_view attribute,
+                                                                const std::string_view &value);
 
-    void InitializeAnnotationBuilder(std::string_view name)
+    void InitializeAnnotationBuilder(const std::string_view &name)
     {
         if (IsParseAnnotation()) {
             ResetAnnotationBuilder();
@@ -437,7 +441,7 @@ private:
         return annotation_builder_.IsInitialized();
     }
 
-    void InitializeAnnotationElementBuilder(std::string_view name)
+    void InitializeAnnotationElementBuilder(const std::string_view &name)
     {
         if (IsParseAnnotationElement() && annotation_element_builder_.IsCompleted()) {
             ResetAnnotationElementBuilder();

@@ -34,12 +34,12 @@ class AnnotationElement;
 
 class AnnotationData {
 public:
-    AnnotationData(std::string_view record_name, std::vector<AnnotationElement> elements)
+    AnnotationData(const std::string_view &record_name, std::vector<AnnotationElement> elements)
         : record_name_(record_name), elements_(std::move(elements))
     {
     }
 
-    explicit AnnotationData(std::string_view record_name) : record_name_(record_name) {}
+    explicit AnnotationData(const std::string_view &record_name) : record_name_(record_name) {}
 
     DEFAULT_MOVE_SEMANTIC(AnnotationData);
     DEFAULT_COPY_SEMANTIC(AnnotationData);
@@ -496,7 +496,7 @@ private:
 
     ScalarValue(Type type, double value) : Value(type), value_(value) {}
 
-    ScalarValue(Type type, std::string_view value) : Value(type), value_(std::string(value)) {}
+    ScalarValue(Type type, const std::string_view &value) : Value(type), value_(std::string(value)) {}
 
     ScalarValue(Type type, pandasm::Type value) : Value(type), value_(std::move(value)) {}
 
@@ -534,7 +534,8 @@ private:
 
 class AnnotationElement {
 public:
-    AnnotationElement(std::string_view name, std::unique_ptr<Value> value) : name_(name), value_(std::move(value)) {}
+    AnnotationElement(const std::string_view &name, std::unique_ptr<Value> value)
+        : name_(name), value_(std::move(value)) {}
 
     AnnotationElement(const AnnotationElement &ann_elem);
     AnnotationElement &operator=(const AnnotationElement &ann_elem);

@@ -28,7 +28,7 @@ constexpr size_t BIN_BASE = 2;
 
 constexpr size_t MAX_DWORD = 65536;
 
-inline bool ValidateInteger(std::string_view p)
+inline bool ValidateInteger(const std::string_view &p)
 {
     constexpr size_t GENERAL_SHIFT = 2;
 
@@ -121,7 +121,7 @@ inline int64_t IntegerNumber(std::string_view p)
     return std::strtoull(p.data(), nullptr, DEC_BASE);
 }
 
-inline bool ValidateFloat(std::string_view p)
+inline bool ValidateFloat(const std::string_view &p)
 {
     std::string_view token = p;
 

@@ -37,7 +37,7 @@ std::string Type::GetDescriptor(bool ignore_primitive) const
 }
 
 /* static */
-panda_file::Type::TypeId Type::GetId(std::string_view name, bool ignore_primitive)
+panda_file::Type::TypeId Type::GetId(const std::string_view &name, bool ignore_primitive)
 {
     static std::unordered_map<std::string_view, panda_file::Type::TypeId> panda_types = {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
