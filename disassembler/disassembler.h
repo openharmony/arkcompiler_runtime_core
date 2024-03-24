@@ -96,7 +96,7 @@ private:
                                  const std::string &ann_elem_index);
     void AddAnnotationElement(pandasm::Function &method, const std::string &annotation_name,
                               const std::string &key, const uint32_t &value);
-    void GetParams(pandasm::Function *method, const panda_file::File::EntityId &proto_id) const;
+    void GetParams(pandasm::Function *method, const panda_file::File::EntityId &code_id) const;
     IdList GetInstructions(pandasm::Function *method, panda_file::File::EntityId method_id,
                            panda_file::File::EntityId code_id) const;
     LabelTable GetExceptions(pandasm::Function *method, panda_file::File::EntityId method_id,
