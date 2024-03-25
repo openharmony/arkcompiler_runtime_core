@@ -26,6 +26,8 @@ function main(): int {
 
     failures += test(objectHasOwnProperty(), "Object.hasOwnProperty");
 
+    failures += test(objectHasOwn(), "Object.hasOwn");
+
     failures += test(objectFromEntries(), "Object.fromEntries");
 
     failures += test(objectAssign(), "Object.assign");
@@ -335,6 +337,20 @@ function objectHasOwnProperty(): int {
     result += ((lambda as Object).hasOwnProperty("length") == true) ? 0 : 1
     result += ((lambda as Object).hasOwnProperty("name") == true) ? 0 : 1
     result += ((lambda as Object).hasOwnProperty(0) == false) ? 0 : 1
+
+    return result
+}
+
+function objectHasOwn(): int {
+    let result: int = 0
+
+    let arr: number[] = [10, 20, 30]
+
+    result += (Object.hasOwn(arr as Object, '0') == true) ? 0 : 1
+    result += (Object.hasOwn(arr as Object, '3') == false) ? 0 : 1
+    result += (Object.hasOwn(arr as Object, "length") == true) ? 0 : 1
+    result += (Object.hasOwn(arr as Object, "qwerty") == false) ? 0 : 1
+    result += (Object.hasOwn(arr as Object, "toString") == false) ? 0 : 1
 
     return result
 }

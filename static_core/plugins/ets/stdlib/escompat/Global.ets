@@ -15,6 +15,8 @@
 
 package escompat;
 
+export type PropertyKey = string;
+
 /**
  * Represents the NaN value according to IEEE-754 specification
  */
