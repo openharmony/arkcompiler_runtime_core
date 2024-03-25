@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,7 +43,7 @@ function(panda_ets_interop_js_plugin TARGET)
     panda_target_link_libraries(${TARGET} ${ARG_LIBRARIES})
 
     if(PANDA_TARGET_OHOS)
-        panda_target_link_libraries(${TARGET} ace_napi.z)
+        panda_target_link_libraries(${TARGET} ace_napi.z  -Wl,--no-undefined)
     else()
         panda_target_include_directories(${TARGET} SYSTEM PRIVATE ${NAPI_HEADERS_PATH})
         set_target_properties(${TARGET}

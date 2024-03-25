@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 # Create ets_interop_js_gtest plugin
 panda_add_library(ets_interop_js_gtest STATIC ets_interop_js_gtest.cpp)
 panda_target_link_libraries(ets_interop_js_gtest gtest)
+panda_target_link_libraries(ets_interop_js_gtest arkruntime)
 set_target_properties(ets_interop_js_gtest PROPERTIES POSITION_INDEPENDENT_CODE ON)
 panda_target_include_directories(ets_interop_js_gtest
     PUBLIC ${PANDA_ETS_PLUGIN_SOURCE}/tests/interop_js/gtest_plugin

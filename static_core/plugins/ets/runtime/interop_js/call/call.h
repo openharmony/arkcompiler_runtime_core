@@ -38,11 +38,11 @@ class EtsCoroutine;
 namespace ark::ets::interop::js {
 class InteropCtx;
 
-napi_value CallETSInstance(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv,
-                           EtsObject *thisObj);
-napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv);
+PANDA_PUBLIC_API napi_value CallETSInstance(EtsCoroutine *coro, InteropCtx *ctx, Method *method,
+                                            Span<napi_value> jsargv, EtsObject *thisObj);
+PANDA_PUBLIC_API napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv);
 
-Expected<Method *, char const *> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint);
+PANDA_PUBLIC_API Expected<Method *, char const *> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint);
 uint8_t JSRuntimeInitJSCallClass(EtsString *clsStr);
 uint8_t JSRuntimeInitJSNewClass(EtsString *clsStr);
 

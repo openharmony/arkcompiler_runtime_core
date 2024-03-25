@@ -125,7 +125,6 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
     classLinker_ = Runtime::GetCurrent()->GetClassLinker();
     linkerCtx_ = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
 
-    JSRuntimeIntrinsicsSetIntrinsicsAPI(GetIntrinsicsAPI());
     auto *jobQueue = Runtime::GetCurrent()->GetInternalAllocator()->New<JsJobQueue>();
     vm->InitJobQueue(jobQueue);
 
@@ -437,6 +436,12 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     INTEROP_LOG(ERROR) << "======================== Native stack =========================";
     PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::ETS_INTEROP_JS, false).GetStream());
     std::abort();
+}
+
+void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
+{
+    // Initialize InteropCtx in VM ExternalData
+    new (InteropCtx::Current(coro)) InteropCtx(coro, env);
 }
 
 }  // namespace ark::ets::interop::js

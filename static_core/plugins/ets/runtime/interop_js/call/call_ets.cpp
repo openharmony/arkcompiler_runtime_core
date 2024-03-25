@@ -50,7 +50,7 @@ private:
     ALWAYS_INLINE bool CheckNumArgs(size_t numArgs) const;
 
     template <bool IS_STATIC>
-    ALWAYS_INLINE napi_value HandleImpl();
+    napi_value HandleImpl();
 
     static napi_value __attribute__((noinline)) ForwardException(InteropCtx *ctx, EtsCoroutine *coro)
     {

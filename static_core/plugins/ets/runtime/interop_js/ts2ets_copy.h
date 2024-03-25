@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,11 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_TS2ETS_TS2ETS_COPY_H_
 
 #include <node_api.h>
+#include "macros.h"
 
 namespace ark::ets::interop::js {
 
-napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck);
+PANDA_PUBLIC_API napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck);
 
 }  // namespace ark::ets::interop::js
 

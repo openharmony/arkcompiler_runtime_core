@@ -24,7 +24,6 @@
 #include "plugins/ets/runtime/interop_js/js_job_queue.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 #include "plugins/ets/runtime/interop_js/interop_stacks.h"
-#include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/intrinsics/std_js_jsruntime.h"
 #include "runtime/include/value.h"
 
@@ -109,11 +108,7 @@ private:
 
 class InteropCtx {
 public:
-    static void Init(EtsCoroutine *coro, napi_env env)
-    {
-        // Initialize InteropCtx in VM ExternalData
-        new (InteropCtx::Current(coro)) InteropCtx(coro, env);
-    }
+    PANDA_PUBLIC_API static void Init(EtsCoroutine *coro, napi_env env);
 
     static void Destroy(void *ptr)
     {
@@ -356,7 +351,7 @@ public:
         ThrowETSError(coro, msg.c_str());
     }
 
-    static void ThrowJSError(napi_env env, const std::string &msg);
+    PANDA_PUBLIC_API static void ThrowJSError(napi_env env, const std::string &msg);
     static void ThrowJSTypeError(napi_env env, const std::string &msg);
     static void ThrowJSValue(napi_env env, napi_value val);
 
@@ -378,7 +373,7 @@ public:
     }
 
     // Die and print execution stacks
-    [[noreturn]] static void Fatal(const char *msg);
+    [[noreturn]] PANDA_PUBLIC_API static void Fatal(const char *msg);
     [[noreturn]] static void Fatal(const std::string &msg)
     {
         Fatal(msg.c_str());

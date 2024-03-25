@@ -26,9 +26,9 @@ namespace ark::ets::interop::js {
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-[[noreturn]] void InteropFatal(const char *message);
-[[noreturn]] void InteropFatal(const std::string &message);
-[[noreturn]] void InteropFatal(const char *message, napi_status status);
+[[noreturn]] PANDA_PUBLIC_API void InteropFatal(const char *message);
+[[noreturn]] PANDA_PUBLIC_API void InteropFatal(const std::string &message);
+[[noreturn]] PANDA_PUBLIC_API void InteropFatal(const char *message, napi_status status);
 
 // Alternative for ASSERT(!expr) with interop stacktraces, enabled in NDEBUG
 #define INTEROP_FATAL_IF(expr)                     \

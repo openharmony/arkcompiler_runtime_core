@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,18 +16,6 @@
 #include "ets_interop_js_gtest.h"
 #include <iostream>
 #include <memory>
-
-#ifdef PANDA_TARGET_OHOS
-// NOTE:
-//  napi_fatal_exception() is not implemented it libace_napi.z.so,
-//  so let's implement it ourselves
-extern "C" napi_status napi_fatal_exception([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value err)
-{
-    std::cerr << "ETS_INTEROP_GTEST_PLUGIN: " << __func__ << " is not implemented" << std::endl;
-    std::abort();
-    return napi_ok;
-}
-#endif  // PANDA_TARGET_OHOS
 
 namespace ark::ets::interop::js::testing {
 

@@ -180,13 +180,13 @@ public:
 
     bool IsAnnotation() const;
     bool IsEnum() const;
-    PANDA_PUBLIC_API bool IsStringClass() const;
+    bool IsStringClass() const;
     bool IsFunctionalClass() const;
     bool IsUnionClass() const;
     bool IsUndefined() const;
     bool IsClassClass() const;
     bool IsInterface() const;
-    PANDA_PUBLIC_API bool IsArrayClass() const;
+    bool IsArrayClass() const;
     bool IsTupleClass() const;
     bool IsBoxedClass() const;
     bool IsJSValueClass() const;

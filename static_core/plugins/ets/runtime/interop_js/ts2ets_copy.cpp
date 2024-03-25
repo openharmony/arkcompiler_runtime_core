@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
+
 #include "interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
