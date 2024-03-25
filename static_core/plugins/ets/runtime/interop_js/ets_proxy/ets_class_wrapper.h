@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_CLASS_WRAPPER_H_
 
 #include "libpandabase/macros.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_field_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_object_reference.h"
@@ -58,10 +59,17 @@ public:
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertEtsProxy(InteropCtx *ctx, Class *klass);
     static std::unique_ptr<JSRefConvert> CreateJSRefConvertJSProxy(InteropCtx *ctx, Class *klass);
 
+    bool IsEtsGlobalClass() const
+    {
+        return IsEtsGlobalClassName(etsClass_->GetDescriptor());
+    }
+
     EtsClass *GetEtsClass()
     {
         return etsClass_;
     }
+
+    EtsMethodSet *GetMethod(const std::string &name) const;
 
     napi_value GetJsCtor(napi_env env) const
     {
@@ -98,8 +106,18 @@ private:
     NO_MOVE_SEMANTIC(EtsClassWrapper);
 
     bool SetupHierarchy(InteropCtx *ctx, const char *jsBuiltinName);
-    std::pair<std::vector<Field *>, std::vector<Method *>> CalculateProperties(const OverloadsMap *overloads);
-    std::vector<napi_property_descriptor> BuildJSProperties(Span<Field *> fields, Span<Method *> methods);
+
+    using PropsMap =
+        std::unordered_map<uint8_t const *, std::variant<EtsMethodSet *, Field *>, utf::Mutf8Hash, utf::Mutf8Equal>;
+    using FieldsVec = std::vector<Field *>;
+    using MethodsVec = std::vector<EtsMethodSet *>;
+
+    std::pair<FieldsVec, MethodsVec> CalculateProperties(const OverloadsMap *overloads);
+    void UpdatePropsWithBaseClasses(PropsMap *props);
+    void CollectConstructors(PropsMap *props);
+    void CollectClassMethods(PropsMap *props, const OverloadsMap *overloads);
+    std::pair<FieldsVec, MethodsVec> CalculateFieldsAndMethods(const PropsMap &props);
+    std::vector<napi_property_descriptor> BuildJSProperties(Span<Field *> fields, Span<EtsMethodSet *> methods);
     EtsClassWrapper *LookupBaseWrapper(EtsClass *klass);
 
     static napi_value JSCtorCallback(napi_env env, napi_callback_info cinfo);
@@ -132,6 +150,7 @@ private:
     // NOTE(vpukhov): allocate inplace to reduce memory consumption
     std::unique_ptr<LazyEtsMethodWrapperLink[]> etsMethodWrappers_;  // NOLINT(modernize-avoid-c-arrays)
     std::unique_ptr<EtsFieldWrapper[]> etsFieldWrappers_;            // NOLINT(modernize-avoid-c-arrays)
+    std::vector<std::unique_ptr<EtsMethodSet>> etsMethods_;
     uint32_t numMethods_ {};
     uint32_t numFields_ {};
 };

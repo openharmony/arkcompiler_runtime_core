@@ -12,18 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const { etsVm, getTestModule } = require('scenarios.test.js');
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_ETS_PROXY_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_ETS_PROXY_H_
+const etsMod = getTestModule('scenarios_test');
+const DerivedClassWithDefaultParameterMethods = etsMod.getClass('DerivedClassWithDefaultParameterMethods');
 
-#include <string_view>
-#include <node_api.h>
+{
+  const INT_VALUE = 777;
+  const DEFAULT_VALUE = 1;
 
-namespace ark::ets::interop::js::ets_proxy {
+  let obj = new DerivedClassWithDefaultParameterMethods();
 
-napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName);
-napi_value GetETSClass(napi_env env, std::string_view classDescriptor);
+  let ret = obj.int_parameter_method();
+  ASSERT_EQ(ret, -DEFAULT_VALUE);
 
-}  // namespace ark::ets::interop::js::ets_proxy
-
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_ETS_PROXY_H_
+  ret = obj.int_parameter_method(INT_VALUE);
+  ASSERT_EQ(ret, -INT_VALUE);
+}

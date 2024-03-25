@@ -103,20 +103,57 @@ TEST_F(EtsInteropScenariosEtsToJs, test_generic_type_as_return_value)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_generic_type_as_return_value.js"));
 }
 
-// NOTE #15925 enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_defined_for_parameter)
+TEST_F(EtsInteropScenariosEtsToJs, negative_test_overloaded_function)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/negative_test_overloaded_function.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, negative_test_overloaded_method)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/negative_test_overloaded_method.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, negative_test_overloaded_static_method)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/negative_test_overloaded_static_method.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_default_value_defined_for_parameter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_parameter.js"));
 }
 
-// NOTE #15925 enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_default_value_define_for_parameter_undefine)
+TEST_F(EtsInteropScenariosEtsToJs, test_default_value_defined_for_method_parameter)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_method_parameter.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_default_value_defined_for_static_method_parameter)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_static_method_parameter.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_for_parameter_undefine)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_parameter_undefine.js"));
 }
 
-// NOTE (splatov) #15925 enable this after interop is implemented in this direction
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_optional_primitive_explicit)
+TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_for_method_parameter_undefine)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_method_parameter_undefine.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_for_static_method_parameter_undefine)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_for_static_method_parameter_undefine.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_default_value_define_derived_class_method)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_default_value_define_derived_class_method.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_optional_primitive_explicit)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_optional_primitive_explicit.js"));
 }

@@ -75,7 +75,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
     ${ETS_EXT_SOURCES}/types/ets_shared_memory.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
-    ${ETS_EXT_SOURCES}/lambda_utils.cpp
+    ${ETS_EXT_SOURCES}/ets_utils.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)

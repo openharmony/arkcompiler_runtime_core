@@ -35,6 +35,7 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         js_proxy/js_proxy.cpp
         ets_proxy/ets_class_wrapper.cpp
         ets_proxy/ets_field_wrapper.cpp
+        ets_proxy/ets_method_set.cpp
         ets_proxy/ets_method_wrapper.cpp
         ets_proxy/shared_reference.cpp
         ets_proxy/shared_reference_storage.cpp

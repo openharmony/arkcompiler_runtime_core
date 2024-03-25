@@ -194,6 +194,16 @@ std::unique_ptr<JSRefConvert> EtsClassWrapper::CreateJSRefConvertJSProxy([[maybe
     return std::make_unique<JSRefConvertJSProxy>();
 }
 
+EtsMethodSet *EtsClassWrapper::GetMethod(const std::string &name) const
+{
+    for (const auto &item : etsMethods_) {
+        if (name == item->GetName()) {
+            return item.get();
+        }
+    }
+    return nullptr;
+}
+
 /*static*/
 EtsClassWrapper *EtsClassWrapper::Get(InteropCtx *ctx, EtsClass *etsClass)
 {
@@ -240,25 +250,16 @@ bool EtsClassWrapper::SetupHierarchy(InteropCtx *ctx, const char *jsBuiltinName)
     return true;
 }
 
-std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::CalculateProperties(
+std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapper::CalculateProperties(
     const OverloadsMap *overloads)
 {
-    auto fatalMethodOverloaded = [](Method *method) {
-        for (auto &m : method->GetClass()->GetMethods()) {
-            if (utf::IsEqual(m.GetName().data, method->GetName().data)) {
-                INTEROP_LOG(ERROR) << "overload: " << EtsMethod::FromRuntimeMethod(&m)->GetMethodSignature(true);
-            }
-        }
-        InteropCtx::Fatal(std::string("Method ") + utf::Mutf8AsCString(method->GetName().data) + " of class " +
-                          utf::Mutf8AsCString(method->GetClass()->GetDescriptor()) + " is overloaded");
-    };
     auto fatalNoMethod = [](Class *klass, const uint8_t *name, const char *signature) {
         InteropCtx::Fatal(std::string("No method ") + utf::Mutf8AsCString(name) + " " + signature + " in " +
                           klass->GetName());
     };
 
     auto klass = etsClass_->GetRuntimeClass();
-    std::unordered_map<uint8_t const *, std::variant<Method *, Field *>, utf::Mutf8Hash, utf::Mutf8Equal> props;
+    PropsMap props;
 
     // Collect fields
     for (auto &f : klass->GetFields()) {
@@ -273,7 +274,9 @@ std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::Calculat
             if (UNLIKELY(method == nullptr)) {
                 fatalNoMethod(klass, name, signature);
             }
-            auto it = props.insert({method->GetName().data, method});
+            auto etsMethodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(method));
+            auto it = props.insert({method->GetName().data, etsMethodSet.get()});
+            etsMethods_.push_back(std::move(etsMethodSet));
             INTEROP_FATAL_IF(!it.second);
         }
     }
@@ -283,51 +286,99 @@ std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::Calculat
     if (klassDesc == panda_file_items::class_descriptors::OBJECT) {
         // Ingore all methods of std.core.Object due to names intersection with JS Object
         // Keep constructors only
-        auto objCtors = etsClass_->GetConstructors();
-        // Assuming that ETS StdLib guarantee that Object has the only one ctor
-        ASSERT(objCtors.size() == 1);
-        auto ctor = objCtors[0]->GetPandaMethod();
-        props.insert({ctor->GetName().data, ctor});
+        CollectConstructors(&props);
         // NOTE(shumilov-petr): Think about removing methods from std.core.Object
         // that are already presented in JS Object, others should be kept
     } else {
         // Collect methods
-        for (auto &m : klass->GetMethods()) {
-            if (m.IsPrivate()) {
-                continue;
-            }
-            auto name = m.GetName().data;
-            if (overloads != nullptr && overloads->find(name) != overloads->end()) {
-                continue;
-            }
-            auto it = props.insert({m.GetName().data, &m});
-            if (UNLIKELY(!it.second)) {
-                fatalMethodOverloaded(&m);
-            }
-        }
+        CollectClassMethods(&props, overloads);
     }
 
-    auto hasSquashedProto = [](EtsClassWrapper *wclass) {
-        ASSERT(wclass->HasBuiltin() || wclass->baseWrapper_ != nullptr);
-#if PANDA_TARGET_OHOS
-        return wclass->HasBuiltin() || wclass->baseWrapper_->HasBuiltin();
-#else
-        (void)wclass;
-        return true;  // NOTE(vpukhov): some napi implementations add explicit receiver checks in call handler,
-                      // thus method inheritance via prototype chain wont work
-#endif
+    UpdatePropsWithBaseClasses(&props);
+
+    return CalculateFieldsAndMethods(props);
+}
+
+void EtsClassWrapper::CollectConstructors(EtsClassWrapper::PropsMap *props)
+{
+    auto objCtors = etsClass_->GetConstructors();
+    // Assuming that ETS StdLib guarantee that Object has the only one ctor
+    ASSERT(objCtors.size() == 1);
+    auto ctor = objCtors[0]->GetPandaMethod();
+    auto etsMethodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(ctor));
+    props->insert({ctor->GetName().data, etsMethodSet.get()});
+    etsMethods_.push_back(std::move(etsMethodSet));
+}
+
+void EtsClassWrapper::CollectClassMethods(EtsClassWrapper::PropsMap *props, const OverloadsMap *overloads)
+{
+    auto fatalMethodOverloaded = [](Method *method) {
+        for (auto &m : method->GetClass()->GetMethods()) {
+            if (utf::IsEqual(m.GetName().data, method->GetName().data)) {
+                INTEROP_LOG(ERROR) << "overload: " << EtsMethod::FromRuntimeMethod(&m)->GetMethodSignature(true);
+            }
+        }
+        InteropCtx::Fatal(std::string("Method ") + utf::Mutf8AsCString(method->GetName().data) + " of class " +
+                          utf::Mutf8AsCString(method->GetClass()->GetDescriptor()) + " is overloaded");
     };
+
+    auto klass = etsClass_->GetRuntimeClass();
+    for (auto &m : klass->GetMethods()) {
+        if (m.IsPrivate()) {
+            continue;
+        }
+        auto name = m.GetName().data;
+        if (overloads != nullptr && overloads->find(name) != overloads->end()) {
+            continue;
+        }
+        auto methodSet = std::make_unique<EtsMethodSet>(EtsMethodSet::Create(&m));
+        auto it = props->insert({m.GetName().data, methodSet.get()});
+        if (!it.second && !std::holds_alternative<EtsMethodSet *>(it.first->second)) {
+            // Method overloads non-method field
+            fatalMethodOverloaded(&m);
+        }
+        if (!it.second && std::holds_alternative<EtsMethodSet *>(it.first->second)) {
+            // Possible correct method overloading: merge to existing entry
+            auto addedMethods = std::get<EtsMethodSet *>(it.first->second);
+            addedMethods->MergeWith(*methodSet.get());
+        } else {
+            etsMethods_.push_back(std::move(methodSet));
+        }
+    }
+}
+
+void EtsClassWrapper::UpdatePropsWithBaseClasses(EtsClassWrapper::PropsMap *props)
+{
+    auto hasSquashedProtoOhosImpl = [](EtsClassWrapper *wclass) {
+        ASSERT(wclass->HasBuiltin() || wclass->baseWrapper_ != nullptr);
+        return wclass->HasBuiltin() || wclass->baseWrapper_->HasBuiltin();
+    };
+
+    auto hasSquashedProtoOtherImpl = [](EtsClassWrapper *wclass) {
+        // NOTE(vpukhov): some napi implementations add explicit receiver checks in call handler,
+        //                thus method inheritance via prototype chain wont work
+        (void)wclass;
+        return true;
+    };
+
+#if PANDA_TARGET_OHOS
+    auto hasSquashedProto = hasSquashedProtoOhosImpl;
+    (void)hasSquashedProtoOtherImpl;
+#else
+    auto hasSquashedProto = hasSquashedProtoOtherImpl;
+    (void)hasSquashedProtoOhosImpl;
+#endif
 
     if (hasSquashedProto(this)) {
         // Copy properties of base classes if we have to split prototype chain
         for (auto wclass = baseWrapper_; wclass != nullptr; wclass = wclass->baseWrapper_) {
             for (auto &wfield : wclass->GetFields()) {
                 Field *field = wfield.GetField();
-                props.insert({field->GetName().data, field});
+                props->insert({field->GetName().data, field});
             }
             for (auto &link : wclass->GetMethods()) {
-                Method *method = link.IsResolved() ? link.GetResolved()->GetMethod() : link.GetUnresolved();
-                props.insert({method->GetName().data, method});
+                EtsMethodSet *methodSet = link.IsResolved() ? link.GetResolved()->GetMethodSet() : link.GetUnresolved();
+                props->insert({utf::CStringAsMutf8(methodSet->GetName()), methodSet});
             }
 
             if (hasSquashedProto(wclass)) {
@@ -335,18 +386,21 @@ std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::Calculat
             }
         }
     }
+}
 
-    std::vector<Method *> methods;
+std::pair<EtsClassWrapper::FieldsVec, EtsClassWrapper::MethodsVec> EtsClassWrapper::CalculateFieldsAndMethods(
+    const PropsMap &props)
+{
+    std::vector<EtsMethodSet *> methods;
     std::vector<Field *> fields;
 
     for (auto &[n, p] : props) {
-        if (std::holds_alternative<Method *>(p)) {
-            auto method = std::get<Method *>(p);
-            if (method->IsConstructor()) {
-                if (!method->IsStatic()) {
-                    etsCtorLink_ = LazyEtsMethodWrapperLink(method);
-                }
-            } else {
+        if (std::holds_alternative<EtsMethodSet *>(p)) {
+            auto method = std::get<EtsMethodSet *>(p);
+            if (method->IsConstructor() && !method->IsStatic()) {
+                etsCtorLink_ = LazyEtsMethodWrapperLink(method);
+            }
+            if (!method->IsConstructor()) {
                 methods.push_back(method);
             }
         } else if (std::holds_alternative<Field *>(p)) {
@@ -359,7 +413,8 @@ std::pair<std::vector<Field *>, std::vector<Method *>> EtsClassWrapper::Calculat
     return {fields, methods};
 }
 
-std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Field *> fields, Span<Method *> methods)
+std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Field *> fields,
+                                                                         Span<EtsMethodSet *> methods)
 {
     std::vector<napi_property_descriptor> jsProps;
     jsProps.reserve(fields.size() + methods.size());
@@ -389,18 +444,16 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(Span<Fi
     Span<LazyEtsMethodWrapperLink> etsMethodWrappers(etsMethodWrappers_.get(), numMethods_);
     size_t methodIdx = 0;
 
-#ifndef NDEBUG
-    std::unordered_set<const uint8_t *> methodNames;
-#endif
-
     for (auto &method : methods) {
         ASSERT(!method->IsConstructor());
-        ASSERT(methodNames.insert(method->GetName().data).second);
         auto lazyLink = &etsMethodWrappers[methodIdx++];
         lazyLink->Set(method);
         jsProps.emplace_back(EtsMethodWrapper::MakeNapiProperty(method, lazyLink));
     }
-    ASSERT(etsCtorLink_.GetUnresolved() != nullptr);
+
+    if (UNLIKELY(!IsEtsGlobalClass() && etsCtorLink_.GetUnresolved() == nullptr)) {
+        InteropCtx::Fatal("Class " + etsClass_->GetRuntimeClass()->GetName() + " has no constructor");
+    }
 
     return jsProps;
 }
@@ -449,6 +502,19 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
 
     auto [fields, methods] = _this->CalculateProperties(overloads);
+    for (auto method : methods) {
+        const std::string methodName(method->GetName());
+        auto baseClassWrapper = _this->baseWrapper_;
+        while (nullptr != baseClassWrapper) {
+            EtsMethodSet *baseMethodSet = baseClassWrapper->GetMethod(methodName);
+            if (nullptr != baseMethodSet) {
+                method->SetBaseMethodSet(baseMethodSet);
+                break;
+            }
+            baseClassWrapper = baseClassWrapper->baseWrapper_;
+        }
+    }
+
     auto jsProps = _this->BuildJSProperties({fields.data(), fields.size()}, {methods.data(), methods.size()});
 
     // NOTE(vpukhov): fatal no-public-fields check when escompat adopt accessors
@@ -457,7 +523,8 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
     //                simple solution: ban JSProxy if !fields.empty()
-    _this->jsproxyWrapper_ = js_proxy::JSProxy::Create(etsClass, {methods.data(), methods.size()});
+    auto ungroupedMethods = CollectAllPandaMethods(methods.begin(), methods.end());
+    _this->jsproxyWrapper_ = js_proxy::JSProxy::Create(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
 
     napi_value jsCtor {};
     NAPI_CHECK_FATAL(napi_define_class(env, etsClass->GetDescriptor(), NAPI_AUTO_LENGTH,
@@ -568,7 +635,7 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
 
     EtsMethodWrapper *ctorWrapper = EtsMethodWrapper::ResolveLazyLink(ctx, etsCtorLink_);
     ASSERT(ctorWrapper != nullptr);
-    EtsMethod *ctorMethod = ctorWrapper->GetEtsMethod();
+    EtsMethod *ctorMethod = ctorWrapper->GetEtsMethod(jsArgs.Size());
     ASSERT(ctorMethod->IsInstanceConstructor());
 
     napi_value callRes = CallETSInstance(coro, ctx, ctorMethod->GetPandaMethod(), jsArgs, etsObject.GetPtr());

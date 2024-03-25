@@ -15,6 +15,8 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_proxy.h"
 
+#include "plugins/ets/runtime/ets_utils.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_set.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_wrapper.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
@@ -22,32 +24,34 @@
 
 namespace ark::ets::interop::js::ets_proxy {
 
-napi_value GetETSFunction(napi_env env, std::string_view classDescriptor, std::string_view methodName)
+napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    InteropCtx *ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_JS(coro, env);
 
-    EtsClass *etsClass = coro->GetPandaVM()->GetClassLinker()->GetClass(classDescriptor.data());
-    if (UNLIKELY(etsClass == nullptr)) {
-        InteropCtx::ThrowJSError(env, "GetETSFunction: unresolved class " + std::string(classDescriptor));
-        return nullptr;
+    std::ostringstream classDescriptorBuilder;
+    classDescriptorBuilder << "L" << packageName << (packageName.empty() ? "ETSGLOBAL;" : "/ETSGLOBAL;");
+    std::string classDescriptor = classDescriptorBuilder.str();
+
+    if (IsEtsGlobalClassName(packageName.data())) {
+        // Old-style value for legacy code
+        // NOTE remove this check after all tests fixed
+        classDescriptor = packageName;
     }
 
-    EtsMethod *etsMethod = etsClass->GetDirectMethod(methodName.data());
-    if (UNLIKELY(etsMethod == nullptr)) {
+    napi_value jsClass = GetETSClass(env, classDescriptor);
+    ASSERT(GetValueType(env, jsClass) == napi_function);
+
+    napi_value jsMethod;
+    const napi_status resolveStatus = napi_get_named_property(env, jsClass, methodName.data(), &jsMethod);
+    if (UNLIKELY(napi_ok != resolveStatus || GetValueType(env, jsMethod) != napi_function)) {
         InteropCtx::ThrowJSError(env, "GetETSFunction: class " + std::string(classDescriptor) + " doesn't contain " +
                                           std::string(methodName) + " method");
         return nullptr;
     }
 
-    EtsMethodWrapper *etsMethodWrapper = EtsMethodWrapper::GetFunction(ctx, etsMethod);
-    if (UNLIKELY(etsMethodWrapper == nullptr)) {
-        InteropCtx::ThrowJSError(env, "GetETSFunction: cannot get EtsMethodWrapper, classDescriptor=" +
-                                          std::string(classDescriptor) + " methodName=" + std::string(methodName));
-        return nullptr;
-    }
-    return etsMethodWrapper->GetJsValue(env);
+    NAPI_CHECK_FATAL(NapiObjectSeal(env, jsMethod));
+    return jsMethod;
 }
 
 napi_value GetETSClass(napi_env env, std::string_view classDescriptor)
