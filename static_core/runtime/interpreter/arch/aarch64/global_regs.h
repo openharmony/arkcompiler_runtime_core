@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,93 +29,93 @@ namespace ark::interpreter::arch::regs {
 #endif
 
 // NOLINTBEGIN(hicpp-no-assembler, misc-definitions-in-headers)
-register const uint8_t *G_PC asm("x20");
-register int64_t G_ACC_VALUE asm("x21");
-register int64_t G_ACC_TAG asm("x22");
-register void *G_FP asm("x23");
-register const void *const *G_DISPATCH_TABLE asm("x24");
-register void *G_M_FP asm("x25");
-register ManagedThread *G_THREAD asm("x28");
+register const uint8_t *g_pc asm("x20");
+register int64_t g_accValue asm("x21");
+register int64_t g_accTag asm("x22");
+register void *g_fp asm("x23");
+register const void *const *g_dispatchTable asm("x24");
+register void *g_mFp asm("x25");
+register ManagedThread *g_thread asm("x28");
 // NOLINTEND(hicpp-no-assembler, misc-definitions-in-headers)
 
 ALWAYS_INLINE inline const uint8_t *GetPc()
 {
-    return G_PC;
+    return g_pc;
 }
 
 ALWAYS_INLINE inline void SetPc(const uint8_t *pc)
 {
-    G_PC = pc;
+    g_pc = pc;
 }
 
 ALWAYS_INLINE inline int64_t GetAccValue()
 {
-    return G_ACC_VALUE;
+    return g_accValue;
 }
 
 ALWAYS_INLINE inline void SetAccValue(int64_t value)
 {
-    G_ACC_VALUE = value;
+    g_accValue = value;
 }
 
 ALWAYS_INLINE inline int64_t GetAccTag()
 {
-    return G_ACC_TAG;
+    return g_accTag;
 }
 
 ALWAYS_INLINE inline void SetAccTag(int64_t tag)
 {
-    G_ACC_TAG = tag;
+    g_accTag = tag;
 }
 
 ALWAYS_INLINE inline Frame *GetFrame()
 {
-    return reinterpret_cast<Frame *>(reinterpret_cast<uintptr_t>(G_FP) - Frame::GetVregsOffset());
+    return reinterpret_cast<Frame *>(reinterpret_cast<uintptr_t>(g_fp) - Frame::GetVregsOffset());
 }
 
 ALWAYS_INLINE inline void SetFrame(Frame *frame)
 {
-    G_FP = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(frame) + Frame::GetVregsOffset());
+    g_fp = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(frame) + Frame::GetVregsOffset());
 }
 
 ALWAYS_INLINE inline void *GetFp()
 {
-    return G_FP;
+    return g_fp;
 }
 
 ALWAYS_INLINE inline void SetFp(void *fp)
 {
-    G_FP = fp;
+    g_fp = fp;
 }
 
 ALWAYS_INLINE inline void *GetMirrorFp()
 {
-    return G_M_FP;
+    return g_mFp;
 }
 
-ALWAYS_INLINE inline void SetMirrorFp(void *m_fp)
+ALWAYS_INLINE inline void SetMirrorFp(void *mFp)
 {
-    G_M_FP = m_fp;
+    g_mFp = mFp;
 }
 
 ALWAYS_INLINE inline const void *const *GetDispatchTable()
 {
-    return G_DISPATCH_TABLE;
+    return g_dispatchTable;
 }
 
-ALWAYS_INLINE inline void SetDispatchTable(const void *const *dispatch_table)
+ALWAYS_INLINE inline void SetDispatchTable(const void *const *dispatchTable)
 {
-    G_DISPATCH_TABLE = dispatch_table;
+    g_dispatchTable = dispatchTable;
 }
 
 ALWAYS_INLINE inline ManagedThread *GetThread()
 {
-    return G_THREAD;
+    return g_thread;
 }
 
 ALWAYS_INLINE inline void SetThread(ManagedThread *thread)
 {
-    G_THREAD = thread;
+    g_thread = thread;
 }
 
 }  // namespace ark::interpreter::arch::regs
