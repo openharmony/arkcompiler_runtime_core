@@ -80,6 +80,8 @@ public:
 private:
     void Extract(const File *pf);
 
+    constexpr static auto ANY_SIGNATURE = "A";
+
     struct MethodDebugInfo {
         std::string source_file;
         std::string source_code;
