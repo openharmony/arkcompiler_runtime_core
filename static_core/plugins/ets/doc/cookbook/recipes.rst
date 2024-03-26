@@ -3142,44 +3142,6 @@ statements.
     // Initialization function should be called to execute statements:
     A.init()
 
-.. _R119:
-
-|CB_R| Importing a module for side-effects only is not supported
-----------------------------------------------------------------
-
-|CB_RULE| ``arkts-no-side-effects-imports``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta:
-    :keywords: ImportFromPath
-
-|CB_ERROR|
-
-|LANG| does not support global variables like ``window`` to avoid
-side-effects during module importing. All variables marked as export can be
-accessed through the ``*`` syntax.
-
-|CB_BAD|
-~~~~~~~~
-
-.. code-block:: typescript
-
-    // === module at "path/to/module.ts"
-    export const EXAMPLE_VALUE = 42
-
-    // Set a global variable
-    window.MY_GLOBAL_VAR = "Hello, world!"
-
-    // ==== using this module:
-    import "path/to/module"
-
-|CB_OK|
-~~~~~~~
-
-.. code-block:: typescript
-
-    import * as m from "path/to/module"
-
 .. _R121:
 
 |CB_R| ``require`` and ``import`` assignment are not supported
@@ -4148,7 +4110,7 @@ direction are supported.
 
 |CB_WARNING|
 
-Currently, only ArkUI decorators are allowed  in the |LANG|.
+Currently, only ArkUI decorators are allowed in the |LANG|.
 Any other decorator will cause a compile-time error.
 
 |CB_BAD|
@@ -4466,8 +4428,11 @@ category:
 
 * ``Sendable`` class or interface
 
-* ``Nullish Sendable`` type: ``T | null``, ``T | undefined``
-  or ``T | null | undefined``, where ``T`` is a sendable data type
+* Type parameter of generic ``Sendable`` type
+
+* Const enum type
+
+* Union type, whose elements are ``Sendable`` data types
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4495,8 +4460,13 @@ category:
 
     interface I extends ISendable {}
 
+    enum E {
+        A,
+        B
+    }
+
     // b.ets
-    import { A, I } from "a"
+    import { A, I, E } from "a"
 
     @Sendable
     class B {
@@ -4504,6 +4474,7 @@ category:
         b: I = {}
         c: number = 1
         d: string | null | undefined = undefined
+        e: E = E.A
     }
 
 |CB_SEE|
@@ -4516,8 +4487,8 @@ category:
 
 .. _R155:
 
-|CB_R| Definite assignment assertion is not allowed in ``Sendable`` classes and Interfaces
-------------------------------------------------------------------------------------------
+|CB_R| Definite assignment assertion is not allowed in ``Sendable`` classes
+---------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-sendable-definite-assignment``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4530,7 +4501,7 @@ category:
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
 |LANG| doesn't allow using definite assignment assertions on properties of
-``Sendable`` classes and interfaces.
+``Sendable`` classes.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4642,7 +4613,7 @@ generic ``Sendable`` type.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-The |LANG| doesn't support sharing closures at runtime. Therefore, ``Sendable``
+|LANG| doesn't support sharing closures at runtime. Therefore, ``Sendable``
 classes are not allowed to capture local variable, or use a function or class
 from the same module, as it would create a closure. Only imported variables,
 classes and functions can be used inside a ``Sendable`` class body.
@@ -4708,3 +4679,368 @@ classes and functions can be used inside a ``Sendable`` class body.
 * :ref:`R154`
 * :ref:`R155`
 * :ref:`R156`
+
+.. _R158:
+
+|CB_R| Only ``@Sendable`` decorator can be used on ``Sendable`` class
+---------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-class-decorator``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableClassDecorator
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+In |LANG|, only ``@Sendable`` decorator is allowed on ``Sendable`` class.
+Additionally, decorators can't be applied to fields, methods, accessors
+or constructor/method parameters of ``Sendable`` class.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    import { DecoratorA, DecoratorB, DecoratorC, DecoratorD } from "decorator"
+
+    @DecoratorA
+    @Sendable
+    class A {
+        @DecoratorB
+        a: number = 1
+
+        @DecoratorC
+        m(@DecoratorD p: number) {}
+    }
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R154`
+
+.. _R159:
+
+|CB_R| Objects of ``Sendable`` type can't be initialized using object literal or array literal
+----------------------------------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-obj-init``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableObjectInitialization
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+|LANG| doesn't support initializing objects of ``Sendable`` type with
+object literal or array literal.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    import {collections} from "@arkts.collections.d.ets"
+
+    let a: collections.Array<number> = [1, 2, 3]
+
+    @Sendable
+    class A {
+        a: number = 1
+    }
+
+    let b: A = {a: 2}
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    import {collections} from "@arkts.collections.d.ets"
+
+    let a: collections.Array<number> = new collections.Array<number>([1, 2, 3])
+
+    @Sendable
+    class A {
+        a: number
+
+        constructor(a: number) {
+            this.a = a;
+        }
+    }
+
+    let b: A = new A(2)
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R154`
+
+.. _R160:
+
+|CB_R| Computed property names are not allowed in ``Sendable`` classes
+----------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-computed-prop-name``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableComputedPropName
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+|LANG| doesn't allow declaring properties in ``Sendable`` classes using
+computed values.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    enum E {
+        B = "b"
+    }
+
+    @Sendable
+    class A {
+        ['a']: number = 1
+        [E.B]: number = 2
+    }
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    @Sendable
+    class A {
+        a: number = 1
+        b: number = 2
+    }
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R154`
+
+.. _R161:
+
+|CB_R| Casting ``Non-sendable`` data to ``Sendable`` type is not allowed
+------------------------------------------------------------------------
+
+|CB_RULE| ``arkts-sendable-as-expr``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SendableAsExpr
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+|LANG| doesn't allow casting ``Non-sendable`` data to ``Sendable`` type.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    class A {}
+
+    @Sendable
+    class B {}
+
+    let c: B = new A() as B
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    @Sendable
+    class A {}
+
+    class B {}
+
+    let c: B = new A() as B
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R153`
+* :ref:`R154`
+
+.. _R162:
+
+|CB_R| Importing a module for side-effects only is not supported in shared module
+---------------------------------------------------------------------------------
+
+|CB_RULE| ``arkts-no-side-effects-imports``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SharedNoSideEffectImport
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+|LANG| doesn't support importing a module for side-effects only in a shared
+module.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    import 'module' // Error, importing a module for side-effects
+    'use shared'
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    import { X, Y } from 'module'
+    'use shared'
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R163`
+* :ref:`R164`
+
+.. _R163:
+
+|CB_R| Only ``Sendable`` entities can be exported in shared module
+------------------------------------------------------------------
+
+|CB_RULE| ``arkts-shared-module-exports``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SharedModuleExports
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+In |LANG|, only ``Sendable`` entities can be exported in a shared module.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    // a.ets
+    'use shared'
+
+    export enum E { A, B } // Error, regular enum is not sendable
+    export class C {} // Error, class C is not sendable
+    export let v1: C; // Error, v1 has a non-sendable type
+
+    type T1 = C;
+    export { T1 }; // Error, type T1 is aliasing the non-sendable type
+    let v2: T1;
+    export { v2 }; // Error, v2 has a non-sendable type
+
+    export { D } from 'b'; // Error, re-exporting non-sendable class
+    export { v3 } from 'b'; // Error, re-exporting variable with non-sendable type
+
+    // b.ets
+    export class D {}
+    export let v3: D;
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    // a.ets
+    'use shared'
+
+    export const enum E { A, B }
+
+    @Sendable
+    export class C {}
+
+    export let v1: C;
+
+    type T1 = C;
+    let v2: T1;
+    export { T1, v2 };
+
+    export { D, v3, v4 } from 'b';
+
+    // b.ets
+    @Sendable
+    export class D {}
+    export let v3: D;
+    export let v4: number;
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R162`
+* :ref:`R164`
+
+.. _R164:
+
+|CB_R| ``export * from ...`` is not allowed in shared module
+------------------------------------------------------------
+
+|CB_RULE| ``arkts-shared-module-no-wildcard-export``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: SharedModuleNoWildcardExport
+
+|CB_ERROR|
+
+**Note: This rule describes restrictions for ArkTS-specific feature**
+
+|LANG| doesn't allow using wildcard exports in shared modules. All exported
+entities must be explicitly specified.
+
+|CB_NON_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    // a.ets
+    @Sendable
+    export class C {}
+    export let a: number;
+
+    // b.ets
+    'use shared'
+    export * from 'a'; // Error, wildcard export in a shared module
+
+|CB_COMPLIANT_CODE|
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    // a.ets
+    @Sendable
+    export class C {}
+    export let a: number;
+
+    // b.ets
+    'use shared'
+    export { C, a } from 'a';
+
+|CB_SEE|
+~~~~~~~~
+
+* :ref:`R162`
+* :ref:`R163`
