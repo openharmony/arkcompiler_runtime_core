@@ -216,8 +216,8 @@ module MetadataGen
   end
 
   def arg_list(is_bool)
-    args = ['std::string_view attribute']
-    args << 'std::string_view value' if !is_bool
+    args = ['const std::string_view &attribute']
+    args << 'const std::string_view &value' if !is_bool
     args
   end
 

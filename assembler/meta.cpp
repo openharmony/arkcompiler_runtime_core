@@ -24,7 +24,7 @@
 
 namespace panda::pandasm {
 
-std::optional<Metadata::Error> Metadata::ValidateSize(std::string_view value) const
+std::optional<Metadata::Error> Metadata::ValidateSize(const std::string_view &value) const
 {
     constexpr size_t SIZE = 10;
 
@@ -45,7 +45,7 @@ bool ItemMetadata::IsForeign() const
     return GetAttribute("external");
 }
 
-static panda::pandasm::Value::Type GetType(std::string_view value)
+static panda::pandasm::Value::Type GetType(const std::string_view &value)
 {
     using VType = panda::pandasm::Value::Type;
     static std::unordered_map<std::string_view, VType> types {
@@ -60,7 +60,7 @@ static panda::pandasm::Value::Type GetType(std::string_view value)
 }
 
 template <class T>
-static T ConvertFromString(std::string_view value, char **end)
+static T ConvertFromString(const std::string_view &value, char **end)
 {
     static_assert(std::is_integral_v<T>, "T must be integral type");
 
@@ -85,31 +85,31 @@ static T ConvertFromString(std::string_view value, char **end)
 }
 
 template <>
-int64_t ConvertFromString(std::string_view value, char **end)
+int64_t ConvertFromString(const std::string_view &value, char **end)
 {
     return static_cast<int64_t>(strtoll(value.data(), end, 0));
 }
 
 template <>
-uint64_t ConvertFromString(std::string_view value, char **end)
+uint64_t ConvertFromString(const std::string_view &value, char **end)
 {
     return static_cast<uint64_t>(strtoull(value.data(), end, 0));
 }
 
 template <>
-float ConvertFromString(std::string_view value, char **end)
+float ConvertFromString(const std::string_view &value, char **end)
 {
     return strtof(value.data(), end);
 }
 
 template <>
-double ConvertFromString(std::string_view value, char **end)
+double ConvertFromString(const std::string_view &value, char **end)
 {
     return strtod(value.data(), end);
 }
 
 template <class T>
-static Expected<T, Metadata::Error> ConvertFromString(std::string_view value)
+static Expected<T, Metadata::Error> ConvertFromString(const std::string_view &value)
 {
     static_assert(std::is_arithmetic_v<T>, "T must be arithmetic type");
 
@@ -129,7 +129,7 @@ static Expected<T, Metadata::Error> ConvertFromString(std::string_view value)
 }
 
 template <Value::Type type, class T = ValueTypeHelperT<type>>
-static Expected<ScalarValue, Metadata::Error> CreatePrimitiveValue(std::string_view value,
+static Expected<ScalarValue, Metadata::Error> CreatePrimitiveValue(const std::string_view &value,
                                                                    T max_value = std::numeric_limits<T>::max())
 {
     auto res = ConvertFromString<T>(value);
@@ -147,7 +147,7 @@ static Expected<ScalarValue, Metadata::Error> CreatePrimitiveValue(std::string_v
 }
 
 static Expected<ScalarValue, Metadata::Error> CreateValue(
-    Value::Type type, std::string_view value,
+    Value::Type type, const std::string_view &value,
     const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotation_id_map = {})
 {
     switch (type) {
@@ -236,7 +236,7 @@ std::optional<Metadata::Error> AnnotationMetadata::AnnotationElementBuilder::Add
     return {};
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::Store(std::string_view attribute)
+std::optional<Metadata::Error> AnnotationMetadata::Store(const std::string_view &attribute)
 {
     if (IsParseAnnotationElement() && !annotation_element_builder_.IsCompleted()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -251,7 +251,7 @@ std::optional<Metadata::Error> AnnotationMetadata::Store(std::string_view attrib
     return Metadata::Store(attribute);
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::MeetExpRecordAttribute(std::string_view attribute,
+std::optional<Metadata::Error> AnnotationMetadata::MeetExpRecordAttribute(const std::string_view &attribute,
                                                                           const std::string_view &value)
 {
     if (IsParseAnnotationElement() && !annotation_element_builder_.IsCompleted()) {
@@ -265,7 +265,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpRecordAttribute(std::s
     return {};
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::MeetExpIdAttribute(std::string_view attribute,
+std::optional<Metadata::Error> AnnotationMetadata::MeetExpIdAttribute(const std::string_view &attribute,
                                                                       const std::string_view &value)
 {
     if (!IsParseAnnotation() || IsParseAnnotationElement()) {
@@ -285,7 +285,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpIdAttribute(std::strin
     return {};
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementNameAttribute(std::string_view attribute,
+std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementNameAttribute(const std::string_view &attribute,
                                                                                const std::string_view &value)
 {
     if (!IsParseAnnotation()) {
@@ -306,7 +306,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementNameAttribute(s
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementTypeAttribute(
-    std::string_view attribute, const std::string_view &value)
+    const std::string_view &attribute, const std::string_view &value)
 {
     if (!IsParseAnnotationElement()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -326,7 +326,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementTypeAttribute(
 }
 
 std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementArrayComponentTypeAttribute(
-    std::string_view attribute, const std::string_view &value)
+    const std::string_view &attribute, const std::string_view &value)
 {
     if (!IsParseAnnotationElement()) {
         return Error(std::string("Unexpected attribute '").append(attribute) +
@@ -350,7 +350,7 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementArrayComponentT
     return {};
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementValueAttribute(std::string_view attribute,
+std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementValueAttribute(const std::string_view &attribute,
                                                                                 const std::string_view &value)
 {
     if (!IsParseAnnotationElement()) {
@@ -380,7 +380,8 @@ std::optional<Metadata::Error> AnnotationMetadata::MeetExpElementValueAttribute(
     return annotation_element_builder_.AddValue(value, id_map_);
 }
 
-std::optional<Metadata::Error> AnnotationMetadata::StoreValue(std::string_view attribute, std::string_view value)
+std::optional<Metadata::Error> AnnotationMetadata::StoreValue(const std::string_view &attribute,
+                                                              const std::string_view &value)
 {
     auto err = Metadata::StoreValue(attribute, value);
     if (err) {
@@ -477,7 +478,8 @@ bool FunctionMetadata::IsCctor() const
     return GetAttribute("cctor");
 }
 
-std::optional<Metadata::Error> FieldMetadata::StoreValue(std::string_view attribute, std::string_view value)
+std::optional<Metadata::Error> FieldMetadata::StoreValue(const std::string_view &attribute,
+                                                         const std::string_view &value)
 {
     auto err = ItemMetadata::StoreValue(attribute, value);
     if (err) {
