@@ -22,6 +22,11 @@
 
 namespace panda::abc2program {
 
+// function_kind_mask
+constexpr uint32_t MASK_9_TO_16_BITS = 0x0000FF00;
+constexpr uint32_t LOWEST_8_BIT_MASK = 0x000000FF;
+constexpr uint32_t BITS_8_SHIFT = 8;
+
 // type name
 constexpr std::string_view GLOBAL_TYPE_NAME = "_GLOBAL";
 constexpr std::string_view ARRAY_TYPE_PREFIX = "[";

@@ -38,6 +38,7 @@ void AbcMethodProcessor::FillProgramData()
 void AbcMethodProcessor::FillFunctionData()
 {
     FillProto();
+    FillFunctionKind();
     FillFunctionMetaData();
     FillCodeData();
 }
@@ -72,6 +73,14 @@ void AbcMethodProcessor::FillProto()
     }
 }
 
+void AbcMethodProcessor::FillFunctionKind()
+{
+    uint32_t method_acc_flags = method_data_accessor_->GetAccessFlags();
+    uint32_t function_kind_u32 = ((method_acc_flags & MASK_9_TO_16_BITS) >> BITS_8_SHIFT);
+    panda_file::FunctionKind function_kind = static_cast<panda_file::FunctionKind>(function_kind_u32);
+    function_.SetFunctionKind(function_kind);
+}
+
 void AbcMethodProcessor::FillFunctionMetaData()
 {
     if (method_data_accessor_->IsStatic()) {
@@ -80,6 +89,14 @@ void AbcMethodProcessor::FillFunctionMetaData()
     if (file_->IsExternal(method_data_accessor_->GetMethodId())) {
         function_.metadata->SetAttribute("external");
     }
+    FillAccessFlags();
+}
+
+void AbcMethodProcessor::FillAccessFlags()
+{
+    uint32_t access_flags = method_data_accessor_->GetAccessFlags();
+    access_flags = (access_flags & LOWEST_8_BIT_MASK);
+    function_.metadata->SetAccessFlags(access_flags);
 }
 
 void AbcMethodProcessor::FillCodeData()

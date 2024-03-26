@@ -30,7 +30,9 @@ class AbcMethodProcessor : public AbcFileEntityProcessor {
   private:
     void FillFunctionData();
     void FillProto();
+    void FillFunctionKind();
     void FillFunctionMetaData();
+    void FillAccessFlags();
     void FillCodeData();
     void AddFunctionIntoFunctionTable();
     AbcTypeConverter type_converter_;

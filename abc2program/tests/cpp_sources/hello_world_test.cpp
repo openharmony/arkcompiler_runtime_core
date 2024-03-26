@@ -124,6 +124,21 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_strings, TestSi
 }
 
 /**
+ * @tc.name: abc2program_hello_world_test_function_kind_access_flags
+ * @tc.desc: get existed function_kind.
+ * @tc.type: FUNC
+ * @tc.require: file path and name
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_function_kind_access_flags, TestSize.Level1)
+{
+    const pandasm::Function &function = *foo_function_;
+    panda_file::FunctionKind function_kind = function.function_kind;
+    EXPECT_TRUE(function_kind == panda_file::FunctionKind::FUNCTION);
+    uint32_t access_flags = function.metadata->GetAccessFlags();
+    EXPECT_TRUE(access_flags == 0x08);
+}
+
+/**
  * @tc.name: abc2program_code_test_function_foo_part1
  * @tc.desc: get program fuction foo.
  * @tc.type: FUNC
