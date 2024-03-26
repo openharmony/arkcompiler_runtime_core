@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 
 namespace ark::taskmanager {
 
-enum class TaskStatisticsImplType : uint8_t { SIMPLE, FINE_GRAINED, LOCK_FREE };
+enum class TaskStatisticsImplType : uint8_t { SIMPLE, FINE_GRAINED, LOCK_FREE, NO_STAT };
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskStatisticsImplType type);
 
 PANDA_PUBLIC_API TaskStatisticsImplType TaskStatisticsImplTypeFromString(std::string_view string);

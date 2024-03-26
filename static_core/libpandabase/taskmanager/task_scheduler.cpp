@@ -36,6 +36,8 @@ TaskScheduler::TaskScheduler(size_t workersCount, TaskStatisticsImplType taskSta
         case TaskStatisticsImplType::LOCK_FREE:
             taskStatistics_ = new LockFreeTaskStatisticsImpl();
             break;
+        case TaskStatisticsImplType::NO_STAT:
+            break;
         default:
             UNREACHABLE();
     }
@@ -78,6 +80,11 @@ TaskQueueId TaskScheduler::RegisterQueue(internal::SchedulableTaskQueueInterface
     queue->SetCallbacks(
         [this](TaskProperties properties, size_t count) { this->IncrementCounterOfAddedTasks(properties, count); },
         [this]() { this->SignalWorkers(); });
+
+    // init countOfTasksIsSystem_ for possible task from registered queue
+    countOfTasksInSystem_[{queue->GetTaskType(), queue->GetVMType(), TaskExecutionMode::FOREGROUND}] = 0U;
+    countOfTasksInSystem_[{queue->GetTaskType(), queue->GetVMType(), TaskExecutionMode::BACKGROUND}] = 0U;
+
     return id;
 }
 
@@ -168,8 +175,7 @@ size_t TaskScheduler::PutTasksInWorker(WorkerThread *worker, TaskQueueId selecte
 
 bool TaskScheduler::AreQueuesEmpty() const
 {
-    for (const auto &[id, queue] : taskQueues_) {
-        (void)id;
+    for ([[maybe_unused]] const auto &[id, queue] : taskQueues_) {
         ASSERT(queue != nullptr);
         if (!queue->IsEmpty()) {
             return false;
@@ -190,7 +196,7 @@ bool TaskScheduler::AreWorkersEmpty() const
 
 bool TaskScheduler::AreNoMoreTasks() const
 {
-    return taskStatistics_->GetCountOfTaskInSystem() == 0;
+    return GetCountOfTasksInSystem() == 0;
 }
 
 size_t TaskScheduler::HelpWorkersWithTasks(TaskProperties properties)
@@ -211,10 +217,14 @@ size_t TaskScheduler::HelpWorkersWithTasks(TaskProperties properties)
         return 0;
     }
     LOG(DEBUG, TASK_MANAGER) << "Helper: executed tasks: " << executedTasksCount << ";";
-    taskStatistics_->IncrementCount(TaskStatus::POPPED, properties, executedTasksCount);
+    DecrementCountOfTasksInSystem(properties, executedTasksCount);
+    if (UNLIKELY(taskStatistics_ != nullptr)) {
+        taskStatistics_->IncrementCount(TaskStatus::POPPED, properties, executedTasksCount);
+    }
+
     // Atomic with acquire order reason: get correct value
     auto waitToFinish = waitToFinish_.load(std::memory_order_acquire);
-    if (waitToFinish > 0 && taskStatistics_->GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
+    if (waitToFinish > 0 && GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
         os::memory::LockHolder taskManagerLockHolder(taskSchedulerStateLock_);
         finishTasksCondVar_.SignalAll();
     }
@@ -275,16 +285,18 @@ void TaskScheduler::WaitForFinishAllTasksWithProperties(TaskProperties propertie
     os::memory::LockHolder lockHolder(taskSchedulerStateLock_);
     // Atomic with acq_rel order reason: other thread should see correct value
     waitToFinish_.fetch_add(1, std::memory_order_acq_rel);
-    while (taskStatistics_->GetCountOfTasksInSystemWithTaskProperties(properties) != 0) {
+    while (GetCountOfTasksInSystemWithTaskProperties(properties) != 0) {
         finishTasksCondVar_.Wait(&taskSchedulerStateLock_);
     }
     // Atomic with acq_rel order reason: other thread should see correct value
     waitToFinish_.fetch_sub(1, std::memory_order_acq_rel);
-    LOG(DEBUG, TASK_MANAGER) << "After waiting tasks with properties: " << properties
-                             << " {added: " << taskStatistics_->GetCount(TaskStatus::ADDED, properties)
-                             << ", executed: " << taskStatistics_->GetCount(TaskStatus::EXECUTED, properties)
-                             << ", popped: " << taskStatistics_->GetCount(TaskStatus::POPPED, properties) << "}";
-    taskStatistics_->ResetCountersWithTaskProperties(properties);
+    if (UNLIKELY(taskStatistics_ != nullptr)) {
+        LOG(DEBUG, TASK_MANAGER) << "After waiting tasks with properties: " << properties
+                                 << " {added: " << taskStatistics_->GetCount(TaskStatus::ADDED, properties)
+                                 << ", executed: " << taskStatistics_->GetCount(TaskStatus::EXECUTED, properties)
+                                 << ", popped: " << taskStatistics_->GetCount(TaskStatus::POPPED, properties) << "}";
+        taskStatistics_->ResetCountersWithTaskProperties(properties);
+    }
 }
 
 void TaskScheduler::Finalize()
@@ -313,13 +325,18 @@ void TaskScheduler::Finalize()
     for (auto *worker : workers_) {
         delete worker;
     }
-    taskStatistics_->ResetAllCounters();
+    if (UNLIKELY(taskStatistics_ != nullptr)) {
+        taskStatistics_->ResetAllCounters();
+    }
     LOG(DEBUG, TASK_MANAGER) << "TaskScheduler: Finalized";
 }
 
 void TaskScheduler::IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue)
 {
-    taskStatistics_->IncrementCount(TaskStatus::ADDED, properties, ivalue);
+    IncrementCountOfTasksInSystem(properties, ivalue);
+    if (UNLIKELY(taskStatistics_ != nullptr)) {
+        taskStatistics_->IncrementCount(TaskStatus::ADDED, properties, ivalue);
+    }
 }
 
 size_t TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap)
@@ -327,10 +344,13 @@ size_t TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounte
     size_t countOfTasks = 0;
     for (const auto &[properties, count] : counterMap) {
         countOfTasks += count;
-        taskStatistics_->IncrementCount(TaskStatus::EXECUTED, properties, count);
+        DecrementCountOfTasksInSystem(properties, count);
+        if (UNLIKELY(taskStatistics_ != nullptr)) {
+            taskStatistics_->IncrementCount(TaskStatus::EXECUTED, properties, count);
+        }
         // Atomic with acquire order reason: get correct value
         auto waitToFinish = waitToFinish_.load(std::memory_order_acquire);
-        if (waitToFinish > 0 && taskStatistics_->GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
+        if (waitToFinish > 0 && GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
             os::memory::LockHolder outsideLockHolder(taskSchedulerStateLock_);
             finishTasksCondVar_.SignalAll();
         }
@@ -364,7 +384,37 @@ TaskScheduler::~TaskScheduler()
     ASSERT(start_ == finish_);
     // Check if all task queue was deleted
     ASSERT(taskQueues_.empty());
-    delete taskStatistics_;
+    if (UNLIKELY(taskStatistics_ != nullptr)) {
+        delete taskStatistics_;
+    }
+}
+
+void TaskScheduler::IncrementCountOfTasksInSystem(TaskProperties prop, size_t count)
+{
+    // Atomic with acq_rel order reason: fast add count to countOfTasksInSystem_[prop]
+    countOfTasksInSystem_[prop].fetch_add(count, std::memory_order_acq_rel);
+}
+
+void TaskScheduler::DecrementCountOfTasksInSystem(TaskProperties prop, size_t count)
+{
+    // Atomic with acq_rel order reason: fast sub count to countOfTasksInSystem_[prop]
+    countOfTasksInSystem_[prop].fetch_sub(count, std::memory_order_acq_rel);
+}
+
+size_t TaskScheduler::GetCountOfTasksInSystemWithTaskProperties(TaskProperties prop) const
+{
+    // Atomic with acquire order reason: need to sync with all prev fetch_adds and fetch_subs
+    return countOfTasksInSystem_.at(prop).load(std::memory_order_acquire);
+}
+
+size_t TaskScheduler::GetCountOfTasksInSystem() const
+{
+    size_t sumCount = 0;
+    for ([[maybe_unused]] const auto &[prop, counter] : countOfTasksInSystem_) {
+        // Atomic with acquire order reason: need to sync with all prev fetch_adds and fetch_subs
+        sumCount += counter.load(std::memory_order_acquire);
+    }
+    return sumCount;
 }
 
 }  // namespace ark::taskmanager

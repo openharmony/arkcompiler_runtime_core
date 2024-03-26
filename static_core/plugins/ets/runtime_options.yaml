@@ -221,9 +221,10 @@ options:
   lang:
     - ets
   type: std::string
-  default: lock-free
+  default: no-stat
   possible_values:
   - simple
   - fine-grained
   - lock-free
-  description: Set type of implementation of task statistics that will be used to store information about tasks
+  - no-stat
+  description: Set type of task statistics implementation that will be used to store information about tasks, if use set `no-stat` there will be no statistics usage
