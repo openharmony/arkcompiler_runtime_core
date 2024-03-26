@@ -138,9 +138,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
             EXPECT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(mda.GetNameId()).data, utf::CStringAsMutf8("main")),
                       0);
 
-            panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
-            EXPECT_EQ(pda.GetNumArgs(), 0U);
-            EXPECT_EQ(pda.GetReturnType().GetId(), panda_file::Type::TypeId::VOID);
+            EXPECT_EQ(mda.GetProtoIdx(), panda_file::MAX_INDEX_16);
 
             EXPECT_EQ(mda.GetAccessFlags(), ACC_STATIC);
             EXPECT_TRUE(mda.GetCodeId().has_value());
@@ -780,12 +778,12 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_009, TestSize.Level1)
     panda_file::ClassDataAccessor cda(*pf, class_id);
 
     int32_t num_methods = 0;
-    const auto tagged = panda_file::Type(panda_file::Type::TypeId::TAGGED);
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-        panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
-        EXPECT_EQ(tagged, pda.GetReturnType());
-        EXPECT_EQ(1u, pda.GetNumArgs());
-        EXPECT_EQ(tagged, pda.GetArgType(0));
+        EXPECT_FALSE(mda.IsExternal());
+        EXPECT_EQ(mda.GetProtoIdx(), panda_file::MAX_INDEX_16);
+        EXPECT_TRUE(mda.GetCodeId().has_value());
+        panda_file::CodeDataAccessor cdacc(*pf, mda.GetCodeId().value());
+        EXPECT_EQ(1u, cdacc.GetNumArgs());
 
         ++num_methods;
     });

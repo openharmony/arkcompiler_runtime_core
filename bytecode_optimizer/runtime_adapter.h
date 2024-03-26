@@ -65,9 +65,11 @@ public:
     size_t GetMethodArgumentsCount([[maybe_unused]] MethodPtr caller, MethodId id) const override
     {
         panda_file::MethodDataAccessor mda(panda_file_, panda_file::File::EntityId(id));
-        panda_file::ProtoDataAccessor pda(panda_file_, mda.GetProtoId());
 
-        return pda.GetNumArgs();
+        ASSERT(!mda.IsExternal());
+        panda_file::CodeDataAccessor cda(panda_file_, mda.GetCodeId().value());
+
+        return cda.GetNumArgs();
     }
 
     size_t GetMethodRegistersCount(MethodPtr method) const override
