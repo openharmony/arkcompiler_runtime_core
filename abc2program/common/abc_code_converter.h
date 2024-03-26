@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,19 +20,19 @@
 #include "bytecode_instruction-inl.h"
 #include "bytecode_instruction.h"
 #include "abc_string_table.h"
-#include "abc2program_key_data.h"
+#include "abc2program_entity_container.h"
 
 namespace panda::abc2program {
 
 class AbcCodeConverter {
 public:
-    explicit AbcCodeConverter(Abc2ProgramKeyData &key_data);
+    explicit AbcCodeConverter(Abc2ProgramEntityContainer &entity_container);
     pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode opcode) const;
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
 private:
-    Abc2ProgramKeyData &key_data_;
+    Abc2ProgramEntityContainer &entity_container_;
     const panda_file::File *file_ = nullptr;
     AbcStringTable *string_table_ = nullptr;
 };  // class AbcCodeConverter

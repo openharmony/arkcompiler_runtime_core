@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,11 @@
 
 namespace panda::abc2program {
 
-AbcDebugInfoProcessor::AbcDebugInfoProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
-    : AbcFileEntityProcessor(entity_id, key_data)
+AbcDebugInfoProcessor::AbcDebugInfoProcessor(panda_file::File::EntityId entity_id,
+                                             Abc2ProgramEntityContainer &entity_container)
+    : AbcFileEntityProcessor(entity_id, entity_container)
 {
     debug_info_data_accessor_ = std::make_unique<panda_file::DebugInfoDataAccessor>(*file_, entity_id_);
-    FillProgramData();
 }
 
 void AbcDebugInfoProcessor::FillProgramData()

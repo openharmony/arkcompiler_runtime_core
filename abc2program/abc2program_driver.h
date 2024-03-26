@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,14 @@ public:
     int Run(int argc, const char **argv);
     bool Run(const std::string &input_file_path, const std::string &output_file_path);
     bool Compile(const std::string &input_file_path);
-    const pandasm::Program &GetProgram();
-private:
     bool Dump(const std::string &output_file_path);
     bool Compile(const std::string &input_file_path, pandasm::Program &program);
+    const pandasm::Program &GetProgram();
+
+private:
     Abc2ProgramCompiler compiler_;
     pandasm::Program program_;
+    std::string input_file_path_;
 }; // class Abc2ProgramDriver
 
 } // namespace panda::abc2program

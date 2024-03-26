@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,43 +18,75 @@
 
 #include <iostream>
 #include <assembly-program.h>
-#include "abc_string_table.h"
+#include "common/abc_string_table.h"
 
 namespace panda::abc2program {
 
+enum class ProgramDumperSource {
+    ECMASCRIPT = 0,
+    PANDA_ASSEMBLY = 1,
+};
+
 using LiteralTagToStringMap = std::unordered_map<panda_file::LiteralTag, std::string>;
+using LabelMap = std::unordered_map<std::string, std::string>;
 
 class PandasmProgramDumper {
 public:
-    PandasmProgramDumper(const panda_file::File &file, const AbcStringTable &string_table)
-        : file_(&file), string_table_(&string_table) {}
     PandasmProgramDumper() {}
-    void Dump(std::ostream &os, const pandasm::Program &program) const;
+    void Dump(std::ostream &os, const pandasm::Program &program);
+    void SetDumperSource(ProgramDumperSource dumper_source);
+    void SetAbcFilePath(const std::string &abc_file_path);
 
 private:
-    bool HasNoAbcInput() const;
     void DumpAbcFilePath(std::ostream &os) const;
-    void DumpProgramLanguage(std::ostream &os, const pandasm::Program &program) const;
-    void DumpLiteralArrayTable(std::ostream &os, const pandasm::Program &program) const;
-    void DumpLiteralArrayTableWithKey(std::ostream &os, const pandasm::Program &program) const;
-    void DumpLiteralArrayTableWithoutKey(std::ostream &os, const pandasm::Program &program) const;
-    void DumpLiteralArrayWithKey(std::ostream &os, const std::string &key,
-                                 const pandasm::LiteralArray &lit_array) const;
-    void DumpLiteralArrayContents(std::ostream &os) const;
-    void DumpRecordTable(std::ostream &os, const pandasm::Program &program) const;
+    void DumpProgramLanguage(std::ostream &os) const;
+    void DumpLiteralArrayTable(std::ostream &os) const;
+    void DumpRecordTable(std::ostream &os) const;
     void DumpRecord(std::ostream &os, const pandasm::Record &record) const;
     bool DumpRecordMetaData(std::ostream &os, const pandasm::Record &record) const;
     void DumpFieldList(std::ostream &os, const pandasm::Record &record) const;
     void DumpField(std::ostream &os, const pandasm::Field &field) const;
     void DumpFieldMetaData(std::ostream &os, const pandasm::Field &field) const;
     void DumpRecordSourceFile(std::ostream &os, const pandasm::Record &record) const;
-    void DumpFunctionTable(std::ostream &os, const pandasm::Program &program) const;
-    void DumpFunction(std::ostream &os, const pandasm::Function &function) const;
-    void DumpStrings(std::ostream &os, const pandasm::Program &program) const;
-    void DumpStringsByStringTable(std::ostream &os, const AbcStringTable &string_table) const;
-    void DumpStringsByProgram(std::ostream &os, const pandasm::Program &program) const;
-    std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
+    void DumpFunctionTable(std::ostream &os);
+    void DumpFunction(std::ostream &os, const pandasm::Function &function);
+    void DumpFunctionAnnotations(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionHead(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionReturnType(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionName(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionParams(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionParamAtIndex(std::ostream &os, const pandasm::Function::Parameter &param, size_t idx) const;
+    void DumpFunctionAttributes(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionBody(std::ostream &os, const pandasm::Function &function);
+    void DumpFunctionIns(std::ostream &os, const pandasm::Function &function);
+    void DumpFunctionIns4PandaAssembly(std::ostream &os, const pandasm::Function &function);
+    void DumpFunctionIns4EcmaScript(std::ostream &os, const pandasm::Function &function);
+    void GetOriginalDumpIns(const pandasm::Function &function);
+    pandasm::Ins DeepCopyIns(const pandasm::Ins &input) const;
+    pandasm::Function::CatchBlock DeepCopyCatchBlock(const pandasm::Function::CatchBlock &catch_block) const;
+    void GetFinalDumpIns();
+    void GetInvalidOpLabelMap();
+    void HandleInvalidopInsLabel(size_t invalid_op_idx, pandasm::Ins &invalid_op_ins);
+    pandasm::Ins *GetNearestValidopIns4InvalidopIns(size_t invalid_op_ins_idx);
+    void GetFinallyLabelMap();
+    void UpdateLabels4DumpIns(std::vector<pandasm::Ins*> &dump_ins, const LabelMap &label_map) const;
+    void UpdateLabels4DumpInsAtIndex(size_t idx, std::vector<pandasm::Ins*> &dump_ins,
+                                     const LabelMap &label_map) const;
+    std::string GetMappedLabel(const std::string &label, const LabelMap &label_map) const;
+    void SetFinallyLabelAtIndex(size_t idx);
+    void DumpFinallyIns(std::ostream &os);
+    void DumpFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionCatchBlocks4PandaAssembly(std::ostream &os, const pandasm::Function &function) const;
+    void DumpFunctionCatchBlocks4EcmaScript(std::ostream &os, const pandasm::Function &function) const;
+    void DumpCatchBlock(std::ostream &os, const pandasm::Function::CatchBlock &catch_block) const;
+    void UpdateCatchBlock(pandasm::Function::CatchBlock &catch_block) const;
+    std::string GetUpdatedCatchBlockLabel(const std::string &orignal_label) const;
+    bool IsMatchLiteralId(const pandasm::Ins &pa_ins) const;
+    size_t GetLiteralIdIndexInIns(const pandasm::Ins &pa_ins) const;
+    void ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const;
+    void DumpStrings(std::ostream &os) const;
     std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
+    std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
     template <typename T>
     void SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const;
     template <typename T>
@@ -85,20 +117,17 @@ private:
     void SerializeLiterals(const pandasm::LiteralArray &lit_array, T &os) const;
     template <typename T>
     void SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, T &os, size_t i) const;
-    void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
-    template <typename T>
-    void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
-                              const panda_file::LiteralDataAccessor::LiteralValue &value) const;
-    void FillLiteralData(pandasm::LiteralArray *lit_array, const panda_file::LiteralDataAccessor::LiteralValue &value,
-                         const panda_file::LiteralTag &tag) const;
-    void FillLiteralData4Method(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                pandasm::LiteralArray::Literal &lit) const;
-    void FillLiteralData4LiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                      pandasm::LiteralArray::Literal &lit) const;
-    static bool IsArray(const panda_file::LiteralTag &tag);
     static LiteralTagToStringMap literal_tag_to_string_map_;
-    const panda_file::File *file_ = nullptr;
-    const AbcStringTable *string_table_ = nullptr;
+    static std::unordered_map<pandasm::Opcode, size_t> opcode_literal_id_index_map_;
+    ProgramDumperSource dumper_source_ = ProgramDumperSource::ECMASCRIPT;
+    std::string abc_file_path_;
+    std::vector<pandasm::Ins> original_dump_ins_;
+    std::vector<pandasm::Ins*> original_dump_ins_ptrs_;
+    std::vector<pandasm::Ins*> final_dump_ins_ptrs_;
+    LabelMap invalid_op_label_to_nearest_valid_op_label_map_;
+    LabelMap finally_label_map_;
+    const pandasm::Program *program_ = nullptr;
+    size_t regs_num_ = 0;
 };
 
 } // namespace panda::abc2program

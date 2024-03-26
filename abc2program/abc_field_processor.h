@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,8 @@ namespace panda::abc2program {
 
 class AbcFieldProcessor : public AbcFileEntityProcessor {
 public:
-    AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data, pandasm::Record &record);
+    AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container,
+                      pandasm::Record &record);
     void FillProgramData() override;
 
 private:
@@ -35,8 +36,8 @@ private:
     void FillFieldAttributes(pandasm::Field &field);
     void FillFieldAnnotations(pandasm::Field &field);
     pandasm::Record &record_;
+    AbcTypeConverter type_converter_;
     std::unique_ptr<panda_file::FieldDataAccessor> field_data_accessor_;
-    std::unique_ptr<AbcTypeConverter> type_converter_;
 };
 
 } // namespace panda::abc2program

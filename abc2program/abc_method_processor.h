@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,17 +18,23 @@
 
 #include "abc_file_entity_processor.h"
 #include "method_data_accessor-inl.h"
+#include "common/abc_type_converter.h"
 
 namespace panda::abc2program {
 
 class AbcMethodProcessor : public AbcFileEntityProcessor {
   public:
-    AbcMethodProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data);
+    AbcMethodProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container);
     void FillProgramData() override;
-    pandasm::Function function_;
 
   private:
-    void FillFunction();
+    void FillFunctionData();
+    void FillProto();
+    void FillFunctionMetaData();
+    void FillCodeData();
+    void AddFunctionIntoFunctionTable();
+    AbcTypeConverter type_converter_;
+    pandasm::Function function_;
     std::unique_ptr<panda_file::MethodDataAccessor> method_data_accessor_;
 };
 

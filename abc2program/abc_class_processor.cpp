@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,17 +21,18 @@
 
 namespace panda::abc2program {
 
-AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2ProgramKeyData &key_data)
-    : AbcFileEntityProcessor(entity_id, key_data)
+AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container)
+    : AbcFileEntityProcessor(entity_id, entity_container)
 {
     class_data_accessor_ = std::make_unique<panda_file::ClassDataAccessor>(*file_, entity_id_);
-    FillProgramData();
 }
 
 void AbcClassProcessor::FillProgramData()
 {
+    LOG(DEBUG, ABC2PROGRAM) << __PRETTY_FUNCTION__ << " started...";
     FillRecord();
     FillFunctions();
+    LOG(DEBUG, ABC2PROGRAM) << __PRETTY_FUNCTION__ << " ended...";
 }
 
 void AbcClassProcessor::FillRecord()
@@ -41,7 +42,7 @@ void AbcClassProcessor::FillRecord()
         return;
     }
     pandasm::Record record("", panda_file::SourceLang::ECMASCRIPT);
-    record.name = key_data_.GetFullRecordNameById(entity_id_);
+    record.name = entity_container_.GetFullRecordNameById(entity_id_);
     ASSERT(program_->record_table.find(record.name) == program_->record_table.end());
     FillRecordData(record);
     program_->record_table.emplace(record.name, std::move(record));
@@ -75,17 +76,6 @@ void AbcClassProcessor::FillRecordAnnotations(pandasm::Record &record)
     log::Unimplemented(__PRETTY_FUNCTION__);
 }
 
-void AbcClassProcessor::FillFields(pandasm::Record &record)
-{
-    if (file_->IsExternal(entity_id_)) {
-        return;
-    }
-    class_data_accessor_->EnumerateFields([&](panda_file::FieldDataAccessor &fda) -> void {
-        panda_file::File::EntityId field_id = fda.GetFieldId();
-        AbcFieldProcessor field_processor(field_id, key_data_, record);
-    });
-}
-
 void AbcClassProcessor::FillRecordSourceFile(pandasm::Record &record)
 {
     std::optional<panda_file::File::EntityId> source_file_id = class_data_accessor_->GetSourceFileId();
@@ -96,6 +86,18 @@ void AbcClassProcessor::FillRecordSourceFile(pandasm::Record &record)
     }
 }
 
+void AbcClassProcessor::FillFields(pandasm::Record &record)
+{
+    if (file_->IsExternal(entity_id_)) {
+        return;
+    }
+    class_data_accessor_->EnumerateFields([&](panda_file::FieldDataAccessor &fda) -> void {
+        panda_file::File::EntityId field_id = fda.GetFieldId();
+        AbcFieldProcessor field_processor(field_id, entity_container_, record);
+        field_processor.FillProgramData();
+    });
+}
+
 void AbcClassProcessor::FillFunctions()
 {
     if (file_->IsExternal(entity_id_)) {
@@ -103,7 +105,8 @@ void AbcClassProcessor::FillFunctions()
     }
     class_data_accessor_->EnumerateMethods([&](panda_file::MethodDataAccessor &mda) -> void {
         panda_file::File::EntityId method_id = mda.GetMethodId();
-        AbcMethodProcessor method_processor(method_id, key_data_);
+        AbcMethodProcessor method_processor(method_id, entity_container_);
+        method_processor.FillProgramData();
     });
 }
 

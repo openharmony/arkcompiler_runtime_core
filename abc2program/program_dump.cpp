@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,76 +16,60 @@
 #include "program_dump.h"
 #include "method_data_accessor-inl.h"
 #include "abc2program_log.h"
-#include "abc_file_utils.h"
+#include "common/abc_file_utils.h"
+#include "os/file.h"
 
 namespace panda::abc2program {
 
-void PandasmProgramDumper::Dump(std::ostream &os, const pandasm::Program &program) const
+void PandasmProgramDumper::Dump(std::ostream &os, const pandasm::Program &program)
 {
+    program_ = &program;
     os << std::flush;
     DumpAbcFilePath(os);
-    DumpProgramLanguage(os, program);
-    DumpRecordTable(os, program);
+    DumpProgramLanguage(os);
+    DumpRecordTable(os);
+    DumpFunctionTable(os);
+    DumpStrings(os);
 }
 
-bool PandasmProgramDumper::HasNoAbcInput() const
+void PandasmProgramDumper::SetDumperSource(ProgramDumperSource dumper_source)
 {
-    return ((file_ == nullptr) || (string_table_ == nullptr));
+    dumper_source_ = dumper_source;
+}
+
+void PandasmProgramDumper::SetAbcFilePath(const std::string &abc_file_path)
+{
+    abc_file_path_ = abc_file_path;
 }
 
 void PandasmProgramDumper::DumpAbcFilePath(std::ostream &os) const
 {
-    if (HasNoAbcInput()) {
+    if (dumper_source_ == ProgramDumperSource::ECMASCRIPT) {
         return;
     }
-    os << DUMP_TITLE_SOURCE_BINARY << file_->GetFilename() << DUMP_CONTENT_DOUBLE_ENDL;
+    std::string file_abs_path = os::file::File::GetAbsolutePath(abc_file_path_).Value();
+    os << DUMP_TITLE_SOURCE_BINARY << file_abs_path << DUMP_CONTENT_DOUBLE_ENDL;
 }
 
-void PandasmProgramDumper::DumpProgramLanguage(std::ostream &os, const pandasm::Program &program) const
+void PandasmProgramDumper::DumpProgramLanguage(std::ostream &os) const
 {
     os << DUMP_TITLE_LANGUAGE;
-    if (program.lang == panda::panda_file::SourceLang::ECMASCRIPT) {
-        os << DUMP_CONTENT_ECMA_SCRIPT;
+    if (program_->lang == panda::panda_file::SourceLang::ECMASCRIPT) {
+        os << DUMP_CONTENT_ECMASCRIPT;
     } else {
         os << DUMP_CONTENT_PANDA_ASSEMBLY;
     }
     os << DUMP_CONTENT_DOUBLE_ENDL;
 }
 
-void PandasmProgramDumper::DumpLiteralArrayTable(std::ostream &os, const pandasm::Program &program) const
-{
-    if (HasNoAbcInput()) {
-        DumpLiteralArrayTableWithoutKey(os, program);
-    } else {
-        DumpLiteralArrayTableWithKey(os, program);
-    }
-}
-
-void PandasmProgramDumper::DumpLiteralArrayTableWithKey(std::ostream &os, const pandasm::Program &program) const
+void PandasmProgramDumper::DumpLiteralArrayTable(std::ostream &os) const
 {
     os << DUMP_TITLE_SEPARATOR;
-    os << DUMP_TITLE_LITERALS << DUMP_CONTENT_SINGLE_ENDL;
-    auto it = program.literalarray_table.begin();
-    auto end = program.literalarray_table.end();
-    for (; it != end; ++it) {
-        DumpLiteralArrayWithKey(os, it->first, it->second);
-    }
+    os << DUMP_TITLE_LITERALS;
     os << DUMP_CONTENT_DOUBLE_ENDL;
-}
-
-void PandasmProgramDumper::DumpLiteralArrayWithKey(std::ostream &os, const std::string &key,
-                                                   const pandasm::LiteralArray &lit_array) const
-{
-    os << key << " ";
-    os << SerializeLiteralArray(lit_array);
-    os << DUMP_CONTENT_SINGLE_ENDL;
-}
-
-void PandasmProgramDumper::DumpLiteralArrayTableWithoutKey(std::ostream &os, const pandasm::Program &program) const
-{
     std::vector<std::string> literal_array_contents;
-    auto it = program.literalarray_table.begin();
-    auto end = program.literalarray_table.end();
+    auto it = program_->literalarray_table.begin();
+    auto end = program_->literalarray_table.end();
     for (; it != end; ++it) {
         literal_array_contents.emplace_back(SerializeLiteralArray(it->second));
     }
@@ -95,12 +79,12 @@ void PandasmProgramDumper::DumpLiteralArrayTableWithoutKey(std::ostream &os, con
     os << DUMP_CONTENT_DOUBLE_ENDL;
 }
 
-void PandasmProgramDumper::DumpRecordTable(std::ostream &os, const pandasm::Program &program) const
+void PandasmProgramDumper::DumpRecordTable(std::ostream &os) const
 {
     os << DUMP_TITLE_SEPARATOR;
     os << DUMP_TITLE_RECORDS;
     os << DUMP_CONTENT_DOUBLE_ENDL;
-    for (const auto &it : program.record_table) {
+    for (const auto &it : program_->record_table) {
         DumpRecord(os, it.second);
     }
     os << DUMP_CONTENT_SINGLE_ENDL;
@@ -108,8 +92,13 @@ void PandasmProgramDumper::DumpRecordTable(std::ostream &os, const pandasm::Prog
 
 void PandasmProgramDumper::DumpRecord(std::ostream &os, const pandasm::Record &record) const
 {
-    if (AbcFileUtils::IsSystemTypeName(record.name)) {
-        return;
+    if (dumper_source_ == ProgramDumperSource::ECMASCRIPT) {
+        if (AbcFileUtils::IsGlobalTypeName(record.name)) {
+            return;
+        }
+        if (AbcFileUtils::IsESTypeAnnotationName(record.name)) {
+            return;
+        }
     }
     os << DUMP_TITLE_RECORD << record.name;
     if (DumpRecordMetaData(os, record)) {
@@ -139,9 +128,9 @@ void PandasmProgramDumper::DumpFieldList(std::ostream &os, const pandasm::Record
 
 void PandasmProgramDumper::DumpField(std::ostream &os, const pandasm::Field &field) const
 {
-    std::string file_name = AbcFileUtils::GetFileNameByAbsolutePath(field.name);
-    os << "\t" << field.type.GetPandasmName() << " " << file_name;
+    os << DUMP_CONTENT_TAB << field.type.GetPandasmName() << " " << field.name;
     DumpFieldMetaData(os, field);
+    os << DUMP_CONTENT_SINGLE_ENDL;
 }
 
 void PandasmProgramDumper::DumpFieldMetaData(std::ostream &os, const pandasm::Field &field) const
@@ -154,47 +143,382 @@ void PandasmProgramDumper::DumpRecordSourceFile(std::ostream &os, const pandasm:
     os << DUMP_TITLE_RECORD_SOURCE_FILE << record.source_file << DUMP_CONTENT_DOUBLE_ENDL;
 }
 
-void PandasmProgramDumper::DumpFunctionTable(std::ostream &os, const pandasm::Program &program) const
+void PandasmProgramDumper::DumpFunctionTable(std::ostream &os)
 {
     os << DUMP_TITLE_SEPARATOR;
     os << DUMP_TITLE_METHODS;
     os << DUMP_CONTENT_DOUBLE_ENDL;
-    for (const auto &it : program.function_table) {
+    for (const auto &it : program_->function_table) {
         DumpFunction(os, it.second);
     }
 }
 
-void PandasmProgramDumper::DumpFunction(std::ostream &os, const pandasm::Function &function) const
+void PandasmProgramDumper::DumpFunction(std::ostream &os, const pandasm::Function &function)
+{
+    regs_num_ = function.regs_num;
+    DumpFunctionAnnotations(os, function);
+    DumpFunctionHead(os, function);
+    DumpFunctionBody(os, function);
+}
+
+void PandasmProgramDumper::DumpFunctionAnnotations(std::ostream &os, const pandasm::Function &function) const
 {
     log::Unimplemented(__PRETTY_FUNCTION__);
 }
 
-void PandasmProgramDumper::DumpStrings(std::ostream &os, const pandasm::Program &program) const
+
+void PandasmProgramDumper::DumpFunctionHead(std::ostream &os, const pandasm::Function &function) const
 {
-    if (HasNoAbcInput()) {
-        DumpStringsByProgram(os, program);
+    os << DUMP_TITLE_FUNCTION;
+    DumpFunctionName(os, function);
+    os << " {" << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpFunctionReturnType(std::ostream &os, const pandasm::Function &function) const
+{
+    os << function.return_type.GetPandasmName() << " ";
+}
+
+void PandasmProgramDumper::DumpFunctionName(std::ostream &os, const pandasm::Function &function) const
+{
+    os << function.name;
+}
+
+void PandasmProgramDumper::DumpFunctionParams(std::ostream &os, const pandasm::Function &function) const
+{
+    os << "(";
+    if (function.params.size() > 0) {
+        DumpFunctionParamAtIndex(os, function.params[0], 0);
+        for (size_t i = 1; i < function.params.size(); ++i) {
+            os << ", ";
+            DumpFunctionParamAtIndex(os, function.params[i], i);
+        }
+    }
+    os << ")";
+}
+
+void PandasmProgramDumper::DumpFunctionParamAtIndex(std::ostream &os,
+                                                    const pandasm::Function::Parameter &param,
+                                                    size_t idx) const
+{
+    os << param.type.GetPandasmName() << " " << DUMP_CONTENT_FUNCTION_PARAM_NAME_PREFIX << idx;
+}
+
+void PandasmProgramDumper::DumpFunctionAttributes(std::ostream &os, const pandasm::Function &function) const
+{
+    log::Unimplemented(__PRETTY_FUNCTION__);
+}
+
+void PandasmProgramDumper::DumpFunctionBody(std::ostream &os, const pandasm::Function &function)
+{
+    DumpFunctionIns(os, function);
+    DumpFunctionCatchBlocks(os, function);
+    os << "}" << DUMP_CONTENT_DOUBLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpFunctionIns(std::ostream &os, const pandasm::Function &function)
+{
+    if (dumper_source_ == ProgramDumperSource::ECMASCRIPT) {
+        DumpFunctionIns4EcmaScript(os, function);
     } else {
-        DumpStringsByStringTable(os, *string_table_);
+        DumpFunctionIns4PandaAssembly(os, function);
     }
 }
 
-void PandasmProgramDumper::DumpStringsByStringTable(std::ostream &os, const AbcStringTable &string_table) const
+void PandasmProgramDumper::DumpFunctionIns4PandaAssembly(std::ostream &os, const pandasm::Function &function)
 {
-    os << DUMP_TITLE_SEPARATOR;
-    os << DUMP_TITLE_STRING;
-    string_table.Dump(os);
-    os << DUMP_CONTENT_SINGLE_ENDL;
+    for (const pandasm::Ins &pa_ins : function.ins) {
+        std::string insStr = pa_ins.ToString("", true, regs_num_);
+        os << DUMP_CONTENT_TAB << insStr << DUMP_CONTENT_SINGLE_ENDL;
+    }
 }
 
-void PandasmProgramDumper::DumpStringsByProgram(std::ostream &os, const pandasm::Program &program) const
+void PandasmProgramDumper::DumpFunctionIns4EcmaScript(std::ostream &os, const pandasm::Function &function)
+{
+    GetOriginalDumpIns(function);
+    GetInvalidOpLabelMap();
+    UpdateLabels4DumpIns(original_dump_ins_ptrs_, invalid_op_label_to_nearest_valid_op_label_map_);
+    GetFinalDumpIns();
+    GetFinallyLabelMap();
+    UpdateLabels4DumpIns(final_dump_ins_ptrs_, finally_label_map_);
+    DumpFinallyIns(os);
+}
+
+void PandasmProgramDumper::GetOriginalDumpIns(const pandasm::Function &function)
+{
+    original_dump_ins_.clear();
+    original_dump_ins_ptrs_.clear();
+    for (const pandasm::Ins &pa_ins : function.ins) {
+        original_dump_ins_.emplace_back(DeepCopyIns(pa_ins));
+    }
+    for (pandasm::Ins &pa_ins : original_dump_ins_) {
+        original_dump_ins_ptrs_.emplace_back(&pa_ins);
+    }
+}
+
+pandasm::Ins PandasmProgramDumper::DeepCopyIns(const pandasm::Ins &input) const
+{
+    std::string insStr = input.ToString("", true, regs_num_);
+    pandasm::Ins res{};
+    res.opcode = input.opcode;
+    for (size_t i = 0; i < input.regs.size(); ++i) {
+        res.regs.emplace_back(input.regs[i]);
+    }
+    for (size_t i = 0; i < input.ids.size(); ++i) {
+        std::string new_id(input.ids[i]);
+        res.ids.emplace_back(new_id);
+    }
+    for (size_t i = 0; i < input.imms.size(); ++i) {
+        pandasm::Ins::IType new_imm = input.imms[i];
+        res.imms.emplace_back(new_imm);
+    }
+    res.label = input.label;
+    res.set_label = input.set_label;
+    pandasm::debuginfo::Ins debug_ins{};
+    debug_ins.line_number = input.ins_debug.line_number;
+    debug_ins.column_number = input.ins_debug.column_number;
+    debug_ins.whole_line = input.ins_debug.whole_line;
+    debug_ins.bound_left = input.ins_debug.bound_left;
+    debug_ins.bound_right = input.ins_debug.bound_right;
+    res.ins_debug = debug_ins;
+    return res;
+}
+
+void PandasmProgramDumper::GetFinalDumpIns()
+{
+    final_dump_ins_ptrs_.clear();
+    for (pandasm::Ins *pa_ins : original_dump_ins_ptrs_) {
+        if (pa_ins->opcode != pandasm::Opcode::INVALID) {
+            final_dump_ins_ptrs_.emplace_back(pa_ins);
+        }
+    }
+}
+
+void PandasmProgramDumper::DumpFinallyIns(std::ostream &os)
+{
+    for (pandasm::Ins *pa_ins : final_dump_ins_ptrs_) {
+        if (IsMatchLiteralId(*pa_ins)) {
+            ReplaceLiteralId4Ins(*pa_ins);
+        }
+        std::string insStr = pa_ins->ToString("", true, regs_num_);
+        os << DUMP_CONTENT_TAB << insStr << DUMP_CONTENT_SINGLE_ENDL;
+    }
+}
+
+void PandasmProgramDumper::GetInvalidOpLabelMap()
+{
+    invalid_op_label_to_nearest_valid_op_label_map_.clear();
+    size_t dump_ins_size = original_dump_ins_.size();
+    for (size_t i = 0; i < dump_ins_size; ++i) {
+        pandasm::Ins &curr_ins = original_dump_ins_[i];
+        if (curr_ins.opcode == pandasm::Opcode::INVALID) {
+            HandleInvalidopInsLabel(i, curr_ins);
+        }
+    }
+}
+
+void PandasmProgramDumper::HandleInvalidopInsLabel(size_t invalid_op_idx, pandasm::Ins &invalid_op_ins)
+{
+    if (!invalid_op_ins.set_label) {
+        return;
+    }
+    pandasm::Ins *nearest_valid_op_ins = GetNearestValidopIns4InvalidopIns(invalid_op_idx);
+    if (nearest_valid_op_ins == nullptr) {
+        return;
+    }
+    if (!nearest_valid_op_ins->set_label) {
+        // here, the invalid op ins and its nearest valid op ins has the same label
+        // the invalid op will be removed, so the label is still unique for each inst
+        nearest_valid_op_ins->label = invalid_op_ins.label;
+        nearest_valid_op_ins->set_label = true;
+    }
+    invalid_op_label_to_nearest_valid_op_label_map_.emplace(invalid_op_ins.label, nearest_valid_op_ins->label);
+}
+
+pandasm::Ins *PandasmProgramDumper::GetNearestValidopIns4InvalidopIns(size_t invalid_op_ins_idx)
+{
+    size_t dump_ins_size = original_dump_ins_.size();
+    // search downwards
+    for (size_t i = invalid_op_ins_idx + 1; i < dump_ins_size; ++i) {
+        pandasm::Ins &curr_ins = original_dump_ins_[i];
+        if (curr_ins.opcode != pandasm::Opcode::INVALID) {
+            return &curr_ins;
+        }
+    }
+    // search upwards
+    for (size_t i = invalid_op_ins_idx - 1; i >= 0; --i) {
+        pandasm::Ins &curr_ins = original_dump_ins_[i];
+        if (curr_ins.opcode != pandasm::Opcode::INVALID) {
+            return &curr_ins;
+        }
+    }
+    return nullptr;
+}
+
+void PandasmProgramDumper::UpdateLabels4DumpIns(std::vector<pandasm::Ins*> &dump_ins, const LabelMap &label_map) const
+{
+    size_t dump_ins_size = dump_ins.size();
+    for (size_t i = 0; i < dump_ins_size; ++i) {
+        UpdateLabels4DumpInsAtIndex(i, dump_ins, label_map);
+    }
+}
+
+void PandasmProgramDumper::UpdateLabels4DumpInsAtIndex(size_t idx, std::vector<pandasm::Ins*> &dump_ins,
+                                                       const LabelMap &label_map) const
+{
+    pandasm::Ins *curr_ins = dump_ins[idx];
+    std::string mapped_label = GetMappedLabel(curr_ins->label, label_map);
+    if (mapped_label != "") {
+        curr_ins->label = mapped_label;
+    }
+    if (curr_ins->IsJump()) {
+        mapped_label = GetMappedLabel(curr_ins->ids[0], label_map);
+        if (mapped_label != "") {
+            curr_ins->ids.clear();
+            curr_ins->ids.emplace_back(mapped_label);
+        }
+    }
+}
+
+std::string PandasmProgramDumper::GetMappedLabel(const std::string &label, const LabelMap &label_map) const
+{
+    auto it = label_map.find(label);
+    if (it != label_map.end()) {
+        return it->second;
+    } else {
+        return "";
+    }
+}
+
+void PandasmProgramDumper::GetFinallyLabelMap()
+{
+    finally_label_map_.clear();
+    size_t dump_ins_size = final_dump_ins_ptrs_.size();
+    for (size_t i = 0; i < dump_ins_size; ++i) {
+        SetFinallyLabelAtIndex(i);
+    }
+}
+
+void PandasmProgramDumper::SetFinallyLabelAtIndex(size_t idx)
+{
+    pandasm::Ins *curr_ins = final_dump_ins_ptrs_[idx];
+    std::string new_label_name = AbcFileUtils::GetLabelNameByInstIdx(idx);
+    if (curr_ins->set_label) {
+        finally_label_map_.emplace(curr_ins->label, new_label_name);
+    } else {
+        curr_ins->label = new_label_name;
+        curr_ins->set_label = true;
+    }
+}
+
+void PandasmProgramDumper::DumpFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const
+{
+    if (dumper_source_ == ProgramDumperSource::ECMASCRIPT) {
+        DumpFunctionCatchBlocks4EcmaScript(os, function);
+    } else {
+        DumpFunctionCatchBlocks4PandaAssembly(os, function);
+    }
+}
+
+void PandasmProgramDumper::DumpFunctionCatchBlocks4PandaAssembly(std::ostream &os,
+                                                                 const pandasm::Function &function) const
+{
+    for (const pandasm::Function::CatchBlock &catch_block : function.catch_blocks) {
+        DumpCatchBlock(os, catch_block);
+    }
+}
+
+void PandasmProgramDumper::DumpFunctionCatchBlocks4EcmaScript(std::ostream &os,
+                                                              const pandasm::Function &function) const
+{
+    std::vector<pandasm::Function::CatchBlock> catch_blocks;
+    for (const pandasm::Function::CatchBlock &catch_block : function.catch_blocks) {
+        catch_blocks.emplace_back(DeepCopyCatchBlock(catch_block));
+    }
+    for (pandasm::Function::CatchBlock &catch_block : catch_blocks) {
+        UpdateCatchBlock(catch_block);
+    }
+    for (const pandasm::Function::CatchBlock &catch_block : catch_blocks) {
+        DumpCatchBlock(os, catch_block);
+    }
+}
+
+void PandasmProgramDumper::UpdateCatchBlock(pandasm::Function::CatchBlock &catch_block) const
+{
+    catch_block.try_begin_label = GetUpdatedCatchBlockLabel(catch_block.try_begin_label);
+    catch_block.try_end_label = GetUpdatedCatchBlockLabel(catch_block.try_end_label);
+    catch_block.catch_begin_label = GetUpdatedCatchBlockLabel(catch_block.catch_begin_label);
+    catch_block.catch_end_label = GetUpdatedCatchBlockLabel(catch_block.catch_end_label);
+}
+
+std::string PandasmProgramDumper::GetUpdatedCatchBlockLabel(const std::string &orignal_label) const
+{
+    std::string updated_label = orignal_label;
+    std::string mapped_label1 = GetMappedLabel(orignal_label, invalid_op_label_to_nearest_valid_op_label_map_);
+    if (mapped_label1 == "") {
+        return orignal_label;
+    }
+    std::string mapped_label2 = GetMappedLabel(mapped_label1, finally_label_map_);
+    if (mapped_label2 == "") {
+        return mapped_label1;
+    }
+    return mapped_label2;
+}
+
+pandasm::Function::CatchBlock PandasmProgramDumper::DeepCopyCatchBlock(
+    const pandasm::Function::CatchBlock &catch_block) const
+{
+    pandasm::Function::CatchBlock res{};
+    res.whole_line = catch_block.whole_line;
+    res.exception_record = catch_block.exception_record;
+    res.try_begin_label = catch_block.try_begin_label;
+    res.try_end_label = catch_block.try_end_label;
+    res.catch_begin_label = catch_block.catch_begin_label;
+    res.catch_end_label = catch_block.catch_end_label;
+    return res;
+}
+
+void PandasmProgramDumper::DumpCatchBlock(std::ostream &os, const pandasm::Function::CatchBlock &catch_block) const
+{
+    if (catch_block.exception_record.empty()) {
+        os << DUMP_TITLE_CATCH_ALL << DUMP_CONTENT_SINGLE_ENDL;
+    } else {
+        os << DUMP_TITLE_CATCH << DUMP_CONTENT_SINGLE_ENDL;
+    }
+    os << DUMP_CONTENT_TAB << DUMP_CONTENT_TRY_BEGIN_LABEL
+       << catch_block.try_begin_label << DUMP_CONTENT_SINGLE_ENDL;
+    os << DUMP_CONTENT_TAB << DUMP_CONTENT_TRY_END_LABEL
+       << catch_block.try_end_label << DUMP_CONTENT_SINGLE_ENDL;
+    os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_BEGIN_LABEL
+       << catch_block.catch_begin_label << DUMP_CONTENT_SINGLE_ENDL;
+    os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_END_LABEL
+       << catch_block.catch_end_label << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+void PandasmProgramDumper::DumpStrings(std::ostream &os) const
 {
     os << DUMP_TITLE_SEPARATOR;
     os << DUMP_TITLE_STRING;
-    os << DUMP_CONTENT_SINGLE_ENDL;
-    for (const std::string &str : program.strings) {
+    for (const std::string &str : program_->strings) {
         os << str << DUMP_CONTENT_SINGLE_ENDL;
     }
-    os << DUMP_CONTENT_SINGLE_ENDL;
+}
+
+bool PandasmProgramDumper::IsMatchLiteralId(const pandasm::Ins &pa_ins) const
+{
+    auto it = opcode_literal_id_index_map_.find(pa_ins.opcode);
+    return (it != opcode_literal_id_index_map_.end());
+}
+
+void PandasmProgramDumper::ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const
+{
+    size_t idx = GetLiteralIdIndexInIns(pa_ins);
+    std::string id_str = pa_ins.ids[idx];
+    auto it = program_->literalarray_table.find(id_str);
+    ASSERT(it != program_->literalarray_table.end());
+    const pandasm::LiteralArray &literal_array = it->second;
+    std::string replaced_value = SerializeLiteralArray(literal_array);
+    pa_ins.ids[idx] = replaced_value;
 }
 
 std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const
@@ -205,7 +529,7 @@ std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralAr
     std::stringstream ss;
     ss << "{ ";
     const auto &tag = lit_array.literals_[0].tag_;
-    if (IsArray(tag)) {
+    if (AbcFileUtils::IsLiteralTagArray(tag)) {
         ss << LiteralTagToString(tag);
     }
     ss << lit_array.literals_.size();
@@ -213,135 +537,6 @@ std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralAr
     SerializeValues(lit_array, ss);
     ss << "]}";
     return ss.str();
-}
-
-void PandasmProgramDumper::GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array,
-                                                   panda_file::File::EntityId offset) const
-{
-    panda_file::LiteralDataAccessor lit_array_accessor(*file_, file_->GetLiteralArraysId());
-    lit_array_accessor.EnumerateLiteralVals(
-        offset, [this, lit_array](
-                    const panda_file::LiteralDataAccessor::LiteralValue &value,
-                    const panda_file::LiteralTag &tag) {
-            switch (tag) {
-                case panda_file::LiteralTag::ARRAY_U1:
-                    FillLiteralArrayData<bool>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I8:
-                case panda_file::LiteralTag::ARRAY_U8:
-                    FillLiteralArrayData<uint8_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I16:
-                case panda_file::LiteralTag::ARRAY_U16:
-                    FillLiteralArrayData<uint16_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I32:
-                case panda_file::LiteralTag::ARRAY_U32:
-                    FillLiteralArrayData<uint32_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I64:
-                case panda_file::LiteralTag::ARRAY_U64:
-                    FillLiteralArrayData<uint64_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_F32:
-                    FillLiteralArrayData<float>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_F64:
-                    FillLiteralArrayData<double>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_STRING:
-                    FillLiteralArrayData<uint32_t>(lit_array, tag, value);
-                    break;
-                default:
-                    FillLiteralData(lit_array, value, tag);
-                    break;
-            }
-        });
-}
-
-template <typename T>
-void PandasmProgramDumper::FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
-                                                const panda_file::LiteralDataAccessor::LiteralValue &value) const
-{
-    panda_file::File::EntityId id(std::get<uint32_t>(value));
-    auto sp = file_->GetSpanFromId(id);
-    auto len = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
-    if (tag != panda_file::LiteralTag::ARRAY_STRING) {
-        for (size_t i = 0; i < len; i++) {
-            pandasm::LiteralArray::Literal lit;
-            lit.tag_ = tag;
-            lit.value_ = bit_cast<T>(panda_file::helpers::Read<sizeof(T)>(&sp));
-            lit_array->literals_.emplace_back(lit);
-        }
-        return;
-    }
-    for (size_t i = 0; i < len; i++) {
-        auto str_id = panda_file::helpers::Read<sizeof(T)>(&sp);
-        pandasm::LiteralArray::Literal lit;
-        lit.tag_ = tag;
-        lit.value_ = string_table_->GetStringById(str_id);
-        lit_array->literals_.emplace_back(lit);
-    }
-}
-
-void PandasmProgramDumper::FillLiteralData(pandasm::LiteralArray *lit_array,
-                                           const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                           const panda_file::LiteralTag &tag) const
-{
-    pandasm::LiteralArray::Literal lit;
-    lit.tag_ = tag;
-    switch (tag) {
-        case panda_file::LiteralTag::BOOL:
-            lit.value_ = std::get<bool>(value);
-            break;
-        case panda_file::LiteralTag::ACCESSOR:
-        case panda_file::LiteralTag::NULLVALUE:
-        case panda_file::LiteralTag::BUILTINTYPEINDEX:
-            lit.value_ = std::get<uint8_t>(value);
-            break;
-        case panda_file::LiteralTag::METHODAFFILIATE:
-            lit.value_ = std::get<uint16_t>(value);
-            break;
-        case panda_file::LiteralTag::LITERALBUFFERINDEX:
-        case panda_file::LiteralTag::INTEGER:
-            lit.value_ = std::get<uint32_t>(value);
-            break;
-        case panda_file::LiteralTag::DOUBLE:
-            lit.value_ = std::get<double>(value);
-            break;
-        case panda_file::LiteralTag::STRING:
-            lit.value_ = std::get<uint32_t>(value);
-            break;
-        case panda_file::LiteralTag::METHOD:
-        case panda_file::LiteralTag::GETTER:
-        case panda_file::LiteralTag::SETTER:
-        case panda_file::LiteralTag::GENERATORMETHOD:
-            lit.value_ = std::get<uint32_t>(value);
-            break;
-        case panda_file::LiteralTag::LITERALARRAY:
-            lit.value_ = std::get<uint32_t>(value);
-            break;
-        case panda_file::LiteralTag::TAGVALUE:
-            return;
-        default:
-            UNREACHABLE();
-    }
-    lit_array->literals_.emplace_back(lit);
-}
-
-void PandasmProgramDumper::FillLiteralData4Method(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                  pandasm::LiteralArray::Literal &lit) const
-{
-    panda_file::MethodDataAccessor mda(*file_, panda_file::File::EntityId(std::get<uint32_t>(value)));
-    lit.value_ = string_table_->GetStringById(mda.GetNameId());
-}
-
-void PandasmProgramDumper::FillLiteralData4LiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                        pandasm::LiteralArray::Literal &lit) const
-{
-    std::stringstream ss;
-    ss << "0x" << std::hex << std::get<uint32_t>(value);
-    lit.value_ = ss.str();
 }
 
 LiteralTagToStringMap PandasmProgramDumper::literal_tag_to_string_map_ = {
@@ -377,38 +572,31 @@ LiteralTagToStringMap PandasmProgramDumper::literal_tag_to_string_map_ = {
 std::string PandasmProgramDumper::LiteralTagToString(const panda_file::LiteralTag &tag) const
 {
     auto it = literal_tag_to_string_map_.find(tag);
-    if (it != literal_tag_to_string_map_.end()) {
-        return it->second;
-    }
-    UNREACHABLE();
-    return "";
+    ASSERT(it != literal_tag_to_string_map_.end());
+    return it->second;
 }
 
-bool PandasmProgramDumper::IsArray(const panda_file::LiteralTag &tag)
+std::unordered_map<pandasm::Opcode, size_t> PandasmProgramDumper::opcode_literal_id_index_map_ = {
+    {pandasm::Opcode::CREATEARRAYWITHBUFFER, 0},
+    {pandasm::Opcode::CREATEOBJECTWITHBUFFER, 0},
+    {pandasm::Opcode::DEFINECLASSWITHBUFFER, 1},
+    {pandasm::Opcode::NEWLEXENVWITHNAME, 0},
+    {pandasm::Opcode::WIDE_NEWLEXENVWITHNAME, 0},
+};
+
+size_t PandasmProgramDumper::GetLiteralIdIndexInIns(const pandasm::Ins &pa_ins) const
 {
-    switch (tag) {
-        case panda_file::LiteralTag::ARRAY_U1:
-        case panda_file::LiteralTag::ARRAY_U8:
-        case panda_file::LiteralTag::ARRAY_I8:
-        case panda_file::LiteralTag::ARRAY_U16:
-        case panda_file::LiteralTag::ARRAY_I16:
-        case panda_file::LiteralTag::ARRAY_U32:
-        case panda_file::LiteralTag::ARRAY_I32:
-        case panda_file::LiteralTag::ARRAY_U64:
-        case panda_file::LiteralTag::ARRAY_I64:
-        case panda_file::LiteralTag::ARRAY_F32:
-        case panda_file::LiteralTag::ARRAY_F64:
-        case panda_file::LiteralTag::ARRAY_STRING:
-            return true;
-        default:
-            return false;
-    }
+    auto it = opcode_literal_id_index_map_.find(pa_ins.opcode);
+    ASSERT(it != opcode_literal_id_index_map_.end());
+    return it->second;
 }
+
 
 template <typename T>
 void PandasmProgramDumper::SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const
 {
-    switch (lit_array.literals_[0].tag_) {
+    const panda_file::LiteralTag &tag0 = lit_array.literals_[0].tag_;
+    switch (tag0) {
         case panda_file::LiteralTag::ARRAY_U1:
             SerializeValues4ArrayU1(lit_array, os);
             break;
@@ -558,7 +746,7 @@ void PandasmProgramDumper::SerializeLiterals(const pandasm::LiteralArray &lit_ar
 template <typename T>
 void PandasmProgramDumper::SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, T &os, size_t i) const
 {
-    const auto &tag = lit_array.literals_[i].tag_;
+    const panda_file::LiteralTag &tag = lit_array.literals_[i].tag_;
     os << LiteralTagToString(tag) << ":";
     const auto &val = lit_array.literals_[i].value_;
     switch (tag) {
@@ -594,8 +782,11 @@ void PandasmProgramDumper::SerializeLiteralsAtIndex(const pandasm::LiteralArray 
         case panda_file::LiteralTag::BUILTINTYPEINDEX:
             os << (static_cast<int16_t>(std::get<uint8_t>(val)));
             break;
+        case panda_file::LiteralTag::TAGVALUE:
+            os << (static_cast<int16_t>(std::get<uint8_t>(val)));
+            break;
         default:
-            UNREACHABLE();
+            LOG(FATAL, ABC2PROGRAM) << __PRETTY_FUNCTION__ << LiteralTagToString(tag) << " is unreachable!";
             break;
     }
 }

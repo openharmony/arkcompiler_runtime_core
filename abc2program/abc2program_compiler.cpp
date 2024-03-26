@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "abc2program_compiler.h"
-#include <iostream>
 #include "abc_file_processor.h"
 
 namespace panda::abc2program {
@@ -30,6 +29,14 @@ bool Abc2ProgramCompiler::OpenAbcFile(const std::string &file_path)
     return true;
 }
 
+bool Abc2ProgramCompiler::FillProgramData(pandasm::Program &program)
+{
+    entity_container_ = std::make_unique<Abc2ProgramEntityContainer>(*file_, *string_table_, program);
+    AbcFileProcessor file_processor(*entity_container_);
+    bool success = file_processor.FillProgramData();
+    return success;
+}
+
 const panda_file::File &Abc2ProgramCompiler::GetAbcFile() const
 {
     return *file_;
@@ -38,14 +45,6 @@ const panda_file::File &Abc2ProgramCompiler::GetAbcFile() const
 AbcStringTable &Abc2ProgramCompiler::GetAbcStringTable() const
 {
     return *string_table_;
-}
-
-bool Abc2ProgramCompiler::FillProgramData(pandasm::Program &program)
-{
-    key_data_ = std::make_unique<Abc2ProgramKeyData>(*file_, *string_table_, program);
-    AbcFileProcessor file_processor(*key_data_);
-    bool success = file_processor.ProcessFile();
-    return success;
 }
 
 } // namespace panda::abc2program

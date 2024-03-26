@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,29 @@
  * limitations under the License.
  */
 
-#include "abc_annotation_processor.h"
-#include "abc2program_log.h"
+#ifndef ABC2PROGRAM_ABC_STRING_TABLE_H
+#define ABC2PROGRAM_ABC_STRING_TABLE_H
+
+#include <cstdint>
+#include <string>
+#include <set>
+#include "file-inl.h"
 
 namespace panda::abc2program {
 
-AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entity_id,
-                                               Abc2ProgramEntityContainer &entity_container)
-    : AbcFileEntityProcessor(entity_id, entity_container)
-{
-    annotation_data_accessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entity_id_);
-}
+class AbcStringTable {
+public:
+    explicit AbcStringTable(const panda_file::File &file) : file_(file) {}
+    std::string GetStringById(uint32_t string_id) const;
+    std::string GetStringById(panda_file::File::EntityId entity_id) const;
+    void AddStringId(uint32_t string_id);
+    void AddStringId(const panda_file::File::EntityId &string_id);
 
-void AbcAnnotationProcessor::FillProgramData()
-{
-    log::Unimplemented(__PRETTY_FUNCTION__);
-}
+private:
+    const panda_file::File &file_;
+    std::set<uint32_t> string_id_set;
+};
 
 } // namespace panda::abc2program
+
+#endif // ABC2PROGRAM_ABC_STRING_TABLE_H
