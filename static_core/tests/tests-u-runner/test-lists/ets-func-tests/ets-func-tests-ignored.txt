@@ -140,29 +140,6 @@ spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_stmt_07.ets
 ### End of Trailing lambda
 ### ArkUI struct
 ### Issue 14040 -> Annotations not yet implemented
-<<<<<<< HEAD
-spec/struct-type/anno/test-builder-func_0.ets
-spec/struct-type/anno/test-builder-func_1.ets
-spec/struct-type/anno/test-struct-builder-param.ets
-spec/struct-type/anno/test-struct-component.ets
-spec/struct-type/anno/test-struct-entry.ets
-spec/struct-type/anno/test-struct-field-consume.ets
-spec/struct-type/anno/test-struct-field-link.ets
-spec/struct-type/anno/test-struct-field-local-storage-link.ets
-spec/struct-type/anno/test-struct-field-local-storage-prop.ets
-spec/struct-type/anno/test-struct-field-prop.ets
-spec/struct-type/anno/test-struct-field-provide.ets
-spec/struct-type/anno/test-struct-field-state.ets
-spec/struct-type/anno/test-struct-field-watch.ets
-spec/struct-type/builder/test-struct-call-conditional-in-build.ets
-spec/struct-type/builder/test-struct-call-function-in-build_2.ets
-spec/struct-type/builder/test-struct-call-function-in-build_3.ets
-spec/struct-type/test-struct-define-constructor.ets
-spec/struct-type/test-struct-implements-interface.ets
-spec/struct-type/test-struct-invoke_0.ets
-spec/struct-type/test-struct-invoke_1.ets
-spec/struct-type/test-use-struct-as-name_2.ets
-=======
 spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_0.ets
 spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_1.ets
 spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-builder-param.ets
@@ -184,7 +161,6 @@ spec/16.Support_for_GUI_Programming/struct-type/test-struct-implements-interface
 spec/16.Support_for_GUI_Programming/struct-type/test-struct-invoke_0.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-struct-invoke_1.ets
 spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.ets
->>>>>>> Move tests for classes to the corresponded folder 09.class
 ### EOF Issue 14040
 ### EOF ArkUI struct
 
@@ -475,24 +451,6 @@ arkui/dollar_dollar_13.ets
 ### End Of Built-In Component Two Way Value Synchronization
 ### Annotations issues
 ### Issue 14040 -> Annotations not yet implemented
-<<<<<<< HEAD
-spec/annotations/annotation_@Builder.ets
-spec/annotations/annotation_@Builder_2.ets
-spec/annotations/annotation_@Component.ets
-spec/annotations/annotation_@Consume.ets
-spec/annotations/annotation_@Entry.ets
-spec/annotations/annotation_@Link.ets
-spec/annotations/annotation_@Link_2.ets
-spec/annotations/annotation_@LocalStorageLink.ets
-spec/annotations/annotation_@ObjectLink.ets
-spec/annotations/annotation_@Observed.ets
-spec/annotations/annotation_@Prop.ets
-spec/annotations/annotation_@Provide.ets
-spec/annotations/annotation_@State.ets
-spec/annotations/annotation_@StorageLink.ets
-spec/annotations/annotation_@Watch.ets
-spec/annotations/annotation_@Watch_2.ets
-=======
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder_2.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Component.ets
@@ -509,7 +467,6 @@ spec/16.Support_for_GUI_Programming/annotations/annotation_@State.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch.ets
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch_2.ets
->>>>>>> Move tests for classes to the corresponded folder 09.class
 ### End of Issue 14040
 ### End of Annotations
 ### Issue I8MB96 begin
