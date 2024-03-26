@@ -26,13 +26,33 @@
 
 namespace panda {
 
+struct MurmurHash32Const {
+    // Here are the main constants for hash counting:
+    // Many of them looks like some kind of magic
+    static constexpr uint32_t C1 = 0xCC9E2D51U;
+    static constexpr uint32_t C2 = 0x1B873593U;
+    static constexpr uint32_t MAX_BITS = 32;
+    static constexpr uint32_t FINALIZE_FIRST_SHIFT = 16;
+    static constexpr uint32_t FINALIZE_SECOND_SHIFT = 13;
+    static constexpr uint32_t FINALIZE_THIRD_SHIFT = 16;
+    static constexpr uint32_t FINALIZE_FIRST_MULTIPLICATOR = 0x85EBCA6BU;
+    static constexpr uint32_t FINALIZE_SECOND_MULTIPLICATOR = 0xC2BAE35U;
+    static constexpr uint32_t MAIN_FIRST_SHIFT = 15;
+    static constexpr uint32_t MAIN_SECOND_SHIFT = 13;
+    static constexpr uint32_t MAIN_CONSTANT = 0xE6546B64U;
+    static constexpr uint32_t MAIN_MULTIPLICATOR = 5;
+    static constexpr uint32_t TAIL_SHIFT = 8;
+    static constexpr uint32_t TAIL_LAST_SHIFT = 15;
+    static constexpr uint32_t BLOCK_SIZE = 4;
+};
+
 // In general murmur hash looks like that:
 // key = |....|....|....|.|.|.|
 //         32   32   32  8 8 8
 // Firstly, we proceed each 32 bits block from key;
 // Secondly, we proceed last 8 bits block which were not covered in previous step.
 template <uint32_t seed_value>
-class MurmurHash32 final : public HashBase<MurmurHash32<seed_value>> {
+class MurmurHash32 final : public HashBase<MurmurHash32<seed_value>>, MurmurHash32Const {
 public:
     static uint32_t GetHash32WithSeedImpl(const uint8_t *key, size_t len, uint32_t seed)
     {
@@ -52,24 +72,6 @@ public:
     }
 
 private:
-    // Here are the main constants for hash counting:
-    // Many of them looks like some kind of magic
-    static constexpr uint32_t C1 = 0xCC9E2D51U;
-    static constexpr uint32_t C2 = 0x1B873593U;
-    static constexpr uint32_t MAX_BITS = 32;
-    static constexpr uint32_t FINALIZE_FIRST_SHIFT = 16;
-    static constexpr uint32_t FINALIZE_SECOND_SHIFT = 13;
-    static constexpr uint32_t FINALIZE_THIRD_SHIFT = 16;
-    static constexpr uint32_t FINALIZE_FIRST_MULTIPLICATOR = 0x85EBCA6BU;
-    static constexpr uint32_t FINALIZE_SECOND_MULTIPLICATOR = 0xC2BAE35U;
-    static constexpr uint32_t MAIN_FIRST_SHIFT = 15;
-    static constexpr uint32_t MAIN_SECOND_SHIFT = 13;
-    static constexpr uint32_t MAIN_CONSTANT = 0xE6546B64U;
-    static constexpr uint32_t MAIN_MULTIPLICATOR = 5;
-    static constexpr uint32_t TAIL_SHIFT = 8;
-    static constexpr uint32_t TAIL_LAST_SHIFT = 15;
-    static constexpr uint32_t BLOCK_SIZE = 4;
-
     static uint32_t Rotl(uint32_t word, uint8_t shift)
     {
         return (word << shift) | (word >> (MAX_BITS - shift));
