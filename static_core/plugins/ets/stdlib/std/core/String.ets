@@ -1118,7 +1118,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
     }
 
     private CreateHTMLString(tag: String, param: String): String{
-        return "<" + tag + param + ">" + new String(this) + "</" + tag + ">"
+        return "<" + tag + param + ">" + (this) + "</" + tag + ">"
     }
 
     /**
@@ -1250,9 +1250,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
     /**
      * The String.fromCharCode() static method returns a string created from the specified sequence of UTF-16 code units
      *
-     * @param codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit
-     *
-     * @throws RangeError if codes[i] is less than 0, or is greater than 0xFFFF
+     * @param codes are numbers between 0 and 65535 (0xFFFF) representing a UTF-16 code unit or NaN
      *
      * @returns string consisting of specified UTF-16 code units.
      *
@@ -1260,7 +1258,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
     public static fromCharCode(...codes: number[]): String {
         let res = new StringBuilder();
         for (const cu of codes) {
-            res.append((cu % 0xffff) as char)
+            res.append((cu % (0x10000)) as char)
         }
         return res.toString()
     }

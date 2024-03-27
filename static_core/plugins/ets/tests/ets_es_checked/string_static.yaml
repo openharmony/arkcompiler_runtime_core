@@ -18,6 +18,8 @@ sub:
         params: []
         rest:
           - combinationRest 97, 10, 65
+          - combinationRest 66, 65, 65, 66
+          - combinationRest 0x2014, 0x12014, "NaN"
           - combinationRest 0xffff0066, -100, "NaN", "Infinity"
           - |
             Proc.new { [[55362, 57271]] }

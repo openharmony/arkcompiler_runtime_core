@@ -109,8 +109,8 @@ function compareRegExpMatchArray(actual : {{.item.method_return_type}}, expected
   if (actual == null || expected == null) {
     return false;
   }
-  for (let i = 0; i < actual.length; i++) {
-     if (actual.result[i] != expected[i]) return false;
+  for (let i = 0; i < actual!.length; i++) {
+     if (actual!.result[i] != expected[i]) return false;
    }
   return true;
 }

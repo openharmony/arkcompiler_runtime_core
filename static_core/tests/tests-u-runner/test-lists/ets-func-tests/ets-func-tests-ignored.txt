@@ -371,9 +371,6 @@ spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
 ### Issue 15693
 std/core/std_core_string_String_localeCompare_string_005.ets
-std/core/std_core_string_String_match_RegExp.ets
-std/core/std_core_string_String_match_String.ets
-std/core/std_core_string_String_fromCharCode_009.ets
 ### Issue 15119
 std/core/std_core_string_String_fromCharCode_006.ets
 ### Issue 15304
