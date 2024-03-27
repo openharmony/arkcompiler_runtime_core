@@ -891,7 +891,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; i++) {
             res.append(this.getUnsafe(i) as number)
-            res.append(s!)
+            res.append(s)
         }
         if (this.lengthInt > 0) {
             res.append(this.getUnsafe(this.lengthInt - 1) as number)
@@ -2789,7 +2789,7 @@ export class Uint8Array implements Iterable<Number> {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; i++) {
             res.append(this.getUnsafe(i) as number)
-            res.append(s!)
+            res.append(s)
         }
         if (this.lengthInt > 0) {
             res.append(this.getUnsafe(this.lengthInt - 1) as number)
@@ -4688,7 +4688,7 @@ export class Uint16Array implements Iterable<Number> {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; i++) {
             res.append(this.getUnsafe(i) as number)
-            res.append(s!)
+            res.append(s)
         }
         if (this.lengthInt > 0) {
             res.append(this.getUnsafe(this.lengthInt - 1) as number)
@@ -6613,7 +6613,7 @@ export class Uint32Array implements Iterable<Number> {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; i++) {
             res.append(this.getUnsafe(i) as number)
-            res.append(s!)
+            res.append(s)
         }
         if (this.lengthInt > 0) {
             res.append(this.getUnsafe(this.lengthInt - 1) as number)
@@ -8538,7 +8538,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; i++) {
             res.append(new BigInt(this.getUnsafe(i)))
-            res.append(s!)
+            res.append(s)
         }
         if (this.lengthInt > 0) {
             res.append(new BigInt(this.getUnsafe(this.lengthInt - 1)))

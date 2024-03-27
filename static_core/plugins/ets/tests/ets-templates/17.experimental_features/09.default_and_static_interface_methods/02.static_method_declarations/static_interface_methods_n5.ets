@@ -14,11 +14,17 @@
  */
 
 /*---
-desc: If the result of the evaluation of e is not equal to null or undefined, then the result of e! is the outcome of the evaluation of e.
+desc: >-
+    A compile-time error occurs if the header or body of a static method
+    of an interface contains the name of any surrounding declaration's
+    type parameter.
+tags: [negative, compile-only]
 ---*/
 
-function main(): void {
-  let i = (): Int|null => { return 5; }();
-  let ii = (): Int|null => { return null; } ();
-  assert (0 ? ii : i)!;
+interface I<T> {
+    static undef2Null(p: T|undefined|null): T|null {  // CTE: 'T' cannot be used here
+        return p === undefined ? null : p
+    }
 }
+
+function main(): void {}

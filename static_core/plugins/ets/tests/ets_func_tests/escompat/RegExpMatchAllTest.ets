@@ -96,19 +96,19 @@ function checkTestResult(actual : RegExpExecArray | null, expected : RegExpExecA
         return 1;
     }
 
-    for (let i = 0; i < actual!.result.length; i++ ) {
-        if (!actual!.result[i].equals(expected!.result[i])) {
+    for (let i = 0; i < actual.result.length; i++ ) {
+        if (!actual.result[i].equals(expected.result[i])) {
             console.println ("check index : " + i);
             console.println("content of result array from actual is not equals to expected");
-            console.println("actual  : " + actual!.result[i]);
-            console.println("expected : " + expected!.result[i]);
+            console.println("actual  : " + actual.result[i]);
+            console.println("expected : " + expected.result[i]);
             return 1;
         }
     }
 
-    for (let i = 0; i < actual!.indices.length; i++) {
-        let actInd = (Value.of(actual!.indices) as ArrayValue).getElement(i).getData() as number[]
-        let expInd = (Value.of(expected!.indices) as ArrayValue).getElement(i).getData() as number[]
+    for (let i = 0; i < actual.indices.length; i++) {
+        let actInd = (Value.of(actual.indices) as ArrayValue).getElement(i).getData() as number[]
+        let expInd = (Value.of(expected.indices) as ArrayValue).getElement(i).getData() as number[]
         for (let j = 0; j < actInd.length; j++) {
             if (actInd[j] != expInd[j]) {
             console.println("check index: " + i);

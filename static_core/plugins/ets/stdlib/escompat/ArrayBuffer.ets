@@ -139,7 +139,7 @@ export class ArrayBuffer extends Buffer
      */
     public slice(begin: int, end?: int): ArrayBuffer {
         if (end == undefined) return this.sliceInternal(begin, this.getByteLength()) as ArrayBuffer
-        else return this.sliceInternal(begin, end!) as ArrayBuffer
+        else return this.sliceInternal(begin, end) as ArrayBuffer
     }
 
     /**

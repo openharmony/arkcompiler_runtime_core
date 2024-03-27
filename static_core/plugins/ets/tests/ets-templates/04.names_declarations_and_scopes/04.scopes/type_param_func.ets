@@ -16,14 +16,16 @@ limitations under the License.
 /*---
 desc: >-
   The scope of a type parameter name in a function declaration is that entire declaration (function parameter scope).
-tags: 
+tags:
+- compile-only
+- negative
 ---*/
 
 let T = 1
 
 function foo<T extends Number>(p: T): T {
     let x: T = p;
-    let res: T = x * 2; // smart-type for x and res is Number, arithmetic id OK
+    let res: T = x * 2; // CTE: arithmetic is not applicable to type parameters
     return res;
 }
 

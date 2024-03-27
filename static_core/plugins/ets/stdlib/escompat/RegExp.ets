@@ -569,7 +569,7 @@ export class RegExp extends Object {
                     lastStart = separatorRight
                     let numberOfCaptures = z.length;
                     for (let i = 1; i < numberOfCaptures; ++i) {
-                        let nextCapture = z!.get(i);
+                        let nextCapture = z.get(i);
                         splittedStrings.pushBack(nextCapture)
                         if (splittedStrings.size() == lim) {
                             return splittedStrings.toArray() as String[]
