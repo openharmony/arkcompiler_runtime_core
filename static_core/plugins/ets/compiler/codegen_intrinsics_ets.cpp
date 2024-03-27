@@ -323,4 +323,26 @@ void Codegen::CreateStringConcat([[maybe_unused]] IntrinsicInst *inst, Reg dst, 
             break;
     }
 }
+
+void Codegen::CreateStringBuilderToString(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto *enc = GetEncoder();
+    if (!IsCompressedStringsEnabled()) {
+        LOG(WARNING, COMPILER) << "String compression must be enabled";
+        enc->SetFalseResult();
+        return;
+    }
+    auto entrypoint = EntrypointId::STRING_BUILDER_TO_STRING;
+    auto sb = src[FIRST_OPERAND];
+    if (GetGraph()->IsAotMode()) {
+        ScopedTmpReg klass(enc);
+        enc->EncodeLdr(klass, false, MemRef(ThreadReg(), GetRuntime()->GetStringClassPointerTlsOffset(GetArch())));
+        CallFastPath(inst, entrypoint, dst, {}, sb, klass);
+    } else {
+        auto klass = TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod())));
+        CallFastPath(inst, entrypoint, dst, {}, sb, klass);
+    }
+}
+
 }  // namespace ark::compiler

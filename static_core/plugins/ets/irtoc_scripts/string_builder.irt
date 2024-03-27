@@ -16,9 +16,9 @@ include_relative 'string_helpers.irt'
 
 module Constants
     ETS_SB_BUFFER_OFFSET = "ark::ObjectHeader::ObjectHeaderSize()"
-    ETS_SB_INDEX_OFFSET = "ark::ObjectHeader::ObjectHeaderSize() + ark::OBJECT_POINTER_SIZE"
-    ETS_SB_LENGTH_OFFSET = "ark::ObjectHeader::ObjectHeaderSize() + ark::OBJECT_POINTER_SIZE + sizeof(int32_t)"
-    ETS_SB_COMPRESS_OFFSET = "ark::ObjectHeader::ObjectHeaderSize() + ark::OBJECT_POINTER_SIZE + 2*sizeof(int32_t)"
+    ETS_SB_INDEX_OFFSET = ETS_SB_BUFFER_OFFSET + " + ark::OBJECT_POINTER_SIZE"
+    ETS_SB_LENGTH_OFFSET = ETS_SB_INDEX_OFFSET + " + sizeof(int32_t)"
+    ETS_SB_COMPRESS_OFFSET = ETS_SB_LENGTH_OFFSET + " + sizeof(int32_t)"
 end
 
 #
@@ -251,3 +251,114 @@ end
 
 GenerateStringBuilderAppendChar(true)
 GenerateStringBuilderAppendChar(false)
+
+
+#
+# StringBuilder.toString
+#
+# Assumtion: string compression is enabled.
+#
+function(:StringBuilderToString,
+          params: {sb: 'ref', string_klass: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  # Compute data size and length of a new string.
+  n_chars := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).u32
+  len_compressed := ShlI(n_chars).Imm(1).u32  # set 'uncompressed' bit to 0
+  sb_compress := LoadI(sb).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+  If(sb_compress, 0).EQ.Unlikely.b {
+    size := len_compressed
+    len_uncompressed := OrI(len_compressed).Imm(1).u32  # set 'uncompressed' bit to 1
+  }
+  data_size := Phi(n_chars, size).u32
+  packed_length := Phi(len_compressed, len_uncompressed).u32
+  # Allocate a string
+  new_str := allocate_string_tlab(string_klass, Cast(data_size).word)
+  # Let the memory writes (TLAB) be visible to other threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  # Set new string's length
+  StoreI(new_str,packed_length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # Set new string's hashcode to 0, so as not to spend time on its computation
+  StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
+  # If string is empty, then there is nothing to do anymore
+  If(n_chars, 0).EQ.Unlikely.b {
+    Return(new_str).ptr
+  }
+
+  # Walk through the buffer elements and append their content to new_str
+  index := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  dst_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+  i1 := Cast(0).i32
+Label(:ForEachBufferSlot)
+  i := Phi(i1, i2).i32
+  dst_data := Phi(dst_data1, dst_data2).ptr
+  slot := AddI(ShlI(i).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+  obj := Load(buffer, slot).ref
+  klass := LoadI(obj).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  klass_flags := LoadI(klass).Imm(Constants::BASE_CLASS_FLAGS_OFFSET).u32
+  If(AndI(klass_flags).Imm("ark::Class::STRING_CLASS").u32, 0).EQ.b {
+    Goto(:ArrayObject)
+  }
+  # -------------------
+  # Object is a string
+  # -------------------
+  str_len := LoadI(obj).Imm(Constants::STRING_LENGTH_OFFSET).i32
+  src_data := AddI(Cast(obj).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::STRING_DATA_OFFSET).ptr
+  src_len := ShrI(str_len).Imm(1).i32
+  If(sb_compress, 0).EQ.Unlikely.b {
+    Goto(:DoNotCompressString)
+  }
+  copy_u8_chars(src_data, dst_data, Cast(src_len).u64)
+  n_bytes1 := src_len
+  Goto(:NextObject)
+Label(:DoNotCompressString)
+  If(AndI(str_len).Imm(1).u32, 1).EQ.b {
+    Goto(:SrcNotCompressed)
+  }
+  expand_u8_to_u16_chars(src_data, dst_data, Cast(src_len).u64)
+  n_bytes2 := ShlI(src_len).Imm(1).i32
+  Goto(:NextObject)
+Label(:SrcNotCompressed)
+  copy_u16_chars(src_data, dst_data, Cast(src_len).u64)
+  n_bytes3 := ShlI(src_len).Imm(1).i32
+  Goto(:NextObject)
+  # -------------------
+  # Object is an array
+  # -------------------
+Label(:ArrayObject)
+  src_arr_data := AddI(Cast(obj).SrcType(Constants::COMPILER_REFERENCE).ptr).Imm(Constants::ARRAY_DATA_OFFSET).ptr
+  src_arr_len := LoadI(obj).Imm(Constants::ARRAY_LENGTH_OFFSET).i32
+  If(sb_compress, 0).EQ.Unlikely.b {
+    Goto(:DoNotCompressArray)
+  }
+  compress_u16_to_u8_chars(src_arr_data, dst_data, Cast(src_arr_len).u64)
+  n_bytes4 := src_arr_len
+  Goto(:NextObject)
+Label(:DoNotCompressArray)
+  copy_u16_chars(src_arr_data, dst_data, Cast(src_arr_len).u64)
+  n_bytes5 := ShlI(src_arr_len).Imm(1).i32
+  # Go to the next buffer slot if any
+Label(:NextObject)
+  n_bytes := Phi(n_bytes1, n_bytes2, n_bytes3, n_bytes4, n_bytes5).i32
+  dst_data2 := Add(dst_data, n_bytes).ptr
+  i2 := AddI(i).Imm(1).i32
+  If(i2, index).LT.Likely.b {
+    Goto(:ForEachBufferSlot)
+  }
+  # Everything is done
+  Return(new_str).ptr
+  # SlowPath if new string can not be allocated in TLAB
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_BUILDER_TO_STRING_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, sb, string_klass).AddImm(entrypoint).MethodAsImm("StringBuilderToStringUsualBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}

@@ -1145,8 +1145,11 @@ intrinsics:
     set_flags: []
     signature:
       ret: std.core.String
-      args: [ ]
+      args: []
     impl: ark::ets::intrinsics::StdCoreStringBuilderToString
+    clear_flags: []
+    codegen_func: CreateStringBuilderToString
+    codegen_arch: [arm64, amd64]
 
 #################
 # escompat.Date #
