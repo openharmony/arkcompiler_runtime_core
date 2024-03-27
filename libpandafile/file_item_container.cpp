@@ -821,8 +821,7 @@ bool ItemContainer::IndexHeaderItem::Write(Writer *writer)
     }
 
     for (auto *index_item : indexes_) {
-        auto itemType = index_item->GetItemType();
-        if (itemType == ItemTypes::FIELD_INDEX_ITEM || itemType == ItemTypes::PROTO_INDEX_ITEM) {
+        if (!index_item->NeedsEmit()) {
             // reserve [field_idx_size] | [proto_idx_size] field
             if (!writer->Write<uint32_t>(INVALID_INDEX)) {
                 return false;

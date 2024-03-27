@@ -530,20 +530,6 @@ void ProtoItem::AddType(TypeItem *type, size_t *n)
 
 bool ProtoItem::Write(Writer *writer)
 {
-    ASSERT(GetOffset() == writer->GetOffset());
-    for (auto s : shorty_) {
-        if (!writer->Write(s)) {
-            return false;
-        }
-    }
-
-    for (auto r : reference_types_) {
-        ASSERT(r->HasIndex(this));
-        if (!writer->Write<uint16_t>(r->GetIndex(this))) {
-            return false;
-        }
-    }
-
     return true;
 }
 

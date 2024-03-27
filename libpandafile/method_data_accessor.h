@@ -170,7 +170,7 @@ public:
 
     bool HasValidProto() const
     {
-        return proto_off_ != 0;
+        return proto_idx_ != INVALID_INDEX_16;
     }
 
     uint32_t GetAnnotationsNumber();

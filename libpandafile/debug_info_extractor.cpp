@@ -228,7 +228,8 @@ void DebugInfoExtractor::Extract(const File *pf)
                         }
                     } else {
                         info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
-                        info.signature = DebugInfoExtractor::ANY_SIGNATURE;
+                        // get signature of <any> type
+                        info.signature = Type::GetSignatureByTypeId(Type(Type::TypeId::TAGGED));
                     }
                 }
                 first_param = false;
