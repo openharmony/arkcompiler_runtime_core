@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,4 +143,26 @@ function main(): void {
     assert arr[8].equals("gap"): "Third substring must be `gap`";
     arr = str1.split(" ", 3);
     assert arr.length == 3: "Length must be 3";
+
+    let str4: String = "Example string";
+    assert str4[0] == c'E': "First character must be `E`";
+    assert str4[8] == c's': "Eighth character must be `s`";
+    assert str4[str4.length - 1] == c'g': "Last character must be `g`";
+
+    try {
+        let failedCase = str4[-1];
+        assert false
+    } catch(err) {
+        assert err instanceof StringIndexOutOfBoundsException: "It should be instance of StringIndexOutOfBoundsException"
+    }
+
+    try {
+        let failedCase = str4[str4.length];
+        assert false
+    } catch(err) {
+        assert err instanceof StringIndexOutOfBoundsException: "It should be instance of StringIndexOutOfBoundsException"
+    }
+
+    let str5: String = "函数式编程";
+    assert str5[0] == c'函': "First character must be `函`";
 }
