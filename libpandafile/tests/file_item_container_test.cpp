@@ -439,7 +439,7 @@ HWTEST(ItemContainer, TestMethods, testing::ext::TestSize.Level0)
         EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
         EXPECT_EQ(data_accessor.GetNameId().GetOffset(), method_name->GetOffset());
         EXPECT_EQ(data_accessor.GetProtoId().GetOffset(), proto_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetProtoIdx(), MAX_INDEX_16);
+        EXPECT_EQ(data_accessor.GetProtoIdx(), INVALID_INDEX_16);
         EXPECT_EQ(data_accessor.GetAccessFlags(), ACC_PUBLIC | ACC_STATIC);
         EXPECT_EQ(data_accessor.GetSize(), method_item->GetSize());
 

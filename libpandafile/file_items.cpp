@@ -572,7 +572,7 @@ bool BaseMethodItem::Write(Writer *writer)
     }
 
     // reserve [proto_idx] field, write invalid index
-    if (!writer->Write<uint16_t>(MAX_INDEX_16)) {
+    if (!writer->Write<uint16_t>(INVALID_INDEX_16)) {
         return false;
     }
 

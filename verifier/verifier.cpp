@@ -235,14 +235,13 @@ bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_
     return true;
 }
 
-void Verifier::CollectModuleLiteralId(panda_file::FieldDataAccessor &field_accessor)
+void Verifier::CollectModuleLiteralId(const panda_file::File::EntityId &field_id)
 {
-    panda_file::StringData sd = file_->GetStringData(field_accessor.GetNameId());
-    if (std::strcmp(utf::Mutf8AsCString(sd.data), MODULE_IDX_FIELD_NAME) != 0) {
-        return;
+    panda_file::FieldDataAccessor field_accessor(*file_, field_id);
+    const auto literal_id = field_accessor.GetValue<uint32_t>().value();
+    if (std::find(literal_ids_.begin(), literal_ids_.end(), literal_id) != literal_ids_.end()) {
+        module_literals_.insert(literal_id);
     }
-    auto module_literal_offset = field_accessor.GetValue<int32_t>().value();
-    module_literals_.insert(module_literal_offset);
 }
 
 bool Verifier::CheckConstantPool(const verifier::ActionType type)
@@ -267,7 +266,7 @@ bool Verifier::CheckConstantPool(const verifier::ActionType type)
             }
             if (type == verifier::ActionType::COLLECTINFOS) {
                 class_accessor.EnumerateFields([&](panda_file::FieldDataAccessor &field_accessor) -> void {
-                    CollectModuleLiteralId(field_accessor);
+                    CollectModuleLiteralId(field_accessor.GetFieldId());
                 });
             }
         }

@@ -138,7 +138,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
             EXPECT_EQ(utf::CompareMUtf8ToMUtf8(pf->GetStringData(mda.GetNameId()).data, utf::CStringAsMutf8("main")),
                       0);
 
-            EXPECT_EQ(mda.GetProtoIdx(), panda_file::MAX_INDEX_16);
+            EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
 
             EXPECT_EQ(mda.GetAccessFlags(), ACC_STATIC);
             EXPECT_TRUE(mda.GetCodeId().has_value());
@@ -780,7 +780,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_009, TestSize.Level1)
     int32_t num_methods = 0;
     cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
         EXPECT_FALSE(mda.IsExternal());
-        EXPECT_EQ(mda.GetProtoIdx(), panda_file::MAX_INDEX_16);
+        EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
         EXPECT_TRUE(mda.GetCodeId().has_value());
         panda_file::CodeDataAccessor cdacc(*pf, mda.GetCodeId().value());
         EXPECT_EQ(1u, cdacc.GetNumArgs());

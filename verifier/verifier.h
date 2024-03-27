@@ -59,7 +59,7 @@ private:
     void GetLiteralIds();
     void GetConstantPoolIds();
     bool CollectIdInInstructions(const panda_file::File::EntityId &method_id);
-    void CollectModuleLiteralId(panda_file::FieldDataAccessor &field_accessor);
+    void CollectModuleLiteralId(const panda_file::File::EntityId &field_id);
     bool CheckConstantPool(const verifier::ActionType type);
     size_t GetVRegCount(const BytecodeInstruction &bc_ins);
     bool CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id);
@@ -94,7 +94,6 @@ private:
     std::unordered_set<uint32_t> module_literals_;
     static constexpr size_t DEFAULT_ARGUMENT_NUMBER = 3;
     static constexpr uint32_t FILE_CONTENT_OFFSET = 12U;
-    static constexpr char MODULE_IDX_FIELD_NAME[] = "moduleRecordIdx";
 };
 } // namespace panda::verifier
 #endif
