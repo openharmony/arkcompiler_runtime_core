@@ -70,12 +70,12 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
     /**
      * Minimal value that this type can have as an integral
      */
-    public static readonly MIN_VALUE: long = -2147483648;
+    public static readonly MIN_VALUE: int = -2147483648;
 
     /**
      * Maximal value that this type can have as an integral
      */
-    public static readonly MAX_VALUE: long = 2147483647;
+    public static readonly MAX_VALUE: int = 2147483647;
 
     /**
      * Size of this type in bits
