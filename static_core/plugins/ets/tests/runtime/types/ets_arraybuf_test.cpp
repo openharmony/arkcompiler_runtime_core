@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "types/ets_class.h"
 #include "types/ets_arraybuffer.h"
+#include "tests/runtime/types/ets_test_mirror_classes.h"
 
 namespace ark::ets::test {
 
@@ -53,37 +54,27 @@ public:
     NO_COPY_SEMANTIC(EtsArrayBufferTest);
     NO_MOVE_SEMANTIC(EtsArrayBufferTest);
 
+    static std::vector<MirrorFieldInfo> GetMembers()
+    {
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsArrayBuffer, byteLength_, "byteLength"),
+                                             MIRROR_FIELD_INFO(EtsArrayBuffer, data_, "data")};
+    }
+
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
-};
-
-struct Member {
-    const char *name;
-    size_t offset;
-};
-
-class EtsArrayBufferMembers {
-public:
-    static std::vector<Member> GetMembers()
-    {
-        return std::vector<Member> {{"byteLength", MEMBER_OFFSET(EtsArrayBuffer, byteLength_)},
-                                    {"data", MEMBER_OFFSET(EtsArrayBuffer, data_)}};
-    }
 };
 
 TEST_F(EtsArrayBufferTest, MemoryLayout)
 {
     EtsClass *klass = vm_->GetClassLinker()->GetArrayBufferClass();
     ASSERT_NE(nullptr, klass);
-    std::vector<Member> members = EtsArrayBufferMembers::GetMembers();
+    std::vector<MirrorFieldInfo> members = GetMembers();
     ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
 
-    // Check both EtsPromise and ark::Class<Promise> has the same number of fields
-    // and at the same offsets
-    for (const Member &memb : members) {
-        EtsField *field = klass->GetFieldIDByName(memb.name);
+    for (const MirrorFieldInfo &memb : members) {
+        EtsField *field = klass->GetFieldIDByName(memb.Name());
         ASSERT_NE(nullptr, field);
-        ASSERT_EQ(memb.offset, field->GetOffset()) << "Offsets of the field '" << memb.name << "' are different";
+        ASSERT_EQ(memb.Offset(), field->GetOffset()) << "Offsets of the field '" << memb.Name() << "' are different";
     }
 }
 }  // namespace ark::ets::test

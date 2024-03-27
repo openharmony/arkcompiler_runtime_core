@@ -287,18 +287,8 @@ public:
     void CheckObject(Reg reg, LabelHolder::LabelId label);
     template <bool IS_CLASS = false>
     void CreatePreWRB(Inst *inst, MemRef mem, RegMask preserved = {}, bool storePair = false);
-    void CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2 = INVALID_REGISTER);
-    void CreatePostWRBForDynamic(Inst *inst, MemRef mem, Reg reg1, Reg reg2);
-    void EncodePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject = true);
-    void CreatePostInterRegionBarrier(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject);
-    void CreatePostInterGenerationalBarrier(Reg base);
-    // Creates call to IRtoC PostWrb Entrypoint. Offline means AOT or IRtoC compilation -> type of GC is not known. So
-    // Managed Thread keeps pointer to actual IRtoC GC barriers implementation at run-time.
-    void CreateOfflineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2);
-    // Creates call to IRtoC PostWrb Entrypoint. Online means JIT compilation -> we know GC type.
-    void CreateOnlineIrtocPostWrbRegionTwoRegs(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject);
-    void CreateOnlineIrtocPostWrbRegionOneReg(Inst *inst, MemRef mem, Reg reg1, bool checkObject);
-    void CreateOnlineIrtocPostWrb(Inst *inst, MemRef mem, Reg reg1, Reg reg2, bool checkObject);
+    void CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2 = INVALID_REGISTER, RegMask preserved = {});
+    void CreatePostWRBForDynamic(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask preserved = {});
     template <typename... Args>
     void CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<EntrypointId, Reg> entrypoint,
                      Args &&...params);
@@ -333,7 +323,6 @@ public:
     ssize_t GetStackOffset(Location location);
     MemRef GetMemRefForSlot(Location location);
     Reg SpReg() const;
-
     Reg FpReg() const;
 
     bool HasLiveCallerSavedRegs(Inst *inst);
@@ -488,6 +477,7 @@ private:
     friend class EncodeVisitor;
     friend class BaselineCodegen;
     friend class SlowPathJsCastDoubleToInt32;
+    friend class PostWriteBarrier;
 };  // Codegen
 
 template <>
@@ -495,6 +485,88 @@ constexpr auto Codegen::ConvertSrcRegisters<0>([[maybe_unused]] Inst *inst)
 {
     return std::make_tuple();
 }
+
+// PostWriteBarrier
+class PostWriteBarrier {
+public:
+    PostWriteBarrier() = delete;
+    PostWriteBarrier(Codegen *cg, Inst *inst) : cg_(cg), inst_(inst)
+    {
+        ASSERT(cg_ != nullptr);
+        ASSERT(inst_ != nullptr);
+        type_ = cg_->GetRuntime()->GetPostType();
+    }
+    DEFAULT_MOVE_SEMANTIC(PostWriteBarrier);
+    DEFAULT_COPY_SEMANTIC(PostWriteBarrier);
+    ~PostWriteBarrier() = default;
+
+    void Encode(MemRef mem, Reg reg1, Reg reg2, bool checkObject = true, RegMask preserved = {});
+
+private:
+    static constexpr auto BARRIER_POSITION = ark::mem::BarrierPosition::BARRIER_POSITION_POST;
+    Codegen *cg_;
+    Inst *inst_;
+    ark::mem::BarrierType type_;
+
+    struct Args {
+        MemRef mem;
+        Reg reg1;
+        Reg reg2;
+        RegMask preserved;
+        bool checkObject = true;
+    };
+
+    void EncodeInterRegionBarrier(Args args);
+    void EncodeInterGenerationalBarrier(Reg base);
+    // Creates call to IRtoC PostWrb Entrypoint. Offline means AOT or IRtoC compilation -> type of GC is not known.
+    // So Managed Thread keeps pointer to actual IRtoC GC barriers implementation at run-time.
+    void EncodeOfflineIrtocBarrier(Args args);
+    // Creates call to IRtoC PostWrb Entrypoint. Online means JIT compilation -> we know GC type.
+    void EncodeOnlineIrtocBarrier(Args args);
+    void EncodeOnlineIrtocRegionTwoRegsBarrier(Args args);
+    void EncodeOnlineIrtocRegionOneRegBarrier(Args args);
+
+    // Auxillary methods
+    void EncodeCalculateCardIndex(Reg baseReg, ScopedTmpReg *tmp, ScopedTmpReg *tmp1);
+    void EncodeCheckObject(Reg base, Reg reg1, LabelHolder::LabelId skipLabel, bool checkNull);
+    void EncodeWrapOneArg(Reg param, Reg base, MemRef mem, size_t additionalOffset = 0);
+
+    template <typename T>
+    T GetBarrierOperandValue(ark::mem::BarrierPosition position, std::string_view name)
+    {
+        auto operand = cg_->GetRuntime()->GetBarrierOperand(position, name);
+        return std::get<T>(operand.GetValue());
+    }
+
+    template <typename... Args>
+    void FillCallParams(MemRef mem, Args &&...params)
+    {
+        auto base {mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, cg_->GetArch()))};
+        if (mem.HasIndex()) {
+            ASSERT(mem.GetScale() == 0 && !mem.HasDisp());
+            cg_->FillCallParams(base, mem.GetIndex(), std::forward<Args>(params)...);
+        } else {
+            cg_->FillCallParams(base, TypedImm(mem.GetDisp()), std::forward<Args>(params)...);
+        }
+    }
+
+    bool HasObject2(const Args &args) const
+    {
+        ASSERT(args.reg1.IsValid());
+        return args.reg2.IsValid() && args.reg1 != args.reg2;
+    }
+
+    Reg GetBase(const Args &args) const
+    {
+        return args.mem.GetBase().As(TypeInfo::FromDataType(DataType::REFERENCE, cg_->GetArch()));
+    }
+
+    RegMask GetParamRegs(const size_t paramsNumber, const Args &args) const
+    {
+        auto paramRegs {cg_->GetTarget().GetParamRegsMask(paramsNumber) & cg_->GetLiveRegisters(inst_).first};
+        return (paramRegs | args.preserved);
+    }
+};  // PostWriteBarrier
 
 }  // namespace ark::compiler
 

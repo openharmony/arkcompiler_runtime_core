@@ -246,6 +246,7 @@ if (NOT PANDA_TARGET_WINDOWS AND NOT PANDA_TARGET_MACOS)
         optimizer/code_generator/disassembly.cpp
         optimizer/code_generator/codegen.cpp
         optimizer/code_generator/codegen_native.cpp
+        optimizer/code_generator/encode_visitor.cpp
         optimizer/code_generator/spill_fill_encoder.cpp
         optimizer/code_generator/slow_path.cpp
         optimizer/code_generator/method_properties.cpp
@@ -504,6 +505,8 @@ if(NOT PANDA_MINIMAL_VIXL AND PANDA_TARGET_AMD64 AND PANDA_WITH_TESTS)
                 ${PANDA_COMPILER_TESTS_LIBRARIES}
             SANITIZERS
                 ${PANDA_SANITIZERS_LIST}
+            DEPS_TARGETS
+                compiler_inst_generator_test_ext
         )
 
         if (PANDA_CI_TESTING_MODE STREQUAL "Nightly")

@@ -23,12 +23,99 @@
 namespace ark::ets {
 
 EtsString *StringBuilderToString(ObjectHeader *sb);
+ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb);
 ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str);
 ObjectHeader *StringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v);
 ObjectHeader *StringBuilderAppendChar(ObjectHeader *sb, EtsChar v);
 ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v);
 ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v);
 ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v);
+
+namespace test {
+class EtsStringBuilderMembersTest;
+}  // namespace test
+
+class EtsStringBuilder : public EtsObject {
+public:
+    EtsStringBuilder() = delete;
+    ~EtsStringBuilder() = delete;
+
+    NO_COPY_SEMANTIC(EtsStringBuilder);
+    NO_MOVE_SEMANTIC(EtsStringBuilder);
+
+    static EtsStringBuilder *FromCoreType(ObjectHeader *obj)
+    {
+        return reinterpret_cast<EtsStringBuilder *>(obj);
+    }
+
+    ObjectHeader *GetCoreType()
+    {
+        return reinterpret_cast<ObjectHeader *>(this);
+    }
+
+    EtsObject *AsObject()
+    {
+        return this;
+    }
+
+    const EtsObject *AsObject() const
+    {
+        return this;
+    }
+
+    static EtsStringBuilder *FromEtsObject(EtsObject *etsObj)
+    {
+        return reinterpret_cast<EtsStringBuilder *>(etsObj);
+    }
+
+    EtsObjectArray *GetBuf() const
+    {
+        return buf_;
+    }
+
+    void SetBuf(EtsCoroutine *coro, EtsObjectArray *buf)
+    {
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsStringBuilder, buf_), buf->GetCoreType());
+    }
+
+    EtsInt GetIndex() const
+    {
+        return index_;
+    }
+
+    void SetIndex(EtsInt index)
+    {
+        index_ = index;
+    }
+
+    EtsInt GetLength() const
+    {
+        return length_;
+    }
+
+    void SetLength(EtsInt length)
+    {
+        length_ = length;
+    }
+
+    EtsBoolean GetCompress() const
+    {
+        return compress_;
+    }
+
+    void SetCompress(EtsBoolean compress)
+    {
+        compress_ = compress;
+    }
+
+private:
+    ObjectPointer<EtsObjectArray> buf_;  // array with pointers to strings or char[]
+    EtsInt index_;                       // index of the current free element in the buf
+    EtsInt length_;                      // length of the resulting string
+    EtsBoolean compress_;                // compress or not the resulting string
+
+    friend class test::EtsStringBuilderMembersTest;
+};
 
 }  // namespace ark::ets
 

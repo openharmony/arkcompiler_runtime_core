@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "inst_generator.h"
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/code_generator/codegen.h"
+#include "optimizer/optimizations/locations_builder.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 
 namespace ark::compiler {
@@ -69,18 +70,7 @@ public:
             }
             statistic_.first.insert({op.first, fullInstStat});
         }
-        auto intrinsics = instGenerator_.Generate(Opcode::Intrinsic);
-        for (auto &intrinsic : intrinsics) {
-            ASSERT(graphCreator_.GetAllocator()->GetAllocatedSize() == 0U);
-            auto graph = graphCreator_.GenerateGraph(intrinsic);
-            graph->RunPass<RegAllocLinearScan>();
-            bool status = graph->RunPass<Codegen>();
-            statistic_.second[intrinsic->CastToIntrinsic()->GetIntrinsicId()] = status;
-            allInstNumber_++;
-            positiveInstNumber_ += static_cast<int>(status);
-            graph->~Graph();
-            graphCreator_.GetAllocator()->Resize(0U);
-        }
+        GenerateIntrinsics();
         for (auto i = 0; i != static_cast<int>(Opcode::NUM_OPCODES); ++i) {
             auto opc = static_cast<Opcode>(i);
             if (opc == Opcode::NOP || opc == Opcode::Intrinsic || opc == Opcode::Builtin) {
@@ -88,6 +78,25 @@ public:
             }
             allOpcodeNumber_++;
             implementedOpcodeNumber_ += static_cast<int>(statistic_.first.find(opc) != statistic_.first.end());
+        }
+    }
+
+private:
+    void GenerateIntrinsics()
+    {
+        auto intrinsics = instGenerator_.Generate(Opcode::Intrinsic);
+        for (auto &intrinsic : intrinsics) {
+            ASSERT(graphCreator_.GetAllocator()->GetAllocatedSize() == 0U);
+            auto graph = graphCreator_.GenerateGraph(intrinsic);
+            auto id = intrinsic->CastToIntrinsic()->GetIntrinsicId();
+#include "compiler/generated/inst_generator_test_ext.inl.h"
+            graph->RunPass<RegAllocLinearScan>();
+            bool status = graph->RunPass<Codegen>();
+            statistic_.second[id] = status;
+            allInstNumber_++;
+            positiveInstNumber_ += static_cast<int>(status);
+            graph->~Graph();
+            graphCreator_.GetAllocator()->Resize(0U);
         }
     }
 };

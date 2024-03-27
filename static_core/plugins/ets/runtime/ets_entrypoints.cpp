@@ -268,4 +268,17 @@ extern "C" ObjectHeader *StringBuilderAppendBoolEntrypoint(ObjectHeader *sb, uin
     return StringBuilderAppendBool(sb, ToEtsBoolean(static_cast<bool>(v)));
 }
 
+extern "C" ObjectHeader *StringBuilderAppendStringEntrypoint(ObjectHeader *sb, ObjectHeader *str,
+                                                             [[maybe_unused]] ObjectHeader *stringKlass)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendString(sb, reinterpret_cast<EtsString *>(str));
+}
+
+extern "C" ObjectHeader *StringBuilderAppendNullStringEntrypoint(ObjectHeader *sb)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendNullString(sb);
+}
+
 }  // namespace ark::ets

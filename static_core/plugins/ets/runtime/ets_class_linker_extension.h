@@ -100,6 +100,11 @@ public:
         return arraybufClass_;
     }
 
+    Class *GetStringBuilderClass()
+    {
+        return stringBuilderClass_;
+    }
+
     Class *GetSharedMemoryClass()
     {
         return sharedMemoryClass_;
@@ -208,6 +213,7 @@ private:
     Class *internalUndefinedClass_ = nullptr;
     Class *promiseClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
+    Class *stringBuilderClass_ = nullptr;
 
     // Cached type API classes
     Class *typeapiFieldClass_ = nullptr;

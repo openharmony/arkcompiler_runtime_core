@@ -2298,6 +2298,11 @@ void Aarch64Encoder::EncodeStrz(Reg src, MemRef mem)
 
 void Aarch64Encoder::EncodeSti(int64_t src, uint8_t srcSizeBytes, MemRef mem)
 {
+    if (mem.IsValid() && mem.IsOffsetMem() && src == 0 && srcSizeBytes == 1) {
+        auto rzero = GetRegfile()->GetZeroReg();
+        GetMasm()->Strb(VixlReg(rzero), ConvertMem(mem));
+        return;
+    }
     if (!ConvertMem(mem).IsValid()) {
         auto rzero = GetRegfile()->GetZeroReg();
         EncodeStr(rzero, mem);

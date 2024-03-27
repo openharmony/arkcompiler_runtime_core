@@ -157,6 +157,7 @@ if (!is_win && !is_mac && !is_mingw) {
     "optimizer/code_generator/codegen.cpp",
     "optimizer/code_generator/codegen_native.cpp",
     "optimizer/code_generator/disassembly.cpp",
+    "optimizer/code_generator/encode_visitor.cpp",
     "optimizer/code_generator/method_properties.cpp",
     "optimizer/code_generator/slow_path.cpp",
     "optimizer/code_generator/spill_fill_encoder.cpp",

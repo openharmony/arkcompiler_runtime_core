@@ -1080,6 +1080,8 @@ intrinsics:
       ret: std.core.StringBuilder
       args: [std.core.String]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendString
+    codegen_func: CreateStringBuilderAppendString
+    codegen_arch: [arm64, amd64]
 
   - name: StdCoreSbToString
     space: ets

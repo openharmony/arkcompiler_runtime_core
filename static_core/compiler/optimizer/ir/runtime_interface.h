@@ -752,6 +752,25 @@ public:
         return cross_values::GetManagedThreadStringClassPtrOffset(arch);
     }
 
+    // StringBuilder offsets.
+    // cross_values are not used here as StringBuilder doesn't have a corresponding c++ representative.
+    static constexpr uint32_t GetSbBufferOffset()
+    {
+        return ObjectHeader::ObjectHeaderSize();
+    }
+    static constexpr uint32_t GetSbIndexOffset()
+    {
+        return GetSbBufferOffset() + ark::OBJECT_POINTER_SIZE;
+    }
+    static constexpr uint32_t GetSbLengthOffset()
+    {
+        return GetSbIndexOffset() + sizeof(int32_t);
+    }
+    static constexpr uint32_t GetSbCompressOffset()
+    {
+        return GetSbLengthOffset() + sizeof(int32_t);
+    }
+
     /// managed Thread object information
 
     uint32_t GetThreadObjectOffset(Arch arch) const

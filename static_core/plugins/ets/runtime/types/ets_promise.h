@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ namespace ark::ets {
 class EtsCoroutine;
 
 namespace test {
-class EtsPromiseMembers;
+class EtsPromiseTest;
 }  // namespace test
 
 class EtsPromise : public ObjectHeader {
@@ -239,7 +239,7 @@ private:
     EtsInt catchQueueSize_;
     uint32_t state_;  // the Promise's state
 
-    friend class test::EtsPromiseMembers;
+    friend class test::EtsPromiseTest;
 };
 
 }  // namespace ark::ets
