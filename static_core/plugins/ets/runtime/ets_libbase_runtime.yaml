@@ -1168,7 +1168,7 @@ intrinsics:
     static: true
     signature:
       ret: i64
-      args: []
+      args: [ i64 ]
     impl: ark::ets::intrinsics::EscompatDateGetLocalTimezoneOffset
 
   - name: EscompatDateGetTimezoneName
@@ -1178,7 +1178,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.String
-      args: []
+      args: [ i64 ]
     impl: ark::ets::intrinsics::EscompatDateGetTimezoneName
 
   - name: EscompatDateGetLocaleString

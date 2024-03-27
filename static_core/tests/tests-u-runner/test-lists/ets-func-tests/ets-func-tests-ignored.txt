@@ -347,8 +347,6 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export.ets
 spec/import_export/07.export_directives/03.re-export_directives/to_export_2.ets
 spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 ### End of Import-export
-# #16376
-escompat/DateTest.ets
 ### issue 14836 begin
 spec/indexable/idx-s01-0030.ets
 spec/indexable/idx-s01-0080.ets

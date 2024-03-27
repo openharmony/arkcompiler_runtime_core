@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@ function main(): int {
     failures += test(testDoubleYearMonthDayHoursMinutesSecondsConstructor(),"Test YMDH minutes and seconds constructor with Double");
     failures += test(testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(),"Test YMDH minutes seconds and millis constructor with Double");
 
+    failures += test(testStringConstructor(), "Test constructor with string")
+    failures += test(testDateConstructor(), "Test constructor with Date object")
+    
     return test(failures, "All tests run");
 }
 
@@ -43,6 +46,7 @@ function test(result: int, message: String ): int {
     return 1;
 }
 
+const msPerMinute: long = 60000;
 const longYears: long[] = [-300, -72, 1, 1900, 1969, 1970, 1971, 1980, 2000, 2020, 2023, 2024, 2030, 2038, 2039];
 const longMonths: long[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2];
 const longHours: long[] =  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 17, 22];
@@ -52,6 +56,8 @@ const doubleYears: double[] = [-300, -72.0, 1.0, 1900.5, 1969.9, 1970.0, 1971.1,
 const doubleMonths: double[] = [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 0.2, 1.1, 2.2];
 const doubleHours: double[] = [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10, 11.11, 15.5, 17.7, 22.22];
 const doubleMinutes: double[] = [0.0, 4.4, 8.8, 12.12, 16.16, 20.20, 24.24, 28.28, 32.32, 36.36, 40.40, 44.44, 48.48, 52.52, 56.56];
+
+const dateString: string[] = ["2019-11-14T00:55:31.820Z", "2024-02-29T00:55:31.950Z", "2000-01-01T00:00:00.001Z"]
 
 function testIntMsConstructor(): int {
 
@@ -80,7 +86,7 @@ function testIntYearMonthConstructor(): int {
         let cd = new Date(longYears[i], md[i]);
         let utc = Date.UTC(longYears[i], md[i]);
         try {
-            if(utc as long != cd.valueOf() as long) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -100,7 +106,7 @@ function testIntYearMonthDayConstructor(): int {
         let cd = new Date(longYears[i], md[i], day);
         let utc = Date.UTC(longYears[i], md[i], day);
         try {
-            if(utc as long != cd.valueOf() as long) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -121,7 +127,7 @@ function testIntYearMonthDayHoursConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i]);
         try {
-            if(utc as long != cd.valueOf() as long) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -143,7 +149,7 @@ function testIntYearMonthDayHoursMinutesConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i]);
         try {
-            if(utc as long != cd.valueOf() as long) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -166,7 +172,7 @@ function testIntYearMonthDayHoursMinutesSecondsConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i]);
         try {
-            if(utc as long != cd.valueOf() as long) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -190,7 +196,7 @@ function testIntYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
         let cd = new Date(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
         let utc = Date.UTC(longYears[i], md[i], day, ht[i], mh[i], mh[i], millis);
         try {
-            if(utc as long != cd.valueOf() as long) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -227,7 +233,7 @@ function testDoubleYearMonthConstructor(): int {
         let cd = new Date(id[i], md[i]);
         let utc = Date.UTC(id[i], md[i]);
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -247,7 +253,7 @@ function testDoubleYearMonthDayConstructor(): int {
         let cd = new Date(id[i], md[i], day);
         let utc = Date.UTC(id[i], md[i], new Double(day));
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -268,7 +274,7 @@ function testDoubleYearMonthDayHoursConstructor(): int {
         let cd = new Date(id[i], md[i], day, ht[i]);
         let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]));
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -291,7 +297,7 @@ function testDoubleYearMonthDayHoursMinutesConstructor(): int {
         let cd = new Date(id[i], md[i], day, ht[i], mh[i]);
         let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]));
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -315,7 +321,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsConstructor(): int {
         let cd = new Date(id[i], md[i], day, ht[i], mh[i], mh[i]);
         let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]), new Double(mh[i]));
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -340,7 +346,7 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
         let cd = new Date(id[i], md[i], day, ht[i], mh[i], mh[i], millis);
         let utc = Date.UTC(id[i], md[i], new Double(day), new Double(ht[i]), new Double(mh[i]), new Double(mh[i]), new Double(millis));
         try {
-            if(utc != cd.valueOf()) failures++;
+            if(utc as long != (cd.valueOf() - cd.getTimezoneOffset() * msPerMinute) as long) failures++;
         } catch (e) {
             return 1;
         }
@@ -348,6 +354,44 @@ function testDoubleYearMonthDayHoursMinutesSecondsMillisConstructor(): int {
     }
 
     return failures;
+}
+
+function testStringConstructor(): int {
+    let failures = 0;
+    let sd: string[] = dateString;
+
+    for(let i: int = 0; i < sd.length; i++) {
+        let cd: Date = new Date(sd[i]);
+        try {
+            if(sd[i] != cd.toISOString()) failures++;
+        } catch (e) {
+            return 1;
+        }
+    }
+    return failures;
+}
+
+function testDateConstructor(): int {
+    let id: double[] = doubleYears;
+    let md: double[] = doubleMonths;
+    let ht: double[] = doubleHours;
+    let mh: double[] = doubleMinutes;
+    let failures: int = 0;
+    for(let i: int = 0; i < id.length; i++) {
+
+        let day: double = md[i] + 1;
+        let tmp = new Date(id[i], md[i], day, ht[i], mh[i], mh[i]);
+        let cd = new Date(tmp);
+        try {
+            if(tmp.valueOf() != cd.valueOf()) failures++;
+        } catch (e) {
+            return 1;
+        }
+        failures += checkDateWithDoubleYMDHMS(tmp, id[i], md[i], day, ht[i], mh[i], mh[i]);
+    }
+
+    return failures;
+    
 }
 
 //*************************************************************************************************************************************************************
@@ -371,17 +415,6 @@ function checkDateWithLongYMDHMS(date: Date, year: long, month: long, day: long,
 function checkDateWithLongYMDHMSM(cd: Date, year: long, month: long, day: long, hour: long, minutes: long, seconds: long, millis: long): int {
     let failures = 0;
 
-        let tzo: long = cd.getTimezoneOffset() as long;
-        let hoursOffset = tzo / 60;
-        hour = hour - hoursOffset;
-        if(hour >= 24) {
-            hour -=24;
-            day++;
-        }
-        if(hour < 0) {
-            hour +=24;
-            day--
-        }
 
         if(cd.getFullYear() != year) {
             failures++
@@ -427,28 +460,27 @@ function checkDateWithDoubleYMDHMS(date: Date, year: double, month: double, day:
 
 function checkDateWithDoubleYMDHMSM(cd: Date, year: double, month: double, day: double, hour: double, minutes: double, seconds: double, millis: double): int {
     let failures = 0;
-
-        let tzo: long = cd.getTimezoneOffset() as long;
-        let hoursOffset = tzo / 60;
-        hour = hour - hoursOffset;
-        if(hour >= 24) {
-            hour -=24;
-            day++;
+        if(cd.getFullYear() != trunc(year)) {
+            failures++
+            //console.println("" + year + "<->" + cd.getFullYear())
         }
-        if(hour < 0) {
-            hour +=24;
-            day--
+        if(cd.getMonth() != trunc(month)) {
+            failures++
+            //console.println("" + month + "<->" + cd.getMonth())
         }
-
-        if(cd.getFullYear() != Double.valueOf(year).intValue()) failures++
-        if(cd.getMonth() != Double.valueOf(month).byteValue()) failures++
-        if(cd.getDate() != Double.valueOf(day).intValue()) failures++;
-
-        if(cd.getHours() != Double.valueOf(hour).intValue()) failures++;
-        if(cd.getMinutes() != Double.valueOf(minutes).byteValue()) failures++;
-        if(cd.getSeconds() != Double.valueOf(seconds).byteValue()) failures++;
-        if(cd.getMilliseconds() != Double.valueOf(millis).shortValue()) failures++;
+        if(cd.getDate() != trunc(day)) {
+            failures++;
+            //console.println("Day mismatch for " + cd + " " + cd.getDate() + " vs: " + day)
+        }
+        if(cd.getHours() != trunc(hour)) {
+            failures++;
+            //console.println("Hours mismatch for " + cd + " " + cd.getHours() + " vs: " + hour)
+        }
+        if(cd.getMinutes() != trunc(minutes)) failures++;
+        if(cd.getSeconds() != trunc(seconds)) failures++;
+        if(cd.getMilliseconds() != trunc(millis)) failures++;
 
     if(failures > 0) return 1;
     return 0;
 }
+
