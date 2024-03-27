@@ -162,4 +162,10 @@ TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_primitive)
     ASSERT_EQ(ret, true);
 }
 
+TEST_F(EtsInteropScenariosJsToEts, Test_optional_call)
+{
+    auto ret = CallEtsMethod<bool>("testOptionals");
+    ASSERT_EQ(ret, true);
+}
+
 }  // namespace ark::ets::interop::js::testing

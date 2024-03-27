@@ -12,14 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { standaloneFunctionJs, ClassWithMethodJs, newInterfaceWithMethod, ClassWithGetterSetter, lambdaFunction,
     genericFunction, ClassToExtend, functionArgTypeAny, functionArgTypeUnknown, functionArgTypeUndefined,
     functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
     functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
     functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
     genericTypeReturnValue, functionArgTypeOptionalPrimitive, functionArgTypePrimitive,
-    functionReturnTypePrimitive } from "/plugins/ets/tests/interop_js/tests/scenarios/js_to_ets/scenarios.js"
+    functionReturnTypePrimitive } from "pure_js"
+
+import {
+    optional_call,
+    single_required,
+} from "decl_js"
+
+function testOptionals() {
+    let x = optional_call(123, 321, 5)
+    assert(x == 123 + 321 + 5);
+    x = optional_call(100)
+    assert(x == 100 + 130 + 1);
+    x = optional_call()
+    assert(x == 123 + 130 + 1);
+
+    x = single_required(123, 321)
+    assert(x == 123 + 321 + 123);
+    x = single_required(100)
+    assert(x == 100 + 123 + 123);
+    return true;
+}
 
 function Test_standalone_function_call(): boolean {
     return standaloneFunctionJs() as int == 1;
