@@ -125,6 +125,16 @@ function __value_is_same(a: NullishType, b: NullishType): boolean {
       return true
   }
 
+  if (a instanceof DataView) {
+      const x = a as DataView
+      const arr = new Array<number>()
+      for (let i = 0.0; i < x.byteLength; i++) {
+        arr.push(x.getUint8(i))
+      }
+      __fail_description += '\ndvw ' + arr + ' <- converted data view'
+      a = arr
+  }
+
   a = __value_rewrap_builtin_array(a);
   b = __value_rewrap_builtin_array(b);
 
@@ -170,7 +180,7 @@ function __check_value(a: NullishType, b: NullishType): void {
 <%= test_cases_current_chunk[0]&.conf&.top_scope %>
 
 % slices = []
-% test_cases_current_chunk.zip((0..)).each_slice(25).with_index { |test_case_cur_slice, slice_idx|
+% test_cases_current_chunk.zip((0..)).each_slice(10).with_index { |test_case_cur_slice, slice_idx|
 %   slices.push slice_idx
 function test<%= slice_idx %>(): void {
 %   test_case_cur_slice.each { |test_case_cur_slice_data|

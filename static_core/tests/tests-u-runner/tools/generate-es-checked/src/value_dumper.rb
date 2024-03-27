@@ -37,7 +37,9 @@ module ESChecker
                     res = x["data"].map { |c| "\\u#{toh.(c, 1)}#{toh.(c, 0)}" }.join
                     "\"#{res}\""
                 when "num"
-                    "Double.bitCastFromLong(#{x["data"]}) /* #{x["dbg"]} */"
+                    "Double.bitCastFromLong(#{x["data"]} as long) /* #{x["dbg"]} */"
+                when "bigint"
+                    "#{x["data"]}n"
                 else
                     raise "unknown kind for #{x}"
                 end

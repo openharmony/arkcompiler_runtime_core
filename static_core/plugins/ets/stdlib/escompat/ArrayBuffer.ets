@@ -27,6 +27,23 @@ package escompat;
     /* abstract */ sliceInternal(begin: int, end: int): Buffer { throw new Error("abstract"); }
 }
 
+export interface ArrayBufferView {
+    /**
+     * The ArrayBuffer instance referenced by the array.
+     */
+    readonly buffer: ArrayBufferLike
+
+    /**
+     * The length in bytes of the array.
+     */
+    readonly byteLength: number
+
+    /**
+     * The offset in bytes of the array.
+     */
+    readonly byteOffset: number
+}
+
 /**
  * JS ArrayBuffer API-compatible class
  */
