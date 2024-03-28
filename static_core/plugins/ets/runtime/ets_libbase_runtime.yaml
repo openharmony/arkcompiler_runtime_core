@@ -909,6 +909,45 @@ intrinsics:
         args: [ ]
     impl: ark::ets::intrinsics::StdCoreStringIsCompressed
 
+ # the following concat methods are private and are not
+ # supposed to be called by the user code directly
+  - name: StdCoreStringConcat2
+    space: ets
+    class_name: std.core.String
+    method_name: concat2
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ std.core.String, std.core.String ]
+    impl: ark::ets::intrinsics::StdCoreStringConcat2
+    codegen_func: CreateStringConcat
+    codegen_arch: [arm64, amd64]
+    clear_flags: [ ]
+
+  - name: StdCoreStringConcat3
+    space: ets
+    class_name: std.core.String
+    method_name: concat3
+    static: true
+    signature:
+      ret: std.core.String
+      args: [std.core.String, std.core.String, std.core.String]
+    impl: ark::ets::intrinsics::StdCoreStringConcat3
+    codegen_func: CreateStringConcat
+    codegen_arch: [arm64, amd64]
+ 
+  - name: StdCoreStringConcat4
+    space: ets
+    class_name: std.core.String
+    method_name: concat4
+    static: true
+    signature:
+      ret: std.core.String
+      args: [std.core.String, std.core.String, std.core.String, std.core.String]
+    impl: ark::ets::intrinsics::StdCoreStringConcat4
+    codegen_func: CreateStringConcat
+    codegen_arch: [arm64, amd64]
+ 
 ##########################
 # std.core.StringBuilder #
 ##########################
@@ -2850,8 +2889,6 @@ intrinsics:
       ret: void
       args: [ std.core.Object, i64, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldDouble
-
-
 
   - name: ValueAPISetFieldByNameObject
     space: ets

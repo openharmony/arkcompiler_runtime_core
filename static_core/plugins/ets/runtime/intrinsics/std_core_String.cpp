@@ -416,4 +416,28 @@ EtsBoolean StdCoreStringIsCompressed(EtsString *thisStr)
     return ToEtsBoolean(thisStr->GetCoreType()->IsMUtf8());
 }
 
+EtsString *StdCoreStringConcat2(EtsString *str1, EtsString *str2)
+{
+    auto s1 = reinterpret_cast<coretypes::String *>(str1);
+    auto s2 = reinterpret_cast<coretypes::String *>(str2);
+    return reinterpret_cast<EtsString *>(CoreStringConcat2(s1, s2));
+}
+
+EtsString *StdCoreStringConcat3(EtsString *str1, EtsString *str2, EtsString *str3)
+{
+    auto s1 = reinterpret_cast<coretypes::String *>(str1);
+    auto s2 = reinterpret_cast<coretypes::String *>(str2);
+    auto s3 = reinterpret_cast<coretypes::String *>(str3);
+    return reinterpret_cast<EtsString *>(CoreStringConcat3(s1, s2, s3));
+}
+
+EtsString *StdCoreStringConcat4(EtsString *str1, EtsString *str2, EtsString *str3, EtsString *str4)
+{
+    auto s1 = reinterpret_cast<coretypes::String *>(str1);
+    auto s2 = reinterpret_cast<coretypes::String *>(str2);
+    auto s3 = reinterpret_cast<coretypes::String *>(str3);
+    auto s4 = reinterpret_cast<coretypes::String *>(str4);
+    return reinterpret_cast<EtsString *>(CoreStringConcat4(s1, s2, s3, s4));
+}
+
 }  // namespace ark::ets::intrinsics

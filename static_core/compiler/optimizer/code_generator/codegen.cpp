@@ -279,6 +279,11 @@ void Codegen::IntrinsicTailCall([[maybe_unused]] IntrinsicInst *inst)
 {
     GetEncoder()->SetFalseResult();
 }
+void Codegen::IntrinsicSaveTlabStatsSafe([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg src1,
+                                         [[maybe_unused]] Reg src2, [[maybe_unused]] Reg tmp)
+{
+    GetEncoder()->SetFalseResult();
+}
 
 #ifdef INTRINSIC_SLOW_PATH_ENTRY_ENABLED
 void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
@@ -322,6 +327,9 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
             break;
         case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_SIXTEEN_UTF16_TO_UTF8_CHARS_USING_SIMD:
             GetEncoder()->EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
+            break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_WRITE_TLAB_STATS_SAFE:
+            IntrinsicSaveTlabStatsSafe(inst, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
             break;
         default:
             UNREACHABLE();

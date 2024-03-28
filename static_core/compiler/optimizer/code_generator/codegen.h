@@ -420,6 +420,7 @@ protected:
     virtual void IntrinsicSaveRegisters(IntrinsicInst *inst);
     virtual void IntrinsicRestoreRegisters(IntrinsicInst *inst);
     virtual void IntrinsicTailCall(IntrinsicInst *inst);
+    virtual void IntrinsicSaveTlabStatsSafe(IntrinsicInst *inst, Reg src1, Reg src2, Reg tmp);
 
 #include "codegen_language_extensions.h"
 #include "intrinsics_codegen.inl.h"

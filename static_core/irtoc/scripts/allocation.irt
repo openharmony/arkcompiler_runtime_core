@@ -16,8 +16,8 @@
 include_relative 'common.irt'
 
 $available_regs = $temps_mask + :arg0 + :arg1
-# there are 2 temp registers are using in case of arm64 (instead of 3 for x86_64 and arm32)
-# that's why one callee-saved register is added to the mask
+# there are 2 temp registers used in the case of arm64 (instead of 3 for
+# x86_64 and arm32) that's why one callee-saved register is added to the mask
 if Options.arch == :arm64
   $available_regs = $available_regs + :callee1
 end
@@ -64,7 +64,7 @@ function(:AllocateObjectTlab,
     Intrinsic(:SLOW_PATH_ENTRY, klass, size).AddImm(Constants::CREATE_OBJECT_BY_CLASS_SLOW_PATH).AddImm(Constants::CREATE_OBJECT_BY_CLASS_USUAL_BRIDGE).Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   } Else {
-    call_runtime_save_all(Constants::WRITE_TLAB_STATS_NO_BRIDGE, start, size).void if defines.DEBUG
+    Intrinsic(:WRITE_TLAB_STATS_SAFE, start, size, Cast(-1).u64).void if defines.DEBUG
     if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
       call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, start, size).void
     end
@@ -121,7 +121,7 @@ def AllocateArrayTlab(element_size)
       Intrinsic(:SLOW_PATH_ENTRY, klass, elements_num).AddImm(Constants::CREATE_ARRAY_SLOW_PATH).AddImm(Constants::CREATE_ARRAY_USUAL_BRIDGE).Terminator.ptr
       Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
     } Else {
-      call_runtime_save_all(Constants::WRITE_TLAB_STATS_NO_BRIDGE, start, size).void if defines.DEBUG
+      Intrinsic(:WRITE_TLAB_STATS_SAFE, start, size, Cast(-1).u64).void if defines.DEBUG
       if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
         call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, start, size).void
       end

@@ -24,6 +24,7 @@ set(intrinsics_tests
     string_substring
     string_getchars
     string_hashcode
+    string_concat
     char_isuppercase
     abs
     min
