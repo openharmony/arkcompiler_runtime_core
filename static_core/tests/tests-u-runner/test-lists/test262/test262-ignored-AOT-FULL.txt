@@ -26,25 +26,9 @@ language/statements/try/tco-catch-finally.js
 language/statements/try/tco-catch.js
 language/statements/try/tco-finally.js
 language/statements/while/tco-body.js
-# fail #9108
-intl402/PluralRules/internals.js
-intl402/PluralRules/constructor-options-throwing-getters.js
-intl402/PluralRules/default-options-object-prototype.js
-intl402/PluralRules/prototype/resolvedOptions/order.js
-intl402/PluralRules/prototype/resolvedOptions/pluralCategories.js
-intl402/PluralRules/prototype/resolvedOptions/properties.js
-intl402/PluralRules/prototype/selectRange/undefined-arguments-throws.js
-intl402/PluralRules/prototype/toStringTag/toString-changed-tag.js
-intl402/PluralRules/prototype/toStringTag/toString-removed-tag.js
-intl402/PluralRules/prototype/toStringTag/toString.js
-intl402/PluralRules/supportedLocalesOf/arguments.js
-# #9381
-language/statements/class/dstr/private-gen-meth-static-ary-ptrn-elem-id-iter-val-array-prototype.js
 
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js
-# 15315
-language/expressions/class/async-method-static/returns-async-function-returns-arguments-from-own-function.js
 # 11486
 language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-add.js
 language/expressions/compound-assignment/left-hand-side-private-reference-accessor-property-bitand.js

@@ -1448,8 +1448,6 @@ intl402/NumberFormat/prototype/constructor/prop-desc.js
 intl402/NumberFormat/prototype/format/length.js
 intl402/NumberFormat/prototype/format/name.js
 intl402/NumberFormat/prototype/format/prop-desc.js
-# #10607
-intl402/NumberFormat/prototype/format/units.js
 intl402/NumberFormat/prototype/formatToParts/length.js
 intl402/NumberFormat/prototype/formatToParts/name.js
 intl402/NumberFormat/prototype/formatToParts/prop-desc.js

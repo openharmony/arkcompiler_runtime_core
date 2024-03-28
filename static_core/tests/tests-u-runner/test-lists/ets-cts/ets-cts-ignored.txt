@@ -1,4 +1,3 @@
-
 # es2panda fails: panda#14423 Boxed floating values are different from the same unboxed
 07.expressions/31.string_interpolation_expressions/siexp_1.ets
 # end of es2panda fails
@@ -709,7 +708,6 @@
 04.names_declarations_and_scopes/04.scopes/type_param_interface.ets
 # end of es2panda fails
 
-
 # 15475 Cannot use enum array in for-of statement
 17.experimental_features/05.statements/01.for-of_type_annotation/for_of_10.ets
 
@@ -950,7 +948,6 @@
 07.expressions/25.equality_expressions/eq_6.ets
 07.expressions/25.equality_expressions/eq_8.ets
 # end of es2panda fails
-
 
 # 15297 Enum constants equality behavior is different from TS
 07.expressions/25.equality_expressions/enum_equality_1.ets
@@ -1252,7 +1249,6 @@
 07.expressions/30.conditional_expressions/conditional_expression_object_0.ets
 # nullability violation
 07.expressions/15.cast_expressions/nullable_cast_1.ets
-# array is always truthy
 # end
 
 # #15577 union type inference
@@ -1381,12 +1377,3 @@
 
 # es2panda: the specification changed
 09.classes/05.field_declarations/01.static_fields/static_field_declaration_n3.ets
-
-# es2panda: As the standard says the long type should be allowed to use in array operations
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_access_n_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_access_n_3.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_creation_n_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_creation_n_1.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/01.unary_numeric_promotion/array_creation_n_3.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_6.ets
-# end of es2panda fails

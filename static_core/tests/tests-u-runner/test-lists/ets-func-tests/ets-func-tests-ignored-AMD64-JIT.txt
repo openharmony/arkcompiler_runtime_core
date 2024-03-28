@@ -1,3 +1,5 @@
-### Issue 14878 begin
-std/core/TypeClassTypeTest.ets
-### Issue 14878 end
+### Issue I8MB96 begin
+spec/bigint/bigint-arithmetic-expr-4-operands-3.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-4.ets
+spec/bigint/bigint-arithmetic-expr-4-operands-5.ets
+### Issue I8MB96 end
