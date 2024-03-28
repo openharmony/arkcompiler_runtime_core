@@ -15,6 +15,12 @@
 
 package std.core;
 
+export final class Void {
+    static readonly void_instance = new Void();
+    private constructor() { }
+
+}
+
 final class __internal_undefined {
     private constructor() { };
 

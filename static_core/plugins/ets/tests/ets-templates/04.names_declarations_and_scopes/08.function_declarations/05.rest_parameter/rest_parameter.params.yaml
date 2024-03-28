@@ -1,0 +1,138 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # example from the specification
+  - sig: |-
+      sum(...numbers: int[]): int
+    def: |-
+      let res = 0
+      for (let n of numbers) res += n
+      return res;
+    call: |-
+      if (sum() == 0 && sum(1) == 1 && sum(1, 2, 3) == 6) return 0;
+
+  # array of arrays
+  - sig: |-
+      sum(...arrays: int[][]): int
+    def: |-
+      let res = 0
+      for (let numbers of arrays)
+          for (let n of numbers)
+              res += n
+      return res;
+    call: |-
+      let a1: int[] = [1, 2, 3]
+      let a2: int[] = [5, 6, 7]
+      let a3: int[] = [9, 9, 9]
+      if (sum(a1) == 6 && sum(a1, a2) == 24 && sum(a3, a2, a1) == 51) return 0;
+
+  # return the array
+  - sig: |-
+      foo(...p: int[]): int[]
+    def: |-
+      return p;
+    call: |-
+      let v: int[] = foo(10, 20, 30)
+      if (v.length == 3 && v[0] == 10 && v[1] == 20 && v[2] == 30) return 0;
+
+  # array of nullables
+  - sig: |-
+      sum(...p: (Int|null)[]): int
+    def: |-
+      let res = 0
+      for (let n: Int|null of p) res += n??0
+      return res;
+    call: |-
+      if (sum(1, null, 2) == 3 && sum(null, null, 99, null) == 99) return 0;
+
+  # array and extra argument
+  - sig: |-
+      foo(x: int, ...p: int[]): int[]
+    def: |-
+      return p;
+    call: |-
+      let v: int[] = foo(10, 20)
+      if (v.length == 1 && v[0] == 20) return 0;
+
+  # array and extra arguments
+  - sig: |-
+      foo(x: int, y: int, ...p: int[]): int
+    def: |-
+      return x + y + p.length;
+    call: |-
+      let v = foo(10, 20, 30, 40, 50, 60, 70, 80, 90)
+      if (v == 37) return 0;
+
+  # empty array
+  - sig: |-
+      foo(...p: int[]): int[]
+    def: |-
+      return p;
+    call: |-
+      let v: int[] = foo()
+      if (v.length == 0) return 0;
+
+  # empty array with extra argument
+  - sig: |-
+      foo(x: int, ...p: int[]): int[]
+    def: |-
+      return p;
+    call: |-
+      let v: int[] = foo(10)
+      if (v.length == 0) return 0;
+
+  # array in extra argument
+  - sig: |-
+      foo(q: int[], ...p: int[]): int
+    def: |-
+      let res: int;
+      for (let i of q) res += i;
+      for (let i of p) res += i;
+      return res;
+    call: |-
+      let v: int = foo([1, 2], 10, 20)
+      if (v == 33) return 0;
+
+  # passing different types
+  - sig: |-
+      foo(x: double, y: boolean, ...p: char[]): string
+    def: |-
+      let res: string = "" + x + y + p.length;
+      for (let ch of p) res += ch
+      return res;
+    call: |-
+      let v = foo(1.5, false, c'A', c'B')
+      if (v == "1.5false2AB") return 0;
+
+  # generic function
+  - sig: |-
+      foo<T>(x: T, ...p: T[]): T[]
+    def: |-
+      return p;
+    call: |-
+      let v: string[] = foo<string>("X", "A", "B", "C")
+      let q: Int[] = foo<Int>(1, 2)
+      if (v.length == 3 && "A".equals(v[0]) && "B".equals(v[1]) && "C".equals(v[2]) && q.length == 1 && q[0] == new Int(2)) return 0;
+      // TODO: when the error with generic function return type will be fixed, the more usual form can be used:
+      // if (v.length == 3 && v[0] == "A" && v[1] == "B" && v[2] == "C" && q.length == 1 && q[0] == 2) return 0;
+
+  # generic function with nullable argument
+  - sig: |-
+      foo<T>(...p: T[]): T[]
+    def: |-
+      return p;
+    call: |-
+      let v: (Object|null)[] = foo<Object|null>(null, new Long(), new Short(), new Object(), null)
+      if (v.length == 5) return 0;

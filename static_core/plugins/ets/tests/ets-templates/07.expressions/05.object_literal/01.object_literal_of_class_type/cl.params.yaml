@@ -1,0 +1,136 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          class A {}
+          class B {}
+      use: |-
+          let a: A = {}
+          let b: B = {}
+          assert a instanceof A
+          assert b instanceof B
+          assert a != b
+
+    - decl: |-
+          class A {}
+          class B {
+              ref: A = new A()
+          }
+      use: |-
+          let a: A = {}
+          let b1: B = { ref: {} }
+          let b2: B = { ref: a }
+          let b3: B = { ref: new A() }
+          assert b1.ref instanceof A
+          assert b2.ref instanceof A
+          assert b3.ref instanceof A
+          assert b2.ref == a
+
+    - decl: |-
+          class A {
+              b: B|null
+          }
+          class B {
+              c: C|null
+          }
+          class C {
+              name: string = ""
+              age: number = 0
+          }
+      use: |-
+          let a: A = { b: { c: { age: 42, name: "John" }}}
+          assert a.b.c.name == "John"
+          assert a.b.c.age == 42
+
+    - decl: |-
+          class A {
+              arr: string[] = new string[2]
+          }
+          function foo(a: A): A {
+              return { arr: [ a.arr[1], a.arr[0] ]}
+          }
+      use: |-
+          assert { arr: ["a", "b"] } as A != { arr: ["a", "b"] } as A
+          let a: A = foo({ arr: ["a", "b"]})
+          assert a.arr[0] == "b"
+          assert a.arr[1] == "a"
+
+    - decl: |-
+          class A {
+              name: string|null = null
+          }
+      use: |-
+          let arr: A[] = new A[2]
+          arr[0] = { name: "John" }
+          arr[1] = { name: "Jack" }
+          assert arr[0] instanceof A && arr[0].name == "John"
+          assert arr[1] instanceof A && arr[1].name == "Jack"
+
+    - decl: |-
+          class A {
+              name: string|null = null
+          }
+      use: |-
+          let arr: A[] = [ { name: "John" }, { name: null } ]
+          assert arr[0] instanceof A && arr[0].name == "John"
+          assert arr[1] instanceof A && arr[1].name == null
+
+    - decl: |-
+          class A {
+              name: string|null = null
+          }
+          class B extends A {
+              age: number
+          }
+      use: |-
+          let b: B = { name: "John", age: 42 }
+          assert b instanceof B && b.age == 42 && b.name == "John"
+          let a: A = b
+          assert a instanceof A && a.name == "John"
+          let c: B = {}
+          assert c instanceof B && c.age == 0 && c.name == null
+
+    - decl: |-
+          class A {
+              age: number = 42
+          }
+      use: |-
+          let a: A = {}
+          assert a instanceof A && a.age == 42
+
+    - use: |-
+          let v: Object[] = [{}, {}, {}, {}, {}]
+          assert v.length == 5 && v[0] instanceof Object && v[0] != v[4]
+
+    - decl: |-
+          class A {
+              age: number = 1
+          }
+          class B {
+              age: number = 2
+          }
+      use: |-
+          let v: Object[] = [ {} as A, {} as B, {} ]
+          assert v[0] instanceof A && (v[0] as A).age == 1
+          assert v[1] instanceof B && (v[1] as B).age == 2
+          assert v[2] instanceof Object
+
+    - decl: |-
+          class A {
+              readonly name: string|null
+          }
+      use: |-
+          let a: A = { name: "John" }
+          assert a.name == "John"

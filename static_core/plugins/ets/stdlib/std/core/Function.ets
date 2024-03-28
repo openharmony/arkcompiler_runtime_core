@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 package std.core;
 
 export interface Function<R> {}
@@ -86,5 +86,5 @@ export interface Function16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in 
 }
 
 export interface FunctionN<R> extends Function<R> {
-    invoke0(...p: Object[]): R;
+    invoke0(...p: (Object|null|undefined)[]): R;
 }

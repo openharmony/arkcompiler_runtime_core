@@ -1,9 +1,5 @@
-# panda#11535
-07.expressions/19.multiplicative_operators/02.division_operator/nan_inf_17.ets
-# panda#11536
-07.expressions/20.additive_operators/02.additive_operators_for_numeric_types/nan_inf_17.ets
 # Skip these, because the run fails if multiple files are connected. The connection is necessary, because of the export tests.
-13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_class.ets
-13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_function.ets
-13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_struct.ets
-13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_variable.ets
+13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/default_import_class.ets
+13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/default_import_function.ets
+13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/default_import_struct.ets
+13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/default_import_variable.ets

@@ -1,0 +1,103 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - types:
+    - { stype: short, src: Short.MIN_VALUE as short, dtype: byte, dst: 0 as byte }
+    - { stype: short, src: Short.MAX_VALUE as short, dtype: byte, dst: (-1) as byte }
+    - { stype: short, src: Short.MIN_VALUE as short, dtype: char, dst: "c'\\u8000'" }
+    - { stype: short, src: Short.MAX_VALUE as short, dtype: char, dst: "c'\\u7fff'" }
+
+    - { stype: char, src: "c'\\u0000'", dtype: byte, dst: 0 as byte }
+    - { stype: char, src: "c'\\uffff'", dtype: byte, dst: (-1) as byte }
+    - { stype: char, src: "c'\\u0000'", dtype: short, dst: 0 as short }
+    - { stype: char, src: "c'\\uffff'", dtype: short, dst: (-1) as short }
+
+    - { stype: int, src: Int.MIN_VALUE as int, dtype: byte, dst: 0 as byte }
+    - { stype: int, src: Int.MAX_VALUE as int, dtype: byte, dst: (-1) as byte }
+    - { stype: int, src: Int.MIN_VALUE as int, dtype: short, dst: 0 as short }
+    - { stype: int, src: Int.MAX_VALUE as int, dtype: short, dst: (-1) as short }
+    - { stype: int, src: Int.MIN_VALUE as int, dtype: char, dst: "c'\\u0000'" }
+    - { stype: int, src: Int.MAX_VALUE as int, dtype: char, dst: "c'\\uffff'" }
+
+    - { stype: long, src: Long.MIN_VALUE as long, dtype: byte, dst: 0 as byte }
+    - { stype: long, src: Long.MAX_VALUE as long, dtype: byte, dst: (-1) as byte }
+    - { stype: long, src: Long.MIN_VALUE as long, dtype: short, dst: 0 as short }
+    - { stype: long, src: Long.MAX_VALUE as long, dtype: short, dst: (-1) as short }
+    - { stype: long, src: Long.MIN_VALUE as long, dtype: char, dst: "c'\\u0000'" }
+    - { stype: long, src: Long.MAX_VALUE as long, dtype: char, dst: "c'\\uffff'" }
+    - { stype: long, src: Long.MIN_VALUE as long, dtype: int, dst: 0 as int }
+    - { stype: long, src: Long.MAX_VALUE as long, dtype: int, dst: (-1) as int }
+
+    - { stype: float, src: Float.MIN_VALUE as float, dtype: byte, dst: 0 as byte }
+    - { stype: float, src: Float.MAX_VALUE as float, dtype: byte, dst: (-1) as byte }
+    - { stype: float, src: Float.MIN_VALUE as float, dtype: short, dst: 0 as short }
+    - { stype: float, src: Float.MAX_VALUE as float, dtype: short, dst: (-1) as short }
+    - { stype: float, src: Float.MIN_VALUE as float, dtype: char, dst: "c'\\u0000'" }
+    - { stype: float, src: Float.MAX_VALUE as float, dtype: char, dst: "c'\\uffff'" }
+    - { stype: float, src: Float.MIN_VALUE as float, dtype: int, dst: 0 }
+    - { stype: float, src: Float.MAX_VALUE as float, dtype: int, dst: 2147483647 }
+    - { stype: float, src: Float.MIN_VALUE as float, dtype: long, dst: 0 as long }
+    - { stype: float, src: Float.MAX_VALUE as float, dtype: long, dst: 9223372036854775807 as long }
+
+    - { stype: double, src: Double.MIN_VALUE, dtype: byte, dst: 0 as byte }
+    - { stype: double, src: Double.MAX_VALUE, dtype: byte, dst: (-1) as byte }
+    - { stype: double, src: Double.MIN_VALUE, dtype: short, dst: 0 as short }
+    - { stype: double, src: Double.MAX_VALUE, dtype: short, dst: (-1) as short }
+    - { stype: double, src: Double.MIN_VALUE, dtype: char, dst: "c'\\u0000'" }
+    - { stype: double, src: Double.MAX_VALUE, dtype: char, dst: "c'\\uffff'" }
+    - { stype: double, src: Double.MIN_VALUE, dtype: int, dst: 0 }
+    - { stype: double, src: Double.MAX_VALUE, dtype: int, dst: 2147483647 }
+    - { stype: double, src: Double.MIN_VALUE, dtype: long, dst: 0 as long }
+    - { stype: double, src: Double.MAX_VALUE, dtype: long, dst: 9223372036854775807 as long }
+    - { stype: double, src: Double.MIN_VALUE, dtype: float, dst: 0.0 as float  }
+    - { stype: double, src: Double.MAX_VALUE, dtype: float, dst: Float.POSITIVE_INFINITY }
+
+    - { stype: float, src: Float.NaN, dtype: byte, dst: 0 as byte }
+    - { stype: float, src: Float.NaN, dtype: short, dst: 0 as short }
+    - { stype: float, src: Float.NaN, dtype: char, dst: "c'\\u0000'" }
+    - { stype: float, src: Float.NaN, dtype: int, dst: 0 }
+    - { stype: float, src: Float.NaN, dtype: long, dst: 0 as long }
+
+    - { stype: float, src: Float.POSITIVE_INFINITY, dtype: byte, dst: (-1) as byte }
+    - { stype: float, src: Float.POSITIVE_INFINITY, dtype: short, dst: (-1) as short }
+    - { stype: float, src: Float.POSITIVE_INFINITY, dtype: char, dst: "c'\\uffff'" }
+    - { stype: float, src: Float.POSITIVE_INFINITY, dtype: int, dst: 2147483647 }
+    - { stype: float, src: Float.POSITIVE_INFINITY, dtype: long, dst: 9223372036854775807 as long }
+
+    - { stype: float, src: Float.NEGATIVE_INFINITY, dtype: byte, dst: 0 as byte }
+    - { stype: float, src: Float.NEGATIVE_INFINITY, dtype: short, dst: 0 as short }
+    - { stype: float, src: Float.NEGATIVE_INFINITY, dtype: char, dst: "c'\\u0000'" }
+    - { stype: float, src: Float.NEGATIVE_INFINITY, dtype: int, dst: -2147483648 }
+    - { stype: float, src: Float.NEGATIVE_INFINITY, dtype: long, dst: (-9223372036854775808) as long }
+
+    - { stype: double, src: Double.NaN, dtype: byte, dst: 0 as byte }
+    - { stype: double, src: Double.NaN, dtype: short, dst: 0 as short }
+    - { stype: double, src: Double.NaN, dtype: char, dst: "c'\\u0000'" }
+    - { stype: double, src: Double.NaN, dtype: int, dst: 0 }
+    - { stype: double, src: Double.NaN, dtype: long, dst: 0 as long }
+
+    - { stype: double, src: Double.POSITIVE_INFINITY, dtype: byte, dst: (-1) as byte }
+    - { stype: double, src: Double.POSITIVE_INFINITY, dtype: short, dst: (-1) as short }
+    - { stype: double, src: Double.POSITIVE_INFINITY, dtype: char, dst: "c'\\uffff'" }
+    - { stype: double, src: Double.POSITIVE_INFINITY, dtype: int, dst: 2147483647 }
+    - { stype: double, src: Double.POSITIVE_INFINITY, dtype: long, dst: 9223372036854775807 as long }
+    - { stype: double, src: Double.POSITIVE_INFINITY, dtype: float, dst: Float.POSITIVE_INFINITY  }
+
+    - { stype: double, src: Double.NEGATIVE_INFINITY, dtype: byte, dst: 0 as byte }
+    - { stype: double, src: Double.NEGATIVE_INFINITY, dtype: short, dst: 0 as short }
+    - { stype: double, src: Double.NEGATIVE_INFINITY, dtype: char, dst: "c'\\u0000'" }
+    - { stype: double, src: Double.NEGATIVE_INFINITY, dtype: int, dst: -2147483648 }
+    - { stype: double, src: Double.NEGATIVE_INFINITY, dtype: long, dst: (-9223372036854775808) as long }
+    - { stype: double, src: Double.NEGATIVE_INFINITY, dtype: float, dst: Float.NEGATIVE_INFINITY  }

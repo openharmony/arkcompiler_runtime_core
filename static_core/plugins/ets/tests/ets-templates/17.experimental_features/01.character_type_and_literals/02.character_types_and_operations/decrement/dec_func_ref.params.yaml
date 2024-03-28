@@ -1,0 +1,69 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+vals:
+    - v1: c'\u0021'
+      exp: 'decPre(v1)'
+      res: c' '
+
+    - v1: c'\u0022'
+      exp: 'decPost(v1)'
+      res: c'!'
+
+    - v1: c'"'
+      exp: "c' ' + decPre(v1)"
+      res: c'A'
+
+    - v1: c'\u0020'
+      exp: "c' ' + decPost(v1)"
+      res: c'?'
+
+    - v1: c'\u0000'
+      exp: "decPre(v1)"
+      res: c'\uFFFF'
+
+    - v1: c'\u0000'
+      exp: "decPost(v1)"
+      res: c'\uFFFF'
+
+    - v1: c'\u00FF'
+      exp: "decPre(c'!' + v1 + v1)"
+      res: c'\u021E'
+
+    - v1: c'\u0001'
+      exp: "decPost(v1 - c'!' - v1)"
+      res: c'\uFFDE'
+
+    - v1: c'\u0F0F'
+      exp: "decPre(v1 - c'1') - decPre(c'\\uACD9')"
+      res: c'\u6205'
+
+    - v1: c'\u0F0F'
+      exp: "decPost(v1 + c'1') + decPost(c'\\uACD9')"
+      res: c'\uBC17'
+
+    - v1: c'\u1110'
+      exp: "decPre(c'\\u0000') - decPre(v1)"
+      res: c'\uEEF0'
+
+    - v1: c'\u1000'
+      exp: "decPost(c'\\u0000') - decPost(v1)"
+      res: c'\uF000'
+
+    - v1: c'∬'
+      exp: "decPre(v1)"
+      res: c'∫'
+
+    - v1: c'∬'
+      exp: "decPost(v1)"
+      res: c'∫'

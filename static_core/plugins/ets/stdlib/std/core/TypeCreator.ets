@@ -588,7 +588,7 @@ export final class InterfaceTypeCreator extends TypeCreator {
  */
 export final class LambdaTypeCreator extends TypeCreator {
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
-    internal result: TypeOrCreator;
+    internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
     private attrs: HasAttributes = new HasAttributes(new FreezableCreator(this), AllowedAttributes.LAMBDA)
 
     /** default constructor */
@@ -953,7 +953,7 @@ export final class ParameterCreator {
 export final class MethodCreator {
     internal name: string
     internal params: Array<ParameterCreator> = new Array<ParameterCreator>();
-    internal result: TypeOrCreator;
+    internal result: TypeOrCreator = TypeOrCreator.from(VoidType.REF);
     internal body: CallableBody | null = null
     internal frozen: FreezableImpl = new FreezableImpl()
     internal attrs: HasAttributes = new HasAttributes(this.frozen, AllowedAttributes.METHOD)

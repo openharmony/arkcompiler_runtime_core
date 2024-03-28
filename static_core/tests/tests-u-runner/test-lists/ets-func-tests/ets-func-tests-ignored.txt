@@ -125,42 +125,42 @@ spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-while.et
 spec/conditional-expression/numeric/expr/numeric-double-object-zero-expression.ets
 ### Trailing lambda issues
 ### Valid cases but not supported features
-spec/trailing_lambdas/trailing_only_fn_03_01.ets
-spec/trailing_lambdas/trailing_only_fn_03_03.ets
-spec/trailing_lambdas/trailing_only_fn_03_04.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_01.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
 ### Issue 14384
-spec/trailing_lambdas/trailing_only_fn_04_01.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_04_01.ets
 ### Issue 14387
-spec/trailing_lambdas/trailing_nested_01.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_nested_01.ets
 ### Issue 14424
-spec/trailing_lambdas/trailing_stmt_05.ets
-spec/trailing_lambdas/trailing_stmt_06.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_stmt_05.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_stmt_06.ets
 ### Issue 14427
-spec/trailing_lambdas/trailing_stmt_07.ets
+spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_stmt_07.ets
 ### End of Trailing lambda
 ### ArkUI struct
 ### Issue 14040 -> Annotations not yet implemented
-spec/struct-type/anno/test-builder-func_0.ets
-spec/struct-type/anno/test-builder-func_1.ets
-spec/struct-type/anno/test-struct-builder-param.ets
-spec/struct-type/anno/test-struct-component.ets
-spec/struct-type/anno/test-struct-entry.ets
-spec/struct-type/anno/test-struct-field-consume.ets
-spec/struct-type/anno/test-struct-field-link.ets
-spec/struct-type/anno/test-struct-field-local-storage-link.ets
-spec/struct-type/anno/test-struct-field-local-storage-prop.ets
-spec/struct-type/anno/test-struct-field-prop.ets
-spec/struct-type/anno/test-struct-field-provide.ets
-spec/struct-type/anno/test-struct-field-state.ets
-spec/struct-type/anno/test-struct-field-watch.ets
-spec/struct-type/builder/test-struct-call-conditional-in-build.ets
-spec/struct-type/builder/test-struct-call-function-in-build_2.ets
-spec/struct-type/builder/test-struct-call-function-in-build_3.ets
-spec/struct-type/test-struct-define-constructor.ets
-spec/struct-type/test-struct-implements-interface.ets
-spec/struct-type/test-struct-invoke_0.ets
-spec/struct-type/test-struct-invoke_1.ets
-spec/struct-type/test-use-struct-as-name_2.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_0.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-builder-func_1.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-builder-param.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-component.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-entry.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-consume.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-link.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-local-storage-link.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-local-storage-prop.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-prop.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-provide.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-state.ets
+spec/16.Support_for_GUI_Programming/struct-type/anno/test-struct-field-watch.ets
+spec/16.Support_for_GUI_Programming/struct-type/builder/test-struct-call-conditional-in-build.ets
+spec/16.Support_for_GUI_Programming/struct-type/builder/test-struct-call-function-in-build_2.ets
+spec/16.Support_for_GUI_Programming/struct-type/builder/test-struct-call-function-in-build_3.ets
+spec/16.Support_for_GUI_Programming/struct-type/test-struct-define-constructor.ets
+spec/16.Support_for_GUI_Programming/struct-type/test-struct-implements-interface.ets
+spec/16.Support_for_GUI_Programming/struct-type/test-struct-invoke_0.ets
+spec/16.Support_for_GUI_Programming/struct-type/test-struct-invoke_1.ets
+spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.ets
 ### EOF Issue 14040
 ### EOF ArkUI struct
 
@@ -247,7 +247,7 @@ spec/undefined-type/array-of-type_1.ets
 ###### EOF Undefined type
 ### Feature: Callable classes
 ### issue 14539
-spec/callable-classes/type-call-instantiate_7.ets
+spec/16.Support_for_GUI_Programming/callable-classes/type-call-instantiate_7.ets
 ### issue 14539
 ### End of Feature: Callable classes
 
@@ -365,6 +365,7 @@ spec/import_export/03.import_directives/t_isnt_exported_but_var_of_t_exported.et
 spec/import_export/07.export_directives/01.selective_export_directive/selective_export_directive_01.ets
 spec/import_export/07.export_directives/03.re-export_directives/re-export_directive_02.ets
 spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_04.ets
+spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_06.ets
 ### Issue 14658
 spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
@@ -449,22 +450,22 @@ arkui/dollar_dollar_13.ets
 ### End Of Built-In Component Two Way Value Synchronization
 ### Annotations issues
 ### Issue 14040 -> Annotations not yet implemented
-spec/annotations/annotation_@Builder.ets
-spec/annotations/annotation_@Builder_2.ets
-spec/annotations/annotation_@Component.ets
-spec/annotations/annotation_@Consume.ets
-spec/annotations/annotation_@Entry.ets
-spec/annotations/annotation_@Link.ets
-spec/annotations/annotation_@Link_2.ets
-spec/annotations/annotation_@LocalStorageLink.ets
-spec/annotations/annotation_@ObjectLink.ets
-spec/annotations/annotation_@Observed.ets
-spec/annotations/annotation_@Prop.ets
-spec/annotations/annotation_@Provide.ets
-spec/annotations/annotation_@State.ets
-spec/annotations/annotation_@StorageLink.ets
-spec/annotations/annotation_@Watch.ets
-spec/annotations/annotation_@Watch_2.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder_2.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Component.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Consume.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Entry.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Link.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Link_2.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@LocalStorageLink.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@ObjectLink.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Observed.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Prop.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Provide.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@State.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@StorageLink.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch.ets
+spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch_2.ets
 ### End of Issue 14040
 ### End of Annotations
 ### Issue I8MB96 begin
@@ -594,18 +595,17 @@ spec/expressions/equality/equality_primitive_01_short_equal_short_015.ets
 ###
 
 ### accessors
-spec/accessors/issue-15142_6.ets
 ### Issue 15396
-spec/accessors/issue-13330_7.ets
-spec/accessors/issue-13330_8.ets
+spec/09.classes/accessors/issue-13330_7.ets
+spec/09.classes/accessors/issue-13330_8.ets
 ### Issue 15644
-spec/accessors/issue-15142_5.ets
+spec/09.classes/accessors/issue-15142_5.ets
 ### Issue 15646
-spec/accessors/issue-15142_9.ets
-spec/accessors/issue-15142_10.ets
+spec/09.classes/accessors/issue-15142_9.ets
+spec/09.classes/accessors/issue-15142_10.ets
 ### Issue 15647
-spec/accessors/issue-15142_7.ets
-spec/accessors/issue-15142_8.ets
+spec/09.classes/accessors/issue-15142_7.ets
+spec/09.classes/accessors/issue-15142_8.ets
 ### end of accessors
 
 ### tuples
@@ -638,7 +638,7 @@ spec/tuples/tuple_write_7.ets
 spec/interfaces_overriding/interface_overriding_02.ets
 spec/interfaces_overriding/interface_overriding_03.ets
 spec/interfaces_overriding/interface_overriding_04.ets
-spec/interfaces_overriding/interface_overriding_05.ets
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
 spec/interfaces_overriding/interface_overriding_06.ets
 ### End of Interfaces overriding
 ### Overriding issues
@@ -646,11 +646,11 @@ spec/interfaces_overriding/interface_overriding_06.ets
 spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_01.ets
 spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_02.ets
 ### Issue 15572
-spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
-spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
 ### Isse 15201
-spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
-spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets
 ### End of Overriding
 ### Issue 15281
 spec/types/number_to_string_1.ets
@@ -741,13 +741,14 @@ std/core/std_core_array_map_short_array_func_short.ets
 std/core/std_core_array_map_float_array_func_float_int_float_array.ets
 std/core/std_core_array_map_long_array_func_long_int_long_array.ets
 
-### Related to (reverted) builtin void type
-### StdLib is not testing corectly after the void revert
-std/core/TypeCreateClassTest.ets
-std/core/TypeCreateErasedBodyTest.ets
-std/core/TypeCreateInterfaceTest.ets
-std/core/TypeCreatePrimitiveNameTest.ets
-### End StdLib is not testing corectly after the void revert
-### End of Related to (reverted) builtin void type
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
+### Issue 1661
+spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_03.ets
+### Issue 1661 end
+
+### Negative tests
+spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_04.ets
+spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_05.ets
+
+

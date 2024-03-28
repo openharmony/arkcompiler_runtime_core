@@ -1,33 +1,20 @@
-# FIXME(igelhaus): stabilize fe_dev202312
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets
-# end of stabilize fe_dev202312
-
-# es2panda fails: panda#14417 Escaping in string interpolation expressions
-02.lexical_elements/09.literals/06.template_literals/templ_01.ets
-07.expressions/31.string_interpolation_expressions/siexp_7.ets
-07.expressions/31.string_interpolation_expressions/siexp_8.ets
-07.expressions/31.string_interpolation_expressions/siexp_9.ets
-# end of es2panda fails
 
 # es2panda fails: panda#14423 Boxed floating values are different from the same unboxed
 07.expressions/31.string_interpolation_expressions/siexp_1.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14436 CTE expected on type variable in static method
-17.experimental_features/08.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods_n4.ets
+17.experimental_features/09.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods_n4.ets
 # end of es2panda fails
 
 # es2panda fails: panda, cannot convert to int
 17.experimental_features/02.array_creation_expressions/expr_2.ets
 17.experimental_features/02.array_creation_expressions/expr_3.ets
-17.experimental_features/02.array_creation_expressions/expr_5.ets
-17.experimental_features/02.array_creation_expressions/expr_7.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14451 Array with reference type elements is not initialized
 17.experimental_features/02.array_creation_expressions/expr_n_12.ets
-17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_7.ets
+17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.ets
 # end of es2panda fails
 
 # es2panda fails: panda Not implemented
@@ -35,14 +22,10 @@
 17.experimental_features/02.array_creation_expressions/expr_n_11.ets
 # end of es2panda fails
 
-# es2panda fails: panda#14507 Cannot call static interface method using type alias
-17.experimental_features/08.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods3.ets
-# end of es2panda fails
-
 # not implemented
-17.experimental_features/14.packages/07.shadowing_of_function_names/shadow_function_name.ets
-17.experimental_features/14.packages/07.shadowing_of_function_names/shadow_function_explicit_name.ets
-17.experimental_features/14.packages/07.shadowing_of_function_names/shadow_function_alias.ets
+17.experimental_features/16.packages/07.shadowing_of_function_names/shadow_function_name.ets
+17.experimental_features/16.packages/07.shadowing_of_function_names/shadow_function_explicit_name.ets
+17.experimental_features/16.packages/07.shadowing_of_function_names/shadow_function_alias.ets
 
 03.types/01.predefined_types/class_types_declaration_2.ets
 03.types/04.using_types/array_value_types_declaration_18.ets
@@ -50,19 +33,10 @@
 03.types/08.reference_types/02.object_class_type/class_methods_2.ets
 03.types/08.reference_types/02.object_class_type/class_methods_3.ets
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/03.type_compatibility_with_initializer/initializer_compatibility_8.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_1.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_1.ets
 05.generics/02.generic_parameters/generic_classes/generic_class_self_dependency_0.ets
 05.generics/02.generic_parameters/generic_classes/generic_class_self_dependency_1.ets
 05.generics/02.generic_parameters/generic_classes/generic_class_self_dependency_2.ets
-05.generics/03.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_21.ets
-05.generics/03.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_22.ets
-05.generics/03.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_23.ets
-05.generics/03.type_parameter_constraint/generic_functions/generic_function_wrong_constraint_13.ets
-05.generics/03.type_parameter_constraint/generic_interfaces/generic_interface_wrong_constraint_13.ets
-05.generics/03.type_parameter_constraint/generic_methods/generic_method_abstr_or_native_wrong_constraint_53.ets
-05.generics/03.type_parameter_constraint/generic_methods/generic_method_abstr_or_native_wrong_constraint_54.ets
-05.generics/03.type_parameter_constraint/generic_methods/generic_method_abstr_or_native_wrong_constraint_55.ets
-05.generics/03.type_parameter_constraint/generic_methods/generic_method_with_body_wrong_constraint_39.ets
 05.generics/05.type_parameter_default/generic_classes/class_type_parameter_default_7.ets
 05.generics/05.type_parameter_default/generic_classes/wrong_class_type_parameter_default_0.ets
 05.generics/05.type_parameter_default/generic_classes/wrong_class_type_parameter_default_1.ets
@@ -81,8 +55,6 @@
 05.generics/05.type_parameter_default/generic_methods/method_type_parameter_default_4.ets
 05.generics/05.type_parameter_default/generic_methods/wrong_method_type_parameter_default_0.ets
 05.generics/05.type_parameter_default/generic_methods/wrong_method_type_parameter_default_1.ets
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_11.ets
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_17.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_9.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_22.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_variance_0.ets
@@ -132,8 +104,6 @@
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_9.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_6.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_14.ets
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_18.ets
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_14.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_22.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_variance_0.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/interface_variance_1.ets
@@ -156,140 +126,35 @@
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_13.ets
 # end of verifier fails
 
-06.contexts_and_conversions/02.kinds_of_conversion/04.casting_conversions/ref_narrowing2_1.ets
-06.contexts_and_conversions/02.kinds_of_conversion/04.casting_conversions/ref_narrowing2_2.ets
-06.contexts_and_conversions/02.kinds_of_conversion/04.casting_conversions/ref_narrowing2_3.ets
-07.expressions/02.evaluation_of_expressions/01.type_of_expression/heap_pollution.ets
-07.expressions/02.evaluation_of_expressions/06.evaluation_of_other_expressions/ase_3.ets
-07.expressions/02.evaluation_of_expressions/06.evaluation_of_other_expressions/ase_4.ets
-07.expressions/02.evaluation_of_expressions/06.evaluation_of_other_expressions/ase_9.ets
-07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/aioobe4.ets
-07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/nase3.ets
-07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/npe1.ets
-07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
-07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/npe3.ets
-07.expressions/02.evaluation_of_expressions/eval_decl.ets
-07.expressions/04.qualified_name/qualified_name_0.ets
-07.expressions/04.qualified_name/qualified_name_1.ets
-07.expressions/04.qualified_name/qualified_name_4.ets
-07.expressions/04.qualified_name/qualified_name_5.ets
-07.expressions/09.this_expression/this_in_interface_method.ets
-07.expressions/09.this_expression/this_in_lambda.ets
-07.expressions/09.this_expression/this_in_lambda_negative.ets
-07.expressions/09.this_expression/this_primary_expression_in_lambda.ets
-07.expressions/11.field_access_expressions/access_through_class_type.ets
-07.expressions/11.field_access_expressions/01.expression_used_by_field_access/nullable_reference_type.ets
-07.expressions/11.field_access_expressions/02.use_super_or_typeReference_to_access_superclass_members/access_by_super_of_generic.ets
-07.expressions/11.field_access_expressions/02.use_super_or_typeReference_to_access_superclass_members/access_by_super_in_initializer.ets
-07.expressions/11.field_access_expressions/02.use_super_or_typeReference_to_access_superclass_members/access_by_super_in_main.ets
-07.expressions/11.field_access_expressions/02.use_super_or_typeReference_to_access_superclass_members/super_in_object.ets
-07.expressions/11.field_access_expressions/access_through_interface_type.ets
-07.expressions/20.unary_expressions/06.unary_minus_operator/unary_minus_corner_0.ets
-07.expressions/17.ensure_not_null_expression/null_check.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_0.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_1.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_10.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_12.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_13.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_19.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_2.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_3.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_4.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_5.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_6.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_7.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_8.ets
-07.expressions/20.multiplicative_expressions/02.division_operator/nan_inf_9.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_0.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_1.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_10.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_11.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_12.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_13.ets
-# 10958
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_14.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_15.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_16.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_17.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_2.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_24.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_25.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_3.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_4.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_5.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_6.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_7.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_8.ets
-07.expressions/20.multiplicative_expressions/03.remainder_operator/nan_inf_9.ets
-07.expressions/22.shift_expressions/rshift_int_1.ets
-07.expressions/22.shift_expressions/shift_int_0.ets
-07.expressions/22.shift_expressions/shift_int_1.ets
-07.expressions/22.shift_expressions/shift_int_2.ets
-07.expressions/22.shift_expressions/shift_int_3.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_44.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_45.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_46.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_47.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_48.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_49.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_50.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_51.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_60.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_61.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_62.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_63.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_68.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_69.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_70.ets
-07.expressions/23.relational_expressions/01.numerical_comparison_operators/float_comparison_71.ets
-07.expressions/27.conditional_or_expression/conditional_or_boolean.ets
-07.expressions/18.ensure_not_null_expression/null_check.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_0.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_1.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_10.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_12.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_13.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_19.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_2.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_3.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_4.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_5.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_6.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_7.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_8.ets
-07.expressions/21.multiplicative_expressions/02.division_operator/nan_inf_9.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_0.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_1.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_10.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_11.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_12.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_13.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_14.ets  # #10958
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_15.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_16.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_17.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_2.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_24.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_25.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_3.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_4.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_5.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_6.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_7.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_8.ets
-07.expressions/21.multiplicative_expressions/03.remainder_operator/nan_inf_9.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_31.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_32.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_33.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_34.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_35.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_36.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_37.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_38.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_39.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_40.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_41.ets
-07.expressions/22.additive_expressions/02.additive_operators_for_numeric_types/int_42.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/ref_narrowing2_1.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/ref_narrowing2_2.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/ref_narrowing2_3.ets
+07.expressions/01.evaluation_of_expressions/heap_pollution.ets
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_3.ets
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_4.ets
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_9.ets
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/aioobe4.ets
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe1.ets
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.ets
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe3.ets
+07.expressions/01.evaluation_of_expressions/eval_decl.ets
+07.expressions/03.qualified_name/qualified_name_0.ets
+07.expressions/03.qualified_name/qualified_name_1.ets
+07.expressions/03.qualified_name/qualified_name_4.ets
+07.expressions/03.qualified_name/qualified_name_5.ets
+07.expressions/08.this_expression/this_in_interface_method.ets
+07.expressions/08.this_expression/this_in_lambda.ets
+07.expressions/08.this_expression/this_in_lambda_negative.ets
+07.expressions/08.this_expression/this_primary_expression_in_lambda.ets
+07.expressions/09.field_access_expressions/access_through_class_type.ets
+07.expressions/09.field_access_expressions/01.accessing_current_object_fields/nullable_reference_type.ets
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_of_generic.ets
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_in_initializer.ets
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_by_super_in_main.ets
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/super_in_object.ets
+07.expressions/09.field_access_expressions/access_through_interface_type.ets
+07.expressions/20.unary_expressions/06.unary_minus/unary_minus_corner_0.ets
+07.expressions/18.ensure-not-nullish_expression/null_check.ets
 07.expressions/23.shift_expressions/rshift_int_1.ets
 07.expressions/23.shift_expressions/shift_int_0.ets
 07.expressions/23.shift_expressions/shift_int_1.ets
@@ -311,34 +176,31 @@
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_69.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_70.ets
 07.expressions/24.relational_expressions/01.numerical_comparison_operators/float_comparison_71.ets
-07.expressions/28.conditional_or_expression/conditional_or_boolean.ets
-08.statements/04.local_declarations/local_class.ets
-09.classes/01.class_declaration/03.class_modifiers_inner_classes_and_static_classes/class_inner_class_declaration.ets
-09.classes/01.class_declaration/03.class_modifiers_inner_classes_and_static_classes/inner_class_inherit_static_member.ets
-09.classes/01.class_declaration/03.class_modifiers_inner_classes_and_static_classes/interface_inner_class_declaration.ets
-09.classes/01.class_declaration/03.class_modifiers_inner_classes_and_static_classes/inner_class_inherit_static_constant_member.ets
-09.classes/01.class_declaration/03.local_classes/access_constant_local_variables_from_local_class.ets
-09.classes/01.class_declaration/03.local_classes/declaration_in_for_loop.ets
-09.classes/01.class_declaration/03.local_classes/declaration_in_function_body.ets
-09.classes/01.class_declaration/03.local_classes/declaration_in_if_clause.ets
-09.classes/01.class_declaration/03.local_classes/declaration_in_method_body.ets
-09.classes/01.class_declaration/03.local_classes/deeply_declaration_in_function_body.ets
-09.classes/01.class_declaration/03.local_classes/local_class_in_static_context.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_0.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_1.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_2.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_3.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_4.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_5.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_6.ets
-09.classes/01.class_declaration/03.local_classes/local_class_refer_on_constant_7.ets
-09.classes/01.class_declaration/03.local_classes/refering_to_local_class.ets
-09.classes/01.class_declaration/03.local_classes/static_member_in_local_class.ets
-09.classes/01.class_declaration/05.class_implementation_clause/abstract_method_override_by_superinterface.ets
-09.classes/01.class_declaration/05.class_implementation_clause/implements_same_interface_with_diferent_parameters.ets
-09.classes/01.class_declaration/05.class_implementation_clause/indirect_interfaces_Implementation_twice.ets
-09.classes/01.class_declaration/07.enclosing_instances/use_instance_const_variables_in_inner_class_0.ets
-09.classes/01.class_declaration/07.enclosing_instances/use_instance_const_variables_in_inner_class_1.ets
+07.expressions/28.conditional-or_expression/conditional_or_boolean.ets
+09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/class_inner_class_declaration.ets
+09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/inner_class_inherit_static_member.ets
+09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/interface_inner_class_declaration.ets
+09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/inner_class_inherit_static_constant_member.ets
+09.classes/10.local_classes_and_interfaces/access_constant_local_variables_from_local_class.ets
+09.classes/10.local_classes_and_interfaces/declaration_in_for_loop.ets
+09.classes/10.local_classes_and_interfaces/declaration_in_function_body.ets
+09.classes/10.local_classes_and_interfaces/declaration_in_if_clause.ets
+09.classes/10.local_classes_and_interfaces/deeply_declaration_in_function_body.ets
+09.classes/10.local_classes_and_interfaces/local_class_in_static_context.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_0.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_1.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_2.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_3.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_4.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_5.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_6.ets
+09.classes/10.local_classes_and_interfaces/local_class_refer_on_constant_7.ets
+09.classes/10.local_classes_and_interfaces/refering_to_local_class.ets
+09.classes/10.local_classes_and_interfaces/static_member_in_local_class.ets
+09.classes/01.class_declaration/04.class_implementation_clause/implements_same_interface_with_diferent_parameters.ets
+09.classes/01.class_declaration/04.class_implementation_clause/indirect_interfaces_Implementation_twice.ets
+09.classes/01.class_declaration/enclosing_instances/use_instance_const_variables_in_inner_class_0.ets
+09.classes/01.class_declaration/enclosing_instances/use_instance_const_variables_in_inner_class_1.ets
 09.classes/02.class_body/class_members_2.ets
 09.classes/03.class_members/inherited_from_superinterface_0.ets
 09.classes/04.access_modifiers/01.private_access_modifier/private_interface_access_in_class.ets
@@ -389,11 +251,11 @@
 09.classes/06.method_declarations/04.final_methods/final_method_derived_class_call.ets
 09.classes/06.method_declarations/04.final_methods/final_declaration_with_modifiers_positive_0.ets
 09.classes/06.method_declarations/04.final_methods/final_declaration_with_modifiers_positive_1.ets
-09.classes/06.method_declarations/10.hiding_by_class_methods/hided_method_access_by_cast.ets
-09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.ets
-09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.ets
-09.classes/06.method_declarations/12.inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_methods_with_same_signatures.ets
-09.classes/06.method_declarations/13.class_method_overloading/method_overload_relatioship_1.ets
+09.classes/06.method_declarations/11.hiding_by_class_methods/hided_method_access_by_cast.ets
+09.classes/06.method_declarations/12.requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_2.ets
+09.classes/06.method_declarations/12.requirements_in_overriding_and_hiding/overriding_methods_with_different_access_modifiers_3.ets
+09.classes/06.method_declarations/13.inheriting_methods_with_override-equivalent_signatures/inheritance_multiple_methods_with_same_signatures.ets
+09.classes/06.method_declarations/07.method_overload_signatures/method_overload_relatioship_1.ets
 09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_5.ets
 09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_6.ets
 09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_14.ets
@@ -519,22 +381,22 @@
 10.interfaces/06.interface_method_declarations/05.inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.ets
 10.interfaces/06.interface_method_declarations/05.inheriting_methods_with_override_equivalent_signatures/override_multiple_default_methods.ets
 10.interfaces/06.interface_method_declarations/02.inheritance_and_overriding/inheritance_static_method.ets
-13.modules_and_compilation_units/03.import_declarations/import_0.ets
-13.modules_and_compilation_units/03.import_declarations/import_1.ets
-13.modules_and_compilation_units/03.import_declarations/import_2.ets
-13.modules_and_compilation_units/04.default_import/core_default_import_0.ets
-13.modules_and_compilation_units/04.default_import/core_default_import_23.ets
-13.modules_and_compilation_units/04.default_import/core_default_import_25.ets
-13.modules_and_compilation_units/06.top_level_declarations/top_level_declarations_11.ets
-17.experimental_features/10.exceptions/01.throwing_functions/lambda_call_with_catch.ets
-17.experimental_features/10.exceptions/01.throwing_functions/lambda_call_with_default_catch.ets
-17.experimental_features/10.exceptions/02.non_throwing_functions/lambda_with_default_catch.ets
-17.experimental_features/10.exceptions/02.non_throwing_functions/lambda_without_default_catch.ets
-17.experimental_features/10.exceptions/03.rethrowing_functions/rethrowing_function_declaration.ets
-17.experimental_features/10.exceptions/03.rethrowing_functions/rethrowing_function_with_non_throwing_function.ets
+13.compilation_units_packages_and_modules/03.import_directives/import_0.ets
+13.compilation_units_packages_and_modules/03.import_directives/import_1.ets
+13.compilation_units_packages_and_modules/03.import_directives/import_2.ets
+13.compilation_units_packages_and_modules/04.default_import/core_default_import_0.ets
+13.compilation_units_packages_and_modules/04.default_import/core_default_import_23.ets
+13.compilation_units_packages_and_modules/04.default_import/core_default_import_25.ets
+13.compilation_units_packages_and_modules/05.top-level_declarations/top_level_declarations_11.ets
+17.experimental_features/14.exceptions/01.throwing_functions/lambda_call_with_catch.ets
+17.experimental_features/14.exceptions/01.throwing_functions/lambda_call_with_default_catch.ets
+17.experimental_features/14.exceptions/02.non_throwing_functions/lambda_with_default_catch.ets
+17.experimental_features/14.exceptions/02.non_throwing_functions/lambda_without_default_catch.ets
+17.experimental_features/14.exceptions/03.rethrowing_functions/rethrowing_function_declaration.ets
+17.experimental_features/14.exceptions/03.rethrowing_functions/rethrowing_function_with_non_throwing_function.ets
 # Verifier failures: panda#11531 panda#11972
-07.expressions/02.evaluation_of_expressions/06.evaluation_of_other_expressions/ase_1.ets
-07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/ase1.ets
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_1.ets
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/ase1.ets
 # end of verifier problems
 # runtime fails: panda#11542
 03.types/07.value_types/01.integer_types_and_operations/right_shift/right_shift_long_10.ets
@@ -552,22 +414,34 @@
 03.types/07.value_types/01.integer_types_and_operations/multiplication/multiplication_char_7.ets
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_byte.ets
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.ets
-07.expressions/07.object_literal/04.object_literal_evaluation/ex1.ets
-07.expressions/07.object_literal/04.object_literal_evaluation/ex2.ets
+07.expressions/05.object_literal/04.object_literal_evaluation/ex1.ets
+07.expressions/05.object_literal/04.object_literal_evaluation/ex2.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_100.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_101.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_120.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_121.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_122.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_135.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_136.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_137.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_150.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_151.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_152.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_165.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_166.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_167.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_180.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_181.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_182.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_198.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_199.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_200.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_216.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_217.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_218.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.ets
+07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_26.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_51.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_52.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_53.ets
@@ -575,307 +449,8 @@
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_79.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_80.ets
 07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_99.ets
-07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/numeric_condition_expression_type_3.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_105.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_106.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_107.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_108.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_109.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_110.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_111.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_112.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_113.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_114.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_115.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_116.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_138.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_139.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_140.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_141.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_142.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_143.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_144.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_145.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_146.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_147.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_148.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_149.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_171.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_172.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_173.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_174.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_175.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_176.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_177.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_178.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_179.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_180.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_181.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_182.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_198.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_199.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_200.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_201.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_202.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_203.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_204.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_205.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_206.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_207.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_208.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_209.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_225.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_226.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_227.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_228.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_229.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_230.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_231.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_232.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_233.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_234.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_235.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_236.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_24.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_25.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_252.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_253.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_254.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_255.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_256.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_257.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_258.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_259.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_26.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_260.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_261.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_262.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_263.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_27.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_279.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_28.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_280.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_281.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_282.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_283.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_284.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_285.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_286.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_287.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_288.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_289.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_29.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_290.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_30.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_309.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_31.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_310.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_311.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_312.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_313.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_314.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_315.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_316.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_317.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_318.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_319.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_32.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_320.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_33.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_339.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_34.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_340.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_341.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_342.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_343.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_344.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_345.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_346.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_347.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_348.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_349.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_35.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_350.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_66.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_67.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_68.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_69.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_70.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_71.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_72.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_73.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_74.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_75.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_76.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_77.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_102.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_103.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_104.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_105.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_106.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_107.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_108.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_109.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_110.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_111.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_112.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_113.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_114.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_115.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_116.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_135.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_136.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_137.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_138.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_139.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_140.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_141.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_142.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_143.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_144.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_145.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_146.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_147.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_148.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_149.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_168.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_169.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_170.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_171.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_172.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_173.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_174.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_175.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_176.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_177.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_178.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_179.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_180.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_181.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_182.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_195.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_196.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_197.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_198.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_199.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_200.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_201.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_202.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_203.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_204.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_205.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_206.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_207.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_208.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_209.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_222.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_223.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_224.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_225.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_226.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_227.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_228.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_229.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_230.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_231.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_232.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_233.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_234.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_235.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_236.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_24.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_249.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_25.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_250.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_251.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_252.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_253.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_254.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_255.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_256.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_257.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_258.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_259.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_26.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_260.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_261.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_262.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_263.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_27.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_276.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_277.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_278.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_279.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_28.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_280.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_281.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_282.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_283.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_284.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_285.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_286.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_287.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_288.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_289.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_29.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_290.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_30.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_306.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_307.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_308.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_309.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_31.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_310.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_311.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_312.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_313.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_314.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_315.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_316.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_317.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_318.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_319.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_32.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_320.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_33.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_336.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_337.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_338.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_339.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_34.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_340.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_341.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_342.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_343.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_344.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_345.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_346.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_347.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_348.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_349.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_35.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_350.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_36.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_37.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_38.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_63.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_64.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_65.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_66.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_67.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_68.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_69.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_70.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_71.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_72.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_73.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_74.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_75.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_76.ets
-07.expressions/29.assignment/02.compound_assignment_operators/ops_boxed_77.ets
-07.expressions/30.conditional_expressions/02.numeric_conditional_expressions/numeric_condition_expression_type_3.ets
-09.classes/01.class_declaration/03.class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_In_interface.ets
-09.classes/01.class_declaration/03.class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_in_class.ets
+09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_In_interface.ets
+09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_in_class.ets
 09.classes/02.class_body/class_members_3.ets
 09.classes/02.class_body/class_members_4.ets
 09.classes/04.access_modifiers/access_modifiers_10.ets
@@ -888,8 +463,6 @@
 09.classes/04.access_modifiers/access_modifiers_9.ets
 # end of es2panda fails
 #FailKind.ES2PANDA_FAIL not implemented yet
-02.lexical_elements/09.literals/07.null_literal/null_literal3.ets
-02.lexical_elements/09.literals/08.undefined_literal/undef_literal3.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_0.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_1.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_10.ets
@@ -912,42 +485,27 @@
 03.types/08.reference_types/07.function_types/function_type_5.ets
 03.types/08.reference_types/07.function_types/function_type_6.ets
 03.types/08.reference_types/07.function_types/function_type_7.ets
-03.types/08.reference_types/08.null_type/null1.ets
-03.types/08.reference_types/08.null_type/null3.ets
-03.types/08.reference_types/08.null_type/null4.ets
-03.types/08.reference_types/08.null_type/null6.ets
 17.experimental_features/06.function_and_method_overloading/01.function_overloading/fn_overloading_30.ets
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_12.ets
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_7.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_0.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_10.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_11.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_12.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_2.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_6.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_7.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_9.ets
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_5.ets
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_6.ets
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_7.ets
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_8.ets
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_9.ets
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_13.ets
-04.names_declarations_and_scopes/08.function_declarations/06.return_type/ret_type_15.ets
-04.names_declarations_and_scopes/08.function_declarations/07.function_overload_signatures/overload.ets
-07.expressions/24.equality_expressions/01.reference_equality_operators/type_conversion_of_one_operand_to_another_type.ets
-07.expressions/29.conditional_expressions/02.numeric_conditional_expressions/numeric_condition_expression_type_5.ets
-07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_2.ets
-07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_3.ets
-07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_4.ets
-07.expressions/29.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_5.ets
-07.expressions/25.equality_expressions/01.reference_equality_operators/type_conversion_of_one_operand_to_another_type.ets
-07.expressions/30.conditional_expressions/02.numeric_conditional_expressions/numeric_condition_expression_type_5.ets
-07.expressions/30.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_2.ets
-07.expressions/30.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_3.ets
-07.expressions/30.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_4.ets
-07.expressions/30.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_5.ets
-07.expressions/31.string_interpolation_expressions/siexp_3.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_10.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_11.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_12.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_7.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_9.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_5.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_6.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_7.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_8.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_9.ets
+04.names_declarations_and_scopes/08.function_declarations/07.return_type/ret_type_13.ets
+04.names_declarations_and_scopes/08.function_declarations/08.function_overload_signatures/overload.ets
+07.expressions/25.equality_expressions/06.reference_equality/type_conversion_of_one_operand_to_another_type.ets
+07.expressions/30.conditional_expressions/conditional_expression_object_2.ets
+07.expressions/30.conditional_expressions/conditional_expression_object_3.ets
+07.expressions/30.conditional_expressions/conditional_expression_object_4.ets
+07.expressions/30.conditional_expressions/conditional_expression_object_5.ets
 08.statements/14.throw_statements/throw_neg2.ets
 17.experimental_features/05.statements/02.multiple_catch_clauses_in_try_statements/catch3.ets
 17.experimental_features/05.statements/02.multiple_catch_clauses_in_try_statements/exec_2.ets
@@ -956,14 +514,14 @@
 09.classes/07.accessor_declarations/getter_override_modifier.ets
 09.classes/07.accessor_declarations/setter_exception.ets
 09.classes/07.accessor_declarations/setter_inheritance.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_1.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_2.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_1.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_2.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_10.ets
 
 # end of es2panda fails not implemented yet
 
 #FailKind.RUNTIME_TIMEOUT - can't reproduce locally, but fail consistently on the CI
-07.expressions/02.evaluation_of_expressions/02.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
+07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/oome1.ets
 # end of es2panda fails
 
 # es2panda fails: Union Types not implemented, #14251, #14252
@@ -974,7 +532,6 @@
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_1.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_2.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_3.ets
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_4.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_5.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_6.ets
 03.types/08.reference_types/11.union_types/union_types_normalization/norm_8.ets
@@ -998,7 +555,6 @@
 03.types/08.reference_types/11.union_types/ut_32.ets
 03.types/08.reference_types/11.union_types/ut_33.ets
 03.types/08.reference_types/11.union_types/ut_34.ets
-03.types/08.reference_types/11.union_types/ut_35.ets
 03.types/08.reference_types/11.union_types/ut_4.ets
 03.types/08.reference_types/11.union_types/ut_5.ets
 03.types/08.reference_types/11.union_types/ut_6.ets
@@ -1008,72 +564,67 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14391 Cannot cast enum to the same enum type or Object
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/identity.ets
-06.contexts_and_conversions/02.kinds_of_conversion/02.reference_types_conversions/ref_widening_40.ets
-06.contexts_and_conversions/02.kinds_of_conversion/02.reference_types_conversions/ref_widening_42.ets
-# end of es2panda fails
-
-# es2panda fails: panda#14766 Cannot get toString() from array
-06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_8.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/identity.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_40.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_42.ets
 # end of es2panda fails
 
 # es2panda fails: panda# Wildcards not yet implemented
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_2.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_21.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_23.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_25.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_27.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_3.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_5.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/unrelated_refs_7.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_2.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_21.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_23.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_25.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_27.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_5.ets
+06.contexts_and_conversions/01.assignment-like_contexts/unrelated_refs_7.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14759 Widening + unboxing conversion for compatible types is not provided
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_1.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_2.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_3.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_4.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_5.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_6.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_7.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_1.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_10.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_11.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_12.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_2.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_3.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_4.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_5.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_6.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_7.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_8.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/widening_refs_unbox_call_9.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_4.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_5.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_6.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/conv_7.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_0.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_1.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_2.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_4.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_5.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_6.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_7.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_0.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_1.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_10.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_11.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_12.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_2.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_4.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_5.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_6.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_7.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_8.ets
+06.contexts_and_conversions/01.assignment-like_contexts/widening_refs_unbox_call_9.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/conv_4.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/conv_5.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/conv_6.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/conv_7.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14767 undefined is not supported
-06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/str_undefined_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_9.ets
+06.contexts_and_conversions/02.string_operator_contexts/conversion_9.ets
 # end of es2panda fails
 
 # es2panda fails: panda#11752
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_10.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_11.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_14.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_2.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_3.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_4.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_5.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_7.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_8.ets
-13.modules_and_compilation_units/07.top_level_statements/block_declaration_9.ets
-13.modules_and_compilation_units/07.top_level_statements/block_execution.ets
-13.modules_and_compilation_units/07.top_level_statements/multiple_block_execution.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_10.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_11.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_14.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_2.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_3.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_4.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_5.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_7.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_8.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_9.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/block_execution.ets
+13.compilation_units_packages_and_modules/07.top-level_statements/multiple_block_execution.ets
 # end of es2panda fails
 
 # es2panda fails: panda#11660 panda#11541
@@ -1082,35 +633,34 @@
 # end of es2panda fails
 
 # runtime fails
-13.modules_and_compilation_units/03.import_declarations/04.several_bindings_for_one_import_path/explicitly_and_implicitly_import_3.ets
-13.modules_and_compilation_units/03.import_declarations/04.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.ets
+13.compilation_units_packages_and_modules/03.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_3.ets
+13.compilation_units_packages_and_modules/03.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.ets
 # end of runtime fails
 
 # es2panda fails: panda#14062
-07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_1.ets
-07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_6.ets
-07.expressions/05.array_literal/01.type_inference_from_context/arr_inf_8.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_6.ets
+07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_8.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14067
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_0.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_1.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_11.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_12.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_13.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_14.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_15.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_16.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_17.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_2.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_3.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_4.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_5.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_6.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_7.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.ets
-07.expressions/05.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_0.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_1.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_11.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_12.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_13.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_14.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_15.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_16.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_17.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_2.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_3.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_4.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_5.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_6.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_7.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.ets
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.ets
 # end of es2panda fails
 
 
@@ -1136,8 +686,8 @@
 # end of es2panda fails
 
 # es2panda fails: panda#12853 es2panda fails on private interface method
-17.experimental_features/08.default_and_static_interface_methods/01.default_method_declarations/private_interface_methods1.ets
-17.experimental_features/08.default_and_static_interface_methods/01.default_method_declarations/private_interface_methods2.ets
+17.experimental_features/09.default_and_static_interface_methods/01.default_method_declarations/private_interface_methods1.ets
+17.experimental_features/09.default_and_static_interface_methods/01.default_method_declarations/private_interface_methods2.ets
 # end of es2panda fails
 
 # es2panda fails: panda#12623
@@ -1151,7 +701,7 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14014
-07.expressions/07.object_literal/01.object_literal_of_class_type/cl_10.ets
+07.expressions/05.object_literal/01.object_literal_of_class_type/cl_10.ets
 # end of es2panda fails
 
 
@@ -1159,28 +709,14 @@
 04.names_declarations_and_scopes/04.scopes/type_param_interface.ets
 # end of es2panda fails
 
-# es2panda fails: panda#13139
-07.expressions/10.method_call_expression/safe_method_call_1.ets
-07.expressions/13.function_call_expression/safe_function_call_2.ets
-07.expressions/13.function_call_expression/safe_function_call_3.ets
-07.expressions/13.function_call_expression/optional_chaining_null_result.ets
-# end of es2panda fails
-
-# 15474 No CTE on nullable values in for-of statement
-08.statements/09.for_of_statements/for_of_neg_10.ets
-08.statements/09.for_of_statements/for_of_neg_11.ets
-08.statements/09.for_of_statements/for_of_neg_12.ets
-08.statements/09.for_of_statements/for_of_neg_13.ets
 
 # 15475 Cannot use enum array in for-of statement
 17.experimental_features/05.statements/01.for-of_type_annotation/for_of_10.ets
 
 # 15477 Type conversions are not supported in for-of statement
-17.experimental_features/05.statements/01.for-of_type_annotation/for_of_11.ets
 17.experimental_features/05.statements/01.for-of_type_annotation/for_of_13.ets
 17.experimental_features/05.statements/01.for-of_type_annotation/for_of_14.ets
 17.experimental_features/05.statements/01.for-of_type_annotation/for_of_24.ets
-17.experimental_features/05.statements/01.for-of_type_annotation/for_of_12.ets
 17.experimental_features/05.statements/01.for-of_type_annotation/for_of_15.ets
 17.experimental_features/05.statements/01.for-of_type_annotation/for_of_25.ets
 
@@ -1195,108 +731,104 @@
 17.experimental_features/05.statements/03.assert_statement/assert_14.ets
 17.experimental_features/05.statements/03.assert_statement/assert_15.ets
 17.experimental_features/05.statements/03.assert_statement/assert_16.ets
-17.experimental_features/05.statements/03.assert_statement/assert_21.ets
-17.experimental_features/05.statements/03.assert_statement/assert_22.ets
-17.experimental_features/05.statements/03.assert_statement/assert_23.ets
-17.experimental_features/05.statements/03.assert_statement/assert_24.ets
 
 # es2panda fails: 7.6.2 Object Literal of Interface Type is not implemented
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_0.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_1.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_10.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_2.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_3.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_4.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_5.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_6.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_7.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_8.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/in_9.ets
-07.expressions/07.object_literal/02.object_literal_of_interface_type/spec_ex1.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_0.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_1.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_10.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_2.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_3.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_4.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_5.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_6.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_7.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_8.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_9.ets
+07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex1.ets
 # end of es2panda fails
 
 # es2panda fails:#13844 7.6.3 Object Literal of Record Type is not implemented
-07.expressions/07.object_literal/03.object_literal_of_record_type/re_0.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/re_1.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/re_2.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/re_3.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/re_4.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/re_5.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/re_6.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex1.ets
-07.expressions/07.object_literal/03.object_literal_of_record_type/spec_ex2.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_0.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_1.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_2.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_3.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_4.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_5.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_6.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/spec_ex1.ets
+07.expressions/05.object_literal/03.object_literal_of_record_type/spec_ex2.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14140
-03.types/07.value_types/05.character_types_and_operations/ch_n_0.ets
-03.types/07.value_types/05.character_types_and_operations/ch_n_1.ets
-03.types/07.value_types/05.character_types_and_operations/ch_n_2.ets
-03.types/07.value_types/05.character_types_and_operations/ch_n_3.ets
-03.types/07.value_types/05.character_types_and_operations/ch_n_4.ets
-03.types/07.value_types/05.character_types_and_operations/ch_n_5.ets
-03.types/07.value_types/05.character_types_and_operations/ch_n_6.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_1.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_5.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_6.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14110
-03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_ref_8.ets
-03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_6.ets
-03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_7.ets
-03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_8.ets
-03.types/07.value_types/05.character_types_and_operations/decrement/dec_func_val_9.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_ref_3.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_ref_4.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_val_3.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_arr_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_6.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_7.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_8.ets
-03.types/07.value_types/05.character_types_and_operations/increment/inc_func_val_9.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_ref_8.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_6.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_7.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_8.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/decrement/dec_func_val_9.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_ref_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_ref_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_val_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_arr_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_6.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_7.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_8.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/increment/inc_func_val_9.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14105
-03.types/07.value_types/05.character_types_and_operations/addition/add_arr_val_2.ets
-03.types/07.value_types/05.character_types_and_operations/addition/add_arr_val_3.ets
-03.types/07.value_types/05.character_types_and_operations/addition/add_arr_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_2.ets
-03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_3.ets
-03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/addition/add_func_val_5.ets
-03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_val_3.ets
-03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/subtraction/sub_arr_val_5.ets
-03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_3.ets
-03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/subtraction/sub_func_val_5.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_0.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_1.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_2.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_3.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_ref_4.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_val_0.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_val_1.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_val_2.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_val_3.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/conditional/cond_exp_val_2.ets
-03.types/07.value_types/05.character_types_and_operations/conditional/cond_fld_val_2.ets
-03.types/07.value_types/05.character_types_and_operations/conditional/cond_func_val_1.ets
-03.types/07.value_types/05.character_types_and_operations/conditional/cond_func_val_2.ets
-03.types/07.value_types/05.character_types_and_operations/conditional/cond_func_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_0.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_1.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_2.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_3.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_4.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_5.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_ref_6.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_val_0.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_val_1.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_val_2.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_val_3.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_val_4.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_val_5.ets
-03.types/07.value_types/05.character_types_and_operations/unary/unary_val_6.ets
-03.types/07.value_types/05.character_types_and_operations/concat/conc2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_arr_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_func_val_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_func_val_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_func_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/addition/add_func_val_5.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/subtraction/sub_arr_val_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/subtraction/sub_arr_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/subtraction/sub_arr_val_5.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/subtraction/sub_func_val_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/subtraction/sub_func_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/subtraction/sub_func_val_5.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_ref_0.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_ref_1.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_ref_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_ref_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_ref_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_0.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_1.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_exp_val_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_fld_val_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_val_1.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_val_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/conditional/cond_func_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_0.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_1.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_5.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_ref_6.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_0.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_1.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_2.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_3.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_4.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_5.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/unary/unary_val_6.ets
+17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/concat/conc2.ets
 # end of es2panda fails
 
 # es2panda fails: panda#13203
@@ -1312,88 +844,61 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14322 extended conditional expressions fail to compile
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_0.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_1.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_10.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_11.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_12.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_13.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_14.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_15.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_16.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_17.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_18.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_19.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_2.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_20.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_21.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_22.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_23.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_24.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_25.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_26.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_27.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_28.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_29.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_3.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_30.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_31.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_33.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_34.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_35.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_36.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_4.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_5.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_6.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_7.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_8.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/ops_9.ets
-# end of es2panda fails
-
-# es2panda fails: panda#14299 new Int(), zero-length arrays, Long.MIN_VALUE should be truthy
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_57.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_57.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_0.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_1.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_10.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_11.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_12.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_13.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_14.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_15.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_16.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_17.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_18.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_19.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_2.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_20.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_21.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_22.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_23.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_24.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_25.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_26.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_27.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_28.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_29.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_3.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_30.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_31.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_32.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_33.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_34.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_35.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_36.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_4.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_5.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_6.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_7.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_8.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/ops_9.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14293 Float.NaN and Double.NaN must be falsy
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f1_10.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f1_11.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/if_f1_10.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/if_f1_11.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14295 SegFault on char and enum in condition
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_35.ets
+15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/if_f2_35.ets
 # end of es2panda fails
 
 # es2panda fails: not yet supported in compiler
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_t_69.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_t_69.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_t_69.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t2_69.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_f2_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/cond_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/do_f_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/for_f_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_f2_32.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/if_t1_64.ets
-15.semantic_rules/05.compatibility_features/01.extended_conditional_expressions/while_f_32.ets
 03.types/08.reference_types/11.union_types/ut_n_2.ets
 # end of es2panda fails
 
 # es2panda fails: panda#14338 es2panda fails to compile overloaded functions
-15.semantic_rules/03.override_equivalent_signatures/pos_1.ets
-15.semantic_rules/03.override_equivalent_signatures/pos_6.ets
-# end of es2panda fails
-
-# es2panda fails: panda#14366 Union type normalization reports error
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_10.ets
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_9.ets
+15.semantic_rules/02.override-equivalent_signatures/pos_1.ets
+15.semantic_rules/02.override-equivalent_signatures/pos_6.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14380 Floating-point type array indexes are not allowed
@@ -1415,31 +920,18 @@
 # end of es2panda fails
 
 # es2panda fails: Record is not implemented yet
-07.expressions/12.indexing_expression/indx3a.ets
-07.expressions/12.indexing_expression/indx3b.ets
-07.expressions/12.indexing_expression/indx3c.ets
-07.expressions/12.indexing_expression/indx3d.ets
+07.expressions/12.indexing_expression/02.record_indexing_expression/indx3a.ets
+07.expressions/12.indexing_expression/02.record_indexing_expression/indx3b.ets
+07.expressions/12.indexing_expression/02.record_indexing_expression/indx3c.ets
+07.expressions/12.indexing_expression/02.record_indexing_expression/indx3d.ets
 # end of es2panda fails
 
 # es2panda fails: equality not yet implemented
-07.expressions/24.equality_expressions/eq_1.ets
-07.expressions/24.equality_expressions/eq_12.ets
-07.expressions/24.equality_expressions/eq_13.ets
-07.expressions/24.equality_expressions/eq_16.ets
-07.expressions/24.equality_expressions/eq_17.ets
-07.expressions/24.equality_expressions/eq_19.ets
-07.expressions/24.equality_expressions/eq_3.ets
-07.expressions/24.equality_expressions/eq_4.ets
-07.expressions/24.equality_expressions/eq_6.ets
-07.expressions/24.equality_expressions/eq_8.ets
-# end of es2panda fails
-
 07.expressions/25.equality_expressions/eq_1.ets
 07.expressions/25.equality_expressions/eq_12.ets
 07.expressions/25.equality_expressions/eq_13.ets
 07.expressions/25.equality_expressions/eq_16.ets
 07.expressions/25.equality_expressions/eq_17.ets
-07.expressions/25.equality_expressions/eq_18.ets
 07.expressions/25.equality_expressions/eq_19.ets
 07.expressions/25.equality_expressions/eq_3.ets
 07.expressions/25.equality_expressions/eq_4.ets
@@ -1447,21 +939,22 @@
 07.expressions/25.equality_expressions/eq_8.ets
 # end of es2panda fails
 
-# #15416
-07.expressions/25.equality_expressions/04.value_equality_operators_for_boolean_types/boolean_equality_operator_8.ets
-
-# es2panda fails: panda:14397 Cannot convert int to Number using cast operator
-07.expressions/15.cast_expressions/cast_1.ets
+07.expressions/25.equality_expressions/eq_1.ets
+07.expressions/25.equality_expressions/eq_12.ets
+07.expressions/25.equality_expressions/eq_13.ets
+07.expressions/25.equality_expressions/eq_16.ets
+07.expressions/25.equality_expressions/eq_17.ets
+07.expressions/25.equality_expressions/eq_19.ets
+07.expressions/25.equality_expressions/eq_3.ets
+07.expressions/25.equality_expressions/eq_4.ets
+07.expressions/25.equality_expressions/eq_6.ets
+07.expressions/25.equality_expressions/eq_8.ets
 # end of es2panda fails
 
-# es2panda fails: panda:14542 Verification fails on a method call in a chaining operator
-07.expressions/01.chaining_operator/chop0.ets
-07.expressions/01.chaining_operator/chop1.ets
-# end of es2panda fails
 
 # 15297 Enum constants equality behavior is different from TS
-07.expressions/25.equality_expressions/02.value_equality_operators/enum_equality_1.ets
-07.expressions/25.equality_expressions/02.value_equality_operators/enum_equality_3.ets
+07.expressions/25.equality_expressions/enum_equality_1.ets
+07.expressions/25.equality_expressions/enum_equality_3.ets
 11.enumerations/01.enumeration_integer_values/enum_int_4.ets
 
 # 14654 Cannot use constant expressions in enum initialization
@@ -1493,43 +986,35 @@
 11.enumerations/03.enumeration_operations/enum_member_name5.ets
 
 # es2panda fails: panda:14368 Expected CTE on casting to never
-03.types/08.reference_types/04.never_type/never_class_instance_4.ets
 03.types/08.reference_types/04.never_type/never_class_instance_neg_0.ets
 03.types/08.reference_types/04.never_type/never_class_instance_neg_17.ets
-03.types/08.reference_types/04.never_type/never_class_instance_neg_11.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14545 es2panda aborts on casting union type value with unboxing
 03.types/08.reference_types/11.union_types/ut_27.ets
 # es2panda fails: panda#14496 Compiler takes two methods with different rest parameters as the same
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_3.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_6.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_8.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_9.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_11.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_12.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_14.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_15.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_16.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_17.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_18.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_19.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_20.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_21.ets
-07.expressions/13.function_call_expression/02.step_2_semantic_correctness_check/step2_5.ets
-07.expressions/13.function_call_expression/02.step_2_semantic_correctness_check/step2_6.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_27.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_28.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_0.ets
-# end of es2panda fails
-
-# es2panda fails: panda#14507 Cannot call static interface method using type alias
-07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3a_3.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_6.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_8.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_9.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_11.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_12.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_14.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_15.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_16.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_17.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_18.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_19.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_20.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_21.ets
+07.expressions/11.function_call_expression/02.step_2_semantic_correctness_check/step2_5.ets
+07.expressions/11.function_call_expression/02.step_2_semantic_correctness_check/step2_6.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_27.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_28.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_0.ets
 # end of es2panda fails
 
 # es2panda fails: panda, 4.8.3 optional parameters not fully implemented
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_10.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_11.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_16.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_18.ets
@@ -1539,21 +1024,7 @@
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_22.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_23.ets
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_24.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_6.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_7.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_8.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_12.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_13.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_14.ets
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_15.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_10.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_13.ets
 # end of es2panda fails
-
-# verifier fails
-07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3a_n_2.ets
-07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3a_n_3.ets
-# end of verifier fails
 
 # es2panda fails: panda#
 07.expressions/10.method_call_expression/03.step_3_semantic_correctness_check/step3b_n_0.ets
@@ -1561,12 +1032,12 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14578 es2panda fails to pick the most-specific function
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_22.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_23.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_24.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_25.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_26.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1_5.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_22.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_23.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_24.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_25.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_26.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1_5.ets
 # end of es2panda fails
 
 # es2panda fails: panda:#14588 Enum type alias is not honored
@@ -1577,9 +1048,7 @@
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_11.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_12.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_13.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_3.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
-04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_5.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_6.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_7.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_8.ets
@@ -1587,30 +1056,22 @@
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_neg_4.ets
 # end of es2panda fails
 
-# es2panda fails: panda:14383 CTE cases with the chaining operator
-07.expressions/13.function_call_expression/fcall_n_4.ets
-# end of es2panda fails
-
 # es2panda fails: panda:14594 Cannot resolve function name for a union type
-07.expressions/13.function_call_expression/fcall_8.ets
+07.expressions/11.function_call_expression/fcall_8.ets
 # end of es2panda fails
 
 # Disable struct test according I8EM2T
-13.modules_and_compilation_units/03.import_declarations/05.default_import_binding/default_import_struct.ets
+13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/default_import_struct.ets
 # end of Disable struct test according I8EM2T
 
 # es2panda fails: panda:14622 Following function call block is always taken as trailing lambda
-17.experimental_features/10.trailing_lambda/trlambda_func_8.ets
-17.experimental_features/10.trailing_lambda/trlambda_met_8.ets
-17.experimental_features/10.trailing_lambda/trlambda_static_met_8.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_8.ets
+17.experimental_features/11.trailing_lambda/trlambda_met_8.ets
+17.experimental_features/11.trailing_lambda/trlambda_static_met_8.ets
 # end of es2panda fails
 
 # 15205 Defined tuple type is inaccessible to instanceof typecheck
 03.types/08.reference_types/10.tuple_types/tt_1.ets
-03.types/08.reference_types/10.tuple_types/tt_2.ets
-
-# 15236 Cannot access tuple element from array of tuples
-03.types/08.reference_types/10.tuple_types/tt_4.ets
 
 # 15238 Cannot cast tuple to Object
 03.types/08.reference_types/10.tuple_types/tt_5.ets
@@ -1628,118 +1089,99 @@
 03.types/08.reference_types/10.tuple_types/tt_10.ets
 03.types/08.reference_types/10.tuple_types/tt_13.ets
 
-# es2panda fails: panda#15188 es2panda aborts on enum in tuple type
-03.types/08.reference_types/10.tuple_types/tt2_24.ets
 
 # es2panda fails: panda#15188 es2panda aborts on union in tuple type
-03.types/08.reference_types/10.tuple_types/tt2_29.ets
-03.types/08.reference_types/10.tuple_types/tt2_30.ets
 03.types/08.reference_types/10.tuple_types/tt2_31.ets
 03.types/08.reference_types/10.tuple_types/tt2_32.ets
 
-# 15243 No CTE on wrong value type in tuple initialization
-03.types/08.reference_types/10.tuple_types/tt_n_12.ets
-
-# 15271 Tuple type couldn't be converted
-03.types/08.reference_types/10.tuple_types/tt_18.ets
-
 # es2panda fails: panda:14623 Cannot reference 'this' in this context
-17.experimental_features/10.trailing_lambda/trlambda_met_1.ets
-17.experimental_features/10.trailing_lambda/trlambda_met_3.ets
-17.experimental_features/10.trailing_lambda/trlambda_met_5.ets
-17.experimental_features/10.trailing_lambda/trlambda_met_7.ets
-17.experimental_features/10.trailing_lambda/trlambda_static_met_1.ets
-17.experimental_features/10.trailing_lambda/trlambda_static_met_3.ets
-17.experimental_features/10.trailing_lambda/trlambda_static_met_5.ets
-17.experimental_features/10.trailing_lambda/trlambda_static_met_7.ets
+17.experimental_features/11.trailing_lambda/trlambda_met_1.ets
+17.experimental_features/11.trailing_lambda/trlambda_met_3.ets
+17.experimental_features/11.trailing_lambda/trlambda_met_5.ets
+17.experimental_features/11.trailing_lambda/trlambda_met_7.ets
+17.experimental_features/11.trailing_lambda/trlambda_static_met_1.ets
+17.experimental_features/11.trailing_lambda/trlambda_static_met_3.ets
+17.experimental_features/11.trailing_lambda/trlambda_static_met_5.ets
+17.experimental_features/11.trailing_lambda/trlambda_static_met_7.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14653 es2panda segfault when optional lambda is omitted
-17.experimental_features/10.trailing_lambda/trlambda_func_15.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_15.ets
 # end of es2panda fails
 
 
-13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_1.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_3.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_5.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_7.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_global_0.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/file/import_path_file_global_1.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_0.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_1.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_2.ets
-13.modules_and_compilation_units/03.import_declarations/07.import_path/dir/import_path_dir_3.ets
+13.compilation_units_packages_and_modules/03.import_directives/06.import_path/file/import_path_file_global_0.ets
+13.compilation_units_packages_and_modules/03.import_directives/06.import_path/file/import_path_file_global_1.ets
+13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_0.ets
+13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_1.ets
+13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_2.ets
+13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_3.ets
 
 # 15095
-09.classes/06.method_declarations/10.hiding_by_class_methods/hiding_instance_static_method.ets
-09.classes/06.method_declarations/11.requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.ets
+09.classes/06.method_declarations/11.hiding_by_class_methods/hiding_instance_static_method.ets
+09.classes/06.method_declarations/12.requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.ets
 # end 15095
 
 # es2panda: panda#13442 Reworking the equality expression so it aligns with the specification changes
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_11.ets
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_13.ets
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_59.ets
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_60.ets
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_61.ets
+07.expressions/25.equality_expressions/01.value_equality_for_numeric_types/numeric_equality_11.ets
+07.expressions/25.equality_expressions/01.value_equality_for_numeric_types/numeric_equality_13.ets
+07.expressions/25.equality_expressions/01.value_equality_for_numeric_types/numeric_equality_59.ets
+07.expressions/25.equality_expressions/01.value_equality_for_numeric_types/numeric_equality_60.ets
+07.expressions/25.equality_expressions/01.value_equality_for_numeric_types/numeric_equality_61.ets
 03.types/08.reference_types/10.tuple_types/tt2_15.ets
-# temporarily excluded:
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_36.ets
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_37.ets
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_38.ets
-07.expressions/25.equality_expressions/03.value_equality_operators_for_numeric_types/numeric_equality_39.ets
 # end of es2panda fails
 
 # Throwing function types
-17.experimental_features/06.native_functions_and_methods/01.native_functions/nat8.ets
-17.experimental_features/10.exceptions/01.throwing_functions/lambda.ets
+17.experimental_features/07.native_functions_and_methods/01.native_functions/nat8.ets
+17.experimental_features/14.exceptions/01.throwing_functions/lambda.ets
 
 # Cast sequence
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_100.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_101.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_108.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_109.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_110.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_111.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_112.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_113.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_120.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_121.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_122.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_123.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_124.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_125.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_48.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_49.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_50.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_51.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_52.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_53.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_60.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_61.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_62.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_63.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_64.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_65.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_72.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_73.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_74.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_75.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_76.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_77.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_84.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_85.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_86.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_87.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_88.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_89.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_96.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_97.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_98.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/sequenced_99.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_100.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_101.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_108.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_109.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_110.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_111.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_112.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_113.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_120.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_121.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_122.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_123.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_124.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_125.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_48.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_49.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_50.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_51.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_52.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_53.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_60.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_61.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_62.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_63.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_64.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_65.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_72.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_73.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_74.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_75.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_76.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_77.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_84.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_85.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_86.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_87.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_88.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_89.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_96.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_97.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_98.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_99.ets
 
 # Leftovers from bit operations on floats
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_61.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_bitwise_68.ets
 
 # New failures according to nullablity changes #15642
 # not recommended, yet allowed
@@ -1759,10 +1201,10 @@
 # inferred type is null
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/null_initializer.ets
 # nullable in arithmetics
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_16.ets
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_8.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_16.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_8.ets
 # primitive allowed in union
-04.names_declarations_and_scopes/08.function_declarations/03.optional_parameters/opt_param_n_0.ets
+04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.ets
 # positive
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.ets
 # positive
@@ -1770,72 +1212,67 @@
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args2_neg_3.ets
 # non-compatible operands, null and non-nullable
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_1.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_2.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_3.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_4.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_5.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_6.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_7.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_1.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_10.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_11.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_12.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_13.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_2.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_3.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_4.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_5.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_6.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_7.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_8.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/boxing2_call_9.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_0.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_1.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_2.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_4.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_5.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_6.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_7.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_0.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_1.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_10.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_11.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_12.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_13.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_2.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_4.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_5.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_6.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_7.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_8.ets
+06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_9.ets
 # no reason to fail
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_0.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_2.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_3.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_4.ets
-06.contexts_and_conversions/01.kinds_of_contexts/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_5.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_0.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_2.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_3.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_4.ets
+06.contexts_and_conversions/03.numeric_operator_contexts/02.binary_numeric_promotion/result_type_cond_n_5.ets
 # non-compatible operands
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/boxing2.ets
-06.contexts_and_conversions/01.kinds_of_contexts/04.casting_contexts/widening_refs.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/boxing2.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/widening_refs.ets
 # assign nullable to non-nullable
-07.expressions/13.function_call_expression/optional_chaining_value_result.ets
+07.expressions/11.function_call_expression/optional_chaining_value_result.ets
 # should be allowed
-07.expressions/30.conditional_expressions/02.numeric_conditional_expressions/type_of_numeric_condition_expression_type_0.ets
-07.expressions/30.conditional_expressions/02.numeric_conditional_expressions/type_of_numeric_condition_expression_type_1.ets
+07.expressions/30.conditional_expressions/type_of_numeric_condition_expression_type_0.ets
+07.expressions/30.conditional_expressions/type_of_numeric_condition_expression_type_1.ets
 # legal
-07.expressions/30.conditional_expressions/03.reference_conditional_expressions/conditional_expression_object_0.ets
+07.expressions/30.conditional_expressions/conditional_expression_object_0.ets
 # nullability violation
 07.expressions/15.cast_expressions/nullable_cast_1.ets
 # array is always truthy
-08.statements/05.if_statements/if2_19.ets
 # end
 
 # #15577 union type inference
-06.contexts_and_conversions/02.kinds_of_conversion/identity_5.ets
-07.expressions/07.object_literal/01.object_literal_of_class_type/cl_2.ets
-07.expressions/13.function_call_expression/fcall_7.ets
-17.experimental_features/10.trailing_lambda/trlambda_func_1.ets
-17.experimental_features/10.trailing_lambda/trlambda_func_11.ets
-17.experimental_features/10.trailing_lambda/trlambda_func_12.ets
-17.experimental_features/10.trailing_lambda/trlambda_func_14.ets
-17.experimental_features/10.trailing_lambda/trlambda_func_5.ets
-17.experimental_features/10.trailing_lambda/trlambda_func_7.ets
-17.experimental_features/10.trailing_lambda/trlambda_func_3.ets
+06.contexts_and_conversions/01.assignment-like_contexts/identity2_5.ets
+07.expressions/05.object_literal/01.object_literal_of_class_type/cl_2.ets
+07.expressions/11.function_call_expression/fcall_7.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_1.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_11.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_12.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_14.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_5.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_7.ets
+17.experimental_features/11.trailing_lambda/trlambda_func_3.ets
 04.names_declarations_and_scopes/06.type_alias_declaration/alias_gen_4.ets
-07.expressions/13.function_call_expression/fcall_9.ets
+07.expressions/11.function_call_expression/fcall_9.ets
 03.types/08.reference_types/11.union_types/ut_22.ets
 # end
 
-# 15276
-17.experimental_features/05.statements/05.function_overloading/fn_overloading_n_10.ets
-#end
-
 # #15610 undefined default array value
-17.experimental_features/03.runtime_evaluation_of_array_creation_expressions/expr_15.ets
+17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_15.ets
 #
 
 #15664
@@ -1844,8 +1281,8 @@
 
 # #15709
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_25.ets
-06.contexts_and_conversions/01.kinds_of_contexts/01.assignment_and_call_contexts/identity_call.ets
-07.expressions/13.function_call_expression/01.step_1_selection_of_function/step1n_4.ets
+06.contexts_and_conversions/01.assignment-like_contexts/identity_call.ets
+07.expressions/11.function_call_expression/01.step_1_selection_of_function/step1n_4.ets
 17.experimental_features/06.function_and_method_overloading/01.function_overloading/fn_overloading_n_10.ets
 #
 
@@ -1906,7 +1343,6 @@
 17.experimental_features/06.function_and_method_overloading/03.interface_method_overloading/im_over_9.ets
 
 # 15605 wrong inherited method selected from abstract class
-17.experimental_features/06.function_and_method_overloading/02.class_method_overloading/cm_over1_4.ets
 17.experimental_features/06.function_and_method_overloading/02.class_method_overloading/cm_over2_7.ets
 17.experimental_features/06.function_and_method_overloading/04.constructor_overloading/co2_over_5.ets
 
@@ -1924,16 +1360,19 @@
 17.experimental_features/06.function_and_method_overloading/04.constructor_overloading/co2_over_8.ets
 
 # 15810 Failed compilation of Ensure-Not-Nullish expression with undefined type
-07.expressions/18.ensure_not_null_expression/undefined_1.ets
-07.expressions/18.ensure_not_null_expression/undefined_3.ets
-07.expressions/18.ensure_not_null_expression/undefined_4.ets
+07.expressions/18.ensure-not-nullish_expression/undefined_1.ets
+07.expressions/18.ensure-not-nullish_expression/undefined_3.ets
+07.expressions/18.ensure-not-nullish_expression/undefined_4.ets
+
+# 16156 Waiting for the full implementation of smartcasts
+07.expressions/18.ensure-not-nullish_expression/undefined_2.ets
+17.experimental_features/09.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods4.ets
 
 # 16022 Failed compilation of Enumeration-Operations
 11.enumerations/03.enumeration_operations/enum_type_methods_valueof.ets
 #
 
 # Null type annotation is allowed now, these test are incorrect
-05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_3.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_2.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.ets

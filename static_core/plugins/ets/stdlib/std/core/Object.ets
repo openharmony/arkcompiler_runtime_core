@@ -37,7 +37,7 @@ type RecordForObject = Map<PropertyKey, NullishType>
 /**
  * `object` is an alias for type `Object`
  */
-// export type object = Object // blocked by #14941
+export type object = Object;
 
 /**
  * Common ancestor amongst all other classes
