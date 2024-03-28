@@ -537,6 +537,17 @@ intrinsics:
     llvm_codegen_func: EmitFround
     safe_intrinsic: true
 
+  - name: StdMathHypot
+    space: ets
+    class_name: std.math.ETSGLOBAL
+    method_name: hypot
+    static: true
+    signature:
+      ret: f64
+      args: [ f64, f64 ]
+    impl: ark::ets::intrinsics::StdMathHypot
+    safe_intrinsic: true
+
 ####################
 # std.core.Console #
 ####################

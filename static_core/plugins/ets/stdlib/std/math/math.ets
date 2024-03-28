@@ -322,10 +322,11 @@ export native function floor(v: double): double;
  * @param v arbitrary number
  *
  * @returns The square root of the sum of squares of its arguments
+ *
+ * @remark
+ * Implemented as native function,  @see `hypot()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L540).
  */
-export function hypot(u: double, v: double): double {
-    return sqrt(u * u + v * v);
-}
+export native function hypot(u: double, v: double): double;
 
 /**
  * Base 10 logarithm of `v`
