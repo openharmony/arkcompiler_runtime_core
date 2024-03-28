@@ -27,7 +27,7 @@ type Union1 = A | string
 function main(): int {
     let a: Union1 = "hello"
     let b: Union1 = new A()
-    if (a === b) {
+    if (a == b) {
         return -1
     }
     return 0
