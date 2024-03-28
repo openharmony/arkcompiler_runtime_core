@@ -190,7 +190,7 @@ std::string GetPrefix(Logger::Level level, Logger::Component component)
 }
 
 /* static */
-void Logger::InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask,
+void Logger::InitializeFileLogging(const std::string &log_file, Level level, const ComponentMask &component_mask,
                                    bool is_fast_logging)
 {
     if (IsInitialized()) {
@@ -221,7 +221,7 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, Com
 
 #ifdef ENABLE_HILOG
 /* static */
-void Logger::InitializeHiLogging(Level level, ComponentMask component_mask)
+void Logger::InitializeHiLogging(Level level, const ComponentMask &component_mask)
 {
     if (IsInitialized()) {
         return;
@@ -240,7 +240,7 @@ void Logger::InitializeHiLogging(Level level, ComponentMask component_mask)
 #endif
 
 /* static */
-void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
+void Logger::InitializeStdLogging(Level level, const ComponentMask &component_mask)
 {
     if (IsInitialized()) {
         return;
@@ -258,7 +258,7 @@ void Logger::InitializeStdLogging(Level level, ComponentMask component_mask)
 }
 
 /* static */
-void Logger::InitializeDummyLogging(Level level, ComponentMask component_mask)
+void Logger::InitializeDummyLogging(Level level, const ComponentMask &component_mask)
 {
     if (IsInitialized()) {
         return;

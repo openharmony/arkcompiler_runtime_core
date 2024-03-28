@@ -134,7 +134,8 @@ void OpenPandaFileFromZipErrorHandler(ZipArchiveHandle &handle)
 }
 
 std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandle &handle, std::string_view location,
-                                                                 EntryFileStat &entry, std::string_view archive_name)
+                                                                 EntryFileStat &entry,
+                                                                 const std::string_view &archive_name)
 {
     uint32_t uncompressed_length = entry.GetUncompressedSize();
     ASSERT(uncompressed_length != 0U);
@@ -173,7 +174,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
 
 // NOLINTNEXTLINE(google-runtime-references)
 std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, FILE *fp, std::string_view location,
-                                                      EntryFileStat &entry, std::string_view archive_filename,
+                                                      EntryFileStat &entry, const std::string_view &archive_filename,
                                                       panda_file::File::OpenMode open_mode)
 {
     std::unique_ptr<const panda_file::File> file;

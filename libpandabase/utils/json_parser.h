@@ -44,9 +44,8 @@ public:
         Value() = default;
         ~Value() = default;
         NO_COPY_SEMANTIC(Value);
-        Value(Value &&rhs) noexcept
+        Value(Value &&rhs) noexcept: value_(std::move(rhs.value_))
         {
-            value_ = std::move(rhs.value_);
             rhs.value_ = std::monostate {};
         }
         Value &operator=(Value &&rhs) noexcept

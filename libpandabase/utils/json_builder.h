@@ -127,7 +127,7 @@ using JsonObjectBuilderBase = JsonBuilderBase<'{', '}'>;
 class JsonObjectBuilder : public JsonObjectBuilderBase {
 public:
     template <typename T>
-    JsonObjectBuilder &AddProperty(std::string_view key, T &&value) &
+    JsonObjectBuilder &AddProperty(const std::string_view &key, T &&value) &
     {
         Entry();
         Stringify(key);

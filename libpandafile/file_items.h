@@ -83,7 +83,7 @@ enum class FunctionKind : uint8_t {
 };
 
 bool IsDynamicLanguage(panda::panda_file::SourceLang lang);
-std::optional<panda::panda_file::SourceLang> LanguageFromString(std::string_view lang);
+std::optional<panda::panda_file::SourceLang> LanguageFromString(const std::string_view &lang);
 const char *LanguageToString(panda::panda_file::SourceLang lang);
 const char *GetCtorName(panda::panda_file::SourceLang lang);
 const char *GetCctorName(panda::panda_file::SourceLang lang);

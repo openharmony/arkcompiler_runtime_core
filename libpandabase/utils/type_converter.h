@@ -38,9 +38,9 @@ namespace panda::helpers {
  */
 class ValueUnit {
 public:
-    ValueUnit(uint64_t value, std::string_view literal);
+    ValueUnit(uint64_t value, const std::string_view &literal);
 
-    ValueUnit(double value, std::string_view literal);
+    ValueUnit(double value, const std::string_view &literal);
 
     /**
      *  \brief Set new \param precision for output
