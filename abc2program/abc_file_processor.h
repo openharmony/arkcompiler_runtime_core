@@ -16,7 +16,9 @@
 #ifndef ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 #define ABC2PROGRAM_ABC_FILE_PROCESSOR_H
 
+#include "abc_module_array_processor.h"
 #include "common/abc2program_entity_container.h"
+#include "libpandafile/module_data_accessor-inl.h"
 
 namespace panda::abc2program {
 
@@ -33,6 +35,7 @@ private:
     AbcStringTable *string_table_ = nullptr;
     pandasm::Program *program_ = nullptr;
     std::unique_ptr<panda_file::LiteralDataAccessor> literal_data_accessor_;
+    std::unique_ptr<panda_file::ModuleDataAccessor> module_data_accessor_;
 };
 
 } // namespace panda::abc2program

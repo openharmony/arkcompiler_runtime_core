@@ -77,6 +77,16 @@ bool Abc2ProgramEntityContainer::AddField(uint32_t field_id, const pandasm::Fiel
     return true;
 }
 
+void Abc2ProgramEntityContainer::AddModuleLiteralOffset(uint32_t offset)
+{
+    module_literals_.insert(offset);
+}
+
+const std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetModuleLiterals() const
+{
+    return module_literals_;
+}
+
 bool Abc2ProgramEntityContainer::AddField(const panda_file::File::EntityId &field_id, const pandasm::Field &field)
 {
     return AddField(field_id.GetOffset(), field);

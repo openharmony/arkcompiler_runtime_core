@@ -53,6 +53,8 @@ public:
     const std::unordered_set<uint32_t> &GetLiteralArrayIdSet() const;
     std::string GetLiteralArrayIdName(uint32_t literal_array_id) const;
     std::string GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id) const;
+    void AddModuleLiteralOffset(uint32_t offset);
+    const std::unordered_set<uint32_t> &GetModuleLiterals() const;
     std::string GetAbcFileAbsolutePath() const;
 
 private:
@@ -66,6 +68,7 @@ private:
     std::unordered_map<uint32_t, std::string> record_full_name_map_;
     std::unordered_map<uint32_t, std::string> method_full_name_map_;
     std::unordered_set<uint32_t> literal_array_id_set_;
+    std::unordered_set<uint32_t> module_literals_;
 }; // class Abc2ProgramEntityContainer
 
 } // namespace panda::abc2program

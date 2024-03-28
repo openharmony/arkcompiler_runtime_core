@@ -60,8 +60,10 @@ void AbcFieldProcessor::FillFieldType(pandasm::Field &field)
 
 void AbcFieldProcessor::FillFieldMetaData(pandasm::Field &field)
 {
+    field.metadata->SetFieldType(field.type);
     FillFieldAttributes(field);
     FillFieldAnnotations(field);
+    FillMetaDataValue(field);
 }
 
 void AbcFieldProcessor::FillFieldAttributes(pandasm::Field &field)
@@ -71,6 +73,48 @@ void AbcFieldProcessor::FillFieldAttributes(pandasm::Field &field)
     }
     if (field_data_accessor_->IsStatic()) {
         field.metadata->SetAttribute(ABC_ATTR_STATIC);
+    }
+}
+
+void AbcFieldProcessor::FillMetaDataValue(pandasm::Field &field)
+{
+    switch (field.type.GetId()) {
+        case panda_file::Type::TypeId::U32: {
+            auto offset = field_data_accessor_->GetValue<uint32_t>().value();
+            if (record_.name == ES_MODULE_RECORD || field.name == MODULE_RECORD_IDX) {
+                entity_container_.AddModuleLiteralOffset(offset);
+                entity_container_.AddLiteralArrayId(offset);
+                auto module_literal = entity_container_.GetLiteralArrayIdName(offset);
+                field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+                    module_literal));
+            } else {
+                const auto val = field_data_accessor_->GetValue<uint32_t>().value();
+                field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(val));
+            }
+            break;
+        }
+        case panda_file::Type::TypeId::U8: {
+            const auto val = field_data_accessor_->GetValue<uint8_t>().value();
+            field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U8>(val));
+            break;
+        }
+        case panda_file::Type::TypeId::U1:
+        case panda_file::Type::TypeId::I8:
+        case panda_file::Type::TypeId::I16:
+        case panda_file::Type::TypeId::U16:
+        case panda_file::Type::TypeId::I32:
+        case panda_file::Type::TypeId::F32:
+        case panda_file::Type::TypeId::F64:
+        case panda_file::Type::TypeId::I64:
+        case panda_file::Type::TypeId::U64:
+        case panda_file::Type::TypeId::REFERENCE:
+        case panda_file::Type::TypeId::TAGGED:
+        case panda_file::Type::TypeId::VOID:
+        case panda_file::Type::TypeId::INVALID: {
+            UNREACHABLE();
+        }
+        default:
+            UNREACHABLE();
     }
 }
 
