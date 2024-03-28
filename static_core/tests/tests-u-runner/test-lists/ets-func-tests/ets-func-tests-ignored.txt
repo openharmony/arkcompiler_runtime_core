@@ -407,6 +407,8 @@ spec/import_export/07.export_directives/02.export_type_directives/to_export_for_
 ### Issue 14675, 14769, 14841
 escompat/ArrayBufferTest2.ets
 ### End of 14675, 14769, 14841
+# #16376
+escompat/DateTest.ets
 # #15177
 escompat/ReflectGetBadCases.ets
 ### issue 14836 begin
