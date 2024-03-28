@@ -177,7 +177,7 @@ export abstract class Type extends Object {
      * @returns instance of appropriate type or null if resolving is failed
      */
     public static resolve(td: TypeDesc): Type | null {
-        let kind = TypeAPIGetTypeKind(td) & TypeKindMask
+        let kind = (TypeAPIGetTypeKind(td) & TypeKindMask) as byte
         switch (kind) {
             case TypeKind.NONE:
                 return null
@@ -2101,7 +2101,7 @@ export final class ArrayType extends Type {
     }
 
     internal static getInstance(td: TypeDesc, elemTD: TypeDesc): ArrayType {
-        let ek = TypeAPIGetTypeKind(elemTD) & TypeKindMask
+        let ek = (TypeAPIGetTypeKind(elemTD) & TypeKindMask) as byte
         switch (ek) {
             case TypeKind.BOOLEAN:
                 return (TypeAPIIsValueType(elemTD)) ? ArrayType.BOOLEAN_VAL : ArrayType.BOOLEAN_REF
