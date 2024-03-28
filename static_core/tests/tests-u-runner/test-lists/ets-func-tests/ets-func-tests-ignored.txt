@@ -88,6 +88,8 @@ spec/unions/union_param_n_02.ets
 ### Issue 14165
 spec/unions/union_compare_02_04.ets
 ### Issue 15312
+### Issue 15965, 14165
+spec/unions/union_compare_02_02.ets
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
