@@ -33,7 +33,19 @@
 #include <atomic>
 
 #ifdef ENABLE_HILOG
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
+
 #include <hilog/log.h>
+
+#undef LOG_DOMAIN
+#define LOG_DOMAIN 0xD003F00
+
+#undef LOG_TAG
+#define LOG_TAG "ArkCompiler"
 #endif
 
 namespace panda {
@@ -391,9 +403,6 @@ protected:
 
 private:
     std::ostringstream stream_;
-    constexpr static unsigned int ARK_DOMAIN = 0xD003F00;
-    constexpr static auto TAG = "ArkCompiler";
-    constexpr static OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, ARK_DOMAIN, TAG};
 
     friend Logger;
 };

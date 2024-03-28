@@ -345,19 +345,19 @@ void HiLogger::LogLineInternal(Level level, Component component, const std::stri
     stream_ << prefix << str;
     switch (level) {
         case Level::DEBUG:
-            OHOS::HiviewDFX::HiLog::Debug(LABEL, "%{public}s", stream_.str().c_str());
+            HILOG_DEBUG(LOG_CORE, "%{public}s", stream_.str().c_str());
             break;
         case Level::INFO:
-            OHOS::HiviewDFX::HiLog::Info(LABEL, "%{public}s", stream_.str().c_str());
+            HILOG_INFO(LOG_CORE, "%{public}s", stream_.str().c_str());
             break;
         case Level::ERROR:
-            OHOS::HiviewDFX::HiLog::Error(LABEL, "%{public}s", stream_.str().c_str());
+            HILOG_ERROR(LOG_CORE, "%{public}s", stream_.str().c_str());
             break;
         case Level::FATAL:
-            OHOS::HiviewDFX::HiLog::Fatal(LABEL, "%{public}s", stream_.str().c_str());
+            HILOG_FATAL(LOG_CORE, "%{public}s", stream_.str().c_str());
             break;
         case Level::WARNING:
-            OHOS::HiviewDFX::HiLog::Warn(LABEL, "%{public}s", stream_.str().c_str());
+            HILOG_WARN(LOG_CORE, "%{public}s", stream_.str().c_str());
             break;
         default:
             UNREACHABLE();
