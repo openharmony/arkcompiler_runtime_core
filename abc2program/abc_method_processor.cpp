@@ -24,7 +24,8 @@ AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id,
     : AbcFileEntityProcessor(entity_id, entity_container),
       type_converter_(AbcTypeConverter(*string_table_)),
       function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_),
-                                  panda_file::SourceLang::ECMASCRIPT))
+                                  panda_file::SourceLang::ECMASCRIPT)),
+      debug_info_extractor_(entity_container.GetDebugInfoExtractor())
 {
     method_data_accessor_ = std::make_unique<panda_file::MethodDataAccessor>(*file_, entity_id_);
 }
@@ -41,6 +42,7 @@ void AbcMethodProcessor::FillFunctionData()
     FillFunctionKind();
     FillFunctionMetaData();
     FillCodeData();
+    FillDebugInfo();
 }
 
 void AbcMethodProcessor::AddFunctionIntoFunctionTable()
@@ -103,6 +105,16 @@ void AbcMethodProcessor::FillCodeData()
         AbcCodeProcessor code_processor(code_id.value(), entity_container_, entity_id_, function_);
         code_processor.FillProgramData();
     }
+}
+
+void AbcMethodProcessor::FillDebugInfo()
+{
+    FillSourceFile();
+}
+
+void AbcMethodProcessor::FillSourceFile()
+{
+    function_.source_file = debug_info_extractor_.GetSourceFile(entity_id_);
 }
 
 } // namespace panda::abc2program

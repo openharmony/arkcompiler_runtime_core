@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <assembly-program.h>
+#include <debug_info_extractor.h>
 #include "file.h"
 #include "abc_string_table.h"
 
@@ -29,9 +30,11 @@ const panda::panda_file::SourceLang lang = panda::panda_file::SourceLang::ECMASC
 
 class Abc2ProgramEntityContainer {
 public:
-    Abc2ProgramEntityContainer(const panda_file::File &file, AbcStringTable &string_table, pandasm::Program &program)
-        : file_(file), string_table_(string_table), program_(program) {}
-
+    Abc2ProgramEntityContainer(const panda_file::File &file,
+                               AbcStringTable &string_table,
+                               pandasm::Program &program,
+                               panda_file::DebugInfoExtractor &debug_info_extractor)
+        : file_(file), string_table_(string_table), program_(program), debug_info_extractor_(debug_info_extractor) {}
     const panda_file::File &GetAbcFile() const;
     AbcStringTable &GetAbcStringTable() const;
     pandasm::Program &GetProgram() const;
@@ -61,12 +64,14 @@ public:
     std::string GetLiteralArrayIdName(uint32_t literal_array_id) const;
     std::string GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id) const;
     std::string GetAbcFileAbsolutePath() const;
+    panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
 
 private:
     std::string ConcatFullMethodNameById(const panda_file::File::EntityId &method_id);
     const panda_file::File &file_;
     AbcStringTable &string_table_;
     pandasm::Program &program_;
+    panda_file::DebugInfoExtractor &debug_info_extractor_;
     std::unordered_map<uint32_t, const pandasm::Record*> record_map_;
     std::unordered_map<uint32_t, const pandasm::Function*> function_map_;
     std::unordered_map<uint32_t, const pandasm::Field*> field_map_;
