@@ -1,10 +1,10 @@
-/*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,25 +13,8 @@
  * limitations under the License.
  */
 
-declare const exports: any;
-let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
+ export const CONSTANT: number = 228;
 
-function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = ETSGLOBAL._$init$_;
-export {_$init$_};
-exports._$init$_ = _$init$_;
-_$init$_();
-
-export enum Letter {
-    A = 0,
-    B = 1,
-    C = 2,
-}
-
-export enum Color {
-    Red = 0,
-    Green = -100,
-    Blue = -99,
-    White = 0,
-}
-
+ export class Bibka {
+	public static readonly NOT_GLOBAL: number = 1337;
+ }

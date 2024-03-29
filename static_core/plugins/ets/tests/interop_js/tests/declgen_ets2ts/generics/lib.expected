@@ -14,21 +14,22 @@
  */
 
 declare const exports: any;
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
 
 function _$init$_(): void { return {} as any; };
-(_$init$_ as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', '_$init$_');
+(_$init$_ as any) = ETSGLOBAL._$init$_;
 export {_$init$_};
 exports._$init$_ = _$init$_;
 _$init$_();
 
 function Identity<T>(x: T): T { return {} as any; };
-(Identity as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'Identity');
+(Identity as any) = ETSGLOBAL.Identity;
 export {Identity};
 exports.Identity = Identity;
 
 
 function ForEach<T extends Object>(a: T[], cb: (p1: T, p2: number) => void): void { return {} as any; };
-(ForEach as any) = (globalThis as any).Panda.getFunction('LETSGLOBAL;', 'ForEach');
+(ForEach as any) = ETSGLOBAL.ForEach;
 export {ForEach};
 exports.ForEach = ForEach;
 

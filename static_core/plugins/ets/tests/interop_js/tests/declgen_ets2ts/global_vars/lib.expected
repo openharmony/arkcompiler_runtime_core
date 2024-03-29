@@ -22,9 +22,15 @@ export {_$init$_};
 exports._$init$_ = _$init$_;
 _$init$_();
 
-function NumberOrStringEquality(a: number | string, b: number | string): boolean { return {} as any; };
-(NumberOrStringEquality as any) = ETSGLOBAL.NumberOrStringEquality;
-export {NumberOrStringEquality};
-exports.NumberOrStringEquality = NumberOrStringEquality;
+const CONSTANT: number = ETSGLOBAL.CONSTANT;
+export {CONSTANT};
+exports.CONSTANT = CONSTANT;
 
+class Bibka {
+    public static NOT_GLOBAL: number = {} as any;
+    constructor() {};
+};
+(Bibka as any) = (globalThis as any).Panda.getClass('LBibka;');
+export {Bibka};
+exports.Bibka = Bibka;
 
