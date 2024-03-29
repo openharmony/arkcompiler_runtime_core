@@ -150,6 +150,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/static_core/isa:isa_combine",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/static_core/isa"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/verifier:libarkverifier",
                     "header": {
                         "header_files": [],

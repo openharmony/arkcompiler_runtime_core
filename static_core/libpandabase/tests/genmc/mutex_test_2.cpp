@@ -16,7 +16,7 @@
 #include <pthread.h>
 #include <cstdlib>
 #define MC_ON
-#include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
+#include "platforms/unix/libpandabase/futex/fmutex.cpp"
 
 // The tests checks mutex try lock
 

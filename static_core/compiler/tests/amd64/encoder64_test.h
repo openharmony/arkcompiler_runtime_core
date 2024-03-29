@@ -18,7 +18,7 @@
 
 #include <climits>
 
-#include "../encoder_test_common.h"
+#include "tests/encoder_test_common.h"
 #include "target/amd64/target.h"
 
 // NOLINTBEGIN(readability-magic-numbers)

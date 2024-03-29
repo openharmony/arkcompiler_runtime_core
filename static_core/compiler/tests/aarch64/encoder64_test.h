@@ -19,7 +19,7 @@
 #include "compiler_options.h"
 #include "cpu_features.h"
 #include "target/aarch64/target.h"
-#include "../encoder_test_common.h"
+#include "tests/encoder_test_common.h"
 
 namespace ark::compiler {
 
