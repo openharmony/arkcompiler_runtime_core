@@ -19,15 +19,48 @@
 namespace panda::abc2program {
 
 AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entity_id,
-                                               Abc2ProgramEntityContainer &entity_container)
-    : AbcFileEntityProcessor(entity_id, entity_container)
+                                               Abc2ProgramEntityContainer &entity_container,
+                                               pandasm::Function &function)
+    : AbcFileEntityProcessor(entity_id, entity_container), function_(function)
 {
     annotation_data_accessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entity_id_);
+    annotation_name_ = string_table_->GetStringById(annotation_data_accessor_->GetClassId());
 }
 
 void AbcAnnotationProcessor::FillProgramData()
 {
-    log::Unimplemented(__PRETTY_FUNCTION__);
+    FillAnnotation();
+}
+
+void AbcAnnotationProcessor::FillAnnotation()
+{
+    std::vector<pandasm::AnnotationElement> elements;
+    FillAnnotationElements(elements);
+    pandasm::AnnotationData annotation_data(annotation_name_, elements);
+    std::vector<pandasm::AnnotationData> annotations;
+    annotations.emplace_back(std::move(annotation_data));
+    function_.metadata->AddAnnotations(annotations);
+}
+
+void AbcAnnotationProcessor::FillAnnotationElements(std::vector<pandasm::AnnotationElement> &elements)
+{
+    for (uint32_t i = 0; i < annotation_data_accessor_->GetCount(); ++i) {
+        auto annotation_data_accessor_elem = annotation_data_accessor_->GetElement(i);
+        auto annotation_elem_name = string_table_->GetStringById(annotation_data_accessor_elem.GetNameId());
+        auto value = annotation_data_accessor_elem.GetScalarValue().GetValue();
+        auto value_type = pandasm::Value::GetCharAsType(annotation_data_accessor_->GetTag(i).GetItem());
+        switch (value_type) {
+            case pandasm::Value::Type::U32: {
+                pandasm::AnnotationElement annotation_element(
+                    annotation_elem_name, std::make_unique<pandasm::ScalarValue>(
+                    pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(value)));
+                elements.emplace_back(annotation_element);
+                break;
+            }
+            default:
+                UNREACHABLE();
+        }
+    }
 }
 
 } // namespace panda::abc2program

@@ -43,6 +43,9 @@ void AbcMethodProcessor::FillFunctionData()
     FillFunctionMetaData();
     FillCodeData();
     FillDebugInfo();
+    FillFuncAnnotation();
+    FillSlotsNum();
+    FillConcurrentModuleRequests();
 }
 
 void AbcMethodProcessor::AddFunctionIntoFunctionTable()
@@ -115,6 +118,38 @@ void AbcMethodProcessor::FillDebugInfo()
 void AbcMethodProcessor::FillSourceFile()
 {
     function_.source_file = debug_info_extractor_.GetSourceFile(entity_id_);
+}
+
+void AbcMethodProcessor::FillFuncAnnotation()
+{
+    method_data_accessor_->EnumerateAnnotations([&](panda_file::File::EntityId annotation_id) {
+        AbcAnnotationProcessor annotation_processor(annotation_id, entity_container_, function_);
+        annotation_processor.FillProgramData();
+    });
+}
+
+void AbcMethodProcessor::FillSlotsNum()
+{
+    for (auto annotation : function_.metadata->GetAnnotations()) {
+        if (annotation.GetName() == SLOT_NUMBER_ANN_RECORD_TYPE_DESCRIPTOR && !annotation.GetElements().empty()) {
+            uint32_t slots_num = annotation.GetElements()[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
+            function_.SetSlotsNum(static_cast<size_t>(slots_num));
+        }
+    }
+    function_.metadata->DeleteAnnotationByName(SLOT_NUMBER_ANN_RECORD_TYPE_DESCRIPTOR);
+}
+
+void AbcMethodProcessor::FillConcurrentModuleRequests()
+{
+    for (auto annotation : function_.metadata->GetAnnotations()) {
+        if (annotation.GetName() != CONCURRENT_MODULE_REQUEST_ANN_RECORD_TYPE_DESCRIPTOR) {
+            continue;
+        }
+        for (auto &elem : annotation.GetElements()) {
+            function_.concurrent_module_requests.emplace_back(elem.GetValue()->GetAsScalar()->GetValue<uint32_t>());
+        }
+    }
+    function_.metadata->DeleteAnnotationByName(CONCURRENT_MODULE_REQUEST_ANN_RECORD_TYPE_DESCRIPTOR);
 }
 
 } // namespace panda::abc2program

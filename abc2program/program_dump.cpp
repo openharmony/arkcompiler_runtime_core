@@ -230,9 +230,11 @@ void PandasmProgramDumper::DumpFunction(std::ostream &os, const pandasm::Functio
 
 void PandasmProgramDumper::DumpFunctionAnnotations(std::ostream &os, const pandasm::Function &function) const
 {
-    log::Unimplemented(__PRETTY_FUNCTION__);
+    for (auto &annotation : function.metadata->GetAnnotations()) {
+        DumpAnnotationData(os, annotation);
+    }
+    os << DUMP_CONTENT_SINGLE_ENDL;
 }
-
 
 void PandasmProgramDumper::DumpFunctionHead(std::ostream &os, const pandasm::Function &function) const
 {

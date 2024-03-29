@@ -34,6 +34,11 @@ constexpr std::string_view ANY_TYPE_NAME = "any";
 constexpr std::string_view ES_TYPE_ANNOTATION_NAME = "_ESTypeAnnotation";
 constexpr std::string_view ES_MODULE_RECORD = "_ESModuleRecord";
 constexpr std::string_view MODULE_RECORD_IDX = "moduleRecordIdx";
+constexpr std::string_view CONCURRENT_MODULE_REQUEST_ANN_RECORD_TYPE_DESCRIPTOR =
+    "L_ESConcurrentModuleRequestsAnnotation;";
+constexpr std::string_view CONCURRENT_MODULE_REQUEST_RECORD_NAME = "_ESConcurrentModuleRequestsAnnotation";
+constexpr std::string_view SLOT_NUMBER_ANN_RECORD_TYPE_DESCRIPTOR = "L_ESSlotNumberAnnotation;";
+constexpr std::string_view SLOT_NUMBER_RECORD_NAME = "_ESSlotNumberAnnotation";
 constexpr std::string_view DOT = ".";
 
 // attribute constant

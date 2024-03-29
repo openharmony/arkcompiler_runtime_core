@@ -59,6 +59,25 @@ public:
 };
 
 /**
+ * @tc.name: abc2program_hello_world_test_func_annotation
+ * @tc.desc: get program function annotation.
+ * @tc.type: FUNC
+ * @tc.require: #I9AQ3K
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_func_annotation, TestSize.Level1)
+{
+    constexpr uint32_t NUM_OF_HELLO_WORLD_TEST_UT_HELLO_WORLD_SLOTS_NUM = 2;
+    constexpr uint32_t NUM_OF_HELLO_WORLD_TEST_UT_FOO_SLOTS_NUM = 24;
+    constexpr uint32_t NUM_OF_HELLO_WORLD_TEST_UT_GOO_SLOTS_NUM = 0;
+    EXPECT_TRUE(hello_world_function_->GetSlotsNum() == NUM_OF_HELLO_WORLD_TEST_UT_HELLO_WORLD_SLOTS_NUM);
+    EXPECT_TRUE(foo_function_->GetSlotsNum() == NUM_OF_HELLO_WORLD_TEST_UT_FOO_SLOTS_NUM);
+    EXPECT_TRUE(goo_function_->GetSlotsNum() == NUM_OF_HELLO_WORLD_TEST_UT_GOO_SLOTS_NUM);
+    EXPECT_TRUE(hello_world_function_->concurrent_module_requests.empty());
+    EXPECT_TRUE(foo_function_->concurrent_module_requests.empty());
+    EXPECT_TRUE(goo_function_->concurrent_module_requests.empty());
+}
+
+/**
  * @tc.name: abc2program_hello_world_test_field_metadata
  * @tc.desc: get program field metadata.
  * @tc.type: FUNC
@@ -185,6 +204,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part1, Te
 {
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
+    constexpr size_t NUM_OF_ARGS_FOR_FOO_METHOD = 3;
     EXPECT_TRUE(function.params.size() == NUM_OF_ARGS_FOR_FOO_METHOD);
     for (size_t i = 0; i < function.params.size(); ++i) {
         EXPECT_TRUE(function.params[i].type.GetPandasmName() == ANY_TYPE_NAME);
@@ -373,6 +393,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, Te
     EXPECT_TRUE(ins76.label == "");
     EXPECT_FALSE(ins76.set_label);
     // check catch blocks
+    constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS = 3;
     EXPECT_TRUE(function.catch_blocks.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS);
     // catch_blocks[0]
     const pandasm::Function::CatchBlock &pa_catch_block0 = function.catch_blocks[0];
@@ -404,6 +425,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
 {
     const pandasm::Function &function = *goo_function_;
     size_t regs_num = function.regs_num;
+    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 2;
     EXPECT_TRUE(function.name == FUNC_NAME_GOO);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_GOO_METHOD_INS);
     // check ins[0]

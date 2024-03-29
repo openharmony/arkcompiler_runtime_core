@@ -27,14 +27,6 @@ namespace panda::abc2program {
 
 constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 77;
 
-constexpr uint32_t NUM_OF_CODE_TEST_UT_FUNC_MAIN_0_METHOD_INS = 18;
-
-constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 2;
-
-constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS = 3;
-
-constexpr size_t NUM_OF_ARGS_FOR_FOO_METHOD = 3;
-
 constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".HelloWorld";
 
 constexpr std::string_view FUNC_NAME_FOO = ".foo";
