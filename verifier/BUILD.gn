@@ -34,6 +34,11 @@ ohos_executable("ark_verifier") {
 
   deps = [ "$ark_root/libpandafile:libarkfile_static" ]
 
+  external_deps = []
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
   configs = arkverifier_configs
 
   public_configs = [ ":arkverifier_public_config" ]
