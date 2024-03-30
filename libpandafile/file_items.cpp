@@ -29,7 +29,7 @@ bool IsDynamicLanguage(panda::panda_file::SourceLang lang)
     return lang == panda::panda_file::SourceLang::ECMASCRIPT;
 }
 
-std::optional<panda::panda_file::SourceLang> LanguageFromString(std::string_view lang)
+std::optional<panda::panda_file::SourceLang> LanguageFromString(const std::string_view &lang)
 {
     if (lang == "ECMAScript") {
         return panda::panda_file::SourceLang::ECMASCRIPT;

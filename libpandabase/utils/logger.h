@@ -145,15 +145,15 @@ public:
 
     static void Initialize(const base_options::Options &options);
 
-    static void InitializeFileLogging(const std::string &log_file, Level level, ComponentMask component_mask,
+    static void InitializeFileLogging(const std::string &log_file, Level level, const ComponentMask &component_mask,
                                       bool is_fast_logging = false);
 #ifdef ENABLE_HILOG
-    static void InitializeHiLogging(Level level, ComponentMask component_mask);
+    static void InitializeHiLogging(Level level, const ComponentMask &component_mask);
 #endif
 
-    static void InitializeStdLogging(Level level, ComponentMask component_mask);
+    static void InitializeStdLogging(Level level, const ComponentMask &component_mask);
 
-    static void InitializeDummyLogging(Level level = Level::DEBUG, ComponentMask component_mask = 0);
+    static void InitializeDummyLogging(Level level = Level::DEBUG, const ComponentMask &component_mask = 0);
 
     static void Destroy();
 
@@ -251,7 +251,7 @@ public:
         logger->component_mask_.set(component);
     }
 
-    static void EnableComponent(ComponentMask component)
+    static void EnableComponent(const ComponentMask &component)
     {
         ASSERT(IsInitialized());
         logger->component_mask_ |= component;
@@ -289,7 +289,7 @@ public:
     }
 
 protected:
-    Logger(Level level, ComponentMask component_mask)
+    Logger(Level level, const ComponentMask &component_mask)
         : level_(level),
           component_mask_(component_mask)
 #ifndef NDEBUG
@@ -300,7 +300,7 @@ protected:
     {
     }
 
-    Logger(Level level, ComponentMask component_mask, [[maybe_unused]] Level nested_allowed_level)
+    Logger(Level level, const ComponentMask &component_mask, [[maybe_unused]] Level nested_allowed_level)
         : level_(level),
           component_mask_(component_mask)
 #ifndef NDEBUG
@@ -347,7 +347,7 @@ static Logger::ComponentMask LoggerComponentMaskAll = ~Logger::ComponentMask();
 
 class FileLogger : public Logger {
 protected:
-    FileLogger(std::ofstream &&stream, Level level, ComponentMask component_mask)
+    FileLogger(std::ofstream &&stream, Level level, const ComponentMask &component_mask)
         : Logger(level, component_mask), stream_(std::forward<std::ofstream>(stream))
     {
     }
@@ -369,7 +369,7 @@ private:
 class FastFileLogger : public Logger {
 protected:
     // Uses advanced Logger constructor, so we tell to suppress all nested messages below WARNING severity
-    FastFileLogger(std::ofstream &&stream, Level level, ComponentMask component_mask)
+    FastFileLogger(std::ofstream &&stream, Level level, const ComponentMask &component_mask)
         : Logger(level, component_mask, Logger::Level::WARNING), stream_(std::forward<std::ofstream>(stream))
     {
     }
@@ -391,7 +391,7 @@ private:
 #ifdef ENABLE_HILOG
 class HiLogger : public Logger {
 protected:
-    HiLogger(Level level, ComponentMask component_mask) : Logger(level, component_mask) {}
+    HiLogger(Level level, const ComponentMask &component_mask) : Logger(level, component_mask) {}
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
     void SyncOutputResource() override {}
@@ -410,7 +410,7 @@ private:
 
 class StderrLogger : public Logger {
 private:
-    StderrLogger(Level level, ComponentMask component_mask) : Logger(level, component_mask) {}
+    StderrLogger(Level level, const ComponentMask &component_mask) : Logger(level, component_mask) {}
 
     void LogLineInternal(Level level, Component component, const std::string &str) override;
     void SyncOutputResource() override {}
@@ -425,7 +425,7 @@ private:
 
 class DummyLogger : public Logger {
 private:
-    DummyLogger(Level level, ComponentMask component_mask) : Logger(level, component_mask) {}
+    DummyLogger(Level level, const ComponentMask &component_mask) : Logger(level, component_mask) {}
 
     void LogLineInternal([[maybe_unused]] Level level, [[maybe_unused]] Component component,
                          [[maybe_unused]] const std::string &str) override

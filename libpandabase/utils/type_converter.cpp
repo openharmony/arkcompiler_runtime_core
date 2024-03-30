@@ -26,9 +26,9 @@
 
 namespace panda::helpers {
 
-ValueUnit::ValueUnit(uint64_t value, std::string_view literal) : value_(value), literal_(literal) {}
+ValueUnit::ValueUnit(uint64_t value, const std::string_view &literal) : value_(value), literal_(literal) {}
 
-ValueUnit::ValueUnit(double value, std::string_view literal) : value_(value), literal_(literal) {}
+ValueUnit::ValueUnit(double value, const std::string_view &literal) : value_(value), literal_(literal) {}
 
 void ValueUnit::SetPrecision(size_t precision)
 {
