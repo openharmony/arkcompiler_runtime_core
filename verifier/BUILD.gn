@@ -33,8 +33,8 @@ ohos_executable("ark_verifier") {
   sources = arkverifier_sources
 
   deps = [ "$ark_root/libpandafile:libarkfile_static_verifier" ]
+  external_deps = [ "zlib:libz" ]
 
-  external_deps = []
   if (enable_hilog) {
     external_deps += [ "hilog:libhilog" ]
   }
@@ -57,7 +57,7 @@ ohos_shared_library("libarkverifier") {
   sources = libarkverifier_sources
 
   deps = [ "$ark_root/libpandafile:libarkfile_static_verifier" ]
-  external_deps = []
+  external_deps = [ "zlib:libz" ]
   if (enable_hilog) {
     external_deps += [ "hilog:libhilog" ]
   }

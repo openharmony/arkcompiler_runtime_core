@@ -17,8 +17,8 @@
 #define LIBZIPARCHIVE_ZIP_ARCHIVE_H
 
 #include <cstdint>
-#include "unzip.h"
-#include "zip.h"
+#include <contrib/minizip/unzip.h>
+#include <contrib/minizip/zip.h>
 
 namespace panda {
 
