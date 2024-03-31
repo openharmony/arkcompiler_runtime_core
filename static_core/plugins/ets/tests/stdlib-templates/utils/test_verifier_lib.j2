@@ -27,7 +27,7 @@ function compareStringBuilderWithString(actual : StringBuilder, expected : Strin
   }
 {%- endif %}
 
-{%- if item.result_nature == "primitive" or item.method_return_type == "UTF_16_CodePoint" or item.method_return_type == "char" or item.method_return_type == "byte" or item.method_return_type == "short" or item.method_return_type == "int" or item.method_return_type == "long" or item.method_return_type == "boolean" or item.method_return_type == "number" %}
+{%- if item.result_nature == "primitive" or item.method_return_type == "UTF_16_CodePoint" or item.method_return_type == "char" or item.method_return_type == "byte" or item.method_return_type == "short" or item.method_return_type == "int" or item.method_return_type == "long" or item.method_return_type == "boolean" or item.method_return_type == "number" or item.method_return_type == "bigint" %}
 {%- if item.method_return_type != "void" %}
 function comparePrimitiveValue(actual : {{.item.method_return_type}}, expected : {{.item.method_return_type}}) : boolean {
 {%- else %}

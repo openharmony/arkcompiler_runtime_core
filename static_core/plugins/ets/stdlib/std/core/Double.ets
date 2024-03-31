@@ -59,7 +59,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     public constructor(value: BigInt) {
-        this.value = Double.parseInt(value.toString())
+        this.value = value.doubleValue()
     }
 
     /**

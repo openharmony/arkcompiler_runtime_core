@@ -106,12 +106,11 @@ export final class BigInt {
         // let b = val & 0x7fffffffffffffff
         // let c = a + b
         // return new BigInt(c)
-        return new BigInt(0 as number)
+        return new BigInt(val)
     }
 
     internal getULong(): long {
-        const s = "BigInt.getULong: not implemented"
-        return 0
+        return BigInt.asUintN(64, this).longValue()
     }
 
     internal getLong(): long {
@@ -193,17 +192,54 @@ export final class BigInt {
         return s;
     }
 
+    public toString(radix: double): string {
+        if (this.equals(0n)) {
+            return "0"
+        }
+        const radixInt = radix as int
+        const q = radixInt as number
+        const qBigInt = new BigInt(q)
+        let buff = ""
+        let absolute = this.abs()
+        while (absolute > 0n) {
+            // temporary solution, need to optimize divide-mod operations
+            let tempDiv = new BigInt((new Number(absolute) / q) as int)
+            const mod = absolute - tempDiv * qBigInt
+            const digit = new Number(mod.doubleValue())
+            buff = digit.toString(radixInt).concat(buff)
+            absolute = tempDiv
+        }
+        buff = (this.negative() ? "-" : "") + buff
+        return buff
+    }
+
     public valueOf(): BigInt {
-        // NOTE: return this? Unclear description in js stdlib
-        throw new Error("BigInt.valueOf: not implemented")
+        return this
     }
 
     public static asIntN(bits: long, num: BigInt): BigInt {
-        throw new Error("BigInt.asIntN: not implemented")
+        if (bits == 0) {
+            return 0n
+        }
+        // operatorLeftShift temporary has limitations to 255 on rhs
+        // in this case must be bits <= 255
+        //  please check `operatorLeftShift` implementation
+
+        // 2^(bits-1)
+        const half = 1n << new BigInt(bits-1)
+        // 2^(bits)-1 = 2 * half - 1
+        let mask = 2n * half - 1n
+        const masked = num & mask
+        // maxRepresentable = 2^(bits) = mask + 1
+        // if masked > 2^(bits-1) : masked - maxRepresentableValue : masked
+        return masked >= half ? masked - (mask + 1n): masked
     }
 
     public static asUintN(bits: long, num: BigInt): BigInt {
-        throw new Error("BigInt.asUintN: not implemented")
+        // operatorLeftShift temporary has limitations to 255 on rhs
+        // in this case must be bits <= 255
+        //  please check `operatorLeftShift` implementation
+        return num & ((1n << (new BigInt(bits))) - 1n)
     }
 
     public negative(): boolean {
@@ -643,27 +679,24 @@ export final class BigInt {
         if (this.positive() && other.positive()) {
             const l = this.asBytes();
             const r = other.asBytes();
-            if (l.size() > r.size()) {
-                return true;
-            }
 
-            if (l.size() < r.size()) {
-                return false;
-            }
+            const ls = l.size()
+            const rs = r.size()
+            const maxSize = ls > rs ? ls : rs
 
-            if ((l.size() == 0) || (r.size() == 0)) {
-                return false;
-            }
+            // if |X| = |Y| we need check that forall xi>yi
+            // if |X| < |Y| or |Y| < |X| we can add zeros to the smallest of the vectors
+            // and reduce to the case when the vector lengths are the same
 
-            for (let i = l.size() - 1; i >= 0; i--) {
-                let left_byte = l.at(i);
-                let right_byte = r.at(i);
+            for (let i = maxSize - 1; i >= 0; i--) {
+                let left_byte = i < ls ? l.at(i) : 0;
+                let right_byte = i < rs ? r.at(i) : 0;
                 if (left_byte == right_byte) {
                     continue;
                 }
-
                 return left_byte > right_byte;
             }
+            // in this case forall i: xi=yi => numbers is equals
 
             return false;
         }
@@ -671,21 +704,14 @@ export final class BigInt {
         if (this.negative() && other.negative()) {
             let l = BigInt.from2sCompliment(this.asBytes());
             let r = BigInt.from2sCompliment(other.asBytes());
-            if (l.size() > r.size()) {
-                return false;
-            }
 
-            if (l.size() < r.size()) {
-                return true;
-            }
+            const ls = l.size()
+            const rs = r.size()
+            const maxSize = ls > rs ? ls : rs
 
-            if ((l.size() == 0) || (r.size() == 0)) {
-                return false;
-            }
-
-            for (let i = l.size() - 1; i >= 0; i--) {
-                let left_byte = l.at(i);
-                let right_byte = r.at(i);
+            for (let i = maxSize - 1; i >= 0; i--) {
+                let left_byte = i < ls ? l.at(i) : 0;
+                let right_byte = i < rs ? r.at(i) : 0;
                 if (left_byte == right_byte) {
                     continue;
                 }
@@ -1141,4 +1167,28 @@ export final class BigInt {
 
         return result;
     }
+
+    /**
+     * Returns the value of an object as a double
+     *
+     * @returns object's value
+     */
+    public doubleValue(): double {
+        let buff = 0 as number
+        const bytes = this.abs().bytes
+        for (let i = 0; i < bytes.size(); ++i) {
+            buff += (bytes.at(i) as double) * Math.pow(256, i)
+        }
+        return this.negative() ? -buff : buff
+    }
+
+    /**
+     * Returns the value of an object as a long
+     *
+     * @returns object's value
+     */
+    public longValue(): long {
+        return this.doubleValue() as long
+    }
+
 }
