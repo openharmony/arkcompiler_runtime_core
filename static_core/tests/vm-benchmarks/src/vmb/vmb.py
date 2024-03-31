@@ -39,6 +39,7 @@ logging.Logger.trace = log_trace  # type: ignore
 
 
 def main() -> None:
+    """Entry point for all the commands."""
     args = Args()
     lvl = dict(zip(LOG_LEVELS,
                    (logging.FATAL,
@@ -64,11 +65,10 @@ def main() -> None:
         return
 
     if args.command == Command.LIST:
-        # TODO: plugins extra
         vmb_root = Path(__file__).parent.resolve()
         for p in ('hooks', 'langs', 'platforms', 'tools'):
-            print(f'=== {p} ===')
-            for f in vmb_root.joinpath('plugins', p).glob('*.py'):
+            print(f'\n=== {p} ===')
+            for f in sorted(vmb_root.joinpath('plugins', p).glob('*.py')):
                 print(f" - {f.with_suffix('').name}")
         return
 
@@ -76,23 +76,23 @@ def main() -> None:
         report_main(args)
         return
 
-    if args.command == Command.RUN:
-        VmbRunner(args).run(PlatformBase.search_units(args.paths))
-        return
-
     if args.command == Command.GEN:
         generate_main(args)
         return
 
+    runner = VmbRunner(args)
     if args.command == Command.ALL:
-        runner = VmbRunner(args)
         # if there is no override, use all langs, exposed by platform
         if not args.langs:
             args.langs = runner.platform.langs
         bench_units = generate_main(args)
-        bench_units, ext_info, timer = runner.run(bench_units)
-        if bench_units:
-            report_main(args, bus=bench_units, ext_info=ext_info, timer=timer)
+    else:
+        bench_units = PlatformBase.search_units(args.paths)
+
+    bus, ext_info, timer = runner.run(bench_units)
+
+    if bus:
+        report_main(args, bus=bus, ext_info=ext_info, timer=timer)
 
 
 if __name__ == '__main__':

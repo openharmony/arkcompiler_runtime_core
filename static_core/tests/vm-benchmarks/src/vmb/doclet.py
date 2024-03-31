@@ -73,12 +73,6 @@ class Doclet(StringEnum):
     IMPORT = "Import"
     TAGS = "Tags"
     BUGS = "Bugs"
-    # Unused
-    # TEARDOWN = "Teardown"
-    # GENERATOR = "Generator"
-    # BINARY_RESOURCE = "BinaryResource"
-    # TEXT_RESOURCE = "TextResource"
-    # RANK = "Rank"
 
     @staticmethod
     def exclusive_doclets() -> Iterable[Doclet]:
@@ -164,6 +158,7 @@ class DocletParser(LineParser):
         return ''
 
     def parse_bench_overrides(self, line: str) -> Optional[argparse.Namespace]:
+        """Parse @Benchmark options."""
         overrides = None
         if line:
             overrides, unknown = \
@@ -171,6 +166,65 @@ class DocletParser(LineParser):
             if unknown:
                 raise ValueError(f'Unknown arg to @Benchmark: {unknown}')
         return overrides
+
+    def process_state(self, benchmarks: List[NameVal]) -> None:
+        self.skip_empty()
+        class_name = self.lang.parse_state(self.current)
+        if not class_name:
+            raise ValueError('Bench class declaration not found!')
+        self.state = BenchClass(name=class_name, tags=self.__pending_tags,
+                                bugs=self.__pending_bugs,
+                                imports=self.__pending_imports)
+        self.__pending_tags, self.__pending_bugs = [], []
+        self.__pending_imports = []
+        # check if there are overrides for whole class
+        for _, value in benchmarks:
+            self.state.bench_args = self.parse_bench_overrides(value)
+
+    def process_benchmark(self, value: str, returns: List[NameVal]) -> None:
+        self.skip_empty()
+        f = self.lang.parse_func(self.current)
+        if not f:
+            raise ValueError('Bench func declaration not found!')
+        overrides = self.parse_bench_overrides(value)
+        ret_type = f[1]
+        if returns:
+            typ = self.get_rettype(returns[0].value)
+            if typ:
+                ret_type = typ
+        self.ensure_state().benches.append(
+            BenchFunc(name=f[0], return_type=ret_type, args=overrides,
+                      tags=self.__pending_tags, bugs=self.__pending_bugs))
+        self.__pending_tags, self.__pending_bugs = [], []
+
+    def process_param(self, param_values: str) -> None:
+        self.skip_empty()
+        p = self.lang.parse_param(self.current)
+        if not p:
+            raise ValueError('Param declaration not found!')
+        self.ensure_state().params[p[0]] = \
+            split_params(self.ensure_value(param_values))
+
+    def process_setup(self) -> None:
+        self.skip_empty()
+        f = self.lang.parse_func(self.current)
+        if not f:
+            raise ValueError('Setup func declaration not found!')
+        self.ensure_state().setup = f[0]
+
+    def process_tag(self, value: str, states: List[NameVal]) -> None:
+        self.__pending_tags += split_params(value)
+        if self.state and states:
+            # only for @State + @Tags
+            self.state.tags += self.__pending_tags
+            self.__pending_tags = []
+
+    def process_bug(self, value: str, states: List[NameVal]) -> None:
+        self.__pending_bugs += split_params(value)
+        if self.state and states:
+            # only for @State + @Bugs
+            self.state.bugs += self.__pending_bugs
+            self.__pending_bugs = []
 
     def parse_comment(self, comment: str) -> None:
         """Process all the @Stuff in multiline comment.
@@ -185,85 +239,32 @@ class DocletParser(LineParser):
         def filter_doclets(t: Doclet) -> List[NameVal]:
             return list(filter(lambda x: x.name == t.value, doclets))
 
+        states = filter_doclets(Doclet.STATE)[:1]
+        benchmarks = filter_doclets(Doclet.BENCHMARK)[:1]
         for _, value in filter_doclets(Doclet.TAGS):
-            self.__pending_tags += split_params(value)
-            if self.state and filter_doclets(Doclet.STATE):
-                # only for @State + @Tags
-                self.state.tags += self.__pending_tags
-                self.__pending_tags = []
-
+            self.process_tag(value, states)
         for _, value in filter_doclets(Doclet.BUGS):
-            self.__pending_bugs += split_params(value)
-            if self.state and filter_doclets(Doclet.STATE):
-                # only for @State + @Bugs
-                self.state.bugs += self.__pending_bugs
-                self.__pending_bugs = []
-
+            self.process_bug(value, states)
         for _, value in filter_doclets(Doclet.IMPORT):
             if self.state:
                 self.state.imports.append(value)
             else:
                 self.__pending_imports.append(value)
-
-        for _ in filter_doclets(Doclet.STATE)[:1]:
-            self.skip_empty()
-            class_name = self.lang.parse_state(self.current)
-            if not class_name:
-                raise ValueError('Bench class declaration not found!')
-            self.state = BenchClass(
-                name=class_name,
-                tags=self.__pending_tags,
-                bugs=self.__pending_bugs,
-                imports=self.__pending_imports
-            )
-            self.__pending_tags = []
-            self.__pending_bugs = []
-            self.__pending_imports = []
-            # check if there are overrides for whole class
-            for _, value in filter_doclets(Doclet.BENCHMARK)[:1]:
-                self.state.bench_args = self.parse_bench_overrides(value)
+        for _ in states:
+            self.process_state(benchmarks)
             return
-
         for _, param_values in filter_doclets(Doclet.PARAM)[:1]:
-            self.skip_empty()
-            p = self.lang.parse_param(self.current)
-            if not p:
-                raise ValueError('Param declaration not found!')
-            self.ensure_state().params[p[0]] = \
-                split_params(self.ensure_value(param_values))
+            self.process_param(param_values)
             return
-
         for _ in filter_doclets(Doclet.SETUP)[:1]:
-            self.skip_empty()
-            f = self.lang.parse_func(self.current)
-            if not f:
-                raise ValueError('Setup func declaration not found!')
-            self.ensure_state().setup = f[0]
+            self.process_setup()
             return
-
-        for _, value in filter_doclets(Doclet.BENCHMARK)[:1]:
-            self.skip_empty()
-            f = self.lang.parse_func(self.current)
-            if not f:
-                raise ValueError('Bench func declaration not found!')
-            overrides = self.parse_bench_overrides(value)
-            ret_type = f[1]
-            returns = filter_doclets(Doclet.RETURNS)
-            if returns:
-                typ = self.get_rettype(returns[0].value)
-                if typ:
-                    ret_type = typ
-            self.ensure_state().benches.append(
-                BenchFunc(name=f[0],
-                          return_type=ret_type,
-                          args=overrides,
-                          tags=self.__pending_tags,
-                          bugs=self.__pending_bugs))
-            self.__pending_tags = []
-            self.__pending_bugs = []
+        for _, value in benchmarks:
+            self.process_benchmark(value, filter_doclets(Doclet.RETURNS))
             return
 
     def parse(self) -> DocletParser:
+        """Search and parse doclet comments."""
         comment = ''
         try:
             while True:
@@ -272,13 +273,12 @@ class DocletParser(LineParser):
                         re.search(self.re_comment_open, self.current):
                     comment += "\n"
                     continue
-                if comment:
-                    if re.search(self.re_comment_close, self.current):
-                        self.parse_comment(comment)
-                        comment = ''
-                        continue
-                    if '@' in self.current:
-                        comment += "\n" + self.current
+                if comment and re.search(self.re_comment_close, self.current):
+                    self.parse_comment(comment)
+                    comment = ''
+                    continue
+                if comment and '@' in self.current:
+                    comment += "\n" + self.current
         except IndexError:
             pass
         return self
@@ -342,7 +342,7 @@ class TemplateVars:  # pylint: disable=invalid-name
             tags = set(parsed.tags + b.tags)  # @State::@Tags + @Bench::@Tags
             if tags_filter and not set.intersection(tags, tags_filter):
                 continue
-            # if no params => fixtures = [()]
+            # if no params fixtures will be [()]
             fix_id = 0
             for f in fixtures:
                 tp = cls(src, parsed.name)
@@ -359,10 +359,10 @@ class TemplateVars:  # pylint: disable=invalid-name
                 tp.BENCH_NAME = f'{parsed.name}_{b.name}'
                 if tp.FIX_ID > 0:
                     tp.BENCH_NAME = f'{tp.BENCH_NAME}_{tp.FIX_ID}'
-                if tests_filter:
-                    if not any((x in tp.BENCH_NAME) for x in tests_filter):
-                        fix_id += 1
-                        continue
+                if tests_filter and \
+                        not any((x in tp.BENCH_NAME) for x in tests_filter):
+                    fix_id += 1
+                    continue
                 tp.STATE_SETUP = f'bench.{parsed.setup}();' \
                     if parsed.setup else ''
                 tp.TAGS = tags
@@ -375,6 +375,7 @@ class TemplateVars:  # pylint: disable=invalid-name
                 fix_id += 1
 
     def set_measure_overrides(self, *overrides) -> None:
+        """Override all measurement options."""
         for ovr in overrides:
             if not ovr:
                 continue

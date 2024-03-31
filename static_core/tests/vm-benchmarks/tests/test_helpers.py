@@ -80,15 +80,14 @@ def test_jsonable() -> None:
     assert a.z.value == 4
 
 
+@dataclass
+class C(Jsonable):
+    m: int
+    n: Optional[int]
+
+
 def test_json_loads() -> None:
-
-    @dataclass
-    class C(Jsonable):
-        m: int
-        n: Optional[int]
-
     obj = json.loads('{"n": 1, "m":2}')
     assert C(**obj).n == 1
-
     obj = json.loads('{"n": null, "m":2}')
     assert C(**obj).n is None

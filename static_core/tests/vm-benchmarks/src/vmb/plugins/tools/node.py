@@ -23,12 +23,12 @@ class Tool(ToolBase):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.node = ToolBase.get_cmd_path('node', 'NODEJS')
+        self.node = ToolBase.get_cmd_path('node', 'NODE')
         self.options = ''
 
     @property
     def name(self) -> str:
-        return 'Node JS'
+        return 'Node'
 
     @property
     def version(self) -> str:

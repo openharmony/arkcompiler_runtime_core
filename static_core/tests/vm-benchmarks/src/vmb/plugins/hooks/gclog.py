@@ -56,7 +56,7 @@ class Hook(HookBase):
                 raise RuntimeError(f'GC: no device path for "{bu.name}"')
             if self.x_sh is None:
                 raise RuntimeError('Remote shell has not been set!')
-            self.x_sh.pull(bu.device_path / gclog_name, gclog)
+            self.x_sh.pull(bu.device_path.joinpath(gclog_name), gclog)
         if not gclog.is_file():
             raise RuntimeError(f'GC: log missed "{gclog}"')
         if not bu.run_out:

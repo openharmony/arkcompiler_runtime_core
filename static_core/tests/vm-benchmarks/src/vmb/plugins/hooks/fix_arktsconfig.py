@@ -22,6 +22,7 @@ from pathlib import Path
 from string import Template
 from vmb.platform import PlatformBase
 from vmb.hook import HookBase
+from vmb.helpers import create_file
 
 log = logging.getLogger('vmb')
 CFG_TEMPLATE = '''{
@@ -71,12 +72,12 @@ class Hook(HookBase):
                 t = f.read()
                 j = json.loads(t)
             old_root = j.get('compilerOptions', {}).get('baseUrl', 'failed')
-            with open(config, 'w', encoding="utf-8") as f:
+            with create_file(config) as f:
                 f.write(t.replace(old_root, str(ark_root.resolve())))
             return
         log.warning('%s does not exist! Creating it "manually"!', config)
         config.parent.mkdir(parents=True, exist_ok=True)
-        with open(config, 'w', encoding="utf-8") as f:
+        with create_file(config) as f:
             f.write(
                 Template(CFG_TEMPLATE).substitute(
                     ROOT=str(ark_root.resolve())))

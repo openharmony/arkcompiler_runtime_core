@@ -79,7 +79,7 @@ class ShellResult:
                 self.tm = int(tmp[0]) * 60 + float(str(tmp[1]) + "." + tmp[2])
             self.tm = round(self.tm, 5)
         else:
-            self.tm = 0
+            self.tm = 0.0
         self.tm *= 1e9
         rss_val = re.search(rss_re, self.err)
         if rss_val:
@@ -261,13 +261,16 @@ class ShellDevice(ShellBase):
 
 
 class ShellAdb(ShellDevice):
+    binname = f"a{'d'}b"
+
     def __init__(self,
                  dev_serial: str = '',
                  timeout: Optional[float] = None,
                  tmp_dir: str = '/data/local/tmp/vmb') -> None:
-        super().__init__(f"{os.environ.get('ADB', 'adb')}",
-                         timeout=timeout,
-                         tmp_dir=tmp_dir)
+        super().__init__(
+            f"{os.environ.get(self.binname.upper(), self.binname)}",
+            timeout=timeout,
+            tmp_dir=tmp_dir)
         if dev_serial:
             self._devsh = f'{self._devsh} -s {dev_serial}'
         self.mk_tmp_dir()

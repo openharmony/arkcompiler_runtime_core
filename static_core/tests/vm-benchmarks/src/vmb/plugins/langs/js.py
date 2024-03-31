@@ -23,16 +23,13 @@ from vmb.lang import LangBase
 class Lang(LangBase):
     name = 'ECMAScript'
     short_name = 'js'
-    # function TestArraySort() {
     __re_state = re.compile(
         r'^\s*function\s+'
         r'(?P<class>\w+)\s*\(\s*\)\s*({)?\s*$')
-    # this.testSort = function() {
     # type is fake
     __re_func = re.compile(
         r'^\s*this\.(?P<func>\w+)\s*=\s*'
         r'(?P<type>)function\s*\(\s*\)\s*({)?\s*$')
-    # this.size;
     # fake type
     __re_param = re.compile(
         r'^\s*(?P<type>this)\.(?P<param>\w+)\s*;\s*$')

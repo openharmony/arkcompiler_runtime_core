@@ -16,7 +16,7 @@
 /**
  * @State
  */
-class Sanity {
+class Void {
 
     /**
      * @Param 10

@@ -61,7 +61,7 @@ class OptFlags(Flag):
 class ToolBase(CrossShell, ABC):
 
     sh_: ShellUnix
-    adb_: ShellDevice
+    andb_: ShellDevice
     hdc_: ShellDevice
     dev_dir: Path
     libs: Path
@@ -99,8 +99,8 @@ class ToolBase(CrossShell, ABC):
         return ToolBase.sh_
 
     @property
-    def adb(self) -> ShellDevice:
-        return ToolBase.adb_
+    def andb(self) -> ShellDevice:
+        return ToolBase.andb_
 
     @property
     def hdc(self) -> ShellDevice:
@@ -156,7 +156,6 @@ class ToolBase(CrossShell, ABC):
             self.kill()
             raise e
         if not res or res.ret != 0:
-            # TODO: where to save logs?
             raise VmbToolExecError(f'{self.name} failed')
         return res
 

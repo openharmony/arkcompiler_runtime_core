@@ -26,7 +26,7 @@ log = logging.getLogger('vmb')
 
 
 class Hook(HookBase):
-    """Change 'print()' -> 'console.log()' for NodeJS."""
+    """Change 'print()' -> 'console.log()' for Node."""
 
     def __init__(self, args: Args) -> None:
         super().__init__(args)

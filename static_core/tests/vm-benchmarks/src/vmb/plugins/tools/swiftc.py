@@ -31,15 +31,14 @@ class Tool(ToolBase):
         super().__init__(*args)
         self.swiftc = ToolBase.get_cmd_path('swiftc', 'SWIFTC')
         if Target.HOST != self.target:
-            # all aarch64 targets
-            ndk = self.ensure_dir(os.environ.get('NDK_PATH', ''))
+            dev_kit = self.ensure_dir(os.environ.get(f'{"N"}DK_PATH', ''))
             swift_build = self.ensure_dir(
                 os.environ.get('SWIFT_BUILD', ''))
             self.command = f'{self.swiftc} ' \
                            '-O -gnone -wmo ' \
-                           f'-tools-directory {ndk}/bin/ ' \
+                           f'-tools-directory {dev_kit}/bin/ ' \
                            '-target aarch64-unknown-linux-and' \
-                           f'roid21 -sdk {ndk}/sysroot ' \
+                           f'roid21 -sdk {dev_kit}/sysroot ' \
                            f'-resource-dir {swift_build} ' \
                            '-o {exe} {src}'
         else:

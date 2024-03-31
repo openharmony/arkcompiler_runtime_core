@@ -17,16 +17,16 @@
 
 import logging
 from vmb.target import Target
-from vmb.plugins.platforms.d8_device import Platform as D8_device
+from vmb.plugins.platforms.v_8_device import Platform as V_8_device
 
 log = logging.getLogger('vmb')
 
 
-class Platform(D8_device):
+class Platform(V_8_device):
 
     @property
     def name(self) -> str:
-        return 'D8 engine on OHOS device'
+        return 'V_8 engine on OHOS device'
 
     @property
     def target(self) -> Target:

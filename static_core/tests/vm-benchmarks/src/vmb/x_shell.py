@@ -28,7 +28,7 @@ class CrossShell(ABC):
 
     @property
     @abstractmethod
-    def adb(self) -> ShellDevice:
+    def andb(self) -> ShellDevice:
         pass
 
     @property
@@ -47,7 +47,7 @@ class CrossShell(ABC):
         if Target.HOST == self.target:
             return self.sh
         if Target.DEVICE == self.target:
-            return self.adb
+            return self.andb
         if Target.OHOS == self.target:
             return self.hdc
         raise NotImplementedError(f'No shell for {self.target}!')

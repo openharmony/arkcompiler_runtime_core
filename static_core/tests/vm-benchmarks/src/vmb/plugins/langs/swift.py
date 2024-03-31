@@ -26,17 +26,10 @@ class Lang(LangBase):
         r'^\s*(export)?\s*'
         r'class\s+(?P<class>\w+)\s*'
         r'({)?\s*$')
-    # func test() {
-    # func test() throws -> Int {
-    # func test() async throws -> Int {
     __re_func = re.compile(
         r'^\s*func\s+(?P<func>\w+)'
         r'\(\s*\)'
         r'\s*(async)?\s*(throws)?\s*(?P<type>->\s*\w+)?\s*({)?\s*$')
-    # var interlaced = false
-    # var frameRate = 0.0
-    # var name: String?
-    # var n = 0
     __re_param = re.compile(
         r'^\s*var\s*(?P<param>\w+)\s*'
         r'(:|\=)?\s*(?P<type>\w+)(\?)?\s*$')

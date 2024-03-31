@@ -22,35 +22,37 @@ from vmb.target import Target
 
 class Tool(ToolBase):
 
+    binname = f'd{8}'
+
     def __init__(self, *args):
         super().__init__(*args)
         opts = self.custom
         if OptFlags.INT in self.flags:
             opts += ' --no-opt --jitless --use-ic --no-expose_wasm '
         if self.target == Target.HOST:
-            d8 = ToolBase.get_cmd_path('d8', 'D8')
-            self.d8 = f'{d8} {opts}'
+            binpath = ToolBase.get_cmd_path(self.binname, 'V_8')
+            self.d_8 = f'{binpath} {opts}'
         elif self.target == Target.DEVICE:
-            self.d8 = f'{self.dev_dir}/d8/d8 {opts}'
+            self.d_8 = f'{self.dev_dir}/v_8/{self.binname} {opts}'
         elif self.target == Target.OHOS:
-            self.d8 = 'LD_LIBRARY_PATH=/data/local/and' \
-                      f'roid {self.dev_dir}/d8/d8 {opts}'
+            self.d_8 = 'LD_LIBRARY_PATH=/data/local/and' \
+                      f'roid {self.dev_dir}/v_8/{self.binname} {opts}'
         else:
             raise NotImplementedError(f'Not supported "{self.target}"!')
 
     @property
     def name(self) -> str:
-        return 'D8 JavaScript Engine'
+        return 'V_8 JavaScript Engine'
 
     @property
     def version(self) -> str:
         return self.x_run(
-            f'echo "quit();"|{self.d8}').grep(r'version\s*([0-9\.]+)')
+            f'echo "quit();"|{self.d_8}').grep(r'version\s*([0-9\.]+)')
 
     def exec(self, bu: BenchUnit) -> None:
         mjs = self.x_src(bu, '.mjs')
-        res = self.x_run(f'{self.d8} {mjs}')
+        res = self.x_run(f'{self.d_8} {mjs}')
         bu.parse_run_output(res)
 
     def kill(self) -> None:
-        self.x_sh.run('pkill d8')
+        self.x_sh.run(f'pkill {self.binname}')

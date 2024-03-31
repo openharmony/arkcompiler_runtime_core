@@ -1,6 +1,6 @@
 # VM Benchmarks
 
-VMB is a tool for running benchmarks for variety VMs, platforms and languages.
+VMB is a tool for running benchmarks for variety Virtual Machines, platforms and languages.
 
 ## Quick start
 
@@ -9,10 +9,10 @@ The only requirement is python3 (3.7+), no additional modules needed.
 #### Option 1: Using wrapper script
 
 ```shell
-# Run all js and ts examples on NodeJS (needs node and tsc):
+# Run all js and ts examples on Node (needs node and tsc):
 ./run-vmb.sh all -p node_host `pwd`/examples/benchmarks
 
-# Run all only js examples on NodeJS (needs node):
+# Run all only js examples on Node (needs node installed):
 ./run-vmb.sh all -l js -p node_host `pwd`/examples/benchmarks
 
 # See all options explained:
@@ -86,7 +86,7 @@ F.e. `vmb gen -l ets,swift,ts,js ./examples/benchmarks`
 will generate benches for all 4 languages in examples.
 
 Then provided to `all` command `--langs` will override langs, supported by platform.
-F.e. `vmb all -l js -p d8_host ./tests` will skip `ts` (typescript)
+F.e. `vmb all -l js -p v_8_host ./tests` will skip `ts` (typescript)
 
 Source files (doclets) could be overriden
 by `--src-langs` option to `all` or `run` command.
@@ -100,7 +100,7 @@ Defaults are:
 | `arkts_*`     | `ets`      | `*.ets`, `*.ts` |
 | `ark_js_vm_*` | `ts`       | `*.ts`          |
 | `swift_*`     | `swift`    | `*.swift`       |
-| `d8_*`        | `ts`, `js` | `*.ts`, `*.js`  |
+| `v_8_*`       | `ts`, `js` | `*.ts`, `*.js`  |
 | `node_*`      | `ts`, `js` | `*.ts`, `*.js`  |
 
 ## Selecting and filtering tests:
@@ -113,12 +113,13 @@ as path to doclets: `vmb all -p x ./test1/test1.js ./more-tests/ ./even-more`
 - Any positional argument to `run` command would be treated
 as path to generated tests: `vmb run -p x ./generated`
 
-## Controlling run options:
+## Benchmark's measurement options:
 * `-wi` (`--warmup-iters`) controls the number of warmup iterations, default is 2.
 * `-mi` (`--measure-iters`) controls the number of measurement iterations, default is 3.
 * `-it` (`--iter-time`) controls the duration of iterations in seconds, deafult is 1.
 * `-wt` (`--warmup-time`) controls the duration of warmup iterations in seconds, deafault is 1.
-* `-gc` (`--sys-gc-pause`) Non-negative value forces GC (twice) and <value> milliseconds sleep before each iteration (GC finish can't be guaranteed on all VMs), default is -1 (no forced GC).
+* `-gc` (`--sys-gc-pause`) Non-negative value forces GC (twice) and <value> milliseconds sleep before each iteration (GC finish can't be guaranteed on all VM's), default is -1 (no forced GC).
+* `-fi` (`--fast-iters`) Number of 'fast' iterations (no warmup, no tuning cycles). Benchmark will run this number of iterations, reagardless of time elapsed.
 
 ## Controlling log:
 There are several log levels wich could be set via `--log-level` option.

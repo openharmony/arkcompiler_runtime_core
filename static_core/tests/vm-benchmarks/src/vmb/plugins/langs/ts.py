@@ -25,19 +25,16 @@ from vmb.lang import LangBase
 class Lang(LangBase):
     name = 'TypeScript'
     short_name = 'ts'
-    # [export] class BenchFoo [{]
     __re_state = re.compile(
         r'^\s*(export)?\s*'
         r'class\s+(?P<class>\w+)\s*'
         r'({)?\s*$')
-    # [public] testFoo(): type [throws] [{]
     __re_func = re.compile(
         r'^\s*(public)?\s+(?P<func>\w+)\s*'
         r'\(\s*\)\s*:\s*(?P<type>\w+)\s*(throws)?\s*({)?\s*$')
     __re_func_void = re.compile(
         r'^\s*(public)?\s+(?P<func>\w+)\s*'
         r'\(\s*\)\s*(throws)?\s*({)?\s*$')
-    # stringSize: number;
     __re_param = re.compile(
         r'^\s*(?P<param>\w+)\s*'
         r':\s*(?P<type>\w+)\s*(;)?\s*$')

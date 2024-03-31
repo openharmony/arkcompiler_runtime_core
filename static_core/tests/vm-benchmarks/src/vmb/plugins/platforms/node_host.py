@@ -43,7 +43,7 @@ class Platform(PlatformBase):
 
     @property
     def name(self) -> str:
-        return 'NodeJS on host'
+        return 'Node on host'
 
     @property
     def target(self) -> Target:

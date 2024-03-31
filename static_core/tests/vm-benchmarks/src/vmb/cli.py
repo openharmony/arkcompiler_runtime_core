@@ -27,6 +27,17 @@ LOG_LEVELS = ('fatal', 'pass', 'error', 'warn', 'info', 'debug', 'trace')
 log = logging.getLogger('vmb')
 
 
+class Command(StringEnum):
+    """VMB commands enum."""
+
+    GEN = 'gen'
+    RUN = 'run'
+    REPORT = 'report'
+    ALL = 'all'
+    VERSION = 'version'
+    LIST = 'list'
+
+
 def comma_separated_list(arg_val: str) -> Set[str]:
     if not arg_val:
         return set()
@@ -34,7 +45,7 @@ def comma_separated_list(arg_val: str) -> Set[str]:
 
 
 def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
-    # These args should be processed in @Benchmarks too
+    """Add options wich should be processed in @Benchmarks too."""
     parser.add_argument('-wi', '--warmup-iters', default=None, type=int,
                         help='Number of warmup iterations')
     parser.add_argument('-mi', '--measure-iters', default=None, type=int,
@@ -50,15 +61,85 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
                         'and wait <val> ms before iteration')
 
 
-class Command(StringEnum):
-    """VMB commands enum."""
+def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
+    parser.add_argument('-l', '--langs',
+                        type=comma_separated_list,
+                        default=set(),
+                        required=(command == Command.GEN),
+                        help='Comma-separated list of lang plugins')
+    parser.add_argument('-o', '--outdir', default='generated', type=str,
+                        help='Dir for generated benches')
+    parser.add_argument('-T', '--tags',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Filter by tag (comma-separated list)')
+    parser.add_argument('-t', '--tests',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Filter by name (comma-separated list)')
+    parser.add_argument('-L', '--src-langs',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Override src file extentions '
+                             '(comma-separated list)')
 
-    GEN = 'gen'
-    RUN = 'run'
-    REPORT = 'report'
-    ALL = 'all'
-    VERSION = 'version'
-    LIST = 'list'
+
+def add_run_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('-p', '--platform', type=str,
+                        required=True,
+                        help='Platform plugin name')
+    parser.add_argument('-m', '--mode', type=str,
+                        default='default',
+                        choices=ToolMode.getall(),
+                        help='Run VM mode')
+    parser.add_argument('-n', '--name', type=str,
+                        default='', help='Description of run')
+    parser.add_argument('--timeout', default=None, type=float,
+                        help='Timeout (seconds)')
+    parser.add_argument('--device', type=str,
+                        default='', help='Device ID (serial)')
+    parser.add_argument('--device-dir', type=str,
+                        default='/data/local/tmp/vmb',
+                        help='Base dir on device (%(default)s)')
+    parser.add_argument('--hooks', type=str, default='',
+                        help='Comma-separated list of hook plugins')
+    parser.add_argument('-A', '--aot-skip-libs', action='store_true',
+                        help='Skip AOT compilation of stdlib')
+    parser.add_argument('-g', '--enable-gc-logs', action='store_true',
+                        help='Runs benchmark with GC logs enabled')
+    parser.add_argument('--dry-run', action='store_true',
+                        help='Generate and compile, no execution')
+    parser.add_argument('--report-json', default='', type=str,
+                        metavar='FILE_NAME',
+                        help='Save json report as FILE_NAME')
+    parser.add_argument('--report-json-compact', action='store_true',
+                        help='Json file without indentation')
+    parser.add_argument('--report-csv', default='', type=str,
+                        metavar='FILE_NAME',
+                        help='Save csv report as FILE_NAME')
+    parser.add_argument('--exclude-list', default='', type=str,
+                        metavar='EXCLUDE_LIST',
+                        help='Path to exclude list')
+    parser.add_argument('--cpumask', default='', type=str,
+                        help='Use cores mask. F.e. 11110000 = low cores')
+
+
+def add_report_opts(parser: argparse.ArgumentParser) -> None:
+    """Add options specific to vmb report."""
+    parser.add_argument('--full', action='store_true',
+                        help='Produce full report')
+    parser.add_argument('--json', default='', type=str,
+                        help='Save out as JSON')
+    parser.add_argument('--aot-stats-json', default='', type=str,
+                        help='File path to save aot stats comparison')
+    parser.add_argument('--aot-passes-json', default='', type=str,
+                        help='File path to save aot passes comparison')
+    parser.add_argument('--compare', action='store_true',
+                        help='Compare 2 reports')
+    parser.add_argument('--flaky-list', default='', type=str,
+                        help='Exclude list file')
+    parser.add_argument('--tolerance', default=0.5, type=float,
+                        help='Percentage of tolerance in comparison')
 
 
 class _ArgumentParser(argparse.ArgumentParser):
@@ -73,7 +154,6 @@ class _ArgumentParser(argparse.ArgumentParser):
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog=self.__epilog()
         )
-
         # Options common for all commands
         self.add_argument('paths', nargs='*', help='Dirs or files')
         self.add_argument('--extra-plugins', default=None,
@@ -85,96 +165,25 @@ class _ArgumentParser(argparse.ArgumentParser):
                           help='Abort run on first error')
         self.add_argument('--no-color', action='store_true',
                           help='Disable color logging')
-
         # Generator-specific options
         if command in (Command.GEN, Command.ALL):
-            self.add_argument('-l', '--langs',
-                              type=comma_separated_list,
-                              default=set(),
-                              required=(command == Command.GEN),
-                              help='Comma-separated list of lang plugins')
-            self.add_argument('-o', '--outdir', default='generated', type=str,
-                              help='Dir for generated benches')
-            self.add_argument('-T', '--tags',
-                              default=set(),
-                              type=comma_separated_list,
-                              help='Filter by tag (comma-separated list)')
-            self.add_argument('-t', '--tests',
-                              default=set(),
-                              type=comma_separated_list,
-                              help='Filter by name (comma-separated list)')
-            self.add_argument('-L', '--src-langs',
-                              default=set(),
-                              type=comma_separated_list,
-                              help='Override src file extentions '
-                              '(comma-separated list)')
+            add_gen_opts(self, command)
             add_measurement_opts(self)
-
         # Runner-specific options
         if command in (Command.RUN, Command.ALL):
-            self.add_argument('-p', '--platform', type=str,
-                              required=True,
-                              help='Platform plugin name')
-            self.add_argument('-m', '--mode', type=str,
-                              default='default',
-                              choices=ToolMode.getall(),
-                              help='Run VM mode')
-            self.add_argument('-n', '--name', type=str,
-                              default='', help='Description of run')
-            self.add_argument('--timeout', default=None, type=float,
-                              help='Timeout (seconds)')
-            self.add_argument('--device', type=str,
-                              default='', help='Device ID (serial)')
-            self.add_argument('--device-dir', type=str,
-                              default='/data/local/tmp/vmb',
-                              help='Base dir on device (%(default)s)')
-            self.add_argument('--hooks', type=str, default='',
-                              help='Comma-separated list of hook plugins')
-            self.add_argument('-A', '--aot-skip-libs', action='store_true',
-                              help='Skip AOT compilation of stdlib')
-            self.add_argument('-g', '--enable-gc-logs', action='store_true',
-                              help='Runs benchmark with GC logs enabled')
-            self.add_argument('--dry-run', action='store_true',
-                              help='Generate and compile, no execution')
-            self.add_argument('--report-json', default='', type=str,
-                              metavar='FILE_NAME',
-                              help='Save json report as FILE_NAME')
-            self.add_argument('--report-json-compact', action='store_true',
-                              help='Json file without indentation')
-            self.add_argument('--report-csv', default='', type=str,
-                              metavar='FILE_NAME',
-                              help='Save csv report as FILE_NAME')
-            self.add_argument('--exclude-list', default='', type=str,
-                              metavar='EXCLUDE_LIST',
-                              help='Path to exclude list')
-            self.add_argument('--cpumask', default='', type=str,
-                              help='Use cores mask. F.e. 11110000 = low cores')
+            add_run_opts(self)
             # add 'custom-option' for some 'well-known' tools.
             # names hardcoded, because platforms and tools lists
             # will be available only after parsing args.
             for tool in ('ark', 'ark_js_vm', 'es2panda', 'es2abc',
-                         'paoc', 'node', 'swiftc', 'tsc', 'd8'):
+                         'paoc', 'node', 'swiftc', 'tsc', 'v_8'):
                 self.add_argument(
                     f'--{tool}-custom-option', default=[],
                     type=str, action='append',
                     help=f'Additional options for {tool}. '
                          '(Possibly several opts in one command)')
-        # Report-specific options
         if command in (Command.REPORT,):
-            self.add_argument('--full', action='store_true',
-                              help='Produce full report')
-            self.add_argument('--json', default='', type=str,
-                              help='Save out as JSON')
-            self.add_argument('--aot-stats-json', default='', type=str,
-                              help='File path to save aot stats comparison')
-            self.add_argument('--aot-passes-json', default='', type=str,
-                              help='File path to save aot passes comparison')
-            self.add_argument('--compare', action='store_true',
-                              help='Compare 2 reports')
-            self.add_argument('--flaky-list', default='', type=str,
-                              help='Exclude list file')
-            self.add_argument('--tolerance', default=0.5, type=float,
-                              help='Percentage of tolerance in comparison')
+            add_report_opts(self)
 
 
 class Args(argparse.Namespace):

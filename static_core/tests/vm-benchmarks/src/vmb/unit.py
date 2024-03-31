@@ -37,7 +37,6 @@ class BenchUnit:
     2) results of building and running this bench
     """
 
-    # TODO: parse any unit (ns/op) and save
     __result_patt = re.compile(
         r'.*: ([\w-]+) (-?\d+(\.\d+)?([eE][+\-]\d+)?)')
     __warmup_patt = re.compile(
@@ -55,9 +54,9 @@ class BenchUnit:
                  tags: Optional[Iterable[str]] = None,
                  bugs: Optional[Iterable[str]] = None) -> None:
         self.path: Path = Path(path)
-        self.__src: Optional[Path] = self.path / src if src else None
+        self.__src: Optional[Path] = self.path.joinpath(src) if src else None
         self.__libs: List[Path] = [
-            self.path / lib for lib in libs] if libs else []
+            self.path.joinpath(lib) for lib in libs] if libs else []
         self.name: str = remove_prefix(self.path.name, UNIT_PREFIX)
         self.device_path: Optional[Path] = None
         self.result: TestResult = TestResult(
@@ -120,7 +119,7 @@ class BenchUnit:
         if files:
             return files[0]
         # fallback: return unexistent
-        return self.path / f'{BENCH_PREFIX}{self.name}'
+        return self.path.joinpath(f'{BENCH_PREFIX}{self.name}')
 
     def libs(self, *ext) -> Iterable[Path]:
         if self.__libs:
@@ -133,9 +132,9 @@ class BenchUnit:
     def src_device(self, *ext) -> Path:
         if self.device_path is None:
             raise RuntimeError(f'Device path not set for {self.name}')
-        return self.device_path / self.src(*ext).name
+        return self.device_path.joinpath(self.src(*ext).name)
 
     def libs_device(self, *ext) -> Iterable[Path]:
         if self.device_path is None:
             raise RuntimeError(f'Device path not set for {self.name}')
-        return [self.device_path / lib.name for lib in self.libs(*ext)]
+        return [self.device_path.joinpath(lib.name) for lib in self.libs(*ext)]

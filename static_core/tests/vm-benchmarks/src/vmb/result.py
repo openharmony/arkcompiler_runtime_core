@@ -48,7 +48,7 @@ class BuildResult(Jsonable):
 
     compiler: str
     size: int = 0
-    time: float = 0
+    time: float = 0.0
     rss: int = 0
     error: Optional[str] = None  # not used yet
 
@@ -56,8 +56,8 @@ class BuildResult(Jsonable):
 @dataclass
 class GCStats(Jsonable):
     gc_avg_bytes_reclaimed: int = 0
-    gc_avg_interval_time: float = 0
-    gc_avg_time: float = 0
+    gc_avg_interval_time: float = 0.0
+    gc_avg_time: float = 0.0
     gc_max_time: int = 0
     gc_median_time: int = 0
     gc_memory_total_heap: int = 0
@@ -68,11 +68,11 @@ class GCStats(Jsonable):
     gc_pct50_time: int = 0
     gc_pct95_time: int = 0
     gc_pct99_time: int = 0
-    gc_std_time: float = 0
+    gc_std_time: float = 0.0
     gc_total_bytes_reclaimed: int = 0
-    gc_total_time: float = 0
-    gc_total_time_sum: float = 0
-    gc_vm_time: float = 0
+    gc_total_time: float = 0.0
+    gc_total_time_sum: float = 0.0
+    gc_vm_time: float = 0.0
     time_unit: str = 'ns'
 
 
@@ -97,7 +97,7 @@ class AOTStats(Jsonable):
 class AOTStatsLib(Jsonable):
     aot_stats: AOTStats = field(default_factory=AOTStats)
     size: int = 0
-    time: float = 0
+    time: float = 0.0
 
     @classmethod
     def from_obj(cls, **kwargs):
@@ -125,7 +125,7 @@ class RunResult(Jsonable):
     INFO - Benchmark result: DemoBench_Demo 95.58749625083489
     """
 
-    avg_time: float = 0
+    avg_time: float = 0.0
     iterations: List[float] = field(default_factory=list)
     warmup: List[float] = field(default_factory=list)
     unit: str = 'ns/op'
@@ -146,7 +146,7 @@ class TestResult(Jsonable):
     execution_forks: List[RunResult] = field(default_factory=list)
     mem_bytes: int = 0
     gc_stats: Optional[GCStats] = None
-    # this field seem unused: aot_stats: Optional[AOTStats] = None
+    # this field seem unused: aot_stats
     # no-exportable:
     _status: BUStatus = BUStatus.NOT_RUN
     _ext_time: float = 0.0
@@ -235,7 +235,6 @@ class MachineMeta(Jsonable):
 
 @dataclass
 class RunReport(Jsonable):
-    # compilers: List[Dict[str, str]] = field(default_factory=list)
     ext_info: ExtInfo = field(default_factory=dict)
     format_version: str = '2'
     machine: MachineMeta = field(default_factory=MachineMeta)

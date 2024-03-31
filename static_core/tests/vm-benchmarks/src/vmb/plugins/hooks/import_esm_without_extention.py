@@ -24,7 +24,7 @@ log = logging.getLogger('vmb')
 
 
 class Hook(HookBase):
-    """Create symlink libX -> libX.mjs for NodeJS."""
+    """Create symlink libX -> libX.mjs for Node."""
 
     @property
     def name(self) -> str:

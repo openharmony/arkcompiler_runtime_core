@@ -130,8 +130,7 @@ class ReporterTests(unittest.TestCase):
             'fw_end_time': 1500
         }
         # Ark uses VM timestamps in the log messages, therefore:
-        # gc_vm_time = fw_end_time - fw_start_time
-        # pauses*.timestamp = pauses*.timestamp - min(ev[0].timestamp, fw_start_time)
+        # gc_vm_time equals fw_end_time minus fw_start_time
         gc_vm_time = adjust_time['fw_end_time'] - adjust_time['fw_start_time']
         delta = events[0].timestamp
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
@@ -235,7 +234,7 @@ class ReporterTests(unittest.TestCase):
             )
         ]
         # A rare case when GC  triggered after VM prints timestamp
-        # gc_vm_time = last gc duration
+        # gc_vm_time equals last gc duration
         gc_vm_time = 100
         report = ArkGcLogReporter().generate_report(events)
         self.assertEqual(gc_vm_time, report['gc_vm_time'])
@@ -283,7 +282,7 @@ class ReporterTests(unittest.TestCase):
             'fw_end_time': 1500
         }
         # A rare case when GC  triggered after VM prints timestamp
-        # gc_vm_time = late gc ts + late gc duration
+        # gc_vm_time equals late gc ts plus late gc duration
         gc_vm_time = events[1].timestamp - events[0].timestamp + events[1].gc_time
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
         self.assertEqual(gc_vm_time, report['gc_vm_time'])
@@ -331,7 +330,7 @@ class ReporterTests(unittest.TestCase):
             'fw_end_time': 1500
         }
         # A rare case when GC  triggered after VM prints timestamp
-        # gc_vm_time = late gc ts + late gc duration
+        # gc_vm_time equals late gc ts plus late gc duration
         gc_vm_time = events[1].timestamp - events[0].timestamp + 100
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
         self.assertEqual(gc_vm_time, report['gc_vm_time'])
@@ -379,7 +378,7 @@ class ReporterTests(unittest.TestCase):
             'fw_end_time': 1500
         }
         # A rare case when GC triggered after VM prints timestamp
-        # gc_vm_time = late gc ts + late gc duration
+        # gc_vm_time equals late gc ts plus late gc duration
         gc_vm_time = events[1].timestamp - adjust_time['fw_start_time'] + events[1].gc_time
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
         self.assertEqual(gc_vm_time, report['gc_vm_time'])

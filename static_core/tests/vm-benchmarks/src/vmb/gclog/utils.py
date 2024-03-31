@@ -53,8 +53,3 @@ def ark_datetime_to_nanos(ts: str) -> int:
     dt, ms = ts.split('.')
     x = datetime.strptime(str(today.year) + ' ' + dt, '%Y %b %d %H:%M:%S')
     return (int(x.timestamp() * 1000) + int(ms)) * 1000 * 1000
-
-
-def art_datetime_to_nanos(ts: str) -> int:
-    dt, ms = ts.split('.')
-    return (int(dt) * 1000 + int(ms)) * 1000 * 1000

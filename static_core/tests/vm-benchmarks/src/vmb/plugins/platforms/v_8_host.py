@@ -16,46 +16,27 @@
 #
 
 import logging
-from typing import List
+from vmb.plugins.platforms.v_8_device import Platform as V_8_device
 from vmb.unit import BenchUnit
-from vmb.platform import PlatformBase
 from vmb.target import Target
-from vmb.cli import Args, OptFlags
+from vmb.cli import OptFlags
 
 log = logging.getLogger('vmb')
 
 
-class Platform(PlatformBase):
-
-    def __init__(self, args: Args) -> None:
-        super().__init__(args)
-        self.tsc = self.tools['tsc'] if 'tsc' in self.required_tools else None
-        self.d8 = self.tools['d8']
+class Platform(V_8_device):
 
     def run_unit(self, bu: BenchUnit) -> None:
         if self.tsc:
             self.tsc(bu)
         if OptFlags.DRY_RUN in self.flags:
             return
-        self.push_unit(bu)
-        self.d8(bu)
+        self.v_8(bu)
 
     @property
     def name(self) -> str:
-        return 'D8 engine on HOS device'
+        return 'V_8 engine on host'
 
     @property
     def target(self) -> Target:
-        return Target.DEVICE
-
-    @property
-    def required_tools(self) -> List[str]:
-        return ['tsc', 'd8'] if 'ts' in self.langs else ['d8']
-
-    @property
-    def required_hooks(self) -> List[str]:
-        return ['fix_print_call']
-
-    @property
-    def langs(self) -> List[str]:
-        return self.args_langs if self.args_langs else ['ts', 'js']
+        return Target.HOST

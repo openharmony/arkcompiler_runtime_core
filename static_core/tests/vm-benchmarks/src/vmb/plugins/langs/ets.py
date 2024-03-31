@@ -24,18 +24,14 @@ class Lang(LangBase):
 
     name = 'ArkTS'
     short_name = 'ets'
-    # [export] class BenchFoo [{]
     __re_state = re.compile(
         r'^\s*(export)?\s*'
         r'class\s+(?P<class>\w+)\s*'
         r'({)?\s*$')
-    # [public] testFoo(): type [throws] [{]
     __re_func = re.compile(
         r'^\s*(public\s+)?(override\s+)?'
         r'(?P<func>\w+)\s*'
         r'\(\s*\)\s*:?\s*(?P<type>\w+)?\s*(throws)?\s*({)?\s*$')
-    # stringSize: number;
-    # size: int = 1024;
     __re_param = re.compile(
         r'^\s*(public\s+)?(static\s+)?'
         r'(?P<param>\w+)\s*'

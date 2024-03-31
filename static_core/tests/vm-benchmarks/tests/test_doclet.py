@@ -163,7 +163,6 @@ ETS_STATE_COMMENT = '''
 class XXX {
 '''
 
-
 ETS_PARAM_INIT = '''
 /**
  * @State
@@ -175,6 +174,24 @@ class X {
  */
   size: int = 1024;
 '''
+
+ETS_MEASURE_OVERRIDES = '''
+    /**
+    * @State
+    * @Benchmark -mi 33 -wi 44 -it 55 -wt 66
+    */
+    class X {
+    /**
+    * @Benchmark -mi 1 -wi 2 -wt 4 -fi 5 -gc 6
+    */
+    public one(): int {
+    }
+    /**
+    * @Benchmark
+    */
+    public two(): bool {
+    }
+    '''
 
 ets_mod = get_plugin('langs', 'ets')
 
@@ -285,28 +302,10 @@ def test_param_init():
     assert parser.state is not None
 
 
-# TODO: tests with complicated overrides from cmdline
 def test_measure_overrides():
-    src = '''
-    /**
-    * @State
-    * @Benchmark -mi 33 -wi 44 -it 55 -wt 66
-    */
-    class X {
-    /**
-    * @Benchmark -mi 1 -wi 2 -wt 4 -fi 5 -gc 6
-    */
-    public one(): int {
-    }
-    /**
-    * @Benchmark
-    */
-    public two(): bool {
-    }
-    '''
     ets = ets_mod.Lang()
     assert ets is not None
-    parser = DocletParser.create(src, ets).parse()
+    parser = DocletParser.create(ETS_MEASURE_OVERRIDES, ets).parse()
     assert parser.state is not None
     assert 'X' == parser.state.name
     b = parser.state.benches
@@ -364,7 +363,6 @@ def test_measure_overrides():
         assert var2.GC == -1
 
 
-# TODO: check 'free' @Tag (should appy to all state?)
 def test_tags():
     src = '''
     /**

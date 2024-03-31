@@ -40,7 +40,8 @@ class ArkGcLogParser(AbstractLogParser):
                     break
             else:
                 le = self.fallback.parse(line)
-                assert le is not None
+                if le is None:
+                    raise ValueError(f'Invalid GC log line: {line}')
                 yield le
 
     def reporter(self) -> Optional[LogReporter]:

@@ -3,8 +3,7 @@
 VMB = ./run-vmb.sh
 
 clean:
-	rm -rf generated 
-	rm -rf dist
+	rm -rf dist generated src/generated examples/benchmarks/generated
 	rm -rf .pytest_cache
 	rm -rf src/vmb/.pytest_cache
 	rm -rf src/vmb.egg-info

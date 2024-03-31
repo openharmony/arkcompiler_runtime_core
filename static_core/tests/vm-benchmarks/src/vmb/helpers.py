@@ -34,10 +34,9 @@ log = logging.getLogger('vmb')
 
 
 def ensure_env_var(var: str) -> str:
+    """Ensure that env variable is set."""
     val = os.environ.get(var, '')
-    if not val:
-        log.fatal('Please set "%s" env var!', var)
-        sys.exit(1)
+    die(not val, 'Please set "%s" env var!', var)
     return val
 
 
@@ -63,6 +62,7 @@ def rnd_string(size=8):
 
 
 def pad_left(s: str, ln: int, limit: int = 80) -> str:
+    """Reurn string left-padded with spaces."""
     ln = min(ln, limit)
     return f'{s[:ln]:<{ln}}'
 
@@ -73,10 +73,12 @@ def remove_prefix(s: str, prefix: str) -> str:
 
 
 def split_params(line: str) -> List[str]:
+    """Split comma-separated string into list."""
     return [t.strip() for t in line.split(',') if t.strip()]
 
 
 def norm_list(it: Optional[Iterable[str]]) -> List[str]:
+    """Remove duplicates and cast to lower case."""
     return sorted([t.lower() for t in set(it)]) if it else []
 
 
@@ -124,18 +126,18 @@ def get_plugin(plug_type: str,
     """Return plugin."""
     # try extra dir first
     if extra:
-        if not extra.is_dir():
-            log.fatal('Extra plugins dir "%s" does not exist!', extra)
-            sys.exit(1)
-        py = extra / plug_type / f'{plug_name}.py'
+        die(extra.is_dir(), 'Extra plugins dir "%s" does not exist!', extra)
+        py = extra.joinpath(plug_type, f'{plug_name}.py')
         if py.is_file():
             return import_module(plug_name, str(py))
     # load default in case there is no extra one
-    py = Path(__file__).parent.resolve() / \
-        'plugins' / plug_type / f'{plug_name}.py'
+    py = Path(__file__).parent.resolve().joinpath(
+        'plugins', plug_type, f'{plug_name}.py')
     if py.is_file():
         return import_module(plug_name, str(py))
-    log.fatal('No such plugin: "%s" (%s)', plug_name, py)
+    log.fatal('No such plugin: "%s"\n'
+              'Searching here: "%s"\n'
+              'To see available plugins: `vmb list`', plug_name, py)
     sys.exit(1)
 
 
@@ -151,6 +153,8 @@ def get_plugins(plug_type: str,
 
 
 class Timer:
+    """Simple struct for begin-end."""
+
     def __init__(self) -> None:
         self.begin = datetime.now(timezone.utc)
         self.end = self.begin
@@ -215,7 +219,7 @@ class Jsonable:
             indent=indent)
 
     def save(self, json_file: Union[Path, str]) -> None:
-        with open(json_file, 'w', encoding="utf-8") as f:
+        with create_file(json_file) as f:
             f.write(self.js())
 
 
@@ -230,7 +234,7 @@ class ColorFormatter(logging.Formatter):
     yellow = "\x1b[33;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    # orange = "\x1b[33;20m"
+    orange = "\x1b[33;20m"
     bold_blue = "\x1b[34;1m"
     fmt = '%(message)s'
 
@@ -249,3 +253,16 @@ class ColorFormatter(logging.Formatter):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
+
+def create_file(path: Union[str, Path]):
+    """Create file in `safe` manner."""
+    return os.fdopen(
+        os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o664),
+        mode='w', encoding='utf-8')
+
+
+def die(condition: bool, *msg) -> None:
+    if condition:
+        log.fatal(*msg)
+        sys.exit(1)

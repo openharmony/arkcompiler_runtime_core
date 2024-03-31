@@ -16,15 +16,14 @@
 #
 
 from __future__ import annotations
-import sys
 import logging
 from typing import List, Optional, Type  # noqa
 from abc import ABC, abstractmethod
 from pathlib import Path
 from vmb.tool import ToolBase
 from vmb.target import Target
-from vmb.unit import BenchUnit
-from vmb.helpers import get_plugins, get_plugin
+from vmb.unit import BenchUnit, UNIT_PREFIX
+from vmb.helpers import get_plugins, get_plugin, die
 from vmb.cli import Args
 from vmb.shell import ShellUnix, ShellAdb, ShellHdc, ShellDevice
 from vmb.result import ExtInfo
@@ -39,25 +38,25 @@ class PlatformBase(CrossShell, ABC):
 
     def __init__(self, args: Args) -> None:
         self.__sh = ShellUnix(args.timeout)
-        self.__adb = None
+        self.__andb = None
         self.__hdc = None
         self.__dev_dir = Path(args.get('device_dir', '/foo/bar'))
-        self.args_langs = args.langs
+        self.args_langs = args.get('langs', set())
         self.ext_info: ExtInfo = {}
         if self.target == Target.DEVICE:
-            self.__adb = ShellAdb(dev_serial=args.device,
-                                  timeout=args.timeout,
-                                  tmp_dir=args.device_dir)
+            self.__andb = ShellAdb(dev_serial=args.device,
+                                   timeout=args.timeout,
+                                   tmp_dir=args.device_dir)
         if self.target == Target.OHOS:
             self.__hdc = ShellHdc(dev_serial=args.device,
                                   timeout=args.timeout,
                                   tmp_dir=args.device_dir)
         ToolBase.sh_ = self.sh
-        ToolBase.adb_ = self.adb
+        ToolBase.andb_ = self.andb
         ToolBase.hdc_ = self.hdc
         ToolBase.dev_dir = self.dev_dir
         # dir with shared libs (init before the suite)
-        ToolBase.libs = Path(args.get_shared_path()) / 'libs'
+        ToolBase.libs = Path(args.get_shared_path()).joinpath('libs')
         ToolBase.libs.mkdir(parents=True, exist_ok=True)
         # init all the tools
         tool_plugins = get_plugins(
@@ -82,8 +81,7 @@ class PlatformBase(CrossShell, ABC):
                 extra=args.extra_plugins)
             platform = platform_module.Platform(args)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            log.fatal(e)
-            sys.exit(1)
+            die(True, 'Plugin load error: %s', e)
         return platform
 
     @property
@@ -115,9 +113,9 @@ class PlatformBase(CrossShell, ABC):
         return self.__sh
 
     @property
-    def adb(self) -> ShellDevice:
-        if self.__adb is not None:
-            return self.__adb
+    def andb(self) -> ShellDevice:
+        if self.__andb is not None:
+            return self.__andb
         # fake object for host platforms
         return ShellAdb.__new__(ShellAdb)
 
@@ -147,32 +145,35 @@ class PlatformBase(CrossShell, ABC):
             self.device_cleanup(bu)
 
     @staticmethod
-    def search_units(paths, bu_prefix='bu') -> List[BenchUnit]:
+    def search_units(paths: List[Path]) -> List[BenchUnit]:
         """Find bench units."""
         bus = []
-        for d in paths:
+        for bu_path in paths:
+            if not bu_path.exists():
+                log.warning('Requested unexisting path: %s', bu_path)
+                continue
             # if file name provided add it unconditionally
-            if Path(d).is_file():
-                bus.append(BenchUnit(Path(d).parent))
+            if bu_path.is_file():
+                bus.append(BenchUnit(Path(bu_path).parent))
+                continue
             # in case of dir search by file extention
-            elif Path(d).is_dir():
-                for p in Path(d).glob(f'**/{bu_prefix}*'):
-                    if p.is_dir():
-                        bus.append(BenchUnit(p.resolve()))
+            for p in bu_path.glob(f'**/{UNIT_PREFIX}*'):
+                if p.is_dir():
+                    bus.append(BenchUnit(p.resolve()))
         return bus
 
     def push_unit(self, bu: BenchUnit, *ext) -> None:
         """Push bench unit to device."""
         if Target.HOST == self.target:
             return
-        bu.device_path = self.dev_dir / bu.path.name
+        bu.device_path = self.dev_dir.joinpath(bu.path.name)
         self.x_sh.run(f'mkdir -p {bu.device_path}')
         for f in bu.path.glob('*'):
             # skip if suffix filter provided
             if ext and f.suffix not in ext:
                 continue
             p = f.resolve()
-            self.x_sh.push(p, bu.device_path / f.name)
+            self.x_sh.push(p, bu.device_path.joinpath(f.name))
 
     def push_libs(self) -> None:
         if Target.HOST == self.target:
