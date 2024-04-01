@@ -105,7 +105,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.buffer = new ArrayBuffer(this.byteLengthInt)
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.$_set(i, arr.at(i){{numberBigIntUndefToPrimitive}})
+            {%- if element.get('clamped', False) %}
+            this.setUnsafe(i, {{element['name']}}Array.clamp(arr.at(i){{numberBigIntUndefToPrimitive}}))
+            {%- else %}
+            this.setUnsafe(i, arr.$_get(i){{numberBigIntToPrimitive}})
+            {%- endif %}
         }
     }
 
@@ -256,8 +260,12 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
-            for (let i: int = 0; i < this.length as int; ++i) {
-                this.$_set(i, arr.$_get(i as number).{{element['etsType']}}Value())
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                {%- if element.get('clamped', False) %}
+                this.setUnsafe(i, {{element['name']}}Array.clamp(arr.$_get(i).{{element['etsType']}}Value()))
+                {%- else %}
+                this.setUnsafe(i, arr.$_get(i).{{element['etsType']}}Value())
+                {%- endif %}
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -362,9 +370,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns a primitive at index
      */
     public at(index: int): {{element['subsetTypeBoxed']}} | undefined {
-        if ((index == Infinity as int) || (index == -Infinity as int)) {
-            return undefined
-        }
         let k: int;
         if (index >= 0) {
             k = index
@@ -372,7 +377,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             k = this.lengthInt + index
         }
         if (k < 0 || k >= this.lengthInt) {
-            return undefined;
+            return undefined
         }
         {%- if element['subsetType'] == 'BigInt'%}
         return new BigInt(this.getUnsafe(k))
@@ -425,8 +430,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param index index to change
      */
     public $_set(index: int, val: {{element['subsetType']}}): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         {%- if element.get('name') != 'Uint8Clamped' %}
         let v = this.zeroIfInfinity(val)
@@ -455,105 +461,169 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param index index to change
      */
     public $_set(index: int, val: {{element['etsType']}}): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         {%- if element.get('name') != 'Uint8Clamped' %}
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
         {%- else %}
-        this.setUnsafeClamp(index,val)
+        this.setUnsafeClamp(index, val)
         {%- endif %}
     }
 
+
+    {%- if element['etsType'] != 'int' %}
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Assigns val as element on index.
      *
-     * @param insertPos insert index to place copied elements
+     * @param val value to set
      *
-     * @param startPos start index to begin copy from
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val as int)
+    }
+
+        /**
+     * Assigns val as element on index.
      *
-     * @param endPos last index to end copy from, excluded
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        if (index < 0 || index >= this.lengthInt) {
+            throw new RangeError("invalid index")
+        }
+        {%- if element.get('name') != 'Uint8Clamped' %}
+        let v = this.zeroIfInfinity(val as {{element['etsType']}})
+        this.setUnsafeClamp(index, v)
+        {%- else %}
+        this.setUnsafeClamp(index, val as {{element['etsType']}})
+        {%- endif %}
+    }
+    {%- endif %}
+
+    /**
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param target insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number, endPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int, endPos as int)
+    public copyWithin(target: number, start: number, end?: number): {{element['name']}}Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        insertPos = normalizeIndex(insertPos, this.lengthInt)
-        if (insertPos >= this.lengthInt) {
-            return
-        }
-
-        startPos = normalizeIndex(startPos, this.lengthInt)
-        endPos = normalizeIndex(endPos, this.lengthInt)
-
-        if (insertPos + endPos - startPos > this.lengthInt) {
-            throw new RangeError("invalid copy within")
-        }
-
-        for (let i = startPos; i < endPos; i++) {
-            this.setUnsafe(insertPos + i - startPos, this.getUnsafe(i))
-        }
+    public copyWithin(target: int, start: number, end?: number): {{element['name']}}Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of {{element['name']}}Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int)
+    public copyWithin(target: number, start: int, end?: number): {{element['name']}}Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of {{element['name']}}Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.lengthInt)
+    public copyWithin(target: int, start: int, end?: number): {{element['name']}}Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of {{element['name']}}Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param insert insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end: int): {{element['name']}}Array {
+        let toPos = normalizeIndex(target, this.lengthInt)
+        let fromPos = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        let count: int = finalPos - fromPos
+        if (count > (this.lengthInt - toPos)) {
+            count = this.lengthInt - toPos
+        }
+        let direction: int = 1
+        if ((fromPos < toPos) && (toPos < fromPos + count)) {
+            fromPos = fromPos + count - 1
+            toPos   = toPos   + count - 1
+            direction = -1
+        }
+        while (count > 0) {
+            const value = this.getUnsafe(fromPos)
+            this.setUnsafe(toPos, value)
+            fromPos = fromPos + direction
+            toPos = toPos + direction
+            --count
+        }
+        return this
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from begin to end of {{element['name']}}Array.
+     *
+     * @param target insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: number): void {
-        this.copyWithin(insertPos as int)
+    public copyWithin(target: number): {{element['name']}}Array {
+        return this.copyWithin(target as int)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of {{element['name']}}Array.
+     * Makes a copy of internal elements to targetPos from begin to end of {{element['name']}}Array.
+     *
+     * @param insert insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.lengthInt)
+    public copyWithin(target: int): {{element['name']}}Array {
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -575,7 +645,29 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns modified {{element['name']}}Array
      */
-    public fill(value: {{element['subsetType']}}, start: number, end: number): {{element['name']}}Array {
+    public fill(value: {{element['subsetType']}}, start?: number, end?: number): {{element['name']}}Array {
+        return this.fill({{fromElementCompat % 'value'}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
+    public fill(value: {{element['subsetType']}}, start: int, end?: number): {{element['name']}}Array {
+        return this.fill({{fromElementCompat % 'value'}}, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
+    public fill(value: {{element['subsetType']}}, start: int, end: number): {{element['name']}}Array {
         return this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
     }
 
@@ -586,65 +678,126 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns modified {{element['name']}}Array
      */
+    public fill(value: {{element['subsetType']}}, start: number, end: int): {{element['name']}}Array {
+        return this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
+    public fill(value: {{element['subsetType']}}, start: int, end: int): {{element['name']}}Array {
+        return this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
+    public fill(value: {{element['etsType']}}, start?: number, end?: number): {{element['name']}}Array {
+        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
+    public fill(value: {{element['etsType']}}, start: int, end?: number): {{element['name']}}Array {
+        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
+    public fill(value: {{element['etsType']}}, start: int, end: number): {{element['name']}}Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
+    public fill(value: {{element['etsType']}}, start: number, end: int): {{element['name']}}Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the {{element['name']}}Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified {{element['name']}}Array
+     */
     public fill(value: {{element['etsType']}}, start: int, end: int): {{element['name']}}Array {
-        start = normalizeIndex(start, this.lengthInt)
-        end = normalizeIndex(end, this.lengthInt)
+        {%- if element.get('clamped', False) %}
         value = {{element['name']}}Array.clamp(value);
-        for (let i = start; i < end; i++) {
+        {%- endif %}
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
+        return this
     }
 
     /**
-     * Fills the {{element['name']}}Array with specified value
+     * Assigns val as element on index.
      *
-     * @param value new value
+     * @param val value to set
      *
-     * @returns modified {{element['name']}}Array
+     * @param index index to change
      */
-    public fill(value: {{element['subsetType']}}, start: number): {{element['name']}}Array {
-        return this.fill({{fromElementCompat % 'value'}}, start as int)
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['etsType']}}, start: int): {{element['name']}}Array {
-        return this.fill(value, start, this.lengthInt)
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['subsetType']}}): {{element['name']}}Array {
-        return this.fill({{fromElementCompat % 'value'}}, 0, this.lengthInt)
-    }
-
-    /**
-     * Fills the {{element['name']}}Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified {{element['name']}}Array
-     */
-    public fill(value: {{element['etsType']}}): {{element['name']}}Array {
-        return this.fill(value, 0, this.lengthInt)
-    }
-
     public set(insertPos: number, val: {{element['subsetType']}}): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
     }
 
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
     public set(insertPos: int, val: {{element['subsetType']}}): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: number, val: {{element['etsType']}}): void {
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: int, val: {{element['etsType']}}): void {
+        this.$_set(insertPos as int, val)
     }
 
     /**
@@ -967,7 +1120,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: Number, end?: Number): {{element['name']}}Array {
+    public slice(begin?: number, end?: number): {{element['name']}}Array {
         return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1087,7 +1240,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
-    public subarray(begin?: Number, end?: Number): {{element['name']}}Array {
+    public subarray(begin?: number, end?: number): {{element['name']}}Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1856,10 +2009,12 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             if (this.buffer instanceof ArrayBuffer) {
                 for (let i = 0; i < {{element['name']}}Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as ArrayBuffer).set(index + {{element['bytes'] - 1}} - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else if (this.buffer instanceof SharedArrayBuffer) {
                 for (let i = 0; i < {{element['name']}}Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as SharedArrayBuffer).set(index + {{element['bytes'] - 1}} - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else {
                 throw new Error("unexpected type of ArrayBufferLike")

@@ -93,7 +93,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         this.buffer = new ArrayBuffer(this.byteLengthInt)
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.$_set(i, arr.at(i)!.intValue())
+            this.setUnsafe(i, Uint8ClampedArray.clamp(arr.at(i)!.intValue()))
         }
     }
 
@@ -237,8 +237,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
-            for (let i: int = 0; i < this.length as int; ++i) {
-                this.$_set(i, arr.$_get(i as number).intValue())
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, Uint8ClampedArray.clamp(arr.$_get(i).intValue()))
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -322,9 +322,6 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns a primitive at index
      */
     public at(index: int): Number | undefined {
-        if ((index == Infinity as int) || (index == -Infinity as int)) {
-            return undefined
-        }
         let k: int;
         if (index >= 0) {
             k = index
@@ -332,7 +329,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
             k = this.lengthInt + index
         }
         if (k < 0 || k >= this.lengthInt) {
-            return undefined;
+            return undefined
         }
         return new Number(this.getUnsafe(k))
     }
@@ -381,8 +378,9 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         this.setUnsafeClamp(index, val as int)
     }
@@ -406,100 +404,130 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
-        this.setUnsafeClamp(index,val)
+        this.setUnsafeClamp(index, val)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number, endPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int, endPos as int)
+    public copyWithin(target: number, start: number, end?: number): Uint8ClampedArray {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        insertPos = normalizeIndex(insertPos, this.lengthInt)
-        if (insertPos >= this.lengthInt) {
-            return
-        }
-
-        startPos = normalizeIndex(startPos, this.lengthInt)
-        endPos = normalizeIndex(endPos, this.lengthInt)
-
-        if (insertPos + endPos - startPos > this.lengthInt) {
-            throw new RangeError("invalid copy within")
-        }
-
-        for (let i = startPos; i < endPos; i++) {
-            this.setUnsafe(insertPos + i - startPos, this.getUnsafe(i))
-        }
+    public copyWithin(target: int, start: number, end?: number): Uint8ClampedArray {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint8ClampedArray.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int)
+    public copyWithin(target: number, start: int, end?: number): Uint8ClampedArray {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint8ClampedArray.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.lengthInt)
+    public copyWithin(target: int, start: int, end?: number): Uint8ClampedArray {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint8ClampedArray.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param insert insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end: int): Uint8ClampedArray {
+        let toPos = normalizeIndex(target, this.lengthInt)
+        let fromPos = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        let count: int = finalPos - fromPos
+        if (count > (this.lengthInt - toPos)) {
+            count = this.lengthInt - toPos
+        }
+        let direction: int = 1
+        if ((fromPos < toPos) && (toPos < fromPos + count)) {
+            fromPos = fromPos + count - 1
+            toPos   = toPos   + count - 1
+            direction = -1
+        }
+        while (count > 0) {
+            const value = this.getUnsafe(fromPos)
+            this.setUnsafe(toPos, value)
+            fromPos = fromPos + direction
+            toPos = toPos + direction
+            --count
+        }
+        return this
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from begin to end of Uint8ClampedArray.
+     *
+     * @param target insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: number): void {
-        this.copyWithin(insertPos as int)
+    public copyWithin(target: number): Uint8ClampedArray {
+        return this.copyWithin(target as int)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint8ClampedArray.
+     * Makes a copy of internal elements to targetPos from begin to end of Uint8ClampedArray.
+     *
+     * @param insert insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.lengthInt)
+    public copyWithin(target: int): Uint8ClampedArray {
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -521,7 +549,29 @@ export class Uint8ClampedArray implements Iterable<Number> {
      *
      * @returns modified Uint8ClampedArray
      */
-    public fill(value: number, start: number, end: number): Uint8ClampedArray {
+    public fill(value: number, start?: number, end?: number): Uint8ClampedArray {
+        return this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
+    public fill(value: number, start: int, end?: number): Uint8ClampedArray {
+        return this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
+    public fill(value: number, start: int, end: number): Uint8ClampedArray {
         return this.fill(value as int, start as int, end as int)
     }
 
@@ -532,65 +582,124 @@ export class Uint8ClampedArray implements Iterable<Number> {
      *
      * @returns modified Uint8ClampedArray
      */
+    public fill(value: number, start: number, end: int): Uint8ClampedArray {
+        return this.fill(value as int, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
+    public fill(value: number, start: int, end: int): Uint8ClampedArray {
+        return this.fill(value as int, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
+    public fill(value: int, start?: number, end?: number): Uint8ClampedArray {
+        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
+    public fill(value: int, start: int, end?: number): Uint8ClampedArray {
+        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
+    public fill(value: int, start: int, end: number): Uint8ClampedArray {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
+    public fill(value: int, start: number, end: int): Uint8ClampedArray {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8ClampedArray with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8ClampedArray
+     */
     public fill(value: int, start: int, end: int): Uint8ClampedArray {
-        start = normalizeIndex(start, this.lengthInt)
-        end = normalizeIndex(end, this.lengthInt)
         value = Uint8ClampedArray.clamp(value);
-        for (let i = start; i < end; i++) {
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
+        return this
     }
 
     /**
-     * Fills the Uint8ClampedArray with specified value
+     * Assigns val as element on index.
      *
-     * @param value new value
+     * @param val value to set
      *
-     * @returns modified Uint8ClampedArray
+     * @param index index to change
      */
-    public fill(value: number, start: number): Uint8ClampedArray {
-        return this.fill(value as int, start as int)
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: int, start: int): Uint8ClampedArray {
-        return this.fill(value, start, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: number): Uint8ClampedArray {
-        return this.fill(value as int, 0, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint8ClampedArray with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8ClampedArray
-     */
-    public fill(value: int): Uint8ClampedArray {
-        return this.fill(value, 0, this.lengthInt)
-    }
-
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
     }
 
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: number, val: int): void {
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: int, val: int): void {
+        this.$_set(insertPos as int, val)
     }
 
     /**
@@ -903,7 +1012,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: Number, end?: Number): Uint8ClampedArray {
+    public slice(begin?: number, end?: number): Uint8ClampedArray {
         return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1023,7 +1132,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      *
      * @returns new Uint8ClampedArray with the same underlying Buffer
      */
-    public subarray(begin?: Number, end?: Number): Uint8ClampedArray {
+    public subarray(begin?: number, end?: number): Uint8ClampedArray {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -1779,10 +1888,12 @@ export class Uint8ClampedArray implements Iterable<Number> {
             if (this.buffer instanceof ArrayBuffer) {
                 for (let i = 0; i < Uint8ClampedArray.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as ArrayBuffer).set(index + 0 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else if (this.buffer instanceof SharedArrayBuffer) {
                 for (let i = 0; i < Uint8ClampedArray.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as SharedArrayBuffer).set(index + 0 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else {
                 throw new Error("unexpected type of ArrayBufferLike")
@@ -1863,7 +1974,7 @@ export class Uint8Array implements Iterable<Number> {
         this.buffer = new ArrayBuffer(this.byteLengthInt)
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.$_set(i, arr.at(i)!.intValue())
+            this.setUnsafe(i, arr.$_get(i).intValue())
         }
     }
 
@@ -2007,8 +2118,8 @@ export class Uint8Array implements Iterable<Number> {
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
-            for (let i: int = 0; i < this.length as int; ++i) {
-                this.$_set(i, arr.$_get(i as number).intValue())
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).intValue())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -2106,9 +2217,6 @@ export class Uint8Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public at(index: int): Number | undefined {
-        if ((index == Infinity as int) || (index == -Infinity as int)) {
-            return undefined
-        }
         let k: int;
         if (index >= 0) {
             k = index
@@ -2116,7 +2224,7 @@ export class Uint8Array implements Iterable<Number> {
             k = this.lengthInt + index
         }
         if (k < 0 || k >= this.lengthInt) {
-            return undefined;
+            return undefined
         }
         return new Number(this.getUnsafe(k))
     }
@@ -2165,8 +2273,9 @@ export class Uint8Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v as int)
@@ -2191,101 +2300,131 @@ export class Uint8Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(insertPos: number, startPos: number, endPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int, endPos as int)
-    }
-
-    /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
-     *
-     * @param insertPos insert index to place copied elements
-     *
-     * @param startPos start index to begin copy from
-     *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        insertPos = normalizeIndex(insertPos, this.lengthInt)
-        if (insertPos >= this.lengthInt) {
-            return
-        }
-
-        startPos = normalizeIndex(startPos, this.lengthInt)
-        endPos = normalizeIndex(endPos, this.lengthInt)
-
-        if (insertPos + endPos - startPos > this.lengthInt) {
-            throw new RangeError("invalid copy within")
-        }
-
-        for (let i = startPos; i < endPos; i++) {
-            this.setUnsafe(insertPos + i - startPos, this.getUnsafe(i))
-        }
+    public copyWithin(target: number, start: number, end?: number): Uint8Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint8Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int)
+    public copyWithin(target: int, start: number, end?: number): Uint8Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint8Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.lengthInt)
+    public copyWithin(target: number, start: int, end?: number): Uint8Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint8Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param target insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end?: number): Uint8Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param insert insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end: int): Uint8Array {
+        let toPos = normalizeIndex(target, this.lengthInt)
+        let fromPos = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        let count: int = finalPos - fromPos
+        if (count > (this.lengthInt - toPos)) {
+            count = this.lengthInt - toPos
+        }
+        let direction: int = 1
+        if ((fromPos < toPos) && (toPos < fromPos + count)) {
+            fromPos = fromPos + count - 1
+            toPos   = toPos   + count - 1
+            direction = -1
+        }
+        while (count > 0) {
+            const value = this.getUnsafe(fromPos)
+            this.setUnsafe(toPos, value)
+            fromPos = fromPos + direction
+            toPos = toPos + direction
+            --count
+        }
+        return this
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from begin to end of Uint8Array.
+     *
+     * @param target insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: number): void {
-        this.copyWithin(insertPos as int)
+    public copyWithin(target: number): Uint8Array {
+        return this.copyWithin(target as int)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint8Array.
+     * Makes a copy of internal elements to targetPos from begin to end of Uint8Array.
+     *
+     * @param insert insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.lengthInt)
+    public copyWithin(target: int): Uint8Array {
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -2307,7 +2446,29 @@ export class Uint8Array implements Iterable<Number> {
      *
      * @returns modified Uint8Array
      */
-    public fill(value: number, start: number, end: number): Uint8Array {
+    public fill(value: number, start?: number, end?: number): Uint8Array {
+        return this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
+    public fill(value: number, start: int, end?: number): Uint8Array {
+        return this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
+    public fill(value: number, start: int, end: number): Uint8Array {
         return this.fill(value as int, start as int, end as int)
     }
 
@@ -2318,65 +2479,123 @@ export class Uint8Array implements Iterable<Number> {
      *
      * @returns modified Uint8Array
      */
+    public fill(value: number, start: number, end: int): Uint8Array {
+        return this.fill(value as int, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
+    public fill(value: number, start: int, end: int): Uint8Array {
+        return this.fill(value as int, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
+    public fill(value: int, start?: number, end?: number): Uint8Array {
+        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
+    public fill(value: int, start: int, end?: number): Uint8Array {
+        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
+    public fill(value: int, start: int, end: number): Uint8Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
+    public fill(value: int, start: number, end: int): Uint8Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint8Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint8Array
+     */
     public fill(value: int, start: int, end: int): Uint8Array {
-        start = normalizeIndex(start, this.lengthInt)
-        end = normalizeIndex(end, this.lengthInt)
-        value = Uint8Array.clamp(value);
-        for (let i = start; i < end; i++) {
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
+        return this
     }
 
     /**
-     * Fills the Uint8Array with specified value
+     * Assigns val as element on index.
      *
-     * @param value new value
+     * @param val value to set
      *
-     * @returns modified Uint8Array
+     * @param index index to change
      */
-    public fill(value: number, start: number): Uint8Array {
-        return this.fill(value as int, start as int)
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: int, start: int): Uint8Array {
-        return this.fill(value, start, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: number): Uint8Array {
-        return this.fill(value as int, 0, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint8Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint8Array
-     */
-    public fill(value: int): Uint8Array {
-        return this.fill(value, 0, this.lengthInt)
-    }
-
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
     }
 
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: number, val: int): void {
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: int, val: int): void {
+        this.$_set(insertPos as int, val)
     }
 
     /**
@@ -2691,7 +2910,7 @@ export class Uint8Array implements Iterable<Number> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: Number, end?: Number): Uint8Array {
+    public slice(begin?: number, end?: number): Uint8Array {
         return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -2811,7 +3030,7 @@ export class Uint8Array implements Iterable<Number> {
      *
      * @returns new Uint8Array with the same underlying Buffer
      */
-    public subarray(begin?: Number, end?: Number): Uint8Array {
+    public subarray(begin?: number, end?: number): Uint8Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -3561,10 +3780,12 @@ export class Uint8Array implements Iterable<Number> {
             if (this.buffer instanceof ArrayBuffer) {
                 for (let i = 0; i < Uint8Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as ArrayBuffer).set(index + 0 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else if (this.buffer instanceof SharedArrayBuffer) {
                 for (let i = 0; i < Uint8Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as SharedArrayBuffer).set(index + 0 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else {
                 throw new Error("unexpected type of ArrayBufferLike")
@@ -3645,7 +3866,7 @@ export class Uint16Array implements Iterable<Number> {
         this.buffer = new ArrayBuffer(this.byteLengthInt)
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.$_set(i, arr.at(i)!.intValue())
+            this.setUnsafe(i, arr.$_get(i).intValue())
         }
     }
 
@@ -3796,8 +4017,8 @@ export class Uint16Array implements Iterable<Number> {
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
-            for (let i: int = 0; i < this.length as int; ++i) {
-                this.$_set(i, arr.$_get(i as number).intValue())
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).intValue())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -3895,9 +4116,6 @@ export class Uint16Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public at(index: int): Number | undefined {
-        if ((index == Infinity as int) || (index == -Infinity as int)) {
-            return undefined
-        }
         let k: int;
         if (index >= 0) {
             k = index
@@ -3905,7 +4123,7 @@ export class Uint16Array implements Iterable<Number> {
             k = this.lengthInt + index
         }
         if (k < 0 || k >= this.lengthInt) {
-            return undefined;
+            return undefined
         }
         return new Number(this.getUnsafe(k))
     }
@@ -3954,8 +4172,9 @@ export class Uint16Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v as int)
@@ -3980,101 +4199,131 @@ export class Uint16Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
-     *
-     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
-     */
-    public copyWithin(insertPos: number, startPos: number, endPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int, endPos as int)
-    }
-
-    /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
-     *
-     * @param insertPos insert index to place copied elements
-     *
-     * @param startPos start index to begin copy from
-     *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        insertPos = normalizeIndex(insertPos, this.lengthInt)
-        if (insertPos >= this.lengthInt) {
-            return
-        }
-
-        startPos = normalizeIndex(startPos, this.lengthInt)
-        endPos = normalizeIndex(endPos, this.lengthInt)
-
-        if (insertPos + endPos - startPos > this.lengthInt) {
-            throw new RangeError("invalid copy within")
-        }
-
-        for (let i = startPos; i < endPos; i++) {
-            this.setUnsafe(insertPos + i - startPos, this.getUnsafe(i))
-        }
+    public copyWithin(target: number, start: number, end?: number): Uint16Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint16Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int)
+    public copyWithin(target: int, start: number, end?: number): Uint16Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint16Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.lengthInt)
+    public copyWithin(target: number, start: int, end?: number): Uint16Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint16Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param target insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end?: number): Uint16Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param insert insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end: int): Uint16Array {
+        let toPos = normalizeIndex(target, this.lengthInt)
+        let fromPos = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        let count: int = finalPos - fromPos
+        if (count > (this.lengthInt - toPos)) {
+            count = this.lengthInt - toPos
+        }
+        let direction: int = 1
+        if ((fromPos < toPos) && (toPos < fromPos + count)) {
+            fromPos = fromPos + count - 1
+            toPos   = toPos   + count - 1
+            direction = -1
+        }
+        while (count > 0) {
+            const value = this.getUnsafe(fromPos)
+            this.setUnsafe(toPos, value)
+            fromPos = fromPos + direction
+            toPos = toPos + direction
+            --count
+        }
+        return this
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from begin to end of Uint16Array.
+     *
+     * @param target insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: number): void {
-        this.copyWithin(insertPos as int)
+    public copyWithin(target: number): Uint16Array {
+        return this.copyWithin(target as int)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint16Array.
+     * Makes a copy of internal elements to targetPos from begin to end of Uint16Array.
+     *
+     * @param insert insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.lengthInt)
+    public copyWithin(target: int): Uint16Array {
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -4096,7 +4345,29 @@ export class Uint16Array implements Iterable<Number> {
      *
      * @returns modified Uint16Array
      */
-    public fill(value: number, start: number, end: number): Uint16Array {
+    public fill(value: number, start?: number, end?: number): Uint16Array {
+        return this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
+    public fill(value: number, start: int, end?: number): Uint16Array {
+        return this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
+    public fill(value: number, start: int, end: number): Uint16Array {
         return this.fill(value as int, start as int, end as int)
     }
 
@@ -4107,65 +4378,123 @@ export class Uint16Array implements Iterable<Number> {
      *
      * @returns modified Uint16Array
      */
+    public fill(value: number, start: number, end: int): Uint16Array {
+        return this.fill(value as int, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
+    public fill(value: number, start: int, end: int): Uint16Array {
+        return this.fill(value as int, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
+    public fill(value: int, start?: number, end?: number): Uint16Array {
+        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
+    public fill(value: int, start: int, end?: number): Uint16Array {
+        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
+    public fill(value: int, start: int, end: number): Uint16Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
+    public fill(value: int, start: number, end: int): Uint16Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint16Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint16Array
+     */
     public fill(value: int, start: int, end: int): Uint16Array {
-        start = normalizeIndex(start, this.lengthInt)
-        end = normalizeIndex(end, this.lengthInt)
-        value = Uint16Array.clamp(value);
-        for (let i = start; i < end; i++) {
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
+        return this
     }
 
     /**
-     * Fills the Uint16Array with specified value
+     * Assigns val as element on index.
      *
-     * @param value new value
+     * @param val value to set
      *
-     * @returns modified Uint16Array
+     * @param index index to change
      */
-    public fill(value: number, start: number): Uint16Array {
-        return this.fill(value as int, start as int)
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: int, start: int): Uint16Array {
-        return this.fill(value, start, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: number): Uint16Array {
-        return this.fill(value as int, 0, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint16Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint16Array
-     */
-    public fill(value: int): Uint16Array {
-        return this.fill(value, 0, this.lengthInt)
-    }
-
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
     }
 
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: number, val: int): void {
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: int, val: int): void {
+        this.$_set(insertPos as int, val)
     }
 
     /**
@@ -4480,7 +4809,7 @@ export class Uint16Array implements Iterable<Number> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: Number, end?: Number): Uint16Array {
+    public slice(begin?: number, end?: number): Uint16Array {
         return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -4600,7 +4929,7 @@ export class Uint16Array implements Iterable<Number> {
      *
      * @returns new Uint16Array with the same underlying Buffer
      */
-    public subarray(begin?: Number, end?: Number): Uint16Array {
+    public subarray(begin?: number, end?: number): Uint16Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -5350,10 +5679,12 @@ export class Uint16Array implements Iterable<Number> {
             if (this.buffer instanceof ArrayBuffer) {
                 for (let i = 0; i < Uint16Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as ArrayBuffer).set(index + 1 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else if (this.buffer instanceof SharedArrayBuffer) {
                 for (let i = 0; i < Uint16Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as SharedArrayBuffer).set(index + 1 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else {
                 throw new Error("unexpected type of ArrayBufferLike")
@@ -5434,7 +5765,7 @@ export class Uint32Array implements Iterable<Number> {
         this.buffer = new ArrayBuffer(this.byteLengthInt)
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.$_set(i, arr.at(i)!.longValue())
+            this.setUnsafe(i, arr.$_get(i).longValue())
         }
     }
 
@@ -5585,8 +5916,8 @@ export class Uint32Array implements Iterable<Number> {
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
-            for (let i: int = 0; i < this.length as int; ++i) {
-                this.$_set(i, arr.$_get(i as number).longValue())
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).longValue())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -5684,9 +6015,6 @@ export class Uint32Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public at(index: int): Number | undefined {
-        if ((index == Infinity as int) || (index == -Infinity as int)) {
-            return undefined
-        }
         let k: int;
         if (index >= 0) {
             k = index
@@ -5694,7 +6022,7 @@ export class Uint32Array implements Iterable<Number> {
             k = this.lengthInt + index
         }
         if (k < 0 || k >= this.lengthInt) {
-            return undefined;
+            return undefined
         }
         return new Number(this.getUnsafe(k))
     }
@@ -5743,8 +6071,9 @@ export class Uint32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v as long)
@@ -5769,101 +6098,157 @@ export class Uint32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: long): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val as int)
+    }
+
+        /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        if (index < 0 || index >= this.lengthInt) {
+            throw new RangeError("invalid index")
+        }
+        let v = this.zeroIfInfinity(val as long)
+        this.setUnsafeClamp(index, v)
+    }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number, endPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int, endPos as int)
+    public copyWithin(target: number, start: number, end?: number): Uint32Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        insertPos = normalizeIndex(insertPos, this.lengthInt)
-        if (insertPos >= this.lengthInt) {
-            return
-        }
-
-        startPos = normalizeIndex(startPos, this.lengthInt)
-        endPos = normalizeIndex(endPos, this.lengthInt)
-
-        if (insertPos + endPos - startPos > this.lengthInt) {
-            throw new RangeError("invalid copy within")
-        }
-
-        for (let i = startPos; i < endPos; i++) {
-            this.setUnsafe(insertPos + i - startPos, this.getUnsafe(i))
-        }
+    public copyWithin(target: int, start: number, end?: number): Uint32Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint32Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int)
+    public copyWithin(target: number, start: int, end?: number): Uint32Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of Uint32Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.lengthInt)
+    public copyWithin(target: int, start: int, end?: number): Uint32Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint32Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param insert insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end: int): Uint32Array {
+        let toPos = normalizeIndex(target, this.lengthInt)
+        let fromPos = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        let count: int = finalPos - fromPos
+        if (count > (this.lengthInt - toPos)) {
+            count = this.lengthInt - toPos
+        }
+        let direction: int = 1
+        if ((fromPos < toPos) && (toPos < fromPos + count)) {
+            fromPos = fromPos + count - 1
+            toPos   = toPos   + count - 1
+            direction = -1
+        }
+        while (count > 0) {
+            const value = this.getUnsafe(fromPos)
+            this.setUnsafe(toPos, value)
+            fromPos = fromPos + direction
+            toPos = toPos + direction
+            --count
+        }
+        return this
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from begin to end of Uint32Array.
+     *
+     * @param target insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: number): void {
-        this.copyWithin(insertPos as int)
+    public copyWithin(target: number): Uint32Array {
+        return this.copyWithin(target as int)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of Uint32Array.
+     * Makes a copy of internal elements to targetPos from begin to end of Uint32Array.
+     *
+     * @param insert insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.lengthInt)
+    public copyWithin(target: int): Uint32Array {
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -5885,7 +6270,29 @@ export class Uint32Array implements Iterable<Number> {
      *
      * @returns modified Uint32Array
      */
-    public fill(value: number, start: number, end: number): Uint32Array {
+    public fill(value: number, start?: number, end?: number): Uint32Array {
+        return this.fill(value as long, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
+    public fill(value: number, start: int, end?: number): Uint32Array {
+        return this.fill(value as long, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
+    public fill(value: number, start: int, end: number): Uint32Array {
         return this.fill(value as long, start as int, end as int)
     }
 
@@ -5896,65 +6303,123 @@ export class Uint32Array implements Iterable<Number> {
      *
      * @returns modified Uint32Array
      */
+    public fill(value: number, start: number, end: int): Uint32Array {
+        return this.fill(value as long, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
+    public fill(value: number, start: int, end: int): Uint32Array {
+        return this.fill(value as long, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
+    public fill(value: long, start?: number, end?: number): Uint32Array {
+        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
+    public fill(value: long, start: int, end?: number): Uint32Array {
+        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
+    public fill(value: long, start: int, end: number): Uint32Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
+    public fill(value: long, start: number, end: int): Uint32Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the Uint32Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified Uint32Array
+     */
     public fill(value: long, start: int, end: int): Uint32Array {
-        start = normalizeIndex(start, this.lengthInt)
-        end = normalizeIndex(end, this.lengthInt)
-        value = Uint32Array.clamp(value);
-        for (let i = start; i < end; i++) {
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
+        return this
     }
 
     /**
-     * Fills the Uint32Array with specified value
+     * Assigns val as element on index.
      *
-     * @param value new value
+     * @param val value to set
      *
-     * @returns modified Uint32Array
+     * @param index index to change
      */
-    public fill(value: number, start: number): Uint32Array {
-        return this.fill(value as long, start as int)
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: long, start: int): Uint32Array {
-        return this.fill(value, start, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: number): Uint32Array {
-        return this.fill(value as long, 0, this.lengthInt)
-    }
-
-    /**
-     * Fills the Uint32Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified Uint32Array
-     */
-    public fill(value: long): Uint32Array {
-        return this.fill(value, 0, this.lengthInt)
-    }
-
     public set(insertPos: number, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
     }
 
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
     public set(insertPos: int, val: number): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: number, val: long): void {
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: int, val: long): void {
+        this.$_set(insertPos as int, val)
     }
 
     /**
@@ -6269,7 +6734,7 @@ export class Uint32Array implements Iterable<Number> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: Number, end?: Number): Uint32Array {
+    public slice(begin?: number, end?: number): Uint32Array {
         return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -6389,7 +6854,7 @@ export class Uint32Array implements Iterable<Number> {
      *
      * @returns new Uint32Array with the same underlying Buffer
      */
-    public subarray(begin?: Number, end?: Number): Uint32Array {
+    public subarray(begin?: number, end?: number): Uint32Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -7139,10 +7604,12 @@ export class Uint32Array implements Iterable<Number> {
             if (this.buffer instanceof ArrayBuffer) {
                 for (let i = 0; i < Uint32Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as ArrayBuffer).set(index + 3 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else if (this.buffer instanceof SharedArrayBuffer) {
                 for (let i = 0; i < Uint32Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as SharedArrayBuffer).set(index + 3 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else {
                 throw new Error("unexpected type of ArrayBufferLike")
@@ -7223,7 +7690,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         this.buffer = new ArrayBuffer(this.byteLengthInt)
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.$_set(i, arr.at(i)!.getULong())
+            this.setUnsafe(i, arr.$_get(i).getULong())
         }
     }
 
@@ -7374,8 +7841,8 @@ export class BigUint64Array implements Iterable<BigInt> {
             this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
-            for (let i: int = 0; i < this.length as int; ++i) {
-                this.$_set(i, arr.$_get(i as number).longValue())
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).longValue())
             }
         } else {
             throw new Error("unexpected type of buf")
@@ -7473,9 +7940,6 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns a primitive at index
      */
     public at(index: int): BigInt | undefined {
-        if ((index == Infinity as int) || (index == -Infinity as int)) {
-            return undefined
-        }
         let k: int;
         if (index >= 0) {
             k = index
@@ -7483,7 +7947,7 @@ export class BigUint64Array implements Iterable<BigInt> {
             k = this.lengthInt + index
         }
         if (k < 0 || k >= this.lengthInt) {
-            return undefined;
+            return undefined
         }
         return new BigInt(this.getUnsafe(k))
     }
@@ -7532,8 +7996,9 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: BigInt): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v.getULong())
@@ -7558,101 +8023,157 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: long): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
         if (index < 0 || index >= this.lengthInt) {
-            throw new RangeError("invalid offset")
+            throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: number, val: int): void {
+        this.$_set(index as int, val as int)
+    }
+
+        /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public $_set(index: int, val: int): void {
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        if (index < 0 || index >= this.lengthInt) {
+            throw new RangeError("invalid index")
+        }
+        let v = this.zeroIfInfinity(val as long)
+        this.setUnsafeClamp(index, v)
+    }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number, endPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int, endPos as int)
+    public copyWithin(target: number, start: number, end?: number): BigUint64Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to endPos.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * @param endPos last index to end copy from, excluded
+     * @param end last index to end copy from, excluded
      *
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int, endPos: int): void {
-        insertPos = normalizeIndex(insertPos, this.lengthInt)
-        if (insertPos >= this.lengthInt) {
-            return
-        }
-
-        startPos = normalizeIndex(startPos, this.lengthInt)
-        endPos = normalizeIndex(endPos, this.lengthInt)
-
-        if (insertPos + endPos - startPos > this.lengthInt) {
-            throw new RangeError("invalid copy within")
-        }
-
-        for (let i = startPos; i < endPos; i++) {
-            this.setUnsafe(insertPos + i - startPos, this.getUnsafe(i))
-        }
+    public copyWithin(target: int, start: number, end?: number): BigUint64Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of BigUint64Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: number, startPos: number): void {
-        this.copyWithin(insertPos as int, startPos as int)
+    public copyWithin(target: number, start: int, end?: number): BigUint64Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from startPos to end of BigUint64Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
      *
-     * @param insertPos insert index to place copied elements
+     * @param target insert index to place copied elements
      *
-     * @param startPos start index to begin copy from
+     * @param start start index to begin copy from
      *
-     * See rules of parameters normalization {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
-    public copyWithin(insertPos: int, startPos: int): void {
-        this.copyWithin(insertPos, startPos, this.lengthInt)
+    public copyWithin(target: int, start: int, end?: number): BigUint64Array {
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of BigUint64Array.
+     * Makes a copy of internal elements to targetPos from startPos to endPos.
+     *
+     * @param insert insert index to place copied elements
+     *
+     * @param start start index to begin copy from
+     *
+     * @param end last index to end copy from, excluded
+     *
+     * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
+     */
+    public copyWithin(target: int, start: int, end: int): BigUint64Array {
+        let toPos = normalizeIndex(target, this.lengthInt)
+        let fromPos = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        let count: int = finalPos - fromPos
+        if (count > (this.lengthInt - toPos)) {
+            count = this.lengthInt - toPos
+        }
+        let direction: int = 1
+        if ((fromPos < toPos) && (toPos < fromPos + count)) {
+            fromPos = fromPos + count - 1
+            toPos   = toPos   + count - 1
+            direction = -1
+        }
+        while (count > 0) {
+            const value = this.getUnsafe(fromPos)
+            this.setUnsafe(toPos, value)
+            fromPos = fromPos + direction
+            toPos = toPos + direction
+            --count
+        }
+        return this
+    }
+
+    /**
+     * Makes a copy of internal elements to targetPos from begin to end of BigUint64Array.
+     *
+     * @param target insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: number): void {
-        this.copyWithin(insertPos as int)
+    public copyWithin(target: number): BigUint64Array {
+        return this.copyWithin(target as int)
     }
 
     /**
-     * Makes a copy of internal elements to insertPos from begin to end of BigUint64Array.
+     * Makes a copy of internal elements to targetPos from begin to end of BigUint64Array.
+     *
+     * @param insert insert index to place copied elements
      *
      * See rules of parameters normalization:
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
-    public copyWithin(insertPos: int): void {
-        this.copyWithin(insertPos, 0, this.lengthInt)
+    public copyWithin(target: int): BigUint64Array {
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -7674,7 +8195,29 @@ export class BigUint64Array implements Iterable<BigInt> {
      *
      * @returns modified BigUint64Array
      */
-    public fill(value: BigInt, start: number, end: number): BigUint64Array {
+    public fill(value: BigInt, start?: number, end?: number): BigUint64Array {
+        return this.fill(value.getULong(), asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
+    public fill(value: BigInt, start: int, end?: number): BigUint64Array {
+        return this.fill(value.getULong(), start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
+    public fill(value: BigInt, start: int, end: number): BigUint64Array {
         return this.fill(value.getULong(), start as int, end as int)
     }
 
@@ -7685,65 +8228,123 @@ export class BigUint64Array implements Iterable<BigInt> {
      *
      * @returns modified BigUint64Array
      */
+    public fill(value: BigInt, start: number, end: int): BigUint64Array {
+        return this.fill(value.getULong(), start as int, end as int)
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
+    public fill(value: BigInt, start: int, end: int): BigUint64Array {
+        return this.fill(value.getULong(), start as int, end as int)
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
+    public fill(value: long, start?: number, end?: number): BigUint64Array {
+        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
+    public fill(value: long, start: int, end?: number): BigUint64Array {
+        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
+    public fill(value: long, start: int, end: number): BigUint64Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
+    public fill(value: long, start: number, end: int): BigUint64Array {
+        return this.fill(value, start as int, end as int)
+    }
+
+    /**
+     * Fills the BigUint64Array with specified value
+     *
+     * @param value new value
+     *
+     * @returns modified BigUint64Array
+     */
     public fill(value: long, start: int, end: int): BigUint64Array {
-        start = normalizeIndex(start, this.lengthInt)
-        end = normalizeIndex(end, this.lengthInt)
-        value = BigUint64Array.clamp(value);
-        for (let i = start; i < end; i++) {
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
+        for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
+        return this
     }
 
     /**
-     * Fills the BigUint64Array with specified value
+     * Assigns val as element on index.
      *
-     * @param value new value
+     * @param val value to set
      *
-     * @returns modified BigUint64Array
+     * @param index index to change
      */
-    public fill(value: BigInt, start: number): BigUint64Array {
-        return this.fill(value.getULong(), start as int)
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: long, start: int): BigUint64Array {
-        return this.fill(value, start, this.lengthInt)
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: BigInt): BigUint64Array {
-        return this.fill(value.getULong(), 0, this.lengthInt)
-    }
-
-    /**
-     * Fills the BigUint64Array with specified value
-     *
-     * @param value new value
-     *
-     * @returns modified BigUint64Array
-     */
-    public fill(value: long): BigUint64Array {
-        return this.fill(value, 0, this.lengthInt)
-    }
-
     public set(insertPos: number, val: BigInt): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
     }
 
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
     public set(insertPos: int, val: BigInt): void {
-        this.$_set(insertPos, val)
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: number, val: long): void {
+        this.$_set(insertPos as int, val)
+    }
+
+    /**
+     * Assigns val as element on index.
+     *
+     * @param val value to set
+     *
+     * @param index index to change
+     */
+    public set(insertPos: int, val: long): void {
+        this.$_set(insertPos as int, val)
     }
 
     /**
@@ -8058,7 +8659,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      *
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
-    public slice(begin?: Number, end?: Number): BigUint64Array {
+    public slice(begin?: number, end?: number): BigUint64Array {
         return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -8178,7 +8779,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      *
      * @returns new BigUint64Array with the same underlying Buffer
      */
-    public subarray(begin?: Number, end?: Number): BigUint64Array {
+    public subarray(begin?: number, end?: number): BigUint64Array {
         return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
@@ -8928,10 +9529,12 @@ export class BigUint64Array implements Iterable<BigInt> {
             if (this.buffer instanceof ArrayBuffer) {
                 for (let i = 0; i < BigUint64Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as ArrayBuffer).set(index + 7 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else if (this.buffer instanceof SharedArrayBuffer) {
                 for (let i = 0; i < BigUint64Array.BYTES_PER_ELEMENT as int; i++) {
                     (this.buffer as SharedArrayBuffer).set(index + 7 - i, (val & 0xff) as byte);
+                    val = val >> 8;
                 }
             } else {
                 throw new Error("unexpected type of ArrayBufferLike")
