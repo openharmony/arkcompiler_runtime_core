@@ -23,6 +23,10 @@ class HelloWorld {
   str = 'HelloWorld';
 }
 
+class Lit {
+  *lit() {}
+}
+
 msg : string = "";
 
 function foo() {

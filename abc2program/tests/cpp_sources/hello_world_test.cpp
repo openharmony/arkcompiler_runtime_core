@@ -91,6 +91,23 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_lang, TestSize.
 }
 
 /**
+ * @tc.name: abc2program_hello_world_test_literalarray_table
+ * @tc.desc: get program literalarray_table.
+ * @tc.type: FUNC
+ * @tc.require: file path and name
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_literalarray_table, TestSize.Level1)
+{
+    std::set<size_t> literals_sizes;
+    for (const auto &it : prog_->literalarray_table) {
+        const pandasm::LiteralArray &literal_array = it.second;
+        size_t literals_size = literal_array.literals_.size();
+        literals_sizes.insert(literals_size);
+    }
+    EXPECT_TRUE(Abc2ProgramTestUtils::ValidateLiteralsSizes(literals_sizes));
+}
+
+/**
  * @tc.name: abc2program_hello_world_test_record_table
  * @tc.desc: get program record_table.
  * @tc.type: FUNC

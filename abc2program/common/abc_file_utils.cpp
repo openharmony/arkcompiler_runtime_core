@@ -14,8 +14,8 @@
  */
 
 #include "abc_file_utils.h"
-#include "os/file.h"
 #include <iostream>
+#include "os/file.h"
 
 namespace panda::abc2program {
 
@@ -37,14 +37,6 @@ bool AbcFileUtils::IsESTypeAnnotationName(const std::string &type_name)
 bool AbcFileUtils::IsSystemTypeName(const std::string &type_name)
 {
     return (IsGlobalTypeName(type_name) || IsArrayTypeName(type_name));
-}
-
-std::string AbcFileUtils::GetFileNameByAbsolutePath(const std::string &absolute_path)
-{
-    size_t pos = absolute_path.find_last_of(panda::os::file::File::GetPathDelim());
-    ASSERT(pos != std::string::npos);
-    std::string file_name = absolute_path.substr(pos + 1);
-    return file_name;
 }
 
 bool AbcFileUtils::IsLiteralTagArray(const panda_file::LiteralTag &tag)

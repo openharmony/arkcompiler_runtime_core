@@ -35,29 +35,33 @@ private:
     void FillFunctionRegsNum();
     void FillIns();
     void FillInsWithoutLabels();
-    void AddJumpLabels();
-    void AddJumpLabel4InsAtIndex(size_t inst_idx, pandasm::Ins &curr_pa_ins) const;
-    void AddLabel4InsAtIndex(size_t inst_idx) const;
-    void AddLabel4InsAtPc(size_t inst_pc) const;
-    std::string GetLabelNameAtPc(size_t inst_pc) const;
+    bool NeedToAddDummyEndIns() const;
+    void AddDummyEndIns();
+    void AddJumpLabels() const;
+    void AddJumpLabel4InsAtIndex(uint32_t inst_idx, pandasm::Ins &curr_pa_ins) const;
+    void AddLabel4InsAtIndex(uint32_t inst_idx) const;
+    void AddLabel4InsAtPc(uint32_t inst_pc) const;
+    std::string GetLabelNameAtPc(uint32_t inst_pc) const;
     void FillCatchBlocks();
     void HandleTryBlock(panda_file::CodeDataAccessor::TryBlock &try_block);
     void HandleCatchBlock(panda_file::CodeDataAccessor::CatchBlock &catch_block);
     void FillCatchBlockLabels(pandasm::Function::CatchBlock &pa_catch_block) const;
     void FillExceptionRecord(panda_file::CodeDataAccessor::CatchBlock &catch_block,
                              pandasm::Function::CatchBlock &pa_catch_block) const;
-    size_t GetInstIdxByInstPc(size_t inst_pc) const;
-    size_t GetInstPcByInstIdx(size_t inst_idx) const;
+    uint32_t GetInstIdxByInstPc(uint32_t inst_pc) const;
+    uint32_t GetInstPcByInstIdx(uint32_t inst_idx) const;
     panda_file::File::EntityId method_id_;
     pandasm::Function &function_;
     std::unique_ptr<panda_file::CodeDataAccessor> code_data_accessor_;
     std::unique_ptr<AbcCodeConverter> code_converter_;
-    std::unordered_map<size_t, size_t> inst_pc_idx_map_;
-    std::unordered_map<size_t, size_t> inst_idx_pc_map_;
-    size_t curr_try_begin_inst_pc_ = 0;
-    size_t curr_try_end_inst_pc_ = 0;
-    size_t curr_catch_begin_pc_ = 0;
-    size_t curr_catch_end_pc_ = 0;
+    std::vector<uint32_t> jump_inst_idx_vec_;
+    std::unordered_map<uint32_t, uint32_t> inst_pc_idx_map_;
+    std::unordered_map<uint32_t, uint32_t> inst_idx_pc_map_;
+    uint32_t ins_size_ = 0;
+    uint32_t curr_try_begin_inst_pc_ = 0;
+    uint32_t curr_try_end_inst_pc_ = 0;
+    uint32_t curr_catch_begin_pc_ = 0;
+    uint32_t curr_catch_end_pc_ = 0;
 }; // AbcCodeProcessor
 
 } // namespace panda::abc2program

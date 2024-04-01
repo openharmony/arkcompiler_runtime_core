@@ -28,7 +28,7 @@ public:
     void FillProgramData() override;
 
 private:
-    void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
+    void GetLiteralArrayById(pandasm::LiteralArray *lit_array, panda_file::File::EntityId lit_array_id) const;
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;
@@ -38,7 +38,6 @@ private:
                                 pandasm::LiteralArray::Literal &lit) const;
     void FillLiteralData4LiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
                                       pandasm::LiteralArray::Literal &lit) const;
-    static bool IsLiteralTagArray(const panda_file::LiteralTag &tag);
     panda_file::LiteralDataAccessor &literal_data_accessor_;
     pandasm::LiteralArray literal_array_;
 };

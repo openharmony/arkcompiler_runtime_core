@@ -26,16 +26,16 @@ AbcLiteralArrayProcessor::AbcLiteralArrayProcessor(panda_file::File::EntityId en
 
 void AbcLiteralArrayProcessor::FillProgramData()
 {
-    GetLiteralArrayByOffset(&literal_array_, entity_id_);
+    GetLiteralArrayById(&literal_array_, entity_id_);
     program_->literalarray_table.emplace(entity_container_.GetLiteralArrayIdName(entity_id_),
                                          std::move(literal_array_));
 }
 
-void AbcLiteralArrayProcessor::GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array,
-                                                       panda_file::File::EntityId offset) const
+void AbcLiteralArrayProcessor::GetLiteralArrayById(pandasm::LiteralArray *lit_array,
+                                                   panda_file::File::EntityId lit_array_id) const
 {
     literal_data_accessor_.EnumerateLiteralVals(
-        offset, [this, lit_array](
+        lit_array_id, [this, lit_array](
                     const panda_file::LiteralDataAccessor::LiteralValue &value,
                     const panda_file::LiteralTag &tag) {
             switch (tag) {
@@ -136,6 +136,8 @@ void AbcLiteralArrayProcessor::FillLiteralData(pandasm::LiteralArray *lit_array,
             break;
         case panda_file::LiteralTag::LITERALARRAY:
             value_lit.value_ = entity_container_.GetLiteralArrayIdName(std::get<uint32_t>(value));
+            entity_container_.TryAddUnprocessedNestedLiteralArrayId(std::get<uint32_t>(value));
+            break;
         case panda_file::LiteralTag::TAGVALUE:
             value_lit.value_ = std::get<uint8_t>(value);
             break;
