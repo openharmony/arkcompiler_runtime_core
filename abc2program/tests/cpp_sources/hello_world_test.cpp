@@ -20,6 +20,7 @@
 #include <vector>
 #include "abc2program_driver.h"
 #include "abc2program_test_utils.h"
+#include "common/abc_file_utils.h"
 
 using namespace testing::ext;
 
@@ -167,6 +168,10 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part1, Te
 {
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
+    EXPECT_TRUE(function.params.size() == NUM_OF_ARGS_FOR_FOO_METHOD);
+    for (size_t i = 0; i < function.params.size(); ++i) {
+        EXPECT_TRUE(function.params[i].type.GetPandasmName() == ANY_TYPE_NAME);
+    }
     EXPECT_TRUE(function.name == FUNC_NAME_FOO);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_INS);
     // check ins[0]

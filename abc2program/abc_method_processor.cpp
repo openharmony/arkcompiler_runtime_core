@@ -51,26 +51,23 @@ void AbcMethodProcessor::AddFunctionIntoFunctionTable()
 
 void AbcMethodProcessor::FillProto()
 {
-    static const uint32_t MAX_ARG_NUM = 0xFFFF;
-    panda_file::File::EntityId proto_id = method_data_accessor_->GetProtoId();
-    LOG(DEBUG, ABC2PROGRAM) << "[getting params]\nproto id: " << proto_id << " (0x" << std::hex << proto_id << ")";
-    panda_file::ProtoDataAccessor proto_accessor(*file_, proto_id);
-    auto params_num = proto_accessor.GetNumArgs();
-    if (params_num > MAX_ARG_NUM) {
-        LOG(ERROR, ABC2PROGRAM) << "> error encountered at " << proto_id << " (0x" << std::hex << proto_id
-                                << "). number of function's arguments (" << std::dec << params_num
-                                << ") exceeds MAX_ARG_NUM (" << MAX_ARG_NUM << ") !";
-
-        return;
-    }
-    size_t refIdx = 0;
-    function_.return_type = type_converter_.PandaFileTypeToPandasmType(proto_accessor.GetReturnType(), proto_accessor,
-                                                                       refIdx);
+    uint32_t params_num = GetNumArgs();
+    pandasm::Type any_type = pandasm::Type(ANY_TYPE_NAME, 0);
+    function_.return_type = any_type;
     for (uint8_t i = 0; i < params_num; i++) {
-        pandasm::Type argType = type_converter_.PandaFileTypeToPandasmType(proto_accessor.GetArgType(i), proto_accessor,
-                                                                           refIdx);
-        function_.params.emplace_back(pandasm::Function::Parameter(argType, lang));
+        function_.params.emplace_back(pandasm::Function::Parameter(any_type, lang));
     }
+}
+
+uint32_t AbcMethodProcessor::GetNumArgs() const
+{
+    std::optional<panda_file::File::EntityId> code_id = method_data_accessor_->GetCodeId();
+    if (!code_id.has_value()) {
+        return 0;
+    }
+    panda_file::File::EntityId code_id_value = code_id.value();
+    panda_file::CodeDataAccessor code_data_accessor(*file_, code_id_value);
+    return code_data_accessor.GetNumArgs();
 }
 
 void AbcMethodProcessor::FillFunctionKind()
