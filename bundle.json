@@ -80,6 +80,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/assembler:libarkassembler_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/assembler"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/libpandabase:libarkbase_frontend_static",
                     "header": {
                         "header_files": [],

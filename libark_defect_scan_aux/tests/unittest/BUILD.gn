@@ -48,10 +48,10 @@ host_unittest_action("LibArkDefectScanAuxTest") {
   sources = [ "defect_scan_aux_test.cpp" ]
   configs = [ "$ark_root/libark_defect_scan_aux:defectscanaux_test_config" ]
 
-  deps = [
-    "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test",
-    sdk_libc_secshared_dep,
-  ]
+  deps =
+      [ "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test" ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   test_abc_dir = rebase_path(target_out_dir)
 
@@ -87,10 +87,10 @@ host_unittest_action("LibArkDefectScanAuxMergeTest") {
   sources = [ "defect_scan_aux_merge_test.cpp" ]
   configs = [ "$ark_root/libark_defect_scan_aux:defectscanaux_test_config" ]
 
-  deps = [
-    "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test",
-    sdk_libc_secshared_dep,
-  ]
+  deps =
+      [ "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test" ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   print("target_out_dir", target_out_dir)
   target_dir = rebase_path(target_out_dir)
@@ -118,10 +118,10 @@ ohos_executable("defect_scan_aux_demo") {
 
   configs = [ "$ark_root/libark_defect_scan_aux:defectscanaux_test_config" ]
 
-  deps = [
-    "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test",
-    sdk_libc_secshared_dep,
-  ]
+  deps =
+      [ "$ark_root/libark_defect_scan_aux:libark_defect_scan_aux_static_test" ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

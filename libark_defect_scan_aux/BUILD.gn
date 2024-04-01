@@ -68,8 +68,9 @@ ohos_shared_library("libark_defect_scan_aux") {
     "$ark_root/compiler:libarkcompiler_frontend_static_for_libark_defect_scan_aux",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   output_extension = "so"
   relative_install_dir = "ark"
@@ -88,8 +89,9 @@ ohos_static_library("libark_defect_scan_aux_static_test") {
     "$ark_root/compiler:libarkcompiler_frontend_static_for_libark_defect_scan_aux",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

@@ -81,7 +81,6 @@ libarkcompiler_sources = [
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
 libarkcompiler_configs = [
-  sdk_libc_secshared_config,
   ":arkcompiler_public_config",
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
@@ -134,8 +133,9 @@ ohos_shared_library("libarkcompiler") {
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
     "$ark_root/libpandafile:libarkfile",
     "$ark_root/libpandafile:libarkfile_type_gen_h",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]
 
@@ -185,7 +185,6 @@ libarkcompiler_frontend_static_common_deps = [
   "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
   "$ark_root/libpandafile:libarkfile_frontend_static",
   "$ark_root/libpandafile:libarkfile_type_gen_h",
-  sdk_libc_secshared_dep,
 ]
 
 ohos_static_library("libarkcompiler_frontend_static") {
@@ -195,6 +194,8 @@ ohos_static_library("libarkcompiler_frontend_static") {
   configs = libarkcompiler_configs
 
   deps = libarkcompiler_frontend_static_common_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]
 
@@ -212,6 +213,8 @@ ohos_static_library(
   defines = [ "IR_FOR_LIBARK_DEFECT_SCAN_AUX" ]
 
   deps = libarkcompiler_frontend_static_common_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]
 

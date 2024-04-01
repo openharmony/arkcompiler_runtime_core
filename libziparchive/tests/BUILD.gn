@@ -31,8 +31,9 @@ host_unittest_action("LibZipArchiveTest") {
     "$ark_root/assembler:libarkassembler_static",
     "$ark_root/libpandafile:libarkfile_static",
     "$ark_root/libziparchive:libarkziparchive_static",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 }
 
 group("unittest") {
