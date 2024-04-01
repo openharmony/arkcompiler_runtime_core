@@ -212,24 +212,26 @@ void DebugInfoExtractor::Extract(const File *pf)
             const char *class_name = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
             dda.EnumerateParameters([&](File::EntityId &param_id) {
                 ParamInfo info;
+                if (param_id.IsValid() && !mda.HasValidProto()) {
+                    info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
+                    // get signature of <any> type
+                    info.signature = Type::GetSignatureByTypeId(Type(Type::TypeId::TAGGED));
+                    param_info.emplace_back(info);
+                    return;
+                }
+
                 if (param_id.IsValid()) {
-                    if (mda.HasValidProto()) {
-                        info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
-                        if (first_param && !mda.IsStatic()) {
-                            info.signature = class_name;
-                        } else {
-                            Type param_type = pda.GetArgType(idx++);
-                            if (param_type.IsPrimitive()) {
-                                info.signature = Type::GetSignatureByTypeId(param_type);
-                            } else {
-                                auto ref_type = pda.GetReferenceType(idx_ref++);
-                                info.signature = utf::Mutf8AsCString(pf->GetStringData(ref_type).data);
-                            }
-                        }
+                    info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
+                    if (first_param && !mda.IsStatic()) {
+                        info.signature = class_name;
                     } else {
-                        info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
-                        // get signature of <any> type
-                        info.signature = Type::GetSignatureByTypeId(Type(Type::TypeId::TAGGED));
+                        Type param_type = pda.GetArgType(idx++);
+                        if (param_type.IsPrimitive()) {
+                            info.signature = Type::GetSignatureByTypeId(param_type);
+                        } else {
+                            auto ref_type = pda.GetReferenceType(idx_ref++);
+                            info.signature = utf::Mutf8AsCString(pf->GetStringData(ref_type).data);
+                        }
                     }
                 }
                 first_param = false;
