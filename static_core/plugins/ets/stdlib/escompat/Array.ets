@@ -549,7 +549,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    public /* override */ filter(fn: (v: T, k: number) => boolean): Array<T> {
+    public override filter(fn: (v: T, k: number) => boolean): Array<T> {
         const res = new Array<T>()
 
         for (let i: int = 0; i < this.actualLength; i++) {
@@ -837,7 +837,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this;
     }
 
-    public find(predicate: (value: T, i: number, self: Array<T>) => boolean): T | undefined {
+    public override find(predicate: (value: T, i: number, self: Array<T>) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
             return undefined
@@ -852,7 +852,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element index or -1 otherwise
      */
-    public findIndex(fn: (value: T, i: number, self: Array<T>) => boolean): number {
+    public override findIndex(fn: (value: T, i: number, self: Array<T>) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
             if (fn(this.$_get_unsafe(i), i as number, this)) {
                 return i;
@@ -869,7 +869,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element or undefined otherwise
      */
-    public findLast(fn: (elem: T, i: number, self: Array<T>) => boolean): T | undefined {
+    public override findLast(fn: (elem: T, i: number, self: Array<T>) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             const val = this.$_get_unsafe(i);
             if (fn(val, i as number, this)) {
@@ -888,7 +888,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public every(fn: (v: T, i: number, self: Array<T>) => boolean): boolean {
+    public override every(fn: (v: T, i: number, self: Array<T>) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
             if (!fn(this.$_get_unsafe(i), i as number, this)) {
                 return false
@@ -924,8 +924,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public filter(fn: (v: T, i: number, self: Array<T>) => boolean): Array<T> {
+    public override filter(fn: (v: T, i: number, self: Array<T>) => boolean): Array<T> {
         return this.filter((v: T, i: number): boolean => fn(v, i as number, this));
     }
 
@@ -938,7 +937,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of first element satisfying to fn, -1 if no such element
      */
-    public findLastIndex(fn: (element: T, i: number, self: Array<T>) => boolean): number {
+    public override findLastIndex(fn: (element: T, i: number, self: Array<T>) => boolean): number {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             if (fn(this.$_get_unsafe(i), i as number, this)) {
                 return i
@@ -957,8 +956,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduce(fn: (a: T, b: T, i: number, self: Array<T>) => T): T {
+    public override reduce(fn: (a: T, b: T, i: number, self: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
@@ -981,8 +979,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number, self: Array<T>) => U, initialValue: U): U {
+    public override reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number, self: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i as number, this)
@@ -1000,8 +997,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduceRight(fn: (a: T, b: T, i: number, self: Array<T>) => T): T {
+    public override reduceRight(fn: (a: T, b: T, i: number, self: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
@@ -1024,8 +1020,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduceRight<U>(fn: (a: U, b: T, i: number, self: Array<T>) => U, initVal: U): U {
+    public override reduceRight<U>(fn: (a: U, b: T, i: number, self: Array<T>) => U, initVal: U): U {
         let acc = initVal
         for (let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i), i as number, this)
@@ -1038,15 +1033,14 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @param fn to apply for each element of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public forEach(fn: (a: T, i: number, self: Array<T>) => void): void {
+    public override forEach(fn: (a: T, i: number, self: Array<T>) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
             fn(this.$_get_unsafe(i), i as number, this)
         }
     }
 
-    public find(predicate: (value: T, i: number) => boolean): T | undefined {
+    public override find(predicate: (value: T, i: number) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
             return undefined
@@ -1061,7 +1055,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element index or -1 otherwise
      */
-    public findIndex(fn: (value: T, i: number) => boolean): number {
+    public override findIndex(fn: (value: T, i: number) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
             if (fn(this.$_get_unsafe(i), i as number)) {
                 return i;
@@ -1078,7 +1072,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element or undefined otherwise
      */
-    public findLast(fn: (elem: T, i: number) => boolean): T | undefined {
+    public override findLast(fn: (elem: T, i: number) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             const val = this.$_get_unsafe(i);
             if (fn(val, i as number)) {
@@ -1097,7 +1091,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public every(fn: (v: T, i: number) => boolean): boolean {
+    public override every(fn: (v: T, i: number) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
             if (!fn(this.$_get_unsafe(i), i as number)) {
                 return false
@@ -1133,7 +1127,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of first element satisfying to fn, -1 if no such element
      */
-    public findLastIndex(fn: (element: T, i: number) => boolean): number {
+    public override findLastIndex(fn: (element: T, i: number) => boolean): number {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             if (fn(this.$_get_unsafe(i), i as number)) {
                 return i
@@ -1152,8 +1146,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduce(fn: (a: T, b: T, i: number) => T): T {
+    public override reduce(fn: (a: T, b: T, i: number) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
@@ -1176,8 +1169,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number) => U, initialValue: U): U {
+    public override reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i), i as number)
@@ -1195,8 +1187,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduceRight(fn: (a: T, b: T, i: number) => T): T {
+    public override reduceRight(fn: (a: T, b: T, i: number) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
@@ -1219,8 +1210,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduceRight<U>(fn: (a: U, b: T, i: number) => U, initVal: U): U {
+    public override reduceRight<U>(fn: (a: U, b: T, i: number) => U, initVal: U): U {
         let acc = initVal
         for (let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i), i as number)
@@ -1233,15 +1223,14 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @param fn to apply for each element of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public forEach(fn: (a: T, i: number) => void): void {
+    public override forEach(fn: (a: T, i: number) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
             fn(this.$_get_unsafe(i), i as number)
         }
     }
 
-    public find(predicate: (value: T) => boolean): T | undefined {
+    public override find(predicate: (value: T) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
             return undefined
@@ -1256,7 +1245,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element index or -1 otherwise
      */
-    public findIndex(fn: (value: T) => boolean): number {
+    public override findIndex(fn: (value: T) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
             if (fn(this.$_get_unsafe(i))) {
                 return i;
@@ -1273,7 +1262,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns found element or undefined otherwise
      */
-    public findLast(fn: (elem: T) => boolean): T | undefined {
+    public override findLast(fn: (elem: T) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             const val = this.$_get_unsafe(i);
             if (fn(val)) {
@@ -1292,7 +1281,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public every(fn: (v: T) => boolean): boolean {
+    public override every(fn: (v: T) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
             if (!fn(this.$_get_unsafe(i))) {
                 return false
@@ -1328,8 +1317,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public filter(fn: (v: T) => boolean): Array<T> {
+    public override filter(fn: (v: T) => boolean): Array<T> {
         return this.filter((v: T, i: number): boolean => fn(v));
     }
 
@@ -1342,7 +1330,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of first element satisfying to fn, -1 if no such element
      */
-    public findLastIndex(fn: (element: T) => boolean): number {
+    public override findLastIndex(fn: (element: T) => boolean): number {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             if (fn(this.$_get_unsafe(i))) {
                 return i
@@ -1361,8 +1349,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduce(fn: (a: T, b: T) => T): T {
+    public override reduce(fn: (a: T, b: T) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
@@ -1385,8 +1372,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduce<U = T>(fn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
+    public override reduce<U = T>(fn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
             acc = fn(acc, this.$_get_unsafe(i))
@@ -1404,8 +1390,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduceRight(fn: (a: T, b: T) => T): T {
+    public override reduceRight(fn: (a: T, b: T) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
@@ -1428,8 +1413,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns a result after applying fn over all elements of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public reduceRight<U>(fn: (a: U, b: T) => U, initVal: U): U {
+    public override reduceRight<U>(fn: (a: U, b: T) => U, initVal: U): U {
         let acc = initVal
         for (let i = this.actualLength - 1; i >= 0; i--) {
             acc = fn(acc, this.$_get_unsafe(i))
@@ -1442,8 +1426,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @param fn to apply for each element of the Array
      */
-    // NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
-    public forEach(fn: (a: T) => void): void {
+    public override forEach(fn: (a: T) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
             fn(this.$_get_unsafe(i))
@@ -1870,7 +1853,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public map<U>(fn: (value: T, i: number, self: Array<T>) => U): Array<U> {
+    public override map<U>(fn: (value: T, i: number, self: Array<T>) => U): Array<U> {
         const len = this.actualLength;
         let res = new NullishType[len];
         for (let i = 0; i < len; i++) {
@@ -1886,7 +1869,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public map<U>(fn: (value: T, i: number) => U): Array<U> {
+    public override map<U>(fn: (value: T, i: number) => U): Array<U> {
         const len = this.actualLength;
         let res = new NullishType[len];
         for (let i = 0; i < len; i++) {
@@ -1902,7 +1885,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public map<U>(fn: (value: T) => U): Array<U> {
+    public override map<U>(fn: (value: T) => U): Array<U> {
         const len = this.actualLength;
         let res = new NullishType[len];
         for (let i = 0; i < len; i++) {
