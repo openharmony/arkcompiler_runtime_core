@@ -448,6 +448,8 @@ arkui/dollar_dollar_11.ets
 arkui/dollar_dollar_12.ets
 arkui/dollar_dollar_13.ets
 ### End Of Built-In Component Two Way Value Synchronization
+# #16098
+arkui/dollar_dollar_10.ets
 ### Annotations issues
 ### Issue 14040 -> Annotations not yet implemented
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets

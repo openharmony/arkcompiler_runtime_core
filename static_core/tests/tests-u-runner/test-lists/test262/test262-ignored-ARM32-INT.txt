@@ -3,22 +3,10 @@ built-ins/DataView/prototype/getFloat64/return-values.js
 built-ins/DataView/prototype/setFloat64/set-values-little-endian-order.js
 built-ins/DataView/prototype/setFloat64/to-boolean-littleendian.js
 language/types/number/8.5.1.js
-# #15437
-harness/assert-true.js
 # #10132
 harness/deepEqual-mapset.js
-# #15404
-harness/compare-array-arguments.js
 # #15019
 harness/assert-notsamevalue-notsame.js
-# #10175
-harness/compare-array-falsy-arguments.js
-# #15286
-harness/verifyProperty-string-prop.js
-# #15368
-harness/promiseHelper.js
-# #15287
-harness/propertyhelper-verifynotenumerable-enumerable.js
 # #15285
 harness/propertyhelper-verifywritable-writable.js
 # #15020
