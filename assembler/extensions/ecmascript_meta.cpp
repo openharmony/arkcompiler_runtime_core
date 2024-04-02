@@ -17,7 +17,7 @@
 
 namespace panda::pandasm::extensions::ecmascript {
 
-std::optional<Metadata::Error> RecordMetadata::Validate(std::string_view attribute) const
+std::optional<Metadata::Error> RecordMetadata::Validate(const std::string_view &attribute) const
 {
     if (attribute == "ecmascript.annotation") {
         if (HasAttribute(attribute)) {
@@ -35,7 +35,8 @@ std::optional<Metadata::Error> RecordMetadata::Validate(std::string_view attribu
     return pandasm::RecordMetadata::Validate(attribute);
 }
 
-std::optional<Metadata::Error> RecordMetadata::Validate(std::string_view attribute, std::string_view value) const
+std::optional<Metadata::Error> RecordMetadata::Validate(const std::string_view &attribute,
+                                                        const std::string_view &value) const
 {
     if (attribute == "ecmascript.extends") {
         if (HasAttribute(attribute)) {
@@ -53,37 +54,40 @@ std::optional<Metadata::Error> RecordMetadata::Validate(std::string_view attribu
     return pandasm::RecordMetadata::Validate(attribute, value);
 }
 
-std::optional<Metadata::Error> FieldMetadata::Validate(std::string_view attribute) const
+std::optional<Metadata::Error> FieldMetadata::Validate(const std::string_view &attribute) const
 {
     return pandasm::FieldMetadata::Validate(attribute);
 }
 
-std::optional<Metadata::Error> FieldMetadata::Validate(std::string_view attribute, std::string_view value) const
+std::optional<Metadata::Error> FieldMetadata::Validate(const std::string_view &attribute,
+                                                       const std::string_view &value) const
 {
     return pandasm::FieldMetadata::Validate(attribute, value);
 }
 
-std::optional<Metadata::Error> FunctionMetadata::Validate(std::string_view attribute) const
+std::optional<Metadata::Error> FunctionMetadata::Validate(const std::string_view &attribute) const
 {
     return pandasm::FunctionMetadata::Validate(attribute);
 }
 
-std::optional<Metadata::Error> FunctionMetadata::Validate(std::string_view attribute, std::string_view value) const
+std::optional<Metadata::Error> FunctionMetadata::Validate(const std::string_view &attribute,
+                                                          const std::string_view &value) const
 {
     return pandasm::FunctionMetadata::Validate(attribute, value);
 }
 
-std::optional<Metadata::Error> ParamMetadata::Validate(std::string_view attribute) const
+std::optional<Metadata::Error> ParamMetadata::Validate(const std::string_view &attribute) const
 {
     return pandasm::ParamMetadata::Validate(attribute);
 }
 
-std::optional<Metadata::Error> ParamMetadata::Validate(std::string_view attribute, std::string_view value) const
+std::optional<Metadata::Error> ParamMetadata::Validate(const std::string_view &attribute,
+                                                       const std::string_view &value) const
 {
     return pandasm::ParamMetadata::Validate(attribute, value);
 }
 
-void RecordMetadata::SetFlags(std::string_view attribute)
+void RecordMetadata::SetFlags(const std::string_view &attribute)
 {
     if (attribute == "ecmascript.annotation") {
         SetAccessFlags(GetAccessFlags() | ACC_ANNOTATION);
@@ -91,12 +95,12 @@ void RecordMetadata::SetFlags(std::string_view attribute)
     pandasm::RecordMetadata::SetFlags(attribute);
 }
 
-void RecordMetadata::SetFlags(std::string_view attribute, std::string_view value)
+void RecordMetadata::SetFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::RecordMetadata::SetFlags(attribute, value);
 }
 
-void RecordMetadata::RemoveFlags(std::string_view attribute)
+void RecordMetadata::RemoveFlags(const std::string_view &attribute)
 {
     if (attribute == "ecmascript.annotation") {
         if ((GetAccessFlags() & ACC_ANNOTATION) != 0) {
@@ -106,67 +110,67 @@ void RecordMetadata::RemoveFlags(std::string_view attribute)
     pandasm::RecordMetadata::RemoveFlags(attribute);
 }
 
-void RecordMetadata::RemoveFlags(std::string_view attribute, std::string_view value)
+void RecordMetadata::RemoveFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::RecordMetadata::RemoveFlags(attribute, value);
 }
 
-void FieldMetadata::SetFlags(std::string_view attribute)
+void FieldMetadata::SetFlags(const std::string_view &attribute)
 {
     pandasm::FieldMetadata::SetFlags(attribute);
 }
 
-void FieldMetadata::SetFlags(std::string_view attribute, std::string_view value)
+void FieldMetadata::SetFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::FieldMetadata::SetFlags(attribute, value);
 }
 
-void FieldMetadata::RemoveFlags(std::string_view attribute)
+void FieldMetadata::RemoveFlags(const std::string_view &attribute)
 {
     pandasm::FieldMetadata::RemoveFlags(attribute);
 }
 
-void FieldMetadata::RemoveFlags(std::string_view attribute, std::string_view value)
+void FieldMetadata::RemoveFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::FieldMetadata::RemoveFlags(attribute, value);
 }
 
-void FunctionMetadata::SetFlags(std::string_view attribute)
+void FunctionMetadata::SetFlags(const std::string_view &attribute)
 {
     pandasm::FunctionMetadata::SetFlags(attribute);
 }
 
-void FunctionMetadata::SetFlags(std::string_view attribute, std::string_view value)
+void FunctionMetadata::SetFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::FunctionMetadata::SetFlags(attribute, value);
 }
 
-void FunctionMetadata::RemoveFlags(std::string_view attribute)
+void FunctionMetadata::RemoveFlags(const std::string_view &attribute)
 {
     pandasm::FunctionMetadata::RemoveFlags(attribute);
 }
 
-void FunctionMetadata::RemoveFlags(std::string_view attribute, std::string_view value)
+void FunctionMetadata::RemoveFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::FunctionMetadata::RemoveFlags(attribute, value);
 }
 
-void ParamMetadata::SetFlags(std::string_view attribute)
+void ParamMetadata::SetFlags(const std::string_view &attribute)
 {
     pandasm::ParamMetadata::SetFlags(attribute);
 }
 
-void ParamMetadata::SetFlags(std::string_view attribute, std::string_view value)
+void ParamMetadata::SetFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::ParamMetadata::SetFlags(attribute, value);
 }
 
-void ParamMetadata::RemoveFlags(std::string_view attribute)
+void ParamMetadata::RemoveFlags(const std::string_view &attribute)
 {
     pandasm::ParamMetadata::RemoveFlags(attribute);
 }
 
-void ParamMetadata::RemoveFlags(std::string_view attribute, std::string_view value)
+void ParamMetadata::RemoveFlags(const std::string_view &attribute, const std::string_view &value)
 {
     pandasm::ParamMetadata::RemoveFlags(attribute, value);
 }

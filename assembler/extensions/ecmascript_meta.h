@@ -79,17 +79,17 @@ protected:
         return false;
     }
 
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 };
 
 class FieldMetadata : public pandasm::FieldMetadata {
@@ -125,17 +125,17 @@ protected:
         return false;
     }
 
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 };
 
 class FunctionMetadata : public pandasm::FunctionMetadata {
@@ -171,17 +171,17 @@ protected:
         return false;
     }
 
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 };
 
 class ParamMetadata : public pandasm::ParamMetadata {
@@ -217,17 +217,17 @@ protected:
         return false;
     }
 
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 };
 
 }  // namespace panda::pandasm::extensions::ecmascript

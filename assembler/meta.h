@@ -146,11 +146,12 @@ public:
     DEFAULT_MOVE_SEMANTIC(Metadata);
 
 protected:
-    virtual std::optional<Error> Validate(std::string_view attribute) const = 0;
+    virtual std::optional<Error> Validate(const std::string_view &attribute) const = 0;
 
-    virtual std::optional<Error> Validate(std::string_view attribute, std::string_view value) const = 0;
+    virtual std::optional<Error> Validate(const std::string_view &attribute,
+                                          const std::string_view &value) const = 0;
 
-    virtual std::optional<Error> StoreValue(std::string_view attribute, std::string_view value)
+    virtual std::optional<Error> StoreValue(const std::string_view &attribute, const std::string_view &value)
     {
         std::string key(attribute);
         auto it = attributes_.find(key);
@@ -163,28 +164,28 @@ protected:
         return {};
     }
 
-    virtual std::optional<Error> Store(std::string_view attribute)
+    virtual std::optional<Error> Store(const std::string_view &attribute)
     {
         set_attributes_.emplace(attribute);
 
         return {};
     }
 
-    virtual void SetFlags(std::string_view attribute) = 0;
+    virtual void SetFlags(const std::string_view &attribute) = 0;
 
-    virtual void SetFlags(std::string_view attribute, std::string_view value) = 0;
+    virtual void SetFlags(const std::string_view &attribute, const std::string_view &value) = 0;
 
-    virtual void RemoveFlags(std::string_view attribute) = 0;
+    virtual void RemoveFlags(const std::string_view &attribute) = 0;
 
-    virtual void RemoveFlags(std::string_view attribute, std::string_view value) = 0;
+    virtual void RemoveFlags(const std::string_view &attribute, const std::string_view &value) = 0;
 
-    bool HasAttribute(std::string_view attribute) const
+    bool HasAttribute(const std::string_view &attribute) const
     {
         std::string key(attribute);
         return GetAttribute(key) || GetAttributeValue(key);
     }
 
-    std::optional<Error> ValidateSize(std::string_view value) const;
+    std::optional<Error> ValidateSize(const std::string_view &value) const;
 
 private:
     std::unordered_set<std::string> set_attributes_;
@@ -217,9 +218,9 @@ public:
     std::optional<Error> ValidateData() override;
 
 protected:
-    std::optional<Error> Store(std::string_view attribute) override;
+    std::optional<Error> Store(const std::string_view &attribute) override;
 
-    std::optional<Error> StoreValue(std::string_view attribute, std::string_view value) override;
+    std::optional<Error> StoreValue(const std::string_view &attribute, const std::string_view &value) override;
 
     virtual bool IsAnnotationRecordAttribute([[maybe_unused]] const std::string_view &attribute) const
     {
@@ -399,15 +400,16 @@ private:
         bool is_initialized_ {false};
     };
 
-    std::optional<Metadata::Error> MeetExpRecordAttribute(std::string_view attribute, const std::string_view &value);
-    std::optional<Metadata::Error> MeetExpIdAttribute(std::string_view attribute, const std::string_view &value);
-    std::optional<Metadata::Error> MeetExpElementNameAttribute(std::string_view attribute,
+    std::optional<Metadata::Error> MeetExpRecordAttribute(const std::string_view &attribute,
+                                                          const std::string_view &value);
+    std::optional<Metadata::Error> MeetExpIdAttribute(const std::string_view &attribute, const std::string_view &value);
+    std::optional<Metadata::Error> MeetExpElementNameAttribute(const std::string_view &attribute,
                                                                const std::string_view &value);
-    std::optional<Metadata::Error> MeetExpElementTypeAttribute(std::string_view attribute,
+    std::optional<Metadata::Error> MeetExpElementTypeAttribute(const std::string_view &attribute,
                                                                const std::string_view &value);
-    std::optional<Metadata::Error> MeetExpElementArrayComponentTypeAttribute(std::string_view attribute,
+    std::optional<Metadata::Error> MeetExpElementArrayComponentTypeAttribute(const std::string_view &attribute,
                                                                              const std::string_view &value);
-    std::optional<Metadata::Error> MeetExpElementValueAttribute(std::string_view attribute,
+    std::optional<Metadata::Error> MeetExpElementValueAttribute(const std::string_view &attribute,
                                                                 const std::string_view &value);
 
     void InitializeAnnotationBuilder(const std::string_view &name)
@@ -504,17 +506,17 @@ public:
     virtual bool IsRuntimeTypeAnnotation() const;
 
 protected:
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 };
 
 class FieldMetadata : public ItemMetadata {
@@ -540,21 +542,21 @@ public:
     }
 
 protected:
-    std::optional<Error> StoreValue(std::string_view attribute, std::string_view value) override;
+    std::optional<Error> StoreValue(const std::string_view &attribute, const std::string_view &value) override;
 
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    virtual bool IsValueAttribute(std::string_view attribute)
+    virtual bool IsValueAttribute(const std::string_view &attribute)
     {
         return attribute == "value";
     }
@@ -571,32 +573,32 @@ public:
     virtual bool IsCctor() const;
 
 protected:
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 };
 
 class ParamMetadata : public AnnotationMetadata {
 protected:
-    std::optional<Error> Validate(std::string_view attribute) const override;
+    std::optional<Error> Validate(const std::string_view &attribute) const override;
 
-    std::optional<Error> Validate(std::string_view attribute, std::string_view value) const override;
+    std::optional<Error> Validate(const std::string_view &attribute, const std::string_view &value) const override;
 
-    void SetFlags(std::string_view attribute) override;
+    void SetFlags(const std::string_view &attribute) override;
 
-    void SetFlags(std::string_view attribute, std::string_view value) override;
+    void SetFlags(const std::string_view &attribute, const std::string_view &value) override;
 
-    void RemoveFlags(std::string_view attribute) override;
+    void RemoveFlags(const std::string_view &attribute) override;
 
-    void RemoveFlags(std::string_view attribute, std::string_view value) override;
+    void RemoveFlags(const std::string_view &attribute, const std::string_view &value) override;
 };
 
 }  // namespace panda::pandasm
