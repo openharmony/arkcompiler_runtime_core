@@ -13,6 +13,9 @@ spec/13.Compilation.Units.Packages.and.Modules/13.3.Import.Directives/issue15182
 spec/13.Compilation.Units.Packages.and.Modules/13.3.Import.Directives/issue15173/src/issue_15173_01.ets
 spec/13.Compilation.Units.Packages.and.Modules/13.3.Import.Directives/issue15173/src/issue_15173_02.ets
 spec/13.Compilation.Units.Packages.and.Modules/13.3.Import.Directives/issue15173/src/issue_15173_03.ets
+spec/13.Compilation.Units.Packages.and.Modules/13.3.Import.Directives/issue15182/src/issue_15173_01.ets
+spec/13.Compilation.Units.Packages.and.Modules/13.3.Import.Directives/issue15182/src/issue_15173_02.ets
+spec/13.Compilation.Units.Packages.and.Modules/13.3.Import.Directives/issue15182/src/issue_15173_03.ets
 spec/13.Compilation.Units.Packages.and.Modules/13.06.Export.Directives/13.06.03.Re-export.Directives/issue_15669_01.ets
 spec/13.Compilation.Units.Packages.and.Modules/13.06.Export.Directives/13.06.03.Re-export.Directives/issue_15669_02.ets
 spec/13.Compilation.Units.Packages.and.Modules/13.06.Export.Directives/13.06.03.Re-export.Directives/issue_15669_03.ets
