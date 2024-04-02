@@ -207,11 +207,19 @@ void DebugInfoExtractor::Extract(const File *pf)
             std::vector<ParamInfo> param_info;
 
             size_t idx = 0;
-            size_t idx_ref = pda.GetReturnType().IsReference() ? 1 : 0;
+            size_t idx_ref = (mda.HasValidProto() && pda.GetReturnType().IsReference()) ? 1 : 0;
             bool first_param = true;
             const char *class_name = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
             dda.EnumerateParameters([&](File::EntityId &param_id) {
                 ParamInfo info;
+                if (param_id.IsValid() && !mda.HasValidProto()) {
+                    info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
+                    // get signature of <any> type
+                    info.signature = Type::GetSignatureByTypeId(Type(Type::TypeId::TAGGED));
+                    param_info.emplace_back(info);
+                    return;
+                }
+
                 if (param_id.IsValid()) {
                     info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
                     if (first_param && !mda.IsStatic()) {

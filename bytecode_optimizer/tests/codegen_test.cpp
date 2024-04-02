@@ -424,7 +424,7 @@ HWTEST_F(CodegenTest, codegen_test_012, TestSize.Level1)
     BytecodeOptimizerRuntimeAdapter runtime_adapter(*pfile.get());
 
     RuntimeInterface::MethodPtr caller = nullptr;
-    BytecodeOptimizerRuntimeAdapter::MethodId id = 251;  // 251: It's a random number
+    BytecodeOptimizerRuntimeAdapter::MethodId id = 178;  // foo method_id
     EXPECT_EQ(runtime_adapter.GetMethodArgumentsCount(caller, id), 0);
 }
 
@@ -446,11 +446,11 @@ HWTEST_F(CodegenTest, codegen_test_013, TestSize.Level1)
     std::unique_ptr<const panda_file::File> pfile = ParseAndEmit(source);
     BytecodeOptimizerRuntimeAdapter runtime_adapter(*pfile.get());
 
-    int f = 222;  // 222: It's a random number
+    int f = 178;  // foo method_id
     RuntimeInterface::MethodPtr method;
     method=(void*)(long)f;
 
-    EXPECT_EQ(runtime_adapter.GetMethodFullName(method, false), "L_ESSlotNumberAnnotation;::SlotNumber");
+    EXPECT_EQ(runtime_adapter.GetMethodFullName(method, false), "L_GLOBAL;::foo");
 }
 
 /**

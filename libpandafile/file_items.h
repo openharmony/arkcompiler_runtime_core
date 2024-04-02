@@ -94,12 +94,14 @@ static constexpr size_t IDX_SIZE = sizeof(uint16_t);
 static constexpr size_t TAG_SIZE = 1;
 static constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
-static constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max();
 static constexpr uint32_t MAX_INDEX_32 = std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t FLAG_WIDTH = 8;
 static constexpr uint32_t FUNTION_KIND_WIDTH = 8;
 static constexpr uint32_t FUNCTION_KIND_MASK = 0xFF00;
 static constexpr uint32_t FLAG_MASK = 0xFF;
+
+constexpr uint16_t INVALID_INDEX_16 = std::numeric_limits<uint16_t>::max();
+constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max() - 1;
 
 constexpr uint32_t PGO_STRING_DEFAULT_COUNT = 5;
 constexpr uint32_t PGO_CLASS_DEFAULT_COUNT = 3;

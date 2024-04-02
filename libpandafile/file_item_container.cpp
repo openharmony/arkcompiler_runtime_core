@@ -837,13 +837,24 @@ bool ItemContainer::IndexHeaderItem::Write(Writer *writer)
     }
 
     for (auto *index_item : indexes_) {
-        if (!writer->Write<uint32_t>(index_item->GetNumItems())) {
-            return false;
-        }
+        if (!index_item->NeedsEmit()) {
+            // reserve [field_idx_size] | [proto_idx_size] field
+            if (!writer->Write<uint32_t>(INVALID_INDEX)) {
+                return false;
+            }
+            // reserve [field_idx_off] | [proto_idx_off] field
+            if (!writer->Write<uint32_t>(INVALID_OFFSET)) {
+                return false;
+            }
+        } else {
+            if (!writer->Write<uint32_t>(index_item->GetNumItems())) {
+                return false;
+            }
 
-        ASSERT(index_item->GetOffset() != 0);
-        if (!writer->Write<uint32_t>(index_item->GetOffset())) {
-            return false;
+            ASSERT(index_item->GetOffset() != 0);
+            if (!writer->Write<uint32_t>(index_item->GetOffset())) {
+                return false;
+            }
         }
     }
 
@@ -890,9 +901,11 @@ bool ItemContainer::IndexItem::Write(Writer *writer)
 {
     ASSERT(GetOffset() == writer->GetOffset());
 
-    for (auto *item : index_) {
-        if (!writer->Write<uint32_t>(item->GetOffset())) {
-            return false;
+    if (NeedsEmit()) {
+        for (auto *item : index_) {
+            if (!writer->Write<uint32_t>(item->GetOffset())) {
+                return false;
+            }
         }
     }
 

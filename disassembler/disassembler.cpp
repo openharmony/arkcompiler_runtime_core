@@ -193,11 +193,12 @@ void Disassembler::GetMethod(pandasm::Function *method, const panda_file::File::
 
     LOG(DEBUG, DISASSEMBLER) << "name: " << method->name;
 
-    GetParams(method, method_accessor.GetProtoId());
     GetMetaData(method, method_id);
 
     if (method_accessor.GetCodeId().has_value()) {
-        const IdList id_list = GetInstructions(method, method_id, method_accessor.GetCodeId().value());
+        auto code_id = method_accessor.GetCodeId().value();
+        GetParams(method, code_id);
+        const IdList id_list = GetInstructions(method, method_id, code_id);
 
         for (const auto &id : id_list) {
             AddMethodToTables(id);
@@ -612,14 +613,14 @@ std::vector<std::string> Disassembler::GetModuleLiterals() const
     return module_literals;
 }
 
-void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::EntityId &proto_id) const
+void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::EntityId &code_id) const
 {
     /**
      * frame size - 2^16 - 1
      */
     static const uint32_t MAX_ARG_NUM = 0xFFFF;
 
-    LOG(DEBUG, DISASSEMBLER) << "[getting params]\nproto id: " << proto_id << " (0x" << std::hex << proto_id << ")";
+    LOG(DEBUG, DISASSEMBLER) << "[getting params number]\ncode id: " << code_id << " (0x" << std::hex << code_id << ")";
 
     if (method == nullptr) {
         LOG(ERROR, DISASSEMBLER) << "> nullptr recieved, but method ptr expected!";
@@ -627,24 +628,22 @@ void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::
         return;
     }
 
-    panda_file::ProtoDataAccessor proto_accessor(*file_, proto_id);
+    panda_file::CodeDataAccessor code_accessor(*file_, code_id);
 
-    auto params_num = proto_accessor.GetNumArgs();
+    auto params_num = code_accessor.GetNumArgs();
 
     if (params_num > MAX_ARG_NUM) {
-        LOG(ERROR, DISASSEMBLER) << "> error encountered at " << proto_id << " (0x" << std::hex << proto_id
+        LOG(ERROR, DISASSEMBLER) << "> error encountered at " << code_id << " (0x" << std::hex << code_id
                                  << "). number of function's arguments (" << std::dec << params_num
                                  << ") exceeds MAX_ARG_NUM (" << MAX_ARG_NUM << ") !";
 
         return;
     }
 
-    size_t ref_idx = 0;
-    method->return_type = PFTypeToPandasmType(proto_accessor.GetReturnType(), proto_accessor, ref_idx);
+    method->return_type = pandasm::Type("any", 0);
 
     for (uint8_t i = 0; i < params_num; i++) {
-        auto arg_type = PFTypeToPandasmType(proto_accessor.GetArgType(i), proto_accessor, ref_idx);
-        method->params.push_back(pandasm::Function::Parameter(arg_type, file_language_));
+        method->params.push_back(pandasm::Function::Parameter(pandasm::Type("any", 0), file_language_));
     }
 }
 
@@ -1128,7 +1127,9 @@ std::string Disassembler::GetMethodSignature(const panda_file::File::EntityId &m
     panda::panda_file::MethodDataAccessor method_accessor(*file_, method_id);
 
     pandasm::Function method(GetFullMethodName(method_id), file_language_);
-    GetParams(&method, method_accessor.GetProtoId());
+    if (method_accessor.GetCodeId().has_value()) {
+        GetParams(&method, method_accessor.GetCodeId().value());
+    }
     GetMetaData(&method, method_id);
 
     return pandasm::GetFunctionSignatureFromName(method.name, method.params);

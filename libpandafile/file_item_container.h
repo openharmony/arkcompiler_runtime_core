@@ -229,6 +229,9 @@ private:
         IndexItem(IndexType type, size_t max_index) : type_(type), max_index_(max_index)
         {
             ASSERT(type_ != IndexType::NONE);
+            if (type == IndexType::FIELD || type == IndexType::PROTO) {
+                SetNeedsEmit(false);
+            }
         }
 
         ~IndexItem() override = default;
@@ -281,7 +284,10 @@ private:
     protected:
         size_t CalculateSize() const override
         {
-            return index_.size() * ID_SIZE;
+            if (NeedsEmit()) {
+                return index_.size() * ID_SIZE;
+            }
+            return 0;
         }
 
     private:

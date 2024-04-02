@@ -108,6 +108,11 @@ public:
         return File::EntityId(proto_off_);
     }
 
+    File::Index GetProtoIdx() const
+    {
+        return proto_idx_;
+    }
+
     uint32_t GetAccessFlags() const
     {
         return access_flags_;
@@ -163,6 +168,11 @@ public:
         return method_id_;
     }
 
+    bool HasValidProto() const
+    {
+        return proto_idx_ != INVALID_INDEX_16;
+    }
+
     uint32_t GetAnnotationsNumber();
     uint32_t GetRuntimeAnnotationsNumber();
     uint32_t GetTypeAnnotationsNumber();
@@ -197,7 +207,7 @@ private:
     uint16_t class_idx_;
     uint16_t proto_idx_;
     uint32_t class_off_;
-    uint32_t proto_off_;
+    uint32_t proto_off_ {0};
     uint32_t name_off_;
     uint32_t access_flags_;
 
