@@ -41,8 +41,12 @@ public:
 
     void Run()
     {
+        dead_marker_ = graph_->NewMarker();
         for (auto bb : graph_->GetBlocksRPO()) {
             for (auto inst : bb->AllInstsSafe()) {
+                if (inst->IsMarked(dead_marker_)) {
+                    continue;
+                }
                 if (!inst->IsPhi() && inst->GetOpcode() != Opcode::CatchPhi) {
                     continue;
                 }
@@ -72,9 +76,11 @@ public:
                     // Phi has only SafePoint in users, we can remove this phi and all phi in collected list.
                     inst->RemoveUsers<true>();
                     inst->GetBasicBlock()->RemoveInst(inst);
+                    inst->SetMarker(dead_marker_);
                     for (auto phi : phi_users_) {
                         phi->RemoveUsers<true>();
                         phi->GetBasicBlock()->RemoveInst(phi);
+                        phi->SetMarker(dead_marker_);
                     }
                 } else {
                     SetTypeByInputs(inst);
@@ -83,6 +89,7 @@ public:
                 graph_->EraseMarker(marker_);
             }
         }
+        graph_->EraseMarker(dead_marker_);
     }
 
 private:
@@ -214,6 +221,7 @@ private:
     InstVector phi_users_;
     InstVector real_users_;
     Marker marker_ {UNDEF_MARKER};
+    Marker dead_marker_ {UNDEF_MARKER};
     bool has_save_state_inst_only_ {true};
 };
 }  // namespace panda::compiler
