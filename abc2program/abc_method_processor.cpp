@@ -113,11 +113,17 @@ void AbcMethodProcessor::FillCodeData()
 void AbcMethodProcessor::FillDebugInfo()
 {
     FillSourceFile();
+    FillSourceCode();
 }
 
 void AbcMethodProcessor::FillSourceFile()
 {
     function_.source_file = debug_info_extractor_.GetSourceFile(entity_id_);
+}
+
+void AbcMethodProcessor::FillSourceCode()
+{
+    function_.source_code = debug_info_extractor_.GetSourceCode(entity_id_);
 }
 
 void AbcMethodProcessor::FillFuncAnnotation()

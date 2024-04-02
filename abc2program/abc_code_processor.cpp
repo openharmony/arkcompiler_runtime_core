@@ -22,7 +22,8 @@ namespace panda::abc2program {
 
 AbcCodeProcessor::AbcCodeProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container,
                                    panda_file::File::EntityId method_id, pandasm::Function &function)
-    : AbcFileEntityProcessor(entity_id, entity_container), method_id_(method_id), function_(function)
+    : AbcFileEntityProcessor(entity_id, entity_container), method_id_(method_id), function_(function),
+      debug_info_extractor_(entity_container.GetDebugInfoExtractor())
 {
     code_data_accessor_ = std::make_unique<panda_file::CodeDataAccessor>(*file_, entity_id_);
     code_converter_ = std::make_unique<AbcCodeConverter>(entity_container_);
@@ -33,6 +34,7 @@ void AbcCodeProcessor::FillProgramData()
     FillFunctionRegsNum();
     FillIns();
     FillCatchBlocks();
+    FillLocalVariableTable();
 }
 
 void AbcCodeProcessor::FillFunctionRegsNum()
@@ -47,6 +49,7 @@ void AbcCodeProcessor::FillIns()
         AddDummyEndIns();
     }
     AddJumpLabels();
+    FillInsDebug();
 }
 
 void AbcCodeProcessor::FillInsWithoutLabels()
@@ -116,8 +119,14 @@ void AbcCodeProcessor::AddDummyEndIns()
 
 uint32_t AbcCodeProcessor::GetInstIdxByInstPc(uint32_t inst_pc) const
 {
+    if (inst_pc_idx_map_.empty()) {
+        return 0;
+    }
     auto it = inst_pc_idx_map_.find(inst_pc);
-    ASSERT(it != inst_pc_idx_map_.end());
+    // Locate the end of ins list of current function
+    if (it == inst_pc_idx_map_.end()) {
+        return (inst_pc_idx_map_.rbegin()->second) + 1;
+    }
     return it->second;
 }
 
@@ -220,6 +229,73 @@ std::string AbcCodeProcessor::GetLabelNameAtPc(uint32_t inst_pc) const
 {
     uint32_t inst_idx = GetInstIdxByInstPc(inst_pc);
     return AbcFileUtils::GetLabelNameByInstIdx(inst_idx);
+}
+
+void AbcCodeProcessor::FillLocalVariableTable()
+{
+    const std::vector<panda_file::LocalVariableInfo>& variables =
+        debug_info_extractor_.GetLocalVariableTable(method_id_);
+    
+    for (const auto &variable : variables) {
+        uint32_t start_idx = GetInstIdxByInstPc(variable.start_offset);
+        uint32_t end_idx = GetInstIdxByInstPc(variable.end_offset);
+        uint32_t length = end_idx - start_idx;
+        panda::pandasm::debuginfo::LocalVariable local_var = {variable.name,
+                                                              variable.type,
+                                                              variable.type_signature,
+                                                              variable.reg_number,
+                                                              start_idx,
+                                                              length};
+        function_.local_variable_debug.push_back(local_var);
+    }
+}
+
+void AbcCodeProcessor::FillInsDebug()
+{
+    constexpr size_t DEFAULT_LINE = -1;
+    constexpr uint32_t DEFAULT_COLUMN = -1;
+    uint32_t line_idx = 0;
+    uint32_t column_idx = 0;
+    uint32_t offset_start = UINT_MAX;
+    uint32_t offset_end = UINT_MAX;
+    size_t line = DEFAULT_LINE;
+    uint32_t column = DEFAULT_COLUMN;
+    const std::vector<panda::panda_file::LineTableEntry>& line_table =
+        debug_info_extractor_.GetLineNumberTable(method_id_);
+    const std::vector<panda::panda_file::ColumnTableEntry>& column_table =
+        debug_info_extractor_.GetColumnNumberTable(method_id_);
+
+    for (uint32_t inst_idx = 0; inst_idx < function_.ins.size(); inst_idx++) {
+        SkipToNextEntryIfNeeded(line_idx, offset_start, offset_end, inst_idx, line_table);
+        line = line_idx > 0 ? line_table[line_idx - 1].line : line;
+        function_.ins[inst_idx].ins_debug.line_number = line;
+    }
+
+    // Column table may be empty if all ins of current function has default column number
+    // The first entry of column table is the offset of the first ins for which column number differs from the default
+    offset_start = 0;
+    offset_end = column_table.size() > 0 ? column_table[0].offset : UINT_MAX;
+    for (uint32_t inst_idx = 0; inst_idx < function_.ins.size(); inst_idx++) {
+        SkipToNextEntryIfNeeded(column_idx, offset_start, offset_end, inst_idx, column_table);
+        column = column_idx > 0 ? column_table[column_idx - 1].column : column;
+        function_.ins[inst_idx].ins_debug.column_number = column;
+    }
+}
+
+template <typename T>
+void AbcCodeProcessor::SkipToNextEntryIfNeeded(uint32_t &idx,
+                                               uint32_t &offset_start,
+                                               uint32_t &offset_end,
+                                               uint32_t inst_idx,
+                                               const T &table)
+{
+    uint32_t ins_offset = GetInstPcByInstIdx(inst_idx);
+    ASSERT(ins_offset < UINT_MAX);
+    while (idx < table.size() && (ins_offset < offset_start || ins_offset >= offset_end)) {
+        offset_start = table[idx].offset;
+        ++idx;
+        offset_end = idx < table.size() ? table[idx].offset : UINT_MAX;
+    }
 }
 
 } // namespace panda::abc2program

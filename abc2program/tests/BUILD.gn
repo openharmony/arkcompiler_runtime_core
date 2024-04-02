@@ -41,7 +41,10 @@ foreach(file, abc2prog_test_js_files) {
 
     src_js = rebase_path(test_js)
     dst_file = rebase_path(test_abc)
-    extra_args = [ "--module" ]
+    extra_args = [
+      "--debug",
+      "--module",
+    ]
     in_puts = [ test_js ]
     out_puts = [ test_abc ]
   }

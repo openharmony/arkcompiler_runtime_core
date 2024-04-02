@@ -282,6 +282,7 @@ void PandasmProgramDumper::DumpFunctionBody(std::ostream &os, const pandasm::Fun
 {
     DumpFunctionIns(os, function);
     DumpFunctionCatchBlocks(os, function);
+    DumpFunctionDebugInfo(os, function);
     os << "}" << DUMP_CONTENT_DOUBLE_ENDL;
 }
 
@@ -298,7 +299,12 @@ void PandasmProgramDumper::DumpFunctionIns4PandaAssembly(std::ostream &os, const
 {
     for (const pandasm::Ins &pa_ins : function.ins) {
         std::string insStr = pa_ins.ToString("", true, regs_num_);
-        os << DUMP_CONTENT_TAB << insStr << DUMP_CONTENT_SINGLE_ENDL;
+        os << DUMP_CONTENT_TAB << std::setw(LINE_WIDTH)
+           << std::left << insStr
+           << DUMP_CONTENT_LINE_NUMBER << pa_ins.ins_debug.line_number;
+        os << std::setw(COLUMN_WIDTH) << std::left << DUMP_CONTENT_SPACE
+           << DUMP_CONTENT_COLUMN_NUMBER << pa_ins.ins_debug.column_number
+           << DUMP_CONTENT_SINGLE_ENDL;
     }
 }
 
@@ -317,11 +323,15 @@ void PandasmProgramDumper::GetOriginalDumpIns(const pandasm::Function &function)
 {
     original_dump_ins_.clear();
     original_dump_ins_ptrs_.clear();
+    original_ins_index_map_.clear();
     for (const pandasm::Ins &pa_ins : function.ins) {
         original_dump_ins_.emplace_back(DeepCopyIns(pa_ins));
     }
+    uint32_t idx = 0;
     for (pandasm::Ins &pa_ins : original_dump_ins_) {
         original_dump_ins_ptrs_.emplace_back(&pa_ins);
+        original_ins_index_map_[&pa_ins] = idx;
+        idx++;
     }
 }
 
@@ -356,9 +366,13 @@ pandasm::Ins PandasmProgramDumper::DeepCopyIns(const pandasm::Ins &input) const
 void PandasmProgramDumper::GetFinalDumpIns()
 {
     final_dump_ins_ptrs_.clear();
+    final_ins_index_map_.clear();
+    uint32_t idx = 0;
     for (pandasm::Ins *pa_ins : original_dump_ins_ptrs_) {
+        final_ins_index_map_[pa_ins] = idx;
         if (pa_ins->opcode != pandasm::Opcode::INVALID) {
             final_dump_ins_ptrs_.emplace_back(pa_ins);
+            idx++;
         }
     }
 }
@@ -370,7 +384,12 @@ void PandasmProgramDumper::DumpFinallyIns(std::ostream &os)
             ReplaceLiteralId4Ins(*pa_ins);
         }
         std::string insStr = pa_ins->ToString("", true, regs_num_);
-        os << DUMP_CONTENT_TAB << insStr << DUMP_CONTENT_SINGLE_ENDL;
+        os << DUMP_CONTENT_TAB << std::setw(LINE_WIDTH)
+           << std::left << insStr
+           << DUMP_CONTENT_LINE_NUMBER << pa_ins->ins_debug.line_number;
+        os << std::setw(COLUMN_WIDTH) << std::left << DUMP_CONTENT_SPACE
+           << DUMP_CONTENT_COLUMN_NUMBER << pa_ins->ins_debug.column_number
+           << DUMP_CONTENT_SINGLE_ENDL;
     }
 }
 
@@ -563,6 +582,71 @@ void PandasmProgramDumper::DumpCatchBlock(std::ostream &os, const pandasm::Funct
     if (dumper_source_ == ProgramDumperSource::PANDA_ASSEMBLY) {
         os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_END_LABEL
            << catch_block.catch_end_label << DUMP_CONTENT_SINGLE_ENDL;
+    }
+}
+
+void PandasmProgramDumper::DumpFunctionDebugInfo(std::ostream &os, const pandasm::Function &function)
+{
+    if (function.local_variable_debug.empty()) {
+        return;
+    }
+    std::map<int32_t, panda::pandasm::debuginfo::LocalVariable> local_variable_table;
+    if (dumper_source_ == ProgramDumperSource::ECMASCRIPT) {
+        UpdateLocalVarMap(function, local_variable_table);
+    } else {
+        for (const auto &variable_info : function.local_variable_debug) {
+            local_variable_table[variable_info.reg] = variable_info;
+        }
+    }
+
+    os << DUMP_CONTENT_SINGLE_ENDL;
+    os << DUMP_TITLE_LOCAL_VAR_TABLE;
+    os << DUMP_CONTENT_DOUBLE_ENDL;
+    os << DUMP_CONTENT_LOCAL_VAR_TABLE;
+    for (const auto &iter : local_variable_table) {
+        const auto &variable_info = iter.second;
+        os << DUMP_CONTENT_TAB
+           << std::setw(START_WIDTH) << std::right << variable_info.start << DUMP_CONTENT_TRIPLE_SPACES;
+        os << std::setw(END_WIDTH) << std::right << variable_info.length << DUMP_CONTENT_DOUBLE_SPACES;
+        os << std::setw(REG_WIDTH) << std::right << variable_info.reg << DUMP_CONTENT_DOUBLE_SPACES;
+        os << std::setw(NAME_WIDTH)
+           << std::right << variable_info.name << DUMP_CONTENT_NONUPLE_SPACES << variable_info.signature;
+        if (!variable_info.signature_type.empty() && variable_info.signature_type != variable_info.signature) {
+            os << " (" << variable_info.signature_type << ")";
+        }
+        os << DUMP_CONTENT_SINGLE_ENDL;
+    }
+    os << DUMP_CONTENT_DOUBLE_ENDL;
+}
+
+void PandasmProgramDumper::UpdateLocalVarMap(const pandasm::Function &function,
+    std::map<int32_t, panda::pandasm::debuginfo::LocalVariable>& local_variable_table)
+{
+    std::unordered_map<uint32_t, uint32_t> original_to_final_index_map_;
+    uint32_t max_original_idx = 0;
+    uint32_t max_final_idx = 0;
+    for (const auto &[key, value] : original_ins_index_map_) {
+        uint32_t final_idx = final_ins_index_map_[key];
+        original_to_final_index_map_[value] = final_idx;
+        if (value > max_original_idx) {
+            max_original_idx = value;
+            max_final_idx = final_idx;
+        }
+    }
+    original_to_final_index_map_[max_original_idx + 1] = max_final_idx;
+
+    for (const auto &variable_info : function.local_variable_debug) {
+        uint32_t original_start = variable_info.start;
+        uint32_t original_end = variable_info.length + variable_info.start;
+        uint32_t new_start = original_to_final_index_map_[original_start];
+        uint32_t new_length = original_to_final_index_map_[original_end] - new_start;
+        panda::pandasm::debuginfo::LocalVariable local_var = {variable_info.name,
+                                                              variable_info.signature,
+                                                              variable_info.signature_type,
+                                                              variable_info.reg,
+                                                              new_start,
+                                                              new_length};
+        local_variable_table[variable_info.reg] = local_var;
     }
 }
 
