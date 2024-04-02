@@ -53,6 +53,30 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
     public constructor(object: NullishType) {}
 
     /**
+     * Returns an instance of string at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns a primitive at index
+     */
+    public $_get(index: number): char {
+        return this.$_get(index as int);
+    }
+
+    /**
+     * Returns an instance of string at passed index.
+     *
+     * @param index index to look at
+     *
+     * @returns char value at index
+     *
+     * @throws StringIndexOutOfBoundsException if index is negative or >= length
+     */
+    public $_get(index: int): char {
+        return this.charAt(index);
+    }
+
+    /**
      * Checks equality of this string and another Object as String
      *
      * @param to another object to compare
