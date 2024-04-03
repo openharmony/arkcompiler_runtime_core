@@ -165,7 +165,7 @@ static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_fore
 }
 
 /*static*/
-uint8_t ItemContainer::api = 0;
+uint8_t ItemContainer::apiVersion = 0;
 
 ItemContainer::ItemContainer()
 {
@@ -621,8 +621,8 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
     }
     writer->CountChecksum(true);
 
-    const auto write_version = GetVersionByApi(ItemContainer::GetApi());
-    std::vector<uint8_t> versionVec(std::begin(write_version.value()), std::end(write_version.value()));
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi());
+    std::vector<uint8_t> versionVec(std::begin(bc_version.value()), std::end(bc_version.value()));
 
     if (!writer->WriteBytes(versionVec)) {
         return false;

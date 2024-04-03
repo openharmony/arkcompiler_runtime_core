@@ -209,17 +209,17 @@ public:
         indexed_item_count_++;
     }
 
-    static void InitApi(uint8_t api)
+    static void SetApi(uint8_t api)
     {
-        ItemContainer::api = api;
+        ItemContainer::apiVersion = api;
     }
 
     static uint8_t GetApi()
     {
-        return ItemContainer::api;
+        return ItemContainer::apiVersion;
     }
 
-    static uint8_t api;
+    static uint8_t apiVersion;
 
 private:
     template <class T>
@@ -242,8 +242,8 @@ private:
         {
             ASSERT(type_ != IndexType::NONE);
 
-            const auto version = GetVersionByApi(ItemContainer::GetApi());
-            if (version.value().front() >= API_12 && (type == IndexType::FIELD || type == IndexType::PROTO)) {
+            const auto bc_version = GetVersionByApi(ItemContainer::GetApi());
+            if (bc_version.value().front() >= API_12 && (type == IndexType::FIELD || type == IndexType::PROTO)) {
                 SetNeedsEmit(false);
             }
         }
