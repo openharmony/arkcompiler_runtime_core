@@ -36,9 +36,9 @@ the class declaration.
 An annotation must be placed immediately before the declaration it is applied to.
 The annotation usage can include arguments as in the example above.
 
-For an annotation to be used, its name must be prefixed with the sympol ``@``
+For an annotation to be used, its name must be prefixed with the symbol ``@``
 (e.g., ``@MyAnno``). 
-Spaces and line separators between the sympol ``@`` and the name are not allowed:
+Spaces and line separators between the symbol ``@`` and the name are not allowed:
 
 .. code-block:: 
    :linenos:
@@ -75,10 +75,7 @@ interface where the keyword ``interface`` is prefixed with the symbol ``@``:
 .. code-block:: abnf
 
     userDefinedAnnotationDeclaration:
-        annotationModifier? '@interface' Identifier '{' annotationField* '}'
-        ;
-    annotationModifier:
-        'export'
+        '@interface' Identifier '{' annotationField* '}'
         ;
     annotationField:
         Identifier ':' TypeNode initializer?
@@ -90,18 +87,20 @@ interface where the keyword ``interface`` is prefixed with the symbol ``@``:
         Expression
         ;
 
+As any other declarated entity, an annotation can be exported, using ``export`` keyword.
+
 A ``TypeNode`` in the annotation field is restricted (see :ref:`Types of Annotation Fields`).
 
 The default value of an *annotation field* can be specified 
 using *initializer* as *constant expression*. A compile-time occurs in the value
-of this expression can not be evaluated in compile-time.
+of this expression cannot be evaluated in compile-time.
 
 An *user-defined annotation* must be defined at top-level,
 otherwise a compile-time error occurs.
 
-An *user-defined annotation* can not be extended (inheritance is not supported). 
+An *user-defined annotation* cannot be extended (inheritance is not supported). 
 
-The name of an *user-defined annotation* can not coincide with a name of other entity.
+The name of an *user-defined annotation* cannot coincide with a name of other entity.
 
 .. code-block:: typescript
    :linenos:
@@ -111,7 +110,7 @@ The name of an *user-defined annotation* can not coincide with a name of other e
     class Position {/*body*/} // compile-time error: duplicate identifier
 
 An annotation declaration does not define a type, so a type alias
-can not be applied to the annotation and it can not be used as an interface:
+cannot be applied to the annotation and it cannot be used as an interface:
 
 .. code-block:: typescript
    :linenos:
@@ -199,7 +198,7 @@ Otherwise, a compile-time error occurs:
     abstract class A {} // compile-time error
 
 Repeatable annotations 
-(applying the same annotation more then once to the enitity)
+(applying the same annotation more than once to the entity)
 are not supported:
 
 .. code-block:: typescript
@@ -322,14 +321,51 @@ The following cases are forbidden for annotations:
 Annotations in .d.ets Files
 ===========================
 
-Annotations can be defined in .d.ets file
-and used in the same file or any other module if imported.
+Ambient annotations can be declared in .d.ets file. 
+
+.. code-block:: abnf
+
+    ambientAnnotationDeclaration:
+        'declare' userDefinedAnnotationDeclaration
+        ;
+
+Such declaration does not introduce a new annotation, but provides type information
+for using annotation that must be defined somewhere else. 
+A runtime error occurs, if there no annotation that corresponds to the ambient annotation, 
+used in the program. 
+
+The ambient declaration and annotation that implements it must be exactly the same, 
+including fields initialization:
 
 .. code-block:: typescript
    :linenos:
 
     // a.d.ets
-    export @interface MyAnno {}
+    export declare @interface NameAnno{name: string = ""}
+
+    // a.ets
+    export @interface NameAnno{name: string = ""} // ok
+
+The following example shows incorrect code,
+as ambient declaration is not the same as annotation declaration:
+
+.. code-block:: typescript
+   :linenos:
+
+    // a.d.ets
+    export declare @interface VersionAnno{version: number} // initialization is missing
+
+    // a.ets
+    export @interface VersionAnno{version: number = 1} 
+
+
+An ambient declaration can be imported and used exactly the same way as a regular annotation.
+
+.. code-block:: typescript
+   :linenos:
+
+    // a.d.ets
+    export declare @interface MyAnno {}
 
     // b.ets
     import { MyAnno } from "./a"
@@ -347,7 +383,7 @@ It is up to the developer to apply it to the implementation declaration.
    :linenos:
 
     // a.d.ets
-    export @interface MyAnno {}
+    export declare @interface MyAnno {}
     
     @MyAnno
     declare class C {}
