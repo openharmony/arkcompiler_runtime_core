@@ -528,41 +528,46 @@ void PandaEtsVM::ResolveNativeMethod(Method *method)
     method->SetNativePointer(ptr);
 }
 
+static void PrintExceptionInfo(EtsCoroutine *coro, EtsHandle<EtsObject> exception, PandaStringStream &ss)
+{
+    auto extension = coro->GetPandaVM()->GetEtsClassLinkerExtension();
+    auto cls = exception->GetClass();
+
+    PandaVector<uint8_t> strBuf;
+    auto const performCall = [coro, &exception, &strBuf](EtsMethod *method) -> std::optional<std::string_view> {
+        ASSERT(method != nullptr);
+        std::array<Value, 1> args = {Value(exception->GetCoreType())};
+        EtsObject *callRes = EtsObject::FromCoreType(
+            EtsMethod::ToRuntimeMethod(method)->Invoke(coro, args.data()).GetAs<ObjectHeader *>());
+        if (coro->HasPendingException() || callRes == EtsObject::FromCoreType(coro->GetUndefinedObject())) {
+            return std::nullopt;
+        }
+        return EtsString::FromEtsObject(callRes)->ConvertToStringView(&strBuf);
+    };
+
+    char const *dumperName =
+        extension->GetErrorClass()->IsAssignableFrom(cls->GetRuntimeClass()) ? "<get>stack" : "toString";
+    ss << std::endl << performCall(cls->GetMethod(dumperName)).value_or("exception dump failed");
+}
+
 void PandaEtsVM::HandleUncaughtException()
 {
-    auto currentCoro = EtsCoroutine::GetCurrent();
-    ASSERT(currentCoro != nullptr);
-    ScopedManagedCodeThread sj(currentCoro);
-    [[maybe_unused]] EtsHandleScope scope(currentCoro);
+    auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+    ScopedManagedCodeThread sj(coro);
+    [[maybe_unused]] EtsHandleScope scope(coro);
 
-    EtsHandle<EtsObject> exception(currentCoro, EtsObject::FromCoreType(currentCoro->GetException()));
+    EtsHandle<EtsObject> exception(coro, EtsObject::FromCoreType(coro->GetException()));
 
     PandaStringStream logStream;
     logStream << "Unhandled exception: " << exception->GetCoreType()->ClassAddr<Class>()->GetName();
 
-    auto *exceptionEtsClass = exception->GetClass();
-    if ((exception->GetCoreType() == currentCoro->GetVM()->GetOOMErrorObject()) ||
-        (GetClassLinker()->GetClass(panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR.data()) ==
-         exceptionEtsClass)) {
-        LOG(ERROR, RUNTIME) << logStream.str();
-        // can't do anything more useful in case of OOM or StackOF
-        // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
-        _exit(1);
+    auto descr = exception->GetClass()->GetDescriptor();
+    if (descr != panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR &&
+        descr != panda_file_items::class_descriptors::STACK_OVERFLOW_ERROR) {
+        coro->ClearException();
+        PrintExceptionInfo(coro, exception, logStream);
     }
-
-    // We need to call Exception::toString() method and write the result to stdout.
-    // NOTE(molotkovmikhail,#I7AJKF): use NAPI to describe the exception and print the stacktrace
-    auto *methodToExecute = EtsMethod::ToRuntimeMethod(exceptionEtsClass->GetMethod("toString"));
-    Value args(exception->GetCoreType());  // only 'this' is required as an argument
-    currentCoro->ClearException();         // required for Invoke()
-    auto methodRes = methodToExecute->Invoke(currentCoro, &args);
-    auto *strResult = coretypes::String::Cast(methodRes.GetAs<ObjectHeader *>());
-    if (strResult == nullptr) {
-        LOG(ERROR, RUNTIME) << logStream.str();
-        // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
-        _exit(1);
-    }
-    logStream << "\n" << ConvertToString(strResult);
     LOG(ERROR, RUNTIME) << logStream.str();
     // _exit guarantees a safe completion in case of multi-threading as static destructors aren't called
     _exit(1);

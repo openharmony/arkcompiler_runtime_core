@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,14 @@
  * limitations under the License.
  */
 
-const correct_res : int = 42;
-let res : int = 0;
-
-class A {
-    public foo() : void {
-        res = 41;
-    }
+abstract class A1 {
+    abstract foo(): int
 }
 
-class B extends A {
-    public override foo() : void {
-        res = 42;
-    }
+class A2 extends A1 {
+    public override foo(): int { return 2 }
 }
 
-function call(a: A) : void {
-    a.foo();
-}
-
-function main(): void {
-    let b: B = new B();
-    call(b);
-    assert res == correct_res: "ERROR: Wrong res after virtual call";
+function main() {
+    assert ((x: A1) => x.foo())(new A2()) == 2;
 }

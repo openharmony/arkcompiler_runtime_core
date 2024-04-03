@@ -103,6 +103,7 @@ static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/c
 static constexpr std::string_view INCOMPATIBLE_CLASS_CHANGE_ERROR      = "Lstd/core/IncompatibleClassChangeError;";
 static constexpr std::string_view INDEX_OUT_OF_BOUNDS_ERROR            = "Lstd/core/IndexOutOfBoundsError;";
 static constexpr std::string_view INSTANTIATION_ERROR                  = "Lstd/core/InstantiationError;";
+static constexpr std::string_view LINKAGE_ERROR                        = "Lstd/core/LinkageError;";
 static constexpr std::string_view NEGATIVE_ARRAY_SIZE_ERROR            = "Lstd/core/NegativeArraySizeError;";
 static constexpr std::string_view NO_CLASS_DEF_FOUND_ERROR             = "Lstd/core/NoClassDefFoundError;";
 static constexpr std::string_view NO_SUCH_FIELD_ERROR                  = "Lstd/core/NoSuchFieldError;";
@@ -111,6 +112,7 @@ static constexpr std::string_view NULL_POINTER_ERROR                   = "Lstd/c
 static constexpr std::string_view OUT_OF_MEMORY_ERROR                  = "Lstd/core/OutOfMemoryError;";
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
 static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/core/StringIndexOutOfBoundsError;";
+static constexpr std::string_view VERIFY_ERROR                         = "Lstd/core/VerifyError;";
 
 static constexpr std::string_view DOUBLE_TO_STRING_CACHE_ELEMENT       = "Lstd/core/DoubleToStringCacheElement;";
 static constexpr std::string_view FLOAT_TO_STRING_CACHE_ELEMENT        = "Lstd/core/FloatToStringCacheElement;";
@@ -119,7 +121,6 @@ static constexpr std::string_view LONG_TO_STRING_CACHE_ELEMENT         = "Lstd/c
 // Error classes
 static constexpr std::string_view ERROR_OPTIONS                        = "Lescompat/ErrorOptions;";
 static constexpr std::string_view RANGE_ERROR                          = "Lescompat/RangeError;";
-static constexpr std::string_view VERIFY_ERROR                         = "Lescompat/VerifyError;";
 
 // interop/js
 static constexpr std::string_view JS_RUNTIME                           = "Lstd/interop/js/JSRuntime;";

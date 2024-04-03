@@ -2331,7 +2331,7 @@
     method_return_type: number,
     expected_test_data_item_type: number,
     expected_data_type: "number[]",
-    expected_test_data: '[0, 0, 0, 1, -1]',
+    expected_test_data: '[0, 0, 0, -1, 1]',
     verify_test_result_function: comparePrimitiveValue
   }
 

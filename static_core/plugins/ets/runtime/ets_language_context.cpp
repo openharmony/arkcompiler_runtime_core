@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,14 +32,14 @@ void EtsLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *mu
     ThrowEtsException(coroutine, utf::Mutf8AsCString(mutf8Name), utf::Mutf8AsCString(mutf8Msg));
 }
 
-PandaUniquePtr<ITableBuilder> EtsLanguageContext::CreateITableBuilder() const
+PandaUniquePtr<ITableBuilder> EtsLanguageContext::CreateITableBuilder(ClassLinkerErrorHandler *errHandler) const
 {
-    return MakePandaUnique<EtsITableBuilder>();
+    return MakePandaUnique<EtsITableBuilder>(errHandler);
 }
 
-PandaUniquePtr<VTableBuilder> EtsLanguageContext::CreateVTableBuilder() const
+PandaUniquePtr<VTableBuilder> EtsLanguageContext::CreateVTableBuilder(ClassLinkerErrorHandler *errHandler) const
 {
-    return MakePandaUnique<EtsVTableBuilder>();
+    return MakePandaUnique<EtsVTableBuilder>(errHandler);
 }
 
 ets::PandaEtsVM *EtsLanguageContext::CreateVM(Runtime *runtime, const RuntimeOptions &options) const

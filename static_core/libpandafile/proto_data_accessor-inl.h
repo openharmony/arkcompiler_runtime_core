@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,13 +109,18 @@ inline bool ProtoDataAccessor::IsEqual(ProtoDataAccessor *other)
     return true;
 }
 
-inline uint32_t ProtoDataAccessor::GetNumArgs()
+inline uint32_t ProtoDataAccessor::GetNumElements()
 {
     if (refTypesSp_.data() == nullptr) {
         SkipShorty();
     }
 
-    return elemNum_ - 1;
+    return elemNum_;
+}
+
+inline uint32_t ProtoDataAccessor::GetNumArgs()
+{
+    return GetNumElements() - 1;
 }
 
 inline File::EntityId ProtoDataAccessor::GetReferenceType(size_t i)

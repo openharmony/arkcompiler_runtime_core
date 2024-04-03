@@ -107,6 +107,16 @@ public:
         return bigintClass_;
     }
 
+    Class *GetExceptionClass()
+    {
+        return exceptionClass_;
+    }
+
+    Class *GetErrorClass()
+    {
+        return errorClass_;
+    }
+
     Class *GetArrayAsListIntClass()
     {
         return arrayAsListIntClass_;
@@ -240,6 +250,8 @@ private:
     Class *boxDoubleClass_ = nullptr;
     // std.core
     Class *bigintClass_ = nullptr;
+    Class *exceptionClass_ = nullptr;
+    Class *errorClass_ = nullptr;
     Class *promiseClass_ = nullptr;
     Method *subscribeOnAnotherPromiseMethod_ = nullptr;
     Class *promiseRefClass_ = nullptr;

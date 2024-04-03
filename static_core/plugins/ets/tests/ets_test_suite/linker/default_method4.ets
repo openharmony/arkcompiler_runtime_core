@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,18 @@
  * limitations under the License.
  */
 
-const correct_res : int = 42;
-let res : int = 0;
-
-interface A {
-    static foo() : void;
+interface I1 {
+    foo(): string { return "I1" }
 }
 
-class B implements A {
-    public override foo() : void {
-        res = 42;
-    }
+interface I2 extends I1 {
+    foo(): string { return "I2" }
 }
 
-function call(a: A) : void {
-    a.foo();
-}
+abstract class A1 implements I2 {}
+class A2 extends A1 implements I1 {}
 
-function main(): void {
-    let b: B = new B();
-    call(b);
-    assert res == correct_res: "ERROR: Wrong res after virtual call";
+function main() {
+    assert ((x: I1) => x.foo())(new A2()) == "I2";
+    assert ((x: I2) => x.foo())(new A2()) == "I2";
 }

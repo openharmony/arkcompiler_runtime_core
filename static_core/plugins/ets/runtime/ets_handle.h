@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ public:
 
     ~EtsHandle() = default;
     DEFAULT_NOEXCEPT_MOVE_SEMANTIC(EtsHandle);
-    NO_COPY_SEMANTIC(EtsHandle);
+    DEFAULT_COPY_SEMANTIC(EtsHandle);
 
 private:
     static constexpr ObjectHeader *GetObjectHeader(T *etsObj)

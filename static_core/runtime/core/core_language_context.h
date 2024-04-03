@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -248,9 +248,9 @@ public:
 
     void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const override;
 
-    PandaUniquePtr<ITableBuilder> CreateITableBuilder() const override;
+    PandaUniquePtr<ITableBuilder> CreateITableBuilder(ClassLinkerErrorHandler *errHandler) const override;
 
-    PandaUniquePtr<VTableBuilder> CreateVTableBuilder() const override;
+    PandaUniquePtr<VTableBuilder> CreateVTableBuilder(ClassLinkerErrorHandler *errHandler) const override;
 
     bool InitializeClass(ClassLinker *classLinker, ManagedThread *thread, Class *klass) const override
     {

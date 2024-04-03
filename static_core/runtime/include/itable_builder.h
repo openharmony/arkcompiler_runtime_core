@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,10 @@ class ITableBuilder {
 public:
     ITableBuilder() = default;
 
-    virtual void Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces, bool isInterface) = 0;
+    [[nodiscard]] virtual bool Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces,
+                                     bool isInterface) = 0;
 
-    virtual void Resolve(Class *klass) = 0;
+    [[nodiscard]] virtual bool Resolve(Class *klass) = 0;
 
     virtual void UpdateClass(Class *klass) = 0;
 
@@ -46,12 +47,16 @@ public:
 
 class DummyITableBuilder final : public ITableBuilder {
 public:
-    void Build([[maybe_unused]] ClassLinker *classLinker, [[maybe_unused]] Class *base,
+    bool Build([[maybe_unused]] ClassLinker *classLinker, [[maybe_unused]] Class *base,
                [[maybe_unused]] Span<Class *> classInterfaces, [[maybe_unused]] bool isInterface) override
     {
+        return true;
     }
 
-    void Resolve([[maybe_unused]] Class *klass) override {}
+    bool Resolve([[maybe_unused]] Class *klass) override
+    {
+        return true;
+    }
 
     void UpdateClass([[maybe_unused]] Class *klass) override {}
 

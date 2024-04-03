@@ -181,6 +181,11 @@ public:
         return classLinker_.get();
     }
 
+    EtsClassLinkerExtension *GetEtsClassLinkerExtension() const
+    {
+        return classLinker_.get()->GetEtsClassLinkerExtension();
+    }
+
     mem::GlobalObjectStorage *GetGlobalObjectStorage() const override
     {
         ASSERT(mm_ != nullptr);

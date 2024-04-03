@@ -61,37 +61,32 @@ static EtsNapiType GetEtsNapiType([[maybe_unused]] Method *method)
 #endif
 }
 
+static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
+{
+    switch (error) {
+        case ClassLinker::Error::CLASS_NOT_FOUND:
+            return panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION;
+        case ClassLinker::Error::FIELD_NOT_FOUND:
+            return panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR;
+        case ClassLinker::Error::METHOD_NOT_FOUND:
+            return panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
+        case ClassLinker::Error::NO_CLASS_DEF:
+            return panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR;
+        case ClassLinker::Error::CLASS_CIRCULARITY:
+            return panda_file_items::class_descriptors::CLASS_CIRCULARITY_ERROR;
+        case ClassLinker::Error::OVERRIDES_FINAL:
+        case ClassLinker::Error::MULTIPLE_OVERRIDE:
+        case ClassLinker::Error::MULTIPLE_IMPLEMENT:
+            return panda_file_items::class_descriptors::LINKAGE_ERROR;
+        default:
+            LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
+            UNREACHABLE();
+    }
+}
+
 void EtsClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, const PandaString &message)
 {
-    std::string_view classDescriptor {};
-    switch (error) {
-        case ClassLinker::Error::CLASS_NOT_FOUND: {
-            classDescriptor = panda_file_items::class_descriptors::CLASS_NOT_FOUND_EXCEPTION;
-            break;
-        }
-        case ClassLinker::Error::FIELD_NOT_FOUND: {
-            classDescriptor = panda_file_items::class_descriptors::NO_SUCH_FIELD_ERROR;
-            break;
-        }
-        case ClassLinker::Error::METHOD_NOT_FOUND: {
-            classDescriptor = panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
-            break;
-        }
-        case ClassLinker::Error::NO_CLASS_DEF: {
-            classDescriptor = panda_file_items::class_descriptors::NO_CLASS_DEF_FOUND_ERROR;
-            break;
-        }
-        case ClassLinker::Error::CLASS_CIRCULARITY: {
-            classDescriptor = panda_file_items::class_descriptors::CLASS_CIRCULARITY_ERROR;
-            break;
-        }
-        default: {
-            LOG(FATAL, CLASS_LINKER) << "Unhandled error (" << static_cast<size_t>(error) << "): " << message;
-            break;
-        }
-    }
-
-    ThrowEtsException(EtsCoroutine::GetCurrent(), classDescriptor, message);
+    ThrowEtsException(EtsCoroutine::GetCurrent(), GetClassLinkerErrorDescriptor(error), message);
 }
 
 bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
@@ -547,6 +542,8 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
         ASSERT(subscribeOnAnotherPromiseMethod_ != nullptr);
     }
     promiseRefClass_ = CacheClass(PROMISE_REF);
+    exceptionClass_ = CacheClass(EXCEPTION);
+    errorClass_ = CacheClass(ERROR);
     arraybufClass_ = CacheClass(ARRAY_BUFFER);
     stringBuilderClass_ = CacheClass(STRING_BUILDER);
     arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);

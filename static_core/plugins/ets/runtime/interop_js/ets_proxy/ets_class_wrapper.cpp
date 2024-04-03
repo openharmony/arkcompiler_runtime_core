@@ -521,10 +521,15 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     if (_this->HasBuiltin() && !fields.empty()) {
         INTEROP_LOG(ERROR) << "built-in class " << etsClass->GetDescriptor() << " has field properties";
     }
+    if (_this->HasBuiltin() && etsClass->IsFinal()) {
+        INTEROP_LOG(FATAL) << "built-in class " << etsClass->GetDescriptor() << " is final";
+    }
     // NOTE(vpukhov): forbid "true" ets-field overriding in js-derived class, as it cannot be proxied back
-    //                simple solution: ban JSProxy if !fields.empty()
-    auto ungroupedMethods = CollectAllPandaMethods(methods.begin(), methods.end());
-    _this->jsproxyWrapper_ = js_proxy::JSProxy::Create(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+    if (!etsClass->IsFinal()) {
+        auto ungroupedMethods = CollectAllPandaMethods(methods.begin(), methods.end());
+        _this->jsproxyWrapper_ =
+            js_proxy::JSProxy::Create(etsClass, {ungroupedMethods.data(), ungroupedMethods.size()});
+    }
 
     napi_value jsCtor {};
     NAPI_CHECK_FATAL(napi_define_class(env, etsClass->GetDescriptor(), NAPI_AUTO_LENGTH,

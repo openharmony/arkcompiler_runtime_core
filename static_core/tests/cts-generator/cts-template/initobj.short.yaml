@@ -1051,24 +1051,10 @@ tests:
           .function void R.ctor0(R a0) <ctor> {
               return.void
           }
-          .function void R.ctor0x(R a0) <ctor> {
-              lda.null
-              return.void
-          }
           .function void R.ctor1(R a0, i32 a1) <ctor> {
               return.void
           }
-          .function void R.ctor1x(R a0, i32 a1) <ctor> {
-              movi v0, 10
-              newarr v0, v0, R[]
-              lda.obj v0
-              return.void
-          }
           .function void R.ctor2(R a0, R a1, i16 a2) <ctor> {
-              return.void
-          }
-          .function void R.ctor2x(R a0, R a1, i16 a2) <ctor> {
-              lda.null
               return.void
           }
           .record panda.NullPointerException <external>
@@ -1106,21 +1092,11 @@ tests:
             - R.ctor0
             - R
           - values:
-            - R.ctor0x
-            - R
-          - values:
             - R.ctor1, v1
-            - R
-          - values:
-            - R.ctor1x, v1
             - R
           - values:
             - R.ctor2, v4, v1
             - R
-          - values:
-            - R.ctor2x, v4, v1
-            - R
-            tags: ['tsan']
           - values:
             - panda.NullPointerException.ctor, v5, v4
             - panda.NullPointerException

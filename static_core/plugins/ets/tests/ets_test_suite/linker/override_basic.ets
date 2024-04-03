@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,14 @@
  * limitations under the License.
  */
 
-const correct_res : int = 4;
-
-let cb: (a: int, b: int): int;
-
-class A {
-    foo(a: int, b: int): int {
-        return a + b + this.c;
-    }
-
-    c: int = 1;
+class A1 {
+    public foo(): int { return 1 }
 }
 
-function main(): void {
-    let a = new A();
-    cb = a.foo;
-    assert cb(1, 2) == correct_res: "ERROR: Wrong res after lambda call";
+class A2 extends A1 {
+    public override foo(): int { return 2 }
+}
+
+function main() {
+    assert ((a: A1) => a.foo())(new A2()) == 2;
 }

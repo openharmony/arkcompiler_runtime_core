@@ -68,7 +68,7 @@ extern "C" EtsObjectArray *StdCoreStackTraceProvisionStackTrace()
     PandaVector<EtsHandle<EtsStackTraceElement>> stackTraceElements;
     for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
         auto element = EtsHandle<EtsStackTraceElement>(coroutine, CreateStackTraceElement(&stack));
-        stackTraceElements.push_back(std::move(element));
+        stackTraceElements.push_back(element);
     }
 
     const auto linesSize = static_cast<uint32_t>(stackTraceElements.size());
