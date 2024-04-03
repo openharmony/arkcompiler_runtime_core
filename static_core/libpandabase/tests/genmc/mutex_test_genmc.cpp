@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include <cstdlib>
 #include <pthread.h>
 #define MC_ON
-#include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
+#include "platforms/unix/libpandabase/futex/fmutex.cpp"
 
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
 thread_local pthread_t current_tid;

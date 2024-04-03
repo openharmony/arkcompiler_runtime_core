@@ -470,7 +470,7 @@ if (DEFINED ENV{GENMC_PATH})
     foreach(genmc_test ${GENMC_TESTS})
         get_filename_component(test_name ${genmc_test} NAME_WE)
         add_custom_target(genmc_${test_name}
-            COMMAND $ENV{GENMC_PATH} "-unroll=10" ${genmc_test}
+            COMMAND $ENV{GENMC_PATH} "-unroll=10" -- -I"${PANDA_ROOT}" ${genmc_test}
         )
         list(APPEND dep_files genmc_${test_name})
     endforeach()

@@ -32,9 +32,9 @@
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/utils.h"
 #include "gtest/gtest.h"
-#include "../unit_test.h"
+#include "compiler/tests/unit_test.h"
 #include "utils/bit_utils.h"
-#include "../vixl_exec_module.h"
+#include "compiler/tests/vixl_exec_module.h"
 
 namespace ark::compiler {
 
