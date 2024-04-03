@@ -91,16 +91,17 @@ Errors
     frontend_status: Partly
 
 ``Error`` is the base class of all errors. Defining a new error class is
-normally not required because error classes for various cases (e.g.,
-``DivideByZeroError``) are defined in the standard library (see
+normally not required because essential error classes for various cases (e.g.,
+``ArrayIndexOutOfBoundsError``) are defined in the standard library (see
 :ref:`Standard Library`).
 
 However, a developer can define a new error by using ``Error``, or any
-derived class as the base of the new class. An example of ``Error``
-handling is provided below:
+derived class as the base of the new class. An example of error handling is
+provided below:
 
 .. index::
    error
+   error handling
    derived class
 
 |
@@ -108,17 +109,23 @@ handling is provided below:
 .. code-block:: typescript
    :linenos:
 
-    class DivideByZeroError extends Error {}
+   class UnknownError extends Error { // User-defined error class 
+      error: Error
+      constructor (error: Error) {
+         super()
+         this.error = error
+      }
+    }
 
-    function divide(a: number, b: number): Number | null {
-      try {
-        return a / b
-      }
-      catch (x) {
-        if (x instanceof DivideByZeroError)
-          return null
-        return 0
-      }
+    function get_array_element<T>(array: T[], index: number): T|null {
+        try {
+          return array[index] // access array
+        }
+        catch (error) {
+          if (error instanceof ArrayIndexOutOfBoundsError) // invalid index detected
+             return null
+          throw new UnknownError (error as Error) // Unknown error occured
+        }
     }
 
 

@@ -392,8 +392,9 @@ A :index:`compile-time error` occurs if:
 
 -  Any type argument of ``typeReference`` is a wildcard type argument.
 
--  An interface is repeated as a direct superinterface in a single
-   ``implements`` clause (even if that interface is named differently).
+If some interface is repeated as a direct superinterface in a single
+``implements`` clause (even if that interface is named differently) then all
+repetitions are ignored.
 
 .. index::
    class declaration
@@ -890,8 +891,9 @@ Field Declarations
 .. meta:
     frontend_status: Done
 
-*Field declarations* represent data members in class instances.
-Fields are actually class instance variables (see :ref:`Variable Declarations`).
+*Field declarations* represent data members in class instances or static data
+members (see :ref:`Static Fields`). Class instance fields are in fact class
+instance variables (see :ref:`Variable Declarations`). 
 
 .. code-block:: abnf
 
@@ -907,14 +909,41 @@ A :index:`compile-time error` occurs if:
 
 -  One and the same field modifier is used more than once in a field declaration.
 -  Name of a field declared in the body of a class declaration is already
-   used for a method in the same declaration.
+   used for a method of this class.
 -  Name of a field declared in the body of a class declaration is already
    used for another field in the same declaration with the same static or
    non-static status.
 
 A field declared by a class with a certain name *shadows* any accessible
-declaration of fields if they have the same name in superclasses and
-superinterfaces of the class.
+declaration of fields if they have the same name in superclasses of the class.
+These are in fact different fields:
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+      field = 1 // 'field' in class A has type number
+      foo () { console.log (this) }
+    }
+    class B extends A {
+      field = "a string" // 'field' in class B has type string
+    }
+    class C extends B {
+      field = true // 'field' in class A has type boolean
+    }
+
+    let a:A = new A
+    a.foo()
+    a = new B
+    a.foo()
+    a = new C
+    a.foo()
+
+    // The output
+    A {field: 1} 
+    B {field: 1, field: "a string"} 
+    C {field: 1, field: "a string", field: true} 
+
 
 .. index::
    field declaration
@@ -925,19 +954,14 @@ superinterfaces of the class.
    shadowing
    access
    superclass
-   superinterface
    class declaration body
 
-If a shadowed field is static, then it can be accessed only with the
-qualification of a superclass or of a superinterface name (see
-:ref:`Field Access Expression`).
+Any static field can be accessed only with the qualification of a superclass or
+of a superinterface name (see :ref:`Field Access Expression`).
 
-A class can access all non-private fields of a superclass and superinterfaces
-from its direct superclass and direct superinterfaces if such non-private
-fields are both:
-
--  Accessible (see :ref:`Scopes`) to code in the class; and
--  Not shadowed by a declaration in the class.
+In case of *shadowing*, a class can access all non-private fields of a
+superclass and superinterfaces from its direct superclass and direct
+superinterfaces, respectively, by using qualifications *this* or *super*.
 
 A class can inherit more than one field or property with the same name from
 its superinterfaces, or from both its superclass and superinterfaces. However,
@@ -946,8 +970,7 @@ body of the class causes a :index:`compile-time error`.
 
 The same field or property declaration can be inherited from an interface in
 more than one way. In that case, the field or property is considered
-to be inherited only once (and thus, referring to it by its simple name causes
-no ambiguity).
+to be inherited only once.
 
 .. index::
    qualified name
@@ -984,9 +1007,8 @@ There are two categories of class or interface fields as follows:
   irrespective of how many instances of the class (even if zero) are
   eventually created.
 
-  Static fields are accessed by using a qualified name notation at any place
-  the class or interface name is accessible (see :ref:`Names` if class or
-  interface name is used as a qualifier).
+  Static fields are always accessed by using a qualified name notation
+  wherever the class or interface name is accessible (see :ref:`Scopes`).
 
 - Instance, or non-static fields
 
@@ -1015,21 +1037,8 @@ Readonly (Constant) Fields
     frontend_status: Done
 
 A field that has the modifier ``readonly`` is a *readonly field*. Changing
-the value of a readonly field after initialization is not allowed.
-
-Both static and non-static fields can be declared *readonly fields*.
-
-A static readonly field must be initialized as follows:
-
--  By using a field initializer, or
--  As a result of a class initializer (see :ref:`Class Initializer`).
-
-
-Otherwise, a :index:`compile-time error` occurs.
-
-A non-static readonly field must be initialized as a result of
-execution of any class constructor. Otherwise, a :index:`compile-time error`
-occurs.
+the value of a readonly field after initialization is not allowed. Both static
+and non-static fields can be declared *readonly fields*.
 
 .. index::
    readonly field
@@ -1051,8 +1060,21 @@ Field Initialization
 .. meta:
     frontend_status: Done
 
-An initializer in a non-static field declaration has the semantics of
-an assignment (see :ref:`Assignment`) to the declared variable.
+Any field must be initialized before the first use (see
+:ref:`Field Access Expression`). The initialization is performed using the
+result of evaluation of the following:
+
+- Default values (see :ref:`Default Values for Types`), or
+- Field initializer (see below), and then
+- Class initializer for a static fields (see :ref:`Class Initializer`), or
+- Any class constructor for a non-static fields (see :ref:`Constructor Declaration`).
+
+A :index:`compile-time error` occurs if none of above is applicable.
+
+*Field initializer* is an expression that is evaluated at compile time or
+runtime. The result of succseful evalution is assigned into the field. The
+semantics of field initializers is therefore similar to that of assignments
+(see :ref:`Assignment`).
 
 The following rules apply to an initializer in a static field declaration:
 
@@ -1061,33 +1083,73 @@ The following rules apply to an initializer in a static field declaration:
    :ref:`Method Call Expression`) or accessing a field (see
    :ref:`Field Access Expression`).
 -  The initializer is evaluated, and the assignment is performed only once
-   when the class is initialized at runtime.
+   before the first access to this field.
 
-**Note**: Constant fields are initialized before all other static fields.
-
-Constant fields initialization never uses default values (see
+``Readonly`` fields initialization never uses default values (see
 :ref:`Default Values for Types`).
 
 In a non-static field declaration, an initializer is evaluated at runtime.
-Its assignment is performed each time an instance of the class is created.
-The initializer can use the following keywords:
+The assignment is performed each time an instance of the class is created.
 
--  ``this`` to access the current object methods or fields, or to refer to the
-   current object;
--  ``super`` to access the methods declared in a superclass;
+The instance fields initializer expression cannot do the following:
+
+- Call methods using ``this`` or ``super``;
+- Use ``this`` directly (as an argument of function calls or in assignments);
+- Use uninitialized fields of the current object.
+
+If the initializer expression contains one of the above patterns, then a
+:index:`compile-time error` occurs.
+
+If allowed in the code, the above restrictions can break the consistency of
+class instances as shown in the following examples:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        a = this // compile-time error as 'this' is not fully initialized
+        b = a.c // Refers to a non-initialized 'c' field of the same object
+        c = a.b // Refers to a non-initialized 'b' field of the same object
+
+        f1 = this.foo() // compile-time error as 'this' is used as an argument
+        f2 = "a string field"
+        foo (): string {
+           console.log (this.f1, this.f2) // Both fields are not yet initizlized
+           return this.f2
+        }
+
+    }
+
+The compiler thus has to determine the right order of fields initialization.
+A :index:`compile-time error` occurs if the order cannot be determined:
+
+.. code-block:: typescript
+   :linenos:
+
+    class X {
+        // The order can be determined
+        a = this.b + this.c // 'a' is to be initialized third
+        b = 1               // 'b' is to be initialized first
+        c = this.b + 1      // 'c' is to be initialized second
+
+
+        // The order cannot be determined
+        f1 = this.f2 + this.f3 
+           // compile-time error: circular dependency between 'f1' and 'f2'
+        f2 = this.f1 + this.f3
+        f3 = 666
+
+    }
+
 
 .. index::
    initializer
    non-static field
    field declaration
-   constant field
    initialization
-   keyword this
-   keyword super
    assignment
    variable
    access
-   superclass
    object
    assignment
    evaluation
@@ -1098,53 +1160,7 @@ The initializer can use the following keywords:
    class
 
 Additional restrictions (as specified in :ref:`Exceptions and Errors Inside Field Initializers`)
-apply to variable initializers that refer to fields which cannot be
-initialized yet.
-
-References to a field (even if the field is in the scope) can be restricted.
-The rules applying to the restrictions on forward references to fields (if the
-reference textually precedes the field declaration) and self-references (if
-the field is used within its own initializer) are provided below.
-
-A :index:`compile-time error` occurs in a reference to a static field *f*
-declared in class or interface *C* if:
-
--  Such a reference is used in *C*’s static initializer (see
-   :ref:`Class Initializer`) or static field initializer (see
-   :ref:`Field Initialization`);
--  Such a reference is used before the declaration of *f*, or within *f*’s own
-   declaration initializer;
--  No such reference is present on the left-hand side of an assignment
-   expression (see :ref:`Assignment`);
--  *C* is the innermost class or interface that encloses such a reference.
-
-
-A :index:`compile-time error` occurs in a reference to a non-static field *f*
-declared in class *C* if such reference is:
-
--  Used in the non-static field initializer of *C*;
--  Used before the declaration of *f*, or within *f*’s own declaration
-   initializer;
--  Not present on the left-hand side of an assignment expression (see
-   :ref:`Assignment`);
--  Enclosed in *C* that is the innermost class or interface.
-
-.. index::
-   restriction
-   exception
-   error
-   initializer
-   variable
-   field
-   interface
-   expression
-   assignment
-   reference
-   non-static field
-   static field
-   innermost class
-   innermost interface
-   enclosing
+apply to variable initializers that refer to fields which cannot be initialized yet.
 
 |
 
@@ -1532,7 +1548,7 @@ a getter or a setter.
 .. code-block:: abnf
 
     classAccessorDeclaration:
-        accessorModifier
+        accessorModifier*
         ( 'get' identifier '(' ')' returnType block?
         | 'set' identifier '(' parameter ')' block?
         )
@@ -1864,7 +1880,7 @@ Constructor Body
 The constructor body must provide correct initialization of new class instances.
 Constructors have two variations:
 
-- *Primiry constructor* that initializes its instance [1]_ own fields directly;
+- *Primary constructor* that initializes its instance [1]_ own fields directly;
 
 - *Secondary constuctor* that uses another same-class constructor to initialize
   its instance fields.
@@ -1898,7 +1914,7 @@ The high-level sequence of a *primary constructor* body includes the following:
       the compiler. If the compiler detects a circular reference, then a
       compile-time error occurs.
 
-4. Arbitary code that guarantees all remaining instance fields (if any) are
+4. Arbitrary code that guarantees all remaining instance fields (if any) are
    initialized but does not:
 
     - Use the value of an instance field before its initialization.
@@ -2210,7 +2226,6 @@ the superclass:
    top-level class
    local class
    access modifier
-   internal access
    throws clause
    rethrows clause
    primordial class
@@ -2249,6 +2264,36 @@ and can only be called from a constructor of *C* (see :ref:`Constructor Body`).
 If *C* defines a static or instance field *F* with the same name as that of
 a field accessible from its direct superclass, then *F* hides the inherited
 field.
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Interface {
+      foo(): void
+      static foo(): void { /* some method body */ }
+   }
+   class Base {
+      foo() { /* Base class method body */ }
+      // foo() is declared in class Base
+
+      static foo () { /* Base class static method body */ }
+   }
+   class Derived extends Base implements Interface {
+      override foo() { /* Derived class method body */ }
+      // foo() is both 
+      //   - overriden in class Derived, and
+      //   - implements foo() from the Interface
+
+      // static foo() inherited from Base hides static foo() from Interface
+   }
+
+   let target: Interface = new Derived
+   target.foo()  // this is a call to an instance method foo() overriden in class Derived
+
+   Interface.foo()  // this is a call to a static method foo() declared in Interface
+   Base.foo()  // this is a call to a static method foo() declared in Base
+   Derived.foo() // this is a call to a static method foo() declared in Derived
+  
 
 .. index::
    inheritance

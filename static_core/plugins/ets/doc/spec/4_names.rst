@@ -24,15 +24,13 @@ This chapter introduces the following three mutually-related notions:
 -  Declarations, and
 -  Scopes.
 
-
 Each entity in an |LANG| program---a variable, a constant, a class,
 a type, a function, a method, etc.---is introduced via a *declaration*.
-An entity declaration assigns a *name* to the entity declared. The name
-is used to refer to the entity further in the program text.
-
-Different declarations introduce new names in different *scopes* (see :ref:`Scopes`).
-The scope affects the accessibility of a new name, and how the name can be
-referred by its qualified or simple (unqualified) name.
+An entity declaration defines a *name* of this entity. The name is used to
+refer to the entity further in the program text. Such declaration binds entity
+name with the *scope* (see :ref:`Scopes`). The scope affects the accessibility
+of a new entity, and how it can be referred by its qualified or simple
+(unqualified) name.
 
 .. index::
    variable
@@ -55,7 +53,8 @@ Names
 .. meta:
     frontend_status: Done
 
-A name refers to any declared entity. Names can have two syntactical forms:
+A name is a sequence of one or more identifiers which allows to refer to any
+declared entity. Names can have two syntactical forms:
 
     - *Simple name* that consists of a single identifier;
     - *Qualified name* that consists of a sequence of identifiers with the
@@ -192,20 +191,20 @@ Scopes
 .. meta:
     frontend_status: Done
 
-Different declarations introduce new names in different *scopes*. Scope (see
-:ref:`Scopes`) is the region of program text where an entity is declared. The
-name can be referred to by its qualified name for the following:
+Different entity declarations introduce new names in different *scopes*. Scope
+(see :ref:`Scopes`) is the region of program text where an entity is declared
+and regions where it is accessible. The following entities can be referred to
+by their qualified names only:
 
--  Instance class,
--  Static class, or
--  Interface members,
+-  Class and interface members, both static and instance ones,
 -  Entities imported via qualified import.
 
-For other entities, the name is referred by its simple (unqualified) name.
+Other entities are referred by their simple (unqualified) names.
 
-The nature of scope usage depends on the kind of the name. A type name
-is used to declare variables or constants. A function name is used to call
-that function.
+Names of different entities can be used for different purposes, like
+
+- A type name is used to declare variables or constants;
+- A function name is used to call that function;
 
 .. index::
    scope
@@ -217,7 +216,7 @@ that function.
    constant
    function call
 
-The scope of a name depends on the context the name is declared in:
+The scope of an entity depends on the context the entity is declared in:
 
 .. _package-access:
 
@@ -237,7 +236,7 @@ The scope of a name depends on the context the name is declared in:
 
 -  *Module level scope* is applicable for separate modules only. A name
    declared on the module level is accessible throughout the entire module.
-   The name can be accessed in other packages if exported.
+   The name can be accessed in other compilation units if exported.
 
 .. index::
    module level scope
@@ -254,7 +253,7 @@ The scope of a name depends on the context the name is declared in:
 
    Access to names inside the class is qualified with one of the following:
 
-   -  Keyword ``this``;
+   -  Keyword ``this`` or ``super``;
    -  Class instance expression for the names of instance entities; or
    -  Name of the class for static entities.
 
@@ -573,8 +572,9 @@ Variable Declarations
 .. meta:
     frontend_status: Done
 
-A *variable declaration* introduces a new named variable that can be assigned
-an initial value:
+A *variable declaration* introduces a new named storage location that will be
+assigned with an initial value as part of declartion or via some initialization
+before the first usage:
 
 .. code-block:: abnf
 
@@ -838,6 +838,89 @@ then a compile-time error occurs (see :ref:`Object Literal`):
 
 |
 
+.. _Smart Types:
+
+Smart Types
+===========
+
+.. meta:
+    frontend_status: Partly
+    todo: implement a dataflow check for loops and try-catch blocks
+
+As every data entity - variable (see :ref:`Variable and Constant Declarations`),
+class variable (see :ref:`Field Declarations`), or local variable (see
+:ref:`Parameter List` and :ref:`Local Declarations`) of some function or method
+has its static type, the type which was expliclty specified or inferred at the
+point of its declaration. This type defines the set of operations which can
+be applied to such entity. Namely what methods can be called and which other
+entities can be accessed having this entity as a reciever of the operation.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a = new Object
+    a.toString() // entity 'a' has method toString()
+
+There could be cases when the type of an entity (mostly local variables) is a
+class or interface type (see :ref:`Classes` and :ref:`Interfaces`) or union
+type (see :ref:`Union Types`) and in the particular context of the program the
+compiler can narrow (smart cast) the static type to a more precise type (smart
+type) and allow operations which are specific to such narrowed type.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: number | string = 666
+    a++ /* Here we know for sure that type of 'a' is number and number-specific
+           operations are type-safe */
+
+    class Base {}
+    class Derived extends Base { method () {} }
+    let b: base = new Derived
+    b.method () /* Here we know for sure that type of 'b' is Derived and Derived-specific
+           operations are type-safe */
+
+Other examples are explicit calls to instanceof (see
+:ref:`InstanceOf Expression`) or checks against null (see
+:ref:`Equality with null or undefined`) as part of if statements (see
+:ref:`if Statements`) or conditional expression (see
+:ref:`Conditional Expressions`)
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (b: Base, d: Derived|null) {
+        if (b instanceof Derived) {
+            b.method()
+        }
+        if (d != null) {
+            d.method()
+        }
+    }
+
+So, for such cases the smart compiler can deduce smart type of an entity and
+will not require unnecesary ``as`` conversions (see :ref:`Cast Expressions`).
+
+There are tricky cases related to overloading (see
+:ref:`Function and Method Overloading`) when a smart type may lead to the call
+of the function or method (see :ref:`Function or Method Selection`) which suits
+the smart type of an argument rather than the static one.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (p: Base) {}
+    function foo (p: Derived) {}
+
+    let b: Base = new Derived
+    foo (b) // potential ambiguity in case of smart type, foo(p:Base) is to be called
+    foo (b as Derived) // no ambiguity,  foo(p:Derived) is to be called
+
+Particular cases supported by the compiler are determined by the compiler
+implementation.
+
+|
+
 .. _Function Declarations:
 
 Function Declarations
@@ -864,7 +947,7 @@ introducing *named functions*. A function body is a block (see :ref:`Block`).
 Function *overload signature* allows calling a function in different ways (see
 :ref:`Function Overload Signatures`).
 
-If a function is declared as *generic* (see :ref:`Generics`), then its type
+If a function is declared *generic* (see :ref:`Generics`), then its type
 parameters must be specified.
 
 The ``native`` modifier indicates that the function is 

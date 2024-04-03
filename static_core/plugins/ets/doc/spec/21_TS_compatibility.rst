@@ -125,7 +125,7 @@ Difference in Overload Signatures
 .. meta:
     frontend_status: Partly
 
-*Implementaion signature* is considered as an accesible entity. The following
+*Implementaion signature* is considered as an accessible entity. The following
 code is valid in |LANG| (while it causes a compile-time error in |TS|):
 
 .. code-block-meta:
@@ -169,13 +169,13 @@ Class fields while inheriting
     frontend_status: Done
 
 |TS| allows overriding class fields with the field in the subclass with
-the invariant or covarint type, and potentially with a new initial value.
+the invariant or covariant type, and potentially with a new initial value.
 
 |LANG| supports shadowing if a new field in a subclass is just a physically
 different field with the same name.
 
 As a result, the number of fields in a derived object, and the semantics of
-*super* can be differnt. An attempt to access ``super.field_name`` in |TS|
+*super* can be different. An attempt to access ``super.field_name`` in |TS|
 returns *undefined*. However, the same code in |LANG| returns the shadowed
 field declared in or inherited from the direct superclass.
 
@@ -213,7 +213,7 @@ Overriding for primitive types
 ******************************
 
 |TS| allows overriding class type version of the primitive type into a pure
-primitive type. |LANG| does not allow such overiding.
+primitive type. |LANG| does not allow such overriding.
 
 These situation is illustrated by the example below:
 

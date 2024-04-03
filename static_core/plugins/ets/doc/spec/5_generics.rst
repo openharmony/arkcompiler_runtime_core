@@ -104,10 +104,10 @@ A class, an interface, or a function must be parameterized by at least one
 *type parameter* to be a *generic*. The type parameter is declared in the type
 parameter section. It can be used as an ordinary type inside a *generic*.
 
-Syntactically, a type parameter is an unqualified identifier (see :ref:`Scopes`
-for the scope of type parameters). Each type parameter can have a *constraint*
-(see :ref:`Type Parameter Constraint`). A type parameter can have a default
-type (see :ref:`Type Parameter Default`).
+Syntactically, a type parameter is an unqualified identifier with the proper
+scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
+can have a *constraint* (see :ref:`Type Parameter Constraint`). A type
+parameter can have a default type (see :ref:`Type Parameter Default`).
 
 .. index::
    generic parameter
@@ -249,7 +249,6 @@ section depends on itself.
    generic declaration
    type parameter
    unqualified identifier
-   scope
    generic declaration
    constraint
    compile-time error

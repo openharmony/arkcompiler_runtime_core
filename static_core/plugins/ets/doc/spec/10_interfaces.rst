@@ -245,8 +245,8 @@ class ``Object`` to which every class is an extension).
 
 A compile-time error occurs if an interface depends on itself.
 
-``ClassCircularityError`` is thrown if circularly declared interfaces
-are detected as interfaces and loaded at runtime.
+.. ``ClassCircularityError`` is thrown if circularly declared interfaces
+   are detected as interfaces are loaded at runtime.
 
 .. index::
    compile-time error
@@ -510,7 +510,7 @@ In the example below, overload signatures are used:
        i.foo("aa")       // ok, implementation method is called
     }
 
-Class ``C`` above defines ony the *implementation* method that is called in
+Class ``C`` above defines only the *implementation* method that is called in
 all cases.
 
 |

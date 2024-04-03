@@ -540,10 +540,10 @@ compatible with the target type, then conversion causes a compile-time error:
     let b: Base = d // OK, as Derived1 and Derived2 are compatible with Base
 
     let x: Double | Int = ...
-    let y: double = x // OK, as Double and Int can be converetd into double 
+    let y: double = x // OK, as Double and Int can be converted into double 
 
     let x: Double | Base = ...
-    let y: double = x // Compile-time error, as Base cannot be converetd into double 
+    let y: double = x // Compile-time error, as Base cannot be converted into double 
 
 |
 
@@ -947,7 +947,7 @@ Character to String Conversions
 ===============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 *Character to string conversion* converts a value of type ``char`` to type
 ``string``. The resultant new string has the length equal to 1. The converted

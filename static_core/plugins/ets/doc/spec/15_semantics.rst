@@ -55,7 +55,7 @@ below), and all their respective *supertypes*.
 More formally speaking, the set is obtained by reflexive and transitive
 closure over the direct supertype relation.
 
-Terms *subclass*, *subinterafce*, *superclass*, and *superinterface* are used
+Terms *subclass*, *subinterface*, *superclass*, and *superinterface* are used
 when considering class or interface types.
 
 *Direct supertypes* of a non-generic class, or of the interface type *C*
@@ -126,7 +126,7 @@ Variance
 Variance is how subtyping between class types relates to subtyping between
 class member signatures (types of parameters, return type).
 
-Variance for generic type arguments is descirbed in :ref:`Type Argument Variance`.
+Variance for generic type arguments is described in :ref:`Type Argument Variance`.
 
 Variance can be of three kinds:
 
@@ -263,15 +263,15 @@ implementation of a method already defined in its parent class. The actual
 method to be called is determined at runtime based on the object's type, and
 overriding is thus related to runtime polymorphism.
 
-|LANG| uses two semantic rules: *overload-equivalence* (see
-:ref:`Overload-Equivalent Signatures`) and *override-compatibility* (see
-:ref:`Override-Compatible Signatures`).
+|LANG| uses two semantic rules:
 
-The *overload-equivalence* rule: the *overloading* of two entities is correct
-if their signatures are **not** *overload-equivalent*.
+-  *Overload-equivalence* rule: the *overloading* of two entities is
+   correct if their signatures are **not** *overload-equivalent* (see
+   :ref:`Overload-Equivalent Signatures`).
 
-The *override-compatibility* rule: the *overriding* of two entities is correct
-if their signatures are *override-compatible*.
+-  *Override-compatibility* rule: the *overriding* of two entities is
+   correct if their signatures are *override-compatible* (see
+   :ref:`Override-Compatible Signatures`).
 
 See :ref:`Overloading for Functions`,
 :ref:`Overloading and Overriding in Classes`, and
@@ -402,7 +402,7 @@ if **all** of the following conditions are met:
 3. The number of type parameters of either method is the same, i.e.,
    ``k = l``.
 
-There are two cases of type override-compatibilty, as types are used as either
+There are two cases of type override-compatibility, as types are used as either
 parameter types, or return types. For each case there are five kinds of types:
 
 - Class/interface type;
@@ -415,7 +415,7 @@ Every type is override-compatible with itself, and that is a case of invariance
 (see :ref:`Invariance`).
 
 Mixed override-compatibility between types of different kinds is always false,
-except the compatibilty with class type ``Object`` as any type is a subtype of
+except the compatibility with class type ``Object`` as any type is a subtype of
 ``Object``.
 
 Variances to be used for types that can be override-compatible in different
@@ -483,10 +483,10 @@ The example below illustrates override-compatibility with ``Object``:
           p1: Derived, p2: (q: Base)=>Derived, p3: number,
           p4: Number, p5: Base[], p6: [Base, Base]
        )
-       kinds_of_return_type(): Object // It can be overrided by all subtypes except primitive ones
+       kinds_of_return_type(): Object // It can be overridden by all subtypes except primitive ones
     }
     class Derived extends Base {
-       override kinds_of_parameters( // Object is a supertype for all types except primitie ones
+       override kinds_of_parameters( // Object is a supertype for all types except primitive ones
           p1: Object, p2: Object,
           p3: Object, //  compile-time error: number and Object are not override-compatible
           p4: Object, p5: Object, p6: Object
@@ -526,7 +526,7 @@ A function can be defined in or imported to the scope.
 
 Semantic check for such two functions is as follows:
 
-- If signtatures of such functions are *overload-equivalent*, then
+- If signatures of such functions are *overload-equivalent*, then
   a compile-time error occurs.
 
 -  Otherwise, *overloading* is valid.
@@ -541,12 +541,41 @@ Overloading and Overriding in Classes
 Both *overloading* and *overriding* must be considered in case of classes for
 methods and partly for constructors.
 
-**Note**: Only accesible methods are subject for overloading and overriding.
+**Note**: Only accessible methods are subject for overloading and overriding.
 For example, if a superclass contains a ``private`` method, and a subclass
 has a method with the same name, then neither overriding nor overloading
 is considered.
 
 **Note**: Accessors are considered methods here.
+
+Overriding member may keep or extend the access modifer (see
+:ref:`Access Modifiers`) of the inherited or implemented member, otherwise a 
+compile-time error occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      public public_member() {} 
+      protected protected_member() {} 
+      internal internal_member() {} 
+      private private_member() {} 
+   }
+
+   interface Interface {
+      public_member() // all members are public in interfaces
+   }
+
+   class Derived extends Base implements Interface {
+      public override public_member() {} 
+         // public member can be overriden and/or implemented by the public one
+      public override protected_member() {} 
+         // protected member can be overriden by the protected or public one
+      internal internal_member() {} 
+         // internal member can be overriden by the internal one only
+      override private_member() {} 
+         // it is a compile-time error to attempt to override private member
+   }
 
 Semantic rules that work in various contexts are represented in the following
 table:
@@ -625,7 +654,7 @@ table:
 
 
 +-------------------------------------+--------------------------------------------+
-| A *constructor* is defined          | All base class constructor are avaialble   |
+| A *constructor* is defined          | All base class constructors are available  |
 | in a subclass.                      | for call in all derived class constructors.|
 +-------------------------------------+--------------------------------------------+
 

@@ -61,7 +61,7 @@ evaluation of  expressions, except for the expressions related to coroutines
         | indexingExpression
         | functionCallExpression
         | newExpression
-        | ensureNotNullishExpression		
+        | ensureNotNullishExpression
         ;
     binaryExpression:
         multiplicativeExpression
@@ -89,7 +89,7 @@ There are three options the ``objectReference`` refers to:
 
 - Class or interface that are to handle static members;
 - ``Super`` that is to access shadowed fields or constructors declared in the
-  superclass, or the overriden method version of the superclass;
+  superclass, or the overridden method version of the superclass;
 - *primaryExpression* that is to refer to an instance variable of a class
   or interface type after evaluation, unless the manner of the evaluation
   is altered by the chaining operator '?.' (see :ref:`Chaining Operator`).
@@ -542,14 +542,12 @@ is called a *simple name*.
 
 A *simple name* refers to the following:
 
--  Global entity of the current compilation unit;
--  Local variable; or
--  Parameter of the surrounding function or method.
-
+-  Entity declared in the current compilation unit;
+-  Local variable or parameter of the surrounding function or method.
 
 A *qualifiedName* that is not a *simple name* refers to the following:
 
--  Entity imported from some compilation unit, or
+-  Entity imported from a compilation unit, or
 -  Member of some class or interface.
 
 
@@ -574,12 +572,12 @@ A *qualifiedName* that is not a *simple name* refers to the following:
     class Type {}
 
     function foo (parameter: Type) {
-      let local: Type = parameter /* here 'parameter' is the
+      let local: Type = parameter /* 'parameter' here is the
           expression in the form of simple name */
-      local = new Type () /* here 'local' is the expression in the
+      local = new Type () /* 'local' here is the expression in the
           form of simple name */
-      local = compilationUnitName.someGlobalVariable /* here qualifiedName
-          refers to a global variable imported from some compilation unit */
+      local = compilationUnitName.someExportedVariable /* qualifiedName here
+          refers to a variable imported from a compilation unit */
     }
 
 |
@@ -834,8 +832,7 @@ Object Literal
 ***************
 
 .. meta:
-    frontend_status: Partly
-    todo: implement object literal for interfaces - #13947
+    frontend_status: Done
 
 An *object literal* is an expression that can be used to create a class
 instance, and to provide some initial values. In some cases it is more
@@ -1470,7 +1467,7 @@ b. *Instance* field access (*objectReference* is evaluated in the form *primaryE
 The evaluation of *primaryExpression* is performed. The result of the *field
 access expression* of an instance field in the class or interface is as follows:
 
--  ``variable`` if the field is not ``readonly``. The the resultant value can
+-  ``variable`` if the field is not ``readonly``. The resultant value can
    then be changed.
 
 -  ``value`` if the field is ``readonly``, except where the *field access*
@@ -1622,7 +1619,7 @@ Step 1: Selection of Type to Use
     frontend_status: Done
 
 The *object reference* is used to determine the type in which to search the method.
-Three forms of *object reference* are avaialble:
+Three forms of *object reference* are available:
 
 +------------------------------+-----------------------------------------------+
 | **Form of object reference** | **Type to use**                               |
@@ -1870,7 +1867,7 @@ The examples are presented below:
    function goo (p: (p: T) => T) { ... }   // 1
    function goo (p: (p: T) => U) { ... }   // 2
  
-   // Here, return types of call arguments are taken into account
+   // Return types of call arguments are taken into account here
    
    goo ((p: T) => T {}) // After steps 3.1, 3.2: two candidates
                         // After step 3.3: the single candidate 1
@@ -4228,8 +4225,7 @@ Equality Expressions
 ********************
 
 .. meta:
-    frontend_status: Partly
-    todo: adapt latest specification changes
+    frontend_status: Done
 
 Equality expressions use *equality operators* '``==``', '``===``', '``!=``',
 and '``!==``':
@@ -4309,8 +4305,7 @@ Value Equality for Numeric Types
 ================================
 
 .. meta:
-    frontend_status: Partly
-    todo: adapt latest specification changes
+    frontend_status: Done
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operands of a value equality operator if
@@ -4397,7 +4392,7 @@ Value Equality for Strings
 ==========================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 Two strings are equal if they represent the same sequence of characters:
 
@@ -4420,8 +4415,7 @@ Value Equality for Booleans
 ===========================
 
 .. meta:
-    frontend_status: Partly
-    todo: adapt latest specification changes
+    frontend_status: Done
 
 The operation is a *boolean equality* if each operand is of type ``boolean`` or
 ``Boolean``.
@@ -4458,8 +4452,7 @@ Value Equality for Characters
 =============================
 
 .. meta:
-    frontend_status: Partly
-    todo: adapt latest specification changes
+    frontend_status: Done
 
 The operation is a *character equality* if each operand is of type ``char``
 or ``Char``.
@@ -4496,8 +4489,7 @@ Equality with ``null`` or ``undefined``
 =======================================
 
 .. meta:
-    frontend_status: None
-    todo: adapt latest specification changes
+    frontend_status: Done
 
 Any entity can be compared to ``null`` by using the operators ``==`` and ``!=``.
 This comparison can return ``true`` only for the entities of *nullable* types
@@ -5400,7 +5392,7 @@ type ``string`` (see :ref:`Type String`).
 
 When evaluating a *string interpolation expression*, the result of each
 embedded expression substitutes that embedded expression. An embedded
-expression must be of type ``tring``. Otherwise, the implicit conversion
+expression must be of type ``string``. Otherwise, the implicit conversion
 to ``string`` takes place in the same way as with the string concatenation
 operator (see :ref:`String Concatenation`):
 
