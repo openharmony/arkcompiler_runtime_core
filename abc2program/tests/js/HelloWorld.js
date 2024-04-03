@@ -31,15 +31,15 @@ msg : string = "";
 
 function foo() {
   try {
-    a_var = 11;
+    varA = 11;
     x = 22;
     try {
-      a_var = 1;
+      varA = 1;
     } catch (e) {
       msg = "inner catch";
       print(msg);
     }
-    if (a_var == "") {
+    if (varA == "") {
       throw "null";
     }
     if (x > 100) {
@@ -62,6 +62,12 @@ function goo() {
 
 }
 
+function hoo () {
+  varA = 1.23;
+}
+
 foo();
 
 print(goo.toString());
+
+hoo();

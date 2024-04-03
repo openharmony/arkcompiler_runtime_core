@@ -25,8 +25,25 @@
 using namespace testing::ext;
 
 namespace panda::abc2program {
-
-static const std::string HELLO_WORLD_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorld.abc";
+const std::string HELLO_WORLD_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorld.abc";
+constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 77;
+constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 2;
+constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS = 3;
+constexpr size_t NUM_OF_ARGS_FOR_FOO_METHOD = 3;
+constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".HelloWorld";
+constexpr std::string_view FUNC_NAME_FOO = ".foo";
+constexpr std::string_view FUNC_NAME_GOO = ".goo";
+constexpr std::string_view FUNC_NAME_HOO = ".hoo";
+constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 4;
+constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
+constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 3;
+constexpr uint8_t TOTAL_NUM_OF_MODULE_LITERALS = 21;
+constexpr uint8_t NUM_OF_MODULE_REQUESTS = 4;
+constexpr uint8_t NUM_OF_REGULAR_IMPORTS = 1;
+constexpr uint8_t NUM_OF_NAMESPACE_IMPORTS = 1;
+constexpr uint8_t NUM_OF_LOCAL_EXPORTS = 1;
+constexpr uint8_t NUM_OF_INDIRECT_EXPORTS = 1;
+constexpr uint8_t NUM_OF_STAR_EXPORTS = 1;
 
 class Abc2ProgramHelloWorldTest : public testing::Test {
 public:
@@ -46,6 +63,9 @@ public:
             if (it.first == FUNC_NAME_GOO) {
                 goo_function_ = &(it.second);
             }
+            if (it.first == FUNC_NAME_HOO) {
+                hoo_function_ = &(it.second);
+            }
         }
     }
 
@@ -56,6 +76,7 @@ public:
     const pandasm::Function *hello_world_function_ = nullptr;
     const pandasm::Function *foo_function_ = nullptr;
     const pandasm::Function *goo_function_ = nullptr;
+    const pandasm::Function *hoo_function_ = nullptr;
 };
 
 /**
@@ -269,7 +290,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part2, Te
     // check ins[21]
     const pandasm::Ins &ins21 = function.ins[21];
     std::string pa_ins_str21 = ins21.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str21 == "label@21: tryldglobalbyname 0x8, a_var");
+    EXPECT_TRUE(pa_ins_str21 == "label@21: tryldglobalbyname 0x8, varA");
     EXPECT_TRUE(ins21.label == "label@21");
     EXPECT_TRUE(ins21.set_label);
     // check ins[25]
@@ -455,5 +476,67 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_source_file, Te
     const pandasm::Function &function = *foo_function_;
     std::string source_file = function.source_file;
     EXPECT_TRUE(source_file.find("HelloWorld.js") != std::string::npos);
+}
+
+/**
+ * @tc.name: abc2program_code_imm_of_FLDAI
+ * @tc.desc: get and check immediate number of opcode FLDAI.
+ * @tc.type: FUNC
+ * @tc.require: issueI9E5ZM
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_imm_of_FLDAI, TestSize.Level1)
+{
+    const pandasm::Function &hoo = *hoo_function_;
+    EXPECT_EQ(hoo.ins.size(), INS_SIZE_OF_FUNCTION_HOO);
+    auto &ins_fldai = hoo.ins[0];
+    EXPECT_TRUE(ins_fldai.opcode == pandasm::Opcode::FLDAI);
+    // check imm of FLDAI
+    EXPECT_EQ(ins_fldai.imms.size(), IMMS_SIZE_OF_OPCODE_FLDAI);
+    auto p = std::get_if<double>(&ins_fldai.imms[0]);
+    EXPECT_NE(p, nullptr);
+    EXPECT_EQ(*p, 1.23);
+}
+
+/**
+ * @tc.name: abc2program_module_literal_entry_test
+ * @tc.desc: get and check number of modules.
+ * @tc.type: FUNC
+ * @tc.require: issueI9E5ZM
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_module_literal_entry_test, TestSize.Level1)
+{
+    auto &mod_table = prog_->literalarray_table;
+    EXPECT_EQ(mod_table.size(), SIZE_OF_LITERAL_ARRAY_TABLE);
+    auto &module_literals = mod_table.begin()->second.literals_;
+    EXPECT_EQ(module_literals.size(), TOTAL_NUM_OF_MODULE_LITERALS);
+    auto check_entry = [&module_literals](size_t idx, panda::panda_file::LiteralTag expect_tag, uint32_t expect_value) {
+        auto *literal = &(module_literals[idx]);
+        EXPECT_EQ(literal->tag_, expect_tag);
+        auto p = std::get_if<uint32_t>(&literal->value_);
+        EXPECT_TRUE(p != nullptr && *p == expect_value);
+    };
+    size_t idx = 0;
+    // check ModuleRequests
+    check_entry(idx, panda::panda_file::LiteralTag::INTEGER, NUM_OF_MODULE_REQUESTS);
+    // Each constant value '1' below stands for each entry. Each entry is also in the literal vector and shall be
+    // considered while calculating the position (index) of next entry.
+    // check RegularImportEntry
+    idx += NUM_OF_MODULE_REQUESTS + 1;
+    check_entry(idx, panda::panda_file::LiteralTag::INTEGER, NUM_OF_REGULAR_IMPORTS);
+    // check NamespaceImportEntry
+    idx += NUM_OF_REGULAR_IMPORTS * LITERAL_NUM_OF_REGULAR_IMPORT + 1;
+    check_entry(idx, panda::panda_file::LiteralTag::INTEGER, NUM_OF_NAMESPACE_IMPORTS);
+    // check LocalExportEntry
+    idx += NUM_OF_NAMESPACE_IMPORTS * LITERAL_NUM_OF_NAMESPACE_IMPORT + 1;
+    check_entry(idx, panda::panda_file::LiteralTag::INTEGER, NUM_OF_LOCAL_EXPORTS);
+    // check IndirectExportEntry
+    idx += NUM_OF_LOCAL_EXPORTS * LITERAL_NUM_OF_LOCAL_EXPORT + 1;
+    check_entry(idx, panda::panda_file::LiteralTag::INTEGER, NUM_OF_INDIRECT_EXPORTS);
+    // check StarExportEntry
+    idx += NUM_OF_INDIRECT_EXPORTS * LITERAL_NUM_OF_INDIRECT_EXPORT + 1;
+    check_entry(idx, panda::panda_file::LiteralTag::INTEGER, NUM_OF_STAR_EXPORTS);
+    // check idx
+    idx += NUM_OF_STAR_EXPORTS * LITERAL_NUM_OF_STAR_EXPORT + 1;
+    EXPECT_EQ(idx, TOTAL_NUM_OF_MODULE_LITERALS);
 }
 };  // panda::abc2program

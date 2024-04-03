@@ -77,6 +77,20 @@ constexpr std::string_view DUMP_CONTENT_NESTED_LITERALARRAY = "$$NESTED-LITERALA
 // ins constant
 constexpr std::string_view LABEL_PREFIX = "label@";
 
+// module literal
+constexpr uint8_t LITERAL_NUM_OF_REGULAR_IMPORT = 3;
+constexpr uint8_t LITERAL_NUM_OF_NAMESPACE_IMPORT = 2;
+constexpr uint8_t LITERAL_NUM_OF_LOCAL_EXPORT = 2;
+constexpr uint8_t LITERAL_NUM_OF_INDIRECT_EXPORT = 3;
+constexpr uint8_t LITERAL_NUM_OF_STAR_EXPORT = 1;
+constexpr uint8_t LITERAL_NUMS[] = {
+    LITERAL_NUM_OF_REGULAR_IMPORT,
+    LITERAL_NUM_OF_NAMESPACE_IMPORT,
+    LITERAL_NUM_OF_LOCAL_EXPORT,
+    LITERAL_NUM_OF_INDIRECT_EXPORT,
+    LITERAL_NUM_OF_STAR_EXPORT
+};
+
 class AbcFileUtils {
 public:
     static bool IsGlobalTypeName(const std::string &type_name);
