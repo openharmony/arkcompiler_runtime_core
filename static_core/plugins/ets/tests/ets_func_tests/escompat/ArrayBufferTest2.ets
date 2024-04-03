@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
+import { Error as EsError, AssertionError as EsAssertionError } from "escompat"
+
 function main(): int {
   let failures: int = 0;
 
-  failures += test(createArrayBufferOfVariousLengths(), "Create ArrayBuffer of Various lengths");
+  failures += test(createArrayBufferOfVariousLengths, "Create ArrayBuffer of Various lengths");
   failures += test(sliceArrayBufferInt(), "Slice ArrayBuffer with various int parameters");
-  failures += test(sliceArrayBufferNumberNegativeEnd(), "Slice ArrayBuffer with negative end number parameters"); 
-  failures += test(sliceArrayBufferNumberNegativeStart(), "Slice ArrayBuffer with negative start number parameters"); 
+  failures += test(sliceArrayBufferNumberNegativeEnd, "Slice ArrayBuffer with negative end number parameters"); 
+  failures += test(sliceArrayBufferNumberNegativeStart, "Slice ArrayBuffer with negative start number parameters");
   failures += test(sliceArrayBufferNumberStartExceedsLength(), "Slice ArrayBuffer with start number parameter exceeds length"); 
   failures += test(sliceArrayBufferNumberEndExceedsLength(), "Slice ArrayBuffer with end number parameter exceeds length"); 
-  failures += test(resizeArrayBufferInt(), "Resize ArrayBuffer with various int parameters");
-  failures += test(isViewArrayBuffer(), "isView ArrayBuffer with various parameters");
+  failures += test(resizeArrayBufferInt, "Resize ArrayBuffer with various int parameters");
+  failures += test(isViewArrayBuffer, "isView ArrayBuffer with various parameters");
   return failures == 0 ? 0 : 1;
 }
 /**
@@ -34,31 +36,40 @@ function createEmptyArrayBuffer(): int {
   return a.byteLength ? 1 : 0;
 }
 
+class Assertions {
+  static assertEquals(expected: int, actual: int): void {
+    if (expected != actual) throw new EsAssertionError(`${expected} != ${actual}`)
+  }
+
+  static assertEquals(expected: number, actual: number): void {
+    if (expected != actual) throw new EsAssertionError(`${expected} != ${actual}`)
+  }
+
+  static assertTrue(condition: boolean): void {
+    if (!condition) throw new EsAssertionError("expected true but was false") 
+  }
+
+  static assertFalse(condition: boolean): void {
+    if (condition) throw new EsAssertionError("expected false but was true")
+  }
+}
+
 /**
  * Check created ArrayBuffer with different lengths
  */
 function createArrayBufferOfVariousLengths(): int {
-  let a = new ArrayBuffer(10);
+  let buf = new ArrayBuffer(10);
+  Assertions.assertEquals(10, buf.byteLength)
 
   try {
-    a = new ArrayBuffer(1024 * 1024 * 1024 * 2);
-    return 1;
-  }
-  catch(e) {
-    if (!(e instanceof NegativeArraySizeException))
-      return 1;
-  }
-
-  try {
-    a = new ArrayBuffer(1024 * 1024 * 1024 * 4);
-    return 1;
-  }
-  catch(e) {
-    if (!(e instanceof NegativeArraySizeException))
-      return 1;
+    new ArrayBuffer(-1)
+    return 1
+  } catch (e) {
+    if (!(e instanceof NegativeArraySizeException)) return 1
+    // expected
   }
 
-  return 0;
+  return 0
 }
 
 /**
@@ -78,27 +89,12 @@ function sliceArrayBufferInt(): int {
 * Check slice() method of ArrayBuffer with negative end number parameters
 */
 function sliceArrayBufferNumberNegativeEnd(): int {
-  let a = new ArrayBuffer(8);
+  let buffer = new ArrayBuffer(8);
   
-  let start = 2 as number;
-  let end = -4 as number;
-  if (a.slice(start, 0 as number).byteLength != 2)
-    return 1;
-  
-  start = 2 as number;
-  end = -10 as number;
-  if (a.slice(start, end).byteLength != 0)
-    return 1;
-  
-  start = 2 as number;
-  end = Number.NEGATIVE_INFINITY;
-  if (a.slice(start, end).byteLength != 5)
-    return 1;
-  
-  start = 0 as number;
-  end = Number.NaN;
-  if (a.slice(start, end).byteLength != 0)
-    return 1;
+  Assertions.assertEquals(2, buffer.slice(2 as number, -4 as number).byteLength)
+  Assertions.assertEquals(0, buffer.slice(2 as number, -10 as number).byteLength)
+  Assertions.assertEquals(0, buffer.slice(2 as number, Number.NEGATIVE_INFINITY).byteLength)
+  Assertions.assertEquals(0, buffer.slice(0 as number, Number.NaN).byteLength)
   
   return 0;
 }
@@ -107,27 +103,13 @@ function sliceArrayBufferNumberNegativeEnd(): int {
 * Check slice() method of ArrayBuffer with negative start number parameters
 */
 function sliceArrayBufferNumberNegativeStart(): int {
-  let a = new ArrayBuffer(8);
+  let buffer = new ArrayBuffer(8);
   
-  let start = -5 as number;
-  let end = 6 as number;
-  if (a.slice(start, end).byteLength != 3)
-    return 1;
-  
-  start = -12 as number;
-  end = 6 as number;
-  if (a.slice(start, end).byteLength != 6)
-    return 1;
-  
-  start = Number.NEGATIVE_INFINITY;
-  end = 6 as number;
-  if (a.slice(start, end).byteLength != 6)
-    return 1;
-  
-  start = Number.NaN;
-  end = 0;
-  if (a.slice(start, end).byteLength != 0)
-    return 1;
+  Assertions.assertEquals(3, buffer.slice(-5 as number, 6 as number).byteLength)
+  Assertions.assertEquals(6, buffer.slice(-12 as number, 6 as number).byteLength)
+  Assertions.assertEquals(6, buffer.slice(Number.NEGATIVE_INFINITY, 6 as number).byteLength)
+  Assertions.assertEquals(0, buffer.slice(Number.NaN, 0).byteLength)
+  Assertions.assertEquals(0, buffer.slice(Number.POSITIVE_INFINITY).byteLength)
   
   return 0;
 }
@@ -182,9 +164,7 @@ function resizeArrayBufferInt(): int {
   let a = new ArrayBuffer(8);
   
   a.resize(12);
-  let b = a.at(11);
-  if (a.byteLength != 12)
-    return 1;
+  Assertions.assertEquals(12, a.byteLength)
 
   try {
     a.resize(0);
@@ -202,24 +182,22 @@ function resizeArrayBufferInt(): int {
  * Check isView() static method of ArrayBuffer
  */
 function isViewArrayBuffer(): int {
-  if (ArrayBuffer.isView({}))
-    return 1;
+  Assertions.assertFalse(ArrayBuffer.isView({}))
+  Assertions.assertFalse(ArrayBuffer.isView(new ArrayBuffer(0)))
+  Assertions.assertFalse(ArrayBuffer.isView(""))
 
-  if (ArrayBuffer.isView(new ArrayBuffer(0)))
-    return 1;
+  Assertions.assertTrue(ArrayBuffer.isView(new Int8Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new Int16Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new Int32Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new BigInt64Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new Float32Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new Float64Array))
 
-  if (ArrayBuffer.isView(""))
-    return 1;
-
-  if (!ArrayBuffer.isView(new Int8Array) ||
-    !ArrayBuffer.isView(new Int16Array) ||
-    !ArrayBuffer.isView(new Int32Array) ||
-    !ArrayBuffer.isView(new BigInt64Array) ||
-    !ArrayBuffer.isView(new Float32Array) ||
-    !ArrayBuffer.isView(new Float64Array)
-    // NOTE: no support for unsigned TypedArrays and DataView yet
-    )
-    return 1;
+  Assertions.assertTrue(ArrayBuffer.isView(new Uint8Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new Uint8ClampedArray))
+  Assertions.assertTrue(ArrayBuffer.isView(new Uint16Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new Uint32Array))
+  Assertions.assertTrue(ArrayBuffer.isView(new BigUint64Array))
 
   return 0;
 }
@@ -231,4 +209,23 @@ function test(result: int, message: String): int {
   }
   console.println("FAILED: " + message);
   return 1;
+}
+
+function test(action: () => int, message: String) {
+  try {
+    const result = action()
+
+    if (result == 0) console.println("PASSED: " + message)
+    else console.println("FAILED: " + message);
+
+    return result
+  } catch (e) {
+    if (e instanceof EsAssertionError) {
+      let error = e as EsAssertionError
+      console.println(`FAILED: '${message}' with exception: ${error.name}(${error.message})`)
+    } else {
+      console.println(`FAILED '${message}' with exception ` + e)
+    }
+    return 1
+  }
 }

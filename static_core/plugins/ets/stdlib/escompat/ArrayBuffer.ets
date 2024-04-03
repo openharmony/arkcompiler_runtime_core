@@ -19,12 +19,12 @@ package escompat;
  * Either ArrayBuffer or SharedArrayBuffer
  */
 // NOTE (kprokopenko): make abstract after abstract overloads get to work
-/* abstract */ class Buffer {
-    /* abstract */ getByteLength(): int { throw new Error("abstract"); }
-    /* abstract */ at(i: int): byte { throw new Error("abstract"); }
-    /* abstract */ set(i: int, b: byte) { throw new Error("abstract"); }
+abstract class Buffer {
+    abstract getByteLength(): int
+    abstract at(i: int): byte
+    abstract set(i: int, b: byte)
     // NOTE (egor-porsev): should be slice(int, int) without an extra 'sliceInternal' method. This is a workaround for #13402
-    /* abstract */ sliceInternal(begin: int, end: int): Buffer { throw new Error("abstract"); }
+    abstract sliceInternal(begin: int, end: int): Buffer
 }
 
 export interface ArrayBufferView {
@@ -57,7 +57,7 @@ export class ArrayBuffer extends Buffer
     public constructor(length: int)
     {
         this.data = new byte[length]
-        this.byteLength = length
+        this._byteLength = length
     }
 
     /**
@@ -85,44 +85,33 @@ export class ArrayBuffer extends Buffer
             || obj instanceof Int32Array
             || obj instanceof BigInt64Array
             || obj instanceof Float32Array
-            || obj instanceof Float64Array)
+            || obj instanceof Float64Array
+            || obj instanceof Uint8Array
+            || obj instanceof Uint8ClampedArray
+            || obj instanceof Uint16Array
+            || obj instanceof Uint32Array
+            || obj instanceof BigUint64Array)
     }
 
     internal override sliceInternal(begin: int, end: int): Buffer {
-        let byteLength = this.getByteLength()
-        if (begin < -byteLength) {
-            begin = 0
-        }
-        if (begin < 0) {
-            begin = byteLength + begin
-        }
-        if (begin >= byteLength) {
-            begin = byteLength
+        const byteLength = this.getByteLength()
+
+        const startIndex = normalizeIndex(begin, byteLength)
+        const endIndex = normalizeIndex(end, byteLength)
+
+        let resultLength = endIndex - startIndex
+        if (resultLength < 0) {
+            resultLength = 0
         }
 
-        if (end < -byteLength) {
-            end = 0
-        }
-        if (end < 0) {
-            end = byteLength + end
-        }
-        if (end >= byteLength) {
-            end = byteLength
+        let result = new ArrayBuffer(resultLength);
+
+        if (resultLength == 0) return result
+        for (let i = 0; i < resultLength; ++i) {
+            result.set(i, this.data[startIndex + i])
         }
 
-        if (end <= begin) {
-            return new ArrayBuffer(0)
-        }
-
-        let len = end - begin
-        if (len < 0) {
-            len = 0
-        }
-        let res = new ArrayBuffer(len);
-        for (let i = 0; i < len; ++i) {
-            res.set(i, this.data[begin + i])
-        }
-        return res
+        return result
     }
 
     /**
@@ -134,8 +123,9 @@ export class ArrayBuffer extends Buffer
      *
      * @returns data taken from current ArrayBuffer with respect to begin and end parameters
      */
-    public slice(begin: number, end: number): ArrayBuffer {
-        return this.slice(begin as int, end as double)
+    public slice(begin: number, end?: number): ArrayBuffer {
+        if (end == undefined) return this.slice(begin as int)
+        else return this.slice(begin as int, end as int)
     }
 
     /**
@@ -147,9 +137,9 @@ export class ArrayBuffer extends Buffer
      *
      * @returns data taken from current ArrayBuffer with respect to begin and end parameters
      */
-    public slice(begin: int, end: int): ArrayBuffer
-    {
-        return this.sliceInternal(begin, end) as ArrayBuffer
+    public slice(begin: int, end?: int): ArrayBuffer {
+        if (end == undefined) return this.sliceInternal(begin, this.getByteLength()) as ArrayBuffer
+        else return this.sliceInternal(begin, end!) as ArrayBuffer
     }
 
     /**
@@ -177,7 +167,11 @@ export class ArrayBuffer extends Buffer
     }
 
     internal override getByteLength(): int {
-        return this.byteLength;
+        return this._byteLength;
+    }
+
+    get byteLength(): number {
+        return this._byteLength
     }
 
     /**
@@ -202,13 +196,14 @@ export class ArrayBuffer extends Buffer
             newData[i] = this.data[i]
         }
         this.data = newData
+        this._byteLength = newLen
     }
 
     public static native from(array: Object): ArrayBuffer;
 
     private data: byte[]
     /** Length in bytes */
-    public readonly byteLength: int
+    private _byteLength: int
 }
 
 /**
