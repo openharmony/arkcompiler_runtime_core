@@ -419,7 +419,7 @@ export class Object {
     *
     * @returns true if the object has the specified field; false otherwise
     */
-    public static hasOwn(target: Object, key: string): boolean {
+    public static hasOwn(target: Object, key: PropertyKey): boolean {
         return target.hasOwnProperty(key)
     }
 
