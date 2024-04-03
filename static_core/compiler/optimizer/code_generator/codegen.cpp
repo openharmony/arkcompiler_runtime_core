@@ -1917,6 +1917,15 @@ void Codegen::CreatePostWRB(Inst *inst, MemRef mem, Reg reg1, Reg reg2, RegMask 
             return;
         }
         // CallPostWRB only for second reg
+        auto secondMemOffset = reg1.GetSize() / BITS_PER_BYTE;
+        if (!mem.HasIndex()) {
+            MemRef secondMem(mem.GetBase(), mem.GetDisp() + secondMemOffset);
+            pwb.Encode(secondMem, reg2, INVALID_REGISTER, !IsInstNotNull(secondValue), preserved);
+            return;
+        }
+        ASSERT(mem.GetScale() == 0 && !mem.HasDisp());
+        ASSERT(GetTarget().GetTempRegsMask().Test(mem.GetIndex().GetId()));
+        GetEncoder()->EncodeAdd(mem.GetIndex(), mem.GetIndex(), Imm(secondMemOffset));
         pwb.Encode(mem, reg2, INVALID_REGISTER, !IsInstNotNull(secondValue), preserved);
         return;
     }
