@@ -525,6 +525,7 @@ spec/types/double_to_string_1.ets
 spec/types/double_to_string_2.ets
 ### Issue 15281 end
 ### Issue 13952
+<<<<<<< HEAD
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload1.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload2.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload3.ets
@@ -534,6 +535,17 @@ spec/10.Interfaces/Interface_Methods_Declarations/method_overload4.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload5.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload7.ets
+=======
+spec/10.Interfaces/method_overload1.ets
+spec/10.Interfaces/method_overload2.ets
+spec/10.Interfaces/method_overload3.ets
+spec/10.Interfaces/method_overload4.ets
+### Issue 13952 end
+### Issue 15542
+spec/10.Interfaces/method_overload5.ets
+spec/10.Interfaces/method_overload6.ets
+spec/10.Interfaces/method_overload7.ets
+>>>>>>> Issue : ahttps://gitee.com/openharmony/arkcompiler_runtime_core/issues/I9E4MJ
 ### BigInt64Array
 std/core/std_core_typedarrays__BigInt64Array.ets
 ### BigInt64Array end
@@ -653,3 +665,9 @@ spec/05.Generics/issue15089_08.ets
 spec/05.Generics/issue15380_2.ets
 spec/05.Generics/wrongUsingInT.ets
 ###  Issue 16696 end
+### Issue 16269
+spec/10.Interfaces/method_overiding_0005.ets
+# Issue 16622
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/override_static_instance_0011.ets
+# Issue 16623
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_static_instance_0002.ets
