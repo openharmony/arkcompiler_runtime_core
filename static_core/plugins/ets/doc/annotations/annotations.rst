@@ -132,7 +132,7 @@ The choice of types for annotation fields is limited to the types listed below:
 - Type ``number``;
 - Type ``boolean``;
 - Type ``string``;
-- Enumeration types;
+- Enumeration types (``const enum`` only);
 - Array of above types, e.g., ``string[]``.
 
 A compile-time error occurs if any other type is used as type of an *annotation
@@ -170,6 +170,10 @@ An annotation declaration is presented in the example below:
     }
     @interface MyAnno{}
 
+
+All values in an *object literal expression* must be constant expressions, 
+otherwise a compile-time error occurs.
+
 Annotation usage is presented in the example below:
 
 .. code-block:: typescript
@@ -185,7 +189,8 @@ Annotation usage is presented in the example below:
     class C3 {/*body*/}
 
 The current version of the language allows to use annotations only
-for non-abstract class declarations and non-abstract method declarations.
+for non-abstract class declarations
+and method declarations in non-abstract classes.
 Otherwise, a compile-time error occurs:
 
 .. code-block:: typescript
@@ -307,6 +312,8 @@ The following cases are forbidden for annotations:
 - Export default,
 
 - Import default,
+
+- Rename in export,
 
 - Rename in import.
 
