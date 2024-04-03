@@ -342,6 +342,9 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
         case RuntimeInterface::IntrinsicId::INTRINSIC_EXPAND_U8_TO_U16:
             GetEncoder()->EncodeUnsignedExtendBytesToShorts(dst, src[0]);
             break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_ATOMIC_BYTE_OR:
+            GetEncoder()->EncodeAtomicByteOr(src[FIRST_OPERAND], src[SECOND_OPERAND]);
+            break;
         default:
             UNREACHABLE();
             break;

@@ -892,6 +892,17 @@ bool LLVMIrConstructor::EmitReverseHalfWords(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitAtomicByteOr(Inst *inst)
+{
+    auto addr = GetInputValue(inst, 0);
+    auto value = GetInputValue(inst, 1);
+    auto byteVal = builder_.CreateTrunc(value, builder_.getInt8Ty());
+    auto op = llvm::AtomicRMWInst::BinOp::Or;
+    builder_.CreateAtomicRMW(op, addr, byteVal, llvm::MaybeAlign(0), llvm::AtomicOrdering::Monotonic);
+
+    return true;
+}
+
 llvm::Value *LLVMIrConstructor::GetMappedValue(Inst *inst, DataType::Type type)
 {
     ASSERT(inputMap_.count(inst) == 1);

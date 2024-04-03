@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ class UpdateRemsetTaskQueue final : public UpdateRemsetWorker<LanguageConfig> {
 public:
     UpdateRemsetTaskQueue(G1GC<LanguageConfig> *gc, GCG1BarrierSet::ThreadLocalCardQueues *queue,
                           os::memory::Mutex *queueLock, size_t regionSize, bool updateConcurrent,
-                          size_t minConcurrentCardsToProcess);
+                          size_t minConcurrentCardsToProcess, size_t hotCardsProcessingFrequency);
     NO_COPY_SEMANTIC(UpdateRemsetTaskQueue);
     NO_MOVE_SEMANTIC(UpdateRemsetTaskQueue);
     ~UpdateRemsetTaskQueue() final;

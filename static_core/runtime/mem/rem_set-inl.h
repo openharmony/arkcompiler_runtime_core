@@ -137,10 +137,10 @@ template <typename LockConfigT>
 template <typename RegionPred, typename MemVisitor>
 inline void RemSet<LockConfigT>::Iterate(const RegionPred &regionPred, const MemVisitor &visitor)
 {
-    for (auto &[bitmap_begin_addr, bitmap] : bitmaps_) {
-        auto *region = AddrToRegion(ToVoidPtr(bitmap_begin_addr));
+    for (auto &[bitmapBeginAddr, bitmap] : bitmaps_) {
+        auto *region = AddrToRegion(ToVoidPtr(bitmapBeginAddr));
         if (regionPred(region)) {
-            MemRange bitmapRange(bitmap_begin_addr, bitmap_begin_addr + DEFAULT_REGION_SIZE);
+            MemRange bitmapRange(bitmapBeginAddr, bitmapBeginAddr + DEFAULT_REGION_SIZE);
             bitmap.Iterate(bitmapRange, [region, visitor](const MemRange &range) { visitor(region, range); });
         }
     }
@@ -162,7 +162,7 @@ template <typename LockConfigT>
 template <bool NEED_LOCK>
 PandaUnorderedSet<Region *> *RemSet<LockConfigT>::GetRefRegions()
 {
-    os::memory::LockHolder lock(remSetLock_);
+    os::memory::LockHolder<LockConfigT, NEED_LOCK> lock(remSetLock_);
     return &refRegions_;
 }
 

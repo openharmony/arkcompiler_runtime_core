@@ -43,7 +43,7 @@ bool CheckPostBarrier(CardTable *cardTable, const void *objAddr, bool checkCardT
     // doesn't for G1, because card_table is processed concurrently, so it can be cleared before we enter here
     bool res = true;
     if (checkCardTable) {
-        res = !cardTable->GetCardPtr(ToUintPtr(objAddr))->IsClear();
+        res = !cardTable->IsClear(ToUintPtr(objAddr));
     }
     return res;
 }
@@ -123,11 +123,11 @@ void GCG1BarrierSet::PreBarrier(void *preValAddr)
 
 void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, void *storedValAddr)
 {
-    LOG_IF(storedValAddr != nullptr, DEBUG, GC)
-        << "GC PostBarrier: write to " << std::hex << objAddr << " value " << storedValAddr;
     if (storedValAddr == nullptr) {
         return;
     }
+
+    LOG(DEBUG, GC) << "GC PostBarrier: write to " << std::hex << objAddr << " value " << storedValAddr;
 
     if (ark::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_)) {
         return;
@@ -140,12 +140,16 @@ void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, void *store
 
     // StoreLoad barrier is required to guarantee order of previous reference store and card load
     arch::StoreLoadBarrier();
-    if (!card->IsMarked()) {
+
+    auto cardValue = card->GetCard();
+    auto cardStatus = CardTable::Card::GetStatus(cardValue);
+    if (!CardTable::Card::IsMarked(cardStatus)) {
         LOG(DEBUG, GC) << "GC Interregion barrier write to " << objAddr << " value " << storedValAddr;
         card->Mark();
-        Enqueue(card);
+        if (!CardTable::Card::IsHot(cardValue)) {
+            Enqueue(card);
+        }
     }
-
     ASSERT(CheckPostBarrier(cardTable_, objAddr, false));
 }
 
@@ -174,10 +178,14 @@ void GCG1BarrierSet::Invalidate(CardTable::CardPtr begin, CardTable::CardPtr las
                    << " to " << cardTable_->GetCardEndAddress(last);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (auto *card = begin; card <= last; ++card) {
-        ASSERT(!card->IsYoung());
-        if (!card->IsMarked()) {
+        auto cardValue = card->GetCard();
+        auto cardStatus = CardTable::Card::GetStatus(cardValue);
+        ASSERT(!CardTable::Card::IsYoung(cardStatus));
+        if (!CardTable::Card::IsMarked(cardStatus)) {
             card->Mark();
-            Enqueue(card);
+            if (!CardTable::Card::IsHot(cardValue)) {
+                Enqueue(card);
+            }
         }
     }
 }

@@ -708,6 +708,7 @@ void G1GC<LanguageConfig>::RunFullGC(ark::GCTask &task)
         ASSERT(HaveEnoughRegionsToMove(1));
     }
     CollectionSet collectionSet = GetFullCollectionSet();
+    ClearTenuredCards(collectionSet);
     PrepareYoungRegionsForFullGC(collectionSet);
     CollectAndMoveTenuredRegions(collectionSet);
     // Reserve a region to prevent OOM in case a lot of garbage in tenured space
@@ -937,14 +938,14 @@ void G1GC<LanguageConfig>::CreateUpdateRemsetWorker()
     if (this->GetSettings()->UseThreadPoolForGC()) {
         updateRemsetWorker_ = allocator->template New<UpdateRemsetThread<LanguageConfig>>(
             this, updatedRefsQueue_, &queueLock_, this->GetG1ObjectAllocator()->GetRegionSize(),
-            this->GetSettings()->G1EnableConcurrentUpdateRemset(),
-            this->GetSettings()->G1MinConcurrentCardsToProcess());
+            this->GetSettings()->G1EnableConcurrentUpdateRemset(), this->GetSettings()->G1MinConcurrentCardsToProcess(),
+            this->GetSettings()->G1HotCardsProcessingFrequency());
     } else {
         ASSERT(this->GetSettings()->UseTaskManagerForGC());
         updateRemsetWorker_ = allocator->template New<UpdateRemsetTaskQueue<LanguageConfig>>(
             this, updatedRefsQueue_, &queueLock_, this->GetG1ObjectAllocator()->GetRegionSize(),
-            this->GetSettings()->G1EnableConcurrentUpdateRemset(),
-            this->GetSettings()->G1MinConcurrentCardsToProcess());
+            this->GetSettings()->G1EnableConcurrentUpdateRemset(), this->GetSettings()->G1MinConcurrentCardsToProcess(),
+            this->GetSettings()->G1HotCardsProcessingFrequency());
     }
     ASSERT(updateRemsetWorker_ != nullptr);
 }
@@ -1079,6 +1080,7 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
         time::Timer timer(&youngPauseTime, true);
         MixedMarkAndCacheRefs(task, collectibleRegions);
         ClearYoungCards(collectibleRegions);
+        ClearTenuredCards(collectibleRegions);
         CollectAndMove<false>(collectibleRegions);
         ClearRefsFromRemsetsCache();
         this->GetObjectGenAllocator()->InvalidateSpaceData();
@@ -1943,7 +1945,7 @@ void G1GC<LanguageConfig>::HandlePendingDirtyCards()
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     updateRemsetWorker_->DrainAllCards(&dirtyCards_);
-    std::for_each(dirtyCards_.cbegin(), dirtyCards_.cend(), [](auto card) { card->Clear(); });
+    std::for_each(dirtyCards_.cbegin(), dirtyCards_.cend(), [](auto card) { card->UnMark(); });
 }
 
 template <class LanguageConfig>
@@ -2089,8 +2091,17 @@ void G1GC<LanguageConfig>::RestoreYoungCards(const CollectionSet &collectionSet)
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::ClearYoungCards(const CollectionSet &collectionSet)
 {
-    CardTable *cardTable = this->GetCardTable();
+    auto *cardTable = this->GetCardTable();
     for (Region *region : collectionSet.Young()) {
+        cardTable->ClearCardRange(ToUintPtr(region), ToUintPtr(region) + DEFAULT_REGION_SIZE);
+    }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ClearTenuredCards(const CollectionSet &collectionSet)
+{
+    auto *cardTable = this->GetCardTable();
+    for (Region *region : collectionSet.Tenured()) {
         cardTable->ClearCardRange(ToUintPtr(region), ToUintPtr(region) + DEFAULT_REGION_SIZE);
     }
 }

@@ -85,6 +85,17 @@ enum CardTableProcessedFlag : uint32_t {
     SET_PROCESSED = 1U << 2U,    // set the visited cards processed
 };
 
+/**
+ *   ---------------------------------------------------------------------------------------
+ *   |                                        Card                                         |
+ *   ---------------------------------------------------------------------------------------
+ *   |         | |                             | |                   | |                   |
+ *   |    0    | |    0    |    0    |    0    | |    0    |    0    | |    0    |    0    |
+ *   |         | |                             | |                   | |                   |
+ *   ----------- ----------------------------------------------------- ---------------------
+ *        |                     |                          |                     |
+ *        ---- hot flag         ---- hotness value         ---- unused bits      ---- status bits
+ */
 class CardTable {
 public:
     class Card;
@@ -162,19 +173,41 @@ public:
 
     class Card {
     public:
+        using Status = uint8_t;
+
         Card() = default;
         explicit Card(uint8_t val);
 
-        bool IsMarked() const;
         void Mark();
-        bool IsClear() const;
+        void UnMark();
         void Clear();
-        bool IsProcessed() const;
         void SetProcessed();
-        bool IsYoung() const;
         void SetYoung();
         uint8_t GetCard() const;
         void SetCard(uint8_t newVal);
+        Status GetStatus() const;
+
+        bool IsMarked() const;
+        bool IsClear() const;
+        bool IsProcessed() const;
+        bool IsYoung() const;
+
+        static bool IsMarked(Status status);
+        static bool IsProcessed(Status status);
+        static bool IsYoung(Status status);
+
+        bool IsHot() const;
+        void SetHot();
+        void ResetHot();
+        void SetMaxHotValue();
+        void IncrementHotValue();
+        void DecrementHotValue();
+
+        static bool IsMaxHotValue(uint8_t value);
+        static bool IsMinHotValue(uint8_t value);
+        static bool IsHot(uint8_t value);
+
+        static Status GetStatus(uint8_t value);
 
         static constexpr uint32_t GetValueOffset()
         {
@@ -196,16 +229,42 @@ public:
             return YOUNG_VALUE;
         }
 
+        static constexpr auto GetMaxHotValue()
+        {
+            return MAX_HOT_VALUE;
+        }
+
+        static constexpr auto GetHotValue()
+        {
+            return HOT_VALUE;
+        }
+
+        static constexpr auto GetHotFlag()
+        {
+            return HOT_FLAG;
+        }
+
+        static constexpr auto GetStatusMask()
+        {
+            return STATUS_MASK;
+        }
+
         ~Card() = default;
 
         NO_COPY_SEMANTIC(Card);
         NO_MOVE_SEMANTIC(Card);
 
     private:
-        static constexpr uint8_t YOUNG_VALUE = 3;
-        static constexpr uint8_t PROCESSED_VALUE = 2;
-        static constexpr uint8_t MARKED_VALUE = 1;
-        static constexpr uint8_t CLEAR_VALUE = 0;
+        static constexpr uint8_t YOUNG_VALUE = 3U;
+        static constexpr uint8_t PROCESSED_VALUE = 2U;
+        static constexpr uint8_t MARKED_VALUE = 1U;
+        static constexpr uint8_t CLEAR_VALUE = 0U;
+        static constexpr uint8_t STATUS_MASK = 3U;
+        static constexpr uint8_t STATUS_BITS = 2U;
+        static constexpr uint8_t UNUSED_BITS = 2U;
+        static constexpr uint8_t HOT_VALUE = 1U << (uint8_t)(STATUS_BITS + UNUSED_BITS);
+        static constexpr uint8_t MAX_HOT_VALUE = 7U << (uint8_t)(STATUS_BITS + UNUSED_BITS);
+        static constexpr uint8_t HOT_FLAG = 1U << 7U;
 
         std::atomic_uint8_t value_ = CLEAR_VALUE;
     };
@@ -227,12 +286,15 @@ private:
     static constexpr uint8_t LOG2_CARD_SIZE = 12;
     static constexpr uint32_t CARD_SIZE = 1U << LOG2_CARD_SIZE;
     static constexpr uint8_t DIRTY_CARD = 1U;
+    static constexpr size_t CHUNK_CARD_NUM = sizeof(std::atomic_size_t) / sizeof(Card);
 
     CardPtr cards_ {nullptr};
     uintptr_t minAddress_ {0};
     size_t cardsCount_ {0};
     InternalAllocatorPtr internalAllocator_ {nullptr};
 };
+
+static_assert(sizeof(std::atomic_size_t) % sizeof(CardTable::Card) == 0);
 
 using CardVisitor = std::function<void(CardTable::CardPtr)>;
 

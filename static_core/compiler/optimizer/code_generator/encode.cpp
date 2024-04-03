@@ -221,6 +221,11 @@ void Encoder::EncodeCompareTest([[maybe_unused]] Reg dst, [[maybe_unused]] Reg s
     SetFalseResult();
 }
 
+void Encoder::EncodeAtomicByteOr([[maybe_unused]] Reg addr, [[maybe_unused]] Reg value)
+{
+    SetFalseResult();
+}
+
 void Encoder::EncodeCompressedStringCharAt([[maybe_unused]] ArgsCompressedStringCharAt &&args)
 {
     SetFalseResult();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "runtime/include/object_header.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/region_allocator.h"
+#include "runtime/mem/gc/card_table-inl.h"
 
 namespace ark::mem {
 
@@ -75,7 +76,8 @@ protected:
     {
         if (!this->IsSameRegion(object, ref)) {
             auto *card = cardTable_->GetCardPtr(ToUintPtr(object) + offset);
-            if (card->IsClear()) {
+            auto cardStatus = card->GetStatus();
+            if (!CardTable::Card::IsYoung(cardStatus) && !CardTable::Card::IsMarked(cardStatus)) {
                 card->Mark();
                 updatedRefsQueue_->push_back(card);
             }

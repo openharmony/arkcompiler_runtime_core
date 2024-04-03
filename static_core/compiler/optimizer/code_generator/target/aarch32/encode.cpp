@@ -2972,6 +2972,30 @@ void Aarch32Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc
     GetMasm()->Mov(ConvertTest(cc).Negate(), VixlReg(dst), 0x0);
 }
 
+void Aarch32Encoder::EncodeAtomicByteOr([[maybe_unused]] Reg addr, [[maybe_unused]] Reg value)
+{
+    /**
+     * .try:
+     *   ldrexb  r2, [r0]
+     *   orr     r2, r2, r1
+     *   strexb  r3, r2, [r0]
+     *   cmp     r3, #0
+     *   bne     .try
+     */
+
+    auto labelCasFailed = CreateLabel();
+    BindLabel(labelCasFailed);
+
+    ScopedTmpReg tmpReg(this);
+    ScopedTmpReg casResult(this);
+
+    GetMasm()->Ldrexb(VixlReg(tmpReg), vixl::aarch32::MemOperand(VixlReg(addr)));
+    GetMasm()->Orr(VixlReg(tmpReg), VixlReg(tmpReg), VixlReg(value));
+    GetMasm()->Strexb(VixlReg(casResult), VixlReg(tmpReg), vixl::aarch32::MemOperand(VixlReg(addr)));
+    GetMasm()->Cmp(VixlReg(casResult), VixlImm(0));
+    GetMasm()->B(vixl::aarch32::ne, static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(labelCasFailed));
+}
+
 void Aarch32Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
 {
     if (src0.IsFloat()) {

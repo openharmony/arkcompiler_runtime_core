@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,7 +138,9 @@ void RootManager<LanguageConfig>::VisitCardTableRoots(CardTable *cardTable, Obje
                 };
                 allocator->IterateOverObjectsInRange(memRange, objectsInRangeVisitor);
             } else {
-                cardTable->MarkCard(memRange.GetStartAddress());
+                auto *card = cardTable->GetCardPtr(memRange.GetStartAddress());
+                // Use SetCard instead of MarkCard because the card can be IsProcessed
+                card->SetCard(CardTable::Card::GetMarkedValue());
             }
         },
         processedFlag);

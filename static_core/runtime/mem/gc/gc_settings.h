@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,6 +169,8 @@ public:
     /// @brief
     size_t G1MinConcurrentCardsToProcess() const;
 
+    size_t G1HotCardsProcessingFrequency() const;
+
     bool G1EnablePauseTimeGoal() const;
 
     uint32_t GetG1MaxGcPauseInMillis() const;
@@ -199,6 +201,8 @@ private:
     /// Size of young-space
     uint64_t youngSpaceSize_ = 0;
     size_t g1MinConcurrentCardsToProcess_ = 0;
+    /// Frequency of proccessing hot cards in update remset thread
+    size_t g1HotCardsProcessingFrequency_ = 0;
     /// Type of native trigger
     NativeGcTriggerType nativeGcTriggerType_ = {NativeGcTriggerType::INVALID_NATIVE_GC_TRIGGER};
     /// Runs full collection one of N times in GC thread

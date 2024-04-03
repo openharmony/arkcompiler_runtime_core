@@ -2082,6 +2082,11 @@ void Amd64Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc)
     GetMasm()->set(ArchCcTest(cc), ArchReg(dst, BYTE_SIZE));
 }
 
+void Amd64Encoder::EncodeAtomicByteOr(Reg addr, Reg value)
+{
+    GetMasm()->lock().or_(asmjit::x86::byte_ptr(ArchReg(addr)), ArchReg(value, ark::compiler::BYTE_SIZE));
+}
+
 void Amd64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
 {
     auto end = GetMasm()->newLabel();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 #include "libpandabase/utils/logger.h"
 
 namespace ark::mem {
+
+using CardStatus = CardTable::Card::Status;
 
 CardTable::CardTable(InternalAllocatorPtr internalAllocator, uintptr_t minAddress, size_t size)
     : minAddress_(minAddress),
@@ -61,12 +63,8 @@ void CardTable::Initialize()
 
 void CardTable::ClearCards(CardPtr start, size_t cardCount)
 {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    CardPtr end = start + cardCount;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto *curCard = start; curCard < end; ++curCard) {
-        curCard->Clear();
-    }
+    static_assert(sizeof(Card) == sizeof(uint8_t));
+    std::memset(reinterpret_cast<uint8_t *>(start), Card::GetClearValue(), cardCount);
 }
 
 bool CardTable::IsMarked(uintptr_t addr) const
@@ -126,19 +124,18 @@ CardTable::Card::Card(uint8_t val)
     SetCard(val);
 }
 
-bool CardTable::Card::IsMarked() const
-{
-    return GetCard() == MARKED_VALUE;
-}
-
 void CardTable::Card::Mark()
 {
-    SetCard(MARKED_VALUE);
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    value_.fetch_or(MARKED_VALUE, std::memory_order_relaxed);
 }
 
-bool CardTable::Card::IsClear() const
+void CardTable::Card::UnMark()
 {
-    return GetCard() == CLEAR_VALUE;
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    value_.fetch_and(~MARKED_VALUE, std::memory_order_relaxed);
 }
 
 void CardTable::Card::Clear()
@@ -146,24 +143,119 @@ void CardTable::Card::Clear()
     SetCard(CLEAR_VALUE);
 }
 
-bool CardTable::Card::IsProcessed() const
-{
-    return GetCard() == PROCESSED_VALUE;
-}
-
 void CardTable::Card::SetProcessed()
 {
     SetCard(PROCESSED_VALUE);
 }
 
-bool CardTable::Card::IsYoung() const
-{
-    return GetCard() == YOUNG_VALUE;
-}
-
 void CardTable::Card::SetYoung()
 {
     SetCard(YOUNG_VALUE);
+}
+
+bool CardTable::Card::IsMarked() const
+{
+    return IsMarked(GetStatus());
+}
+
+bool CardTable::Card::IsClear() const
+{
+    return GetCard() == CLEAR_VALUE;
+}
+
+bool CardTable::Card::IsProcessed() const
+{
+    return IsProcessed(GetStatus());
+}
+
+bool CardTable::Card::IsYoung() const
+{
+    return IsYoung(GetStatus());
+}
+
+/* static */
+bool CardTable::Card::IsMarked(CardStatus status)
+{
+    return status == MARKED_VALUE;
+}
+
+/* static */
+bool CardTable::Card::IsProcessed(CardStatus status)
+{
+    return status == PROCESSED_VALUE;
+}
+
+/* static */
+bool CardTable::Card::IsYoung(CardStatus status)
+{
+    return status == YOUNG_VALUE;
+}
+
+/* static */
+CardStatus CardTable::Card::GetStatus(uint8_t value)
+{
+    return value & STATUS_MASK;
+}
+
+bool CardTable::Card::IsHot() const
+{
+    return IsHot(GetCard());
+}
+
+void CardTable::Card::SetHot()
+{
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    value_.fetch_or(HOT_FLAG, std::memory_order_relaxed);
+}
+
+void CardTable::Card::ResetHot()
+{
+    static constexpr auto RESET_HOT_MASK = uint8_t(~HOT_FLAG);
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    value_.fetch_and(RESET_HOT_MASK, std::memory_order_relaxed);
+}
+
+void CardTable::Card::SetMaxHotValue()
+{
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    value_.fetch_or(MAX_HOT_VALUE, std::memory_order_relaxed);
+}
+
+void CardTable::Card::IncrementHotValue()
+{
+    ASSERT(!IsMaxHotValue(GetCard()));
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    value_.fetch_add(HOT_VALUE, std::memory_order_relaxed);
+}
+
+void CardTable::Card::DecrementHotValue()
+{
+    ASSERT(!IsMinHotValue(GetCard()));
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    value_.fetch_sub(HOT_VALUE, std::memory_order_relaxed);
+}
+
+/* static */
+bool CardTable::Card::IsMaxHotValue(uint8_t value)
+{
+    return (value & MAX_HOT_VALUE) == MAX_HOT_VALUE;
+}
+
+/* static */
+bool CardTable::Card::IsMinHotValue(uint8_t value)
+{
+    return (value & MAX_HOT_VALUE) == 0;
+}
+
+/* static */
+bool CardTable::Card::IsHot(uint8_t value)
+{
+    return (value & HOT_FLAG) == HOT_FLAG;
 }
 
 CardTable::CardPtr CardTable::GetCardPtr(uintptr_t addr) const

@@ -460,6 +460,11 @@ options:
   default: 2
   description: Minimum number of cards to process from queue in update-remset-thread. Higher number consumes less CPU, but can cause higher pause.
 
+- name: g1-hot-cards-processing-frequency
+  type: uint32_t
+  default: 7
+  description: Frequency of proccessing hot cards in update-remset-thread
+
 - name: g1-promotion-region-alive-rate
   type: uint32_t
   default: 75

@@ -2446,6 +2446,14 @@ void Aarch64Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc
     GetMasm()->Cset(VixlReg(dst), ConvertTest(cc));
 }
 
+void Aarch64Encoder::EncodeAtomicByteOr(Reg addr, Reg value)
+{
+#ifndef NDEBUG
+    vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kAtomics);
+#endif
+    GetMasm()->Stsetb(VixlReg(value, BYTE_SIZE), MemOperand(VixlReg(addr)));
+}
+
 void Aarch64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
 {
     if (src0.IsFloat()) {

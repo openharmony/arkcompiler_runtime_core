@@ -298,6 +298,7 @@ public:
     void EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
+    void EncodeAtomicByteOr(Reg addr, Reg value) override;
 
     void EncodeSelect(ArgsSelect &&args) override;
     void EncodeSelect(ArgsSelectImm &&args) override;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
+#include "mem/gc/card_table.h"
 #include <chrono>
+#include <cstdint>
 #include <cstdlib>
 #include <ctime>
 #include <random>
 
 #include "gtest/gtest.h"
+#include "mem/mem.h"
 #include "runtime/mem/gc/card_table-inl.h"
 #include "runtime/mem/mem_stats_additional_info.h"
 #include "runtime/mem/mem_stats_default.h"
@@ -117,6 +120,41 @@ protected:
         return PoolManager::GetMmapMemPool()->GetMinObjectAddress() + GetRandomCardIndex() * CardTable::GetCardSize();
     }
 
+    std::set<uintptr_t> GetRandomCardAddressSet()
+    {
+        std::set<uintptr_t> addrSet;
+        while (addrSet.size() <= K_ALLOC_COUNT) {
+            uintptr_t addr = GetRandomCardAddress();
+            if (!addrSet.insert(addr).second) {
+                continue;
+            }
+            ASSERT(cardTable_->GetCardPtr(addr)->IsClear());
+        }
+        return addrSet;
+    }
+
+    void SetMaxHotValue(std::set<uintptr_t> &addrSet)
+    {
+        for (auto addr : addrSet) {
+            auto *card = cardTable_->GetCardPtr(addr);
+            auto cardValue = card->GetCard();
+            while (!CardTable::Card::IsMaxHotValue(cardValue)) {
+                card->IncrementHotValue();
+                ASSERT(!card->IsClear());
+                cardValue = card->GetCard();
+            }
+        }
+    }
+
+    void SetHotFlag(std::set<uintptr_t> &addrSet)
+    {
+        for (auto addr : addrSet) {
+            auto *card = cardTable_->GetCardPtr(addr);
+            card->SetHot();
+            ASSERT(card->IsHot());
+        }
+    }
+
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     std::unique_ptr<CardTable> cardTable_;
 
@@ -182,7 +220,7 @@ TEST_F(CardTableTest, ClearTest)
     // clear all marked and count them
     for (auto card : *cardTable_) {
         if (card->IsMarked()) {
-            card->Clear();
+            card->UnMark();
             clearedCnt++;
         }
     }
@@ -221,9 +259,12 @@ TEST_F(CardTableTest, double_initialization)
 TEST_F(CardTableTest, corner_cases)
 {
     // Mark 1st byte in the heap
-    ASSERT_EQ((*cardTable_->begin())->IsMarked(), false);
+    auto cardIt = cardTable_->begin();
+    auto *firstCard = *cardIt;
+    auto *secondCard = *(++cardIt);
+    ASSERT_EQ(firstCard->IsMarked(), false);
     cardTable_->MarkCard(GetMinAddress());
-    ASSERT_EQ((*cardTable_->begin())->IsMarked(), true);
+    ASSERT_EQ(firstCard->IsMarked(), true);
     // Mark last byte in the heap
     uintptr_t last = GetMinAddress() + GetPoolSize() - 1;
     ASSERT_EQ(cardTable_->IsMarked(last), false);
@@ -233,7 +274,7 @@ TEST_F(CardTableTest, corner_cases)
     uintptr_t secondLast = GetMinAddress() + 2 * cardTable_->GetCardSize() - 1;
     ASSERT_EQ(cardTable_->IsMarked(secondLast), false);
     cardTable_->MarkCard(secondLast);
-    ASSERT_EQ(((*cardTable_->begin()) + 1)->IsMarked(), true);
+    ASSERT_EQ(secondCard->IsMarked(), true);
 }
 
 TEST_F(CardTableTest, VisitMarked)
@@ -264,6 +305,96 @@ TEST_F(CardTableTest, VisitMarked)
     for (size_t i = 0; i < expectedRanges.size(); i++) {
         ASSERT(memRanges[i].GetStartAddress() == expectedRanges[i].GetStartAddress());
         ASSERT(memRanges[i].GetEndAddress() == expectedRanges[i].GetEndAddress());
+    }
+}
+
+TEST_F(CardTableTest, IncrementHotValueTest)
+{
+    auto addrSet = GetRandomCardAddressSet();
+    for (auto addr : addrSet) {
+        auto *card = cardTable_->GetCardPtr(addr);
+        [[maybe_unused]] auto cardValue = card->GetCard();
+        ASSERT(CardTable::Card::IsMinHotValue(cardValue));
+    }
+    SetMaxHotValue(addrSet);
+    for (auto addr : addrSet) {
+        auto *card = cardTable_->GetCardPtr(addr);
+        auto cardValue = card->GetCard();
+        [[maybe_unused]] auto cardStatus = CardTable::Card::GetStatus(cardValue);
+        ASSERT(CardTable::Card::IsMaxHotValue(cardValue));
+        ASSERT(!CardTable::Card::IsHot(cardValue));
+        ASSERT(!CardTable::Card::IsMarked(cardStatus));
+        ASSERT(!CardTable::Card::IsYoung(cardStatus));
+        ASSERT(!CardTable::Card::IsProcessed(cardStatus));
+    }
+}
+
+TEST_F(CardTableTest, SetHotFlagTest)
+{
+    auto addrSet = GetRandomCardAddressSet();
+    SetHotFlag(addrSet);
+    for (auto addr : addrSet) {
+        auto *card = cardTable_->GetCardPtr(addr);
+        auto cardValue = card->GetCard();
+        [[maybe_unused]] auto cardStatus = CardTable::Card::GetStatus(cardValue);
+        ASSERT(CardTable::Card::IsHot(cardValue));
+        ASSERT(CardTable::Card::IsMinHotValue(cardValue));
+        ASSERT(!CardTable::Card::IsMarked(cardStatus));
+        ASSERT(!CardTable::Card::IsYoung(cardStatus));
+        ASSERT(!CardTable::Card::IsProcessed(cardStatus));
+    }
+}
+
+TEST_F(CardTableTest, HotCardTest)
+{
+    auto addrSet = GetRandomCardAddressSet();
+    // Increment hot value
+    SetMaxHotValue(addrSet);
+    // Set hot flag
+    SetHotFlag(addrSet);
+
+    // Mark card
+    for (auto addr : addrSet) {
+        auto *card = cardTable_->GetCardPtr(addr);
+        ASSERT(!card->IsMarked());
+        card->Mark();
+        auto cardValue = card->GetCard();
+        [[maybe_unused]] auto cardStatus = CardTable::Card::GetStatus(cardValue);
+        ASSERT(CardTable::Card::IsMaxHotValue(cardValue));
+        ASSERT(CardTable::Card::IsHot(cardValue));
+        ASSERT(CardTable::Card::IsMarked(cardStatus));
+        ASSERT(!CardTable::Card::IsYoung(cardStatus));
+        ASSERT(!CardTable::Card::IsProcessed(cardStatus));
+    }
+
+    // Make card clear
+    for (auto addr : addrSet) {
+        auto *card = cardTable_->GetCardPtr(addr);
+        ASSERT(card->IsMarked());
+        card->UnMark();
+        auto cardValue = card->GetCard();
+        [[maybe_unused]] auto cardStatus = CardTable::Card::GetStatus(cardValue);
+        ASSERT(CardTable::Card::IsMaxHotValue(cardValue));
+        ASSERT(CardTable::Card::IsHot(cardValue));
+        ASSERT(!CardTable::Card::IsMarked(cardStatus));
+        ASSERT(!CardTable::Card::IsYoung(cardStatus));
+        ASSERT(!CardTable::Card::IsProcessed(cardStatus));
+
+        card->ResetHot();
+        cardValue = card->GetCard();
+        cardStatus = CardTable::Card::GetStatus(cardValue);
+        ASSERT(CardTable::Card::IsMaxHotValue(cardValue));
+        ASSERT(!CardTable::Card::IsHot(cardValue));
+        ASSERT(!CardTable::Card::IsMarked(cardStatus));
+        ASSERT(!CardTable::Card::IsYoung(cardStatus));
+        ASSERT(!CardTable::Card::IsProcessed(cardStatus));
+
+        while (!CardTable::Card::IsMinHotValue(cardValue)) {
+            ASSERT(!card->IsClear());
+            card->DecrementHotValue();
+            cardValue = card->GetCard();
+        }
+        ASSERT(card->IsClear());
     }
 }
 

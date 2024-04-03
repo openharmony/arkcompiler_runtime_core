@@ -186,6 +186,8 @@ module Constants
     CARD_MARKED_VALUE = "mem::CardTable::Card::GetMarkedValue()"
     CARD_YOUNG_VALUE = "mem::CardTable::Card::GetYoungValue()"
     CARD_DIRTY_VALUE = "mem::CardTable::GetCardDirtyValue()"
+    CARD_STATUS_MASK = "mem::CardTable::Card::GetStatusMask()"
+    CARD_HOT_FLAG = "mem::CardTable::Card::GetHotFlag()"
     CARD_ALIGNMENT_MASK = "cross_values::GetCardAlignmentMask(GetArch())"
     POINTER_LOG_SIZE = "cross_values::GetPointerLogSize(GetArch())"
 

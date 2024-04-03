@@ -209,6 +209,7 @@ public:
     // Additional check for isnan-comparison
     virtual void EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc);
     virtual void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc);
+    virtual void EncodeAtomicByteOr(Reg addr, Reg value);
     struct ArgsCompressedStringCharAt {
         Reg dst;
         Reg str;
