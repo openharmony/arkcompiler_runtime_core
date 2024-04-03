@@ -1401,7 +1401,8 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
         MakeConcurrentModuleRequestsAnnotation(prog);
     }
 
-    auto items = ItemContainer {api};
+    ItemContainer::InitApi(api);
+    auto items = ItemContainer {};
     auto primitive_types = CreatePrimitiveTypes(&items);
     auto entities = AsmEmitter::AsmEntityCollections {};
     SetLastError("");
@@ -1477,7 +1478,8 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
                       PandaFileToPandaAsmMaps *maps, bool debug_info,
                       panda::panda_file::pgo::ProfileOptimizer *profile_opt, uint8_t api)
 {
-    auto items = ItemContainer {api};
+    ItemContainer::InitApi(api);
+    auto items = ItemContainer {};
     if (!Emit(&items, program, maps, debug_info, profile_opt)) {
         return false;
     }
@@ -1504,7 +1506,8 @@ bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::
 std::unique_ptr<const panda_file::File> AsmEmitter::Emit(const Program &program, PandaFileToPandaAsmMaps *maps,
                                                          uint8_t api)
 {
-    auto items = ItemContainer {api};
+    ItemContainer::InitApi(api);
+    auto items = ItemContainer {};
     if (!Emit(&items, program, maps)) {
         return nullptr;
     }

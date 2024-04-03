@@ -501,8 +501,12 @@ ProtoItem::ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &par
     for (auto &p : params) {
         AddType(p.GetType(), &n);
     }
-    // no need to emit protoItem
-    SetNeedsEmit(false);
+
+    const auto version = GetVersionByApi(ItemContainer::GetApi());
+    if (version.value().front() >= API_12) {
+        // no need to emit protoItem
+        SetNeedsEmit(false);
+    }
 }
 
 void ProtoItem::AddType(TypeItem *type, size_t *n)
@@ -530,6 +534,20 @@ void ProtoItem::AddType(TypeItem *type, size_t *n)
 
 bool ProtoItem::Write(Writer *writer)
 {
+    ASSERT(GetOffset() == writer->GetOffset());
+    for (auto s : shorty_) {
+        if (!writer->Write(s)) {
+            return false;
+        }
+    }
+
+    for (auto r : reference_types_) {
+        ASSERT(r->HasIndex(this));
+        if (!writer->Write<uint16_t>(r->GetIndex(this))) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -557,9 +575,18 @@ bool BaseMethodItem::Write(Writer *writer)
         return false;
     }
 
-    // reserve [proto_idx] field, write invalid index
-    if (!writer->Write<uint16_t>(INVALID_INDEX_16)) {
-        return false;
+    const auto version = GetVersionByApi(ItemContainer::GetApi());
+    if (version.value().front() >= API_12) {
+        // reserve [proto_idx] field, write invalid index
+        if (!writer->Write<uint16_t>(INVALID_INDEX_16)) {
+            return false;
+        }
+    } else {
+        ASSERT(proto_->HasIndex(this));
+
+        if (!writer->Write<uint16_t>(proto_->GetIndex(this))) {
+            return false;
+        }
     }
 
     ASSERT(name_->GetOffset() != 0);

@@ -34,7 +34,7 @@ class ItemDeduper;
 
 class ItemContainer {
 public:
-    explicit ItemContainer(uint8_t api = 0);
+    explicit ItemContainer();
     ~ItemContainer() = default;
     NO_COPY_SEMANTIC(ItemContainer);
     NO_MOVE_SEMANTIC(ItemContainer);
@@ -209,6 +209,18 @@ public:
         indexed_item_count_++;
     }
 
+    static void InitApi(uint8_t api)
+    {
+        ItemContainer::api = api;
+    }
+
+    static uint8_t GetApi()
+    {
+        return ItemContainer::api;
+    }
+
+    static uint8_t api;
+
 private:
     template <class T>
     auto GetInsertPosition()
@@ -229,7 +241,9 @@ private:
         IndexItem(IndexType type, size_t max_index) : type_(type), max_index_(max_index)
         {
             ASSERT(type_ != IndexType::NONE);
-            if (type == IndexType::FIELD || type == IndexType::PROTO) {
+
+            const auto version = GetVersionByApi(ItemContainer::GetApi());
+            if (version.value().front() >= API_12 && (type == IndexType::FIELD || type == IndexType::PROTO)) {
                 SetNeedsEmit(false);
             }
         }
@@ -583,7 +597,6 @@ private:
 
     BaseItem *end_;
     size_t indexed_item_count_ {0};
-    const uint8_t api_{0};
 };
 
 }  // namespace panda::panda_file
