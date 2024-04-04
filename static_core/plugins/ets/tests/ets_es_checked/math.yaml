@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+category: Math
 sub:
-  - category: Math
-    vars:
+  - vars:
       tricky: ["0.0", "-0.0", "NaN", "-NaN", "Infinity", "-Infinity", "1e18", "0.0078125", -5.0, -1.0, +1.0]
     sub:
       - method: Math.abs

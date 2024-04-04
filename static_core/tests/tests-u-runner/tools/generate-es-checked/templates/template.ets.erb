@@ -197,14 +197,14 @@ function test<%= slice_idx %>(): void {
     __warn_action = <%= warn_level %>
     __fail_description = <%= "#{test_case_cur.ts.expr}".inspect %>
 %     if test_case_cur.self
-    let self = <%= test_case_cur.ets.self %>;
+    let self = <%= test_case_cur.ts.self %>;
 %     end
     <%= test_case_cur.conf.setup %>
 %     rb_obj = expected[(idx * 2).to_s]
 %     if rb_obj.kind_of?(String) && rb_obj.start_with?("#__threw ")
     let threw = false;
     try {
-      <%= test_case_cur.ets.expr %>;
+      <%= test_case_cur.ts.expr %>;
     } catch (e) {
       threw = true;
     }
@@ -213,9 +213,9 @@ function test<%= slice_idx %>(): void {
       __fail();
     }
 %     elsif test_case_cur.conf.ret_type == "void"
-    <%= test_case_cur.ets.expr %>
+    <%= test_case_cur.ts.expr %>
 %     else
-    __check_value(<%= test_case_cur.ets.expr %>, <%= ESChecker::ValueDumper.new(test_case_cur.conf).dump(rb_obj) %>);
+    __check_value(<%= test_case_cur.ts.expr %>, <%= ESChecker::ValueDumper.new(test_case_cur.conf).dump(rb_obj) %>);
 %     end
 %   if test_case_cur.self
 %     rb_obj = expected[(idx * 2 + 1).to_s]

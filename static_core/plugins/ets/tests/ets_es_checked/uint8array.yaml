@@ -13,9 +13,9 @@
 
 #-Infinity as number,  NaN as number, -NaN as number, Infinity as number
 
+category: Uint8Array
 sub:
-  - category: Uint8Array
-    self:
+  - self:
       - |
         ((): Uint8Array => { let b: number[] = [-Infinity as number, Infinity as number, -NaN as number, NaN as number, 0 as number, 4 as number, 1 as number, 2.1 as number, 256.0 as number, 65536.0 as number, -256.0 as number, -65536.0 as number]; let a = new Uint8Array(b.length); a.set(b); return a; })()
     self_type: Iterable<number>

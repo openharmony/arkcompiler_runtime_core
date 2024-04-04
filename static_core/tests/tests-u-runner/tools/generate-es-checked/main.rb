@@ -141,11 +141,6 @@ class Generator
     def initialize(filter_pattern)
         @filter_pattern = filter_pattern
 
-        @conf = OpenStruct.new
-        @conf.self = nil
-        @conf.vars = eval('Vars.new', $user_binding)
-        @conf.category = ""
-
         @tests_by_name = {}
 
         @test_count = 0
@@ -154,6 +149,17 @@ class Generator
         @tests_excluded = 0
 
         check_node_version
+    end
+
+    def prepare(path, conf_yaml)
+        @conf = OpenStruct.new
+        @conf.self = nil
+        file_name = File.basename(path, ".yaml").gsub(/\s+/, '_').gsub(/[^a-zA-Z0-9_=]/, '_')
+        @conf.category = file_name + "_"
+        @conf.vars = eval('Vars.new', $user_binding)
+        if conf_yaml["top_scope"]
+            @conf.top_scope = conf_yaml["top_scope"]
+        end
     end
 
     def check_node_version()
@@ -176,9 +182,6 @@ class Generator
 
     def parse_non_endpoint_conf(sub)
         conf = @conf
-        if sub["category"]
-            conf.category += sub["category"] + "_"
-        end
         if sub.has_key?("self")
             conf.self = sub["self"]
             conf.self_type = sub["self_type"]
@@ -195,9 +198,6 @@ class Generator
     end
 
     def process(sub)
-        if sub["top_scope"]
-            @conf.top_scope = sub["top_scope"]
-        end
         old_conf = deep_copy(@conf)
         if sub["excluded"]
             @tests_excluded += 1
@@ -259,25 +259,19 @@ class Generator
                 push.conf = conf
                 push.self = conf.self
                 push.ts = OpenStruct.new
-                push.ets = OpenStruct.new
                 if conf.self
                     raise if pars.ts.size < 1
-                    raise if pars.ets.size < 1
                     push.ts.self = pars.ts[0]
-                    push.ets.self = pars.ets[0]
                     pars.ts = pars.ts[1..]
-                    pars.ets = pars.ets[1..]
                 end
                 if push.conf.setup
                     push.conf.setup = push.conf.setup.gsub(/\bpars\b/, pars.ts.join(', '))
                 end
                 if is_expr
                     push.ts.expr = sub["expr"].gsub(/\bpars\b/, pars.ts.join(', '))
-                    push.ets.expr = sub["expr"].gsub(/\bpars\b/, pars.ets.join(', '))
                 else
                     slf = conf.self ? "self." : ""
                     push.ts.expr = "#{slf}#{sub["method"]}(#{pars.ts.join(', ')})"
-                    push.ets.expr = "#{slf}#{sub["method"]}(#{pars.ets.join(', ')})"
                 end
                 tests.push(push)
             }
@@ -408,6 +402,7 @@ gen = Generator.new($options[:'filter'])
 ARGV.each { |a|
     puts "reading #{a}"
     file = YAML.load_file(a)
+    gen.prepare a, file
     gen.process file
 }
 

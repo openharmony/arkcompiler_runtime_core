@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+category: ArrayLambdas
 sub:
-  - category: ArrayLambdas
-    self:
+  - self:
       - Array.of<number>(-2, -1, 0, 1, 2)
       - Array.of<number>(2, -2, 1, -1, 0)
       - Array.of<number>(NaN, Infinity, -Infinity, NaN)

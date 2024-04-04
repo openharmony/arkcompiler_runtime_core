@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+category: Global
 sub:
-  - category: Global
-    vars:
+  - vars:
       radix_values: [2, 8, 10, 16, -1.0, 0.0, 1.0, "NaN", 60.0, 36.0, 37.0]
       test_values_number: ["NaN", "-Infinity", "Infinity", "1.1", "123.456", "0o11"]
       test_values_string: ["'NaN'", "'-Infinity'", "'Infinity'", "'1.1'", "'123.456'", "'0o11'", "'false'", "'true'", "'null'", "'undefined'", "'+0'", "'-0'", "'+0.0'", "'-0.0'", "'+1'", "'-1'", "'0xff'", "'ff'", "'0xff.ff'", "'777'", "'11'", "'99'", "'077'", "'099'", "'-099'", "'-0x88'"]

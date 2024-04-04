@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+category: Map
 sub:
-  - category: Map
-    self:
+  - self:
       - new Map<number, string>()
       - new Map<number, string>().set(+0, "1").set(NaN, "2").set(Infinity, "5").set(-Infinity, "6")
       - new Map<number, string>().set(+0, "1").set(-0, "2").set(1e30, "3")
