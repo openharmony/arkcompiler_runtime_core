@@ -32,7 +32,6 @@ using ark::llvmbackend::gc_barriers::EmitPostWRB;
 using ark::llvmbackend::gc_barriers::EmitPreWRB;
 using ark::llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT;
 using ark::llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT;
-using ark::llvmbackend::runtime_calls::CreateEntrypointCallCommon;
 using ark::llvmbackend::runtime_calls::GetThreadRegValue;
 
 namespace {
@@ -54,9 +53,9 @@ llvm::CallInst *CreateEntrypointCallHelper(llvm::IRBuilder<> *builder, ark::comp
     }
 
     auto threadReg = GetThreadRegValue(builder, arkInterface);
-    auto call = CreateEntrypointCallCommon(builder, threadReg, arkInterface,
-                                           static_cast<ark::llvmbackend::runtime_calls::EntrypointId>(id), arguments,
-                                           llvm::makeArrayRef(bundles));
+    auto call = ark::llvmbackend::runtime_calls::CreateEntrypointCallCommon(
+        builder, threadReg, arkInterface, static_cast<ark::llvmbackend::runtime_calls::EntrypointId>(id), arguments,
+        llvm::makeArrayRef(bundles));
     if (inst->hasFnAttr("inline-info")) {
         call->addFnAttr(inst->getFnAttr("inline-info"));
     }
@@ -137,6 +136,7 @@ llvm::Value *SlowClassLoadingHelper(llvm::IRBuilder<> *builder, llvm::CallInst *
     builder->SetInsertPoint(slowPath);
 
     auto freshKlass = CreateEntrypointCallHelper(builder, eid, {klassPtr}, arkInterface, inst);
+    ASSERT(freshKlass->getCallingConv() == llvm::CallingConv::C);
     freshKlass->setCallingConv(llvm::CallingConv::ArkResolver);
     builder->CreateBr(continuation);
 
@@ -388,6 +388,7 @@ llvm::Value *LowerResolveVirtual(llvm::IRBuilder<> *builder, llvm::CallInst *ins
         static constexpr auto ENTRYPOINT_ID = ark::compiler::RuntimeInterface::EntrypointId::INTF_INLINE_CACHE;
         entrypointAddress =
             CreateEntrypointCallHelper(builder, ENTRYPOINT_ID, {method, thiz, methodId, offset}, arkInterface, inst);
+        ASSERT(entrypointAddress->getCallingConv() == llvm::CallingConv::C);
         entrypointAddress->setCallingConv(llvm::CallingConv::ArkFast4);
     }
 

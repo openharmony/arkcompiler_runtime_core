@@ -615,7 +615,7 @@ macro(:instrument_branches) do |imm, acc_type, method_ptr|
     hc := LoadI(method_ptr).Imm(Constants::GET_HOTNESS_COUNTER_OFFSET).i16;
 
     If(hc, 0).LE.Unlikely {
-      osr_success := call_runtime("CallCompilerSlowPathOSR", %tr, method_ptr, %frame, acc_, acc_tag, ins_offset, imm).i32
+      osr_success := call_runtime("CallCompilerSlowPathOSR", %tr, method_ptr, %frame, acc_, acc_tag, ins_offset, imm).b
       IfImm(osr_success).Imm(0).NE.Unlikely {
         handle_fake_return()
       }
@@ -827,7 +827,7 @@ end
 # Handlers:
 
 macro(:handle_throw) do |vs|
-  IfImm(vs).Imm(0).EQ.Unlikely {
+  If(vs, 0).EQ.Unlikely {
     call_runtime("ThrowNullPointerExceptionFromInterpreter").void
   } Else {
     call_runtime("ThrowExceptionFromInterpreter", %tr, vs, %frame, %pc).void

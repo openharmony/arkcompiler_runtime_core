@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1171,7 +1171,7 @@ void Lowering::LowerIf(IfImmInst *inst)
     ASSERT(inst->GetCc() == ConditionCode::CC_NE || inst->GetCc() == ConditionCode::CC_EQ);
     ASSERT(inst->GetImm() == 0);
     if (inst->GetOperandsType() != DataType::BOOL) {
-        ASSERT(!GetGraph()->SupportManagedCode() || GetGraph()->IsDynamicMethod());
+        ASSERT(GetGraph()->IsDynamicMethod());
         return;
     }
     auto input = inst->GetInput(0).GetInst();

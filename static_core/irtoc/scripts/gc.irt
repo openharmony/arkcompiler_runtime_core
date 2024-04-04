@@ -130,7 +130,7 @@ def PostInterRegionBarrierMarkPairFast()
         ref_addr_obj2 := AddI(ref_addr_obj1.ref_uint).Imm(Constants::REFERENCE_TYPE_SIZE).ref_uint
 
         If(ShrI(Xor(mem, obj2).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).NE.Unlikely {
-            IfImm(AndI(ref_addr_obj2).Imm(Constants::CARD_ALIGNMENT_MASK).ref_uint).Imm(0).EQ.Unlikely {
+            If(AndI(ref_addr_obj2).Imm(Constants::CARD_ALIGNMENT_MASK).ref_uint, 0).EQ.Unlikely {
                 LiveOut(ref_addr_obj2).DstReg(regmap[:arg0]).ref_uint
                 Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW).MethodAsImm("PostInterRegionBarrierTwoCardsSlow").Terminator.void
             }

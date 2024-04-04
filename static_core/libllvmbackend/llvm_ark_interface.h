@@ -53,6 +53,13 @@ class File;
 
 namespace ark::llvmbackend {
 
+enum class BridgeType {
+    NONE,        //
+    ODD_SAVED,   //
+    ENTRYPOINT,  //
+    SLOW_PATH,   //
+};
+
 class LLVMArkInterface {
 public:
     using MethodPtr = void *;
@@ -89,6 +96,7 @@ public:
 
     const char *GetIntrinsicRuntimeFunctionName(IntrinsicId id) const;
     const char *GetEntrypointRuntimeFunctionName(EntrypointId id) const;
+    BridgeType GetBridgeType(EntrypointId id) const;
 
     llvm::StringRef GetRuntimeFunctionName(LLVMArkInterface::RuntimeCallType callType, IntrinsicId id);
     llvm::FunctionType *GetRuntimeFunctionType(llvm::StringRef name) const;

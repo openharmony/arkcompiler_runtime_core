@@ -806,6 +806,7 @@ bool LLVMIrConstructor::EmitStringGetCharsTlab(Inst *inst)
     auto eid = RuntimeInterface::EntrypointId::STRING_GET_CHARS_TLAB_COMPRESSED;
     auto result = CreateEntrypointCall(eid, inst,
                                        {GetInputValue(inst, 0), GetInputValue(inst, 1), GetInputValue(inst, 2), klass});
+    ASSERT(result->getCallingConv() == llvm::CallingConv::C);
     result->setCallingConv(llvm::CallingConv::ArkFast4);
     result->addRetAttr(llvm::Attribute::NonNull);
     result->addRetAttr(llvm::Attribute::NoAlias);
@@ -833,6 +834,7 @@ bool LLVMIrConstructor::EmitStringHashCode(Inst *inst)
 
     auto newHashCode =
         CreateEntrypointCall(RuntimeInterface::EntrypointId::STRING_HASH_CODE_COMPRESSED, inst, {string});
+    ASSERT(newHashCode->getCallingConv() == llvm::CallingConv::C);
     newHashCode->setCallingConv(llvm::CallingConv::ArkFast1);
     builder_.CreateBr(continuation);
     SetCurrentBasicBlock(continuation);
@@ -1090,6 +1092,7 @@ llvm::CallInst *LLVMIrConstructor::CreateFastPathCall(Inst *inst, RuntimeInterfa
 {
     auto call = CreateEntrypointCall(eid, inst, args);
     ASSERT_PRINT(!args.empty(), "For zero arguments convention should be chosen in more accurate way");
+    ASSERT(call->getCallingConv() == llvm::CallingConv::C);
     call->setCallingConv(GetFastPathCallingConv(args.size()));
     WrapArkCall(inst, call);
     return call;
@@ -1873,6 +1876,7 @@ llvm::Value *LLVMIrConstructor::CreateNewStringFromCharsTlab(Inst *inst, llvm::V
     auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
     arguments.push_back(klass);
     auto result = CreateEntrypointCall(entryId, inst, arguments);
+    ASSERT(result->getCallingConv() == llvm::CallingConv::C);
     result->setCallingConv(callConv);
     WrapArkCall(inst, result);
     MarkAsAllocation(result);
@@ -1883,6 +1887,7 @@ llvm::Value *LLVMIrConstructor::CreateNewStringFromStringTlab(Inst *inst, llvm::
 {
     auto entryId = RuntimeInterface::EntrypointId::CREATE_STRING_FROM_STRING_TLAB_COMPRESSED;
     auto result = CreateEntrypointCall(entryId, inst, {stringVal});
+    ASSERT(result->getCallingConv() == llvm::CallingConv::C);
     result->setCallingConv(llvm::CallingConv::ArkFast1);
     WrapArkCall(inst, result);
     MarkAsAllocation(result);
@@ -3784,6 +3789,7 @@ void LLVMIrConstructor::VisitIfImm(GraphVisitor *v, Inst *inst)
 
     llvm::Value *cond = nullptr;
     if (ifimm->GetCc() == ConditionCode::CC_NE && ifimm->GetImm() == 0 && x->getType()->isIntegerTy()) {
+        ASSERT(ifimm->GetOperandsType() == DataType::BOOL);
         cond = ctor->builder_.CreateTrunc(x, ctor->builder_.getInt1Ty());
     } else {
         ASSERT(x->getType()->isIntOrPtrTy());
@@ -4238,6 +4244,7 @@ void LLVMIrConstructor::VisitMonitor(GraphVisitor *v, Inst *inst)
     auto eid = monitor->IsEntry() ? RuntimeInterface::EntrypointId::MONITOR_ENTER_FAST_PATH
                                   : RuntimeInterface::EntrypointId::MONITOR_EXIT_FAST_PATH;
     auto call = ctor->CreateEntrypointCall(eid, inst, {object});
+    ASSERT(call->getCallingConv() == llvm::CallingConv::C);
     call->setCallingConv(llvm::CallingConv::ArkFast1);
 
     ctor->WrapArkCall(inst, call);

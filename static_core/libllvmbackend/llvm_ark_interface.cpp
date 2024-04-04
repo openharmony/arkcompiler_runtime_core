@@ -624,6 +624,11 @@ LLVMArkInterface::RuntimeCallee LLVMArkInterface::GetEntrypointCallee(Entrypoint
     return {functionProto, functionName};
 }
 
+BridgeType LLVMArkInterface::GetBridgeType(EntrypointId id) const
+{
+    return GetBridgeTypeInternal(static_cast<RuntimeInterface::EntrypointId>(id));
+}
+
 llvm::Function *LLVMArkInterface::GetFunctionByMethodPtr(LLVMArkInterface::MethodPtr method) const
 {
     ASSERT(method != nullptr);

@@ -760,7 +760,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
     bx6 := Phi(bx4, bx5).u32
     ex6 := Phi(ex4, ex5).u32
 
-    IfImm(bx6).Imm(0).EQ.Likely.b {
+    If(bx6, 0).EQ.Likely.b {
       If(ex6, length).EQ.Unlikely.b {
         Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
       }
