@@ -21,6 +21,7 @@ ninja-build=1.10.*
 
 lcov=1.15-*                                  # For coverage calculation
 libc++-dev:amd64=1:14**                      # For clang-tidy to find standard headers
+python2                                      # For repo tool
 python3-pip
 python3-setuptools
 python3=3.10*                                # For running multilingual benchmarks
