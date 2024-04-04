@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -296,16 +296,14 @@ TEST_P(TaskSchedulerTest, TaskSchedulerGetTask)
         queue->AddTask(
             Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&globalQueue]() { globalQueue.push(TaskType::GC); }));
     }
-    for (size_t i = 0; i < COUNT_OF_TASKS; i++) {
-        auto task = tm->GetTaskFromQueue(GC_STATIC_VM_BACKGROUND_PROPERTIES);
-        ASSERT_TRUE(task.has_value());
-        task.value().RunTask();
+    for (size_t i = 0; i < COUNT_OF_TASKS;) {
+        i += tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES);
     }
-    ASSERT_FALSE(tm->GetTaskFromQueue(GC_STATIC_VM_BACKGROUND_PROPERTIES).has_value()) << "seed:" << GetSeed();
+    ASSERT_EQ(tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0) << "seed:" << GetSeed();
     ASSERT_EQ(globalQueue.size(), COUNT_OF_TASKS) << "seed:" << GetSeed();
     tm->Initialize();
     tm->Finalize();
-    ASSERT_FALSE(tm->GetTaskFromQueue(GC_STATIC_VM_BACKGROUND_PROPERTIES).has_value()) << "seed:" << GetSeed();
+    ASSERT_EQ(tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0) << "seed:" << GetSeed();
     tm->UnregisterAndDestroyTaskQueue<>(queue);
     tm->Destroy();
 }
@@ -369,9 +367,8 @@ TEST_P(TaskSchedulerTest, TaskCreateTaskRecursively)
     runner = [&counter, &runner, &gcQueue](size_t recursionDepth) {
         if (recursionDepth < MAX_RECURSION_DEPTH) {
             for (size_t j = 0; j < COUNT_OF_REPLICAS; j++) {
-                size_t queueSize = gcQueue->AddTask(Task::Create(
-                    GC_STATIC_VM_BACKGROUND_PROPERTIES, [runner, recursionDepth]() { runner(recursionDepth + 1); }));
-                ASSERT_TRUE(queueSize != 0);
+                gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES,
+                                              [runner, recursionDepth]() { runner(recursionDepth + 1); }));
             }
             // Atomic with relaxed order reason: data race with counter with no synchronization or ordering
             // constraints
@@ -403,19 +400,17 @@ TEST_P(TaskSchedulerTest, TaskSchedulerTaskGetTask)
     std::atomic_size_t counter = 0;
     constexpr size_t COUNT_OF_TASK = 100'000;
     gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, []() {
+        size_t executedTasksCount = 0;
         while (true) {  // wait for valid task;
-            auto task = TaskScheduler::GetTaskScheduler()->GetTaskFromQueue(GC_STATIC_VM_BACKGROUND_PROPERTIES);
-            if (task.has_value()) {
-                task.value().RunTask();
+            executedTasksCount =
+                TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES);
+            if (executedTasksCount > 0) {
                 break;
             }
         }
         for (size_t i = 0; i < COUNT_OF_TASK; i++) {
-            auto task = TaskScheduler::GetTaskScheduler()->GetTaskFromQueue(GC_STATIC_VM_BACKGROUND_PROPERTIES);
-            if (!task.has_value()) {
-                continue;
-            }
-            task.value().RunTask();
+            executedTasksCount +=
+                TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES);
         }
     }));
     for (size_t i = 0; i < COUNT_OF_TASK; i++) {

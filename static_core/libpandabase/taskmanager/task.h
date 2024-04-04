@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,8 +99,11 @@ private:
     TaskExecutionMode executionMode_;
 };
 
+constexpr auto INVALID_TASK_PROPERTIES = TaskProperties(TaskType::UNKNOWN, VMType::UNKNOWN, TaskExecutionMode::UNKNOWN);
+
 class Task {
 public:
+    PANDA_PUBLIC_API Task() = default;
     NO_COPY_SEMANTIC(Task);
     DEFAULT_MOVE_SEMANTIC(Task);
 
@@ -119,13 +122,25 @@ public:
     /// @brief Executes body of task
     PANDA_PUBLIC_API void RunTask();
 
+    /**
+     * @brief Makes task invalid, it should not be executed anymore.
+     * @see INVALID_TASK_PROPERTIES
+     */
+    PANDA_PUBLIC_API void MakeInvalid();
+
+    /**
+     * @brief Checks if task is invalid
+     * @see INVALID_TASK_PROPERTIES
+     */
+    PANDA_PUBLIC_API bool IsInvalid() const;
+
     PANDA_PUBLIC_API ~Task() = default;
 
 private:
     Task(TaskProperties properties, RunnerCallback runner);
 
-    TaskProperties properties_;
-    RunnerCallback runner_;
+    TaskProperties properties_ {INVALID_TASK_PROPERTIES};
+    RunnerCallback runner_ {nullptr};
 };
 
 PANDA_PUBLIC_API std::ostream &operator<<(std::ostream &os, TaskType type);
