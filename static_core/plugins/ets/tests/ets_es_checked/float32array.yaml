@@ -17,10 +17,10 @@ sub:
   - category: Float32Array
     self:
       - |
-        ((): Float32Array => { let b: number[] = [-Infinity as number, Infinity as number, -NaN as number, NaN as number, 0 as number, 4 as number, 1 as number, 2.1 as number, -1 as number, 11 as number, 1 as number, 21 as number, 111 as number, 300 as number, -300 as number, -2.2 as number]; let a = new Float32Array(b.length); a.set(b); return a; })()
+        ((): Float32Array => { let b: number[] = [-Infinity as number, Infinity as number, -NaN as number, NaN as number, 0 as number, 4 as number, 1 as number, 2.1 as number, 256.0 as number, 65536.0 as number, -256.0 as number, -65536.0 as number]; let a = new Float32Array(b.length); a.set(b); return a; })()
     self_type: Iterable<number>
     vars:
-      default_inds: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.0, 5.0 , 100.0, -1.1, 2.2, "-Infinity", "Infinity", "NaN", "0x8 as number", "-0o4 as number"]
+      default_inds: ["self.length", "-self.length", "self.length - 1.0", "-self.length + 1.0", 1.0, 5.0 , 100.0, -1.1, 2.2, "-Infinity", "Infinity", "NaN", "0x8 as number", "-0o4 as number"]
     sub:
       - method: "at"
         params:
@@ -71,3 +71,17 @@ sub:
             ((): Float32Array => { let arr = new Array<number>(); arr.push(-1234.0); arr.push(1234.0); let a = new Float32Array((arr.values() as Iterable<number>)); return a; })()
         sub:
           - method: "values"
+      - method: "copyWithin"
+        ret_type: Iterable<number>
+        params:
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+        mandatory: 2
+      - method: "fill"
+        ret_type: Iterable<number>
+        params:
+          - paramOf(11.0)
+          - paramOf(*default_inds)
+          - paramOf(*default_inds)
+        mandatory: 1
