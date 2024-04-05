@@ -19,7 +19,6 @@ cases:
 
   - { stype: '() => void', src: '() => { return; }', dtype: Object }
   - { stype: '(() => void)[]', src: '[]', dtype: Object }
-  - { stype: '((a: Double) => double)[][]|null', src: 'null', dtype: 'Object[]|null' }
 
   - { stype: 'Byte', src: 'new Byte()', dtype: Object }
   - { stype: 'Short', src: 'new Short()', dtype: Object }
@@ -121,3 +120,9 @@ cases:
     stype: C<I>
     src: new C<I>()
     dtype: B<I>
+
+  - stype: |-
+      ((a: Double) => double)[][]|null
+    src: |-
+      null
+    dtype: Object[]|null

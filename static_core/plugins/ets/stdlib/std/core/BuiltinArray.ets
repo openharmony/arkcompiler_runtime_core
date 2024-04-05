@@ -1053,7 +1053,7 @@ export function toLocaleString(self: boolean[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }
@@ -2454,7 +2454,7 @@ export function toLocaleString(self: byte[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }
@@ -3855,7 +3855,7 @@ export function toLocaleString(self: short[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }
@@ -5256,7 +5256,7 @@ export function toLocaleString(self: int[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }
@@ -6657,7 +6657,7 @@ export function toLocaleString(self: long[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }
@@ -8058,7 +8058,7 @@ export function toLocaleString(self: float[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }
@@ -9467,7 +9467,7 @@ export function toLocaleString(self: double[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }
@@ -10876,7 +10876,7 @@ export function toLocaleString(self: char[], ): string {
         if (i != 0) {
             sb.append(",")
         }
-        let x: NullishType = self[i]
+        let x = self[i] as NullishType;
         if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
             sb.append(x!.toLocaleString())
         }

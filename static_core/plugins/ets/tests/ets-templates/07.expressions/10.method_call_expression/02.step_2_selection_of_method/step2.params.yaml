@@ -444,7 +444,7 @@ cases:
       use: |-
           let a: A = new C()
           assert a.met(true) == "C-true"
-          assert a.met(new Boolean()) == "C-false"
+          assert a.met(new Boolean()) == "B-false"
 
           let b: B = new B()
           assert b.met(true) == "A-true"

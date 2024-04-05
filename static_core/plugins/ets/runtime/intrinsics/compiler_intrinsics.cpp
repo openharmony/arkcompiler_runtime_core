@@ -19,6 +19,8 @@
 #include "runtime/include/exceptions.h"
 #include "compiler/optimizer/ir/constants.h"
 
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 namespace ark::ets::intrinsics {
 
 constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
@@ -355,6 +357,12 @@ extern "C" void CompilerEtsStObjByNameObj(ark::Method *method, int32_t id, uint3
                                           ark::ObjectHeader *storeValue)
 {
     CompilerEtsStObjByNameRef(method, id, pc, obj, storeValue);
+}
+
+extern "C" uint8_t CompilerEtsEquals(ObjectHeader *obj1, ObjectHeader *obj2)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    return static_cast<uint8_t>(EtsReferenceEquals(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
 }
 
 }  // namespace ark::ets::intrinsics

@@ -17,9 +17,9 @@ function compareLength(rea: RegExpExecArray | null, len: int): int {
     if (rea == null && len != 0) {
         return 1
     }
-    if (rea != null && rea!.length != len) {
+    if (rea != null && rea.length != len) {
         return 1
-    } 
+    }
     return 0
 }
 

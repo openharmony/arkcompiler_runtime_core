@@ -73,12 +73,6 @@ cases:
       }
 
   - use: |-
-      let v: I[]|null = new I[0]
-      if (a.meth<I[]>(v, v) !== v) {  // I[]|null is not I[]
-          return 1
-      }
-
-  - use: |-
       let v: Object[]|null = new Color[0]
       if (a.meth<Color[]>(v, [Color.Blue]) !== v) {  // Object[]|null is not Color[]
           return 1

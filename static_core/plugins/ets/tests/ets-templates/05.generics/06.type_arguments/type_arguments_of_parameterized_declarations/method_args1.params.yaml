@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -83,7 +83,7 @@ cases:
       type B = X
 
   - use: |-
-      let v: B = null
+      let v: B = null as B
       if (a.meth<B>(v, new Y<X>()) !== v) {
           return 1;
       }
@@ -112,4 +112,10 @@ cases:
       let v = 1
       if (a.meth<int>(1, 2) != 2) {
           return 1;
+      }
+
+  - use: |-
+      let v: I[]|null = new I[0]
+      if (a.meth<I[]>(v, v) !== v) {  // I[]|null is not I[]
+          return 1
       }

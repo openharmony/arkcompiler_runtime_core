@@ -132,3 +132,14 @@ intrinsics:
     clear_flags: [  ]
     peephole_func: PeepholeStObjByName
 
+  - name: CompilerEtsEquals
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: u1
+      args: [ ref, ref ]
+    impl: ark::ets::intrinsics::CompilerEtsEquals
+    set_flags: [ commutative ]
+    clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist ]
+    peephole_func: PeepholeEquals

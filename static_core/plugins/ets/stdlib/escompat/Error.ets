@@ -56,8 +56,8 @@ export class Error {
     * @param options options of the error
     */
     constructor(name: String, message: String | undefined, options: ErrorOptions | undefined) {
-        this.message = (message == undefined) ? "" : message!
-        this.cause = (options == undefined) ? undefined : options!.cause
+        this.message = (message == undefined) ? "" : message
+        this.cause = (options == undefined) ? undefined : options.cause
         this.name = name
         this.stackLines = StackTrace.provisionStackTrace()
     }

@@ -25,7 +25,7 @@ class A {
 }
 
 function main(): int {
-    let a: A|undefined = new A();
+    let a: A|undefined = (): A|undefined => { return new A(); }();
     if(a!.b == false) {
         a!.b = true;
     }

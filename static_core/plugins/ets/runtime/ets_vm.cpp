@@ -235,11 +235,14 @@ bool PandaEtsVM::Initialize()
     if (!classLinker_->Initialize()) {
         LOG(FATAL, ETS) << "Cannot initialize ets class linker";
     }
+    classLinker_->GetEtsClassLinkerExtension()->InitializeBuiltinClasses();
 
-    if (Runtime::GetCurrent()->GetOptions().ShouldLoadBootPandaFiles()) {
-        PreallocSpecialReference(this, oomObjRef_, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR.data());
-        PreallocSpecialReference(this, undefinedObjRef_, panda_file_items::class_descriptors::INTERNAL_UNDEFINED.data(),
-                                 true);
+    if (Runtime::GetOptions().ShouldLoadBootPandaFiles()) {
+        // NOLINTNEXTLINE(google-build-using-namespace)
+        using namespace panda_file_items::class_descriptors;
+
+        PreallocSpecialReference(this, oomObjRef_, OUT_OF_MEMORY_ERROR.data());
+        PreallocSpecialReference(this, undefinedObjRef_, INTERNAL_UNDEFINED.data(), true);
 
         if (Thread::GetCurrent() != nullptr) {
             ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());

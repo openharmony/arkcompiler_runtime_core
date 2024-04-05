@@ -18,7 +18,7 @@ desc: The type of ensure-not-nullish expression is the non-nullish variant of th
 ---*/
 
 function main(): void {
-  let i: Int|undefined = undefined;
+  let i: Int|undefined = (): Int|undefined => { return undefined; }();
   try {
     let ii = i!;
     assert 0;

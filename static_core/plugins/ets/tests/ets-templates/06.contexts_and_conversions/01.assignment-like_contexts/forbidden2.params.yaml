@@ -13,14 +13,6 @@
 
 ---
 cases:
-  - { stype: Object, sval: new Int(), dtype: Boolean }
-
-  - defs: |-
-      class A {}
-    stype: Object
-    sval: new A()
-    dtype: Double
-
   - defs: |-
       class A {}
     stype: Object
@@ -41,20 +33,6 @@ cases:
     stype: A
     sval: new A()
     dtype: I
-
-  - defs: |-
-      interface I {}
-      class A implements I {}
-      class B implements I {}
-    stype: I
-    sval: new A()
-    dtype: B
-
-  - defs: |-
-      class A {}
-    stype: Object
-    sval: new A[1]
-    dtype: A[][]
 
   - defs: |-
       interface I {}

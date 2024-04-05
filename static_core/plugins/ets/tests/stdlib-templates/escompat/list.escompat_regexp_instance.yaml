@@ -417,8 +417,8 @@
       {
         test1: 'new RegExpExecArray(0, "", [""])',
         test2: 'new RegExpExecArray(0, "aaaaa", ["aaaaa"])',
-        test3: 'null',
-        test4: 'null'
+        test3: 'null as RegExpExecArray | null',
+        test4: 'null as RegExpExecArray | null'
       },
   }
 
@@ -515,7 +515,7 @@
       test6: 'new RegExpMatchArray(-1, "", ["bab"])',
       test7: 'new RegExpMatchArray(-1, "", ["bab"])',
       test8: 'new RegExpMatchArray(-1, "", ["bab"])',
-      test9: 'null',
+      test9: 'null as RegExpMatchArray | null',
     }
 }
 

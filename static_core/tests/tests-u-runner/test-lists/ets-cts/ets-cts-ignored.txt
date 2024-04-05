@@ -4,6 +4,7 @@
 
 # es2panda fails: panda#14436 CTE expected on type variable in static method
 17.experimental_features/09.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods_n4.ets
+17.experimental_features/09.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods_n5.ets
 # end of es2panda fails
 
 # es2panda fails: panda, cannot convert to int
@@ -564,7 +565,9 @@
 
 # es2panda fails: panda#14391 Cannot cast enum to the same enum type or Object
 06.contexts_and_conversions/04.casting_contexts_and_conversions/identity.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_39.ets
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_40.ets
+06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_41.ets
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_42.ets
 # end of es2panda fails
 
@@ -1359,10 +1362,6 @@
 07.expressions/18.ensure-not-nullish_expression/undefined_1.ets
 07.expressions/18.ensure-not-nullish_expression/undefined_3.ets
 07.expressions/18.ensure-not-nullish_expression/undefined_4.ets
-
-# 16156 Waiting for the full implementation of smartcasts
-07.expressions/18.ensure-not-nullish_expression/undefined_2.ets
-17.experimental_features/09.default_and_static_interface_methods/02.static_method_declarations/static_interface_methods4.ets
 
 # 16022 Failed compilation of Enumeration-Operations
 11.enumerations/03.enumeration_operations/enum_type_methods_valueof.ets

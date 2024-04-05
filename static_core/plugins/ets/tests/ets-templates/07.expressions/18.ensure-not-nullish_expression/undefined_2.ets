@@ -18,7 +18,7 @@ desc: If the result of the evaluation of e is not equal to null or undefined, th
 ---*/
 
 function main(): void {
-  let i: Int|null = 5;
-  let ii: Int|null = null;
+  let i = (): Int|null => { return 5; }();
+  let ii = (): Int|null => { return null; } ();
   assert (0 ? ii : i)!;
 }

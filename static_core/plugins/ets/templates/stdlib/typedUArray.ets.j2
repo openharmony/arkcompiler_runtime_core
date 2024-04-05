@@ -30,7 +30,7 @@ const IS_LITTLE_ENDIAN = RuntimeGetPlatformIsLittleEndian();
     {%- set asElementCompat = ('%s as ' + element['subsetType']) if element['subsetType'] != 'BigInt' else 'new BigInt(%s)' %}
     {%- set fromElementCompat = ('%s as ' + element['etsType']) if element['subsetType'] != 'BigInt' else '%s.getULong()' %}
     {%- set numberBigIntToPrimitive = ('.' + element['etsType'] + 'Value()') if element['subsetType'] != 'BigInt' else '.getULong()' %}
-    {%- set numberBigIntUndefToPrimitive = ('!' + numberBigIntToPrimitive) %}
+    {%- set numberBigIntUndefToPrimitive = (numberBigIntToPrimitive) %}
     {%- set isNonCompat = '/* public */ internal' if element['subsetType'] != 'BigInt' else 'private' %}
 
 class {{element['name']}}ArrayIteratorKeys implements IterableIterator<Number> {
@@ -106,7 +106,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.byteOffsetInt = 0
         for (let i: int = 0; i < this.lengthInt; ++i) {
             {%- if element.get('clamped', False) %}
-            this.setUnsafe(i, {{element['name']}}Array.clamp(arr.at(i){{numberBigIntUndefToPrimitive}}))
+            this.setUnsafe(i, {{element['name']}}Array.clamp(arr.$_get(i){{numberBigIntUndefToPrimitive}}))
             {%- else %}
             this.setUnsafe(i, arr.$_get(i){{numberBigIntToPrimitive}})
             {%- endif %}
@@ -125,7 +125,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -152,7 +152,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 {% endif %}
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / {{element['name']}}Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }

@@ -20,7 +20,7 @@ function TestPassUndefinedToEts(): boolean {
     if (a as JSValue !== JSRuntime.getUndefined()) {
         return false;
     }
-    if (a === null) {
+    if (a == null) {
         return false;
     }
     return true;

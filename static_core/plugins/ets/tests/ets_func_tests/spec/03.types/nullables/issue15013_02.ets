@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,19 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 /*---
-desc: 03.01 Predefined Types
-name: 03.types/01.predefined_types/long_to_string_1
-tags: []
----*/
+ desc: 03 Types
+ name: issue15013_02.ets
+ tags: 
+ ---*/
 
-function toString(value: long): string {
-    return value.toString(value);
+import {NullishType} from './issue15013_to_export'
+
+function foo<T>(x: T): NullishType {
+  return x
 }
 
 function main(): void {
-    let a: long = 5;
-    let v = toString(a);
-    assert v instanceof string;
+  let y = foo(null)
+  assert y == null
 }

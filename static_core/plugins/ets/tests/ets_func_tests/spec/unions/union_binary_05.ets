@@ -14,21 +14,15 @@
  */
 
 /*---
-desc: 03.01 Predefined Types
-name: 03.types/01.predefined_types/short_to_string_2
+desc: 03.08.11 Union types
+name: 03.types/08.reference_types/03.08.11.union_types/union_binary_05
 tags: []
 ---*/
-
-function toString(value: short): string {
-    let cb: (arg: short) => string = 
-        (arg: short) => {
-            return arg.toString(arg);
-        }
-    return cb(value);
-}
+type Margin = number | string
 
 function main(): void {
-    let value: short = 5;
-    let a = toString(value);
-    assert a instanceof string;
+    let a: Margin = 7
+    let b: Margin = 5
+    let c: Margin = a % b
+    assert (c as number) == 2
 }

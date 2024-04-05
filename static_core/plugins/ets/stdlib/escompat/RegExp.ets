@@ -96,12 +96,12 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
         if (match == null) {
             return new IteratorResult<RegExpMatchArray>()
         }
-        let matchStr = match!.get(0)
+        let matchStr = match.get(0)
         if (matchStr == "") {
             let nextIndex = RegExp.advanceStringIndex(this.string, this.regexp.lastIndex, this.regexp.unicode)
             this.regexp.lastIndex = nextIndex
         }
-        return new IteratorResult<RegExpMatchArray>(match!)
+        return new IteratorResult<RegExpMatchArray>(match)
     }
 
     override iterator(): IterableIterator<RegExpMatchArray> {
@@ -126,7 +126,7 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
             return new IteratorResult<RegExpMatchArray>()
         }
         this.returned = true
-        return new IteratorResult<RegExpMatchArray>(match!)
+        return new IteratorResult<RegExpMatchArray>(match)
     }
 
     override iterator(): IterableIterator<RegExpMatchArray> {
@@ -421,7 +421,7 @@ export class RegExp extends Object {
         if (result == null) {
             return -1
         } else {
-            return result!.index
+            return result.index
         }
     }
 
@@ -436,11 +436,11 @@ export class RegExp extends Object {
             if (result == null) {
                 break;
             }
-            results.push(result!)
+            results.push(result)
             if (!this.global) {
                 break;
             }
-            let matchStr = result!.get(0)
+            let matchStr = result.get(0)
             if (matchStr == "") {
                 let thisIndex = this.lastIndex
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
@@ -461,7 +461,7 @@ export class RegExp extends Object {
                 let capN = result.get(n);
                 captures.pushBack(capN)
             }
-            let namedCaptures = /*result.groups*/ undefined;
+            let namedCaptures: Object | undefined = /*result.groups*/ undefined;
             let replacement = String.getSubstitution(matched, str, position as int, captures.toArray(), namedCaptures, replaceValue)
             if (position >= nextSourcePosition) {
                 accumulatedResult += str.substring(nextSourcePosition, position) + replacement
@@ -485,11 +485,11 @@ export class RegExp extends Object {
             if (result == null) {
                 break;
             }
-            results.push(result!)
+            results.push(result)
             if (!this.global) {
                 break;
             }
-            let matchStr = result!.get(0)
+            let matchStr = result.get(0)
             if (matchStr == "") {
                 let thisIndex = this.lastIndex
                 let nextIndex = RegExp.advanceStringIndex(str, thisIndex, this.unicode)
@@ -514,7 +514,7 @@ export class RegExp extends Object {
             args.pushBack(new Double(position as double));
             args.pushBack(str)
             if (namedCaptures != undefined) {
-                args.pushBack(namedCaptures as Object)
+                args.pushBack(namedCaptures)
             }
             let replacement = replacer(matched, args.toArray());
             if (position >= nextSourcePosition) {
@@ -536,10 +536,10 @@ export class RegExp extends Object {
         let lim: long;
         if (limit == undefined) {
             lim = (1 << 32) -1
-        } else if (limit! == 0) {
+        } else if (limit == 0) {
             return new String[0]
         } else {
-            lim = limit!.unboxed() as long
+            lim = limit.unboxed() as long
         }
         let size = str.getLength()
         if (size == 0) {
@@ -567,9 +567,9 @@ export class RegExp extends Object {
                         return splittedStrings.toArray() as String[]
                     }
                     lastStart = separatorRight
-                    let numberOfCaptures = z!.length;
+                    let numberOfCaptures = z.length;
                     for (let i = 1; i < numberOfCaptures; ++i) {
-                        let nextCapture = z!.get(i);
+                        let nextCapture = z.get(i);
                         splittedStrings.pushBack(nextCapture)
                         if (splittedStrings.size() == lim) {
                             return splittedStrings.toArray() as String[]
@@ -600,7 +600,7 @@ export class RegExp extends Object {
                 return new RegExpMatchArray(-1, "", matches.toArray() as String[])
             }
             else {
-                let matchStr = result!.get(0)
+                let matchStr = result.get(0)
                 matches.pushBack(matchStr)
                 if (matchStr == "") {
                     this.lastIndex = RegExp.advanceStringIndex(str, this.lastIndex, this.unicode)

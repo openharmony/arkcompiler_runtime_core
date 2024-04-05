@@ -117,7 +117,7 @@ export final class FinalizationRegistry {
         let refObject = new WeakRef<Object>(object);
         let refToken: WeakRef<Object> | null = null;
         if (token != null) {
-            refToken = new WeakRef<Object>(token!);
+            refToken = new WeakRef<Object>(token);
         }
         let free_index = this.allocTrimplet();
         // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations
@@ -133,7 +133,7 @@ export final class FinalizationRegistry {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
             let refToken = this.getToken(i);
-            if (refToken != null && refToken!.deref() == token) {
+            if (refToken != null && refToken.deref() == token) {
                 this.freeNextTrimplet(prev);
                 i = prev; // iterator rollback
             }
@@ -144,7 +144,7 @@ export final class FinalizationRegistry {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
             let object = this.getObject(i);
-            if (object != null && object!.deref() == null) {
+            if (object != null && object.deref() == null) {
                 // Remove from trimplet first to prevent
                 // calling it again in separate thread
                 let arg: Object | null = this.getCallbackArg(i);

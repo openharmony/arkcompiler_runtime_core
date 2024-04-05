@@ -94,16 +94,6 @@ void EtsClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, co
     ThrowEtsException(EtsCoroutine::GetCurrent(), classDescriptor, message);
 }
 
-bool EtsClassLinkerExtension::CacheClass(Class **classForCache, const char *descriptor)
-{
-    *classForCache = GetClassLinker()->GetClass(reinterpret_cast<const uint8_t *>(descriptor), false, GetBootContext());
-    if (*classForCache == nullptr || !InitializeClass(*classForCache)) {
-        LOG(ERROR, CLASS_LINKER) << "Cannot create class " << descriptor;
-        return false;
-    }
-    return true;
-}
-
 bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 {
     // NOLINTNEXTLINE(google-build-using-namespace)
@@ -120,12 +110,10 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     // inheritance chain. After this, initialization order is not fixed.
     auto classClass = CreateClassRoot(langCtx_.GetClassClassDescriptor(), ClassRoot::CLASS);
 
-    // EtsClass has three reference fields, if they are not traversed in gc, then
+    // EtsClass has reference fields, if they are not traversed in gc, then
     // they can be either deallocated or moved
-    // also this layout is hardcoded here because it was forbidden to add this class into ets code (stdlib)
-    constexpr size_t CLASS_CLASS_REF_FIELDS_NUM = 3;
-    classClass->SetRefFieldsOffset(EtsClass::GetIfTableOffset(), false);
-    classClass->SetRefFieldsNum(CLASS_CLASS_REF_FIELDS_NUM, false);
+    classClass->SetRefFieldsOffset(EtsClass::GCRefFieldsOffset(), false);
+    classClass->SetRefFieldsNum(EtsClass::GCRefFieldsNum(), false);
     classClass->SetVolatileRefFieldsNum(0, false);
 
     auto *objectClass = GetClassLinker()->GetClass(langCtx_.GetObjectClassDescriptor(), false, GetBootContext());
@@ -135,10 +123,6 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     }
 
     SetClassRoot(ClassRoot::OBJECT, objectClass);
-
-    if (!CacheClass(&objectClass_, OBJECT.data())) {
-        return false;
-    }
 
     ASSERT(classClass->GetBase() == nullptr);
     classClass->SetBase(objectClass);
@@ -185,72 +169,6 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     InitializeArrayClassRoot(ClassRoot::ARRAY_TAGGED, ClassRoot::TAGGED, "[A");
     InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
                              utf::Mutf8AsCString(langCtx_.GetStringArrayClassDescriptor()));
-
-    if (!CacheClass(&boxBooleanClass_, BOX_BOOLEAN.data())) {
-        return false;
-    }
-    if (!CacheClass(&boxByteClass_, BOX_BYTE.data())) {
-        return false;
-    }
-    if (!CacheClass(&boxCharClass_, BOX_CHAR.data())) {
-        return false;
-    }
-    if (!CacheClass(&boxShortClass_, BOX_SHORT.data())) {
-        return false;
-    }
-    if (!CacheClass(&boxIntClass_, BOX_INT.data())) {
-        return false;
-    }
-    if (!CacheClass(&boxLongClass_, BOX_LONG.data())) {
-        return false;
-    }
-    if (!CacheClass(&boxFloatClass_, BOX_FLOAT.data())) {
-        return false;
-    }
-    if (!CacheClass(&boxDoubleClass_, BOX_DOUBLE.data())) {
-        return false;
-    }
-    if (!CacheClass(&promiseClass_, PROMISE.data())) {
-        return false;
-    }
-    if (!CacheClass(&internalUndefinedClass_, INTERNAL_UNDEFINED.data())) {
-        return false;
-    }
-    if (!CacheClass(&arraybufClass_, ARRAY_BUFFER.data())) {
-        return false;
-    }
-    if (!CacheClass(&sharedMemoryClass_, SHARED_MEMORY.data())) {
-        return false;
-    }
-
-    if (!CacheClass(&typeapiFieldClass_, FIELD.data())) {
-        return false;
-    }
-    if (!CacheClass(&typeapiMethodClass_, METHOD.data())) {
-        return false;
-    }
-    if (!CacheClass(&typeapiParameterClass_, PARAMETER.data())) {
-        return false;
-    }
-    if (!CacheClass(&stringBuilderClass_, STRING_BUILDER.data())) {
-        return false;
-    }
-
-    coroutine->SetPromiseClass(promiseClass_);
-    // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
-    // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
-    coroutine->SetStringClassPtr(stringClass);
-    coroutine->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
-
-    Class *weakRefClass;
-    // Cache into local variable, no need to cache to this class
-    if (!CacheClass(&weakRefClass, WEAK_REF.data())) {
-        return false;
-    }
-    // Mark std.core.WeakRef class as weak reference (flag)
-    auto *managedWeakRefEtsClass = reinterpret_cast<EtsClass *>(weakRefClass->GetManagedObject());
-    managedWeakRefEtsClass->SetWeakReference();
-
     return true;
 }
 
@@ -283,8 +201,17 @@ bool EtsClassLinkerExtension::InitializeArrayClass(Class *arrayClass, Class *com
     return true;
 }
 
-bool EtsClassLinkerExtension::InitializeClass([[maybe_unused]] Class *klass)
+bool EtsClassLinkerExtension::InitializeClass(Class *klass)
 {
+    ASSERT(IsInitialized());
+    ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+
+    constexpr uint32_t ETS_ACCESS_FLAGS_MASK = 0xFFFFU;
+
+    EtsClass::FromRuntimeClass(klass)->Initialize(
+        klass->GetBase() != nullptr ? EtsClass::FromRuntimeClass(klass->GetBase()) : nullptr,
+        klass->GetAccessFlags() & ETS_ACCESS_FLAGS_MASK, klass->IsPrimitive());
+
     return true;
 }
 
@@ -570,6 +497,64 @@ Class *EtsClassLinkerExtension::FromClassObject(ark::ObjectHeader *obj)
 size_t EtsClassLinkerExtension::GetClassObjectSizeFromClassSize(uint32_t size)
 {
     return EtsClass::GetSize(size);
+}
+
+Class *EtsClassLinkerExtension::CacheClass(std::string_view descriptor, bool forceInit)
+{
+    Class *cls = GetClassLinker()->GetClass(utf::CStringAsMutf8(descriptor.data()), false, GetBootContext());
+    if (cls == nullptr) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create class " << descriptor;
+        return nullptr;
+    }
+    if (forceInit && !GetClassLinker()->InitializeClass(EtsCoroutine::GetCurrent(), cls)) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot initialize class " << descriptor;
+        return nullptr;
+    }
+    return cls;
+}
+
+template <typename F>
+Class *EtsClassLinkerExtension::CacheClass(std::string_view descriptor, F const &setup, bool forceInit)
+{
+    Class *cls = CacheClass(descriptor, forceInit);
+    if (cls != nullptr) {
+        setup(EtsClass::FromRuntimeClass(cls));
+    }
+    return cls;
+}
+
+void EtsClassLinkerExtension::InitializeBuiltinClasses()
+{
+    // NOLINTNEXTLINE(google-build-using-namespace)
+    using namespace panda_file_items::class_descriptors;
+
+    CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
+    undefinedClass_ = CacheClass(INTERNAL_UNDEFINED, [](auto *c) { c->SetValueTyped(); });
+    boxBooleanClass_ = CacheClass(BOX_BOOLEAN, [](auto *c) { c->SetValueTyped(); });
+    boxByteClass_ = CacheClass(BOX_BYTE, [](auto *c) { c->SetValueTyped(); });
+    boxCharClass_ = CacheClass(BOX_CHAR, [](auto *c) { c->SetValueTyped(); });
+    boxShortClass_ = CacheClass(BOX_SHORT, [](auto *c) { c->SetValueTyped(); });
+    boxIntClass_ = CacheClass(BOX_INT, [](auto *c) { c->SetValueTyped(); });
+    boxLongClass_ = CacheClass(BOX_LONG, [](auto *c) { c->SetValueTyped(); });
+    boxFloatClass_ = CacheClass(BOX_FLOAT, [](auto *c) { c->SetValueTyped(); });
+    boxDoubleClass_ = CacheClass(BOX_DOUBLE, [](auto *c) { c->SetValueTyped(); });
+    bigintClass_ = CacheClass(BIG_INT, [](auto *c) { c->SetValueTyped(); });
+    promiseClass_ = CacheClass(PROMISE);
+    arraybufClass_ = CacheClass(ARRAY_BUFFER);
+    stringBuilderClass_ = CacheClass(STRING_BUILDER);
+    arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);
+    typeapiFieldClass_ = CacheClass(FIELD);
+    typeapiMethodClass_ = CacheClass(METHOD);
+    typeapiParameterClass_ = CacheClass(PARAMETER);
+    sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
+    CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
+
+    auto coro = EtsCoroutine::GetCurrent();
+    coro->SetPromiseClass(promiseClass_);
+    // NOTE (electronick, #15938): Refactor the managed class-related pseudo TLS fields
+    // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
+    coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));
+    coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
 }
 
 }  // namespace ark::ets

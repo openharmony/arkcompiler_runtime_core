@@ -113,7 +113,7 @@ function_decls:
           assert foo() instanceof Object[]
 
     - decl: |-
-          let s: Long[][] = new Long[1][1]
+          let s: Long[][] | null = new Long[1][1]
           function foo() {  // infer Object
               if (s != null)
                   return s;

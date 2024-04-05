@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 /*---
-desc: 03.01 Predefined Types
-name: 03.types/01.predefined_types/double_to_string_2
-tags: []
----*/
+ desc: 03 Types
+ name: issue15013_to_export.ets
+ tags: [compile-only, not-a-test]
+ ---*/
 
-function toString(value: double): string {
-    let cb: (arg: double) => string = 
-        (arg: double) => {
-            return arg.toString(arg);
-        }
-    return cb(value);
-}
-
-function main(): void {
-    let value: double = 5;
-    let a = toString(value);
-    assert a instanceof string;
-}
+export type NullishType = Object | null | undefined

@@ -32,7 +32,7 @@ class Extender extends Base {
 function main(): void {
     let a = new Extender();
 
-    assert a.field == 10;  // Access static via instance
+    assert (a as Base).field == 20;  // Access to static members via instance is prohibited (see 9.5.1 and 7.10.3)
     assert Extender.field == 10;
 
 }

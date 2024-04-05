@@ -1088,6 +1088,11 @@ public:
         return GetOpcode() == Opcode::NullPtr;
     }
 
+    bool IsLoadUndefined() const
+    {
+        return GetOpcode() == Opcode::LoadUndefined;
+    }
+
     bool IsReturn() const
     {
         return GetOpcode() == Opcode::Return || GetOpcode() == Opcode::ReturnI || GetOpcode() == Opcode::ReturnVoid;

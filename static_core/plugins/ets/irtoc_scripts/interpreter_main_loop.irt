@@ -1,5 +1,5 @@
 # plugin interpreter_main_loop
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,3 +44,6 @@
     handle_ets_stobj_name_long(op[0], as_id(op[1]), i.format.size)
   when "ETS_STOBJ_NAME_OBJ_PREF_V8_ID32"
     handle_ets_stobj_name_obj(op[0], as_id(op[1]), i.format.size)
+
+  when "ETS_EQUALS_PREF_V4_V4"
+    handle_ets_equals(vreg_value(op[0]).ref, vreg_value(op[1]).ref)

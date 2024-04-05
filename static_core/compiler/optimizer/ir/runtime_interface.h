@@ -1242,6 +1242,11 @@ public:
         UNREACHABLE();
     }
 
+    virtual bool IsClassValueTyped([[maybe_unused]] ClassPtr klass) const
+    {
+        UNREACHABLE();
+    }
+
     uintptr_t GetEntrypointTlsOffset(Arch arch, EntrypointId id) const
     {
         return cross_values::GetManagedThreadEntrypointOffset(arch, ark::EntrypointId(static_cast<uint8_t>(id)));

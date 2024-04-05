@@ -16,5 +16,3 @@ cases:
   - { type: boolean, val: 'true', rt: byte, rv: 1 as byte, op: '+' }
   - { type: Boolean, val: new Boolean(false), rt: short, rv: 1 as short, op: '-' }
   - { type: string, val: '"99"', rt: char, rv: "c'0'", op: '*' }
-  - { type: Integral, val: new Int(0), rt: int, rv: 1, op: '/' }
-  - { type: Floating, val: new Float(0), rt: float, rv: 1.0 as float, op: '+' }

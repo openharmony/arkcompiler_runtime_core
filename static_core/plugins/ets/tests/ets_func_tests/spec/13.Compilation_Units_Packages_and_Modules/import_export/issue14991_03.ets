@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,23 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 /*---
-desc: 03.01 Predefined Types
-name: 03.types/01.predefined_types/float_to_string_2
-tags: []
----*/
+ desc: 13.03 Import Directives
+ name: issue14991_03
+ tags: [not-a-test, compile-only]
+ ---*/
 
-function toString(value: float): string {
-    let cb: (arg: float) => string = 
-        (arg: float) => {
-            return arg.toString(arg);
-        }
-    return cb(value);
-}
-
-function main(): void {
-    let value: float = 5;
-    let a = toString(value);
-    assert a instanceof string;
+export interface I {
+  foo():string;
 }

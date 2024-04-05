@@ -56,6 +56,7 @@ public:
     IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId(compiler::DataType::Type type) const override;
     IntrinsicId GetStringBuilderConcatStringsIntrinsicId() const override;
     IntrinsicId GetStringIsCompressedIntrinsicId() const override;
+    bool IsClassValueTyped(ClassPtr klass) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
     MethodPtr ResolveLookUpCall(FieldPtr rawField, ClassPtr klass, bool isSetter) override;

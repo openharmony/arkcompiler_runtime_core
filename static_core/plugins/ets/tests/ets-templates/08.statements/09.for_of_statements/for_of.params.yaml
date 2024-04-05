@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ cases:
           if (res == "") return 0;
 
     - use: |-
-          let arr: int[]|null = new int[0]
+          let arr: int[]|null = (): int[]|null => { return new int[0]; }()
           for (let v of arr!) res += v
           if (res == "") return 0;
 
@@ -28,7 +28,7 @@ cases:
           if (res == "") return 0;
 
     - use: |-
-          let s: String|null = ""
+          let s: String|null = (): string|null => { return ""; }()
           for (let v of s!) res += v
           if (res == "") return 0;
 
@@ -109,7 +109,7 @@ cases:
           if (res == "AAA") return 0;
 
     - use: |-
-          let s: string|null = null
+          let s: string|null = (): string|null => { return null; }();
           try {
               for (let v of s!) res += v
           } catch (e: NullPointerException) {
@@ -118,7 +118,7 @@ cases:
           if (res == "OK") return 0;
 
     - use: |-
-          let s: string|undefined = undefined
+          let s: string|undefined = (): string|undefined => { return undefined; }();
           try {
               for (let v of s!) res += v
           } catch (e: NullPointerException) {
@@ -127,7 +127,7 @@ cases:
           if (res == "OK") return 0;
 
     - use: |-
-          let s: number[]|null = null
+          let s: number[]|null = (): number[]|null => { return null; }();
           try {
               for (let v of s!) res += v
           } catch (e: NullPointerException) {
@@ -136,7 +136,7 @@ cases:
           if (res == "OK") return 0;
 
     - use: |-
-          let s: number[]|undefined = undefined
+          let s: number[]|undefined = (): number[]|undefined => { return undefined; }();
           try {
               for (let v of s!) res += v
           } catch (e: NullPointerException) {

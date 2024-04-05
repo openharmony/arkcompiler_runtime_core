@@ -23,6 +23,6 @@ class A {
 }
 
 function main(): void {
-    let instance: A|null = null;
+    let instance: A|null = (): A|null => { return null; }();
     instance?.x;
 }

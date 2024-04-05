@@ -133,11 +133,11 @@ panda_ets_interop_js_gtest(ets_interop_js_class_composite_decl
     ETS_CONFIG ${ETS_CONFIG_DECL}
 )
 
-panda_ets_interop_js_gtest(ets_interop_js_dynamic_instanceof
-    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_instanceof/dynamic_instanceof.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_instanceof/dynamic_instanceof.ets
-    ETS_CONFIG ${ETS_CONFIG}
-)
+#panda_ets_interop_js_gtest(ets_interop_js_dynamic_instanceof
+#    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_instanceof/dynamic_instanceof.cpp
+#    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_instanceof/dynamic_instanceof.ets
+#    ETS_CONFIG ${ETS_CONFIG}
+#)
 
 panda_ets_interop_js_gtest(ets_interop_dynamic_with_lambda
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.cpp

@@ -14,17 +14,15 @@
  */
 
 /*---
-desc: 03.01 Predefined Types
-name: 03.types/01.predefined_types/number_to_string_1
+desc: 03.08.11 Union types
+name: 03.types/08.reference_types/03.08.11.union_types/union_plus_04
 tags: []
 ---*/
-
-function toString(value: number): string {
-    return value.toString(value);
-}
+type Margin = number | string
 
 function main(): void {
-    let a: number = 5;
-    let v = toString(a);
-    assert v instanceof string;
+    let a: Margin = 5
+    let b: Margin = 6
+    let c: Margin = a + (b as number)
+    assert c  == 11
 }

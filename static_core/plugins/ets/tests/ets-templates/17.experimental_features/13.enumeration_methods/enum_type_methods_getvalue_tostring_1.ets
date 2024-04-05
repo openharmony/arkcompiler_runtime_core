@@ -21,5 +21,5 @@ enum Color {Red = 1, Green = 2, Blue}
 
 function main(): void {
   let c: Color = Color.Green
-  assert c.toString() == c.getValue().toString()
+  assert c.toString() == (c.getValue() as Int).toString()
 }

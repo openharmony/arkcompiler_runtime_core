@@ -77,16 +77,6 @@ cases:
           // ignore
       }
 
-  - defs: |-
-      class A extends Exception {}
-    use: |-
-      let p: A|null = new A();
-      try {
-          throw p;
-      } catch (e) {
-          // ignore
-      }
-
   - use: |-
       try {
           throw new Object();

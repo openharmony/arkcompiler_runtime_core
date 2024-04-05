@@ -16,7 +16,7 @@
 function main(): void {
     const arr: int[] = [1, 2];
     const res: string[] = map<string>(arr, (x: int): string => {
-        return x.toString()
+        return (x as Int).toString()
     })
     assert res.length == 2
     assert res[0] == "1"

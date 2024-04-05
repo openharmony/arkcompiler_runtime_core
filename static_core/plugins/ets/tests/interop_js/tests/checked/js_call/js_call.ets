@@ -737,17 +737,17 @@ function test_rehash(): int {
     let count = 40
     let jsValues = new JSValue[count];
     for (let i = 0; i < count; i++) {
-        jsValues[i] = i.toString() as JSValue
+        jsValues[i] = (i as Int).toString() as JSValue
     }
     let jsValues2 = new JSValue[count];
     for (let i = 0; i < count; i++) {
-        jsValues2[i] = i.toString() as JSValue
+        jsValues2[i] = (i as Int).toString() as JSValue
     }
     for (let i = 0; i < count; i++) {
-        if (jsValues[i] as String != i.toString()) {
+        if (jsValues[i] as String != (i as Int).toString()) {
             return 1
         }
-        if (jsValues2[i] as String != i.toString()) {
+        if (jsValues2[i] as String != (i as Int).toString()) {
             return 2
         }
     }

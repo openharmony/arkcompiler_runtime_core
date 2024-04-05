@@ -83,7 +83,7 @@ cases:
       type B = X
 
   - use: |-
-      let v: B = null
+      let v: B = null as B
       if (a.meth <B> (new X(), v) !== v) {
           return 1;
       }
@@ -106,3 +106,12 @@ cases:
       }
     decl: |-
       type B = X[]|null
+
+  - use: |-
+      let v: X|null = null
+      if (a.meth <B> (new X(), v) !== v) {  // X|null is not Y|null
+          return 1;
+      }
+    decl: |-
+      type B = string|null
+    bound: ' extends Object|null'

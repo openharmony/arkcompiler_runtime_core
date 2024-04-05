@@ -31,7 +31,7 @@ package escompat;
     {%- set fromElementCompat = (' as ' + T) if elementCompat == 'number' else '.getLong()' %}
     {%- set subsetTypeValues = 'Number' if elementCompat == 'number' else 'BigInt' %}
     {%- set numberBigIntToPrimitive = ('.' + T + 'Value()') if elementCompat == 'number' else '.getLong()' %}
-    {%- set numberBigIntUndefToPrimitive = ('!' + numberBigIntToPrimitive) %}
+    {%- set numberBigIntUndefToPrimitive = (numberBigIntToPrimitive) %}
 
 class {{N}}ArrayIteratorKeys implements IterableIterator<Number> {
     private length: int
@@ -115,7 +115,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
     public constructor(buf: ArrayBufferLike, byteOffset: Number | undefined, length: Number | undefined) {
         let intByteOffset: int = 0
         if (byteOffset != undefined) {
-            intByteOffset = byteOffset!.intValue()
+            intByteOffset = byteOffset.intValue()
             if (intByteOffset < 0) {
                 throw new RangeError("Range Error: byteOffset " + intByteOffset + " is outside the bounds of the buffer")
             }
@@ -142,7 +142,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
 {% endif %}
         let intLength: int
         if (length != undefined) {
-            intLength = length!.intValue()
+            intLength = length.intValue()
             if (intLength > intByteLength / {{N}}Array.BYTES_PER_ELEMENT as int) {
                 throw new RangeError("Range Error: length " + intLength + " is outside the bounds of the buffer with byteOffset " + intByteOffset)
             }
@@ -889,7 +889,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         if (fromIndex == undefined) {
             return this.includes(e{{fromElementCompat}}, 0 as int)
         }
-        return this.includes(e{{fromElementCompat}}, fromIndex!.intValue())
+        return this.includes(e{{fromElementCompat}}, fromIndex.intValue())
     }
 
     /**
@@ -940,7 +940,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         if (fromIndex == undefined) {
             return this.indexOf(e{{fromElementCompat}}, 0)
         }
-        return this.indexOf(e{{fromElementCompat}}, fromIndex!.intValue())
+        return this.indexOf(e{{fromElementCompat}}, fromIndex.intValue())
     }
 
     /**
@@ -1034,7 +1034,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         if (fromIndex == undefined) {
             return this.lastIndexOf(val{{fromElementCompat}}, 0 as int)
         }
-        return this.lastIndexOf(val{{fromElementCompat}}, fromIndex!.intValue()) as number
+        return this.lastIndexOf(val{{fromElementCompat}}, fromIndex.intValue()) as number
     }
 
     /**
@@ -1821,9 +1821,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
                 return undefined
             }
         {%- if elementCompat == 'BigInt' %}
-            if (fn(val!, i{{castToIdx}}, this)) {
+            if (fn(val, i{{castToIdx}}, this)) {
         {%- else %}
-            if (fn(val!.valueOf(), i{{castToIdx}}, this)) {
+            if (fn(val.valueOf(), i{{castToIdx}}, this)) {
         {%- endif %}
                 return val
             }

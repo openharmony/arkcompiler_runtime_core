@@ -47,7 +47,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
         if (value == undefined) {
             this.value = false
         } else {
-            this.value = value!
+            this.value = value
         }
     }
 

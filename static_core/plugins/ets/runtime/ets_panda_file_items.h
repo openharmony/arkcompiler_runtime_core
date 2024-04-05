@@ -26,6 +26,7 @@ namespace class_descriptors {
 // Base classes
 static constexpr std::string_view ERROR                                = "Lescompat/Error;";
 static constexpr std::string_view ARRAY_BUFFER                         = "Lescompat/ArrayBuffer;";
+static constexpr std::string_view BIG_INT                              = "Lescompat/BigInt;";
 static constexpr std::string_view ASYNC                                = "Lets/coroutine/Async;";
 static constexpr std::string_view EXCEPTION                            = "Lstd/core/Exception;";
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
@@ -121,6 +122,7 @@ static constexpr std::string_view JS_VALUE                             = "Lstd/i
 static constexpr std::string_view JS_ERROR                             = "Lstd/interop/js/JSError;";
 
 static constexpr std::string_view ARRAY                                = "Lescompat/Array;";
+static constexpr std::string_view ARRAY_AS_LIST_INT                    = "Lstd/containers/ArrayAsListInt;";
 
 // escompat
 static constexpr std::string_view SHARED_MEMORY                        = "Lescompat/SharedMemory;";

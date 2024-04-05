@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,19 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 /*---
-desc: 03.01 Predefined Types
-name: 03.types/01.predefined_types/float_to_string_1
-tags: []
----*/
+ desc: 7.19 Nullish-Coalescing Expression
+ name: issue14609_01
+ tags: [negative, compile-only]
+ ---*/
 
-function toString(value: float): string {
-    return value.toString(value);
-}
-
-function main(): void {
-    let a: float = 5;
-    let v = toString(a);
-    assert v instanceof string;
+class A<T> {
+  public parent: A<T>|undefined
+  get root(): A<T> {
+    return this.parent?.root ?? this
+  }
 }

@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/ets_entrypoints.h"
 
+#include "include/object_header.h"
 #include "libpandafile/shorty_iterator.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_runtime_interface.h"
@@ -22,10 +23,13 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "runtime/arch/helpers.h"
 #include "runtime/interpreter/vregister_iterator.h"
+#include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/types/ets_box_primitive.h"
 
 namespace ark::ets {
 
@@ -279,6 +283,19 @@ extern "C" ObjectHeader *StringBuilderAppendNullStringEntrypoint(ObjectHeader *s
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendNullString(sb);
+}
+
+extern "C" bool IsClassValueTypedEntrypoint(Class *cls)
+{
+    return EtsClass::FromRuntimeClass(cls)->IsValueTyped();
+}
+
+extern "C" bool CompareETSValueTypedEntrypoint(ManagedThread *thread, ObjectHeader *obj1, ObjectHeader *obj2)
+{
+    auto coro = EtsCoroutine::CastFromThread(thread);
+    auto eobj1 = EtsObject::FromCoreType(obj1);
+    auto eobj2 = EtsObject::FromCoreType(obj2);
+    return EtsValueTypedEquals(coro, eobj1, eobj2);
 }
 
 }  // namespace ark::ets

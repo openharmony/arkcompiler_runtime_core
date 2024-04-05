@@ -327,7 +327,7 @@ function resolvePendingPromise(): boolean {
     if (resolvePromiseFn == null) {
         return false;
     }
-    resolvePromiseFn!("Panda");
+    resolvePromiseFn("Panda");
     return true;
 }
 
@@ -374,7 +374,7 @@ async function testAwaitJsPromise(pendingP: Promise<Object>): Promise<Object> {
     let res: String = (await pendingP) as String;
 
     globalTest!.msg("testAwaitJsPromise: await result is: " + res, Test.INFO);
-    
+
     if (res != "JS_PROMISE_RESULT") {
         globalTest!.msg("testAwaitJsPromise: await result is wrong!", Test.FATAL);
         globalTest!.fail();
@@ -382,7 +382,7 @@ async function testAwaitJsPromise(pendingP: Promise<Object>): Promise<Object> {
         globalTest!.msg("testAwaitJsPromise: await result is CORRECT!", Test.INFO);
         globalTest!.success();
     }
-    
+
     globalTest!.msg("testAwaitJsPromise: done", Test.INFO);
     /**
      * TODO(konstanting, #I67QXC): add a test where we would return here a PENDING promise.
@@ -571,7 +571,7 @@ function testPromiseAnyRejected(): Promise<Object|null> {
         globalTest!.fail();
         return null;
     }, (err: Object|null): Object|null => {
-        if (err == null || !(err instanceof AggregateError)) { 
+        if (err == null || !(err instanceof AggregateError)) {
             globalTest!.fail();
         } else {
             globalTest!.success();

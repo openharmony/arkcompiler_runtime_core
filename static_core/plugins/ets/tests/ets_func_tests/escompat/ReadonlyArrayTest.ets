@@ -37,8 +37,8 @@ class Arrays {
   }
 
   static equals<T>(left: Array<T>, right: Array<T>): boolean {
-    const leftReadOnly: ReadonlyArray<T> = left;
-    const rightReadOnly: ReadonlyArray<T> = right;
+    const leftReadOnly = left as ReadonlyArray<T>;
+    const rightReadOnly = right as ReadonlyArray<T>;
     return Arrays.equals(leftReadOnly, rightReadOnly);
   }
 
@@ -119,7 +119,7 @@ function findIndexFuncArg3ReadonlyArray(): int {
 }
 
 function mapFuncArg3ReadonlyArray(): int {
-    let mappingFunc = (v: Number, index: number, arr: ReadonlyArray<Number>): Number => 
+    let mappingFunc = (v: Number, index: number, arr: ReadonlyArray<Number>): Number =>
         (index < 4) && (index < arr.length) ? Number.valueOf(arr[index] * arr[index]) : Number.valueOf(0);
 
     let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
@@ -140,7 +140,7 @@ function mapFuncArg3ReadonlyArray(): int {
 }
 
 function everyFuncArg3ReadonlyArray(): int {
-    const emptyArray: ReadonlyArray<Number> = new Array<Number>; 
+    const emptyArray: ReadonlyArray<Number> = new Array<Number>;
     if (!emptyArray.every(filterPositiveElement)) return RESULT_FAILURE;
 
     const testArray: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);

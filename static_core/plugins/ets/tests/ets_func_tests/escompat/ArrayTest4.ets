@@ -185,7 +185,7 @@ function forEachFuncArg3ArrayNumber(): int {
             s = "";
         } else {
             let tmp = arr.at(index)! + a;
-            s += tmp.toString() + ",";
+            s += (tmp as Number).toString() + ",";
         }
     }
     let arr = new Array<Number>;

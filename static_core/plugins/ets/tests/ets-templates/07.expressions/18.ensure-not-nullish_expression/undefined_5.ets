@@ -20,6 +20,6 @@ desc: If the result of the evaluation of e is not equal to null or undefined, th
 class A {}
 
 function main(): void {
-  let i: A|undefined|null = new A();
-  assert i! instanceof A;
+  let i: A|undefined|null = (): A|undefined|null => { return new A(); }();
+  assert i instanceof A;
 }

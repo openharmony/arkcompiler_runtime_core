@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,17 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 /*---
-desc: 03.08.11 Union types
-name: 03.types/08.reference_types/03.08.11.union_types/union_binary_n_02
-tags: [negative, compile-only]
----*/
-type Margin = number | string
+ desc: 13.03 Import Directives
+ name: issue14991_02
+ tags: [not-a-test, compile-only]
+ files: [./issue14991_03.ets]
+ ---*/
 
-function main(): void {
-    let a: Margin = 7
-    let b: Margin = 5
-    let c: Margin = a % b
-    assert (c as number) == 2
+import { I } from './issue14991_03'
+
+export class A implements I {
+  foo(): string {
+    return "A implements I";
+  }
 }

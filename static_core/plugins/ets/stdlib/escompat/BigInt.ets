@@ -25,7 +25,7 @@ type Vec = ArrayAsListInt;
 /**
  * BigInt class stub
  */
-export class BigInt {
+export final class BigInt {
     private bytes: Vec;
     private sign: boolean;
 
@@ -55,31 +55,31 @@ export class BigInt {
     }
 
     constructor(d: byte) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Byte).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: short) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Short).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: int) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Int).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: long) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Long).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
 
     constructor(d: double) {
-        let bigint = new BigInt(d.toString());
+        let bigint = new BigInt((d as Double).toString());
         this.bytes = bigint.bytes;
         this.sign = bigint.sign;
     }
@@ -121,6 +121,10 @@ export class BigInt {
 
     public equals(to: BigInt): boolean {
         return this.toString().equals(to.toString());
+    }
+
+    public override equals(to: NullishType): boolean {
+        return (to instanceof BigInt) && this.equals(to as BigInt);
     }
 
     /**
@@ -212,7 +216,7 @@ export class BigInt {
         }
 
         if ((this.sign == true) && (sign == false)) {
-            this.bytes = BigInt.to2sCompliment(this.bytes);
+            this.bytes = BigInt.to2sComplement(this.bytes);
         }
 
         this.sign = sign;
@@ -415,7 +419,7 @@ export class BigInt {
 
         product = BigInt.reverse(product);
         if (result.negative()) {
-            product = BigInt.to2sCompliment(product);
+            product = BigInt.to2sComplement(product);
         }
 
         result.setBytes(product);
@@ -476,7 +480,7 @@ export class BigInt {
         }
 
         if (result.negative()) {
-            res = BigInt.to2sCompliment(res);
+            res = BigInt.to2sComplement(res);
         }
 
         result.setBytes(res);
@@ -534,7 +538,7 @@ export class BigInt {
         }
 
         if (result.negative()) {
-            result.bytes = BigInt.to2sCompliment(result.bytes);
+            result.bytes = BigInt.to2sComplement(result.bytes);
         }
 
         return result;
@@ -721,7 +725,7 @@ export class BigInt {
             let temp = res.at(i);
             res.set(i, (res.at(i) << r) % 256);
             res.set(i, res.at(i) | overflow);
-            overflow = (temp & BigInt.MASKS_LEFT_SHIFT[r]) >> (8 - r)
+            overflow = (temp & BigInt.MASKS_LEFT_SHIFT[r]) >>> (8 - r)
             overflow = overflow % 256
         }
 
@@ -734,7 +738,7 @@ export class BigInt {
         }
 
         if (result.negative()) {
-            res = BigInt.to2sCompliment(res);
+            res = BigInt.to2sComplement(res);
         }
 
         result.setBytes(res);
@@ -771,12 +775,15 @@ export class BigInt {
 
         for (let i = 0; i < res.size(); i++) {
             let temp = res.at(i);
-            res.set(i, (res.at(i) >> r) % 256);
+            res.set(i, (res.at(i) >>> r) % 256);
             res.set(i, res.at(i) | overflow);
             overflow = ((temp & BigInt.MASKS_RIGHT_SHIFT[r]) << (8 - r)) % 256;
         }
 
         res = BigInt.reverse(res);
+        if (res.size() > 1 && res.at(res.size() - 1) == 255 && r > 0) {
+            res.popBack();
+        }
         if (res.size() == 0) {
             res.pushBack(0);
         }
@@ -982,7 +989,7 @@ export class BigInt {
         }
 
         if (this.negative()) {
-            this.bytes = BigInt.to2sCompliment(this.bytes);
+            this.bytes = BigInt.to2sComplement(this.bytes);
         }
     }
 
@@ -1073,7 +1080,7 @@ export class BigInt {
         return bytes;
     }
 
-    private static to2sCompliment(input: Vec): Vec {
+    private static to2sComplement(input: Vec): Vec {
         // Perform 2's complement for negative numbers.
         let bytes = input;
         for (let i = 0; i < bytes.size(); i++) {
@@ -1085,7 +1092,7 @@ export class BigInt {
         for (let i = 0; i < bytes.size(); i++) {
             let current: short = bytes.at(i) + carry as short;
             bytes.set(i, current % 256);
-            carry = ((current >> 8) as short)
+            carry = ((current >>> 8) as short)
         }
 
         return bytes;

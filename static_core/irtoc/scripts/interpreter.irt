@@ -88,6 +88,10 @@ macro(:"btou32") do |arg|
     Cast(arg).SrcType("DataType::BOOL").send('u32')
 end
 
+macro(:"btou8") do |arg|
+  Cast(arg).SrcType("DataType::BOOL").send('u8')
+end
+
 [['u32', 'UINT32'], ['i32', 'INT32'], ['u64', 'UINT64'], ['i64', 'INT64']].each do |from, from_type|
   ['f32', 'f64'].each do |to|
     macro(:"#{from}to#{to}") do |arg|
