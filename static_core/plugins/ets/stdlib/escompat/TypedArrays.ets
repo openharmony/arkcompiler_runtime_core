@@ -1357,29 +1357,45 @@ export final class Int8Array implements Iterable<Number> {
         return this.filter(newF)
     }
 
+
     /**
      * Finds the first element in the Int8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int8Array) => boolean =
+            (value: number, index: number, obj: Int8Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Int8Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int8Array) => boolean =
+            (value: number, index: number, obj: Int8Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Int8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Int8Array) => boolean =
+            (value: number, index: number, obj: Int8Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -1469,8 +1485,7 @@ export final class Int8Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: byte, b: byte) => boolean =
             //     (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
@@ -1692,16 +1707,13 @@ export final class Int8Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return byte | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Int8Array) => boolean): Number | undefined {
+    public find(fn: (value: number, index: number, obj: Int8Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
@@ -1710,27 +1722,27 @@ export final class Int8Array implements Iterable<Number> {
     /**
      * Finds the first element in the Int8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int8Array) => boolean =
+            (value: number, index: number, obj: Int8Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Int8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Int8Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -1740,26 +1752,26 @@ export final class Int8Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Int8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as number) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Int8Array) => boolean =
+            (value: number, index: number, obj: Int8Array): boolean => { return fn(value, index as number) }
         return this.findIndex(newF) as number
     }
 
     /**
      * Finds an index of the first element in the Int8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn() }
+        let newF: (value: number, index: number, obj: Int8Array) => boolean =
+            (value: number, index: number, obj: Int8Array): boolean => { return fn() }
         return this.findIndex(newF) as number
     }
 
@@ -3309,29 +3321,45 @@ export final class Int16Array implements Iterable<Number> {
         return this.filter(newF)
     }
 
+
     /**
      * Finds the first element in the Int16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int16Array) => boolean =
+            (value: number, index: number, obj: Int16Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Int16Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int16Array) => boolean =
+            (value: number, index: number, obj: Int16Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Int16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Int16Array) => boolean =
+            (value: number, index: number, obj: Int16Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -3421,8 +3449,7 @@ export final class Int16Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: short, b: short) => boolean =
             //     (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
@@ -3644,16 +3671,13 @@ export final class Int16Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return short | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Int16Array) => boolean): Number | undefined {
+    public find(fn: (value: number, index: number, obj: Int16Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
@@ -3662,27 +3686,27 @@ export final class Int16Array implements Iterable<Number> {
     /**
      * Finds the first element in the Int16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int16Array) => boolean =
+            (value: number, index: number, obj: Int16Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Int16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Int16Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -3692,26 +3716,26 @@ export final class Int16Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Int16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as number) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Int16Array) => boolean =
+            (value: number, index: number, obj: Int16Array): boolean => { return fn(value, index as number) }
         return this.findIndex(newF) as number
     }
 
     /**
      * Finds an index of the first element in the Int16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn() }
+        let newF: (value: number, index: number, obj: Int16Array) => boolean =
+            (value: number, index: number, obj: Int16Array): boolean => { return fn() }
         return this.findIndex(newF) as number
     }
 
@@ -5238,29 +5262,45 @@ export final class Int32Array implements Iterable<Number> {
         return this.filter(newF)
     }
 
+
     /**
      * Finds the first element in the Int32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int32Array) => boolean =
+            (value: number, index: number, obj: Int32Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Int32Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int32Array) => boolean =
+            (value: number, index: number, obj: Int32Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Int32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Int32Array) => boolean =
+            (value: number, index: number, obj: Int32Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -5350,8 +5390,7 @@ export final class Int32Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: int, b: int) => boolean =
             //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
@@ -5573,16 +5612,13 @@ export final class Int32Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return int | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Int32Array) => boolean): Number | undefined {
+    public find(fn: (value: number, index: number, obj: Int32Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
@@ -5591,27 +5627,27 @@ export final class Int32Array implements Iterable<Number> {
     /**
      * Finds the first element in the Int32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Int32Array) => boolean =
+            (value: number, index: number, obj: Int32Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Int32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Int32Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -5621,26 +5657,26 @@ export final class Int32Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Int32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as number) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Int32Array) => boolean =
+            (value: number, index: number, obj: Int32Array): boolean => { return fn(value, index as number) }
         return this.findIndex(newF) as number
     }
 
     /**
      * Finds an index of the first element in the Int32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn() }
+        let newF: (value: number, index: number, obj: Int32Array) => boolean =
+            (value: number, index: number, obj: Int32Array): boolean => { return fn() }
         return this.findIndex(newF) as number
     }
 
@@ -7194,29 +7230,45 @@ export final class BigInt64Array implements Iterable<BigInt> {
         return this.filter(newF)
     }
 
+
     /**
      * Finds the first element in the BigInt64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return BigInt | undefined as in JS
      */
-    public find(fn: (val: BigInt) => boolean): BigInt | undefined {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): BigInt | undefined {
+        let newF: (value: BigInt, index: number, obj: BigInt64Array) => boolean =
+            (value: BigInt, index: number, obj: BigInt64Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the BigInt64Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return BigInt | undefined as in JS
+     */
+    public find(fn: (value: BigInt) => boolean): BigInt | undefined {
+        let newF: (value: BigInt, index: number, obj: BigInt64Array) => boolean =
+            (value: BigInt, index: number, obj: BigInt64Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the BigInt64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: BigInt) => boolean): number {
+        let newF: (value: BigInt, index: number, obj: BigInt64Array) => boolean =
+            (value: BigInt, index: number, obj: BigInt64Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -7306,8 +7358,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: long, b: long) => boolean =
             //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
@@ -7529,16 +7580,13 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return long | undefined as in JS
+     * NOTE: return BigInt | undefined as in JS
      */
-    public find(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): BigInt | undefined {
+    public find(fn: (value: BigInt, index: number, obj: BigInt64Array) => boolean): BigInt | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val, i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (fn(new BigInt(val), i as number, this)) {
+                return new BigInt(val)
             }
         }
         return undefined
@@ -7547,27 +7595,27 @@ export final class BigInt64Array implements Iterable<BigInt> {
     /**
      * Finds the first element in the BigInt64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return BigInt | undefined as in JS
      */
-    public find(fn: (val: BigInt, index: number) => boolean): BigInt | undefined {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index) }
+    public find(fn: (value: BigInt, index: number) => boolean): BigInt | undefined {
+        let newF: (value: BigInt, index: number, obj: BigInt64Array) => boolean =
+            (value: BigInt, index: number, obj: BigInt64Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the BigInt64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
+    public findIndex(fn: (value: BigInt, index: number, obj: BigInt64Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(new BigInt(val), i as number, this)) {
+            if (fn(new BigInt(this.getUnsafe(i)), i as number, this)) {
                 return i as number
             }
         }
@@ -7577,26 +7625,26 @@ export final class BigInt64Array implements Iterable<BigInt> {
     /**
      * Finds an index of the first element in the BigInt64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as number) }
+    public findIndex(fn: (value: BigInt, index: number) => boolean): number {
+        let newF: (value: BigInt, index: number, obj: BigInt64Array) => boolean =
+            (value: BigInt, index: number, obj: BigInt64Array): boolean => { return fn(value, index as number) }
         return this.findIndex(newF) as number
     }
 
     /**
      * Finds an index of the first element in the BigInt64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: () => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn() }
+        let newF: (value: BigInt, index: number, obj: BigInt64Array) => boolean =
+            (value: BigInt, index: number, obj: BigInt64Array): boolean => { return fn() }
         return this.findIndex(newF) as number
     }
 
@@ -9131,29 +9179,45 @@ export final class Float32Array implements Iterable<Number> {
         return this.filter(newF)
     }
 
+
     /**
      * Finds the first element in the Float32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Float32Array) => boolean =
+            (value: number, index: number, obj: Float32Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Float32Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Float32Array) => boolean =
+            (value: number, index: number, obj: Float32Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Float32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Float32Array) => boolean =
+            (value: number, index: number, obj: Float32Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -9243,8 +9307,7 @@ export final class Float32Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: float, b: float) => boolean =
             //     (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
@@ -9466,16 +9529,13 @@ export final class Float32Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return float | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Float32Array) => boolean): Number | undefined {
+    public find(fn: (value: number, index: number, obj: Float32Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
@@ -9484,27 +9544,27 @@ export final class Float32Array implements Iterable<Number> {
     /**
      * Finds the first element in the Float32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Float32Array) => boolean =
+            (value: number, index: number, obj: Float32Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Float32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Float32Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -9514,26 +9574,26 @@ export final class Float32Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Float32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as number) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Float32Array) => boolean =
+            (value: number, index: number, obj: Float32Array): boolean => { return fn(value, index as number) }
         return this.findIndex(newF) as number
     }
 
     /**
      * Finds an index of the first element in the Float32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn() }
+        let newF: (value: number, index: number, obj: Float32Array) => boolean =
+            (value: number, index: number, obj: Float32Array): boolean => { return fn() }
         return this.findIndex(newF) as number
     }
 
@@ -10945,29 +11005,45 @@ export final class Float64Array implements Iterable<Number> {
         return this.filter(newF)
     }
 
+
     /**
      * Finds the first element in the Float64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Float64Array) => boolean =
+            (value: number, index: number, obj: Float64Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Float64Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Float64Array) => boolean =
+            (value: number, index: number, obj: Float64Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Float64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Float64Array) => boolean =
+            (value: number, index: number, obj: Float64Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -11057,8 +11133,7 @@ export final class Float64Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: double, b: double) => boolean =
             //     (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
@@ -11280,16 +11355,13 @@ export final class Float64Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return double | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Float64Array) => boolean): Number | undefined {
+    public find(fn: (value: number, index: number, obj: Float64Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (fn(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
@@ -11298,27 +11370,27 @@ export final class Float64Array implements Iterable<Number> {
     /**
      * Finds the first element in the Float64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number | undefined {
+        let newF: (value: number, index: number, obj: Float64Array) => boolean =
+            (value: number, index: number, obj: Float64Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Float64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Float64Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -11328,26 +11400,26 @@ export final class Float64Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Float64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as number) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Float64Array) => boolean =
+            (value: number, index: number, obj: Float64Array): boolean => { return fn(value, index as number) }
         return this.findIndex(newF) as number
     }
 
     /**
      * Finds an index of the first element in the Float64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
     public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn() }
+        let newF: (value: number, index: number, obj: Float64Array) => boolean =
+            (value: number, index: number, obj: Float64Array): boolean => { return fn() }
         return this.findIndex(newF) as number
     }
 

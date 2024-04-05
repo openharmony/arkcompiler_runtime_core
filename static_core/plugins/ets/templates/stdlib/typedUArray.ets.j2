@@ -313,7 +313,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
     }
-    {%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped  #}
+{%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
 
     internal zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
         {%- if element.get('subsetType') == 'number' %}
@@ -471,7 +471,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.setUnsafeClamp(index, val)
         {%- endif %}
     }
-    {% if element['etsType'] != 'int' -%}
+    {%- if element['etsType'] != 'int' %}
 
     /**
      * Assigns val as element on index.
@@ -1460,26 +1460,41 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     /**
      * Finds the first element in the {{element['name']}}Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return {{elType}} | undefined as in JS
      */
-    public find(fn: (val: {{elType}}) => boolean): {{elType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): {{elType}}|undefined {
+        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
+            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the {{element['name']}}Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return {{elType}} | undefined as in JS
+     */
+    public find(fn: (value: {{elType}}) => boolean): {{elType}}|undefined {
+        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
+            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: {{elType}}) => boolean): {{idxType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: {{elType}}) => boolean): {{idxType}} {
+        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
+            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value) }
         return this.findIndex(newF){{castToIdx}}
     }
 
@@ -1560,7 +1575,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
         // let mustPrecede: (a: {{element['etsType']}}, b: {{element['etsType']}}) => boolean =
         //     (a: {{element['etsType']}}, b: {{element['etsType']}}): boolean => { return (fn(a, b) <= 0) }
         // sort(arr, mustPrecede)
@@ -1664,12 +1679,12 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-    * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array.
-    *
-    * @param fn a function to apply for each element of current {{element['name']}}Array
-    *
-    * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
-    */
+     * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array.
+     *
+     * @param fn a function to apply for each element of current {{element['name']}}Array
+     *
+     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
+     */
     public map(fn: (val: {{elType}}, index: {{idxType}}) => {{elType}}): {{element['name']}}Array {
         let resBuf = new ArrayBuffer(this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT as int)
         let res = new {{element['name']}}Array(resBuf)
@@ -1754,39 +1769,40 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return {{element['etsType']}} | undefined as in JS
+     * NOTE: return {{elType}} | undefined as in JS
      */
-    public find(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{elType}} {
+    public find(fn: (value: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{elType}}|undefined {
         for (let i = 0; i < this.lengthInt; i++) {
             let val = {{castToEl % 'this.getUnsafe(i)'}}
             if (fn(val, i{{castToIdx}}, this)) {
                 return val
             }
         }
-        throw new Error("{{element['name']}}Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
      * Finds the first element in the {{element['name']}}Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return {{elType}} | undefined as in JS
      */
-    public find(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{elType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val, index) }
+    public find(fn: (value: {{elType}}, index: {{idxType}}) => boolean): {{elType}}|undefined {
+        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
+            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{idxType}} {
+    public findIndex(fn: (value: {{elType}}, index: {{idxType}}, obj: {{element['name']}}Array) => boolean): {{idxType}} {
         for (let i = 0; i < this.lengthInt; i++) {
             if (fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)) {
                 return i{{castToIdx}}
@@ -1798,13 +1814,26 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     /**
      * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
-        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => boolean =
-            (val: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(val, index) }
+    public findIndex(fn: (value: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
+        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
+            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value, index) }
+        return this.findIndex(newF)
+    }
+
+    /**
+     * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): {{idxType}} {
+        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
+            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn() }
         return this.findIndex(newF)
     }
 

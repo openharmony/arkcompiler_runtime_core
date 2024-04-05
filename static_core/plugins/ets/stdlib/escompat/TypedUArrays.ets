@@ -410,7 +410,6 @@ export class Uint8ClampedArray implements Iterable<Number> {
         }
         this.setUnsafeClamp(index, val)
     }
-    
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -1346,26 +1345,41 @@ export class Uint8ClampedArray implements Iterable<Number> {
     /**
      * Finds the first element in the Uint8ClampedArray that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val) }
+    public find(fn: () => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint8ClampedArray) => boolean =
+            (value: number, index: number, obj: Uint8ClampedArray): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Uint8ClampedArray that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint8ClampedArray) => boolean =
+            (value: number, index: number, obj: Uint8ClampedArray): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint8ClampedArray that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint8ClampedArray) => boolean =
+            (value: number, index: number, obj: Uint8ClampedArray): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -1446,7 +1460,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
         // let mustPrecede: (a: int, b: int) => boolean =
         //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
         // sort(arr, mustPrecede)
@@ -1550,12 +1564,12 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Uint8ClampedArray using fn(arr[i]) over all elements of current Uint8ClampedArray.
-    *
-    * @param fn a function to apply for each element of current Uint8ClampedArray
-    *
-    * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
-    */
+     * Creates a new Uint8ClampedArray using fn(arr[i]) over all elements of current Uint8ClampedArray.
+     *
+     * @param fn a function to apply for each element of current Uint8ClampedArray
+     *
+     * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Uint8ClampedArray {
         let resBuf = new ArrayBuffer(this.lengthInt * Uint8ClampedArray.BYTES_PER_ELEMENT as int)
         let res = new Uint8ClampedArray(resBuf)
@@ -1640,39 +1654,40 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return int | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Uint8ClampedArray) => boolean): number {
+    public find(fn: (value: number, index: number, array: Uint8ClampedArray) => boolean): number|undefined {
         for (let i = 0; i < this.lengthInt; i++) {
             let val = this.getUnsafe(i) as number
             if (fn(val, i as number, this)) {
                 return val
             }
         }
-        throw new Error("Uint8ClampedArray.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
      * Finds the first element in the Uint8ClampedArray that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint8ClampedArray) => boolean =
+            (value: number, index: number, obj: Uint8ClampedArray): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint8ClampedArray that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Uint8ClampedArray) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Uint8ClampedArray) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
             if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
@@ -1684,13 +1699,26 @@ export class Uint8ClampedArray implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Uint8ClampedArray that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8ClampedArray) => boolean =
-            (val: number, index: number, array: Uint8ClampedArray): boolean => { return fn(val, index) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint8ClampedArray) => boolean =
+            (value: number, index: number, obj: Uint8ClampedArray): boolean => { return fn(value, index) }
+        return this.findIndex(newF)
+    }
+
+    /**
+     * Finds an index of the first element in the Uint8ClampedArray that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (value: number, index: number, obj: Uint8ClampedArray) => boolean =
+            (value: number, index: number, obj: Uint8ClampedArray): boolean => { return fn() }
         return this.findIndex(newF)
     }
 
@@ -2306,7 +2334,6 @@ export class Uint8Array implements Iterable<Number> {
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
-    
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -3243,26 +3270,41 @@ export class Uint8Array implements Iterable<Number> {
     /**
      * Finds the first element in the Uint8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint8Array) => boolean =
+            (value: number, index: number, obj: Uint8Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Uint8Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint8Array) => boolean =
+            (value: number, index: number, obj: Uint8Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint8Array) => boolean =
+            (value: number, index: number, obj: Uint8Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -3343,7 +3385,7 @@ export class Uint8Array implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
         // let mustPrecede: (a: int, b: int) => boolean =
         //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
         // sort(arr, mustPrecede)
@@ -3447,12 +3489,12 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Uint8Array using fn(arr[i]) over all elements of current Uint8Array.
-    *
-    * @param fn a function to apply for each element of current Uint8Array
-    *
-    * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
-    */
+     * Creates a new Uint8Array using fn(arr[i]) over all elements of current Uint8Array.
+     *
+     * @param fn a function to apply for each element of current Uint8Array
+     *
+     * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Uint8Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Uint8Array.BYTES_PER_ELEMENT as int)
         let res = new Uint8Array(resBuf)
@@ -3537,39 +3579,40 @@ export class Uint8Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return int | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Uint8Array) => boolean): number {
+    public find(fn: (value: number, index: number, array: Uint8Array) => boolean): number|undefined {
         for (let i = 0; i < this.lengthInt; i++) {
             let val = this.getUnsafe(i) as number
             if (fn(val, i as number, this)) {
                 return val
             }
         }
-        throw new Error("Uint8Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
      * Finds the first element in the Uint8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint8Array) => boolean =
+            (value: number, index: number, obj: Uint8Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Uint8Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Uint8Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
             if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
@@ -3581,13 +3624,26 @@ export class Uint8Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Uint8Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint8Array) => boolean =
-            (val: number, index: number, array: Uint8Array): boolean => { return fn(val, index) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint8Array) => boolean =
+            (value: number, index: number, obj: Uint8Array): boolean => { return fn(value, index) }
+        return this.findIndex(newF)
+    }
+
+    /**
+     * Finds an index of the first element in the Uint8Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (value: number, index: number, obj: Uint8Array) => boolean =
+            (value: number, index: number, obj: Uint8Array): boolean => { return fn() }
         return this.findIndex(newF)
     }
 
@@ -4204,7 +4260,6 @@ export class Uint16Array implements Iterable<Number> {
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
-    
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -5141,26 +5196,41 @@ export class Uint16Array implements Iterable<Number> {
     /**
      * Finds the first element in the Uint16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint16Array) => boolean =
+            (value: number, index: number, obj: Uint16Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Uint16Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint16Array) => boolean =
+            (value: number, index: number, obj: Uint16Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint16Array) => boolean =
+            (value: number, index: number, obj: Uint16Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -5241,7 +5311,7 @@ export class Uint16Array implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
         // let mustPrecede: (a: int, b: int) => boolean =
         //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
         // sort(arr, mustPrecede)
@@ -5345,12 +5415,12 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Uint16Array using fn(arr[i]) over all elements of current Uint16Array.
-    *
-    * @param fn a function to apply for each element of current Uint16Array
-    *
-    * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
-    */
+     * Creates a new Uint16Array using fn(arr[i]) over all elements of current Uint16Array.
+     *
+     * @param fn a function to apply for each element of current Uint16Array
+     *
+     * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Uint16Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Uint16Array.BYTES_PER_ELEMENT as int)
         let res = new Uint16Array(resBuf)
@@ -5435,39 +5505,40 @@ export class Uint16Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return int | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Uint16Array) => boolean): number {
+    public find(fn: (value: number, index: number, array: Uint16Array) => boolean): number|undefined {
         for (let i = 0; i < this.lengthInt; i++) {
             let val = this.getUnsafe(i) as number
             if (fn(val, i as number, this)) {
                 return val
             }
         }
-        throw new Error("Uint16Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
      * Finds the first element in the Uint16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint16Array) => boolean =
+            (value: number, index: number, obj: Uint16Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Uint16Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Uint16Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
             if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
@@ -5479,13 +5550,26 @@ export class Uint16Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Uint16Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint16Array) => boolean =
-            (val: number, index: number, array: Uint16Array): boolean => { return fn(val, index) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint16Array) => boolean =
+            (value: number, index: number, obj: Uint16Array): boolean => { return fn(value, index) }
+        return this.findIndex(newF)
+    }
+
+    /**
+     * Finds an index of the first element in the Uint16Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (value: number, index: number, obj: Uint16Array) => boolean =
+            (value: number, index: number, obj: Uint16Array): boolean => { return fn() }
         return this.findIndex(newF)
     }
 
@@ -6102,6 +6186,7 @@ export class Uint32Array implements Iterable<Number> {
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -7064,26 +7149,41 @@ export class Uint32Array implements Iterable<Number> {
     /**
      * Finds the first element in the Uint32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint32Array) => boolean =
+            (value: number, index: number, obj: Uint32Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the Uint32Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
+     */
+    public find(fn: (value: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint32Array) => boolean =
+            (value: number, index: number, obj: Uint32Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint32Array) => boolean =
+            (value: number, index: number, obj: Uint32Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -7164,7 +7264,7 @@ export class Uint32Array implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
         // let mustPrecede: (a: long, b: long) => boolean =
         //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
         // sort(arr, mustPrecede)
@@ -7268,12 +7368,12 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Uint32Array using fn(arr[i]) over all elements of current Uint32Array.
-    *
-    * @param fn a function to apply for each element of current Uint32Array
-    *
-    * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
-    */
+     * Creates a new Uint32Array using fn(arr[i]) over all elements of current Uint32Array.
+     *
+     * @param fn a function to apply for each element of current Uint32Array
+     *
+     * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Uint32Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Uint32Array.BYTES_PER_ELEMENT as int)
         let res = new Uint32Array(resBuf)
@@ -7358,39 +7458,40 @@ export class Uint32Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return long | undefined as in JS
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number, array: Uint32Array) => boolean): number {
+    public find(fn: (value: number, index: number, array: Uint32Array) => boolean): number|undefined {
         for (let i = 0; i < this.lengthInt; i++) {
             let val = this.getUnsafe(i) as number
             if (fn(val, i as number, this)) {
                 return val
             }
         }
-        throw new Error("Uint32Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
      * Finds the first element in the Uint32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return number | undefined as in JS
      */
-    public find(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val, index) }
+    public find(fn: (value: number, index: number) => boolean): number|undefined {
+        let newF: (value: number, index: number, obj: Uint32Array) => boolean =
+            (value: number, index: number, obj: Uint32Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the Uint32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number, array: Uint32Array) => boolean): number {
+    public findIndex(fn: (value: number, index: number, obj: Uint32Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
             if (fn(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
@@ -7402,13 +7503,26 @@ export class Uint32Array implements Iterable<Number> {
     /**
      * Finds an index of the first element in the Uint32Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Uint32Array) => boolean =
-            (val: number, index: number, array: Uint32Array): boolean => { return fn(val, index) }
+    public findIndex(fn: (value: number, index: number) => boolean): number {
+        let newF: (value: number, index: number, obj: Uint32Array) => boolean =
+            (value: number, index: number, obj: Uint32Array): boolean => { return fn(value, index) }
+        return this.findIndex(newF)
+    }
+
+    /**
+     * Finds an index of the first element in the Uint32Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (value: number, index: number, obj: Uint32Array) => boolean =
+            (value: number, index: number, obj: Uint32Array): boolean => { return fn() }
         return this.findIndex(newF)
     }
 
@@ -8025,6 +8139,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -8987,26 +9102,41 @@ export class BigUint64Array implements Iterable<BigInt> {
     /**
      * Finds the first element in the BigUint64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return BigInt | undefined as in JS
      */
-    public find(fn: (val: BigInt) => boolean): BigInt {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val) }
+    public find(fn: () => boolean): BigInt|undefined {
+        let newF: (value: BigInt, index: number, obj: BigUint64Array) => boolean =
+            (value: BigInt, index: number, obj: BigUint64Array): boolean => { return fn() }
+        return this.find(newF)
+    }
+
+    /**
+     * Finds the first element in the BigUint64Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the first element that satisfies fn
+     * NOTE: return BigInt | undefined as in JS
+     */
+    public find(fn: (value: BigInt) => boolean): BigInt|undefined {
+        let newF: (value: BigInt, index: number, obj: BigUint64Array) => boolean =
+            (value: BigInt, index: number, obj: BigUint64Array): boolean => { return fn(value) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the BigUint64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val) }
+    public findIndex(fn: (value: BigInt) => boolean): number {
+        let newF: (value: BigInt, index: number, obj: BigUint64Array) => boolean =
+            (value: BigInt, index: number, obj: BigUint64Array): boolean => { return fn(value) }
         return this.findIndex(newF) as number
     }
 
@@ -9087,7 +9217,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
         // let mustPrecede: (a: long, b: long) => boolean =
         //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
         // sort(arr, mustPrecede)
@@ -9191,12 +9321,12 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-    * Creates a new BigUint64Array using fn(arr[i]) over all elements of current BigUint64Array.
-    *
-    * @param fn a function to apply for each element of current BigUint64Array
-    *
-    * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
-    */
+     * Creates a new BigUint64Array using fn(arr[i]) over all elements of current BigUint64Array.
+     *
+     * @param fn a function to apply for each element of current BigUint64Array
+     *
+     * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
+     */
     public map(fn: (val: BigInt, index: number) => BigInt): BigUint64Array {
         let resBuf = new ArrayBuffer(this.lengthInt * BigUint64Array.BYTES_PER_ELEMENT as int)
         let res = new BigUint64Array(resBuf)
@@ -9281,39 +9411,40 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * NOTE: return long | undefined as in JS
+     * NOTE: return BigInt | undefined as in JS
      */
-    public find(fn: (val: BigInt, index: number, array: BigUint64Array) => boolean): BigInt {
+    public find(fn: (value: BigInt, index: number, array: BigUint64Array) => boolean): BigInt|undefined {
         for (let i = 0; i < this.lengthInt; i++) {
             let val = new BigInt(this.getUnsafe(i))
             if (fn(val, i as number, this)) {
                 return val
             }
         }
-        throw new Error("BigUint64Array.find: not implemented if element was not found")
+        return undefined
     }
 
     /**
      * Finds the first element in the BigUint64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
+     * NOTE: return BigInt | undefined as in JS
      */
-    public find(fn: (val: BigInt, index: number) => boolean): BigInt {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val, index) }
+    public find(fn: (value: BigInt, index: number) => boolean): BigInt|undefined {
+        let newF: (value: BigInt, index: number, obj: BigUint64Array) => boolean =
+            (value: BigInt, index: number, obj: BigUint64Array): boolean => { return fn(value, index) }
         return this.find(newF)
     }
 
     /**
      * Finds an index of the first element in the BigUint64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: BigInt, index: number, array: BigUint64Array) => boolean): number {
+    public findIndex(fn: (value: BigInt, index: number, obj: BigUint64Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
             if (fn(new BigInt(this.getUnsafe(i)), i as number, this)) {
                 return i as number
@@ -9325,13 +9456,26 @@ export class BigUint64Array implements Iterable<BigInt> {
     /**
      * Finds an index of the first element in the BigUint64Array that satisfies the condition
      *
-     * @param fn condition
+     * @param fn the condition to apply for each element
      *
      * @returns the index of the first element that satisfies fn
      */
-    public findIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigUint64Array) => boolean =
-            (val: BigInt, index: number, array: BigUint64Array): boolean => { return fn(val, index) }
+    public findIndex(fn: (value: BigInt, index: number) => boolean): number {
+        let newF: (value: BigInt, index: number, obj: BigUint64Array) => boolean =
+            (value: BigInt, index: number, obj: BigUint64Array): boolean => { return fn(value, index) }
+        return this.findIndex(newF)
+    }
+
+    /**
+     * Finds an index of the first element in the BigUint64Array that satisfies the condition
+     *
+     * @param fn the condition to apply for each element
+     *
+     * @returns the index of the first element that satisfies fn
+     */
+    public findIndex(fn: () => boolean): number {
+        let newF: (value: BigInt, index: number, obj: BigUint64Array) => boolean =
+            (value: BigInt, index: number, obj: BigUint64Array): boolean => { return fn() }
         return this.findIndex(newF)
     }
 
