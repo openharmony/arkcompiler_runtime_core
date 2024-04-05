@@ -20,9 +20,7 @@ spec/bigint/bigint-arithmetic-comparison-strict-1.ets
 spec/bigint/bigint-arithmetic-comparison-strict-2.ets
 spec/bigint/bigint-arithmetic-div-equal.ets
 spec/bigint/bigint-arithmetic-expr-4-operands-1-1.ets
-spec/bigint/bigint-arithmetic-expr-4-operands-1.ets
 spec/bigint/bigint-arithmetic-expr-4-operands-2-1.ets
-spec/bigint/bigint-arithmetic-expr-4-operands-2.ets
 spec/bigint/bigint-arithmetic-expr-4-operands-3-1.ets
 spec/bigint/bigint-arithmetic-expr-4-operands-3.ets
 spec/bigint/bigint-arithmetic-expr-4-operands-4-1.ets

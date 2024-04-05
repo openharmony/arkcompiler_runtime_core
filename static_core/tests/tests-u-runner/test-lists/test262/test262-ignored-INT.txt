@@ -1,8 +1,2 @@
-# #15407
-built-ins/JSON/stringify/value-tojson-object-circular.js
-# #10558
-built-ins/Array/prototype/concat/Array.prototype.concat_large-typed-array.js
-# #10607
-intl402/NumberFormat/prototype/format/units.js
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js

@@ -27,16 +27,6 @@ language/statements/try/tco-catch.js
 language/statements/try/tco-finally.js
 language/statements/while/tco-body.js
 
-# #9964
-built-ins/parseInt/S15.1.2.2_A8.js
-# #9958
-built-ins/parseFloat/S15.1.2.3_A6.js
-# #9717
-built-ins/String/prototype/repeat/repeat-string-n-times.js
-# #15361
-built-ins/Date/prototype/toISOString/15.9.5.43-0-10.js
-# #15082
-built-ins/Date/prototype/getDay/this-value-non-object.js
 # fail precision #9110
 built-ins/Date/UTC/fp-evaluation-order.js
 

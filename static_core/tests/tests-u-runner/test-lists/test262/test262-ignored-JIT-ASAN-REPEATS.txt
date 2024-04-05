@@ -1,55 +1,6 @@
-built-ins/Array/prototype/concat/Array.prototype.concat_large-typed-array.js
-built-ins/Array/prototype/every/15.4.4.16-7-c-ii-1.js
-built-ins/Array/prototype/every/15.4.4.16-7-c-ii-2.js
-built-ins/Array/prototype/filter/15.4.4.20-9-c-ii-1.js
-built-ins/Array/prototype/forEach/15.4.4.18-7-c-ii-1.js
-built-ins/Array/prototype/indexOf/15.4.4.14-10-1.js
-built-ins/Array/prototype/lastIndexOf/15.4.4.15-9-1.js
-built-ins/Array/prototype/map/15.4.4.19-8-c-ii-1.js
-built-ins/Array/prototype/reduce/callbackfn-resize-arraybuffer.js
-built-ins/Array/prototype/some/15.4.4.17-7-c-ii-2.js
-built-ins/Array/prototype/sort/stability-2048-elements.js
-built-ins/RegExp/CharacterClassEscapes/character-class-non-digit-class-escape-plus-quantifier.js
-built-ins/RegExp/CharacterClassEscapes/character-class-non-digit-class-escape.js
-built-ins/RegExp/CharacterClassEscapes/character-class-non-whitespace-class-escape.js
-built-ins/RegExp/CharacterClassEscapes/character-class-non-whitespace-class-escape-plus-quantifier.js
-built-ins/RegExp/CharacterClassEscapes/character-class-non-word-class-escape-plus-quantifier.js
-built-ins/RegExp/CharacterClassEscapes/character-class-non-word-class-escape.js
-# #9717
-built-ins/String/prototype/repeat/repeat-string-n-times.js
-built-ins/String/prototype/toLocaleUpperCase/special_casing.js
-built-ins/TypedArray/prototype/sort/stability.js
-built-ins/TypedArrayConstructors/ctors-bigint/typedarray-arg/src-typedarray-not-big-throws.js
-# #9964
-built-ins/parseInt/S15.1.2.2_A8.js
-intl402/RelativeTimeFormat/constructor/supportedLocalesOf/locales-invalid.js
-# #10417
-intl402/String/prototype/toLocaleUpperCase/special_casing_Lithuanian.js
-intl402/DateTimeFormat/date-time-options.js
-language/expressions/class/dstr/gen-meth-ary-ptrn-elem-id-init-throws.js
-language/expressions/class/dstr/gen-meth-dflt-ary-ptrn-elem-id-init-throws.js
-language/expressions/class/dstr/meth-ary-ptrn-elem-id-init-throws.js
-language/expressions/class/dstr/meth-dflt-ary-ptrn-elem-id-init-throws.js
-language/statements/class/dstr/gen-meth-ary-ptrn-elem-id-init-throws.js
-language/statements/class/dstr/gen-meth-dflt-ary-ptrn-elem-id-init-throws.js
-language/statements/class/dstr/meth-ary-ptrn-elem-id-init-throws.js
-language/statements/class/dstr/meth-dflt-ary-ptrn-elem-id-init-throws.js
-language/statements/for-await-of/async-gen-dstr-const-ary-ptrn-elem-obj-val-null.js
-language/statements/for-await-of/async-gen-dstr-let-ary-ptrn-elem-obj-val-null.js
-language/statements/for-await-of/async-gen-dstr-var-ary-ptrn-elem-obj-val-null.js
-# #9965
-built-ins/RegExp/from-regexp-like-get-flags-err.js
 # #11968
 built-ins/Function/prototype/call/S15.3.4.4_A3_T9.js
 # #10036
 intl402/DateTimeFormat/constructor-no-instanceof.js
-# #9960
-intl402/Number/prototype/toLocaleString/returns-same-results-as-NumberFormat.js
-# #10923
-harness/deepEqual-primitives.js
-# #10049
-built-ins/Array/prototype/concat/Array.prototype.concat_small-typed-array.js
-# #10299
-built-ins/Array/prototype/filter/15.4.4.20-9-b-11.js
 # #11221
 built-ins/Array/S15.4_A1.1_T9.js
