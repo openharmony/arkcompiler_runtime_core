@@ -16,6 +16,7 @@ import("$ark_root/tests/test_helper.gni")
 
 host_unittest_action("LibPandaBaseTest") {
   module_out_path = module_output_path
+  include_dirs = [ "$ark_root/platforms" ]
 
   sources = [
     "arch_test.cpp",
