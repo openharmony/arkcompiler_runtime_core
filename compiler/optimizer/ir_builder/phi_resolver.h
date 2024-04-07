@@ -75,12 +75,12 @@ public:
                     }
                     // Phi has only SafePoint in users, we can remove this phi and all phi in collected list.
                     inst->RemoveUsers<true>();
-                    inst->GetBasicBlock()->RemoveInst(inst);
                     inst->SetMarker(dead_marker_);
+                    inst->GetBasicBlock()->RemoveInst(inst);
                     for (auto phi : phi_users_) {
                         phi->RemoveUsers<true>();
-                        phi->GetBasicBlock()->RemoveInst(phi);
                         phi->SetMarker(dead_marker_);
+                        phi->GetBasicBlock()->RemoveInst(phi);
                     }
                 } else {
                     SetTypeByInputs(inst);
