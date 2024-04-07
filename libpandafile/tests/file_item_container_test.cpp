@@ -480,7 +480,7 @@ void TestProtos(size_t n)
     constexpr size_t ELEM_PER16 = 16 / ELEM_WIDTH;
 
     // Write panda file to memory
-
+    ItemContainer::SetApi(11);
     ItemContainer container;
 
     ClassItem *class_item = container.GetOrCreateClassItem("A");
@@ -563,6 +563,14 @@ void TestProtos(size_t n)
         EXPECT_EQ(proto_data_accessor.GetSize(), size);
         EXPECT_EQ(proto_data_accessor.GetSize(), proto_item->GetSize());
     });
+}
+
+HWTEST(ItemContainer, TestProtos, testing::ext::TestSize.Level0)
+{
+    TestProtos(0);
+    TestProtos(1);
+    TestProtos(2);
+    TestProtos(7);
 }
 
 HWTEST(ItemContainer, TestDebugInfo, testing::ext::TestSize.Level0)

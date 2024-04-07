@@ -1186,4 +1186,193 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_020, TestSize.Level1)
     auto success = AsmEmitter::EmitPrograms(filename, progs, true);
     EXPECT_TRUE(success);
 }
+
+/**
+ * @tc.name: assembly_emitter_test_021
+ * @tc.desc: Verify the AsmEmitter::EmitPrograms function with different API version.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
+{
+    Parser p;
+    auto source = R"(
+        .function any foo(any a0) <noimpl>
+    )";
+    auto res = p.Parse(source);
+    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    std::vector<Program *> progs;
+    progs.push_back(&res.Value());
+
+    // api 11
+    {
+        std::string descriptor;
+        const std::string filename_api11 = "source_021_api11.abc";
+        auto is_emitted = AsmEmitter::EmitPrograms(filename_api11, progs, false, 11);
+        EXPECT_TRUE(is_emitted);
+        auto pf = panda_file::OpenPandaFile(filename_api11);
+        EXPECT_NE(pf, nullptr);
+
+        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        EXPECT_TRUE(class_id.IsValid());
+
+        panda_file::ClassDataAccessor cda(*pf, class_id);
+
+        EXPECT_FALSE(cda.GetSourceLang());
+
+        const auto tagged = panda_file::Type(panda_file::Type::TypeId::TAGGED);
+        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+            EXPECT_NE(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
+            panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
+            EXPECT_EQ(tagged, pda.GetReturnType());
+            EXPECT_EQ(1u, pda.GetNumArgs());
+            EXPECT_EQ(tagged, pda.GetArgType(0));
+        });
+    }
+
+    // api 12
+    {
+        std::string descriptor;
+        const std::string filename_api12 = "source_021_api12.abc";
+        auto is_emitted = AsmEmitter::EmitPrograms(filename_api12, progs, false, 12);
+        EXPECT_TRUE(is_emitted);
+        auto pf = panda_file::OpenPandaFile(filename_api12);
+        EXPECT_NE(pf, nullptr);
+
+        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        EXPECT_TRUE(class_id.IsValid());
+
+        panda_file::ClassDataAccessor cda(*pf, class_id);
+
+        EXPECT_FALSE(cda.GetSourceLang());
+
+        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+            EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
+        });
+    }
+}
+
+/**
+ * @tc.name: assembly_emitter_test_022
+ * @tc.desc: Verify the AsmEmitter::Emit function with different API version.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_022, TestSize.Level1)
+{
+    Parser p;
+    auto source = R"(
+        .function any foo(any a0) <noimpl>
+    )";
+    auto res = p.Parse(source);
+    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    // api 11
+    {
+        std::string descriptor;
+        const std::string filename_api11 = "source_022_api11.abc";
+        auto writer = panda_file::FileWriter(filename_api11);
+        auto is_emitted = AsmEmitter::Emit(&writer, res.Value(), nullptr, nullptr, false, nullptr, 11);
+        EXPECT_TRUE(is_emitted);
+        auto pf = panda_file::OpenPandaFile(filename_api11);
+        EXPECT_NE(pf, nullptr);
+
+        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        EXPECT_TRUE(class_id.IsValid());
+
+        panda_file::ClassDataAccessor cda(*pf, class_id);
+
+        EXPECT_FALSE(cda.GetSourceLang());
+
+        const auto tagged = panda_file::Type(panda_file::Type::TypeId::TAGGED);
+        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+            EXPECT_NE(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
+            panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
+            EXPECT_EQ(tagged, pda.GetReturnType());
+            EXPECT_EQ(1u, pda.GetNumArgs());
+            EXPECT_EQ(tagged, pda.GetArgType(0));
+        });
+    }
+
+    // api 12
+    {
+        std::string descriptor;
+        const std::string filename_api12 = "source_022_api12.abc";
+        auto writer = panda_file::FileWriter(filename_api12);
+        auto is_emitted = AsmEmitter::Emit(&writer, res.Value(), nullptr, nullptr, false, nullptr, 12);
+        EXPECT_TRUE(is_emitted);
+        auto pf = panda_file::OpenPandaFile(filename_api12);
+        EXPECT_NE(pf, nullptr);
+
+        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        EXPECT_TRUE(class_id.IsValid());
+
+        panda_file::ClassDataAccessor cda(*pf, class_id);
+
+        EXPECT_FALSE(cda.GetSourceLang());
+
+        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+            EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
+        });
+    }
+}
+
+/**
+ * @tc.name: assembly_emitter_test_023
+ * @tc.desc: Verify the AsmEmitter::Emit function with different API version.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_023, TestSize.Level1)
+{
+    Parser p;
+    auto source = R"(
+        .function any foo(any a0) <noimpl>
+    )";
+
+    auto res = p.Parse(source);
+    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    // api 11
+    {
+        std::string descriptor;
+        auto pf = AsmEmitter::Emit(res.Value(), nullptr, 11);
+        EXPECT_NE(pf, nullptr);
+
+        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        EXPECT_TRUE(class_id.IsValid());
+
+        panda_file::ClassDataAccessor cda(*pf, class_id);
+
+        EXPECT_FALSE(cda.GetSourceLang());
+
+        const auto tagged = panda_file::Type(panda_file::Type::TypeId::TAGGED);
+        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+            EXPECT_NE(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
+            panda_file::ProtoDataAccessor pda(*pf, mda.GetProtoId());
+            EXPECT_EQ(tagged, pda.GetReturnType());
+            EXPECT_EQ(1u, pda.GetNumArgs());
+            EXPECT_EQ(tagged, pda.GetArgType(0));
+        });
+    }
+
+    // api 12
+    {
+        std::string descriptor;
+        auto pf = AsmEmitter::Emit(res.Value(), nullptr, 12);
+        EXPECT_NE(pf, nullptr);
+
+        auto class_id = pf->GetClassId(GetTypeDescriptor("_GLOBAL", &descriptor));
+        EXPECT_TRUE(class_id.IsValid());
+
+        panda_file::ClassDataAccessor cda(*pf, class_id);
+
+        EXPECT_FALSE(cda.GetSourceLang());
+
+        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+            EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
+        });
+    }
+}
 }
