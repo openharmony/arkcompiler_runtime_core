@@ -14,6 +14,7 @@
  */
 
 #include "disassembler.h"
+#include "utils/const_value.h"
 
 #include <sstream>
 #include <iomanip>
@@ -21,9 +22,6 @@
 namespace panda::disasm {
 
 void Disassembler::GetInsInfo(const panda_file::File::EntityId& code_id, MethodInfo* method_info /* out */) const {
-    const static size_t FORMAT_WIDTH = 20;
-    const static size_t INSTRUCTION_WIDTH = 4;
-
     panda_file::CodeDataAccessor code_accessor(*file_, code_id);
 
     auto ins_sz = code_accessor.GetCodeSize();
@@ -32,11 +30,12 @@ void Disassembler::GetInsInfo(const panda_file::File::EntityId& code_id, MethodI
     auto bc_ins = BytecodeInstruction(ins_arr);
     auto bc_ins_last = bc_ins.JumpTo(ins_sz);
 
+    auto instruction_offset = code_id.GetOffset() + static_cast<uint32_t>(code_accessor.GetInstructions() - file_->GetSpanFromId(code_id).data());
     while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
         std::stringstream ss;
 
-        ss << "offset: 0x" << std::setfill('0') << std::setw(4) << std::hex
-           << code_id.GetOffset() + bc_ins.GetAddress() - BytecodeInstruction(ins_arr).GetAddress();
+        ss << "offset: 0x" << std::setfill('0') << std::setw(ark::INSTRUCTION_OFFSET_WIDTH) << std::hex
+           << instruction_offset + bc_ins.GetAddress() - BytecodeInstruction(ins_arr).GetAddress();
         ss << ", " << std::setfill('.');
 
         BytecodeInstruction::Format format = bc_ins.GetFormat();
@@ -44,7 +43,7 @@ void Disassembler::GetInsInfo(const panda_file::File::EntityId& code_id, MethodI
         switch (format) {
 % Panda::formats.each do |fmt|
         case BytecodeInstruction::Format::<%= fmt.pretty.upcase %>:
-            ss << std::setw(FORMAT_WIDTH) << std::left << "[<%= fmt.pretty.upcase %>]";
+            ss << std::setw(ark::INSTRUCTION_FORMAT_WIDTH) << std::left << "[<%= fmt.pretty.upcase %>]";
             break;
 % end
         default:
@@ -57,7 +56,7 @@ void Disassembler::GetInsInfo(const panda_file::File::EntityId& code_id, MethodI
         const size_t sz = bc_ins.GetSize();
 
         for (size_t i = 0; i < sz; i++) {
-            ss << "0x" << std::setw(INSTRUCTION_WIDTH) << std::setfill('0') << std::right << std::hex << static_cast<int>(pc[i]);
+            ss << "0x" << std::setw(ark::INSTRUCTION_VALUE_WIDTH) << std::setfill('0') << std::right << std::hex << static_cast<int>(pc[i]);
 
             if (i != sz - 1) {
                 ss << " ";

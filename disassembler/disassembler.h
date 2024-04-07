@@ -140,6 +140,9 @@ private:
     void Serialize(const pandasm::Record &record, std::ostream &os, bool print_information = false) const;
     void SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const;
     void Serialize(const pandasm::Function &method, std::ostream &os, bool print_information = false) const;
+    void SerializeInstructions(const pandasm::Function &method, std::ostream &os,
+                               const std::map<std::string, MethodInfo>::const_iterator &method_info_it,
+                               bool print_method_info = false) const;
     void SerializeMethodAnnotations(const pandasm::Function &method, std::ostream &os) const;
     void SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value,
                           std::ostream &os) const;
