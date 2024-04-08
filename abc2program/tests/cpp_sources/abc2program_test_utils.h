@@ -39,6 +39,8 @@ constexpr uint32_t NUM_OF_HELLOE_WORLD_TEST_UT_FUNC_MAIN_0_METHOD_INS = 23;
 
 constexpr uint32_t NUM_OF_HELLOE_WORLD_TEST_UT_INSTANCE_INITIALIZER_METHOD_INS = 4;
 
+constexpr size_t NUM_OF_ARGS_FOR_FOO_METHOD = 3;
+
 constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".HelloWorld";
 
 constexpr std::string_view FUNC_NAME_MAIN_0 = ".func_main_0";

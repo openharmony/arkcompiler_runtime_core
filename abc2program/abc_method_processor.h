@@ -30,6 +30,7 @@ class AbcMethodProcessor : public AbcFileEntityProcessor {
   private:
     void FillFunctionData();
     void FillProto();
+    uint32_t GetNumArgs() const;
     void FillFunctionKind();
     void FillFunctionMetaData();
     void FillAccessFlags();
