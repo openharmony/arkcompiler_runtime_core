@@ -147,8 +147,8 @@ source_set("libarkfile_static_verifier") {
     "$ark_root/libpandabase:libarkbase_static",
     "$ark_root/libziparchive:libarkziparchive_static",
   ]
-
-  external_deps = [
+  external_deps = []
+  external_deps += [
     "zlib:shared_libz",
     sdk_libc_secshared_dep,
   ]
