@@ -29,7 +29,7 @@
         void const *_label;                                                           \
         asm("ldr %[label], [%[dispatch_table], %w[opcode], uxtw #3]"                  \
             : [label] "=r"(_label)                                                    \
-            : [dispatch_table] "r"(DISPATCH_TABLE), [opcode] "r"((uint32_t)(OPCODE)); \
+            : [dispatch_table] "r"(DISPATCH_TABLE), [opcode] "r"((uint32_t)OPCODE));  \
         goto *_label;                                                                 \
     } while (0)
 
