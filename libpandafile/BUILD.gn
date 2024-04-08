@@ -78,13 +78,12 @@ libarkfile_sources = [
 ]
 
 libarkfile_configs = [
-  sdk_libc_secshared_config,
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
   ":arkfile_public_config",
 ]
 
-group("arkfile_header_deps") {
+ohos_static_library("arkfile_header_deps") {
   deps = [
     ":isa_gen_libarkfile_bytecode_emitter_def_gen_h",
     ":isa_gen_libarkfile_bytecode_emitter_gen_h",
@@ -96,9 +95,11 @@ group("arkfile_header_deps") {
     ":source_lang_enum_h",
     "$ark_root/libpandabase:arkbase_header_deps",
   ]
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
-ohos_source_set("libarkfile_static") {
+ohos_static_library("libarkfile_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs

@@ -21,7 +21,7 @@
 #include <pthread.h>
 
 #define MC_ON
-#include "../../../platforms/unix/libpandabase/futex/fmutex.cpp"
+#include "unix/libpandabase/futex/fmutex.cpp"
 
 pthread_t pthread_self(void);
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
