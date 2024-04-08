@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-
+const success: int = 0;
+const fail:    int = 1;
 
 function main(): int {
     let failures: int = 0;
@@ -51,30 +52,29 @@ function main(): int {
     failures += check(testSlice0(), "Try to Array slice(0) function");
     failures += check(testSlice1(), "Try to Array slice(1) function");
     failures += check(testSlice2(), "Try to Array slice(2) function");
-    failures += check(createArray_Set_And_Get(), "Create Array from source data");
-
+    failures += check(createArraySetAndGet(), "Create Array from source data");
 
     {% for ci in copyWithin -%}
     failures += check({{.ci.name}}(), "Test262: {{.ci.name}}");
     {%+ endfor %}
 
 
-    if (failures > 0) return 1
-    return 0;
+    if (failures > 0) { return fail; }
+    return success;
 }
 
 function check(result: int, message: String): int {
-    if(result == 0) {
-      return 0;
+    if (result == 0) {
+        return success;
     }
     console.println("\nFAILED: " + message);
-    return 1;
+    return fail;
 }
 
 function createDefault(): int {
     let target: {{.item.objectType}} = new {{.item.objectType}}();
-    if(target.length as int == 0 && target.byteOffset as int == 0) return 0;
-    return 1;
+    if (target.length as int == 0 && target.byteOffset as int == 0) { return success; }
+    return fail;
 }
 
 function createTAFromEmptyArrayBuffer(): int {
@@ -83,11 +83,11 @@ function createTAFromEmptyArrayBuffer(): int {
     try {
         target = new {{.item.objectType}}(ss);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    if(target.length as int == 0 && target.byteOffset as int == 0) return 0;
-    return 1;
+    if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+    return fail;
 }
 
 function createTAFromNonEmptyArrayBuffer(): int {
@@ -96,12 +96,12 @@ function createTAFromNonEmptyArrayBuffer(): int {
     try {
         target = new {{.item.objectType}}(ss);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    if(target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) return 0;
+    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) { return success; }
     console.println("Error: Actual bytes length: " + target.byteLength);
-    return 1;
+    return fail;
 }
 
 
@@ -111,11 +111,11 @@ function createTAFromEmptyArrayBufferOneParamNoOffset(): int {
     try {
         target = new {{.item.objectType}}(ss, 0 as number);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    if(target.length as int == 0 && target.byteOffset as int == 0) return 0;
-    return 1;
+    if (target.length as int == 0 && target.byteOffset as int == 0) { return success; }
+    return fail;
 }
 
 function createTAFromNonEmptyArrayBufferOneParamNoOffset(): int {
@@ -124,12 +124,12 @@ function createTAFromNonEmptyArrayBufferOneParamNoOffset(): int {
     try {
         target = new {{.item.objectType}}(ss, 0 as number);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    if(target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) return 0;
+    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) { return success; }
     console.println("Error: Actual bytes length: " + target.byteLength);
-    return 1;
+    return fail;
 }
 
 function createTAFromNonEmptyArrayBufferOneParamWithOffset(): int {
@@ -139,13 +139,13 @@ function createTAFromNonEmptyArrayBufferOneParamWithOffset(): int {
         target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}} as number);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
-    if(target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}}) return 0;
+    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}}) { return success; }
     console.println("Error: Actual bytes length: " + target.byteLength);
     console.println("Error: Actual bytes offset: " + target.byteOffset);
-    return 1;
+    return fail;
 }
 
 function createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(): int {
@@ -155,13 +155,13 @@ function createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(): int {
         target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}} as number, 4 as number);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
-    if(target.byteLength as int == 4*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}} && target.length as int == 4) return 0;
+    if (target.byteLength as int == 4*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}} && target.length as int == 4) { return success; }
     console.println("Error: Actual bytes length: " + target.byteLength);
     console.println("Error: Actual bytes offset: " + target.byteOffset);
-    return 1;
+    return fail;
 }
 
 
@@ -172,11 +172,11 @@ function createTAFromEmptyArrayBufferTwoParams(): int {
     try {
         target = new {{.item.objectType}}(ss, 0 as number, 0 as number);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    if(target.length as int == 0 && target.byteOffset as int == 0) return 0;
-    return 1;
+    if (target.length as int == 0 && target.byteOffset as int == 0) { return success; }
+    return fail;
 }
 
 function createTAFromNonEmptyArrayBufferTwoParamsZeroLength(): int {
@@ -185,12 +185,12 @@ function createTAFromNonEmptyArrayBufferTwoParamsZeroLength(): int {
     try {
         target = new {{.item.objectType}}(ss, 0 as number, 0 as number);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    if(target.byteLength as int == 0 && target.byteOffset as int == 0) return 0;
+    if (target.byteLength as int == 0 && target.byteOffset as int == 0) { return success; }
     console.println("Error: Actual bytes length: " + target.byteLength);
-    return 1;
+    return fail;
 }
 
 function createTAFromNonEmptyArrayBufferTwoParams(): int {
@@ -199,12 +199,12 @@ function createTAFromNonEmptyArrayBufferTwoParams(): int {
     try {
         target = new {{.item.objectType}}(ss, 0 as number, 3 as number);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    if(target.byteLength as int == 3*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) return 0;
+    if (target.byteLength as int == 3*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) { return success; }
     console.println("Error: Actual bytes length: " + target.byteLength);
-    return 1;
+    return fail;
 }
 
 const source: {{.item.primitiveType}}[] = {{.item.data}};
@@ -212,40 +212,65 @@ const source: {{.item.primitiveType}}[] = {{.item.data}};
 {% set posInf =       item.primitiveType[0].upper() + item.primitiveType[1:] + '.POSITIVE_INFINITY' %}
 {% set negInf = '-' + item.primitiveType[0].upper() + item.primitiveType[1:] + '.NEGATIVE_INFINITY' %}
 {% set skipInfinity = True if item.primitiveType == 'float' or item.primitiveType == 'double' else False %}
+{% set skipInfinity = False %}
 
-function createArray_Set_And_Get(): int {
+function createArraySetAndGet(): int {
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
     let target: {{.item.objectType}};
     try {
         target = new {{.item.objectType}}(ss);
     } catch(e) {
-        return 1;
+        return fail;
     }
-    for(let i:int = 0; i < source.length as int; i++) {
+    for (let i: int = 0; i < source.length as int; i++) {
         try {
             target.set(i, source[i] as {{.item.primitiveType}});
         } catch(e) {
-            console.print("Catched exception at insert");
-            return 1;
+            console.print("Catched exception at insert via set(int, {{.item.primitiveType}})");
+            return fail;
         }
-
     }
-    //console.println("Validate....");
-    let acc: int = 0;
-
-    for(let i:int = 0; i < source.length as int; i++) {
-        let back = target[i] as {{.item.primitiveType}} ;
+    for (let i: int = 0; i < source.length as int; i++) {
     {%- if skipInfinity %}
         if ((source[i] == {{.posInf}}) && (source[i] == {{.negInf}})) {
             continue;
         }
     {%- endif %}
-        if(back != source[i]) {
+        let back = target[i] as {{.item.primitiveType}};
+        if (back != source[i]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
-            acc++;
+            return fail;
+        }
+        if (target[i as int] != target[i as number]) {
+            console.println("Data mismatch for $_get(int) and $_get(number): " + target[i as int] + " vs " + target[i as number]);
+            return fail;
         }
     }
-    return acc;
+
+    // NOTE: comparison of target that filled by set(int, {{.item.primitiveType}}) vs target2.$_set(number, {{.item.primitiveType}})
+    let target2: {{.item.objectType}};
+    try {
+        target2 = new {{.item.objectType}}(new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}}));
+    } catch(e) {
+        return fail;
+    }
+    for (let i: int = 0; i < source.length; i++) {
+        try {
+            target2[i as number] = source[i] as {{.item.primitiveType}};
+        } catch(e) {
+            console.print("Catched exception at insert via $_set(number, {{.item.primitiveType}})");
+            return fail;
+        }
+        if (target[i] != target2[i]) {
+            console.print("Data mismatch for $_get(int) vs $_get(int) filled by set(int, {{.item.primitiveType}}) vs $_set(number, {{.item.primitiveType}})");
+            return fail;
+        }
+        if (target[i as number] != target2[i as number]) {
+            console.print("Data mismatch for $_get(number) vs $_get(number) filled by set(int, {{.item.primitiveType}}) vs $_set(number, {{.item.primitiveType}})");
+            return fail;
+        }
+    }
+    return success;
 }
 
 function createArrayFromArray(): int {
@@ -254,16 +279,15 @@ function createArrayFromArray(): int {
     try {
         target = new {{.item.objectType}}(ss);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
     try {
         target.set(source);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
-    //console.println("Validate....");
     let acc: int = 0;
 
     let sumExp: {{.item.primitiveType}} = 0;
@@ -283,14 +307,14 @@ function createArrayFromArray(): int {
         acc++;
     }
 
-    for(let i:int = 0; i < source.length as int; i++) {
-        let back = target[i] as {{.item.primitiveType}};
+    for (let i: int = 0; i < source.length as int; i++) {
     {%- if skipInfinity %}
         if ((source[i] == {{.posInf}}) && (source[i] == {{.negInf}})) {
             continue;
         }
     {%- endif %}
-        if(back != source[i]) {
+        let back = target[i] as {{.item.primitiveType}};
+        if (back != source[i]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
             acc++;
         }
@@ -307,27 +331,25 @@ function createArrayFromArrayWithOffset(): int {
     try {
         target = new {{.item.objectType}}(ss);
     } catch(e) {
-        return 1;
+        return fail;
     }
     try {
         target.set(source, offset);
     } catch(e) {
         console.println("can't set")
-        return 1;
+        return fail;
     }
 
-    //console.println("Validate....");
     let acc: int = 0;
 
-    for(let i:int = offset; i < source.length as int; i++) {
-        let back = target[i] as {{.item.primitiveType}};
-
+    for (let i: int = offset; i < source.length as int; i++) {
     {%- if skipInfinity %}
         if ((source[i-offset] == {{.posInf}}) && (source[i-offset] == {{.negInf}})) {
             continue;
         }
     {%- endif %}
-        if(back != source[i-offset]) {
+        let back = target[i] as {{.item.primitiveType}};
+        if (back != source[i-offset]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
             acc++;
         }
@@ -342,14 +364,14 @@ function createFilteredArrayFromGiven(): int {
         origin = new {{.item.objectType}}(ss);
         origin.set(source);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
     let target: {{.item.objectType}};
     try {
         target = origin.filter((val: {{.item.type}}, index: number): boolean => { return (val{{.item.cast2primitive}}) > 0});
     } catch(e) {
-        return 1;
+        return fail;
     }
 
     let targetIdx = 0
@@ -359,19 +381,19 @@ function createFilteredArrayFromGiven(): int {
         }
         if (targetIdx >= target.length as int) {
             console.println("filter: buffer overflow")
-            return 1
+            return fail
         }
         if (target.at(targetIdx) != origin.at(originIdx)) {
             console.println("wrong filtered item " + target.at(targetIdx))
-            return 1
+            return fail
         }
         targetIdx++
     }
     if (targetIdx != target.length as int) {
         console.println("new element " + target.at(targetIdx))
-        return 1
+        return fail
     }
-    return 0;
+    return success;
 }
 
 
@@ -383,15 +405,13 @@ function testLastIndexOfNotFound(): int {
         target = new {{.item.objectType}}(ss);
         target.set(source);
     } catch(e) {
-        return 1;
+        return fail;
     }
 
     let nf: int = target.lastIndexOf(11 as {{.item.primitiveType}}) as int;
 
-    if(nf == -1) return 0;
-    return 1;
-
-
+    if (nf == -1) { return success; }
+    return fail;
 }
 
 function testLastIndexOf4(): int {
@@ -406,13 +426,13 @@ function testLastIndexOf4(): int {
         target.set(source);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
     let result: int = target.lastIndexOf(50 as {{.item.primitiveType}}, 5);
-    if(result == 4) return 0;
+    if (result == 4) { return success; }
 
-    return 1;
+    return fail;
 }
 
 function testLastIndexOf3(): int {
@@ -427,13 +447,13 @@ function testLastIndexOf3(): int {
         target.set(source);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
     let result: int = target.lastIndexOf(50 as {{.item.primitiveType}}, 3);
 
-    if(result == 3) return 0;
-    return 1;
+    if (result == 3) { return success; }
+    return fail;
 }
 
 
@@ -450,7 +470,7 @@ function testMap(): int {
         origin.set(source);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
 
@@ -460,27 +480,27 @@ function testMap(): int {
         target = origin.map((val: {{.item.type}}, index: number): {{.item.type}} => { return {{.item.create}}(-val{{.item.cast2primitive}}) });
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
 
-    if(target.length as int != source.length as int) {
+    if (target.length as int != source.length as int) {
         console.println("Array length mismatch");
-        return 1;
+        return fail;
     }
 
-    for(let i:int = 0; i< source.length as int; i++) {
+    for (let i: int = 0; i < source.length as int; i++) {
     {%- if skipInfinity %}
         if ((source[i] == {{.posInf}}) && (source[i] == {{.negInf}})) {
             continue;
         }
     {%- endif %}
-        if(target[i] as {{.item.primitiveType}} != -source[i]) {
+        if (target[i] as {{.item.primitiveType}} != -source[i]) {
             console.println("Array data mismatch");
-            return 1;
+            return fail;
         }
     }
-    return 0;
+    return success;
 }
 
 
@@ -496,7 +516,7 @@ function testSlice0(): int {
         origin.set(source);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
 
@@ -506,25 +526,25 @@ function testSlice0(): int {
         target = origin.slice();
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
-    if(target.length as int != origin.length as int) {
+    if (target.length as int != origin.length as int) {
         console.println("Array length mismatch on slice");
-        return 1;
+        return fail;
     }
 
     //Check all the data copied;
-    for(let i:int = 0; i< origin.length as int; i++) {
+    for (let i: int = 0; i < origin.length as int; i++) {
         let tv = target[i] as {{.item.primitiveType}};
         let ov = origin[i] as {{.item.primitiveType}};
         console.println(source[i] + "->" + tv + "->" + ov);
-        if(tv != ov) {
+        if (tv != ov) {
             console.println("Array data mismatch");
-            return 1;
+            return fail;
         }
     }
-    return 0;
+    return success;
 }
 
 function testSlice1(): int {
@@ -539,7 +559,7 @@ function testSlice1(): int {
         origin.set(source);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
     let sliceStart: int = 1;
@@ -551,25 +571,25 @@ function testSlice1(): int {
         target = origin.slice(sliceStart);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
-    if(target.length as int != origin.length as int - sliceStart) {
+    if (target.length as int != origin.length as int - sliceStart) {
         console.println("Array length mismatch on slice1");
-        return 1;
+        return fail;
     }
 
     //Check all the data copied;
-    for(let i:int = sliceStart; i < sliceEnd; i++) {
+    for (let i: int = sliceStart; i < sliceEnd; i++) {
         let tv = target[i - sliceStart] as {{.item.primitiveType}};
         let ov = origin[i] as {{.item.primitiveType}};
         console.println(source[i] + "->" + tv + "->" + ov);
-        if(tv != ov) {
+        if (tv != ov) {
             console.println("Array data mismatch");
-            return 1;
+            return fail;
         }
     }
-    return 0;
+    return success;
 }
 
 function testSlice2(): int {
@@ -584,7 +604,7 @@ function testSlice2(): int {
         origin.set(source);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
     let sliceStart: int = 1;
@@ -596,30 +616,29 @@ function testSlice2(): int {
         target = origin.slice(sliceStart, sliceEnd);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
 
-    if(target.length as int != sliceEnd - sliceStart) {
+    if (target.length as int != sliceEnd - sliceStart) {
         console.println("Array length mismatch on slice2");
-        return 1;
+        return fail;
     }
 
     //Check all the data copied;
-    for(let i:int = sliceStart; i< sliceEnd; i++) {
+    for (let i: int = sliceStart; i < sliceEnd; i++) {
         let tv = target[i - sliceStart] as {{.item.primitiveType}};
         let ov = origin[i] as {{.item.primitiveType}};
         console.println(source[i] + "->" + tv + "->" + ov);
-        if(tv != ov) {
+        if (tv != ov) {
             console.println("Array data mismatch");
-            return 1;
+            return fail;
         }
     }
-    return 0;
+    return success;
 }
 
 function createFromSource(source: {{.item.primitiveType}}[]): {{.item.objectType}} throws {
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
-
     let origin: {{.item.objectType}};
 
     try {
@@ -629,36 +648,32 @@ function createFromSource(source: {{.item.primitiveType}}[]): {{.item.objectType
         console.println(e);
         throw new Exception("Unable to create typed array");
     }
-
     return origin;
 }
 
 function dump(source: {{.item.primitiveType}}[], origin: {{.item.objectType}}): void {
     console.print("Expected: ");
-    for(let i: int = 0; i< source.length as int; i++) console.print(source[i] + " ");
+    for (let i: int = 0; i < source.length as int; i++) { console.print(source[i] + " "); }
     console.println();
     console.print("Passed: ");
-    for(let i: int = 0; i< origin.length as int; i++) console.print(origin[i] as {{.item.primitiveType}} + " ");
+    for (let i: int = 0; i < origin.length as int; i++) { console.print(origin[i] as {{.item.primitiveType}} + " "); }
     console.println();
 }
 
 
 function assertArrayEqualsToTypedArray(source: {{.item.primitiveType}}[], origin: {{.item.objectType}}): int {
-    if(origin.length as int != source.length as int) {
-        return 1;
+    if (origin.length as int != source.length as int) {
+        return fail;
     }
-
-    for(let i: int; i< origin.length; i++) {
+    for (let i: int; i < origin.length; i++) {
         let tv: {{.item.primitiveType}} = origin[i] as {{.item.primitiveType}};
         let sv: {{.item.primitiveType}} = source[i] as {{.item.primitiveType}};
-        if(tv != sv) {
+        if (tv != sv) {
             console.println("Unexpected data changed at [" + i + "] " + sv + "->" + tv);
-
-            return 1;
+            return fail;
         }
     }
-
-    return 0;
+    return success;
 }
 
 const src: {{.item.primitiveType}}[] = [1 as {{.item.primitiveType}},
@@ -670,14 +685,12 @@ const src: {{.item.primitiveType}}[] = [1 as {{.item.primitiveType}},
 {%+ for ci in copyWithin %}
 function {{.ci.name}}(): int {
     let origin: {{.item.objectType}};
-
     let expected: {{.item.primitiveType}}[] = [{%+ for ea in ci.expected %}{{.ea}} as {{.item.primitiveType}}, {% endfor %}];
-
     try {
         origin = createFromSource(src);
     } catch(e) {
         console.println(e);
-        return 1;
+        return fail;
     }
     origin.copyWithin({{.ci.params|join(', ')}});
     return assertArrayEqualsToTypedArray(expected, origin);

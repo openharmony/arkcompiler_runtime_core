@@ -245,7 +245,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         }
     }
 
-     /**
+    /**
      * Creates an Uint8ClampedArray with respect to length.
      *
      * @param length data initializer
@@ -378,7 +378,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -404,12 +404,13 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
         this.setUnsafeClamp(index, val)
     }
+    
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -1316,7 +1317,6 @@ export class Uint8ClampedArray implements Iterable<Number> {
 
     /// === with element lambda functions ===
 
-
     /**
      * Checks that all elements of Uint8ClampedArray satisfy the passed function
      *
@@ -1329,6 +1329,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
             (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Uint8ClampedArray from current Uint8ClampedArray based on a condition fn
      *
@@ -1407,13 +1408,13 @@ export class Uint8ClampedArray implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Uint8ClampedArray using fn(arr[i]) over all elements of current Uint8ClampedArray
-    *
-    * @param fn a function to apply for each element of current Uint8ClampedArray
-    *
-    * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
-    */
+    /**
+     * Creates a new Uint8ClampedArray using fn(arr[i]) over all elements of current Uint8ClampedArray
+     *
+     * @param fn a function to apply for each element of current Uint8ClampedArray
+     *
+     * @returns a new Uint8ClampedArray where for each element from current Uint8ClampedArray fn was applied
+     */
     public map(fn: (val: number) => number): Uint8ClampedArray {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -1445,15 +1446,13 @@ export class Uint8ClampedArray implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: int, b: int) => boolean =
-                (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.lengthInt; i++) {
-                this.setUnsafe(i, arr[i])
-            }
-        */
+        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // let mustPrecede: (a: int, b: int) => boolean =
+        //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
+        // sort(arr, mustPrecede)
+        // for (let i = 0; i < this.lengthInt; i++) {
+        //     this.setUnsafe(i, arr[i])
+        // }
         return this;
     }
 
@@ -1641,7 +1640,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return int | undefined as in JS
+     * NOTE: return int | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Uint8ClampedArray) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1795,7 +1794,6 @@ export class Uint8ClampedArray implements Iterable<Number> {
     public from(o: Object, mapFn: (e: Object, index: number) => int): Uint8ClampedArray {
         throw new Error("Uint8ClampedArray.from: not implemented")
     }
-
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -1901,6 +1899,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         }
     }
 }
+
 
 class Uint8ArrayIteratorKeys implements IterableIterator<Number> {
     private length: int = 0
@@ -2126,7 +2125,7 @@ export class Uint8Array implements Iterable<Number> {
         }
     }
 
-     /**
+    /**
      * Creates an Uint8Array with respect to length.
      *
      * @param length data initializer
@@ -2273,7 +2272,7 @@ export class Uint8Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -2300,13 +2299,14 @@ export class Uint8Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
+    
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -3214,7 +3214,6 @@ export class Uint8Array implements Iterable<Number> {
 
     /// === with element lambda functions ===
 
-
     /**
      * Checks that all elements of Uint8Array satisfy the passed function
      *
@@ -3227,6 +3226,7 @@ export class Uint8Array implements Iterable<Number> {
             (element: number, index: number, array: Uint8Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Uint8Array from current Uint8Array based on a condition fn
      *
@@ -3305,13 +3305,13 @@ export class Uint8Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Uint8Array using fn(arr[i]) over all elements of current Uint8Array
-    *
-    * @param fn a function to apply for each element of current Uint8Array
-    *
-    * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
-    */
+    /**
+     * Creates a new Uint8Array using fn(arr[i]) over all elements of current Uint8Array
+     *
+     * @param fn a function to apply for each element of current Uint8Array
+     *
+     * @returns a new Uint8Array where for each element from current Uint8Array fn was applied
+     */
     public map(fn: (val: number) => number): Uint8Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -3343,15 +3343,13 @@ export class Uint8Array implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: int, b: int) => boolean =
-                (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.lengthInt; i++) {
-                this.setUnsafe(i, arr[i])
-            }
-        */
+        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // let mustPrecede: (a: int, b: int) => boolean =
+        //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
+        // sort(arr, mustPrecede)
+        // for (let i = 0; i < this.lengthInt; i++) {
+        //     this.setUnsafe(i, arr[i])
+        // }
         return this;
     }
 
@@ -3539,7 +3537,7 @@ export class Uint8Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return int | undefined as in JS
+     * NOTE: return int | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Uint8Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -3693,7 +3691,6 @@ export class Uint8Array implements Iterable<Number> {
     public from(o: Object, mapFn: (e: Object, index: number) => int): Uint8Array {
         throw new Error("Uint8Array.from: not implemented")
     }
-
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -3793,6 +3790,7 @@ export class Uint8Array implements Iterable<Number> {
         }
     }
 }
+
 
 class Uint16ArrayIteratorKeys implements IterableIterator<Number> {
     private length: int = 0
@@ -4025,7 +4023,7 @@ export class Uint16Array implements Iterable<Number> {
         }
     }
 
-     /**
+    /**
      * Creates an Uint16Array with respect to length.
      *
      * @param length data initializer
@@ -4172,7 +4170,7 @@ export class Uint16Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -4199,13 +4197,14 @@ export class Uint16Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafeClamp(index, v)
     }
+    
 
     /**
      * Makes a copy of internal elements to targetPos from startPos to endPos.
@@ -5113,7 +5112,6 @@ export class Uint16Array implements Iterable<Number> {
 
     /// === with element lambda functions ===
 
-
     /**
      * Checks that all elements of Uint16Array satisfy the passed function
      *
@@ -5126,6 +5124,7 @@ export class Uint16Array implements Iterable<Number> {
             (element: number, index: number, array: Uint16Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Uint16Array from current Uint16Array based on a condition fn
      *
@@ -5204,13 +5203,13 @@ export class Uint16Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Uint16Array using fn(arr[i]) over all elements of current Uint16Array
-    *
-    * @param fn a function to apply for each element of current Uint16Array
-    *
-    * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
-    */
+    /**
+     * Creates a new Uint16Array using fn(arr[i]) over all elements of current Uint16Array
+     *
+     * @param fn a function to apply for each element of current Uint16Array
+     *
+     * @returns a new Uint16Array where for each element from current Uint16Array fn was applied
+     */
     public map(fn: (val: number) => number): Uint16Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -5242,15 +5241,13 @@ export class Uint16Array implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: int, b: int) => boolean =
-                (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.lengthInt; i++) {
-                this.setUnsafe(i, arr[i])
-            }
-        */
+        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // let mustPrecede: (a: int, b: int) => boolean =
+        //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
+        // sort(arr, mustPrecede)
+        // for (let i = 0; i < this.lengthInt; i++) {
+        //     this.setUnsafe(i, arr[i])
+        // }
         return this;
     }
 
@@ -5438,7 +5435,7 @@ export class Uint16Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return int | undefined as in JS
+     * NOTE: return int | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Uint16Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -5592,7 +5589,6 @@ export class Uint16Array implements Iterable<Number> {
     public from(o: Object, mapFn: (e: Object, index: number) => int): Uint16Array {
         throw new Error("Uint16Array.from: not implemented")
     }
-
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -5692,6 +5688,7 @@ export class Uint16Array implements Iterable<Number> {
         }
     }
 }
+
 
 class Uint32ArrayIteratorKeys implements IterableIterator<Number> {
     private length: int = 0
@@ -5924,7 +5921,7 @@ export class Uint32Array implements Iterable<Number> {
         }
     }
 
-     /**
+    /**
      * Creates an Uint32Array with respect to length.
      *
      * @param length data initializer
@@ -6071,7 +6068,7 @@ export class Uint32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -6098,7 +6095,7 @@ export class Uint32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: long): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -6116,7 +6113,7 @@ export class Uint32Array implements Iterable<Number> {
         this.$_set(index as int, val as int)
     }
 
-        /**
+    /**
      * Assigns val as element on index.
      *
      * @param val value to set
@@ -6124,7 +6121,7 @@ export class Uint32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -7038,7 +7035,6 @@ export class Uint32Array implements Iterable<Number> {
 
     /// === with element lambda functions ===
 
-
     /**
      * Checks that all elements of Uint32Array satisfy the passed function
      *
@@ -7051,6 +7047,7 @@ export class Uint32Array implements Iterable<Number> {
             (element: number, index: number, array: Uint32Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new Uint32Array from current Uint32Array based on a condition fn
      *
@@ -7129,13 +7126,13 @@ export class Uint32Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Uint32Array using fn(arr[i]) over all elements of current Uint32Array
-    *
-    * @param fn a function to apply for each element of current Uint32Array
-    *
-    * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
-    */
+    /**
+     * Creates a new Uint32Array using fn(arr[i]) over all elements of current Uint32Array
+     *
+     * @param fn a function to apply for each element of current Uint32Array
+     *
+     * @returns a new Uint32Array where for each element from current Uint32Array fn was applied
+     */
     public map(fn: (val: number) => number): Uint32Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -7167,15 +7164,13 @@ export class Uint32Array implements Iterable<Number> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: long, b: long) => boolean =
-                (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.lengthInt; i++) {
-                this.setUnsafe(i, arr[i])
-            }
-        */
+        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // let mustPrecede: (a: long, b: long) => boolean =
+        //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
+        // sort(arr, mustPrecede)
+        // for (let i = 0; i < this.lengthInt; i++) {
+        //     this.setUnsafe(i, arr[i])
+        // }
         return this;
     }
 
@@ -7363,7 +7358,7 @@ export class Uint32Array implements Iterable<Number> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return long | undefined as in JS
+     * NOTE: return long | undefined as in JS
      */
     public find(fn: (val: number, index: number, array: Uint32Array) => boolean): number {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -7517,7 +7512,6 @@ export class Uint32Array implements Iterable<Number> {
     public from(o: Object, mapFn: (e: Object, index: number) => long): Uint32Array {
         throw new Error("Uint32Array.from: not implemented")
     }
-
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -7617,6 +7611,7 @@ export class Uint32Array implements Iterable<Number> {
         }
     }
 }
+
 
 class BigUint64ArrayIteratorKeys implements IterableIterator<Number> {
     private length: int = 0
@@ -7849,7 +7844,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         }
     }
 
-     /**
+    /**
      * Creates an BigUint64Array with respect to length.
      *
      * @param length data initializer
@@ -7996,7 +7991,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: BigInt): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -8023,7 +8018,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: long): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -8041,7 +8036,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         this.$_set(index as int, val as int)
     }
 
-        /**
+    /**
      * Assigns val as element on index.
      *
      * @param val value to set
@@ -8049,7 +8044,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -8963,7 +8958,6 @@ export class BigUint64Array implements Iterable<BigInt> {
 
     /// === with element lambda functions ===
 
-
     /**
      * Checks that all elements of BigUint64Array satisfy the passed function
      *
@@ -8976,6 +8970,7 @@ export class BigUint64Array implements Iterable<BigInt> {
             (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new BigUint64Array from current BigUint64Array based on a condition fn
      *
@@ -9054,13 +9049,13 @@ export class BigUint64Array implements Iterable<BigInt> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new BigUint64Array using fn(arr[i]) over all elements of current BigUint64Array
-    *
-    * @param fn a function to apply for each element of current BigUint64Array
-    *
-    * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
-    */
+    /**
+     * Creates a new BigUint64Array using fn(arr[i]) over all elements of current BigUint64Array
+     *
+     * @param fn a function to apply for each element of current BigUint64Array
+     *
+     * @returns a new BigUint64Array where for each element from current BigUint64Array fn was applied
+     */
     public map(fn: (val: BigInt) => BigInt): BigUint64Array {
         let newF: (val: BigInt, index: number) => BigInt =
             (val: BigInt, index: number): BigInt => { return fn(val) }
@@ -9092,15 +9087,13 @@ export class BigUint64Array implements Iterable<BigInt> {
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: long, b: long) => boolean =
-                (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.lengthInt; i++) {
-                this.setUnsafe(i, arr[i])
-            }
-        */
+        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // let mustPrecede: (a: long, b: long) => boolean =
+        //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
+        // sort(arr, mustPrecede)
+        // for (let i = 0; i < this.lengthInt; i++) {
+        //     this.setUnsafe(i, arr[i])
+        // }
         return this;
     }
 
@@ -9288,7 +9281,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return long | undefined as in JS
+     * NOTE: return long | undefined as in JS
      */
     public find(fn: (val: BigInt, index: number, array: BigUint64Array) => boolean): BigInt {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -9442,7 +9435,6 @@ export class BigUint64Array implements Iterable<BigInt> {
     public from(o: Object, mapFn: (e: Object, index: number) => long): BigUint64Array {
         throw new Error("BigUint64Array.from: not implemented")
     }
-
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
