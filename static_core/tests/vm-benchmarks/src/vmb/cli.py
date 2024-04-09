@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the 'License');
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an 'AS IS' BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import argparse
+import sys
+import logging
+from typing import Any, List, Set
+from pathlib import Path
+from vmb.helpers import StringEnum, split_params, read_list_file
+from vmb.tool import ToolMode, OptFlags
+
+LOG_LEVELS = ('fatal', 'pass', 'error', 'warn', 'info', 'debug', 'trace')
+log = logging.getLogger('vmb')
+
+
+class Command(StringEnum):
+    """VMB commands enum."""
+
+    GEN = 'gen'
+    RUN = 'run'
+    REPORT = 'report'
+    ALL = 'all'
+    VERSION = 'version'
+    LIST = 'list'
+
+
+def comma_separated_list(arg_val: str) -> Set[str]:
+    if not arg_val:
+        return set()
+    return set(split_params(arg_val))
+
+
+def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
+    """Add options wich should be processed in @Benchmarks too."""
+    parser.add_argument('-wi', '--warmup-iters', default=None, type=int,
+                        help='Number of warmup iterations')
+    parser.add_argument('-mi', '--measure-iters', default=None, type=int,
+                        help='Number of measurement iterations')
+    parser.add_argument('-it', '--iter-time', default=None, type=int,
+                        help='Iteration time, sec')
+    parser.add_argument('-wt', '--warmup-time', default=None, type=int,
+                        help='Warmup iteration time, sec')
+    parser.add_argument('-fi', '--fast-iters', default=None, type=int,
+                        help='Number of fast iterations')
+    parser.add_argument('-gc', '--sys-gc-pause', default=None, type=int,
+                        help='If <val> >= 0 invoke GC twice '
+                        'and wait <val> ms before iteration')
+
+
+def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
+    parser.add_argument('-l', '--langs',
+                        type=comma_separated_list,
+                        default=set(),
+                        required=(command == Command.GEN),
+                        help='Comma-separated list of lang plugins')
+    parser.add_argument('-o', '--outdir', default='generated', type=str,
+                        help='Dir for generated benches')
+    parser.add_argument('-T', '--tags',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Filter by tag (comma-separated list)')
+    parser.add_argument('-t', '--tests',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Filter by name (comma-separated list)')
+    parser.add_argument('-L', '--src-langs',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Override src file extentions '
+                             '(comma-separated list)')
+
+
+def add_run_opts(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument('-p', '--platform', type=str,
+                        required=True,
+                        help='Platform plugin name')
+    parser.add_argument('-m', '--mode', type=str,
+                        default='default',
+                        choices=ToolMode.getall(),
+                        help='Run VM mode')
+    parser.add_argument('-n', '--name', type=str,
+                        default='', help='Description of run')
+    parser.add_argument('--timeout', default=None, type=float,
+                        help='Timeout (seconds)')
+    parser.add_argument('--device', type=str,
+                        default='', help='Device ID (serial)')
+    parser.add_argument('--device-dir', type=str,
+                        default='/data/local/tmp/vmb',
+                        help='Base dir on device (%(default)s)')
+    parser.add_argument('--hooks', type=str, default='',
+                        help='Comma-separated list of hook plugins')
+    parser.add_argument('-A', '--aot-skip-libs', action='store_true',
+                        help='Skip AOT compilation of stdlib')
+    parser.add_argument('-g', '--enable-gc-logs', action='store_true',
+                        help='Runs benchmark with GC logs enabled')
+    parser.add_argument('--dry-run', action='store_true',
+                        help='Generate and compile, no execution')
+    parser.add_argument('--report-json', default='', type=str,
+                        metavar='FILE_NAME',
+                        help='Save json report as FILE_NAME')
+    parser.add_argument('--report-json-compact', action='store_true',
+                        help='Json file without indentation')
+    parser.add_argument('--report-csv', default='', type=str,
+                        metavar='FILE_NAME',
+                        help='Save csv report as FILE_NAME')
+    parser.add_argument('--exclude-list', default='', type=str,
+                        metavar='EXCLUDE_LIST',
+                        help='Path to exclude list')
+    parser.add_argument('--cpumask', default='', type=str,
+                        help='Use cores mask. F.e. 11110000 = low cores')
+
+
+def add_report_opts(parser: argparse.ArgumentParser) -> None:
+    """Add options specific to vmb report."""
+    parser.add_argument('--full', action='store_true',
+                        help='Produce full report')
+    parser.add_argument('--json', default='', type=str,
+                        help='Save out as JSON')
+    parser.add_argument('--aot-stats-json', default='', type=str,
+                        help='File path to save aot stats comparison')
+    parser.add_argument('--aot-passes-json', default='', type=str,
+                        help='File path to save aot passes comparison')
+    parser.add_argument('--compare', action='store_true',
+                        help='Compare 2 reports')
+    parser.add_argument('--flaky-list', default='', type=str,
+                        help='Exclude list file')
+    parser.add_argument('--tolerance', default=0.5, type=float,
+                        help='Percentage of tolerance in comparison')
+
+
+class _ArgumentParser(argparse.ArgumentParser):
+
+    @staticmethod
+    def __epilog() -> str:
+        return ''
+
+    def __init__(self, command: Command) -> None:
+        super().__init__(
+            prog=f'vmb {command.value}',
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog=self.__epilog()
+        )
+        # Options common for all commands
+        self.add_argument('paths', nargs='*', help='Dirs or files')
+        self.add_argument('--extra-plugins', default=None,
+                          help='Path to extra plugins')
+        self.add_argument('-v', '--log-level', default='info',
+                          choices=LOG_LEVELS,
+                          help='Log level (default: %(default)s)')
+        self.add_argument('--abort-on-fail', action='store_true',
+                          help='Abort run on first error')
+        self.add_argument('--no-color', action='store_true',
+                          help='Disable color logging')
+        # Generator-specific options
+        if command in (Command.GEN, Command.ALL):
+            add_gen_opts(self, command)
+            add_measurement_opts(self)
+        # Runner-specific options
+        if command in (Command.RUN, Command.ALL):
+            add_run_opts(self)
+            # add 'custom-option' for some 'well-known' tools.
+            # names hardcoded, because platforms and tools lists
+            # will be available only after parsing args.
+            for tool in ('ark', 'ark_js_vm', 'es2panda', 'es2abc',
+                         'paoc', 'node', 'swiftc', 'tsc', 'v_8'):
+                self.add_argument(
+                    f'--{tool}-custom-option', default=[],
+                    type=str, action='append',
+                    help=f'Additional options for {tool}. '
+                         '(Possibly several opts in one command)')
+        if command in (Command.REPORT,):
+            add_report_opts(self)
+
+
+class Args(argparse.Namespace):
+    """Args parser for VMB."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.command = None
+        if len(sys.argv) < 2 \
+            or sys.argv[1] == 'help' \
+                or sys.argv[1] not in Command.getall():
+            print('Usage: vmb COMMAND [options] [paths]')
+            print(f'       COMMAND {{{",".join(Command.getall())}}}')
+            for c in Command:
+                print('='*80)
+                try:
+                    Args.print_help(c)
+                except SystemExit:
+                    continue
+            print('='*80)
+            sys.exit(1)
+        self.command = Command(sys.argv[1])
+        args = sys.argv[2:]
+        _ArgumentParser(self.command).parse_args(args, namespace=self)
+        # provide some defaults
+        self.paths: List[Path] = [Path(p) for p in self.paths] if self.paths \
+            else [Path.cwd()]
+        self.src_langs = {f'.{x.lstrip(".")}'
+                          for x in self.get('src_langs', []) if x}
+        # pylint: disable-next=access-member-before-definition
+        if self.extra_plugins:  # type: ignore
+            # pylint: disable-next=access-member-before-definition
+            self.extra_plugins = Path(self.extra_plugins)  # type: ignore
+        excl = self.get('exclude_list', None)
+        self.exclude_list = read_list_file(excl) if excl else []
+
+    def __repr__(self) -> str:
+        return '\n'.join(super().__repr__().split(','))
+
+    def get(self, arg: str, default=None) -> Any:
+        return vars(self).get(arg, default)
+
+    def get_opts_flags(self) -> OptFlags:
+        flags = OptFlags.NONE
+        mode = ToolMode(self.get('mode'))
+        if ToolMode.AOT == mode:
+            flags |= OptFlags.AOT
+        elif ToolMode.INT == mode:
+            flags |= OptFlags.INT
+        elif ToolMode.JIT == mode:
+            flags |= OptFlags.JIT
+        if self.get('dry_run', False):
+            flags |= OptFlags.DRY_RUN
+        if self.get('aot_skip_libs', False):
+            flags |= OptFlags.AOT_SKIP_LIBS
+        if self.get('enable_gc_logs', False):
+            flags |= OptFlags.GC_STATS
+        return flags
+
+    def get_custom_opts(self, name: str) -> str:
+        opts = self.get(f'{name}_custom_option', [])
+        return ' '.join(opts)
+
+    def get_shared_path(self) -> str:
+        path = self.get('outdir', '')
+        if path:
+            return path
+        return self.get('path', ['.'])[0]
+
+    @staticmethod
+    def print_help(cmd: Command) -> None:
+        """Print usage for VMB command."""
+        _ArgumentParser(cmd).parse_args(['--help'])
