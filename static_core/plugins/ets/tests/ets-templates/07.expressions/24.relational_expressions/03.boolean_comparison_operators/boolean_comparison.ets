@@ -13,16 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for am in access_modifiers %}
-
+{% for case in boolean_comparison %}
 
 /*---
-desc: A compile-time error occurs if a local class or interface declaration has a local class or interface declaration has the access modifier public, protected, or private.
-tags: [compile-only, negative]
+desc: Boolean comparison {{case.left}} {{case.op}} {{case.right}}
 ---*/
 
-function bar(): void {
-  {{am.decl}}
+function main(): void {
+  let x: {{case.type}} = {{case.left}}
+  let y: {{case.type}} = {{case.right}}
+  assert ( x {{case.op}} y) == {{case.result}};
 }
 
 {% endfor %}

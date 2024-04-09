@@ -14,10 +14,12 @@
 --- # List of declarations
 nullables:
     - { type: '(Int|null)[]', vals: '[null]', val: 'new Int(1)', assert: 'x[0]!.unboxed() == 1' }
-    - { type: '(Int|null|null)[]', vals: '[new Int(1)]', val: 'null', assert: 'x[0] == null' }
+    - { type: '(Int|undefined)[]', vals: '[new Int(1)]', val: 'undefined', assert: 'x[0] == undefined' }
+    - { type: '(Int|null|undefined)[]', vals: '[new Int(1)]', val: 'undefined', assert: 'x[0] == undefined' }
 
     - { type: '(Int|null)[][]', vals: '[[null]]', val: 'new Int[1]; x[0][0] = new Int(42)', assert: 'x[0][0]!.unboxed() == 42' }
-    - { type: '(Int|null|null)[][]', vals: '[[new Int(42)]]', val: 'new Int[1]; x[0][0] = null', assert: 'x[0][0] == null' }
+    - { type: '(Int|undefined)[][]', vals: '[[undefined]]', val: 'new Int[1]; x[0][0] = new Int(42)', assert: 'x[0][0]!.unboxed() == 42' }
+    - { type: '(Int|null|undefined)[][]', vals: '[[new Int(42)]]', val: 'new Int[1]; x[0][0] = null', assert: 'x[0][0] == null' }
 
     - decl: |-
         type Z = Int | null
@@ -27,9 +29,16 @@ nullables:
       assert: 'x[0] == null'
 
     - decl: |-
-        type Z = Int | null | null
+        type Z = Int | undefined
       type: 'Z[]'
-      vals: '[null]'
+      vals: '[new Int(1)]'
+      val: 'undefined'
+      assert: 'x[0] == undefined'
+
+    - decl: |-
+        type Z = Int | null | undefined
+      type: 'Z[]'
+      vals: '[undefined]'
       val: 'new Int(66)'
       assert: 'x[0]!.unboxed() == 66'
 
@@ -41,8 +50,15 @@ nullables:
       assert: 'x[0] == null'
 
     - decl: |-
-        type Z = (Int | null | null)[]
+        type Z = (Int | undefined)[]
       type: 'Z'
-      vals: '[null]'
+      vals: '[new Int(1)]'
+      val: 'undefined'
+      assert: 'x[0] == undefined'
+
+    - decl: |-
+        type Z = (Int | null | undefined)[]
+      type: 'Z'
+      vals: '[undefined]'
       val: 'new Int(66)'
       assert: 'x[0]!.unboxed() == 66'

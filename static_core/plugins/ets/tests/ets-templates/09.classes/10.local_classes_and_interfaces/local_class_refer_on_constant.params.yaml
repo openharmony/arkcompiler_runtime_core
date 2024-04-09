@@ -21,3 +21,4 @@ variable_types:
   - double
   - boolean
   - String
+  - Object

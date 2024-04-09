@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for c in cases %}
+
 /*---
-desc: Constructor signature
+desc: >-
+    When declared in a scope, names of local classes and interfaces have access to entities visible within this scope,
+    and capture the entities they use from this scope.
+    Function/method parameters and local variables can be used and thus captured.
 ---*/
 
-class C {
-    constructor(c: int) {
-    }
+{{c.decl}}
 
-    constructor(c: int, d: boolean) {
-    }
-}
+{{c.check}}
 
-function main(): void {}
+{% endfor %}

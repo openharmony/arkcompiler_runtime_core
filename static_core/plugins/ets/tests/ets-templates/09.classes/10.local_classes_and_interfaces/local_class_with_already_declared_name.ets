@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,19 +14,14 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Class constructors declaration with same signatures.
-assert: It is a compile-time error to declare two constructors whose signatures have the same erasure in a class.
+desc: A compile-time error occurs if a local class or interface declaration has a name that is used to declare a new local class or interface (unless such new local class or interface is declared within a class or interface declaration).
 tags: [compile-only, negative]
 ---*/
 
-class A {
-  public x: int;
+function bar(): void {
+  let B: int = 1;
 
-  public constructor() {
-    x = 5;
-  }
-
-  public constructor() {
-    x = 5;
+  class B {
+    public x: int;
   }
 }

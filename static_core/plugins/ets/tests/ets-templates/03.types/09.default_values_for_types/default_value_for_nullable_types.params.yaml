@@ -11,14 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of default values for primitive types
+--- # List of default values for Nullish types
 default_value:
-  - {type: 'number',    value: '0' }
-  - {type: 'byte',    value: '0' }
-  - {type: 'short',   value: '0' }
-  - {type: 'int',     value: '0' }
-  - {type: 'long',    value: '0' }
-  - {type: 'float',   value: '0.0' }
-  - {type: 'double',  value: '0.0' }
-  - {type: 'char',    value: "c'\\u0000'" }
-  - {type: 'boolean', value: "false" }
+  - {type: 'Int|null',           value: 'null' }
+  - {type: 'Int|undefined',      value: 'undefined' }
+  - {type: 'null|undefined',     value: 'undefined' }
+  - {type: 'undefined|null',     value: 'undefined' }
+  - {type: 'Int|undefined|null', value: 'undefined' }
+  - {type: 'null|Int|undefined', value: 'undefined' }

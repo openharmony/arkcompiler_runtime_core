@@ -13,16 +13,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for am in access_modifiers %}
-
-
 /*---
-desc: A compile-time error occurs if a local class or interface declaration has a local class or interface declaration has the access modifier public, protected, or private.
+desc: Class constructors declaration with same signatures.
+assert: It is a compile-time error to declare two constructors whose signatures have the same erasure in a class.
 tags: [compile-only, negative]
 ---*/
 
-function bar(): void {
-  {{am.decl}}
-}
+class A {
+  public x: int;
 
-{% endfor %}
+  public constructor() {
+    x = 5;
+  }
+
+  public constructor() {
+    x = 5;
+  }
+}

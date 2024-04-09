@@ -13,7 +13,7 @@
 
 --- # List of default values for primitive types
 default_value:
-  - {type: 'number',    value: '0' }
+  - {type: 'number',  value: '0' }
   - {type: 'byte',    value: '0' }
   - {type: 'short',   value: '0' }
   - {type: 'int',     value: '0' }

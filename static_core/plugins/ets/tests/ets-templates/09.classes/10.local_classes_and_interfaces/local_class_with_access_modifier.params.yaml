@@ -11,8 +11,102 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of access modifiers
+--- # List of local classes and interfaces with modifiers (including for methods and fields)
 access_modifiers:
-  - public
-  - protected
-  - private
+  - decl: |-
+      public class A {}
+
+  - decl: |-
+      protected class A {}
+
+  - decl: |-
+      private class A {}
+
+  - decl: |-
+      class A {
+        public foo(): int {};
+      }
+
+  - decl: |-
+      class A {
+        public foo: int;
+      }
+
+  - decl: |-
+      class A {
+        protected foo(): int {};
+      }
+
+  - decl: |-
+      class A {
+        protected foo: int;
+      }
+
+  - decl: |-
+      class A {
+        private foo(): int {};
+      }
+
+  - decl: |-
+      class A {
+        private foo: int;
+      }
+
+  - decl: |-
+      class A {
+        export foo(): int {};
+      }
+
+  - decl: |-
+      class A {
+        export foo: int;
+      }
+
+  - decl: |-
+      public interface I {}
+
+  - decl: |-
+      protected interface I {}
+
+  - decl: |-
+      private interface I {}
+
+  - decl: |-
+      interface I {
+        public foo(): int;
+      }
+
+  - decl: |-
+      interface I {
+        public foo: int;
+      }
+
+  - decl: |-
+      interface I {
+        protected foo(): int;
+      }
+
+  - decl: |-
+      interface I {
+        protected foo: int;
+      }
+
+  - decl: |-
+      interface I {
+        private foo(): int;
+      }
+
+  - decl: |-
+      interface I {
+        private foo: int;
+      }
+
+  - decl: |-
+      interface I {
+        export foo(): int;
+      }
+
+  - decl: |-
+      interface I {
+        export foo: int;
+      }

@@ -13,16 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for am in access_modifiers %}
-
-
 /*---
-desc: A compile-time error occurs if a local class or interface declaration has a local class or interface declaration has the access modifier public, protected, or private.
+desc: A compile-time error occurs if a local class or interface declaration has a name that is used to declare a new local class or interface (unless such new local class or interface is declared within a class or interface declaration).
 tags: [compile-only, negative]
 ---*/
 
 function bar(): void {
-  {{am.decl}}
-}
+  let B: int = 1;
 
-{% endfor %}
+  interface B {
+    x: int;
+  }
+}

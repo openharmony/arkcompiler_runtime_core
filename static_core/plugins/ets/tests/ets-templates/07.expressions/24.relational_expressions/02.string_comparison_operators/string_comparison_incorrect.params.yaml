@@ -11,8 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of modifiers
-modifiers:
-  - static
-  - sealed
-  - non-sealed
+--- # List of string comparison conditions
+string_comparison:
+  - {left: "", right: "", op: "=>", result: "false"}
+  - {left: "", right: "", op: "= >", result: "false"}
+  - {left: " ", right: "", op: "=<", result: "false"}
+  - {left: " ", right: "", op: "= <", result: "false"}

@@ -13,16 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for am in access_modifiers %}
-
-
+{% for s in ids %}
 /*---
-desc: A compile-time error occurs if a local class or interface declaration has a local class or interface declaration has the access modifier public, protected, or private.
+desc: Using incorrect characters, reserved keywords and too long character sequence in function name will result in compilation error.
 tags: [compile-only, negative]
 ---*/
 
-function bar(): void {
-  {{am.decl}}
+function {{s}}(): void {}
+
+function main(): void {
+  assert true;
 }
 
-{% endfor %}
+{%- endfor %}

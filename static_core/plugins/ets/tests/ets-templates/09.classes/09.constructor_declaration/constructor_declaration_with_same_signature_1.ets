@@ -13,16 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for am in access_modifiers %}
-
-
 /*---
-desc: A compile-time error occurs if a local class or interface declaration has a local class or interface declaration has the access modifier public, protected, or private.
-tags: [compile-only, negative]
+desc: Same constructor signature
+tags: [negative, compile-only]
 ---*/
 
-function bar(): void {
-  {{am.decl}}
+class C {
+    constructor(c: int) {
+    }
+
+    constructor(c: int) {
+    }
 }
 
-{% endfor %}
+function main(): void {}

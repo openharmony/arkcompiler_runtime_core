@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,8 +14,9 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Default values for reference type
-tags: [negative]
+desc: >-
+    Reference types and enumeration types have no default values.
+    Variables of such types must be initialized explicitly with a value before the first use of a type.
 ---*/
 
 class A {
@@ -24,5 +25,10 @@ class A {
 
 function main(): void {
   let x: A;
-  x.foo();
+  try {
+    x.foo();
+    assert false;
+  } catch (e) {
+    assert e instanceof NullPointerException;
+  }
 }

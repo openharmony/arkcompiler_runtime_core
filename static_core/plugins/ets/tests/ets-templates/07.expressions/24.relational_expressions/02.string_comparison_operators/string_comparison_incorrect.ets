@@ -13,16 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for am in access_modifiers %}
-
+{% for str in string_comparison %}
 
 /*---
-desc: A compile-time error occurs if a local class or interface declaration has a local class or interface declaration has the access modifier public, protected, or private.
-tags: [compile-only, negative]
+desc: String comparison {{str.left}} {{str.op}} {{str.right}}
+tags: [negative, compile-only]
 ---*/
 
-function bar(): void {
-  {{am.decl}}
+function main(): void {
+  let x: string = {{str.left}}
+  let y: string = {{str.right}}
+  assert ( x {{str.op}} y) == {{str.result}};
 }
 
 {% endfor %}

@@ -13,16 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for am in access_modifiers %}
-
+{% for i in default_value %}
 
 /*---
-desc: A compile-time error occurs if a local class or interface declaration has a local class or interface declaration has the access modifier public, protected, or private.
-tags: [compile-only, negative]
+desc: Default values for primitive type {{i.type}}  in global variable
+params: {{i.type}}, {{i.value}}
 ---*/
 
-function bar(): void {
-  {{am.decl}}
+let x: {{i.type}};
+
+function main(): void {
+  assert x == {{i.value}};
 }
 
 {% endfor %}
