@@ -17,15 +17,14 @@
 #define ABC2PROGRAM_ABC_MODULE_ARRAY_PROCESSOR_H
 
 #include "abc_file_entity_processor.h"
-#include "libpandafile/module_data_accessor-inl.h"
+#include "module_data_accessor-inl.h"
 
 namespace panda::abc2program {
 
 class AbcModuleArrayProcessor : public AbcFileEntityProcessor {
 public:
     AbcModuleArrayProcessor(panda_file::File::EntityId entity_id,
-                             Abc2ProgramEntityContainer &entity_container,
-                             panda_file::ModuleDataAccessor &mdoule_data_accessor_);
+                            Abc2ProgramEntityContainer &entity_container);
     void FillProgramData() override;
 private:
     void FillModuleRequests(std::vector<panda::pandasm::LiteralArray::Literal> &literal_vec,
@@ -42,7 +41,7 @@ private:
         uint32_t request_module_idx);
     void FillEntrySize(std::vector<panda::pandasm::LiteralArray::Literal> &literal_vec,
         const std::vector<uint32_t> &num_vec);
-    panda_file::ModuleDataAccessor &module_data_accessor_;
+    std::unique_ptr<panda_file::ModuleDataAccessor> module_data_accessor_;
 };
 } // namespace panda::abc2program
 

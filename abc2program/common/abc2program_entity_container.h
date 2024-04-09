@@ -31,6 +31,7 @@ class Abc2ProgramEntityContainer {
 public:
     Abc2ProgramEntityContainer(const panda_file::File &file, AbcStringTable &string_table, pandasm::Program &program)
         : file_(file), string_table_(string_table), program_(program) {}
+
     const panda_file::File &GetAbcFile() const;
     AbcStringTable &GetAbcStringTable() const;
     pandasm::Program &GetProgram() const;
@@ -43,18 +44,22 @@ public:
     const pandasm::Record *GetRecordById(const panda_file::File::EntityId &class_id) const;
     const pandasm::Function *GetFunctionById(const panda_file::File::EntityId &method_id) const;
     const pandasm::Field *GetFieldById(const panda_file::File::EntityId &field_id) const;
+
     std::string GetFullRecordNameById(const panda_file::File::EntityId &class_id);
     std::string GetFullMethodNameById(uint32_t method_id);
     std::string GetFullMethodNameById(const panda_file::File::EntityId &method_id);
-
-    void AddLiteralArrayId(uint32_t literal_array_id);
-    void AddLiteralArrayId(const panda_file::File::EntityId &literal_array_id);
     void AddProgramString(const std::string &str) const;
-    const std::unordered_set<uint32_t> &GetLiteralArrayIdSet() const;
+
+    std::unordered_set<uint32_t> GetLiteralArrayIdSet();
+    const std::unordered_set<uint32_t> &GetMouleLiteralArrayIdSet() const;
+    const std::unordered_set<uint32_t> &GetUnnestedLiteralArrayIdSet() const;
+    std::unordered_set<uint32_t> &GetUnprocessedNestedLiteralArrayIdSet();
+    void AddModuleLiteralArrayId(uint32_t module_literal_array_id);
+    void AddUnnestedLiteralArrayId(const panda_file::File::EntityId &literal_array_id);
+    void AddProcessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
+    void TryAddUnprocessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     std::string GetLiteralArrayIdName(uint32_t literal_array_id) const;
     std::string GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id) const;
-    void AddModuleLiteralOffset(uint32_t offset);
-    const std::unordered_set<uint32_t> &GetModuleLiterals() const;
     std::string GetAbcFileAbsolutePath() const;
 
 private:
@@ -67,8 +72,10 @@ private:
     std::unordered_map<uint32_t, const pandasm::Field*> field_map_;
     std::unordered_map<uint32_t, std::string> record_full_name_map_;
     std::unordered_map<uint32_t, std::string> method_full_name_map_;
-    std::unordered_set<uint32_t> literal_array_id_set_;
-    std::unordered_set<uint32_t> module_literals_;
+    std::unordered_set<uint32_t> module_literal_array_id_set_;
+    std::unordered_set<uint32_t> unnested_literal_array_id_set_;
+    std::unordered_set<uint32_t> processed_nested_literal_array_id_set_;
+    std::unordered_set<uint32_t> unprocessed_nested_literal_array_id_set_;
 }; // class Abc2ProgramEntityContainer
 
 } // namespace panda::abc2program

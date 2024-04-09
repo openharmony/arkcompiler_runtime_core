@@ -16,13 +16,17 @@
 #include "abc_module_array_processor.h"
 
 namespace panda::abc2program {
+
 AbcModuleArrayProcessor::AbcModuleArrayProcessor(panda_file::File::EntityId entity_id,
-    Abc2ProgramEntityContainer &entity_container, panda_file::ModuleDataAccessor &modoule_data_accessor)
-    : AbcFileEntityProcessor(entity_id, entity_container), module_data_accessor_(modoule_data_accessor) {}
+                                                 Abc2ProgramEntityContainer &entity_container)
+    : AbcFileEntityProcessor(entity_id, entity_container)
+{
+    module_data_accessor_ = std::make_unique<panda_file::ModuleDataAccessor>(*file_, entity_id_);
+}
 
 void AbcModuleArrayProcessor::FillProgramData()
 {
-    const std::vector<uint32_t> &request_modules_offset = module_data_accessor_.getRequestModules();
+    const std::vector<uint32_t> &request_modules_offset = module_data_accessor_->getRequestModules();
     std::vector<panda::pandasm::LiteralArray::Literal> literal_vec;
     FillModuleRequests(literal_vec, request_modules_offset);
     uint32_t regular_import_num = 0;
@@ -30,7 +34,7 @@ void AbcModuleArrayProcessor::FillProgramData()
     uint32_t local_export_num = 0;
     uint32_t indirect_export_num = 0;
     uint32_t star_export_num = 0;
-    module_data_accessor_.EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset,
+    module_data_accessor_->EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset,
         uint32_t request_module_idx, uint32_t import_name_offset, uint32_t local_name_offset) {
         switch (tag) {
             case panda_file::ModuleTag::REGULAR_IMPORT:
@@ -71,7 +75,7 @@ void AbcModuleArrayProcessor::FillModuleRequests(std::vector<panda::pandasm::Lit
 {
     panda::pandasm::LiteralArray::Literal module_size = {
         .tag_ = panda::panda_file::LiteralTag::INTEGER,
-        .value_ = request_modules_offset.size()
+        .value_ = static_cast<uint32_t>(request_modules_offset.size())
     };
     literal_vec.emplace_back(module_size);
     for (auto &request : request_modules_offset) {
@@ -98,7 +102,7 @@ void AbcModuleArrayProcessor::FillRegularImportEntry(std::vector<panda::pandasm:
     literal_vec.emplace_back(import_name);
     panda::pandasm::LiteralArray::Literal module_request = {
         .tag_ = panda::panda_file::LiteralTag::METHODAFFILIATE,
-        .value_ = request_module_idx
+        .value_ = static_cast<uint16_t>(request_module_idx)
     };
     literal_vec.emplace_back(module_request);
 }
@@ -114,7 +118,7 @@ void AbcModuleArrayProcessor::FillNamespaceImportEntry(
     literal_vec.emplace_back(local_name);
     panda::pandasm::LiteralArray::Literal module_request = {
         .tag_ = panda::panda_file::LiteralTag::METHODAFFILIATE,
-        .value_ = request_module_idx
+        .value_ = static_cast<uint16_t>(request_module_idx)
     };
     literal_vec.emplace_back(module_request);
 }
@@ -149,7 +153,7 @@ void AbcModuleArrayProcessor::FillIndirectExportEntry(std::vector<panda::pandasm
     literal_vec.emplace_back(import_name);
     panda::pandasm::LiteralArray::Literal module_request = {
         .tag_ = panda::panda_file::LiteralTag::METHODAFFILIATE,
-        .value_ = request_module_idx
+        .value_ = static_cast<uint16_t>(request_module_idx)
     };
     literal_vec.emplace_back(module_request);
 }
@@ -159,7 +163,7 @@ void AbcModuleArrayProcessor::FillStarExportEntry(std::vector<panda::pandasm::Li
 {
     panda::pandasm::LiteralArray::Literal module_request = {
         .tag_ = panda::panda_file::LiteralTag::METHODAFFILIATE,
-        .value_ = request_module_idx
+        .value_ = static_cast<uint16_t>(request_module_idx)
     };
     literal_vec.emplace_back(module_request);
 }

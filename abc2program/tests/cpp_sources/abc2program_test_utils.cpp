@@ -19,8 +19,8 @@
 
 namespace panda::abc2program {
 
-std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"", ".HelloWorld", ".foo", ".goo",
-                                                                                    ".instance_initializer",
+std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"", ".HelloWorld", ".Lit", ".foo",
+                                                                                    ".goo", ".instance_initializer",
                                                                                     "HelloWorld", "a_var", "error",
                                                                                     "inner catch",
                                                                                     "masg", "max", "min", "msg",
@@ -31,6 +31,8 @@ std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_
                                                                                     "_ESSlotNumberAnnotation",
                                                                                     "_ESTypeInfoRecord",
                                                                                     "_GLOBAL"};
+
+std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 8, 21};
 
 template <typename T>
 bool Abc2ProgramTestUtils::ValidateStrings(const T &strings, const T &expected_strings)
@@ -55,6 +57,11 @@ bool Abc2ProgramTestUtils::ValidateProgramStrings(const std::set<std::string> &p
 bool Abc2ProgramTestUtils::ValidateRecordNames(const std::vector<std::string> &record_names)
 {
     return ValidateStrings(record_names, helloworld_expected_record_names_);
+}
+
+bool Abc2ProgramTestUtils::ValidateLiteralsSizes(const std::set<size_t> &literal_array_sizes)
+{
+    return (literal_array_sizes == helloworld_expected_literals_sizes_);
 }
 
 }  // namespace panda::abc2program

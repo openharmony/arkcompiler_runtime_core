@@ -77,16 +77,6 @@ bool Abc2ProgramEntityContainer::AddField(uint32_t field_id, const pandasm::Fiel
     return true;
 }
 
-void Abc2ProgramEntityContainer::AddModuleLiteralOffset(uint32_t offset)
-{
-    module_literals_.insert(offset);
-}
-
-const std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetModuleLiterals() const
-{
-    return module_literals_;
-}
-
 bool Abc2ProgramEntityContainer::AddField(const panda_file::File::EntityId &field_id, const pandasm::Field &field)
 {
     return AddField(field_id.GetOffset(), field);
@@ -164,23 +154,55 @@ std::string Abc2ProgramEntityContainer::ConcatFullMethodNameById(const panda_fil
     return ss.str();
 }
 
-void Abc2ProgramEntityContainer::AddLiteralArrayId(uint32_t literal_array_id)
+// ark_disasm can use this method to get all literal array ids except module literal ids
+std::unordered_set<uint32_t> Abc2ProgramEntityContainer::GetLiteralArrayIdSet()
 {
-    auto it = literal_array_id_set_.find(literal_array_id);
-    if (it != literal_array_id_set_.end()) {
+    std::unordered_set<uint32_t> literal_array_id_set;
+    set_union(module_literal_array_id_set_.begin(), module_literal_array_id_set_.end(),
+              processed_nested_literal_array_id_set_.begin(), processed_nested_literal_array_id_set_.end(),
+              inserter(literal_array_id_set, literal_array_id_set.begin()));
+    return literal_array_id_set;
+}
+
+const std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetMouleLiteralArrayIdSet() const
+{
+    return module_literal_array_id_set_;
+}
+
+const std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetUnnestedLiteralArrayIdSet() const
+{
+    return unnested_literal_array_id_set_;
+}
+
+std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetUnprocessedNestedLiteralArrayIdSet()
+{
+    return unprocessed_nested_literal_array_id_set_;
+}
+
+void Abc2ProgramEntityContainer::AddModuleLiteralArrayId(uint32_t literal_array_id)
+{
+    module_literal_array_id_set_.insert(literal_array_id);
+}
+
+void Abc2ProgramEntityContainer::AddUnnestedLiteralArrayId(const panda_file::File::EntityId &literal_array_id)
+{
+    unnested_literal_array_id_set_.insert(literal_array_id.GetOffset());
+}
+
+void Abc2ProgramEntityContainer::AddProcessedNestedLiteralArrayId(uint32_t nested_literal_array_id)
+{
+    processed_nested_literal_array_id_set_.insert(nested_literal_array_id);
+}
+
+void Abc2ProgramEntityContainer::TryAddUnprocessedNestedLiteralArrayId(uint32_t nested_literal_array_id)
+{
+    if (unnested_literal_array_id_set_.count(nested_literal_array_id)) {
         return;
     }
-    literal_array_id_set_.insert(literal_array_id);
-}
-
-void Abc2ProgramEntityContainer::AddLiteralArrayId(const panda_file::File::EntityId &literal_array_id)
-{
-    AddLiteralArrayId(literal_array_id.GetOffset());
-}
-
-const std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetLiteralArrayIdSet() const
-{
-    return literal_array_id_set_;
+    if (processed_nested_literal_array_id_set_.count(nested_literal_array_id)) {
+        return;
+    }
+    unprocessed_nested_literal_array_id_set_.insert(nested_literal_array_id);
 }
 
 std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(uint32_t literal_array_id) const

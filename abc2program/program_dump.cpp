@@ -27,6 +27,7 @@ void PandasmProgramDumper::Dump(std::ostream &os, const pandasm::Program &progra
     os << std::flush;
     DumpAbcFilePath(os);
     DumpProgramLanguage(os);
+    DumpLiteralArrayTable(os);
     DumpRecordTable(os);
     DumpFunctionTable(os);
     DumpStrings(os);
@@ -178,6 +179,7 @@ void PandasmProgramDumper::DumpScalarValue(std::ostream &os, const pandasm::Scal
         }
         case pandasm::Value::Type::F32:
             os << DUMP_CONTENT_SPACE << scalar.GetValue<float>();
+            break;
         case pandasm::Value::Type::F64: {
             os << DUMP_CONTENT_SPACE << scalar.GetValue<double>();
             break;
@@ -556,12 +558,17 @@ void PandasmProgramDumper::DumpCatchBlock(std::ostream &os, const pandasm::Funct
        << catch_block.try_end_label << DUMP_CONTENT_SINGLE_ENDL;
     os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_BEGIN_LABEL
        << catch_block.catch_begin_label << DUMP_CONTENT_SINGLE_ENDL;
-    os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_END_LABEL
-       << catch_block.catch_end_label << DUMP_CONTENT_SINGLE_ENDL;
+    if (dumper_source_ == ProgramDumperSource::PANDA_ASSEMBLY) {
+        os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_END_LABEL
+           << catch_block.catch_end_label << DUMP_CONTENT_SINGLE_ENDL;
+    }
 }
 
 void PandasmProgramDumper::DumpStrings(std::ostream &os) const
 {
+    if (dumper_source_ == ProgramDumperSource::ECMASCRIPT) {
+        return;
+    }
     os << DUMP_TITLE_SEPARATOR;
     os << DUMP_TITLE_STRING;
     for (const std::string &str : program_->strings) {
@@ -571,8 +578,7 @@ void PandasmProgramDumper::DumpStrings(std::ostream &os) const
 
 bool PandasmProgramDumper::IsMatchLiteralId(const pandasm::Ins &pa_ins) const
 {
-    auto it = opcode_literal_id_index_map_.find(pa_ins.opcode);
-    return (it != opcode_literal_id_index_map_.end());
+    return opcode_literal_id_index_map_.count(pa_ins.opcode);
 }
 
 void PandasmProgramDumper::ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const
@@ -647,6 +653,8 @@ std::unordered_map<pandasm::Opcode, size_t> PandasmProgramDumper::opcode_literal
     {pandasm::Opcode::DEFINECLASSWITHBUFFER, 1},
     {pandasm::Opcode::NEWLEXENVWITHNAME, 0},
     {pandasm::Opcode::WIDE_NEWLEXENVWITHNAME, 0},
+    {pandasm::Opcode::CALLRUNTIME_CREATEPRIVATEPROPERTY, 0},
+    {pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS, 1},
 };
 
 size_t PandasmProgramDumper::GetLiteralIdIndexInIns(const pandasm::Ins &pa_ins) const
@@ -843,7 +851,7 @@ void PandasmProgramDumper::SerializeLiteralsAtIndex(const pandasm::LiteralArray 
             os << (std::get<uint16_t>(val));
             break;
         case panda_file::LiteralTag::LITERALARRAY:
-            os << (std::get<std::string>(val));
+            os << DUMP_CONTENT_NESTED_LITERALARRAY;  // we use "$$NESTED-LITERALARRAY$$" as a place holder
             break;
         case panda_file::LiteralTag::BUILTINTYPEINDEX:
             os << (static_cast<int16_t>(std::get<uint8_t>(val)));

@@ -43,20 +43,34 @@ void AbcCodeProcessor::FillFunctionRegsNum()
 void AbcCodeProcessor::FillIns()
 {
     FillInsWithoutLabels();
+    if (NeedToAddDummyEndIns()) {
+        AddDummyEndIns();
+    }
     AddJumpLabels();
 }
 
 void AbcCodeProcessor::FillInsWithoutLabels()
 {
-    const auto ins_size = code_data_accessor_->GetCodeSize();
+    ins_size_ = code_data_accessor_->GetCodeSize();
     const uint8_t *ins_arr = code_data_accessor_->GetInstructions();
     auto bc_ins = BytecodeInstruction(ins_arr);
-    const auto bc_ins_last = bc_ins.JumpTo(ins_size);
-    size_t inst_pc = 0;
-    size_t inst_idx = 0;
+    const auto bc_ins_last = bc_ins.JumpTo(ins_size_);
+    uint32_t inst_pc = 0;
+    uint32_t inst_idx = 0;
     while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
         pandasm::Ins pa_ins = code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
-        function_.ins.emplace_back(pa_ins);
+        /*
+         * Private field jump_inst_idx_vec_ store all jump inst idx in a pandasm::Function.
+         * For example, a pandasm::Function has 100 pandasm::Ins with only 4 jump pandasm::Ins.
+         * When we add label for jump target and add jump id for jump inst,
+         * we only need to enumerate the 4 jump pandasm::Ins which stored in jump_inst_idx_vec_,
+         * while no need to enumerate the whole 100 pandasm::Ins.
+         * It will improve our compile performance.
+        */
+        if (pa_ins.IsJump()) {
+            jump_inst_idx_vec_.emplace_back(inst_idx);
+        }
+        function_.AddInstruction(pa_ins);
         inst_pc_idx_map_.emplace(inst_pc, inst_idx);
         inst_idx_pc_map_.emplace(inst_idx, inst_pc);
         inst_idx++;
@@ -65,37 +79,62 @@ void AbcCodeProcessor::FillInsWithoutLabels()
     }
 }
 
-size_t AbcCodeProcessor::GetInstIdxByInstPc(size_t inst_pc) const
+bool AbcCodeProcessor::NeedToAddDummyEndIns() const
+{
+    bool need_to_add_dummy_end_ins = false;
+    code_data_accessor_->EnumerateTryBlocks([&](panda_file::CodeDataAccessor::TryBlock &try_block) {
+        try_block.EnumerateCatchBlocks([&](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
+            uint32_t catch_end_pc = catch_block.GetHandlerPc() + catch_block.GetCodeSize();
+            if (catch_end_pc == ins_size_) {
+                need_to_add_dummy_end_ins = true;
+            }
+            return true;
+        });
+        return true;
+    });
+    return need_to_add_dummy_end_ins;
+}
+
+void AbcCodeProcessor::AddDummyEndIns()
+{
+    uint32_t inst_idx = static_cast<uint32_t>(function_.ins.size());
+    pandasm::Ins dummy_end_ins{};
+    dummy_end_ins.opcode = pandasm::Opcode::INVALID;
+    dummy_end_ins.label = AbcFileUtils::GetLabelNameByInstIdx(inst_idx);
+    dummy_end_ins.set_label = true;
+    inst_pc_idx_map_.emplace(ins_size_, inst_idx);
+    inst_idx_pc_map_.emplace(inst_idx, ins_size_);
+    function_.AddInstruction(dummy_end_ins);
+}
+
+uint32_t AbcCodeProcessor::GetInstIdxByInstPc(uint32_t inst_pc) const
 {
     auto it = inst_pc_idx_map_.find(inst_pc);
     ASSERT(it != inst_pc_idx_map_.end());
     return it->second;
 }
 
-size_t AbcCodeProcessor::GetInstPcByInstIdx(size_t inst_idx) const
+uint32_t AbcCodeProcessor::GetInstPcByInstIdx(uint32_t inst_idx) const
 {
     auto it = inst_idx_pc_map_.find(inst_idx);
     ASSERT(it != inst_idx_pc_map_.end());
     return it->second;
 }
 
-void AbcCodeProcessor::AddJumpLabels()
+void AbcCodeProcessor::AddJumpLabels() const
 {
-    size_t inst_count = function_.ins.size();
-    for (size_t curr_inst_idx = 0; curr_inst_idx < inst_count; ++curr_inst_idx) {
-        pandasm::Ins &curr_pa_ins = function_.ins[curr_inst_idx];
-        if (curr_pa_ins.IsJump()) {
-            AddJumpLabel4InsAtIndex(curr_inst_idx, curr_pa_ins);
-        }
+    for (uint32_t jump_inst_idx : jump_inst_idx_vec_) {
+        pandasm::Ins &jump_pa_ins = function_.ins[jump_inst_idx];
+        AddJumpLabel4InsAtIndex(jump_inst_idx, jump_pa_ins);
     }
 }
 
-void AbcCodeProcessor::AddJumpLabel4InsAtIndex(size_t curr_inst_idx, pandasm::Ins &curr_pa_ins) const
+void AbcCodeProcessor::AddJumpLabel4InsAtIndex(uint32_t curr_inst_idx, pandasm::Ins &curr_pa_ins) const
 {
-    size_t curr_inst_pc = GetInstPcByInstIdx(curr_inst_idx);
+    uint32_t curr_inst_pc = GetInstPcByInstIdx(curr_inst_idx);
     const int32_t jmp_offset = std::get<int64_t>(curr_pa_ins.imms.at(0));
-    size_t dst_inst_pc = curr_inst_pc + jmp_offset;
-    size_t dst_inst_idx = GetInstIdxByInstPc(dst_inst_pc);
+    uint32_t dst_inst_pc = curr_inst_pc + jmp_offset;
+    uint32_t dst_inst_idx = GetInstIdxByInstPc(dst_inst_pc);
     pandasm::Ins &dst_pa_ins = function_.ins[dst_inst_idx];
     AddLabel4InsAtIndex(dst_inst_idx);
     curr_pa_ins.imms.clear();
@@ -154,7 +193,7 @@ void AbcCodeProcessor::FillExceptionRecord(panda_file::CodeDataAccessor::CatchBl
     }
 }
 
-void AbcCodeProcessor::AddLabel4InsAtIndex(size_t inst_idx) const
+void AbcCodeProcessor::AddLabel4InsAtIndex(uint32_t inst_idx) const
 {
     pandasm::Ins &pa_ins = function_.ins[inst_idx];
     if (pa_ins.set_label) {
@@ -164,15 +203,15 @@ void AbcCodeProcessor::AddLabel4InsAtIndex(size_t inst_idx) const
     pa_ins.set_label = true;
 }
 
-void AbcCodeProcessor::AddLabel4InsAtPc(size_t inst_pc) const
+void AbcCodeProcessor::AddLabel4InsAtPc(uint32_t inst_pc) const
 {
-    size_t inst_idx = GetInstIdxByInstPc(inst_pc);
+    uint32_t inst_idx = GetInstIdxByInstPc(inst_pc);
     AddLabel4InsAtIndex(inst_idx);
 }
 
-std::string AbcCodeProcessor::GetLabelNameAtPc(size_t inst_pc) const
+std::string AbcCodeProcessor::GetLabelNameAtPc(uint32_t inst_pc) const
 {
-    size_t inst_idx = GetInstIdxByInstPc(inst_pc);
+    uint32_t inst_idx = GetInstIdxByInstPc(inst_pc);
     return AbcFileUtils::GetLabelNameByInstIdx(inst_idx);
 }
 

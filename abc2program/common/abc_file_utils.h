@@ -67,6 +67,7 @@ constexpr std::string_view DUMP_CONTENT_TRY_END_LABEL = "try_end_label : ";
 constexpr std::string_view DUMP_CONTENT_CATCH_BEGIN_LABEL = "catch_begin_label : ";
 constexpr std::string_view DUMP_CONTENT_CATCH_END_LABEL = "catch_end_label : ";
 constexpr std::string_view STR_LITERAL_ARRAY_ID = ".LITERAL_ARRAY_ID:";
+constexpr std::string_view DUMP_CONTENT_NESTED_LITERALARRAY = "$$NESTED-LITERALARRAY$$";
 
 // ins constant
 constexpr std::string_view LABEL_PREFIX = "label@";
@@ -77,7 +78,6 @@ public:
     static bool IsArrayTypeName(const std::string &type_name);
     static bool IsSystemTypeName(const std::string &type_name);
     static bool IsESTypeAnnotationName(const std::string &type_name);
-    static std::string GetFileNameByAbsolutePath(const std::string &absolute_path);
     static bool IsLiteralTagArray(const panda_file::LiteralTag &tag);
     static std::string GetLabelNameByInstIdx(size_t inst_idx);
 };  // class AbcFileUtils

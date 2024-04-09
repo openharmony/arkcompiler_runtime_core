@@ -80,13 +80,12 @@ void AbcFieldProcessor::FillMetaDataValue(pandasm::Field &field)
 {
     switch (field.type.GetId()) {
         case panda_file::Type::TypeId::U32: {
-            auto offset = field_data_accessor_->GetValue<uint32_t>().value();
+            uint32_t module_literal_array_id = field_data_accessor_->GetValue<uint32_t>().value();
             if (record_.name == ES_MODULE_RECORD || field.name == MODULE_RECORD_IDX) {
-                entity_container_.AddModuleLiteralOffset(offset);
-                entity_container_.AddLiteralArrayId(offset);
-                auto module_literal = entity_container_.GetLiteralArrayIdName(offset);
+                entity_container_.AddModuleLiteralArrayId(module_literal_array_id);
+                auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(module_literal_array_id);
                 field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
-                    module_literal));
+                    module_literal_array_id_name));
             } else {
                 const auto val = field_data_accessor_->GetValue<uint32_t>().value();
                 field.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(val));

@@ -18,7 +18,6 @@
 
 #include "abc_module_array_processor.h"
 #include "common/abc2program_entity_container.h"
-#include "libpandafile/module_data_accessor-inl.h"
 
 namespace panda::abc2program {
 
@@ -30,12 +29,16 @@ public:
 private:
     void FillClassesData();
     void FillLiteralArrayTable();
+    void FillModuleLiteralArrays();
+    void FillUnnestedLiteralArrays();
+    void FillNestedLiteralArrays();
+    void FillModuleLiteralArrayById(uint32_t module_literal_array_id);
+    void FillLiteralArrayById(uint32_t literal_array_id);
     Abc2ProgramEntityContainer &entity_container_;
     const panda_file::File *file_ = nullptr;
     AbcStringTable *string_table_ = nullptr;
     pandasm::Program *program_ = nullptr;
     std::unique_ptr<panda_file::LiteralDataAccessor> literal_data_accessor_;
-    std::unique_ptr<panda_file::ModuleDataAccessor> module_data_accessor_;
 };
 
 } // namespace panda::abc2program
