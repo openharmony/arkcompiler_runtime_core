@@ -724,6 +724,26 @@ options:
   default: true
   description: Enable scalar replacement optimization
 
+- name: compiler-peepholes
+  type: bool
+  default: true
+  description: Enable peepholes optimizations
+
+- name: compiler-if-merging
+  type: bool
+  default: true
+  description: Enable if-merging optimization
+
+- name: compiler-redundant-loop-elimination
+  type: bool
+  default: true
+  description: Enable redundant-loop-elimination optimization
+
+- name: compiler-optimize-memory-barriers
+  type: bool
+  default: true
+  description: Enable optimize-memory-barriers optimization
+
 - name: compiler-profile
   type: std::string
   default: ""

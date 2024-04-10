@@ -1040,7 +1040,8 @@ void Codegen::CreateVRegForRegister(const Location &location, Inst *inst, const 
     } else {
         ASSERT(regNum >= GetFirstCallerReg(GetArch(), isFp));
         auto lastSlot = GetFrameLayout().GetCallerLastSlot(isFp);
-        regNum -= GetFirstCallerReg(GetArch(), isFp);
+        RegMask mask(GetCallerRegsMask(GetArch(), isFp));
+        regNum = mask.GetDistanceFromTail(regNum);
         codeBuilder_->AddVReg(VRegInfo(lastSlot - regNum, VRegInfo::Location::SLOT,
                                        IrTypeToMetainfoType(inst->GetType()), vreg.GetVRegType()));
     }

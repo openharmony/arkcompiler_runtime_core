@@ -77,6 +77,12 @@ pass_logs = {
     'simplify-string-builder': 'simplify-sb',
     'enable-fast-interop': None,
     'interop-intrinsic-optimization': 'interop-intrinsic-opt',
+    'peepholes': 'peephole',
+    'move-constants': None,
+    'if-merging': 'if-merging',
+    'redundant-loop-elimination': 'rle-opt',
+    'scheduling': 'scheduler',
+    'optimize-memory-barriers': None,
 }
 pass_list = pass_logs.keys()
 

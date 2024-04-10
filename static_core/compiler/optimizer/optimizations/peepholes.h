@@ -20,6 +20,7 @@
 #include "optimizer/pass.h"
 
 #include "compiler_logger.h"
+#include "compiler_options.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/graph_visitor.h"
 
@@ -49,6 +50,11 @@ public:
     bool IsApplied() const
     {
         return isApplied_;
+    }
+
+    bool IsEnable() const override
+    {
+        return g_options.IsCompilerPeepholes();
     }
 
     void InvalidateAnalyses() override;

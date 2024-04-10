@@ -16,8 +16,6 @@
 #ifndef COMPILER_RUNTIME_INTERFACE_H
 #define COMPILER_RUNTIME_INTERFACE_H
 
-#include <cstdint>
-#include <cstddef>
 #include "assembler/assembly-literals.h"
 #include "cross_values.h"
 #include "datatype.h"
@@ -1529,6 +1527,7 @@ enum class DeoptimizeType : uint8_t {
     INLINE_IC,
     INLINE_DYN,
     NOT_PROFILED,
+    IFIMM_TRY,
     COUNT
 };
 
@@ -1552,7 +1551,8 @@ inline const char *DeoptimizeTypeToString(DeoptimizeType deoptType)
                                                                          "DOUBLE_WITH_INT",
                                                                          "INLINE_IC",
                                                                          "INLINE_DYN",
-                                                                         "NOT_PROFILED"};
+                                                                         "NOT_PROFILED",
+                                                                         "IFIMM_TRY"};
 
     auto idx = static_cast<uint8_t>(deoptType);
     ASSERT(idx < COUNT);

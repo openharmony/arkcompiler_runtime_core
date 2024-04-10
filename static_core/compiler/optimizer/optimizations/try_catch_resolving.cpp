@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-#include "include/class.h"
-#include "runtime/include/class-inl.h"
 #include "compiler_logger.h"
-#include "compiler/optimizer/ir/runtime_interface.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/basicblock.h"
@@ -29,6 +26,7 @@ TryCatchResolving::TryCatchResolving(Graph *graph)
     : Optimization(graph),
       tryBlocks_(graph->GetLocalAllocator()->Adapter()),
       throwInsts_(graph->GetLocalAllocator()->Adapter()),
+      throwInsts0_(graph->GetLocalAllocator()->Adapter()),
       catchBlocks_(graph->GetLocalAllocator()->Adapter()),
       phiInsts_(graph->GetLocalAllocator()->Adapter()),
       cphi2phi_(graph->GetLocalAllocator()->Adapter()),
@@ -54,6 +52,11 @@ bool TryCatchResolving::RunImpl()
         COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Visit try-begin BB " << bb->GetId();
         VisitTryInst(GetTryBeginInst(bb));
     }
+    if (!g_options.IsCompilerNonOptimizing() && !GetGraph()->IsAotMode()) {
+        if (!throwInsts0_.empty()) {
+            DeoptimizeIfs();
+        }
+    }
     GetGraph()->RemoveUnreachableBlocks();
     GetGraph()->ClearTryCatchInfo();
     GetGraph()->EraseMarker(marker_);
@@ -62,6 +65,51 @@ bool TryCatchResolving::RunImpl()
     GetGraph()->RunPass<Cleanup>();
     COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "Finishing try-catch-resolving";
     return true;
+}
+
+void TryCatchResolving::DeoptimizeIfs()
+{
+    for (auto thr0w : throwInsts0_) {
+        auto *tryBB = thr0w->GetBasicBlock();
+        if (tryBB->GetPredsBlocks().size() != 1) {
+            continue;
+        }
+        auto pred = tryBB->GetPredBlockByIndex(0);
+        auto lastInst = pred->GetLastInst();
+        if (lastInst == nullptr || lastInst->GetOpcode() != Opcode::IfImm) {
+            continue;
+        }
+        auto ifImm = lastInst->CastToIfImm();
+        ASSERT(ifImm->GetCc() == ConditionCode::CC_NE || ifImm->GetCc() == ConditionCode::CC_EQ);
+        ASSERT(ifImm->GetImm() == 0);
+        auto saveState = tryBB->GetFirstInst();
+        if (saveState == nullptr || saveState->GetOpcode() != Opcode::SaveState) {
+            continue;
+        }
+        auto cc = ifImm->GetCc();
+        if (tryBB == pred->GetFalseSuccessor()) {
+            cc = GetInverseConditionCode(cc);
+        }
+        auto compInst = GetGraph()->CreateInstCompare(DataType::BOOL, ifImm->GetPc(), ifImm->GetInput(0).GetInst(),
+                                                      GetGraph()->FindOrCreateConstant(0), DataType::BOOL, cc);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+        compInst->SetCurrentMethod(ifImm->GetCurrentMethod());
+#endif
+        saveState->RemoveUsers<false>();
+        tryBB->EraseInst(saveState, true);
+        auto deoptimizeIf = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, saveState->GetPc(), compInst,
+                                                               saveState, DeoptimizeType::IFIMM_TRY);
+        deoptimizeIf->SetInput(0, compInst);
+        deoptimizeIf->SetInput(1, saveState);
+        lastInst->InsertBefore(compInst);
+        lastInst->InsertBefore(saveState);
+        lastInst->InsertBefore(deoptimizeIf);
+        COMPILER_LOG(DEBUG, TRY_CATCH_RESOLVING) << "IfImm " << lastInst->GetId() << " BB " << pred->GetId()
+                                                 << " is replaced by DeoptimizeIf " << deoptimizeIf->GetId();
+        pred->RemoveInst(lastInst);
+        pred->RemoveSucc(tryBB);
+        tryBB->RemovePred(pred);
+    }
 }
 
 BasicBlock *TryCatchResolving::FindCatchBeginBlock(BasicBlock *bb)
@@ -85,10 +133,17 @@ void TryCatchResolving::CollectCandidates()
                 bb->RemovePred(cblPred);
                 catch2cphis_.emplace(bb, cblPred);
             }
-        } else if (bb->IsTry() && GetGraph()->GetThrowCounter(bb) > 0) {
+        } else if (bb->IsTry()) {
             auto throwInst = bb->GetLastInst();
-            ASSERT(throwInst != nullptr && throwInst->GetOpcode() == Opcode::Throw);
-            throwInsts_.emplace_back(throwInst);
+            if (throwInst != nullptr && throwInst->GetOpcode() != Opcode::Throw) {
+                throwInst = nullptr;
+            }
+            if (GetGraph()->GetThrowCounter(bb) > 0) {
+                ASSERT(throwInst != nullptr);
+                throwInsts_.emplace_back(throwInst);
+            } else if (throwInst != nullptr) {
+                throwInsts0_.emplace_back(throwInst);
+            }
         }
     }
 }
