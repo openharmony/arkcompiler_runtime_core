@@ -422,4 +422,16 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
     EXPECT_TRUE(function.catch_blocks.size() == 0);
 }
 
+/**
+ * @tc.name: abc2program_hello_world_test_source_file
+ * @tc.desc: Verify the source file.
+ * @tc.type: FUNC
+ * @tc.require: issueI9CL5Z
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_source_file, TestSize.Level1)
+{
+    const pandasm::Function &function = *foo_function_;
+    std::string source_file = function.source_file;
+    EXPECT_TRUE(source_file.find("HelloWorld.js") != std::string::npos);
+}
 };  // panda::abc2program

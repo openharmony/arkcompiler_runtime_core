@@ -36,6 +36,11 @@ pandasm::Program &Abc2ProgramEntityContainer::GetProgram() const
     return program_;
 }
 
+panda_file::DebugInfoExtractor &Abc2ProgramEntityContainer::GetDebugInfoExtractor() const
+{
+    return debug_info_extractor_;
+}
+
 bool Abc2ProgramEntityContainer::AddRecord(uint32_t class_id, const pandasm::Record &record)
 {
     auto it = record_map_.find(class_id);

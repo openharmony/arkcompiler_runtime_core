@@ -18,6 +18,7 @@
 
 #include <string>
 #include <assembly-program.h>
+#include <debug_info_extractor.h>
 #include "common/abc2program_entity_container.h"
 
 namespace panda::abc2program {
@@ -32,6 +33,7 @@ private:
     std::unique_ptr<const panda_file::File> file_;
     std::unique_ptr<AbcStringTable> string_table_;
     std::unique_ptr<Abc2ProgramEntityContainer> entity_container_;
+    std::unique_ptr<panda_file::DebugInfoExtractor> debug_info_extractor_;
 }; // class Abc2ProgramCompiler
 
 } // namespace panda::abc2program

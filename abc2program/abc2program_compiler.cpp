@@ -26,12 +26,16 @@ bool Abc2ProgramCompiler::OpenAbcFile(const std::string &file_path)
         return false;
     }
     string_table_ = std::make_unique<AbcStringTable>(*file_);
+    debug_info_extractor_ = std::make_unique<panda_file::DebugInfoExtractor>(file_.get());
     return true;
 }
 
 bool Abc2ProgramCompiler::FillProgramData(pandasm::Program &program)
 {
-    entity_container_ = std::make_unique<Abc2ProgramEntityContainer>(*file_, *string_table_, program);
+    entity_container_ = std::make_unique<Abc2ProgramEntityContainer>(*file_,
+                                                                     *string_table_,
+                                                                     program,
+                                                                     *debug_info_extractor_);
     AbcFileProcessor file_processor(*entity_container_);
     bool success = file_processor.FillProgramData();
     return success;

@@ -28,7 +28,6 @@ abc2program_sources = [
   "abc_annotation_processor.cpp",
   "abc_class_processor.cpp",
   "abc_code_processor.cpp",
-  "abc_debug_info_processor.cpp",
   "abc_field_processor.cpp",
   "abc_file_entity_processor.cpp",
   "abc_file_processor.cpp",
