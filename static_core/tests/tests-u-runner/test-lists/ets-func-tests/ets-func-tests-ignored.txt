@@ -435,16 +435,16 @@ spec/expressions/equality/equality_primitive_01_short_equal_short_015.ets
 
 ### accessors
 ### Issue 15396
-spec/09.classes/accessors/issue-13330_7.ets
-spec/09.classes/accessors/issue-13330_8.ets
+spec/09.Classes/accessors/issue-13330_7.ets
+spec/09.Classes/accessors/issue-13330_8.ets
 ### Issue 15644
-spec/09.classes/accessors/issue-15142_5.ets
+spec/09.Classes/accessors/issue-15142_5.ets
 ### Issue 15646
-spec/09.classes/accessors/issue-15142_9.ets
-spec/09.classes/accessors/issue-15142_10.ets
+spec/09.Classes/accessors/issue-15142_9.ets
+spec/09.Classes/accessors/issue-15142_10.ets
 ### Issue 15647
-spec/09.classes/accessors/issue-15142_7.ets
-spec/09.classes/accessors/issue-15142_8.ets
+spec/09.Classes/accessors/issue-15142_7.ets
+spec/09.Classes/accessors/issue-15142_8.ets
 ### end of accessors
 
 ### tuples
@@ -473,16 +473,16 @@ spec/tuples/tuple_write_7.ets
 spec/interfaces_overriding/interface_overriding_02.ets
 spec/interfaces_overriding/interface_overriding_03.ets
 spec/interfaces_overriding/interface_overriding_04.ets
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
+spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
 spec/interfaces_overriding/interface_overriding_06.ets
 ### End of Interfaces overriding
 ### Overriding issues
 ### Issue 15572
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
+spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
+spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
 ### Isse 15201
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets
+spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
+spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets
 ### End of Overriding
 ### Issue 15281
 spec/types/number_to_string_1.ets
