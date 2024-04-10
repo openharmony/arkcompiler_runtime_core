@@ -33,6 +33,70 @@ def GenerateStringEquals(lang, dynamic, compression)
     length_shift = (dynamic ? 2 : 1)
     mode = [:FastPath]
     mode.push(:DynamicMethod, :DynamicStub) if dynamic
+
+    reg_mask = Options.arch == :arm64 ?
+        RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee1, :callee2, :callee3, :callee4, :callee5, :callee6, :callee7, :tmp0, :tmp1) :
+        $panda_mask + :tmp0 + :tmp1 + :tr
+
+    function("#{lang}StringEqualsUnroll#{suffix}".to_sym,
+          params: {str1_ref: 'ref', str2_ref: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: reg_mask,
+          mode: mode,
+          lang: lang.empty? ? 'PANDA_ASSEMBLY' : lang.upcase) {
+        if Options.arch == :arm32
+            Intrinsic(:UNREACHABLE).void.Terminator
+            next
+        end
+        str1 := Cast(str1_ref).SrcType(Constants::COMPILER_REFERENCE).ptr
+        str2 := Cast(str2_ref).SrcType(Constants::COMPILER_REFERENCE).ptr
+        # Compare first 32 bytes
+        buf1 := LoadI(str1).Imm(Constants::STRING_DATA_OFFSET).u64
+        buf2 := LoadI(str2).Imm(Constants::STRING_DATA_OFFSET).u64
+        If(buf1, buf2).NE.Unlikely.b {
+            Goto(:NotEqual)
+        }
+        diff := load_diff(str1, str2, 8)
+        diff := Or(diff, load_diff(str1, str2, 16)).u64
+        diff := Or(diff, load_diff(str1, str2, 24)).u64
+        If(diff, 0).NE.Unlikely.b {
+            Goto(:NotEqual)
+        }
+        length := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+        length := Cast(length).SrcType("DataType::UINT32").u64
+        length := unpack_length(length, compression, length_shift)
+        last_buf_index := SubI(length).Imm(32).u64
+        last_ptr1 := Add(str1, last_buf_index).ptr
+        last_ptr2 := Add(str2, last_buf_index).ptr
+        first_ptr1 := AddI(str1).Imm(32).ptr
+        first_ptr2 := AddI(str2).Imm(32).ptr
+    Label(:Loop)
+        ptr1 := Phi(first_ptr1, next_ptr1).ptr
+        ptr2 := Phi(first_ptr2, next_ptr2).ptr
+        diff := load_diff(ptr1, ptr2, 0)
+        diff := Or(diff, load_diff(ptr1, ptr2, 8)).u64
+        diff := Or(diff, load_diff(ptr1, ptr2, 16)).u64
+        diff := Or(diff, load_diff(ptr1, ptr2, 24)).u64
+        If(diff, 0).NE.Unlikely.b {
+            Goto(:NotEqual)
+        }
+        next_ptr1 := Add(ptr1, 32).ptr
+        If(next_ptr1, last_ptr1).GE.Unlikely.b {
+            diff := load_diff(last_ptr1, last_ptr2, 0)
+            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 8)).u64
+            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 16)).u64
+            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 24)).u64
+            If(diff, 0).NE.Unlikely.b {
+                Goto(:NotEqual)
+            }
+            Return(1).b
+        }
+        next_ptr2 := Add(ptr2, 32).ptr
+        Goto(:Loop)
+    Label(:NotEqual)
+        Return(0).b
+    }
+
     reg_mask = Options.arch == :arm64 ? RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :callee2) :
         RegMask.new($full_regmap, :arg0, :arg1, :tmp0, :tmp1, :callee0, :caller1)
 
@@ -100,7 +164,8 @@ def GenerateStringEquals(lang, dynamic, compression)
             LiveOut(str2).DstReg(regmap[:arg1]).ref
             entrypoint_id = "#{lang.empty? ? '' : lang.upcase + '_'}STRING_EQUALS_UNROLL" + (compression ? "_COMPRESSED" : "");
             entrypoint_offset = get_entrypoint_offset(entrypoint_id)
-            Intrinsic(:TAIL_CALL).AddImm(entrypoint_offset).Terminator.v0id
+            entrypoint_name = "#{lang.empty? ? '' : lang}StringEqualsUnroll" + (compression ? "Compressed" : "");
+            Intrinsic(:TAIL_CALL).AddImm(entrypoint_offset).MethodAsImm(entrypoint_name).Terminator.b
         }
         first_idx := Constants::STRING_DATA_OFFSET
         last_idx := Sub(Add(first_idx, length).u64, 8).u64
@@ -119,67 +184,6 @@ def GenerateStringEquals(lang, dynamic, compression)
             res := Compare(buf1, buf2).EQ.b
             Return(res).b
         }
-        Goto(:Loop)
-    Label(:NotEqual)
-        Return(0).b
-    }
-
-    reg_mask = Options.arch == :arm64 ?
-        RegMask.new($full_regmap, :arg0, :arg1, :callee0, :callee1, :callee2, :callee3, :callee4, :callee5, :callee6, :callee7, :tmp0, :tmp1) :
-        $panda_mask + :tmp0 + :tmp1 + :tr
-
-    function("#{lang}StringEqualsUnroll#{suffix}".to_sym,
-          params: {str1: 'ptr', str2: 'ptr'},
-          regmap: $full_regmap,
-          regalloc_set: reg_mask,
-          mode: mode,
-          lang: lang.empty? ? 'PANDA_ASSEMBLY' : lang.upcase) {
-        if Options.arch == :arm32
-            Intrinsic(:UNREACHABLE).void.Terminator
-            next
-        end
-        # Compare first 32 bytes
-        buf1 := LoadI(str1).Imm(Constants::STRING_DATA_OFFSET).u64
-        buf2 := LoadI(str2).Imm(Constants::STRING_DATA_OFFSET).u64
-        If(buf1, buf2).NE.Unlikely.b {
-            Goto(:NotEqual)
-        }
-        diff := load_diff(str1, str2, 8)
-        diff := Or(diff, load_diff(str1, str2, 16)).u64
-        diff := Or(diff, load_diff(str1, str2, 24)).u64
-        If(diff, 0).NE.Unlikely.b {
-            Goto(:NotEqual)
-        }
-        length := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        length := Cast(length).SrcType("DataType::UINT32").u64
-        length := unpack_length(length, compression, length_shift)
-        last_buf_index := SubI(length).Imm(32).u64
-        last_ptr1 := Add(str1, last_buf_index).ptr
-        last_ptr2 := Add(str2, last_buf_index).ptr
-        first_ptr1 := AddI(str1).Imm(32).ptr
-        first_ptr2 := AddI(str2).Imm(32).ptr
-    Label(:Loop)
-        ptr1 := Phi(first_ptr1, next_ptr1).ptr
-        ptr2 := Phi(first_ptr2, next_ptr2).ptr
-        diff := load_diff(ptr1, ptr2, 0)
-        diff := Or(diff, load_diff(ptr1, ptr2, 8)).u64
-        diff := Or(diff, load_diff(ptr1, ptr2, 16)).u64
-        diff := Or(diff, load_diff(ptr1, ptr2, 24)).u64
-        If(diff, 0).NE.Unlikely.b {
-            Goto(:NotEqual)
-        }
-        next_ptr1 := Add(ptr1, 32).ptr
-        If(next_ptr1, last_ptr1).GE.Unlikely.b {
-            diff := load_diff(last_ptr1, last_ptr2, 0)
-            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 8)).u64
-            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 16)).u64
-            diff := Or(diff, load_diff(last_ptr1, last_ptr2, 24)).u64
-            If(diff, 0).NE.Unlikely.b {
-                Goto(:NotEqual)
-            }
-            Return(1).b
-        }
-        next_ptr2 := Add(ptr2, 32).ptr
         Goto(:Loop)
     Label(:NotEqual)
         Return(0).b
@@ -317,8 +321,7 @@ def GenerateCreateStringFromStringTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_STRING_SLOW_PATH")
-    entrypoint_llvm = get_entrypoint_offset("CREATE_STRING_FROM_STRING_ODD_SAVED")
-    Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str).AddImm(entrypoint).MethodAsImm("CreateStringFromStringOddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromStringTlab
@@ -639,8 +642,7 @@ def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_ARRAY_SLOW_PATH")
-    entrypoint_llvm = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_ARRAY_ODD_SAVED")
-    Intrinsic(:SLOW_PATH_ENTRY, char_offset, char_count, char_array, string_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, char_offset, char_count, char_array, string_klass).AddImm(entrypoint).MethodAsImm("CreateStringFromCharArrayUsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromCharArrayTlab
@@ -701,8 +703,7 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_SLOW_PATH")
-    entrypoint_llvm = get_entrypoint_offset("CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_ODD_SAVED")
-    Intrinsic(:SLOW_PATH_ENTRY, char_count, char_array, string_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, char_count, char_array, string_klass).AddImm(entrypoint).MethodAsImm("CreateStringFromZeroBasedCharArrayOddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromZeroBasedCharArrayTlab
@@ -826,8 +827,7 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
-    entrypoint_llvm = get_entrypoint_offset("SUB_STRING_FROM_STRING_ODD_SAVED")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateSubstringFromStringTlab
@@ -890,8 +890,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("STRING_GET_CHARS_SLOW_PATH")
-    entrypoint_llvm = get_entrypoint_offset("STRING_GET_CHARS_ODD_SAVED")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index, array_klass).AddImm(entrypoint).MethodAsImm("StringGetCharsUsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateStringGetCharsTlab

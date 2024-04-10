@@ -388,6 +388,7 @@ llvm::Value *LowerResolveVirtual(llvm::IRBuilder<> *builder, llvm::CallInst *ins
         static constexpr auto ENTRYPOINT_ID = ark::compiler::RuntimeInterface::EntrypointId::INTF_INLINE_CACHE;
         entrypointAddress =
             CreateEntrypointCallHelper(builder, ENTRYPOINT_ID, {method, thiz, methodId, offset}, arkInterface, inst);
+        entrypointAddress->setCallingConv(llvm::CallingConv::ArkFast4);
     }
 
     return builder->CreateIntToPtr(entrypointAddress, builder->getPtrTy());

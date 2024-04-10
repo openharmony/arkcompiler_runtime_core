@@ -18,8 +18,6 @@
 #include "llvm_ark_interface.h"
 #include "compiler/optimizer/code_generator/target_info.h"
 
-#include <llvm/IR/InstIterator.h>
-#include <llvm/IR/Instructions.h>
 #include <llvm/CodeGen/MachineFrameInfo.h>
 #include <llvm/MC/MCRegisterInfo.h>
 #include <llvm/CodeGen/TargetInstrInfo.h>
@@ -27,23 +25,19 @@
 
 #define DEBUG_TYPE "frame-builder"
 
-using llvm::MachineFunction;
-using llvm::MachineFunctionPass;
-using llvm::MachineInstr;
-using llvm::StringRef;
-
 namespace {
 
-class FrameLoweringPass : public MachineFunctionPass {
+class FrameLoweringPass : public llvm::MachineFunctionPass {
 public:
-    static constexpr StringRef PASS_NAME = "ARK-LLVM Frame builder";
+    static constexpr llvm::StringRef PASS_NAME = "ARK-LLVM Frame Lowering";
+    static constexpr llvm::StringRef ARG_NAME = "ark-llvm-frame-lowering";
 
     explicit FrameLoweringPass(ark::llvmbackend::LLVMArkInterface *arkInterface = nullptr)
-        : MachineFunctionPass(id_), arkInterface_ {arkInterface}
+        : llvm::MachineFunctionPass(ID), arkInterface_ {arkInterface}
     {
     }
 
-    StringRef getPassName() const override
+    llvm::StringRef getPassName() const override
     {
         return PASS_NAME;
     }
@@ -61,7 +55,7 @@ public:
     }
 
     template <typename FrameBuilderT>
-    bool VisitMachineFunction(MachineFunction &mfunc)
+    bool VisitMachineFunction(llvm::MachineFunction &mfunc)
     {
         // Collect information about current function
         FrameInfo frameInfo;
@@ -102,7 +96,7 @@ public:
         return true;
     }
 
-    bool runOnMachineFunction(MachineFunction &mfunc) override
+    bool runOnMachineFunction(llvm::MachineFunction &mfunc) override
     {
         if (mfunc.getFunction().getMetadata("use-ark-frame") == nullptr) {
             return false;
@@ -136,7 +130,7 @@ public:
     }
 
     // first -- X-regs, second -- V-regs
-    FrameInfo::RegMasks GetUsedRegs(const MachineFunction &mfunc) const
+    FrameInfo::RegMasks GetUsedRegs(const llvm::MachineFunction &mfunc) const
     {
         FrameInfo::RegMasks masks {};
 
@@ -171,8 +165,8 @@ public:
         const llvm::MCRegisterInfo *regInfo = mfunc.getSubtarget().getRegisterInfo();
         for (auto &mblock : mfunc) {
             for (auto &minst : mblock) {
-                bool isFrameSetup = minst.getFlag(MachineInstr::FrameSetup);
-                bool isFrameDestroy = minst.getFlag(MachineInstr::FrameDestroy);
+                bool isFrameSetup = minst.getFlag(llvm::MachineInstr::FrameSetup);
+                bool isFrameDestroy = minst.getFlag(llvm::MachineInstr::FrameDestroy);
                 if (isFrameSetup || isFrameDestroy) {
                     continue;
                 }
@@ -184,12 +178,12 @@ public:
         return masks;
     }
 
-    bool HasCalls(const MachineFunction &mfunc)
+    bool HasCalls(const llvm::MachineFunction &mfunc)
     {
         for (auto &mblock : mfunc) {
             for (auto &minst : mblock) {
-                bool isFrameSetup = minst.getFlag(MachineInstr::FrameSetup);
-                bool isFrameDestroy = minst.getFlag(MachineInstr::FrameDestroy);
+                bool isFrameSetup = minst.getFlag(llvm::MachineInstr::FrameSetup);
+                bool isFrameDestroy = minst.getFlag(llvm::MachineInstr::FrameDestroy);
                 if (isFrameSetup || isFrameDestroy) {
                     continue;
                 }
@@ -203,15 +197,17 @@ public:
         return false;
     }
 
-    static char id_;  // NOLINT(readability-identifier-naming)
+    static inline char ID = 0;  // NOLINT(readability-identifier-naming)
 private:
     ark::llvmbackend::LLVMArkInterface *arkInterface_ {nullptr};
 };
-char FrameLoweringPass::id_ = 0;  // NOLINT(readability-identifier-naming)
-
 }  // namespace
 
-MachineFunctionPass *ark::llvmbackend::CreateFrameLoweringPass(ark::llvmbackend::LLVMArkInterface *arkInterface)
+llvm::MachineFunctionPass *ark::llvmbackend::CreateFrameLoweringPass(ark::llvmbackend::LLVMArkInterface *arkInterface)
 {
     return new FrameLoweringPass(arkInterface);
 }
+
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+static llvm::RegisterPass<FrameLoweringPass> g_fl(FrameLoweringPass::ARG_NAME, FrameLoweringPass::PASS_NAME, false,
+                                                  false);

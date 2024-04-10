@@ -252,28 +252,27 @@ extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint3
 }
 
 extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v,
-                                                           [[maybe_unused]] ObjectHeader *arrayKlass)
+                                                           [[maybe_unused]] Class *arrayKlass)
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendLong(sb, v);
 }
 
 extern "C" ObjectHeader *StringBuilderAppendCharEntrypoint(ObjectHeader *sb, uint16_t ch,
-                                                           [[maybe_unused]] ObjectHeader *arrayKlass)
+                                                           [[maybe_unused]] Class *arrayKlass)
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendChar(sb, ch);
 }
 
 extern "C" ObjectHeader *StringBuilderAppendBoolEntrypoint(ObjectHeader *sb, uint8_t v,
-                                                           [[maybe_unused]] ObjectHeader *arrayKlass)
+                                                           [[maybe_unused]] Class *arrayKlass)
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendBool(sb, ToEtsBoolean(static_cast<bool>(v)));
 }
 
-extern "C" ObjectHeader *StringBuilderAppendStringEntrypoint(ObjectHeader *sb, ObjectHeader *str,
-                                                             [[maybe_unused]] ObjectHeader *stringKlass)
+extern "C" ObjectHeader *StringBuilderAppendStringEntrypoint(ObjectHeader *sb, ObjectHeader *str)
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendString(sb, reinterpret_cast<EtsString *>(str));

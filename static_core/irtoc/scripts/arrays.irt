@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,6 +46,7 @@ end
 
 def GenerateArrayCopyTo(el_size)
     suffix = el_size.to_s + "B"
+    lowercase_suffix = el_size.to_s + "b"
     #$regmask = Options.arch_64_bits? ? $temps_mask + :arg0 + :arg1 + :arg2 + :arg3 + :arg4 : $panda_mask
     $regmask = $panda_mask
     function("ArrayCopyTo#{suffix}".to_sym,
@@ -72,9 +73,8 @@ if defines.PANDA_WITH_ETS
 
 Label(:FallToIntrinsic)
     # call Intrinsic
-    id1 = get_entrypoint_offset("ARRAY_COPY_TO#{suffix}_SLOW_PATH")
-    id2 = get_entrypoint_offset("ARRAY_COPY_TO#{suffix}_ODD_SAVED")
-    Intrinsic(:SLOW_PATH_ENTRY, src_obj, dst_obj, dst_start, src_start, src_end).AddImm(id1).AddImm(id2).Terminator.void
+    ep_offset = get_entrypoint_offset("ARRAY_COPY_TO#{suffix}_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, src_obj, dst_obj, dst_start, src_start, src_end).AddImm(ep_offset).MethodAsImm("ArrayCopyTo#{lowercase_suffix}OddSavedBridge").Terminator.void
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 end
 

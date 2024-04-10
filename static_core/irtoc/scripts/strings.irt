@@ -99,8 +99,8 @@ function(:StringConcat2Tlab,
     Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
-    id = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(id).AddImm(id).Terminator.ptr
+    ep_offset = get_entrypoint_offset("STRING_CONCAT2_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1, str2).AddImm(ep_offset).MethodAsImm("StringConcat2UsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -189,9 +189,8 @@ Label(:EndCopy)
     Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
-    id1 = get_entrypoint_offset("STRING_CONCAT3_SLOW_PATH")
-    id2 = get_entrypoint_offset("STRING_CONCAT3_ODD_SAVED")
-    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3).AddImm(id1).AddImm(id2).Terminator.ptr
+    ep_offset = get_entrypoint_offset("STRING_CONCAT3_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3).AddImm(ep_offset).MethodAsImm("StringConcat3OddSavedBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -298,7 +297,7 @@ Label(:EndCopy)
     Return(new_str).ptr
 
 Label(:SlowPathEntrypoint)
-    id = get_entrypoint_offset("STRING_CONCAT4_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3, str4).AddImm(id).AddImm(id).Terminator.ptr
+    ep_offset = get_entrypoint_offset("STRING_CONCAT4_SLOW_PATH")
+    Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3, str4).AddImm(ep_offset).MethodAsImm("StringConcat4UsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }

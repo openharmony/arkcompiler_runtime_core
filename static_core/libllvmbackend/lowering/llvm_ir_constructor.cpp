@@ -408,9 +408,10 @@ bool LLVMIrConstructor::TryEmitIntrinsic(Inst *inst, RuntimeInterface::Intrinsic
                                                   LLVMArkInterface::RuntimeCallType::INTRINSIC,
                                                   static_cast<LLVMArkInterface::EntrypointId>(arkId));
 
-    auto args = GetIntrinsicArguments(llvmId->getFunctionType(), inst->CastToIntrinsic());
-    auto llvmIntrinsicCall = llvm::CallInst::Create(llvmId, args, "", GetCurrentBasicBlock());
-    ValueMapAdd(inst, llvmIntrinsicCall);
+    auto arguments = GetIntrinsicArguments(llvmId->getFunctionType(), inst->CastToIntrinsic());
+    auto result = llvm::CallInst::Create(llvmId, arguments, "", GetCurrentBasicBlock());
+    SetIntrinsicParamAttrs(result, inst->CastToIntrinsic(), arguments);
+    ValueMapAdd(inst, result);
     return true;
 }
 
@@ -446,9 +447,24 @@ bool LLVMIrConstructor::EmitStringBuilderChar(Inst *inst)
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_CHAR, 2U);
 }
 
-bool LLVMIrConstructor::EmitStringBuilderAppendString(Inst *inst)
+bool LLVMIrConstructor::EmitStringBuilderString(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_BUILDER_STRING_COMPRESSED, 2U);
+}
+
+bool LLVMIrConstructor::EmitStringConcat2(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT2_TLAB, 2U);
+}
+
+bool LLVMIrConstructor::EmitStringConcat3(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT3_TLAB, 3U);
+}
+
+bool LLVMIrConstructor::EmitStringConcat4(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_CONCAT4_TLAB, 4U);
 }
 
 bool LLVMIrConstructor::EmitIsInf(Inst *inst)
@@ -486,7 +502,7 @@ bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
 
     // Arguments
     ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
-    for (size_t i = 0; i < inst->GetInputs().Size(); ++i) {
+    for (size_t i = 0; i < inst->GetInputs().Size(); i++) {
         args.push_back(GetInputValue(inst, i));
     }
     auto threadRegPtr = builder_.CreateIntToPtr(GetThreadRegValue(), builder_.getPtrTy());
@@ -494,24 +510,25 @@ bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
     args.push_back(threadRegPtr);
     args.push_back(frameRegPtr);
 
-    // Types
-    ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
-    for (const auto &input : inst->GetInputs()) {
-        argTypes.push_back(GetExactType(input.GetInst()->GetType()));
+    ASSERT(inst->CastToIntrinsic()->HasImms() && inst->CastToIntrinsic()->GetImms().size() == 2U);
+    uint32_t externalId = inst->CastToIntrinsic()->GetImms()[1];
+    auto externalName = GetGraph()->GetRuntime()->GetExternalMethodName(GetGraph()->GetMethod(), externalId);
+    auto callee = func_->getParent()->getFunction(externalName);
+    if (callee == nullptr) {
+        ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
+        for (const auto &input : inst->GetInputs()) {
+            argTypes.push_back(GetExactType(input.GetInst()->GetType()));
+        }
+        argTypes.push_back(builder_.getPtrTy());
+        argTypes.push_back(builder_.getPtrTy());
+        auto ftype = llvm::FunctionType::get(GetType(inst->GetType()), argTypes, false);
+        callee = llvm::Function::Create(ftype, llvm::Function::ExternalLinkage, externalName, func_->getParent());
     }
-    argTypes.push_back(builder_.getPtrTy());
-    argTypes.push_back(builder_.getPtrTy());
-    auto ftype = llvm::FunctionType::get(GetType(inst->GetType()), argTypes, false);
 
-    ASSERT(inst->CastToIntrinsic()->GetImms().size() == 2U);
-    uint32_t offset = inst->CastToIntrinsic()->GetImms()[1];
-
-    auto addr = builder_.CreateConstInBoundsGEP1_64(builder_.getInt8Ty(), threadRegPtr, offset);
-    auto callee = builder_.CreateLoad(builder_.getPtrTy(), addr);
-
-    auto call = builder_.CreateCall(ftype, callee, args, "");
+    auto call = builder_.CreateCall(callee->getFunctionType(), callee, args);
     call->setCallingConv(func_->getCallingConv());
-    call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_MustTail);
+    call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_Tail);
+    call->addFnAttr(llvm::Attribute::get(call->getContext(), "ark-tail-call"));
     if (call->getType()->isVoidTy()) {
         builder_.CreateRetVoid();
     } else {
@@ -631,8 +648,8 @@ bool LLVMIrConstructor::EmitTailCall(Inst *inst)
     } else {
         UNREACHABLE();
     }
-    call->setCallingConv(func_->getCallingConv());
     call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_Tail);
+    call->addFnAttr(llvm::Attribute::get(call->getContext(), "ark-tail-call"));
     if (func_->getReturnType()->isVoidTy()) {
         builder_.CreateRetVoid();
     } else {
@@ -1028,6 +1045,7 @@ llvm::CallInst *LLVMIrConstructor::CreateIntrinsicCall(Inst *inst, RuntimeInterf
     } else {
         result = builder_.CreateCall(callee, arguments);
     }
+    SetIntrinsicParamAttrs(result, inst->CastToIntrinsic(), arguments);
 
     if (inst->RequireState()) {
         debugData_->SetLocation(result, inst->GetPc());
@@ -1484,8 +1502,7 @@ llvm::Value *LLVMIrConstructor::CreateSignDivMod(Inst *inst, llvm::Instruction::
     ASSERT(opcode == llvm::Instruction::SDiv || opcode == llvm::Instruction::SRem);
     llvm::Value *x = GetInputValue(inst, 0);
     llvm::Value *y = GetInputValue(inst, 1);
-    auto arch = GetGraph()->GetArch();
-    if (arch == Arch::AARCH64 && !llvm::isa<llvm::Constant>(y)) {
+    if (GetGraph()->GetArch() == Arch::AARCH64 && !llvm::isa<llvm::Constant>(y)) {
         return CreateAArch64SignDivMod(inst, opcode, x, y);
     }
     auto &ctx = func_->getContext();
@@ -1635,20 +1652,16 @@ llvm::Value *LLVMIrConstructor::CreateLoadMethodUsingVTable(llvm::Value *thiz, C
     ASSERT(thiz != nullptr);
     ASSERT(call != nullptr);
     ASSERT(GetGraph()->GetAotData()->GetUseCha());
-    constexpr uint32_t SHIFT_64_BITS = 3;
-    constexpr uint32_t SHIFT_32_BITS = 2;
 
     auto runtime = GetGraph()->GetRuntime();
-    auto classp = CreateLoadClassFromObject(thiz);
-    auto arch = GetGraph()->GetArch();
+    auto klass = CreateLoadClassFromObject(thiz);
 
     // Get index
     auto vtableIndex = runtime->GetVTableIndex(call->GetCallMethod());
     // Load from VTable, address = klass + ((index << shift) + vtableOffset)
-    auto totalOffset =
-        runtime->GetVTableOffset(arch) + (vtableIndex << (Is64BitsArch(arch) ? SHIFT_64_BITS : SHIFT_32_BITS));
-    auto methPtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), classp, totalOffset);
-    return builder_.CreateLoad(builder_.getPtrTy(), methPtr);
+    auto totalOffset = (vtableIndex << 3U) + runtime->GetVTableOffset(GetGraph()->GetArch());
+    auto methodPtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klass, totalOffset);
+    return builder_.CreateLoad(builder_.getPtrTy(), methodPtr);
 }
 
 llvm::Value *LLVMIrConstructor::CreateResolveVirtualCall(Inst *inst, llvm::Value *thiz, uint32_t methodId)
@@ -2128,24 +2141,36 @@ void LLVMIrConstructor::CreateIf(Inst *inst, llvm::Value *cond, bool likely, boo
 llvm::CallInst *LLVMIrConstructor::CreateTailCallFastPath(Inst *inst)
 {
     ASSERT(inst->GetInputs().Size() == 0);
-    // Arguments
-    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
-    ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
+    ASSERT(inst->CastToIntrinsic()->HasImms() && inst->CastToIntrinsic()->GetImms().size() == 2U);
     ASSERT(ccValues_.size() == func_->arg_size());
-    for (size_t i = 0; i < func_->arg_size(); ++i) {
-        args.push_back(i < ccValues_.size() && ccValues_.at(i) != nullptr ? ccValues_.at(i) : func_->getArg(i));
-        argTypes.push_back(args.at(i)->getType());
+
+    ArenaVector<llvm::Value *> args(GetGraph()->GetLocalAllocator()->Adapter());
+    uint32_t externalId = inst->CastToIntrinsic()->GetImms()[1];
+    auto externalName = GetGraph()->GetRuntime()->GetExternalMethodName(GetGraph()->GetMethod(), externalId);
+    auto callee = func_->getParent()->getFunction(externalName);
+    llvm::CallingConv::ID cc = 0;
+    if (callee == nullptr) {
+        ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
+        for (size_t i = 0; i < func_->arg_size(); i++) {
+            args.push_back(i < ccValues_.size() && ccValues_.at(i) != nullptr ? ccValues_.at(i) : func_->getArg(i));
+            argTypes.push_back(args.at(i)->getType());
+        }
+        auto ftype = llvm::FunctionType::get(GetType(inst->GetType()), argTypes, false);
+        callee = llvm::Function::Create(ftype, llvm::Function::ExternalLinkage, externalName, func_->getParent());
+        cc = func_->getCallingConv();
+    } else {
+        size_t size = func_->arg_size();
+        ASSERT(callee->arg_size() <= size);
+        for (size_t i = 0; i < callee->arg_size() - 2U; i++) {
+            args.push_back(i < ccValues_.size() && ccValues_.at(i) != nullptr ? ccValues_.at(i) : func_->getArg(i));
+        }
+        args.push_back(func_->getArg(size - 2U));
+        args.push_back(func_->getArg(size - 1U));
+        cc = callee->getCallingConv();
     }
-    ASSERT(inst->CastToIntrinsic()->HasImms() && inst->CastToIntrinsic()->GetImms().size() == 1U);
-    uint32_t offset = inst->CastToIntrinsic()->GetImms()[0];
-
-    auto ftype = llvm::FunctionType::get(func_->getReturnType(), argTypes, false);
-
-    auto threadRegPtr = builder_.CreateIntToPtr(GetThreadRegValue(), builder_.getPtrTy());
-    auto addr = builder_.CreateConstInBoundsGEP1_64(builder_.getInt8Ty(), threadRegPtr, offset);
-    auto callee = builder_.CreateLoad(builder_.getPtrTy(), addr);
-
-    return builder_.CreateCall(ftype, callee, args);
+    auto call = builder_.CreateCall(callee->getFunctionType(), callee, args);
+    call->setCallingConv(cc);
+    return call;
 }
 
 llvm::CallInst *LLVMIrConstructor::CreateTailCallInterpreter(Inst *inst)
@@ -2184,7 +2209,9 @@ llvm::CallInst *LLVMIrConstructor::CreateTailCallInterpreter(Inst *inst)
     }
 
     auto functionType = llvm::FunctionType::get(func_->getReturnType(), argTypes, false);
-    return builder_.CreateCall(functionType, ptr, ccValues_);
+    auto call = builder_.CreateCall(functionType, ptr, ccValues_);
+    call->setCallingConv(func_->getCallingConv());
+    return call;
 }
 
 template <uint32_t VECTOR_SIZE>
@@ -2313,6 +2340,52 @@ ArenaVector<llvm::Value *> LLVMIrConstructor::GetIntrinsicArguments(llvm::Functi
     }
     ASSERT(intrinsicFunctionType->getNumParams() == args.size());
     return args;
+}
+
+void LLVMIrConstructor::SetIntrinsicParamAttrs(llvm::CallInst *call, IntrinsicInst *inst,
+                                               [[maybe_unused]] llvm::ArrayRef<llvm::Value *> args)
+{
+    size_t i = inst->IsMethodFirstInput() ? 1U : 0;
+    if (inst->HasImms()) {
+        i += inst->GetImms().size();
+    }
+#ifndef NDEBUG
+    for (size_t j = 0; j < i; j++) {
+        ASSERT(!args[j]->getType()->isIntegerTy() || args[j]->getType()->getIntegerBitWidth() > VECTOR_SIZE_16);
+    }
+#endif
+    for (size_t arkIndex = 0; arkIndex < inst->GetInputsCount(); arkIndex++) {
+        // Skip SaveState
+        if (inst->GetInput(arkIndex).GetInst()->IsSaveState()) {
+            continue;
+        }
+        auto arkType = inst->GetInputType(arkIndex);
+        switch (arkType) {
+            case DataType::UINT8:
+                ASSERT(args[i]->getType()->isIntegerTy() && args[i]->getType()->getIntegerBitWidth() == VECTOR_SIZE_8);
+                call->addParamAttr(i, llvm::Attribute::ZExt);
+                break;
+            case DataType::UINT16:
+                ASSERT(args[i]->getType()->isIntegerTy() && args[i]->getType()->getIntegerBitWidth() == VECTOR_SIZE_16);
+                call->addParamAttr(i, llvm::Attribute::ZExt);
+                break;
+            case DataType::INT8:
+                ASSERT(args[i]->getType()->isIntegerTy() && args[i]->getType()->getIntegerBitWidth() == VECTOR_SIZE_8);
+                call->addParamAttr(i, llvm::Attribute::SExt);
+                break;
+            case DataType::INT16:
+                ASSERT(args[i]->getType()->isIntegerTy() && args[i]->getType()->getIntegerBitWidth() == VECTOR_SIZE_16);
+                call->addParamAttr(i, llvm::Attribute::SExt);
+                break;
+            case DataType::BOOL:
+                break;
+            default:
+                ASSERT(!args[i]->getType()->isIntegerTy() || args[i]->getType()->getIntegerBitWidth() > VECTOR_SIZE_16);
+                break;
+        }
+        i++;
+    }
+    ASSERT(i == args.size());
 }
 
 llvm::FunctionType *LLVMIrConstructor::GetFunctionTypeForCall(CallInst *call)
@@ -3837,11 +3910,6 @@ void LLVMIrConstructor::VisitMultiArray(GraphVisitor *v, Inst *inst)
 
     auto ltype = ctor->builder_.getInt64Ty();
     auto dtype = DataType::INT64;
-    if (!Is64BitsArch(ctor->GetGraph()->GetArch())) {
-        ltype = ctor->builder_.getInt32Ty();
-        dtype = DataType::INT32;
-    }
-
     auto sizes = ctor->CreateAllocaForArgs(ltype, sizesCount);
 
     // Store multi-array sizes
@@ -3883,9 +3951,7 @@ void LLVMIrConstructor::VisitInitString(GraphVisitor *v, Inst *inst)
         auto result = ctor->CreateNewStringFromStringTlab(inst, arg);
         ctor->ValueMapAdd(inst, result);
     } else {
-        auto runtime = ctor->GetGraph()->GetRuntime();
-        auto arch = ctor->GetGraph()->GetArch();
-        auto lengthOffset = runtime->GetArrayLengthOffset(arch);
+        auto lengthOffset = ctor->GetGraph()->GetRuntime()->GetArrayLengthOffset(ctor->GetGraph()->GetArch());
         auto lengthPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), arg, lengthOffset);
         auto length = ctor->builder_.CreateLoad(ctor->builder_.getInt32Ty(), lengthPtr);
         auto result = ctor->CreateNewStringFromCharsTlab(
@@ -4579,7 +4645,12 @@ bool LLVMIrConstructor::BuildIr(bool preventInlining)
     auto method = graph_->GetMethod();
     auto runtime = graph_->GetRuntime();
     arkInterface_->RememberFunctionOrigin(func_, method);
-    debugData_->BeginSubprogram(func_, runtime->GetFullFileName(method), runtime->GetMethodId(method));
+
+    if (!graph_->GetMode().IsFastPath()) {
+        debugData_->BeginSubprogram(func_, runtime->GetFullFileName(method), runtime->GetMethodId(method));
+    } else {
+        func_->addFnAttr(llvm::Attribute::NoInline);
+    }
 
     auto normalMarkerHolder = MarkerHolder(graph_);
     auto normal = normalMarkerHolder.GetMarker();
@@ -4599,15 +4670,16 @@ bool LLVMIrConstructor::BuildIr(bool preventInlining)
         FillPhiInputs(block, normal);
     }
 
-    debugData_->EndSubprogram(func_);
+    if (!graph_->GetMode().IsFastPath()) {
+        debugData_->EndSubprogram(func_);
+    }
+    if (!arkInterface_->IsIrtocMode()) {
+        func_->addFnAttr("frame-pointer", "all");
+    }
 #ifndef NDEBUG
     // Only for tests
     BreakIrIfNecessary();
 #endif
-    if (!arkInterface_->IsIrtocMode()) {
-        func_->addFnAttr("frame-pointer", "all");
-    }
-
     // verifyFunction returns false if there are no errors. But we return true if everything is ok.
     auto verified = !verifyFunction(*func_, &llvm::errs());
     if (!verified) {

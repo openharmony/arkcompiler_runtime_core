@@ -26,13 +26,6 @@
 
 #include "transforms/transform_utils.h"
 
-using ark::llvmbackend::LLVMArkInterface;
-using llvm::MachineFunction;
-using llvm::MachineFunctionPass;
-using llvm::RegisterPass;
-using llvm::report_fatal_error;
-using llvm::StringRef;
-
 #define DEBUG_TYPE "patch-return-handler-stack-adjustment"
 
 namespace {
@@ -58,14 +51,22 @@ namespace {
  * To find such assemblies the pass looks for a comment in the inline assembly template -
  * LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT
  */
-class PatchReturnHandlerStackAdjustment : public MachineFunctionPass {
+class PatchReturnHandlerStackAdjustment : public llvm::MachineFunctionPass {
 public:
-    explicit PatchReturnHandlerStackAdjustment(LLVMArkInterface *arkInterface = nullptr)
+    static constexpr llvm::StringRef PASS_NAME = "ARK-LLVM patch stack adjustment";
+    static constexpr llvm::StringRef ARG_NAME = "patch-return-handler-stack-adjustment";
+
+    explicit PatchReturnHandlerStackAdjustment(ark::llvmbackend::LLVMArkInterface *arkInterface = nullptr)
         : MachineFunctionPass(ID), arkInterface_(arkInterface)
     {
     }
 
-    bool runOnMachineFunction(MachineFunction &machineFunction) override
+    llvm::StringRef getPassName() const override
+    {
+        return PASS_NAME;
+    }
+
+    bool runOnMachineFunction(llvm::MachineFunction &machineFunction) override
     {
         ASSERT(arkInterface_ != nullptr);
         if (!arkInterface_->IsIrtocReturnHandler(machineFunction.getFunction())) {
@@ -74,7 +75,8 @@ public:
 
         auto &frameInfo = machineFunction.getFrameInfo();
         if (frameInfo.hasVarSizedObjects()) {
-            report_fatal_error(StringRef("Return handler '") + machineFunction.getName() + "' uses var sized objects");
+            llvm::report_fatal_error(llvm::StringRef("Return handler '") + machineFunction.getName() +
+                                     "' uses var sized objects");
             return false;
         }
         auto stackSize = frameInfo.getStackSize();
@@ -92,7 +94,8 @@ public:
                 static constexpr unsigned STACK_ADJUSTMENT_INDEX = 3;
 
                 std::string_view inlineAsm {instruction.getOperand(INLINE_ASM_INDEX).getSymbolName()};
-                if (inlineAsm.find(LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT) != std::string::npos) {
+                if (inlineAsm.find(ark::llvmbackend::LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT) !=
+                    std::string::npos) {
                     auto &stackAdjustment = instruction.getOperand(STACK_ADJUSTMENT_INDEX);
                     ASSERT(stackAdjustment.isImm());
                     auto oldStackSize = stackAdjustment.getImm();
@@ -110,30 +113,20 @@ public:
         return changed;
     }
 
-    StringRef getPassName() const override
-    {
-        return PASS_NAME;
-    }
-
     static inline char ID = 0;  // NOLINT(readability-identifier-naming)
-    static constexpr StringRef PASS_NAME = "ARK-LLVM patch stack adjustment";
-    static constexpr StringRef ARG_NAME = "patch-return-handler-stack-adjustment";
-
 private:
-    LLVMArkInterface *arkInterface_;
+    ark::llvmbackend::LLVMArkInterface *arkInterface_ {nullptr};
 };
 
 }  // namespace
 
-namespace ark::llvmbackend {
-
-MachineFunctionPass *CreatePatchReturnHandlerStackAdjustmentPass(LLVMArkInterface *arkInterface)
+llvm::MachineFunctionPass *ark::llvmbackend::CreatePatchReturnHandlerStackAdjustmentPass(
+    ark::llvmbackend::LLVMArkInterface *arkInterface)
 {
     return new PatchReturnHandlerStackAdjustment(arkInterface);
 }
 
-}  // namespace ark::llvmbackend
-
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static RegisterPass<PatchReturnHandlerStackAdjustment> g_p1(PatchReturnHandlerStackAdjustment::ARG_NAME,
-                                                            PatchReturnHandlerStackAdjustment::PASS_NAME, false, false);
+static llvm::RegisterPass<PatchReturnHandlerStackAdjustment> g_p1(PatchReturnHandlerStackAdjustment::ARG_NAME,
+                                                                  PatchReturnHandlerStackAdjustment::PASS_NAME, false,
+                                                                  false);

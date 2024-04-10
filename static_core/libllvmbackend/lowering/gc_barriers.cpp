@@ -57,10 +57,8 @@ void EmitPreWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, bool isVolatileMem
     auto hasEntrypoint = builder->CreateIsNotNull(entrypoint);
     builder->CreateCondBr(hasEntrypoint, loadValueBb, outBb);
 
-    // Load old value
+    // Load old value, similar to LLVMIrConstructor::CreateLoadWithOrdering
     builder->SetInsertPoint(loadValueBb);
-
-    // See LLVMEntry::EmitLoad
     auto load = builder->CreateLoad(builder->getPtrTy(LLVMArkInterface::GC_ADDR_SPACE), mem);
     if (isVolatileMem) {
         auto alignment = module->getDataLayout().getPrefTypeAlignment(load->getType());

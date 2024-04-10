@@ -32,6 +32,7 @@
 #include "optimizer/analysis/monitor_analysis.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "runtime/include/method.h"
+#include "runtime/include/thread.h"
 #include "compiler_options.h"
 
 #include "llvm_aot_compiler.h"
@@ -503,8 +504,17 @@ void LLVMAotCompiler::CompileAll()
         std::for_each(modules.begin(), modules.end(), [this](auto module) -> void { CompileModule(*module); });
     } else {
         llvm::ThreadPool threadPool {llvm::hardware_concurrency(numThreads)};
+        auto thread = runtime_->GetCurrentThread();
+        ASSERT(thread != nullptr);
         for (auto &module : modules) {
-            threadPool.async([this](auto it) -> void { CompileModule(*it); }, module);
+            threadPool.async(
+                [this, thread](auto it) -> void {
+                    auto oldThread = runtime_->GetCurrentThread();
+                    runtime_->SetCurrentThread(thread);
+                    CompileModule(*it);
+                    runtime_->SetCurrentThread(oldThread);
+                },
+                module);
         }
     }
 

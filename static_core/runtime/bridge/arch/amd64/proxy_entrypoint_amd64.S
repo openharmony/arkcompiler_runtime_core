@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,13 @@
 
 .macro PROXY_ENTRYPOINT name, entry
 .global \name
+#ifdef PANDA_WITH_HIDDEN_SYMBOLS
+.hidden \name
+.hidden \entry
+#else
+.protected \name
+.protected \entry
+#endif
 .type \name, %function
 \name:
     CFI_STARTPROC
@@ -71,7 +78,7 @@
 
     movq %rsp, %rsi
     leaq 24(%rbp), %rdx
-    callq \entry@plt
+    callq \entry
 
     popq %rdi
 
@@ -162,7 +169,7 @@
     movsd (-CALLER_VREG0_OFFSET + 120)(%rbp), %xmm15
 
 1:
-    jmp ThrowNativeExceptionBridge@plt
+    jmp ThrowNativeExceptionBridge
     
 4:
     retq

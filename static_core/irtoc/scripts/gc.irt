@@ -90,7 +90,7 @@ def PostInterRegionBarrierMarkSingleFast()
 
         ref_addr := Add(mem, offset).ref_uint
         LiveOut(ref_addr).DstReg(regmap[:arg0]).ref_uint
-        Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
+        Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).MethodAsImm("PostInterRegionBarrierSlow").Terminator.void
 
     Label(:Done)
         ReturnVoid().void
@@ -132,7 +132,7 @@ def PostInterRegionBarrierMarkPairFast()
         If(ShrI(Xor(mem, obj2).ref_uint).Imm(Constants::REGION_SIZE_BIT).ref_uint, 0).NE.Unlikely {
             IfImm(AndI(ref_addr_obj2).Imm(Constants::CARD_ALIGNMENT_MASK).ref_uint).Imm(0).EQ.Unlikely {
                 LiveOut(ref_addr_obj2).DstReg(regmap[:arg0]).ref_uint
-                Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW).Terminator.void
+                Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW).MethodAsImm("PostInterRegionBarrierTwoCardsSlow").Terminator.void
             }
             # No need to sub REFERENCE_TYPE_SIZE as the card will be the same:
             Goto(:Call1)
@@ -150,7 +150,7 @@ def PostInterRegionBarrierMarkPairFast()
     Label(:Call1)
         phi := Phi(ref_addr_obj2, ref_addr_obj1).ref_uint
         LiveOut(phi).DstReg(regmap[:arg0]).ref_uint
-        Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).Terminator.void
+        Intrinsic(:TAIL_CALL).AddImm(Constants::POST_INTER_REGION_BARRIER_SLOW).MethodAsImm("PostInterRegionBarrierSlow").Terminator.void
 
     Label(:Done)
         ReturnVoid().void
@@ -241,12 +241,12 @@ def PostInterRegionBarrierTwoCardsSlow()
     }
 end
 
+PostInterRegionBarrierSlow()
+PostInterRegionBarrierTwoCardsSlow()
+
 PostInterGenerationalBarrier(0)
 PostInterGenerationalBarrier(1)
 PostInterGenerationalBarrier(2)
 
 PostInterRegionBarrierMarkSingleFast()
 PostInterRegionBarrierMarkPairFast()
-
-PostInterRegionBarrierSlow()
-PostInterRegionBarrierTwoCardsSlow()

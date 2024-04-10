@@ -21,5 +21,11 @@ bool EmitStringBuilderAppendByte(Inst *inst);
 bool EmitStringBuilderAppendShort(Inst *inst);
 bool EmitStringBuilderAppendInt(Inst *inst);
 bool EmitStringBuilderAppendLong(Inst *inst);
+bool EmitStringBuilderAppendString(Inst *inst);
 
 llvm::Value *CreateStringBuilderAppendLong(Inst *inst);
+llvm::Value *CreateStringBuilderAppendString(Inst *inst);
+
+void StringBuilderAppendStringMain(Inst *inst, llvm::Value *sbIndexOffset, llvm::Value *sbIndex,
+                                   llvm::Value *sbBuffer, llvm::BasicBlock *contBb);
+void StringBuilderAppendStringNull(Inst *inst, llvm::PHINode *result, llvm::BasicBlock *contBb);

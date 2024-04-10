@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -80,14 +80,10 @@ module Constants
     TLAB_OFFSET = "cross_values::GetManagedThreadTlabOffset(GetArch())"
     TLAB_CUR_FREE_POSITION_OFFSET = "cross_values::GetTlabCurFreePositionOffset(GetArch())"
     TLAB_MEMORY_END_ADDR_OFFSET = "cross_values::GetTlabMemoryEndAddrOffset(GetArch())"
-    CREATE_OBJECT_BY_CLASS_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CREATE_OBJECT_BY_CLASS_SLOW_PATH)"
-    CREATE_OBJECT_BY_CLASS_USUAL_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CREATE_OBJECT_BY_CLASS)"
     OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
     WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
     WRITE_TLAB_STATS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS)"
     ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
-    CREATE_ARRAY_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CREATE_ARRAY_SLOW_PATH)"
-    CREATE_ARRAY_USUAL_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CREATE_ARRAY)"
     GET_CALLEE_METHOD = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
     INITIALIZE_CLASS_BY_ID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
     RESOLVE_CLASS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::RESOLVE_CLASS_DIRECT)"
@@ -145,11 +141,6 @@ module Constants
     LOCKED_OBJECT_INFO_MONITOR_OFFSET = "cross_values::GetLockedObjectInfoMonitorOffset(GetArch())"
     LOCKED_OBJECT_INFO_FRAME_OFFSET = "cross_values::GetLockedObjectInfoStackOffset(GetArch())"
     LOCKED_OBJECT_INFO_SIZE = "cross_values::GetLockedObjectInfoSize(GetArch())"
-    MONITOR_ENTER_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::MONITOR_ENTER_SLOW_PATH)"
-    MONITOR_ENTER_ODD_SAVED = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::MONITOR_ENTER_ODD_SAVED)"
-    MONITOR_EXIT_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::MONITOR_EXIT_SLOW_PATH)"
-    MONITOR_EXIT_ODD_SAVED = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::MONITOR_EXIT_ODD_SAVED)"
-    CHECK_CAST_USUAL_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CHECK_CAST)"
     MARK_WORD_STATUS_MASK = "static_cast<uint64_t>(MarkWord::STATUS_MASK)"
     MARK_WORD_LWL_THREAD_ID_OFFSET = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_SHIFT)"
     MARK_WORD_LWL_THREAD_ID_MASK = "static_cast<uint64_t>(MarkWord::LIGHT_LOCK_THREADID_MASK_IN_PLACE)"
@@ -163,8 +154,6 @@ module Constants
     CLASS_ITABLE_ENTRIES_SIZE_OFFSET = "CLASS_ITABLE_OFFSET + CLASS_ITABLE_ENTRIES_SIZE_OFFSET"
     CLASS_ITABLE_ENTRY_SIZE = "cross_values::GetClassItableEntrySize(GetArch())"
     CLASS_ITABLE_ENTRY_INTERFACE_OFFSET = "cross_values::GetClassItableEntryInterfaceOffset(GetArch())"
-    IS_INSTANCE_BY_BCID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::IS_INSTANCE_BY_BCID)"
-    CHECK_CAST_BY_BCID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::CHECK_CAST_BY_BCID)"
     METHOD_ACCESS_FLAGS_OFFSET = "cross_values::GetMethodAccessFlagsOffset(GetArch())"
 
     IC_HANDLER_KIND_BIT = "cross_values::GetIcHandlerKindBitStartBit(graph->GetArch())"
@@ -217,8 +206,6 @@ module Constants
     STRING_LENGTH_OFFSET = "ark::coretypes::STRING_LENGTH_OFFSET"
     STRING_HASHCODE_OFFSET = "ark::coretypes::STRING_HASHCODE_OFFSET"
     STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"
-    STRING_EQUALS_UNROLL = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_EQUALS_UNROLL)"
-    STRING_EQUALS_UNROLL_COMPRESSED = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_EQUALS_UNROLL_COMPRESSED)"
     ALIGNMENT_MASK = "~(TLAB_ALIGNMENT - 1)"
 
     # shift one bit less to keep ACC_INTRINSIC bit

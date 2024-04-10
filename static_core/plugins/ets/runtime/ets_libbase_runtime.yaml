@@ -922,6 +922,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStringConcat2
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitStringConcat2
     clear_flags: [ ]
 
   - name: StdCoreStringConcat3
@@ -935,7 +936,8 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStringConcat3
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
- 
+    llvm_codegen_func: EmitStringConcat3
+
   - name: StdCoreStringConcat4
     space: ets
     class_name: std.core.String
@@ -947,7 +949,8 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStringConcat4
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
- 
+    llvm_codegen_func: EmitStringConcat4
+
 ##########################
 # std.core.StringBuilder #
 ##########################
@@ -1131,6 +1134,7 @@ intrinsics:
       args: [std.core.String]
     impl: ark::ets::intrinsics::StdCoreStringBuilderAppendString
     codegen_func: CreateStringBuilderAppendString
+    llvm_codegen_func: EmitStringBuilderAppendString
     codegen_arch: [arm64, amd64]
 
   - name: StdCoreSbToString

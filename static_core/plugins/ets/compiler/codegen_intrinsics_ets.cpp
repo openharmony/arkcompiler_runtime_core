@@ -172,7 +172,7 @@ void Codegen::CreateStringBuilderAppendBool(IntrinsicInst *inst, Reg dst, SRCREG
 
 static inline void EncodeSbAppendNullString(Codegen *cg, IntrinsicInst *inst, Reg dst, Reg builder)
 {
-    auto entrypoint = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_NULL_STRING_SLOW_PATH;
+    auto entrypoint = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_NULL_STRING;
     cg->CallRuntime(inst, entrypoint, dst, {}, builder);
 }
 
@@ -280,18 +280,9 @@ void Codegen::CreateStringBuilderAppendString(IntrinsicInst *inst, Reg dst, SRCR
         EncodeSbAppendString(this, inst, SbAppendArgs(dst, builder, str), labelReturn, labelSlowPath);
     }
     // Slow path
-    static constexpr auto ENTRYPOINT_ID = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_STRING_SLOW_PATH;
+    static constexpr auto ENTRYPOINT_ID = RuntimeInterface::EntrypointId::STRING_BUILDER_APPEND_STRING;
     enc->BindLabel(labelSlowPath);
-    if (GetGraph()->IsAotMode()) {
-        auto klassOffs = GetRuntime()->GetStringClassPointerTlsOffset(GetArch());
-        ScopedTmpReg klass(enc);
-        GetEncoder()->EncodeLdr(klass, false, MemRef(ThreadReg(), klassOffs));
-        CallRuntime(inst, ENTRYPOINT_ID, dst, {}, builder, str, klass);
-    } else {
-        auto klassPtr = GetRuntime()->GetStringClass(GetGraph()->GetMethod());
-        auto klass = TypedImm(reinterpret_cast<uintptr_t>(klassPtr));
-        CallRuntime(inst, ENTRYPOINT_ID, dst, {}, builder, str, klass);
-    }
+    CallRuntime(inst, ENTRYPOINT_ID, dst, {}, builder, str);
     // Return
     enc->BindLabel(labelReturn);
 }

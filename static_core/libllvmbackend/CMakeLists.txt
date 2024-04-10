@@ -38,6 +38,7 @@ set(SOURCES
         transforms/passes/ark_inlining.cpp
         transforms/passes/ark_frame_lowering/frame_lowering.cpp
         transforms/passes/ark_frame_lowering/frame_builder.cpp
+        transforms/passes/check_tail_calls.cpp
         transforms/passes/expand_atomics.cpp
         transforms/passes/fixup_poisons.cpp
         transforms/passes/gc_intrusion.cpp

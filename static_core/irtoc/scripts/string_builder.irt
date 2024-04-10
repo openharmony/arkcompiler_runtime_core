@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,12 +24,6 @@ module Constants
     FALSESTR = "0x0073006c00610066"
     FALSESTR2 = "0x0065"
     BOOLSTRLEN = "5"
-    SB_STRING_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_BUILDER_STRING_SLOW_PATH)"
-    SB_STRING_USUAL_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_BUILDER_STRING_USUAL_BRIDGE)"
-    SB_CHAR_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_BUILDER_CHAR_SLOW_PATH)"
-    SB_CHAR_USUAL_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_BUILDER_CHAR_USUAL_BRIDGE)"
-    SB_BOOL_SLOW_PATH = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_BUILDER_BOOL_SLOW_PATH)"
-    SB_BOOL_USUAL_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::STRING_BUILDER_BOOL_USUAL_BRIDGE)"
 end
 
 function(:StringBuilderBool,
@@ -53,7 +47,8 @@ function(:StringBuilderBool,
 
     new_count := Add(count, length).u32
     If(size, new_count).LT.Unlikely.b {
-        Intrinsic(:SLOW_PATH_ENTRY, sb, tv).AddImm(Constants::SB_BOOL_SLOW_PATH).AddImm(Constants::SB_BOOL_USUAL_BRIDGE).Terminator.ref
+        ep_offset = get_entrypoint_offset("STRING_BUILDER_BOOL_SLOW_PATH");
+        Intrinsic(:SLOW_PATH_ENTRY, sb, tv).AddImm(ep_offset).MethodAsImm("StringBuilderBoolUsualBridge").Terminator.ref
         Intrinsic(:UNREACHABLE).Terminator.void
     }
 
@@ -91,7 +86,8 @@ function(:StringBuilderChar,
     count := LoadI(sb).Imm(Constants::SB_COUNT_OFFSET).u32
     size := LoadI(value).Imm(Constants::ARRAY_LENGTH_OFFSET).u32
     If(size, count).LE.Unlikely.b {
-        Intrinsic(:SLOW_PATH_ENTRY, sb, ch).AddImm(Constants::SB_CHAR_SLOW_PATH).AddImm(Constants::SB_CHAR_USUAL_BRIDGE).Terminator.ref
+        ep_offset = get_entrypoint_offset("STRING_BUILDER_CHAR_SLOW_PATH");
+        Intrinsic(:SLOW_PATH_ENTRY, sb, ch).AddImm(ep_offset).MethodAsImm("StringBuilderCharUsualBridge").Terminator.ref
         Intrinsic(:UNREACHABLE).Terminator.void
     }
 
@@ -213,7 +209,8 @@ Label(:Exit)
     Return(sb).ref
 
 Label(:CallCppIntrinsic)
-    Intrinsic(:SLOW_PATH_ENTRY, sb, str).AddImm(Constants::SB_STRING_SLOW_PATH).AddImm(Constants::SB_STRING_USUAL_BRIDGE).Terminator.ref
+    ep_offset = get_entrypoint_offset("STRING_BUILDER_STRING_SLOW_PATH");
+    Intrinsic(:SLOW_PATH_ENTRY, sb, str).AddImm(ep_offset).MethodAsImm("StringBuilderStringUsualBridge").Terminator.ref
     Intrinsic(:UNREACHABLE).Terminator.void
 
 }

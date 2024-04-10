@@ -406,8 +406,8 @@ if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
                               ${IRTOC_SOURCE_DIR}/scripts/strings.irt
                               ${IRTOC_SOURCE_DIR}/scripts/string_builder.irt
                               ${IRTOC_SOURCE_DIR}/scripts/string_helpers.irt
-                              ${IRTOC_SOURCE_DIR}/scripts/arrays.irt
                               ${IRTOC_SOURCE_DIR}/scripts/memcopy.irt
+                              ${IRTOC_SOURCE_DIR}/scripts/arrays.irt
                   TARGET_VARIABLE IRTOC_FASTPATH_OBJ
                   TARGET_VARIABLE_LLVM IRTOC_FASTPATH_LLVM_OBJ
                   SKIP_VALIDATION ${skip_fastpath_validation})

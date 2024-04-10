@@ -139,8 +139,7 @@ function(:StringBuilderAppendLong,
   Return(sb).ref
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_LONG_SLOW_PATH")
-  entrypoint_llvm = get_entrypoint_offset("STRING_BUILDER_APPEND_LONG_ODD_SAVED")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ref
+  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).MethodAsImm("StringBuilderAppendLongOddSavedBridge").Terminator.ref
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -189,8 +188,7 @@ function(:StringBuilderAppendBool,
   Return(sb).ref
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_BOOL_SLOW_PATH")
-  entrypoint_llvm = get_entrypoint_offset("STRING_BUILDER_APPEND_BOOL_ODD_SAVED")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ref
+  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).MethodAsImm("StringBuilderAppendBoolOddSavedBridge").Terminator.ref
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -246,8 +244,7 @@ def GenerateStringBuilderAppendChar(string_compression_enabled)
   Return(sb).ref
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_CHAR_SLOW_PATH")
-  entrypoint_llvm = get_entrypoint_offset("STRING_BUILDER_APPEND_CHAR_ODD_SAVED")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, ch, array_klass).AddImm(entrypoint).AddImm(entrypoint_llvm).Terminator.ref
+  Intrinsic(:SLOW_PATH_ENTRY, sb, ch, array_klass).AddImm(entrypoint).MethodAsImm("StringBuilderAppendCharOddSavedBridge").Terminator.ref
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 end
