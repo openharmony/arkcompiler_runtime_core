@@ -79,10 +79,6 @@ bool CardHandler<LanguageConfig>::Handle(CardTable::CardPtr cardPtr)
     bool result = true;
     auto *startAddress = ToVoidPtr(cardTable_->GetCardStartAddress(cardPtr));
     LOG(DEBUG, GC) << "HandleCard card: " << cardTable_->GetMemoryRange(cardPtr);
-
-    // clear card before we process it, because parallel mutator thread can make a write and we would miss it
-    cardPtr->Clear();
-
     ASSERT_PRINT(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(startAddress)),
                  "Invalid space type for the " << startAddress);
     auto *region = AddrToRegion(startAddress);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "runtime/arch/memory_helpers.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "libpandabase/mem/gc_barrier.h"
@@ -124,41 +125,57 @@ void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, void *store
 {
     LOG_IF(storedValAddr != nullptr, DEBUG, GC)
         << "GC PostBarrier: write to " << std::hex << objAddr << " value " << storedValAddr;
-    if (storedValAddr != nullptr) {
-        // If it is cross-region reference
-        auto *card = cardTable_->GetCardPtr(ToUintPtr(objAddr) + offset);
-        if (!card->IsYoung() && !card->IsMarked() &&
-            !ark::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_)) {
-            LOG(DEBUG, GC) << "GC Interregion barrier write to " << objAddr << " value " << storedValAddr;
-            card->Mark();
-            Enqueue(card);
-        }
+    if (storedValAddr == nullptr) {
+        return;
     }
-    ASSERT(storedValAddr == nullptr || ark::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_) ||
-           CheckPostBarrier(cardTable_, objAddr, false));
+
+    if (ark::mem::IsSameRegion(objAddr, storedValAddr, regionSizeBitsCount_)) {
+        return;
+    }
+
+    auto *card = cardTable_->GetCardPtr(ToUintPtr(objAddr) + offset);
+    if (card->IsYoung()) {
+        return;
+    }
+
+    // StoreLoad barrier is required to guarantee order of previous reference store and card load
+    arch::StoreLoadBarrier();
+    if (!card->IsMarked()) {
+        LOG(DEBUG, GC) << "GC Interregion barrier write to " << objAddr << " value " << storedValAddr;
+        card->Mark();
+        Enqueue(card);
+    }
+
+    ASSERT(CheckPostBarrier(cardTable_, objAddr, false));
 }
 
 void GCG1BarrierSet::PostBarrier(const void *objAddr, size_t offset, size_t count)
 {
     // Force post inter-region barrier
     auto firstAddr = ToUintPtr(objAddr) + offset;
-    auto lastAddr = firstAddr + count - 1;
-    Invalidate(firstAddr, lastAddr);
+    auto *beginCard = cardTable_->GetCardPtr(firstAddr);
+    auto *lastCard = cardTable_->GetCardPtr(firstAddr + count - 1);
+    if (beginCard->IsYoung()) {
+        // Check one card only because cards from beginCard to lastCard belong to the same region
+        return;
+    }
+    // StoreLoad barrier is required to guarantee order of previous reference store and card load
+    arch::StoreLoadBarrier();
+    Invalidate(beginCard, lastCard);
     ASSERT(CheckPostBarrier(cardTable_, objAddr, false));
     // NOTE: We can improve an implementation here
     // because now we consider every field as an object reference field.
     // Maybe, it will be better to check it, but there can be possible performance degradation.
 }
 
-void GCG1BarrierSet::Invalidate(uintptr_t begin, uintptr_t last)
+void GCG1BarrierSet::Invalidate(CardTable::CardPtr begin, CardTable::CardPtr last)
 {
-    LOG(DEBUG, GC) << "GC Interregion barrier write for memory range from  " << ToVoidPtr(begin) << " to "
-                   << ToVoidPtr(last);
-    auto *beginCard = cardTable_->GetCardPtr(begin);
-    auto *lastCard = cardTable_->GetCardPtr(last);
+    LOG(DEBUG, GC) << "GC Interregion barrier write for memory range from  " << cardTable_->GetCardStartAddress(begin)
+                   << " to " << cardTable_->GetCardEndAddress(last);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto *card = beginCard; card <= lastCard; ++card) {
-        if (!card->IsYoung() && !card->IsMarked()) {
+    for (auto *card = begin; card <= last; ++card) {
+        ASSERT(!card->IsYoung());
+        if (!card->IsMarked()) {
             card->Mark();
             Enqueue(card);
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@
 #error "Unsupported target"
 #endif
 
+#include "libpandabase/macros.h"
+
 namespace ark::arch {
 
 // Forces system-wide full memory synchronization
@@ -36,6 +38,12 @@ namespace ark::arch {
 inline void FullMemoryBarrier()
 {
     arch_specific::FullMemoryBarrier();
+}
+
+// Actually only full memory barrier guarantees StoreLoad order but separate implementation is used because of #16489
+ALWAYS_INLINE inline void StoreLoadBarrier()
+{
+    __sync_synchronize();
 }
 
 }  // namespace ark::arch

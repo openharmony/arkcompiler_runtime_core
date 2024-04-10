@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -248,7 +248,7 @@ public:
     NO_MOVE_SEMANTIC(GCG1BarrierSet);
 
 private:
-    void Invalidate(uintptr_t begin, uintptr_t last);
+    void Invalidate(CardTable::CardPtr begin, CardTable::CardPtr last);
     using PostFuncT = std::function<void(const void *, const void *)> *;
     // Store operands explicitly for interpreter perf
     // PRE BARRIER

@@ -184,6 +184,7 @@ module Constants
     CARD_VALUE_OFFSET = "cross_values::GetCardValueOffset(GetArch())"
     CARD_CLEAR_VALUE = "mem::CardTable::Card::GetClearValue()"
     CARD_MARKED_VALUE = "mem::CardTable::Card::GetMarkedValue()"
+    CARD_YOUNG_VALUE = "mem::CardTable::Card::GetYoungValue()"
     CARD_DIRTY_VALUE = "mem::CardTable::GetCardDirtyValue()"
     CARD_ALIGNMENT_MASK = "cross_values::GetCardAlignmentMask(GetArch())"
     POINTER_LOG_SIZE = "cross_values::GetPointerLogSize(GetArch())"
