@@ -261,21 +261,28 @@ spec/nullables/nullable-lambda-default-param_5.ets
 spec/05.Generics/issue14751.ets
 ### Issue 14752
 spec/05.Generics/issue14752.ets
+<<<<<<< HEAD
 ### Issue 14498
 spec/05.Generics/generic_03.ets
+=======
+>>>>>>> Title: Refactoring folder's structure for functional specificaton tests
 ### Issue 14510
 spec/05.Generics/generic_02.ets
 ### Issue 14542
 ### Negative tests
 spec/05.Generics/wrongUsingInT.ets
+<<<<<<< HEAD
 ### Issue 14656
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_05.ets
+=======
+>>>>>>> Title: Refactoring folder's structure for functional specificaton tests
 ### Issue 14941
 spec/05.Generics/issue14700_ArrayBackedConstructorWithobject.ets
 ### Issue 15089
 spec/05.Generics/issue15089_05.ets
 spec/05.Generics/issue15089_06.ets
 spec/05.Generics/issue15089_08.ets
+<<<<<<< HEAD
 ### Issue 15623
 spec/05.Generics/issue15380_0.ets
 ### Issue 15380
@@ -307,6 +314,10 @@ spec/05.generic/issue15380_0.ets
 spec/05.generic/issue15380_1.ets
 spec/05.generic/issue15380_2.ets
 spec/05.generic/issue15380_3.ets
+=======
+### Issue 15380
+spec/05.Generics/issue15380_2.ets
+>>>>>>> Title: Refactoring folder's structure for functional specificaton tests
 ### End of Generic
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)

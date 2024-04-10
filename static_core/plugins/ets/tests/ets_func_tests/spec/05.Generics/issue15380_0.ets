@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 05 Generics
+desc: 05.Generics
 name: issue15380_0.ets
 tags: [negative, compile-only]
 ---*/

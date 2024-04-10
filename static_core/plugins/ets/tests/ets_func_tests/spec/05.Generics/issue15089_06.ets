@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 /*---
- desc: 05 Generics
+ desc: 05.Generics
  name: issue15089_06.ets
- tags: 
+ tags:
  ---*/
 
 class A<T> {
@@ -29,4 +29,4 @@ class A<T> {
 function main(): void {
   let x = new A<Float>(0.1)
   assert x.data instanceof Float
-} 
+}

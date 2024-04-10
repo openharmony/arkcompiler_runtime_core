@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 05 Generics
+desc: 05.Generics
 name: 05.generics/wrongUsingInT
 tags: [negative, compile-only]
 ---*/

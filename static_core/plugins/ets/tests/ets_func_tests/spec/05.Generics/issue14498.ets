@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 07.31 Lambda Expressions
+desc: 05.Generics
 name: issue14498.ets
 tags: [compile-only]
 ---*/

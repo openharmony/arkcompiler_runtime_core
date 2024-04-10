@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 /*---
- desc: 05 Generics
+ desc: 05.Generics
  name: issue15089_05.ets
- tags: 
+ tags:
  ---*/
 
 class MyClass {
