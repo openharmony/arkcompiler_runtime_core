@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "runtime/arch/memory_helpers.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/gc/g1/g1-helpers.h"
@@ -62,10 +63,12 @@ extern "C" void PostWrbUpdateCardFuncEntrypoint(const void *from, const void *to
     auto *card = cardTable->GetCardPtr(ToUintPtr(from));
     LOG(DEBUG, GC) << "G1GC post queue add ref: " << std::hex << from << " -> " << ToVoidPtr(ToObjPtr(to))
                    << " from_card: " << cardTable->GetMemoryRange(card);
-    // NOTE(dtrubenkov): remove !card->IsYoung() after it will be encoded in compiler barrier
-    if ((card->IsClear()) && (!card->IsYoung())) {
-        // NOTE(dtrubenkov): either encode this in compiler barrier or remove from Interpreter barrier (if move to
-        // INT/JIT parts then don't check IsClear here cause it will be marked already)
+    if (card->IsYoung()) {
+        return;
+    }
+    // StoreLoad barrier is required to guarantee order of previous reference store and card load
+    arch::StoreLoadBarrier();
+    if (card->IsClear()) {
         card->Mark();
         barriers->Enqueue(card);
     }

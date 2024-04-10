@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -161,6 +161,15 @@ scoped_macro(:push_dirty_card_to_buffer) do |cards, min_addr, mem|
     mem_word := Cast(mem).SrcType(Constants::REF_UINT).word
     card_offset := ShrI(Sub(mem_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
     card := Add(cards, card_offset).ptr
+    card_value := LoadI(card).Imm(Constants::CARD_VALUE_OFFSET).u8
+
+    is_card_young := Compare(card_value, Constants::CARD_YOUNG_VALUE).EQ.b
+    IfImm(is_card_young).Imm(0).NE.b {
+        Goto(:Done)
+    }
+
+    # StoreLoad barrier is required to guarantee order of previous reference store and card load
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     card_value := LoadI(card).Imm(Constants::CARD_VALUE_OFFSET).u8
 
     is_card_clear := Compare(card_value, Constants::CARD_CLEAR_VALUE).EQ.b

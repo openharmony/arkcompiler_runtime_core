@@ -158,6 +158,12 @@ size_t UpdateRemsetWorker<LanguageConfig>::ProcessAllCards()
     FillFromQueue(&cards_);
     FillFromThreads(&cards_);
     FillFromPostBarrierBuffers(&cards_);
+
+    std::for_each(cards_.begin(), cards_.end(), [](auto *card) { card->Clear(); });
+
+    // clear cards before we process it, because parallel mutator thread can make a write and we would miss it
+    arch::StoreLoadBarrier();
+
     LOG_IF(!cards_.empty(), DEBUG, GC) << "Started process: " << cards_.size() << " cards";
 
     size_t cardsSize = 0;

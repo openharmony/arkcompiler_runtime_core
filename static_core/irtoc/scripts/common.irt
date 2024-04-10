@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -195,6 +195,7 @@ module Constants
     CARD_VALUE_OFFSET = "cross_values::GetCardValueOffset(GetArch())"
     CARD_CLEAR_VALUE = "mem::CardTable::Card::GetClearValue()"
     CARD_MARKED_VALUE = "mem::CardTable::Card::GetMarkedValue()"
+    CARD_YOUNG_VALUE = "mem::CardTable::Card::GetYoungValue()"
     CARD_DIRTY_VALUE = "mem::CardTable::GetCardDirtyValue()"
     CARD_ALIGNMENT_MASK = "cross_values::GetCardAlignmentMask(GetArch())"
     POINTER_LOG_SIZE = "cross_values::GetPointerLogSize(GetArch())"
