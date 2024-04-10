@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/runtime/interop_js/js_value_call.h"
+#include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/class_linker-inl.h"
 
@@ -69,6 +69,7 @@ static JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -134,6 +135,7 @@ static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj
         return etsJsValue->AsObject();
     }
 
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsVal = etsJsValue->GetNapiValue(env);
@@ -155,6 +157,7 @@ static typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *et
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -172,6 +175,7 @@ static void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, type
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -187,6 +191,7 @@ static typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int32_t ind
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -225,6 +230,7 @@ static JSValue *JSRuntimeGetGlobal()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -235,6 +241,7 @@ static JSValue *JSRuntimeCreateObject()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -247,6 +254,7 @@ uint8_t JSRuntimeInstanceOf(JSValue *object, JSValue *ctor)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -292,6 +300,7 @@ static JSValue *JSRuntimeLoadModule(EtsString *module)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
 
     PandaString moduleName = module->GetMutf8();
@@ -329,7 +338,9 @@ static JSValue *JSRuntimeLoadModule(EtsString *module)
 
 static uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs)
 {
-    auto ctx = InteropCtx::Current();
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
 
@@ -347,6 +358,7 @@ void *CompilerGetJSNamedProperty(void *val, char *propStr)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
     auto jsVal = ToLocal(val);
     napi_value res;
@@ -363,6 +375,7 @@ void *CompilerGetJSProperty(void *val, void *prop)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
     auto jsVal = ToLocal(val);
     napi_value res;
@@ -396,6 +409,7 @@ void *CompilerJSCallCheck(void *fn)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
 
     if (UNLIKELY(GetValueType(env, jsFn) != napi_function)) {
@@ -414,20 +428,18 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
     auto jsArgs = reinterpret_cast<napi_value *>(args);
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
 
     [[maybe_unused]] napi_value jsRet;
     napi_status jsStatus;
     {
-        ctx->GetInteropFrames().push_back({coro->GetCurrentFrame(), true});
         ScopedNativeCodeThread nativeScope(coro);
         if constexpr (USE_RET) {
             jsStatus = napi_call_function(env, jsThis, jsFn, argc, jsArgs, &jsRet);
         } else {
             jsStatus = napi_call_function(env, jsThis, jsFn, argc, jsArgs, nullptr);
         }
-
-        ctx->GetInteropFrames().pop_back();
     }
 
     if (UNLIKELY(jsStatus != napi_ok)) {
@@ -450,17 +462,14 @@ void *CompilerJSNewInstance(void *fn, uint32_t argc, void *args)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
 
     napi_value jsRet;
     napi_status jsStatus;
     {
-        ctx->GetInteropFrames().push_back({coro->GetCurrentFrame(), true});
         ScopedNativeCodeThread nativeScope(coro);
-
         jsStatus = napi_new_instance(env, jsFn, argc, jsArgs, &jsRet);
-
-        ctx->GetInteropFrames().pop_back();
     }
 
     if (UNLIKELY(jsStatus != napi_ok)) {
@@ -512,6 +521,7 @@ typename CONVERTOR::cpptype ConvertFromLocal(void *value)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
     auto jsVal = ToLocal(value);
     auto res = CONVERTOR::Unwrap(ctx, env, jsVal);
@@ -536,6 +546,7 @@ JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
 
     if (UNLIKELY(IsNull(env, jsVal))) {
@@ -566,6 +577,7 @@ void *ConvertToLocal(typename T::cpptype etsValue)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
     napi_value localJsValue = T::Wrap(env, etsValue);
     if (UNLIKELY(localJsValue == nullptr)) {
@@ -579,6 +591,7 @@ void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
 
     auto ref = etsValue->GetCoreType();
@@ -644,6 +657,7 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
 
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
+    INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
 
     if (UNLIKELY(IsNull(env, jsVal))) {

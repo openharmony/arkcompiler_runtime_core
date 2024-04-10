@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
@@ -118,10 +118,12 @@ InteropCtx *ConstStringStorage::Ctx()
 
 InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
 {
-    EtsJSNapiEnvScope envscope(this, env);
+    JSNapiEnvScope envscope(this, env);
+
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     refstor_ = vm->GetGlobalObjectStorage();
+    classLinker_ = Runtime::GetCurrent()->GetClassLinker();
     linkerCtx_ = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
 
     JSRuntimeIntrinsicsSetIntrinsicsAPI(GetIntrinsicsAPI());
@@ -387,20 +389,24 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     auto ctx = InteropCtx::Current(coro);
 
     INTEROP_LOG(ERROR) << "======================== ETS stack ============================";
-    auto &istk = ctx->GetInteropFrames();
+    auto istk = ctx->interopStk_.GetRecords();
     auto istkIt = istk.rbegin();
 
-    for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
-        while (istkIt != istk.rend() && stack.GetFp() == istkIt->etsFrame) {
-            INTEROP_LOG(ERROR) << (istkIt->toJs ? "<ets-to-js>" : "<js-to-ets>");
+    auto printIstkFrames = [&istkIt, &istk](void *fp) {
+        while (istkIt != istk.rend() && fp == istkIt->etsFrame) {
+            INTEROP_LOG(ERROR) << "<interop> " << (istkIt->descr != nullptr ? istkIt->descr : "unknown");
             istkIt++;
         }
+    };
 
+    for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
+        printIstkFrames(istkIt->etsFrame);
         Method *method = stack.GetMethod();
         INTEROP_LOG(ERROR) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                            << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
     ASSERT(istkIt == istk.rend() || istkIt->etsFrame == nullptr);
+    printIstkFrames(nullptr);
 
     auto env = ctx->jsEnv_;
     INTEROP_LOG(ERROR) << (env != nullptr ? "<ets-entrypoint>" : "current js env is nullptr!");

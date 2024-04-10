@@ -21,7 +21,7 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/mem/local_object_handle.h"
 
@@ -72,8 +72,7 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    [[maybe_unused]] EtsJSNapiEnvScope scope(ctx, env);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {
@@ -102,8 +101,7 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
-    [[maybe_unused]] EtsJSNapiEnvScope scope(ctx, env);
-    ScopedManagedCodeThread managedScope(coro);
+    INTEROP_CODE_SCOPE_JS(coro, env);
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, coro, ctx, env, jsThis);
     if (UNLIKELY(etsThis == nullptr)) {

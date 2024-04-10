@@ -148,13 +148,6 @@ public:
         return value;
     }
 
-    // Specific for experimental ts2ets_tstype
-    static JSValue *CreateTSTypeDerived([[maybe_unused]] Class *klass, [[maybe_unused]] napi_env env,
-                                        [[maybe_unused]] napi_value jsVal)
-    {
-        UNREACHABLE();
-    }
-
     static void FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg);
 
     static constexpr uint32_t GetTypeOffset()

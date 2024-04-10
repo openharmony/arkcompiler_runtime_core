@@ -274,7 +274,7 @@ function test_typecheck_jscall(): boolean {
     throw unreachable();
 }
 
-function test_typecheck_etscall(): boolean {
+function test_typecheck_callets(): boolean {
     try {
         let etsfn: (x: String) => String = (x: String): String => {
             throw unreachable();

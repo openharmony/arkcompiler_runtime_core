@@ -16,13 +16,13 @@ enable_language(ASM)
 set(ETS_INTEROP_ARCH_SOURCES)
 
 if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm32/ts2ets_jscall_bridge_arm32.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm32/call_bridge_arm32.S)
 elseif(PANDA_TARGET_ARM32_ABI_HARD)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm32/ts2ets_jscall_bridge_arm32hf.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm32/call_bridge_arm32hf.S)
 elseif(PANDA_TARGET_ARM64)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm64/ts2ets_jscall_bridge_aarch64.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm64/call_bridge_aarch64.S)
 elseif(PANDA_TARGET_AMD64)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/amd64/ts2ets_jscall_bridge_amd64.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/amd64/call_bridge_amd64.S)
 endif()
 
 panda_ets_interop_js_plugin(ets_interop_js_napi
@@ -30,6 +30,8 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         interop_context.cpp
         ets_vm_plugin.cpp
         intrinsics_api_impl.cpp
+        call/call_js.cpp
+        call/call_ets.cpp
         js_proxy/js_proxy.cpp
         ets_proxy/ets_class_wrapper.cpp
         ets_proxy/ets_field_wrapper.cpp
@@ -41,10 +43,8 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         js_refconvert.cpp
         js_refconvert_builtin.cpp
         js_refconvert_function.cpp
-        js_value_call.cpp
         interop_common.cpp
         ts2ets_copy.cpp
-        ts2ets_tstype.cpp
         js_job_queue.cpp
         pending_promise_listener.cpp
         ${ETS_INTEROP_ARCH_SOURCES}

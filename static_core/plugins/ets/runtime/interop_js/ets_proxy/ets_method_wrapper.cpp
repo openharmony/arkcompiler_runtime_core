@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference.h"
-#include "plugins/ets/runtime/interop_js/js_value_call.h"
-#include "plugins/ets/runtime/interop_js/napi_env_scope.h"
+#include "plugins/ets/runtime/interop_js/call/call.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 
 #include "runtime/mem/vm_handle-inl.h"
 
@@ -102,7 +102,7 @@ napi_value EtsMethodWrapper::EtsMethodCallHandler(napi_env env, napi_callback_in
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(coro);
 
-    [[maybe_unused]] EtsJSNapiEnvScope envscope(ctx, env);
+    INTEROP_CODE_SCOPE_JS(coro, env);
     size_t argc;
     napi_value jsThis;
     void *data;
@@ -124,14 +124,13 @@ napi_value EtsMethodWrapper::EtsMethodCallHandler(napi_env env, napi_callback_in
 
     Method *method = _this->etsMethod_->GetPandaMethod();
 
-    ScopedManagedCodeThread managedScope(coro);
     if constexpr (IS_STATIC) {
         EtsClass *etsClass = _this->etsMethod_->GetClass();
         if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, etsClass))) {
             ctx->ForwardEtsException(coro);
             return nullptr;
         }
-        return EtsCallImplStatic(coro, ctx, method, *jsArgs);
+        return CallETSStatic(coro, ctx, method, *jsArgs);
     }
 
     if (UNLIKELY(IsNullOrUndefined(env, jsThis))) {
@@ -148,7 +147,7 @@ napi_value EtsMethodWrapper::EtsMethodCallHandler(napi_env env, napi_callback_in
         return nullptr;
     }
 
-    return EtsCallImplInstance(coro, ctx, method, *jsArgs, etsThis);
+    return CallETSInstance(coro, ctx, method, *jsArgs, etsThis);
 }
 
 // Explicit instantiation

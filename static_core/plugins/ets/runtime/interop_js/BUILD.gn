@@ -55,6 +55,8 @@ ohos_source_set("ets_interop_js_napi_static") {
   include_dirs = [ "$ark_napi_headers_path" ]
 
   sources = [
+    "call/call_ets.cpp",
+    "call/call_js.cpp",
     "ets_proxy/ets_class_wrapper.cpp",
     "ets_proxy/ets_field_wrapper.cpp",
     "ets_proxy/ets_method_wrapper.cpp",
@@ -71,18 +73,16 @@ ohos_source_set("ets_interop_js_napi_static") {
     "js_refconvert_builtin.cpp",
     "js_refconvert_function.cpp",
     "js_value.cpp",
-    "js_value_call.cpp",
     "pending_promise_listener.cpp",
     "ts2ets_copy.cpp",
-    "ts2ets_tstype.cpp",
   ]
   if (current_cpu == "amd64" || current_cpu == "x64" ||
       current_cpu == "x86_64") {
-    sources += [ "arch/amd64/ts2ets_jscall_bridge_amd64.S" ]
+    sources += [ "arch/amd64/call_bridge_amd64.S" ]
   } else if (current_cpu == "arm64") {
-    sources += [ "arch/arm64/ts2ets_jscall_bridge_aarch64.S" ]
+    sources += [ "arch/arm64/call_bridge_aarch64.S" ]
   } else if (current_cpu == "arm") {
-    sources += [ "arch/arm32/ts2ets_jscall_bridge_arm32.S" ]
+    sources += [ "arch/arm32/call_bridge_arm32.S" ]
   }
 
   deps = [
