@@ -445,16 +445,16 @@ spec/expressions/equality/equality_primitive_01_short_equal_short_015.ets
 
 ### accessors
 ### Issue 15396
-spec/09.classes/Accessor_Declarations/issue-13330_7.ets
-spec/09.classes/Accessor_Declarations/issue-13330_8.ets
+spec/09.Classes/Accessor_Declarations/issue-13330_7.ets
+spec/09.Classes/Accessor_Declarations/issue-13330_8.ets
 ### Issue 15644
-spec/09.classes/Accessor_Declarations/issue-15142_5.ets
+spec/09.Classes/Accessor_Declarations/issue-15142_5.ets
 ### Issue 15646
-spec/09.classes/Accessor_Declarations/issue-15142_9.ets
-spec/09.classes/Accessor_Declarations/issue-15142_10.ets
+spec/09.Classes/Accessor_Declarations/issue-15142_9.ets
+spec/09.Classes/Accessor_Declarations/issue-15142_10.ets
 ### Issue 15647
-spec/09.classes/Accessor_Declarations/issue-15142_7.ets
-spec/09.classes/Accessor_Declarations/issue-15142_8.ets
+spec/09.Classes/Accessor_Declarations/issue-15142_7.ets
+spec/09.Classes/Accessor_Declarations/issue-15142_8.ets
 ### end of accessors
 
 ### tuples
@@ -495,7 +495,7 @@ spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/overri
 ### Issue 15201
 spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
 spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
-spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets### End of Overriding
+spec/09.Classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.ets
 ### End of Overriding
 ### Issue 15281
 spec/types/number_to_string_1.ets
