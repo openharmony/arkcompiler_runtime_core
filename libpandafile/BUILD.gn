@@ -21,11 +21,6 @@ config("arkfile_public_config") {
     "$target_gen_dir/include",
   ]
 
-  include_dirs += [
-    "//third_party/zlib",
-    "//third_party/zlib/contrib/minizip",
-  ]
-
   defines = []
   if (is_ohos && !is_standard_system) {
     defines += [ "ENABLE_FULL_FILE_FIELDS" ]
@@ -111,6 +106,11 @@ ohos_static_library("libarkfile_static") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (!ark_standalone_build) {
+    public_external_deps = [ "zlib:libz" ]
+  } else {
+    external_deps += [ "zlib:libz" ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -129,6 +129,11 @@ ohos_source_set("libarkfile_static_fuzz") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (!ark_standalone_build) {
+    public_external_deps = [ "zlib:libz" ]
+  } else {
+    external_deps += [ "zlib:libz" ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
@@ -182,6 +187,11 @@ ohos_source_set("libarkfile_frontend_set_static") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (!ark_standalone_build) {
+    public_external_deps = [ "zlib:libz" ]
+  } else {
+    external_deps += [ "zlib:libz" ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

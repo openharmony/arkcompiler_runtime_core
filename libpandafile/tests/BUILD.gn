@@ -42,7 +42,10 @@ host_unittest_action("LibPandaFileTest") {
     "//third_party/googletest:gmock_main",
   ]
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  external_deps = [
+    "zlib:libz",
+    sdk_libc_secshared_dep,
+  ]
 
   cflags = [ "-DWITH_MOCK" ]
 }

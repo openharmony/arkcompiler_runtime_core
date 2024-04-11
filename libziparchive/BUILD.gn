@@ -18,11 +18,6 @@ config("arkziparchive_config") {
     "$ark_root/libziparchive",
     "$ark_root/libpandabase",
   ]
-
-  include_dirs += [
-    "//third_party/zlib",
-    "//third_party/zlib/contrib/minizip",
-  ]
 }
 
 ohos_source_set("libarkziparchive_static") {
@@ -41,7 +36,7 @@ ohos_source_set("libarkziparchive_static") {
   if (ark_standalone_build || is_arkui_x) {
     external_deps += [ "zlib:libz" ]
   } else {
-    external_deps += [ "zlib:shared_libz" ]
+    public_external_deps = [ "zlib:shared_libz" ]
   }
 
   part_name = "runtime_core"
@@ -74,9 +69,10 @@ ohos_source_set("libarkziparchive_frontend_set_static") {
 
   deps = [ "$ark_root/libpandabase:libarkbase_frontend_static" ]
 
-  external_deps = [ sdk_libc_secshared_dep ]
-
-  external_deps += [ "zlib:libz" ]
+  external_deps = [
+    "zlib:libz",
+    sdk_libc_secshared_dep,
+  ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
