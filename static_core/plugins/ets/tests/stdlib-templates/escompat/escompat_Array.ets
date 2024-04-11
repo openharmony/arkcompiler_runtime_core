@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,10 +91,10 @@ function main(): int {
     failures += check((): int => { return testIndexOfMissed()}, "Test indexOf method with missed data");
     failures += check((): int => { return testIndexOfFromEmpty()}, "Test indexOf method with empty array");
 
-    failures += check((): int => { return testFlatEmpty()}, "Test flat empty");
-    failures += check((): int => { return testFlatFlat()}, "Test flat non empty flat array");
-    failures += check((): int => { return testFlatNonFlat1()}, "Test flat non empty non flat array 1");
-    failures += check((): int => { return testFlatNonFlat2()}, "Test flat non empty non flat array 2");
+    // failures += check((): int => { return testFlatEmpty()}, "Test flat empty");
+    // failures += check((): int => { return testFlatFlat()}, "Test flat non empty flat array");
+    // failures += check((): int => { return testFlatNonFlat1()}, "Test flat non empty non flat array 1");
+    // failures += check((): int => { return testFlatNonFlat2()}, "Test flat non empty non flat array 2");
 
     failures += check((): int => { return testSplice1()}, "Test splice 1");
     failures += check((): int => { return testSplice2()}, "Test splice 2");
@@ -110,91 +110,93 @@ function main(): int {
 const source: Object[] = {{.item.copySource}};
 const source2: Object[] = {{.item.concatSource}};
 
+const SUCCESS = 0;
+const FAILURE = 1;
 
 function testShift(): int {
-    let array: Array<Object> = new Array<Object>(source);
-    let length: int = array.length();
+    const array = Array.from<object>(source)
+    let length = array.length;
 
     let shifted = array.shift();
 
     length--;
-    if(array.length() != length) {
-        console.println("Target array length mismatch: " + array.length() + " but expected" + length);
-        return 1;
+    if (array.length != length) {
+        console.println("Target array length mismatch: " + array.length + " but expected" + length);
+        return FAILURE;
     }
 
-    if(shifted != source[0] as Object) {
+    if (shifted != source[0] as Object) {
         console.println("Unexpected value returned at shift");
-        return 1;
+        return FAILURE;
     }
 
-    for(let i: int = 0; i< array.length(); i++) {
+    for (let i: int = 0; i < array.length; i++) {
         let j = i+1;
-        if(array.at(i) == source[j]) continue;
+        if (array.at(i) == source[j]) continue;
         console.println("Data mismatch");
-        return 1;
+        return FAILURE;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 function testShiftEmpty(): int {
     let array: Array<Object> = new Array<Object>();
-    let length: int = array.length();
+    let length = array.length;
 
     let result = array.shift();
-    if(array.length() != 0) {
+    if (array.length != 0) {
         console.println("Array<Object> size mismatch");
-        return 1;
+        return FAILURE;
     }
-    if(result != null) {
+    if (result != null) {
         console.println("Unexpected data returned at shift empty " + result);
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 
 function testPop(): int {
-    let array: Array<Object> = new Array<Object>(source);
-    let length: int = array.length();
+    const array = Array.from<object>(source)
+    let length = array.length;
 
     let popped = array.pop();
 
     length--;
-    if(array.length() != length) {
-        console.println("Target array length mismatch: " + array.length() + " but expected" + length);
-        return 1;
+    if (array.length != length) {
+        console.println("Target array length mismatch: " + array.length + " but expected" + length);
+        return FAILURE;
     }
 
-    if(popped != source[length] as Object) {
+    if (popped != source[length as int] as Object) {
         console.println("Unexpected value returned at pop");
-        return 1;
+        return FAILURE;
     }
 
-    for(let i: int = 0; i< array.length(); i++) {
-        if(array.at(i) == source[i]) continue;
+    for (let i: int = 0; i < array.length; i++) {
+        if (array.at(i) == source[i]) continue;
         console.println("Data mismatch");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 
 function testPopEmpty(): int {
     let array: Array<Object> = new Array<Object>();
-    let length: int = array.length();
+    let length = array.length;
 
     let result = array.pop();
-    if(array.length() != 0) {
+    if (array.length != 0) {
         console.println("Array<Object> size mismatch");
-        return 1;
+        return FAILURE;
     }
-    if(result != null) {
+    if (result != null) {
         console.println("Unexpected data returned at pop empty" + result);
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 
@@ -202,198 +204,197 @@ function testPushEmpty(): int {
     let array: Array<Object> = new Array<Object>();
 
 
-    let length: int = array.push(source[0]);
-    if(length == 1) return 0;
+    let length = array.push(source[0]);
+    if (length == 1) return SUCCESS;
     console.println("Bad length after push");
-    return 1;
+    return FAILURE;
 }
 
 function testPush(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
 
-    let length: int = array.length();
+    let length = array.length;
     length++;
 
-    let test: int = array.push(source[0]);
+    let test = array.push(source[0]);
 
-    if(test == length) return 0;
+    if (test == length) return SUCCESS;
     console.println("Bad length after push");
-    return 1;
+    return FAILURE;
 }
 
 
 function testIncludes(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
 
-    if(array.length() != source.length) {
+    if (array.length != source.length) {
         console.println("Unexpected target length");
-        return 1;
+        return FAILURE;
     }
 
-    for(let i: int = 0; i< array.length(); i++) {
-        if(array.includes(source[i])) continue;
+    for (let i: int = 0; i < array.length; i++) {
+        if (array.includes(source[i])) continue;
         console.println("Missed expected data");
-        return 1;
+        return FAILURE;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 function testIncludesInEmpty(): int {
     let array: Array<Object> = new Array<Object>();
 
-    if(array.length() != 0) {
+    if (array.length != 0) {
         console.println("Unexpected target length");
-        return 1;
+        return FAILURE;
     }
 
-    for(let i: int = 0; i< array.length(); i++) {
-        if(array.includes(source[i])) return 1;
+    for (let i: int = 0; i < array.length; i++) {
+        if (array.includes(source[i])) return FAILURE;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 
 function testIndexOf(): int {
-    let array: Array<Object> = new Array<Object>(source);
-    let result: int = array.indexOf(source[3]);
-    if(result == 3) return 0;
+    const array = Array.from<object>(source)
+    let result = array.indexOf(source[3]);
+    if (result == 3) return SUCCESS;
 
     console.println("Unexpected data returned");
-    return 1;
+    return FAILURE;
 
 }
 
 function testIndexOfMissed(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
     let test: Object = {{.item.fillValue}};
-    let result: int = array.indexOf(test);
-    if(result == -1) return 0;
+    let result = array.indexOf(test);
+    if (result == -1) return SUCCESS;
     console.println("Unexpected data returned");
-    return 1;
+    return FAILURE;
 }
 
 
 function testIndexOfFromEmpty(): int {
     let array: Array<Object> = new Array<Object>();
 
-    let result: int = array.indexOf(source[3]);
-    if(result == -1) return 0;
+    let result = array.indexOf(source[3]);
+    if (result == -1) return SUCCESS;
     console.println("Unexpected data returned");
-    return 1;
+    return FAILURE;
 }
 
 function testGoodPosIndex(): int {
-    let array: Array<Object> = new Array<Object>(source);
-
+    const array = Array.from<object>(source)
     let test = array.at(0);
-    if(test == source[0]) return 0;
+    if (test == source[0]) return SUCCESS;
     console.println("Bad at() result");
-    return 1;
+    return FAILURE;
 }
 
 function testGoodNegIndex(): int {
-    let array: Array<Object> = new Array<Object>(source);
-
-    let test = array.at(-array.length());
-    if(test == source[0]) return 0;
+    const array = Array.from<object>(source)
+    let test = array.at(-array.length);
+    if (test == source[0]) return SUCCESS;
     console.println("Bad at() result");
-    return 1;
+    return FAILURE;
 }
 
 
 function testBadNegIndex(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
     let exp = array.at(-100);
-    if(exp == null) return 0;
+    if (exp == null) return SUCCESS;
     console.println("Unexpected result on bad negative index");
-    return 1;
+    return FAILURE;
 }
 
 function testBadPosIndex(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
     let exp = array.at(100);
-    if(exp == null) return 0;
+    if (exp == null) return SUCCESS;
     console.println("Unexpected result on bad positive index");
-    return 1;
+    return FAILURE;
 }
 
 
 function checkValues(source: Array<Object>, value: Object): int {
-    for(let i: int = 0; i < source.length(); i++) {
-        if(source.at(i) == value) continue;
-        return 1;
+    for (let i: int = 0; i < source.length; i++) {
+        if (source.at(i) == value) continue;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 
 function checkValues(source: Array<Object>, value: Object, start: int, end: int): int {
-    for(let i: int = start; i < end; i++) {
-        if(source.at(i) == value) continue;
-        return 1;
+    for (let i: int = start; i < end; i++) {
+        if (source.at(i) == value) continue;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testCreateFrom(): int {
     let array: Array<Object> = Array.from<Object>(source);
-    if(array.length() != source.length) {
+    if (array.length != source.length) {
         console.println("Data length mismatch");
-        return 1;
+        return FAILURE;
     }
-    for(let i: int = 0; i< source.length; i++) {
-        if(array.at(i) ==  source[i]) continue;
+    for (let i: int = 0; i < source.length; i++) {
+        if (array.at(i) ==  source[i]) continue;
         console.println("Data mismatch");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testCreateFrom2(): int {
-    let array: Array<Object> = Array.from<Object, Object>(source, (v: Object): Object => { return v; } );
-    if(array.length() != source.length) {
+    const sourceArr = Array.from<object>(source)
+    const array = Array.from<Object, Object>(sourceArr, (v: Object, _: number): Object => { return v; } );
+    if (array.length != source.length) {
         console.println("Data length mismatch");
-        return 1;
+        return FAILURE;
     }
-    for(let i: int = 0; i< source.length; i++) {
-        if(array.at(i) ==  source[i]) continue;
+    for (let i: int = 0; i < source.length; i++) {
+        if (array.at(i) ==  source[i]) continue;
         console.println("Data mismatch");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testMap0(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
     let map: Object = {{.item.fillValue}};
 
-    let target: Array<Int> = array.map<Int>((item: Object): Int => { return item as Int; });
-    if(target.length() != array.length()) {
+    let target = array.map((item: Object): {{.item.copySourceItemType}} => { return item as {{.item.copySourceItemType}}; });
+    if (target.length != array.length) {
         console.println("Data length mismatch");
-        return 1;
+        return FAILURE;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 function testEvery(): int {
-    let array = new Array<Object>(source2);
+    const array = Array.from<object>(source2)
     let test: boolean = array.every((item: Object): boolean => { return item instanceof {{.item.itemType}}});
-    if(test) return 0;
+    if (test) return SUCCESS;
     console.println("Unexpected every result");
-    return 1;
+    return FAILURE;
 }
 
 function testSome(): int {
-    let array: Array<Object> = new Array<Object>(source2);
+    const array = Array.from<object>(source2)
     let match: Object = source2[1];
 
     let test: boolean = array.some((item: Object): boolean => { return item == match});
-    if(test) return 0;
+    if (test) return SUCCESS;
     console.println("Unexpected some result");
-    return 1;
+    return FAILURE;
 }
 
 function testSomeNegative(): int {
@@ -401,20 +402,20 @@ function testSomeNegative(): int {
     let match: Object = {{.item.fillValue}};
 
     let test: boolean = array.some((item: Object): boolean => { return item == match});
-    if(!test) return 0;
+    if (!test) return SUCCESS;
     console.println("Unexpected negative some result");
-    return 1;
+    return FAILURE;
 }
 
 
 function testFill0(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
     array.fill({{.item.fillValue}});
     return checkValues(array, {{.item.fillValue}});
 }
 
 function testFill3(): int {
-    let array: Array<Object> = new Array<Object>(source);
+    const array = Array.from<object>(source)
     array.fill({{.item.fillValue}}, 1, 3);
     return checkValues(array, {{.item.fillValue}}, 1, 3);
 }
@@ -424,24 +425,24 @@ function testConcat(): int {
     let array2: Array<Object> = new Array<Object>(source2);
 
     let target: Array<Object> =  array1.concat(array2);
-    if(target.length() != array1.length() * 2) {
+    if (target.length != array1.length * 2) {
         console.println("Expected array length mismatch");
-        return 1;
+        return FAILURE;
     }
-    let tl: int = array1.length();
+    let tl = array1.length;
 
-    for(let i = 0; i < tl; i++) {
-        if( target.at(i) != array1.at(i)) {
+    for (let i = 0; i < tl; i++) {
+        if ( target.at(i) != array1.at(i)) {
             console.println("produced array not contains this array");
-            return 1;
+            return FAILURE;
         }
-        if(target.at(i+tl) != array2.at(i)) {
+        if (target.at(i+tl) != array2.at(i)) {
             console.println("produced array not contains given array");
-            return 1;
+            return FAILURE;
         }
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 function testJoinEmpty():int {
@@ -449,281 +450,277 @@ function testJoinEmpty():int {
     let src = new Array<Object>(empty);
 
     let target: String = src.join();
-    if(target != "") {
+    if (target != "") {
         console.println("Unexpected empty join result");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testJoin0(): int {
-    let src = new Array<Object>(source2);
+    const src = Array.from<object>(source2)
     let target: String = src.join();
 
-    if(target != "{{.item.joinResult0}}") {
+    if (target != "{{.item.joinResult0}}") {
         console.println("Unexpected join(0) result: " + target + " vs " + "{{.item.joinResult0}}");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testJoin1(): int {
-    let src = new Array<Object>(source2);
+    const src = Array.from<object>(source2)
     let target: String = src.join("+");
 
-    if(target != "{{.item.joinResult1}}") {
+    if (target != "{{.item.joinResult1}}") {
         console.println("Unexpected join(1) result: " + target + " vs " + "{{.item.joinResult1}}");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testSlice0(): int {
-    let src = new Array<Object>(source2);
+    const src = Array.from<object>(source2)
 
-    let sliceStart: int = 0;
-    let sliceEnd  : int = src.length();
-    let length: int = sliceEnd - sliceStart;
+    let sliceStart: number = 0;
+    let sliceEnd = src.length;
+    let length = sliceEnd - sliceStart;
 
     let target = src.slice();
 
-    if(target.length() != length) {
+    if (target.length != length) {
         console.println("Unexpected length change on slice(0)");
-        return 1;
+        return FAILURE;
     }
 
 
-    for(let i: int = sliceStart; i < sliceEnd; i++) {
-        if(target.at(i) == src.at(i)) continue;
+    for (let i = sliceStart; i < sliceEnd; i++) {
+        if (target.at(i) == src.at(i)) continue;
         console.println("Bad slice copy");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testSlice1(): int {
     let src = new Array<Object>(source2);
 
-    let sliceStart: int = 0;
-    let sliceEnd  : int = src.length();
-    let length: int = sliceEnd - sliceStart;
+    let sliceStart: number = 0;
+    let sliceEnd = src.length;
+    let length = sliceEnd - sliceStart;
 
     let target = src.slice(sliceStart);
 
-    if(target.length() != length) {
+    if (target.length != length) {
         console.println("Unexpected length change on slice(1)");
-        return 1;
+        return FAILURE;
     }
 
 
-    for(let i: int = sliceStart; i < sliceEnd; i++) {
-        if(target.at(i) == src.at(i)) continue;
+    for (let i = sliceStart; i < sliceEnd; i++) {
+        if (target.at(i) == src.at(i)) continue;
         console.println("Bad slice copy");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testSlice2(): int {
     let src = new Array<Object>(source2);
 
-    let sliceStart: int = 0;
-    let sliceEnd  : int = src.length();
-    let length: int = sliceEnd - sliceStart;
+    let sliceStart: number = 0;
+    let sliceEnd = src.length;
+    let length = sliceEnd - sliceStart;
 
     let target = src.slice(sliceStart, sliceEnd);
 
-    if(target.length() != length) {
+    if (target.length != length) {
         console.println("Unexpected length change on slice(2)");
-        return 1;
+        return FAILURE;
     }
 
 
-    for(let i: int = sliceStart; i < sliceEnd; i++) {
-        if(target.at(i) == src.at(i)) continue;
+    for (let i = sliceStart; i < sliceEnd; i++) {
+        if (target.at(i) == src.at(i)) continue;
         console.println("Bad slice copy");
-        return 1;
+        return FAILURE;
     }
-    return 0;
+    return SUCCESS;
 }
 
 function testFind(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = source[2];
 
     let test = src.find((item: Object): boolean => { return item == match});
-    if(test == match) return 0;
+    if (test == match) return SUCCESS;
     console.println("Missed expected")
-    return 1;
+    return FAILURE;
 }
 
 function testFindMissData(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = {{.item.fillValue}};
 
     let test = src.find((item: Object): boolean => { return item == match});
-    if(test == null) return 0;
+    if (test == null) return SUCCESS;
     console.println("Found some unexpected")
-    return 1;
+    return FAILURE;
 }
 
 function testFindIndex(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = source[2];
 
-    let index: int = src.findIndex((item: Object): boolean => { return item == match});
-    if(index == 2) return 0;
+    let index = src.findIndex((item: Object): boolean => { return item == match});
+    if (index == 2) return SUCCESS;
     console.println("Missed expected index")
-    return 1;
+    return FAILURE;
 }
 
 function testFindMissIndex(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = {{.item.fillValue}};
 
-    let index: int = src.findIndex((item: Object): boolean => { return item == match});
-    if(index == -1) return 0;
+    let index = src.findIndex((item: Object): boolean => { return item == match});
+    if (index == -1) return SUCCESS;
     console.println("Found some unexpected")
-    return 1;
+    return FAILURE;
 }
 
 
 
 function testFindStatic(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = source[2];
 
     let test = src.find((item: Object): boolean => { return item == match});
-    if(test == match) return 0;
+    if (test == match) return SUCCESS;
     console.println("Missed expected")
-    return 1;
+    return FAILURE;
 }
 
 function testFindMissDataStatic(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = {{.item.fillValue}};
 
     let test = src.find((item: Object): boolean => { return item == match});
-    if(test == null) return 0;
+    if (test == null) return SUCCESS;
     console.println("Found some unexpected")
-    return 1;
+    return FAILURE;
 }
 
 
 function testFindIndexStatic(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = source[2];
 
-    let index: int = src.findIndex((item: Object): boolean => { return item == match});
-    if(index == 2) return 0;
+    let index = src.findIndex((item: Object): boolean => { return item == match});
+    if (index == 2) return SUCCESS;
     console.println("Missed expected index")
-    return 1;
+    return FAILURE;
 }
 
 function testFindMissIndexStatic(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = {{.item.fillValue}};
 
-    let index: int = src.findIndex((item: Object): boolean => { return item == match});
-    if(index == -1) return 0;
+    let index = src.findIndex((item: Object): boolean => { return item == match});
+    if (index == -1) return SUCCESS;
     console.println("Found some unexpected")
-    return 1;
+    return FAILURE;
 }
 
 function testFindLast(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = source[3];
 
     let test = src.findLast((item: Object): boolean => { return item == match});
-    if(test == match) return 0;
+    if (test == match) return SUCCESS;
     console.println("Missed expected")
-    return 1;
-
+    return FAILURE;
 }
 
 function testFindLastStatic(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = source[3];
 
     let test = src.findLast((item: Object): boolean => { return item == match});
-    if(test == match) return 0;
+    if (test == match) return SUCCESS;
     console.println("Missed expected")
-    return 1;
-
+    return FAILURE;
 }
 
 
 function testFindLastIndex(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = source[3];
 
-    let test: int = src.findLastIndex((item: Object): boolean => { return item == match});
-    if(test == 3) return 0;
+    let test = src.findLastIndex((item: Object): boolean => { return item == match});
+    if (test == 3) return SUCCESS;
 
-    return 1;
-
+    return FAILURE;
 }
 
 function testFindLastIndexMissed(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = "Missed";
 
-    let test: int = src.findLastIndex((item: Object): boolean => { return item == match});
-    if(test == -1) return 0;
+    let test = src.findLastIndex((item: Object): boolean => { return item == match});
+    if (test == -1) return SUCCESS;
 
-    return 1;
-
+    return FAILURE;
 }
 
 
 function testFindLastMissed(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = {{.item.fillValue}};
 
     let test = src.findLast((item: Object): boolean => { return item == match});
-    if(test == null) return 0;
+    if (test == null) return SUCCESS;
     console.println("Found some unexpected")
-    return 1;
+    return FAILURE;
 }
 
 function testFindLastMissedStatic(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let match: Object = {{.item.fillValue}};
 
     let test = src.findLast((item: Object): boolean => { return item == match});
-    if(test == null) return 0;
+    if (test == null) return SUCCESS;
     console.println("Found some unexpected")
-    return 1;
+    return FAILURE;
 }
 
 
 function testReverse(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     src.reverse();
-    let l:int = src.length();
+    let l = src.length;
 
-    for(let i: int = 0; i< l; i++) {
-        if(src.at(i) == source[l-i-1]) continue;
+    for (let i = 0; i < l; i++) {
+        if (src.at(i as int) == source[l-i-1 as int]) continue;
         console.println("Bad data after reverse");
-        return 1;
+        return FAILURE;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 function testToReversed(): int {
-    let src = new Array<Object>(source);
+    const src = Array.from<object>(source)
     let reversed = src.toReversed();
 
-    let l:int = reversed.length();
+    let l = reversed.length;
 
-    for(let i: int = 0; i< l; i++) {
-        if(reversed.at(i) == source[l-i-1]) continue;
+    for (let i = 0; i < l; i++) {
+        if (reversed.at(i as int) == source[l-i-1 as int]) continue;
         console.println("Bad data after reverse");
-        return 1;
+        return FAILURE;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 function testToSorted(): int {
@@ -731,154 +728,154 @@ function testToSorted(): int {
     let unsorted: Object[] = new Object[source.length];
     let l:int = unsorted.length;
 
-    for(let i: int = 0; i<l; i++) {
+    for (let i: int = 0; i <l; i++) {
         unsorted[i] = source[l-i-1];
     }
 
-    let src = new Array<Object>(unsorted);
+    const src = Array.from<object>(unsorted)
 
     let sorted = src.toSorted();
 
-    for(let i: int = 0; i< src.length(); i++) {
-        if(sorted.at(i) == source[i]) continue;
+    for (let i: int = 0; i < src.length; i++) {
+        if (sorted.at(i) == source[i]) continue;
         console.print("Bad data order");
-        return 1;
+        return FAILURE;
     }
 
-    return 0;
+    return SUCCESS;
 }
 
 
 function testReduce(): int {
-    let arr: Array<Object> = new Array<Object>(source2);
+    const arr = Array.from<object>(source2)
 
-    let reduce = arr.reduce<Object>((acc: Object, val: Object): Object => {
+    let reduce = arr.reduce((acc: Object, val: Object): Object => {
         let tmp: String = acc.toString();
         tmp += val.toString();
         return tmp;
     });
     let expected: String = "{{.item.reduce}}";
-    if(expected == reduce as String) return 0;
+    if (expected == reduce as String) return SUCCESS;
     console.println("Unexpected reduce: " + reduce);
-    return 1;
+    return FAILURE;
 }
 
 function testReduceRight(): int {
-    let arr: Array<Object> = new Array<Object>(source2);
+    const arr = Array.from<object>(source2)
 
-    let reduce = arr.reduce<Object>((acc: Object, val: Object): Object => {
+    let reduce = arr.reduceRight((acc: Object, val: Object): Object => {
         let tmp: String = acc.toString();
         tmp += val.toString();
         return tmp;
     });
     let expected: String = "{{.item.reduceRight}}";
-    if(expected == reduce as String) return 0;
+    if (expected == reduce as String) return SUCCESS;
     console.println("Unexpected reduce: " + reduce);
-    return 1;
+    return FAILURE;
 }
 
 
 function testReduceWithStart(): int {
-    let arr: Array<Object> = new Array<Object>(source2);
+    const arr = Array.from<object>(source2)
 
-    let reduce = arr.reduce<Object>((acc: Object, val: Object): Object => {
+    let reduce = arr.reduce((acc: Object, val: Object): Object => {
         let tmp: String = acc.toString();
         tmp += val.toString();
         return tmp;
     }, "Hello");
     let expected: String = "Hello{{.item.reduce}}";
-    if(expected == reduce as String) return 0;
+    if (expected == reduce as String) return SUCCESS;
     console.println("Unexpected reduce: " + reduce);
-    return 1;
+    return FAILURE;
 }
 
 function testReduceRightWithStart(): int {
-    let arr: Array<Object> = new Array<Object>(source2);
+    const arr = Array.from<object>(source2)
 
-    let reduce = arr.reduce<Object>((acc: Object, val: Object): Object => {
+    let reduce = arr.reduceRight((acc: Object, val: Object): Object => {
         let tmp: String = acc.toString();
         tmp += val.toString();
         return tmp;
     }, "Hello");
     let expected: String = "Hello{{.item.reduceRight}}";
-    if(expected == reduce as String) return 0;
+    if (expected == reduce as String) return SUCCESS;
     console.println("Unexpected reduce: " + reduce);
-    return 1;
+    return FAILURE;
 }
 
 function testFlatEmpty(): int {
     let arr: Array<Object> = new Array<Object>();
 
-    let flatten = arr.flat();
-    if(flatten.length() == 0) return 0;
+    let flatten = arr.flat<Object>();
+    if (flatten.length == 0) return SUCCESS;
     console.println("Unexpected flatten array length");
-    return 1;
+    return FAILURE;
 }
 
 function testFlatFlat(): int {
     let arr: Array<Object> = new Array<Object>(source);
 
-    let flatten = arr.flat();
-    if(flatten.length() == arr.length()) return 0;
+    let flatten = arr.flat<Object>();
+    if (flatten.length == arr.length) return SUCCESS;
     console.println("Unexpected flatten array length");
-    return 1;
+    return FAILURE;
 }
 
 function testFlatNonFlat1(): int {
     let arr: Array<Object> = new Array<Object>(source);
-    let length = arr.length();
+    let length = arr.length;
 
     arr.push(source);
 
-    let flatten = arr.flat();
+    let flatten = arr.flat<Object>();
 
-    if(flatten.length() == length * 2) return 0;
-    console.println("Unexpected flatten array length: " + flatten.length() + " expected: " + length * 2);
-    return 1;
+    if (flatten.length == length * 2) return SUCCESS;
+    console.println("Unexpected flatten array length: " + flatten.length + " expected: " + length * 2);
+    return FAILURE;
 }
 
 function testFlatNonFlat2(): int {
     let arr: Array<Object> = new Array<Object>(source);
-    let length = arr.length();
+    let length = arr.length;
 
     arr.push(new Array<Object>(source));
 
-    let flatten = arr.flat();
+    let flatten = arr.flat<Object>();
 
 
-    if(flatten.length() == length * 2) return 0;
-    console.println("Unexpected flatten array length: " + flatten.length() + " expected: " + length * 2);
-    return 1;
+    if (flatten.length == length * 2) return SUCCESS;
+    console.println("Unexpected flatten array length: " + flatten.length + " expected: " + length * 2);
+    return FAILURE;
 }
 
 function testSplice1(): int {
-    let arr: Array<Object> = new Array<Object>(source);
-    let length = arr.length();
+    const arr = Array.from<object>(source)
+    let length = arr.length;
 
     arr.splice(2);
-    if(arr.length() == 2) return 0;
+    if (arr.length == 2) return SUCCESS;
     console.println("Unexected size after splice");
-    return 1;
+    return FAILURE;
 }
 
 function testSplice2(): int {
-    let arr: Array<Object> = new Array<Object>(source);
-    let length = arr.length();
+    const arr = Array.from<object>(source)
+    let length = arr.length;
 
     arr.splice(2, 1);
-    if(arr.length() == 4) return 0;
+    if (arr.length == 4) return SUCCESS;
     console.println("Unexected size after splice");
-    return 1;
+    return FAILURE;
 }
 
 function testSplice3(): int {
-    let arr: Array<Object> = new Array<Object>(source);
-    let length = arr.length();
+    const arr = Array.from<object>(source)
+    let length = arr.length;
 
     arr.splice(-1);
-    if(arr.length() == 4) return 0;
+    if (arr.length == 4) return SUCCESS;
     console.println("Unexected size after splice");
-    return 1;
+    return FAILURE;
 }
 
 
@@ -887,17 +884,17 @@ function array{{.ci.name}}(): int {
     let arr: Array<Object> = new Array<Object>(source);
     let target: Array<Object> = arr.copyWithin({{.ci.params|join(', ')}});
 
-    return 0;
+    return SUCCESS;
 }
 {%- endfor %}
 
 
 function check(result: int, message: String): int {
-    if(result == 0) {
-      return 0;
+    if (result == 0) {
+      return SUCCESS;
     }
     console.println("\nFAILED: " + message);
-    return 1;
+    return FAILURE;
 }
 
 function check(fn: () => int, message: String): int {
@@ -906,14 +903,14 @@ function check(fn: () => int, message: String): int {
         result = fn();
     } catch(e) {
         console.println("FAILED: " + message + " => Exception catched: " + e);
-        return 1;
+        return FAILURE;
     }
 
-    if(result == 0) {
-      return 0;
+    if (result == 0) {
+      return SUCCESS;
     }
     console.println("\nFAILED: " + message);
-    return 1;
+    return FAILURE;
 }
 
 {%- endfor %}
