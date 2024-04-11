@@ -20,5 +20,5 @@ desc: If the result of the evaluation of e is not equal to null or undefined, th
 function main(): void {
   let i: Int|undefined = 5;
   let ii: Int|undefined = undefined;
-  assert (0 ? ii : i)!;
+  assert !!(0 ? ii : i)!;
 }
