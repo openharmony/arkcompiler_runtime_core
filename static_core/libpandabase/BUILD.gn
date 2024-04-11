@@ -15,11 +15,14 @@ import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
 import("//build/ohos.gni")
 
-group("libarktsbase_package") {
+ohos_static_library("libarktsbase_package") {
   deps = []
   if (enable_static_vm) {
     deps += [ ":libarktsbase_frontend_static" ]
   }
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 config("arkbase_public_config") {
