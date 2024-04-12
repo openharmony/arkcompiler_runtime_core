@@ -1,33 +1,61 @@
-# DECLGEN TOOL FOR `.d.sts` FILES GENERATION
+# DECLGEN TOOL FOR `.d.ets` FILES GENERATION
 
-## PREREQUISITES
+This tool generates `.d.ets` files with declarations in `ets` for given TypeScript source code files.
 
-in order to use tool, you need to have `third_party` initialized by the cmake.
+It
+* is based on rules from the "TS to ETS cookbook,
+* autofixes some subset of TS code,
+* outputs errors in .json format for code which is not autofixable.
 
-## INSTALL
+## Installation
 
 ```
-cd declgen_ts2ets/
 npm i
 ```
 
-## COMPILE TOOL
+## Build
 
 ```
-npm run compile
+npm run build
 ```
 
-## RUN TOOL
+## Run
 
 ```
-FNAME=/path/to/the/ts/file OUT_PATH=/path/to/the/directory/for/the/generated/decl/files npm run declgen
+npm run declgen -- <declgen options>
 ```
 
-this command reads the provided `${FNAME}` `.ts` file and generates corresponding declaration file for the static VM in the `${OUT_PATH}` folder
+### Example
 
-## TESTS
+```
+npm run build
+npm run declgen -- -f my_file.ts
+```
 
-tests are run with two scripts:
+This generates a file `my_file.d.ets` with `ets` declarations for `my_file.ts`.
 
-- `./scripts/ohos_sdk_tests.sh` - runs es2panda on the main file that imports generated declarations from ohos sdk. usage: `./scripts/ohos_sdk_tests.sh /path/to/ohos/sdk/ /path/to/panda/build`
-- `.scripts/templated_tests.sh` - generates set of simple tests using templates in the `templates` folder and runs them. assures the format of tool's output
+## Options
+To see all available options, run the following command:
+
+```
+npm run declgen -- --help
+```
+
+```
+Usage: declgen [options]
+
+Declarations generator for ets.
+
+Options:
+  -o, --out <outDir>            Directory where to put generated declarations.
+  -p, --project <tsconfigPath>  path to TS project config file
+  -d, --dir <projectDir>        Directory with TS files to generate declrartions from. (default: [])
+  -f, --file <fileName>         TS file to generate declarations from. (default: [])
+  -h, --help                    display help for command
+```
+
+## Test
+
+```
+npm run test
+```

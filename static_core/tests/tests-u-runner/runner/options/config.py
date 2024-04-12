@@ -53,7 +53,7 @@ class Config:
     @cached_property
     @value(
         yaml_path="test-suites",
-        cli_name=["test_suites", "test262", "parser", "hermes", "system",
+        cli_name=["test_suites", "test262", "parser", "declgenparser", "hermes", "system",
                   "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom"],
         cast_to_type=_to_test_suites,
         required=True

@@ -78,6 +78,10 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
         default=None,
         help='run parser tests (ex --regression')
     parser.add_argument(
+        '--declgenparser', action='store_true', dest='declgenparser',
+        default=None,
+        help="run declgen parser tests")
+    parser.add_argument(
         '--hermes', action='store_true', dest='hermes',
         default=None,
         help='run Hermes tests')
