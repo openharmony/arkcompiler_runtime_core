@@ -57,7 +57,6 @@ class Int8ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-
 /**
  * JS Int8Array API-compatible class
  */
@@ -281,7 +280,6 @@ export final class Int8Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -295,7 +293,6 @@ export final class Int8Array implements Iterable<Number> {
         }
         return val
     }
-
 
     /**
      * Assigns val as element on index.
@@ -316,13 +313,14 @@ export final class Int8Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafe(index, v as byte)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -342,13 +340,14 @@ export final class Int8Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val as byte)
         this.setUnsafe(index, v as byte)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -368,7 +367,7 @@ export final class Int8Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: byte): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
@@ -384,7 +383,7 @@ export final class Int8Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public $_get(index: number): number {
-        this.$_get(index as int)
+        return this.$_get(index as int)
     }
 
     /**
@@ -400,7 +399,6 @@ export final class Int8Array implements Iterable<Number> {
         }
         return this.getUnsafe(index) as number
     }
-
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -592,7 +590,6 @@ export final class Int8Array implements Iterable<Number> {
         return this.fill(value as byte, start as int, end as int)
     }
 
-
     /**
      * Fills the Int8Array with specified value
      *
@@ -614,6 +611,7 @@ export final class Int8Array implements Iterable<Number> {
     public fill(value: number, start: int, end: int): Int8Array {
         return this.fill(value as byte, start as int, end as int)
     }
+
     /**
      * Fills the Int8Array with specified value
      *
@@ -635,7 +633,6 @@ export final class Int8Array implements Iterable<Number> {
     public fill(value: byte, start: int, end?: number): Int8Array {
         return this.fill(value, start as int, asIntOrDefault(end, this.length as int));
     }
-
 
     /**
      * Fills the Int8Array with specified value
@@ -731,7 +728,6 @@ export final class Int8Array implements Iterable<Number> {
         }
     }
 
-
     /**
      * Copies all elements of arr to the current Int8Array.
      *
@@ -814,7 +810,6 @@ export final class Int8Array implements Iterable<Number> {
         return false
     }
 
-
     /**
      * Checks if specified argument is in Int8Array
      *
@@ -873,7 +868,6 @@ export final class Int8Array implements Iterable<Number> {
         }
         return -1
     }
-
 
     /**
      * Returns index of specified element
@@ -981,7 +975,6 @@ export final class Int8Array implements Iterable<Number> {
         return -1
     }
 
-
     /**
      * Moves backwards and search val.
      *
@@ -1063,7 +1056,7 @@ export final class Int8Array implements Iterable<Number> {
         return this.slice(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a slice of current Int8Array using range [begin, end)
      *
      * @param begin start index to be taken into slice
@@ -1169,7 +1162,7 @@ export final class Int8Array implements Iterable<Number> {
         return this.subarray(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a Int8Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
@@ -1338,7 +1331,6 @@ export final class Int8Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-
     /**
      * Checks that all elements of Int8Array satisfy the passed function
      *
@@ -1429,13 +1421,13 @@ export final class Int8Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array
-    *
-    * @param fn a function to apply for each element of current Int8Array
-    *
-    * @returns a new Int8Array where for each element from current Int8Array fn was applied
-    */
+    /**
+     * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array
+     *
+     * @param fn a function to apply for each element of current Int8Array
+     *
+     * @returns a new Int8Array where for each element from current Int8Array fn was applied
+     */
     public map(fn: (val: number) => number): Int8Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -1480,14 +1472,12 @@ export final class Int8Array implements Iterable<Number> {
         }
         else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            /*
-                let mustPrecede: (a: byte, b: byte) => boolean =
-                    (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
-                sort(arr, mustPrecede)
-                for (let i = 0; i < this.length as int; ++i) {
-                    this.set(i, arr[i])
-                }
-            */
+            // let mustPrecede: (a: byte, b: byte) => boolean =
+            //     (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
+            // sort(arr, mustPrecede)
+            // for (let i = 0; i < this.length as int; ++i) {
+            //     this.set(i, arr[i])
+            // }
         }
         return this
     }
@@ -1586,12 +1576,12 @@ export final class Int8Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array.
-    *
-    * @param fn a function to apply for each element of current Int8Array
-    *
-    * @returns a new Int8Array where for each element from current Int8Array fn was applied
-    */
+     * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array.
+     *
+     * @param fn a function to apply for each element of current Int8Array
+     *
+     * @returns a new Int8Array where for each element from current Int8Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Int8Array {
         let resBuf = new ArrayBuffer(this.length as int * Int8Array.BYTES_PER_ELEMENT as int)
         let res = new Int8Array(resBuf, 0, resBuf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
@@ -2012,7 +2002,6 @@ class Int16ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-
 /**
  * JS Int16Array API-compatible class
  */
@@ -2243,7 +2232,6 @@ export final class Int16Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -2257,7 +2245,6 @@ export final class Int16Array implements Iterable<Number> {
         }
         return val
     }
-
 
     /**
      * Assigns val as element on index.
@@ -2278,13 +2265,14 @@ export final class Int16Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafe(index, v as short)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -2304,13 +2292,14 @@ export final class Int16Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val as short)
         this.setUnsafe(index, v as short)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -2330,7 +2319,7 @@ export final class Int16Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: short): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
@@ -2346,7 +2335,7 @@ export final class Int16Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public $_get(index: number): number {
-        this.$_get(index as int)
+        return this.$_get(index as int)
     }
 
     /**
@@ -2362,7 +2351,6 @@ export final class Int16Array implements Iterable<Number> {
         }
         return this.getUnsafe(index) as number
     }
-
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -2554,7 +2542,6 @@ export final class Int16Array implements Iterable<Number> {
         return this.fill(value as short, start as int, end as int)
     }
 
-
     /**
      * Fills the Int16Array with specified value
      *
@@ -2576,6 +2563,7 @@ export final class Int16Array implements Iterable<Number> {
     public fill(value: number, start: int, end: int): Int16Array {
         return this.fill(value as short, start as int, end as int)
     }
+
     /**
      * Fills the Int16Array with specified value
      *
@@ -2597,7 +2585,6 @@ export final class Int16Array implements Iterable<Number> {
     public fill(value: short, start: int, end?: number): Int16Array {
         return this.fill(value, start as int, asIntOrDefault(end, this.length as int));
     }
-
 
     /**
      * Fills the Int16Array with specified value
@@ -2693,7 +2680,6 @@ export final class Int16Array implements Iterable<Number> {
         }
     }
 
-
     /**
      * Copies all elements of arr to the current Int16Array.
      *
@@ -2776,7 +2762,6 @@ export final class Int16Array implements Iterable<Number> {
         return false
     }
 
-
     /**
      * Checks if specified argument is in Int16Array
      *
@@ -2835,7 +2820,6 @@ export final class Int16Array implements Iterable<Number> {
         }
         return -1
     }
-
 
     /**
      * Returns index of specified element
@@ -2943,7 +2927,6 @@ export final class Int16Array implements Iterable<Number> {
         return -1
     }
 
-
     /**
      * Moves backwards and search val.
      *
@@ -3025,7 +3008,7 @@ export final class Int16Array implements Iterable<Number> {
         return this.slice(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a slice of current Int16Array using range [begin, end)
      *
      * @param begin start index to be taken into slice
@@ -3131,7 +3114,7 @@ export final class Int16Array implements Iterable<Number> {
         return this.subarray(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a Int16Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
@@ -3300,7 +3283,6 @@ export final class Int16Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-
     /**
      * Checks that all elements of Int16Array satisfy the passed function
      *
@@ -3391,13 +3373,13 @@ export final class Int16Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array
-    *
-    * @param fn a function to apply for each element of current Int16Array
-    *
-    * @returns a new Int16Array where for each element from current Int16Array fn was applied
-    */
+    /**
+     * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array
+     *
+     * @param fn a function to apply for each element of current Int16Array
+     *
+     * @returns a new Int16Array where for each element from current Int16Array fn was applied
+     */
     public map(fn: (val: number) => number): Int16Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -3442,14 +3424,12 @@ export final class Int16Array implements Iterable<Number> {
         }
         else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            /*
-                let mustPrecede: (a: short, b: short) => boolean =
-                    (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
-                sort(arr, mustPrecede)
-                for (let i = 0; i < this.length as int; ++i) {
-                    this.set(i, arr[i])
-                }
-            */
+            // let mustPrecede: (a: short, b: short) => boolean =
+            //     (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
+            // sort(arr, mustPrecede)
+            // for (let i = 0; i < this.length as int; ++i) {
+            //     this.set(i, arr[i])
+            // }
         }
         return this
     }
@@ -3548,12 +3528,12 @@ export final class Int16Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array.
-    *
-    * @param fn a function to apply for each element of current Int16Array
-    *
-    * @returns a new Int16Array where for each element from current Int16Array fn was applied
-    */
+     * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array.
+     *
+     * @param fn a function to apply for each element of current Int16Array
+     *
+     * @returns a new Int16Array where for each element from current Int16Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Int16Array {
         let resBuf = new ArrayBuffer(this.length as int * Int16Array.BYTES_PER_ELEMENT as int)
         let res = new Int16Array(resBuf, 0, resBuf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
@@ -3978,7 +3958,6 @@ class Int32ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-
 /**
  * JS Int32Array API-compatible class
  */
@@ -4209,7 +4188,6 @@ export final class Int32Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -4223,7 +4201,6 @@ export final class Int32Array implements Iterable<Number> {
         }
         return val
     }
-
 
     /**
      * Assigns val as element on index.
@@ -4244,13 +4221,14 @@ export final class Int32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafe(index, v as int)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -4270,7 +4248,7 @@ export final class Int32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
@@ -4286,7 +4264,7 @@ export final class Int32Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public $_get(index: number): number {
-        this.$_get(index as int)
+        return this.$_get(index as int)
     }
 
     /**
@@ -4302,7 +4280,6 @@ export final class Int32Array implements Iterable<Number> {
         }
         return this.getUnsafe(index) as number
     }
-
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -4494,7 +4471,6 @@ export final class Int32Array implements Iterable<Number> {
         return this.fill(value as int, start as int, end as int)
     }
 
-
     /**
      * Fills the Int32Array with specified value
      *
@@ -4516,6 +4492,7 @@ export final class Int32Array implements Iterable<Number> {
     public fill(value: number, start: int, end: int): Int32Array {
         return this.fill(value as int, start as int, end as int)
     }
+
     /**
      * Fills the Int32Array with specified value
      *
@@ -4537,7 +4514,6 @@ export final class Int32Array implements Iterable<Number> {
     public fill(value: int, start: int, end?: number): Int32Array {
         return this.fill(value, start as int, asIntOrDefault(end, this.length as int));
     }
-
 
     /**
      * Fills the Int32Array with specified value
@@ -4633,7 +4609,6 @@ export final class Int32Array implements Iterable<Number> {
         }
     }
 
-
     /**
      * Copies all elements of arr to the current Int32Array.
      *
@@ -4716,7 +4691,6 @@ export final class Int32Array implements Iterable<Number> {
         return false
     }
 
-
     /**
      * Checks if specified argument is in Int32Array
      *
@@ -4775,7 +4749,6 @@ export final class Int32Array implements Iterable<Number> {
         }
         return -1
     }
-
 
     /**
      * Returns index of specified element
@@ -4883,7 +4856,6 @@ export final class Int32Array implements Iterable<Number> {
         return -1
     }
 
-
     /**
      * Moves backwards and search val.
      *
@@ -4965,7 +4937,7 @@ export final class Int32Array implements Iterable<Number> {
         return this.slice(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a slice of current Int32Array using range [begin, end)
      *
      * @param begin start index to be taken into slice
@@ -5071,7 +5043,7 @@ export final class Int32Array implements Iterable<Number> {
         return this.subarray(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a Int32Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
@@ -5240,7 +5212,6 @@ export final class Int32Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-
     /**
      * Checks that all elements of Int32Array satisfy the passed function
      *
@@ -5331,13 +5302,13 @@ export final class Int32Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array
-    *
-    * @param fn a function to apply for each element of current Int32Array
-    *
-    * @returns a new Int32Array where for each element from current Int32Array fn was applied
-    */
+    /**
+     * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array
+     *
+     * @param fn a function to apply for each element of current Int32Array
+     *
+     * @returns a new Int32Array where for each element from current Int32Array fn was applied
+     */
     public map(fn: (val: number) => number): Int32Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -5382,14 +5353,12 @@ export final class Int32Array implements Iterable<Number> {
         }
         else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            /*
-                let mustPrecede: (a: int, b: int) => boolean =
-                    (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-                sort(arr, mustPrecede)
-                for (let i = 0; i < this.length as int; ++i) {
-                    this.set(i, arr[i])
-                }
-            */
+            // let mustPrecede: (a: int, b: int) => boolean =
+            //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
+            // sort(arr, mustPrecede)
+            // for (let i = 0; i < this.length as int; ++i) {
+            //     this.set(i, arr[i])
+            // }
         }
         return this
     }
@@ -5488,12 +5457,12 @@ export final class Int32Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array.
-    *
-    * @param fn a function to apply for each element of current Int32Array
-    *
-    * @returns a new Int32Array where for each element from current Int32Array fn was applied
-    */
+     * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array.
+     *
+     * @param fn a function to apply for each element of current Int32Array
+     *
+     * @returns a new Int32Array where for each element from current Int32Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Int32Array {
         let resBuf = new ArrayBuffer(this.length as int * Int32Array.BYTES_PER_ELEMENT as int)
         let res = new Int32Array(resBuf, 0, resBuf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
@@ -5918,7 +5887,6 @@ class BigInt64ArrayIterator implements IterableIterator<BigInt> {
     }
 }
 
-
 /**
  * JS BigInt64Array API-compatible class
  */
@@ -6149,7 +6117,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         this.byteOffset = 0
     }
 
-
     internal zeroIfInfinity(val: BigInt): BigInt {
         if ((val.getLong() == Infinity) || (val.getLong() == -Infinity)) {
             return new BigInt(0)
@@ -6163,7 +6130,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         }
         return val
     }
-
 
     /**
      * Assigns val as element on index.
@@ -6184,13 +6150,14 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: BigInt): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val)
         this.setUnsafe(index, v.getLong())
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -6210,13 +6177,14 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         let v = this.zeroIfInfinity(val as long)
         this.setUnsafe(index, v as long)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -6236,7 +6204,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * @param index index to change
      */
     public $_set(index: int, val: long): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
@@ -6252,7 +6220,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * @returns a primitive at index
      */
     public $_get(index: number): BigInt {
-        this.$_get(index as int)
+        return this.$_get(index as int)
     }
 
     /**
@@ -6268,7 +6236,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         }
         return new BigInt(this.getUnsafe(index))
     }
-
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -6460,7 +6427,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         return this.fill(value.getLong(), start as int, end as int)
     }
 
-
     /**
      * Fills the BigInt64Array with specified value
      *
@@ -6482,6 +6448,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
     public fill(value: BigInt, start: int, end: int): BigInt64Array {
         return this.fill(value.getLong(), start as int, end as int)
     }
+
     /**
      * Fills the BigInt64Array with specified value
      *
@@ -6503,7 +6470,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
     public fill(value: long, start: int, end?: number): BigInt64Array {
         return this.fill(value, start as int, asIntOrDefault(end, this.length as int));
     }
-
 
     /**
      * Fills the BigInt64Array with specified value
@@ -6599,7 +6565,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         }
     }
 
-
     /**
      * Copies all elements of arr to the current BigInt64Array.
      *
@@ -6682,7 +6647,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         return false
     }
 
-
     /**
      * Checks if specified argument is in BigInt64Array
      *
@@ -6741,7 +6705,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         }
         return -1
     }
-
 
     /**
      * Returns index of specified element
@@ -6849,7 +6812,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
         return -1
     }
 
-
     /**
      * Moves backwards and search val.
      *
@@ -6931,7 +6893,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         return this.slice(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a slice of current BigInt64Array using range [begin, end)
      *
      * @param begin start index to be taken into slice
@@ -7037,7 +6999,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
         return this.subarray(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a BigInt64Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
@@ -7206,7 +7168,6 @@ export final class BigInt64Array implements Iterable<BigInt> {
     }
 
     /// === with element lambda functions ===
-
     /**
      * Checks that all elements of BigInt64Array satisfy the passed function
      *
@@ -7297,13 +7258,13 @@ export final class BigInt64Array implements Iterable<BigInt> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array
-    *
-    * @param fn a function to apply for each element of current BigInt64Array
-    *
-    * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
-    */
+    /**
+     * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array
+     *
+     * @param fn a function to apply for each element of current BigInt64Array
+     *
+     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
+     */
     public map(fn: (val: BigInt) => BigInt): BigInt64Array {
         let newF: (val: BigInt, index: number) => BigInt =
             (val: BigInt, index: number): BigInt => { return fn(val) }
@@ -7348,14 +7309,12 @@ export final class BigInt64Array implements Iterable<BigInt> {
         }
         else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            /*
-                let mustPrecede: (a: long, b: long) => boolean =
-                    (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
-                sort(arr, mustPrecede)
-                for (let i = 0; i < this.length as int; ++i) {
-                    this.set(i, arr[i])
-                }
-            */
+            // let mustPrecede: (a: long, b: long) => boolean =
+            //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
+            // sort(arr, mustPrecede)
+            // for (let i = 0; i < this.length as int; ++i) {
+            //     this.set(i, arr[i])
+            // }
         }
         return this
     }
@@ -7454,12 +7413,12 @@ export final class BigInt64Array implements Iterable<BigInt> {
     }
 
     /**
-    * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array.
-    *
-    * @param fn a function to apply for each element of current BigInt64Array
-    *
-    * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
-    */
+     * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array.
+     *
+     * @param fn a function to apply for each element of current BigInt64Array
+     *
+     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
+     */
     public map(fn: (val: BigInt, index: number) => BigInt): BigInt64Array {
         let resBuf = new ArrayBuffer(this.length as int * BigInt64Array.BYTES_PER_ELEMENT as int)
         let res = new BigInt64Array(resBuf, 0, resBuf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
@@ -7884,7 +7843,6 @@ class Float32ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-
 /**
  * JS Float32Array API-compatible class
  */
@@ -8115,8 +8073,6 @@ export final class Float32Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-
-
     /**
      * Assigns val as element on index.
      *
@@ -8136,12 +8092,13 @@ export final class Float32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         this.setUnsafe(index, val as float)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -8161,12 +8118,13 @@ export final class Float32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         this.setUnsafe(index, val as float)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -8186,7 +8144,7 @@ export final class Float32Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: float): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
@@ -8201,7 +8159,7 @@ export final class Float32Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public $_get(index: number): number {
-        this.$_get(index as int)
+        return this.$_get(index as int)
     }
 
     /**
@@ -8217,7 +8175,6 @@ export final class Float32Array implements Iterable<Number> {
         }
         return this.getUnsafe(index) as number
     }
-
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -8409,7 +8366,6 @@ export final class Float32Array implements Iterable<Number> {
         return this.fill(value as float, start as int, end as int)
     }
 
-
     /**
      * Fills the Float32Array with specified value
      *
@@ -8431,6 +8387,7 @@ export final class Float32Array implements Iterable<Number> {
     public fill(value: number, start: int, end: int): Float32Array {
         return this.fill(value as float, start as int, end as int)
     }
+
     /**
      * Fills the Float32Array with specified value
      *
@@ -8452,7 +8409,6 @@ export final class Float32Array implements Iterable<Number> {
     public fill(value: float, start: int, end?: number): Float32Array {
         return this.fill(value, start as int, asIntOrDefault(end, this.length as int));
     }
-
 
     /**
      * Fills the Float32Array with specified value
@@ -8546,7 +8502,6 @@ export final class Float32Array implements Iterable<Number> {
         }
     }
 
-
     /**
      * Copies all elements of arr to the current Float32Array.
      *
@@ -8629,7 +8584,6 @@ export final class Float32Array implements Iterable<Number> {
         return false
     }
 
-
     /**
      * Checks if specified argument is in Float32Array
      *
@@ -8688,7 +8642,6 @@ export final class Float32Array implements Iterable<Number> {
         }
         return -1
     }
-
 
     /**
      * Returns index of specified element
@@ -8796,7 +8749,6 @@ export final class Float32Array implements Iterable<Number> {
         return -1
     }
 
-
     /**
      * Moves backwards and search val.
      *
@@ -8878,7 +8830,7 @@ export final class Float32Array implements Iterable<Number> {
         return this.slice(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a slice of current Float32Array using range [begin, end)
      *
      * @param begin start index to be taken into slice
@@ -8984,7 +8936,7 @@ export final class Float32Array implements Iterable<Number> {
         return this.subarray(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a Float32Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
@@ -9153,7 +9105,6 @@ export final class Float32Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-
     /**
      * Checks that all elements of Float32Array satisfy the passed function
      *
@@ -9244,13 +9195,13 @@ export final class Float32Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array
-    *
-    * @param fn a function to apply for each element of current Float32Array
-    *
-    * @returns a new Float32Array where for each element from current Float32Array fn was applied
-    */
+    /**
+     * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array
+     *
+     * @param fn a function to apply for each element of current Float32Array
+     *
+     * @returns a new Float32Array where for each element from current Float32Array fn was applied
+     */
     public map(fn: (val: number) => number): Float32Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -9295,14 +9246,12 @@ export final class Float32Array implements Iterable<Number> {
         }
         else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            /*
-                let mustPrecede: (a: float, b: float) => boolean =
-                    (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
-                sort(arr, mustPrecede)
-                for (let i = 0; i < this.length as int; ++i) {
-                    this.set(i, arr[i])
-                }
-            */
+            // let mustPrecede: (a: float, b: float) => boolean =
+            //     (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
+            // sort(arr, mustPrecede)
+            // for (let i = 0; i < this.length as int; ++i) {
+            //     this.set(i, arr[i])
+            // }
         }
         return this
     }
@@ -9401,12 +9350,12 @@ export final class Float32Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array.
-    *
-    * @param fn a function to apply for each element of current Float32Array
-    *
-    * @returns a new Float32Array where for each element from current Float32Array fn was applied
-    */
+     * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array.
+     *
+     * @param fn a function to apply for each element of current Float32Array
+     *
+     * @returns a new Float32Array where for each element from current Float32Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Float32Array {
         let resBuf = new ArrayBuffer(this.length as int * Float32Array.BYTES_PER_ELEMENT as int)
         let res = new Float32Array(resBuf, 0, resBuf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
@@ -9831,7 +9780,6 @@ class Float64ArrayIterator implements IterableIterator<Number> {
     }
 }
 
-
 /**
  * JS Float64Array API-compatible class
  */
@@ -10062,8 +10010,6 @@ export final class Float64Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
-
-
     /**
      * Assigns val as element on index.
      *
@@ -10083,12 +10029,13 @@ export final class Float64Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: number): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
         this.setUnsafe(index, val as double)
     }
+
     /**
      * Assigns val as element on index.
      *
@@ -10108,7 +10055,7 @@ export final class Float64Array implements Iterable<Number> {
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.length as int) {
             throw new RangeError("invalid index")
         }
@@ -10123,7 +10070,7 @@ export final class Float64Array implements Iterable<Number> {
      * @returns a primitive at index
      */
     public $_get(index: number): number {
-        this.$_get(index as int)
+        return this.$_get(index as int)
     }
 
     /**
@@ -10139,7 +10086,6 @@ export final class Float64Array implements Iterable<Number> {
         }
         return this.getUnsafe(index) as number
     }
-
 
     /**
      * Returns an instance of primitive type at passed index.
@@ -10331,7 +10277,6 @@ export final class Float64Array implements Iterable<Number> {
         return this.fill(value as double, start as int, end as int)
     }
 
-
     /**
      * Fills the Float64Array with specified value
      *
@@ -10413,8 +10358,6 @@ export final class Float64Array implements Iterable<Number> {
         }
     }
 
-
-
     /**
      * Copies all elements of arr to the current Float64Array.
      *
@@ -10488,8 +10431,6 @@ export final class Float64Array implements Iterable<Number> {
         return false
     }
 
-
-
     /**
      * Returns index of specified element
      *
@@ -10537,8 +10478,6 @@ export final class Float64Array implements Iterable<Number> {
         }
         return -1
     }
-
-
 
     /**
      * Joins data to a string
@@ -10635,8 +10574,6 @@ export final class Float64Array implements Iterable<Number> {
         return -1
     }
 
-
-
     /**
     * Creates a new Float64Array using initializer
     *
@@ -10707,7 +10644,7 @@ export final class Float64Array implements Iterable<Number> {
         return this.slice(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a slice of current Float64Array using range [begin, end)
      *
      * @param begin start index to be taken into slice
@@ -10813,7 +10750,7 @@ export final class Float64Array implements Iterable<Number> {
         return this.subarray(begin as int, end as int)
     }
 
-        /**
+    /**
      * Creates a Float64Array with the same underlying ArrayBufferLike
      *
      * @param begin start index, inclusive
@@ -10982,7 +10919,6 @@ export final class Float64Array implements Iterable<Number> {
     }
 
     /// === with element lambda functions ===
-
     /**
      * Checks that all elements of Float64Array satisfy the passed function
      *
@@ -11073,13 +11009,13 @@ export final class Float64Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array
-    *
-    * @param fn a function to apply for each element of current Float64Array
-    *
-    * @returns a new Float64Array where for each element from current Float64Array fn was applied
-    */
+    /**
+     * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array
+     *
+     * @param fn a function to apply for each element of current Float64Array
+     *
+     * @returns a new Float64Array where for each element from current Float64Array fn was applied
+     */
     public map(fn: (val: number) => number): Float64Array {
         let newF: (val: number, index: number) => number =
             (val: number, index: number): number => { return fn(val) }
@@ -11124,14 +11060,12 @@ export final class Float64Array implements Iterable<Number> {
         }
         else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            /*
-                let mustPrecede: (a: double, b: double) => boolean =
-                    (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
-                sort(arr, mustPrecede)
-                for (let i = 0; i < this.length as int; ++i) {
-                    this.set(i, arr[i])
-                }
-            */
+            // let mustPrecede: (a: double, b: double) => boolean =
+            //     (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
+            // sort(arr, mustPrecede)
+            // for (let i = 0; i < this.length as int; ++i) {
+            //     this.set(i, arr[i])
+            // }
         }
         return this
     }
@@ -11230,12 +11164,12 @@ export final class Float64Array implements Iterable<Number> {
     }
 
     /**
-    * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array.
-    *
-    * @param fn a function to apply for each element of current Float64Array
-    *
-    * @returns a new Float64Array where for each element from current Float64Array fn was applied
-    */
+     * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array.
+     *
+     * @param fn a function to apply for each element of current Float64Array
+     *
+     * @returns a new Float64Array where for each element from current Float64Array fn was applied
+     */
     public map(fn: (val: number, index: number) => number): Float64Array {
         let resBuf = new ArrayBuffer(this.length as int * Float64Array.BYTES_PER_ELEMENT as int)
         let res = new Float64Array(resBuf, 0, resBuf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)

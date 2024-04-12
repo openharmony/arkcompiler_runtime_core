@@ -272,7 +272,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         }
     }
 
-     /**
+    /**
      * Creates an {{element['name']}}Array with respect to length.
      *
      * @param length data initializer
@@ -313,9 +313,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
     }
+    {%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped  #}
 
-{%- if element.get('name') != 'Uint8Clamped' %}
-    {# comment: Uint8Array and others, except Uint8Clamped  #}
     internal zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {
         {%- if element.get('subsetType') == 'number' %}
         if ((val == Infinity) || (val == -Infinity)) {
@@ -333,7 +332,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         }
         return val
     }
-{%- endif %}
+    {%- endif %}
 
     /**
      * Iteratorable interface implementation
@@ -430,7 +429,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param index index to change
      */
     public $_set(index: int, val: {{element['subsetType']}}): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -461,7 +460,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param index index to change
      */
     public $_set(index: int, val: {{element['etsType']}}): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -472,9 +471,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.setUnsafeClamp(index, val)
         {%- endif %}
     }
+    {% if element['etsType'] != 'int' -%}
 
-
-    {%- if element['etsType'] != 'int' %}
     /**
      * Assigns val as element on index.
      *
@@ -486,7 +484,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.$_set(index as int, val as int)
     }
 
-        /**
+    /**
      * Assigns val as element on index.
      *
      * @param val value to set
@@ -494,7 +492,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param index index to change
      */
     public $_set(index: int, val: int): void {
-        // NOTE (ikorobkov): TS doesn't throw exception. Exception added to avoid event of memory out-range access
+        // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
         if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
@@ -999,7 +997,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         let res: StringBuilder = new StringBuilder("")
         for (let i = 0; i < this.lengthInt - 1; i++) {
             res.append({{asElementCompat % 'this.getUnsafe(i)'}})
-            res.append(s!)
+            res.append(s)
         }
         if (this.lengthInt > 0) {
             res.append({{asElementCompat % 'this.getUnsafe(this.lengthInt - 1)'}})
@@ -1423,7 +1421,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /// === with element lambda functions ===
-    {# NOTE: to add overloads with idxType == 'int' we need to enhance generics supports #}
+    {#- NOTE: to add overloads with idxType == 'int' we need to enhance generics supports #}
     {%- for isEts in [False] %}
         {%- if isEts %}
             {%- set idxType, castToIdx = 'int', '' %}
@@ -1445,6 +1443,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             (element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => { return fn(element) }
         return this.every(newF)
     }
+
     /**
      * creates a new {{element['name']}}Array from current {{element['name']}}Array based on a condition fn
      *
@@ -1523,13 +1522,13 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.forEach(newF)
     }
 
-   /**
-    * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array
-    *
-    * @param fn a function to apply for each element of current {{element['name']}}Array
-    *
-    * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
-    */
+    /**
+     * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array
+     *
+     * @param fn a function to apply for each element of current {{element['name']}}Array
+     *
+     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
+     */
     public map(fn: (val: {{elType}}) => {{elType}}): {{element['name']}}Array {
         let newF: (val: {{elType}}, index: number) => {{elType}} =
             (val: {{elType}}, index: number): {{elType}} => { return fn(val) }
@@ -1561,15 +1560,13 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         for (let i = 0; i < this.lengthInt; i++) {
             arr[i] = this.getUnsafe(i)
         }
-        // TODO(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        /*
-            let mustPrecede: (a: {{element['etsType']}}, b: {{element['etsType']}}) => boolean =
-                (a: {{element['etsType']}}, b: {{element['etsType']}}): boolean => { return (fn(a, b) <= 0) }
-            sort(arr, mustPrecede)
-            for (let i = 0; i < this.lengthInt; i++) {
-                this.setUnsafe(i, arr[i])
-            }
-        */
+        // NOTE (ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
+        // let mustPrecede: (a: {{element['etsType']}}, b: {{element['etsType']}}) => boolean =
+        //     (a: {{element['etsType']}}, b: {{element['etsType']}}): boolean => { return (fn(a, b) <= 0) }
+        // sort(arr, mustPrecede)
+        // for (let i = 0; i < this.lengthInt; i++) {
+        //     this.setUnsafe(i, arr[i])
+        // }
         return this;
     }
 
@@ -1757,7 +1754,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @param fn the condition to apply for each element
      *
      * @returns the first element that satisfies fn
-     * TODO: return {{element['etsType']}} | undefined as in JS
+     * NOTE: return {{element['etsType']}} | undefined as in JS
      */
     public find(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{elType}} {
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1911,7 +1908,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     public from(o: Object, mapFn: (e: Object, index: {{idxType}}) => {{element['etsType']}}): {{element['name']}}Array {
         throw new Error("{{element['name']}}Array.from: not implemented")
     }
-    {%- endfor %}
+    {% endfor -%}
 
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
@@ -2022,5 +2019,4 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         }
     }
 }
-
-{%- endfor %}
+{% endfor -%}
