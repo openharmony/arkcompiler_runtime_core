@@ -1486,67 +1486,417 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param init initial value
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
      *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint8ClampedArray) => number, init: number): number {
-        let acc = init
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint8ClampedArray) => number): number {
-        let acc = this.$_get(0) as number
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+
+        let accumulatedValue = this.$_get(0) as number
         for (let i = 1; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
      *
-     * @param init initial value
-     *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint8ClampedArray) => number, init: number): number {
-        let acc = init
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal, currVal, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal, currVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: () => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn())
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint8ClampedArray) => number): number {
-        let acc: number = this.$_get(this.lengthInt - 1) as number
-        for (let i = this.lengthInt - 2; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
         }
-        return acc
+        
+        let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
+        for (let i = this.lengthInt - 2; i >= 0; i--) {
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+        }
+        return accumulatedValue
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevValue, currValue, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevValue, currValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn(prevValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: () => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                        callbackfn())
     }
 
     /**
@@ -3383,67 +3733,417 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param init initial value
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
      *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint8Array) => number, init: number): number {
-        let acc = init
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint8Array) => number): number {
-        let acc = this.$_get(0) as number
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint8Array) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+
+        let accumulatedValue = this.$_get(0) as number
         for (let i = 1; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
      *
-     * @param init initial value
-     *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint8Array) => number, init: number): number {
-        let acc = init
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal, currVal, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal, currVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: () => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn())
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint8Array) => number): number {
-        let acc: number = this.$_get(this.lengthInt - 1) as number
-        for (let i = this.lengthInt - 2; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint8Array) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
         }
-        return acc
+        
+        let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
+        for (let i = this.lengthInt - 2; i >= 0; i--) {
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+        }
+        return accumulatedValue
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevValue, currValue, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevValue, currValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn(prevValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: () => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                        callbackfn())
     }
 
     /**
@@ -5281,67 +5981,417 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param init initial value
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
      *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint16Array) => number, init: number): number {
-        let acc = init
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint16Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint16Array) => number): number {
-        let acc = this.$_get(0) as number
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint16Array) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+
+        let accumulatedValue = this.$_get(0) as number
         for (let i = 1; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
      *
-     * @param init initial value
-     *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint16Array) => number, init: number): number {
-        let acc = init
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal, currVal, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal, currVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: () => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn())
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint16Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint16Array) => number): number {
-        let acc: number = this.$_get(this.lengthInt - 1) as number
-        for (let i = this.lengthInt - 2; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint16Array) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
         }
-        return acc
+        
+        let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
+        for (let i = this.lengthInt - 2; i >= 0; i--) {
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+        }
+        return accumulatedValue
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevValue, currValue, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevValue, currValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn(prevValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: () => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                        callbackfn())
     }
 
     /**
@@ -7204,67 +8254,417 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param init initial value
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
      *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint32Array) => number, init: number): number {
-        let acc = init
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint32Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: number, curVal: number, curIndex: number, array: Uint32Array) => number): number {
-        let acc = this.$_get(0) as number
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: (previousValue: U) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint32Array) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+
+        let accumulatedValue = this.$_get(0) as number
         for (let i = 1; i < this.lengthInt; i++) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
      *
-     * @param init initial value
-     *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint32Array) => number, init: number): number {
-        let acc = init
+    public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal, currVal, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal, currVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: number) => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: () => number): number {
+        return this.reduce(
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn())
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint32Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduceRight(fn: (acc: number, curVal: number, curIndex: number, array: Uint32Array) => number): number {
-        let acc: number = this.$_get(this.lengthInt - 1) as number
-        for (let i = this.lengthInt - 2; i >= 0; i--) {
-            acc = fn(acc, this.getUnsafe(i) as number, i as number, this)
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: (previuosValue: U) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = number>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Uint32Array) => number): number {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
         }
-        return acc
+        
+        let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
+        for (let i = this.lengthInt - 2; i >= 0; i--) {
+            accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
+        }
+        return accumulatedValue
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevValue, currValue, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevValue, currValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: number) => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn(prevValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: () => number): number {
+        return this.reduceRight(
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                        callbackfn())
     }
 
     /**
@@ -9127,67 +10527,417 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param init initial value
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
      *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigUint64Array) => BigInt, init: BigInt): BigInt {
-        let acc = init
+    public reduce<U = BigInt>(
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
-            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using left-to-right traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduce(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigUint64Array) => BigInt): BigInt {
-        let acc = new BigInt(this.$_get(0))
+    public reduce<U = BigInt>(
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = BigInt>(
+                callbackfn: (previousValue: U, currentValue: BigInt) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = BigInt>(
+                callbackfn: (previousValue: U) => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduce<U = BigInt>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduce(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => BigInt): BigInt {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+
+        let accumulatedValue = new BigInt(this.$_get(0))
         for (let i = 1; i < this.lengthInt; i++) {
-            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
      *
-     * @param init initial value
-     *
-     * @returns reduction result
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
      */
-    public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigUint64Array) => BigInt, init: BigInt): BigInt {
-        let acc = init
+    public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number) => BigInt): BigInt {
+        return this.reduce(
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal, currVal, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt) => BigInt): BigInt {
+        return this.reduce(
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal, currVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: (previousValue: BigInt) => BigInt): BigInt {
+        return this.reduce(
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduce method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array first element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduce method on an empty array without an initial value creates a TypeError
+     */
+    public reduce(callbackfn: () => BigInt): BigInt {
+        return this.reduce(
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn())
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = BigInt>(
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => U, 
+                initialValue: U): U {
+        let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
-            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
         }
-        return acc
+        return accumulatedValue
     }
 
     /**
-     * Reduces data into a single value using right-to-left traversal
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
      *
-     * @param fn condition
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns reduction result
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
      */
-    public reduceRight(fn: (acc: BigInt, curVal: BigInt, curIndex: number, array: BigUint64Array) => BigInt): BigInt {
-        let acc: BigInt = new BigInt(this.$_get(this.lengthInt - 1))
-        for (let i = this.lengthInt - 2; i >= 0; i--) {
-            acc = fn(acc, new BigInt(this.getUnsafe(i)), i as number, this)
+    public reduceRight<U = BigInt>(
+                callbackfn: (previuosValue: U, currentValue: BigInt, currentIndex: number) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal, currVal, currIndex), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = BigInt>(
+                callbackfn: (previuosValue: U, currentValue: BigInt) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal, currVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = BigInt>(
+                callbackfn: (previuosValue: U) => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevVal), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue The parameter which value is used as the initial value to start the accumulation.
+     * The first call to the callbackfn function provides this value as an argument.
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     */
+    public reduceRight<U = BigInt>(
+                callbackfn: () => U, 
+                initialValue: U): U {
+        return this.reduceRight(
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(), 
+                initialValue)
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts four arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => BigInt): BigInt {
+        if (this.lengthInt == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
         }
-        return acc
+        
+        let accumulatedValue: BigInt = new BigInt(this.$_get(this.lengthInt - 1))
+        for (let i = this.lengthInt - 2; i >= 0; i--) {
+            accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
+        }
+        return accumulatedValue
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts three arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number) => BigInt): BigInt {
+        return this.reduceRight(
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevValue, currValue, currIndex))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts two arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt) => BigInt): BigInt {
+        return this.reduceRight(
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevValue, currValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts one argument.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: (previousValue: BigInt) => BigInt): BigInt {
+        return this.reduceRight(
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn(prevValue))
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order.
+     * The return value of the callback function is the accumulated result,
+     * and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts no arguments.
+     * The reduceRight method calls the callbackfn function one time for each element in the array.
+     * The first call to the callbackfn function provides array last element value as an argument
+     *
+     * @returns The value that results from running the callback function to completion over the entire typed array.
+     * calling reduceRight method on an empty array without an initial value creates a TypeError
+     */
+    public reduceRight(callbackfn: () => BigInt): BigInt {
+        return this.reduceRight(
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                        callbackfn())
     }
 
     /**

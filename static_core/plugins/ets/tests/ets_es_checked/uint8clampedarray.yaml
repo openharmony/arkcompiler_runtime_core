@@ -21,6 +21,18 @@ sub:
     self_type: Iterable<number>
     vars:
       default_inds: ["self.length", "-self.length", "self.length - 1.0", "-self.length + 1.0", 1.0, 5.0 , 100.0, -1.1, 2.2, "-Infinity", "Infinity", "NaN", "0x8 as number", "-0o4 as number"]
+      reduce_lambdas:
+        - "() => 1.0"
+        - "(a: number) => a"
+        - "(a: number, b: number) => a + b"
+        - "(a: number, b: number, i: number) => a + b + i"
+        - "(a: number, b: number, i: number, selfRef: Uint8ClampedArray) => a + b + i"
+      reduce_u_lambdas:
+        - "(): string => '*'"
+        - "(a: string): string => '*' + a"
+        - "(a: string, b: number): string => a + ',' + b"
+        - "(a: string, b: number, i: number): string => a + ',' + (b + i)"
+        - "(a: string, b: number, i: number, selfRef: Uint8ClampedArray): string => a + ',' + (b + i)"
     sub:
       - method: "at"
         params:
@@ -85,3 +97,17 @@ sub:
           - paramOf(*default_inds)
           - paramOf(*default_inds)
         mandatory: 1
+      - method: "reduce"
+        params:
+          - paramOf(*reduce_lambdas)
+      - method: "reduce<string>"
+        params:
+          - paramOf(*reduce_u_lambdas)
+          - paramOf("''")
+      - method: "reduceRight"
+        params:
+          - paramOf(*reduce_lambdas)
+      - method: "reduceRight<string>"
+        params:
+          - paramOf(*reduce_u_lambdas)
+          - paramOf("''")
