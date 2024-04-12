@@ -757,6 +757,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         this.set(arr, 0)
     }
 
+
     /**
      * Copies elements from an ArrayLike object to the Uint8ClampedArray.
      *
@@ -775,27 +776,94 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Creates an Uint8ClampedArray from array-like argument
-     *
-     * @param o array-like object to initialize Uint8ClampedArray
-     *
-     * @param mapFn function to apply for each
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
      * @returns new Uint8ClampedArray
      */
-    public from<T>(o: Iterator<T>, mapFn: (e: T) => number): Uint8ClampedArray {
-        throw new Error("Uint8ClampedArray.from: not implemented")
+    public static from(arr: ArrayLike<number>): Uint8ClampedArray {
+        return Uint8ClampedArray.from<number>(arr, (x: number, k: number): number => x);
+    }
+    
+    /**
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
+     * @returns new Uint8ClampedArray
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Uint8ClampedArray {   
+        if (mapfn == undefined) {
+            mapfn = (v: number, k: number): number => { return v }
+        }
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const aType = Type.of(arrayLike) as ClassType
+        const mNum = aType.getMethodsNum()
+        let m: Method
+        let i: long
+        for (i = 0; i < mNum; i++) {
+            m = aType.getMethod(i);
+            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                break
+            }
+        }
+        if (i == mNum) {
+            throw new Error("failed to get iterator from iterable")
+        }
+
+        // Calc length of items inside arrayLike, save length into i variable
+        i = 0
+        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                break
+            }
+            i++
+        }
+
+        let res = new Uint8ClampedArray(i as int)
+        i = 0
+        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                return res
+            }
+            res.setUnsafeClamp(i as int, (mapfn)!(v.value as number, i as number) as int)
+            i++
+        }
     }
 
     /**
-     * Creates an Uint8ClampedArray from array-like argument
-     *
-     * @param o array-like object to initialize Uint8ClampedArray
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
      * @returns new Uint8ClampedArray
      */
-    public from(o: Iterator<Number>): Uint8ClampedArray {
-        throw new Error("Uint8ClampedArray.from: not implemented")
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Uint8ClampedArray {
+        let res = new Uint8ClampedArray(arrayLike.length);
+        let idx = new int[1];
+        idx[0] = 0;
+        const verifyCompiles: Iterable<T> = arrayLike
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const getIteratorFromIterable = (a: Object): Iterator<T> => {
+            if (a instanceof String) {
+                return (a as String).iterator() as Iterator<T>
+            }
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum();
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i);
+                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m.invoke(a, [])! as Iterator<T>
+                }
+            }
+            throw new Error("failed to get iterator from iterable")
+        }
+        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+            res.setUnsafeClamp(idx[0] as int, mapfn(x as T, idx[0] as number) as int)
+            idx[0] += 1;
+        })
+        return res;
     }
 
     /**
@@ -2223,18 +2291,6 @@ export class Uint8ClampedArray implements Iterable<Number> {
         this.forEach(newF)
     }
 
-    /**
-     * Creates an Uint8ClampedArray from array-like argument
-     *
-     * @param o array-like object to initialize Uint8ClampedArray
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint8ClampedArray
-     */
-    public from(o: Object, mapFn: (e: Object, index: number) => int): Uint8ClampedArray {
-        throw new Error("Uint8ClampedArray.from: not implemented")
-    }
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -3095,6 +3151,7 @@ export class Uint8Array implements Iterable<Number> {
         this.set(arr, 0)
     }
 
+
     /**
      * Copies elements from an ArrayLike object to the Uint8Array.
      *
@@ -3114,27 +3171,94 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Creates an Uint8Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint8Array
-     *
-     * @param mapFn function to apply for each
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
      * @returns new Uint8Array
      */
-    public from<T>(o: Iterator<T>, mapFn: (e: T) => number): Uint8Array {
-        throw new Error("Uint8Array.from: not implemented")
+    public static from(arr: ArrayLike<number>): Uint8Array {
+        return Uint8Array.from<number>(arr, (x: number, k: number): number => x);
+    }
+    
+    /**
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
+     * @returns new Uint8Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Uint8Array {   
+        if (mapfn == undefined) {
+            mapfn = (v: number, k: number): number => { return v }
+        }
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const aType = Type.of(arrayLike) as ClassType
+        const mNum = aType.getMethodsNum()
+        let m: Method
+        let i: long
+        for (i = 0; i < mNum; i++) {
+            m = aType.getMethod(i);
+            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                break
+            }
+        }
+        if (i == mNum) {
+            throw new Error("failed to get iterator from iterable")
+        }
+
+        // Calc length of items inside arrayLike, save length into i variable
+        i = 0
+        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                break
+            }
+            i++
+        }
+
+        let res = new Uint8Array(i as int)
+        i = 0
+        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                return res
+            }
+            res.setUnsafeClamp(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)) as int)
+            i++
+        }
     }
 
     /**
-     * Creates an Uint8Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint8Array
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
      * @returns new Uint8Array
      */
-    public from(o: Iterator<Number>): Uint8Array {
-        throw new Error("Uint8Array.from: not implemented")
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Uint8Array {
+        let res = new Uint8Array(arrayLike.length);
+        let idx = new int[1];
+        idx[0] = 0;
+        const verifyCompiles: Iterable<T> = arrayLike
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const getIteratorFromIterable = (a: Object): Iterator<T> => {
+            if (a instanceof String) {
+                return (a as String).iterator() as Iterator<T>
+            }
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum();
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i);
+                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m.invoke(a, [])! as Iterator<T>
+                }
+            }
+            throw new Error("failed to get iterator from iterable")
+        }
+        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+            res.setUnsafeClamp(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as int)
+            idx[0] += 1;
+        })
+        return res;
     }
 
     /**
@@ -4562,18 +4686,6 @@ export class Uint8Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-    /**
-     * Creates an Uint8Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint8Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint8Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: number) => int): Uint8Array {
-        throw new Error("Uint8Array.from: not implemented")
-    }
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -5435,6 +5547,7 @@ export class Uint16Array implements Iterable<Number> {
         this.set(arr, 0)
     }
 
+
     /**
      * Copies elements from an ArrayLike object to the Uint16Array.
      *
@@ -5454,27 +5567,94 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Creates an Uint16Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint16Array
-     *
-     * @param mapFn function to apply for each
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
      * @returns new Uint16Array
      */
-    public from<T>(o: Iterator<T>, mapFn: (e: T) => number): Uint16Array {
-        throw new Error("Uint16Array.from: not implemented")
+    public static from(arr: ArrayLike<number>): Uint16Array {
+        return Uint16Array.from<number>(arr, (x: number, k: number): number => x);
+    }
+    
+    /**
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
+     * @returns new Uint16Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Uint16Array {   
+        if (mapfn == undefined) {
+            mapfn = (v: number, k: number): number => { return v }
+        }
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const aType = Type.of(arrayLike) as ClassType
+        const mNum = aType.getMethodsNum()
+        let m: Method
+        let i: long
+        for (i = 0; i < mNum; i++) {
+            m = aType.getMethod(i);
+            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                break
+            }
+        }
+        if (i == mNum) {
+            throw new Error("failed to get iterator from iterable")
+        }
+
+        // Calc length of items inside arrayLike, save length into i variable
+        i = 0
+        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                break
+            }
+            i++
+        }
+
+        let res = new Uint16Array(i as int)
+        i = 0
+        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                return res
+            }
+            res.setUnsafeClamp(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)) as int)
+            i++
+        }
     }
 
     /**
-     * Creates an Uint16Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint16Array
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
      * @returns new Uint16Array
      */
-    public from(o: Iterator<Number>): Uint16Array {
-        throw new Error("Uint16Array.from: not implemented")
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Uint16Array {
+        let res = new Uint16Array(arrayLike.length);
+        let idx = new int[1];
+        idx[0] = 0;
+        const verifyCompiles: Iterable<T> = arrayLike
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const getIteratorFromIterable = (a: Object): Iterator<T> => {
+            if (a instanceof String) {
+                return (a as String).iterator() as Iterator<T>
+            }
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum();
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i);
+                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m.invoke(a, [])! as Iterator<T>
+                }
+            }
+            throw new Error("failed to get iterator from iterable")
+        }
+        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+            res.setUnsafeClamp(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as int)
+            idx[0] += 1;
+        })
+        return res;
     }
 
     /**
@@ -6902,18 +7082,6 @@ export class Uint16Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-    /**
-     * Creates an Uint16Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint16Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint16Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: number) => int): Uint16Array {
-        throw new Error("Uint16Array.from: not implemented")
-    }
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -7802,6 +7970,7 @@ export class Uint32Array implements Iterable<Number> {
         this.set(arr, 0)
     }
 
+
     /**
      * Copies elements from an ArrayLike object to the Uint32Array.
      *
@@ -7821,27 +7990,94 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Creates an Uint32Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint32Array
-     *
-     * @param mapFn function to apply for each
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
      * @returns new Uint32Array
      */
-    public from<T>(o: Iterator<T>, mapFn: (e: T) => number): Uint32Array {
-        throw new Error("Uint32Array.from: not implemented")
+    public static from(arr: ArrayLike<number>): Uint32Array {
+        return Uint32Array.from<number>(arr, (x: number, k: number): number => x);
+    }
+    
+    /**
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
+     * @returns new Uint32Array
+     */
+    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Uint32Array {   
+        if (mapfn == undefined) {
+            mapfn = (v: number, k: number): number => { return v }
+        }
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const aType = Type.of(arrayLike) as ClassType
+        const mNum = aType.getMethodsNum()
+        let m: Method
+        let i: long
+        for (i = 0; i < mNum; i++) {
+            m = aType.getMethod(i);
+            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                break
+            }
+        }
+        if (i == mNum) {
+            throw new Error("failed to get iterator from iterable")
+        }
+
+        // Calc length of items inside arrayLike, save length into i variable
+        i = 0
+        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                break
+            }
+            i++
+        }
+
+        let res = new Uint32Array(i as int)
+        i = 0
+        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        while (true) {
+            const v = iter.next()
+            if (v.done) {
+                return res
+            }
+            res.setUnsafeClamp(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)) as long)
+            i++
+        }
     }
 
     /**
-     * Creates an Uint32Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint32Array
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
      * @returns new Uint32Array
      */
-    public from(o: Iterator<Number>): Uint32Array {
-        throw new Error("Uint32Array.from: not implemented")
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Uint32Array {
+        let res = new Uint32Array(arrayLike.length);
+        let idx = new int[1];
+        idx[0] = 0;
+        const verifyCompiles: Iterable<T> = arrayLike
+        // NOTE(aleksander-sotov): Reflection is used due to #15523
+        const getIteratorFromIterable = (a: Object): Iterator<T> => {
+            if (a instanceof String) {
+                return (a as String).iterator() as Iterator<T>
+            }
+            const aType = Type.of(a) as ClassType
+            const mNum = aType.getMethodsNum();
+            for (let i = 0; i < mNum; i++) {
+                const m = aType.getMethod(i);
+                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                    return m.invoke(a, [])! as Iterator<T>
+                }
+            }
+            throw new Error("failed to get iterator from iterable")
+        }
+        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+            res.setUnsafeClamp(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as long)
+            idx[0] += 1;
+        })
+        return res;
     }
 
     /**
@@ -9269,18 +9505,6 @@ export class Uint32Array implements Iterable<Number> {
         this.forEach(newF)
     }
 
-    /**
-     * Creates an Uint32Array from array-like argument
-     *
-     * @param o array-like object to initialize Uint32Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new Uint32Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: number) => long): Uint32Array {
-        throw new Error("Uint32Array.from: not implemented")
-    }
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -10169,6 +10393,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         this.set(arr, 0)
     }
 
+
     /**
      * Copies elements from an ArrayLike object to the BigUint64Array.
      *
@@ -10188,27 +10413,32 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Creates an BigUint64Array from array-like argument
-     *
-     * @param o array-like object to initialize BigUint64Array
-     *
-     * @param mapFn function to apply for each
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
      * @returns new BigUint64Array
      */
-    public from<T>(o: Iterator<T>, mapFn: (e: T) => BigInt): BigUint64Array {
+    public static from(arr: ArrayLike<BigInt>): BigUint64Array {
         throw new Error("BigUint64Array.from: not implemented")
+    }
+    
+    /**
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
+     * @returns new BigUint64Array
+     */
+    public static from(arrayLike: Iterable<BigInt>, mapfn?: (v: BigInt, k: number) => BigInt): BigUint64Array {
+        throw new Error("BigUint64Array.from: not implemented");
     }
 
     /**
-     * Creates an BigUint64Array from array-like argument
-     *
-     * @param o array-like object to initialize BigUint64Array
-     *
+     * Creates an array from an array-like or iterable object.
+     * @param arrayLike An array-like or iterable object to convert to an array.
+     * @param mapfn A mapping function to call on every element of the array.
      * @returns new BigUint64Array
      */
-    public from(o: Iterator<BigInt>): BigUint64Array {
-        throw new Error("BigUint64Array.from: not implemented")
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigUint64Array {
+        throw new Error("BigUint64Array.from: not implemented");
     }
 
     /**
@@ -11636,18 +11866,6 @@ export class BigUint64Array implements Iterable<BigInt> {
         this.forEach(newF)
     }
 
-    /**
-     * Creates an BigUint64Array from array-like argument
-     *
-     * @param o array-like object to initialize BigUint64Array
-     *
-     * @param mapFn function to apply for each
-     *
-     * @returns new BigUint64Array
-     */
-    public from(o: Object, mapFn: (e: Object, index: number) => long): BigUint64Array {
-        throw new Error("BigUint64Array.from: not implemented")
-    }
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
