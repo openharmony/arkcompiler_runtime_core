@@ -478,9 +478,10 @@ void TestProtos(size_t n)
 {
     constexpr size_t ELEM_WIDTH = 4;
     constexpr size_t ELEM_PER16 = 16 / ELEM_WIDTH;
+    constexpr uint8_t API_VERSION = 11;
 
     // Write panda file to memory
-    ItemContainer::SetApi(11);
+    ItemContainer::SetApi(API_VERSION);
     ItemContainer container;
 
     ClassItem *class_item = container.GetOrCreateClassItem("A");
