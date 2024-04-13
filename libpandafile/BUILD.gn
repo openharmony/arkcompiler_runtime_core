@@ -112,6 +112,10 @@ ohos_static_library("libarkfile_static") {
     external_deps += [ "zlib:libz" ]
   }
 
+  if (enable_hilog) {
+    public_external_deps += [ "hilog:libhilog" ]
+  }
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
@@ -133,6 +137,10 @@ ohos_source_set("libarkfile_static_fuzz") {
     public_external_deps = [ "zlib:libz" ]
   } else {
     external_deps += [ "zlib:libz" ]
+  }
+
+  if (enable_hilog) {
+    public_external_deps += [ "hilog:libhilog" ]
   }
 
   part_name = "runtime_core"
