@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H
+#define PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H
 
 #include <atomic>
 #include <cstdint>
@@ -77,11 +77,13 @@ public:
     void LinkWaiter(Waiter &waiter);
     void UnlinkWaiter(Waiter &waiter);
 
-    int8_t GetElement(uint32_t index);
-    void SetElement(uint32_t index, int8_t element);
+    template <typename T>
+    T GetElement(uint32_t index);
+    template <typename T>
+    void SetElement(uint32_t index, T element);
 
-    template <typename F>
-    std::pair<int8_t, int8_t> ReadModifyWriteI8(int32_t index, const F &f);
+    template <typename T, typename F>
+    std::pair<T, T> ReadModifyWrite(int32_t index, const F &f);
 
     enum class WaitResult { OK = 0, NOT_EQUAL = 1, TIMED_OUT = 2 };
 
@@ -152,4 +154,4 @@ private:
 
 }  // namespace ark::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_SHAREDMEM_H

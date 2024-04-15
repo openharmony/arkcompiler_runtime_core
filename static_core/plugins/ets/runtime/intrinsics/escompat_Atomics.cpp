@@ -31,96 +31,163 @@
 
 namespace ark::ets::intrinsics {
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define SHARED_MEMORY_AT(type, postfix)                                          \
+    extern "C" type SharedMemoryAt##postfix(EtsSharedMemory *mem, int32_t index) \
+    {                                                                            \
+        return mem->GetElement<type>(index);                                     \
+    }
+
+#define SHARED_MEMORY_SET(type, postfix)                                                      \
+    extern "C" void SharedMemorySet##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                         \
+        mem->SetElement<type>(index, value);                                                  \
+    }
+
+#define SHARED_MEMORY_ADD(type, postfix)                                                      \
+    extern "C" type SharedMemoryAdd##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                         \
+        auto add = [value](type oldValue) { return oldValue + value; };                       \
+        auto result = mem->ReadModifyWrite<type>(index, add);                                 \
+        return result.first;                                                                  \
+    }
+
+#define SHARED_MEMORY_AND_SIGNED(type, postfix)                                                   \
+    extern "C" type SharedMemoryAnd##postfix(EtsSharedMemory *mem, int32_t index, type value)     \
+    {                                                                                             \
+        auto bitwiseAnd = [value](type oldValue) {                                                \
+            return static_cast<type>((bit_cast<u##type>(oldValue)) & (bit_cast<u##type>(value))); \
+        };                                                                                        \
+        auto result = mem->ReadModifyWrite<type>(index, bitwiseAnd);                              \
+        return result.first;                                                                      \
+    }
+
+#define SHARED_MEMORY_AND_UNSIGNED(type, postfix)                                                     \
+    extern "C" type SharedMemoryAnd##postfix(EtsSharedMemory *mem, int32_t index, type value)         \
+    {                                                                                                 \
+        auto bitwiseAnd = [value](type oldValue) { return static_cast<type>((oldValue) & (value)); }; \
+        auto result = mem->ReadModifyWrite<type>(index, bitwiseAnd);                                  \
+        return result.first;                                                                          \
+    }
+
+#define SHARED_MEMORY_COMPARE_EXCHANGE(type, postfix)                                                             \
+    extern "C" type SharedMemoryCompareExchange##postfix(EtsSharedMemory *mem, int32_t index, type expectedValue, \
+                                                         type replacementValue)                                   \
+    {                                                                                                             \
+        auto compareExchange = [expectedValue, replacementValue](type oldValue) {                                 \
+            return oldValue == expectedValue ? replacementValue : oldValue;                                       \
+        };                                                                                                        \
+        auto result = mem->ReadModifyWrite<type>(index, compareExchange);                                         \
+        return result.first;                                                                                      \
+    }
+
+#define SHARED_MEMORY_EXCHANGE(type, postfix)                                                      \
+    extern "C" type SharedMemoryExchange##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                              \
+        auto exchange = [value]([[maybe_unused]] type oldValue) { return value; };                 \
+        auto result = mem->ReadModifyWrite<type>(index, exchange);                                 \
+        return result.first;                                                                       \
+    }
+
+#define SHARED_MEMORY_LOAD(type, postfix)                                          \
+    extern "C" type SharedMemoryLoad##postfix(EtsSharedMemory *mem, int32_t index) \
+    {                                                                              \
+        auto load = [](type value) { return value; };                              \
+        auto result = mem->ReadModifyWrite<type>(index, load);                     \
+        return result.first;                                                       \
+    }
+
+#define SHARED_MEMORY_OR_SIGNED(type, postfix)                                                    \
+    extern "C" type SharedMemoryOr##postfix(EtsSharedMemory *mem, int32_t index, type value)      \
+    {                                                                                             \
+        auto orBitwise = [value](type oldValue) {                                                 \
+            return static_cast<type>((bit_cast<u##type>(oldValue)) | (bit_cast<u##type>(value))); \
+        };                                                                                        \
+        auto result = mem->ReadModifyWrite<type>(index, orBitwise);                               \
+        return result.first;                                                                      \
+    }
+
+#define SHARED_MEMORY_OR_UNSIGNED(type, postfix)                                                     \
+    extern "C" type SharedMemoryOr##postfix(EtsSharedMemory *mem, int32_t index, type value)         \
+    {                                                                                                \
+        auto orBitwise = [value](type oldValue) { return static_cast<type>((oldValue) | (value)); }; \
+        auto result = mem->ReadModifyWrite<type>(index, orBitwise);                                  \
+        return result.first;                                                                         \
+    }
+
+#define SHARED_MEMORY_STORE(type, postfix)                                                      \
+    extern "C" type SharedMemoryStore##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                           \
+        auto store = [value]([[maybe_unused]] type oldValue) { return value; };                 \
+        auto result = mem->ReadModifyWrite<type>(index, store);                                 \
+        return result.second;                                                                   \
+    }
+
+#define SHARED_MEMORY_SUB(type, postfix)                                                      \
+    extern "C" type SharedMemorySub##postfix(EtsSharedMemory *mem, int32_t index, type value) \
+    {                                                                                         \
+        auto add = [value](type oldValue) { return oldValue - value; };                       \
+        auto result = mem->ReadModifyWrite<type>(index, add);                                 \
+        return result.first;                                                                  \
+    }
+
+#define SHARED_MEMORY_XOR_SIGNED(type, postfix)                                                   \
+    extern "C" type SharedMemoryXor##postfix(EtsSharedMemory *mem, int32_t index, type value)     \
+    {                                                                                             \
+        auto xorBitwise = [value](type oldValue) {                                                \
+            return static_cast<type>((bit_cast<u##type>(oldValue)) ^ (bit_cast<u##type>(value))); \
+        };                                                                                        \
+        auto result = mem->ReadModifyWrite<type>(index, xorBitwise);                              \
+        return result.first;                                                                      \
+    }
+
+#define SHARED_MEMORY_XOR_UNSIGNED(type, postfix)                                                     \
+    extern "C" type SharedMemoryXor##postfix(EtsSharedMemory *mem, int32_t index, type value)         \
+    {                                                                                                 \
+        auto xorBitwise = [value](type oldValue) { return static_cast<type>((oldValue) ^ (value)); }; \
+        auto result = mem->ReadModifyWrite<type>(index, xorBitwise);                                  \
+        return result.first;                                                                          \
+    }
+
+#define FOR_ALL_TYPES(sharedMemoryMethod)                                                                     \
+    SHARED_MEMORY_##sharedMemoryMethod(int8_t, I8) SHARED_MEMORY_##sharedMemoryMethod(int16_t, I16)           \
+        SHARED_MEMORY_##sharedMemoryMethod(int32_t, I32) SHARED_MEMORY_##sharedMemoryMethod(int64_t, I64)     \
+            SHARED_MEMORY_##sharedMemoryMethod(uint8_t, U8) SHARED_MEMORY_##sharedMemoryMethod(uint16_t, U16) \
+                SHARED_MEMORY_##sharedMemoryMethod(uint32_t, U32) SHARED_MEMORY_##sharedMemoryMethod(uint64_t, U64)
+
+#define FOR_SIGNED_TYPES(sharedMemoryMethod)                                                        \
+    SHARED_MEMORY_##sharedMemoryMethod(int8_t, I8) SHARED_MEMORY_##sharedMemoryMethod(int16_t, I16) \
+        SHARED_MEMORY_##sharedMemoryMethod(int32_t, I32) SHARED_MEMORY_##sharedMemoryMethod(int64_t, I64)
+
+#define FOR_UNSIGNED_TYPES(sharedMemoryMethod)                                                        \
+    SHARED_MEMORY_##sharedMemoryMethod(uint8_t, U8) SHARED_MEMORY_##sharedMemoryMethod(uint16_t, U16) \
+        SHARED_MEMORY_##sharedMemoryMethod(uint32_t, U32) SHARED_MEMORY_##sharedMemoryMethod(uint64_t, U64)
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
+FOR_ALL_TYPES(AT)
+FOR_ALL_TYPES(SET)
+FOR_ALL_TYPES(ADD)
+FOR_ALL_TYPES(COMPARE_EXCHANGE)
+FOR_ALL_TYPES(EXCHANGE)
+FOR_ALL_TYPES(LOAD)
+FOR_ALL_TYPES(STORE)
+FOR_ALL_TYPES(SUB)
+FOR_SIGNED_TYPES(OR_SIGNED)
+FOR_UNSIGNED_TYPES(OR_UNSIGNED)
+FOR_SIGNED_TYPES(AND_SIGNED)
+FOR_UNSIGNED_TYPES(AND_UNSIGNED)
+FOR_SIGNED_TYPES(XOR_SIGNED)
+FOR_UNSIGNED_TYPES(XOR_UNSIGNED)
+
 extern "C" EtsSharedMemory *SharedMemoryCreate(int32_t byteLength)
 {
     return EtsSharedMemory::Create(byteLength);
 }
 
-extern "C" int8_t SharedMemoryAt(EtsSharedMemory *mem, int32_t index)
-{
-    return mem->GetElement(index);
-}
-
-extern "C" void SharedMemorySet(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    mem->SetElement(index, value);
-}
-
 extern "C" int32_t SharedMemoryGetByteLength(EtsSharedMemory *mem)
 {
     return static_cast<int32_t>(mem->GetLength());
-}
-
-extern "C" int8_t SharedMemoryAddI8(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    auto add = [value](int8_t oldValue) { return oldValue + value; };
-    auto result = mem->ReadModifyWriteI8(index, add);
-    return result.first;
-}
-
-extern "C" int8_t SharedMemoryAndI8(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    auto bitwiseAnd = [value](int8_t oldValue) {
-        return static_cast<int8_t>(bit_cast<uint8_t>(oldValue) & bit_cast<uint8_t>(value));
-    };
-    auto result = mem->ReadModifyWriteI8(index, bitwiseAnd);
-    return result.first;
-}
-
-extern "C" int8_t SharedMemoryCompareExchangeI8(EtsSharedMemory *mem, int32_t index, int8_t expectedValue,
-                                                int8_t replacementValue)
-{
-    auto compareExchange = [expectedValue, replacementValue](int8_t oldValue) {
-        return oldValue == expectedValue ? replacementValue : oldValue;
-    };
-    auto result = mem->ReadModifyWriteI8(index, compareExchange);
-    return result.first;
-}
-
-extern "C" int8_t SharedMemoryExchangeI8(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    auto exchange = [value]([[maybe_unused]] int8_t oldValue) { return value; };
-    auto result = mem->ReadModifyWriteI8(index, exchange);
-    return result.first;
-}
-
-extern "C" int8_t SharedMemoryLoadI8(EtsSharedMemory *mem, int32_t index)
-{
-    auto load = [](int8_t value) { return value; };
-    auto result = mem->ReadModifyWriteI8(index, load);
-    return result.first;
-}
-
-extern "C" int8_t SharedMemoryOrI8(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    auto orBitwise = [value](int8_t oldValue) {
-        return static_cast<int8_t>(bit_cast<uint8_t>(oldValue) | bit_cast<uint8_t>(value));
-    };
-    auto result = mem->ReadModifyWriteI8(index, orBitwise);
-    return result.first;
-}
-
-extern "C" int8_t SharedMemoryStoreI8(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    auto store = [value]([[maybe_unused]] int8_t oldValue) { return value; };
-    auto result = mem->ReadModifyWriteI8(index, store);
-    return result.second;
-}
-
-extern "C" int8_t SharedMemorySubI8(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    auto add = [value](int8_t oldValue) { return oldValue - value; };
-    auto result = mem->ReadModifyWriteI8(index, add);
-    return result.first;
-}
-
-extern "C" int8_t SharedMemoryXorI8(EtsSharedMemory *mem, int32_t index, int8_t value)
-{
-    auto xorBitwise = [value](int8_t oldValue) {
-        return static_cast<int8_t>(bit_cast<uint8_t>(oldValue) ^ bit_cast<uint8_t>(value));
-    };
-    auto result = mem->ReadModifyWriteI8(index, xorBitwise);
-    return result.first;
 }
 
 std::string PrintWaiters(EtsSharedMemory &mem)
@@ -178,5 +245,23 @@ extern "C" int32_t SharedMemoryBoundedNotify(EtsSharedMemory *mem, int32_t byteO
     ASSERT(count >= 0);
     return mem->NotifyI32(byteOffset, std::optional(count));
 }
+
+#undef SHARED_MEMORY_AT
+#undef SHARED_MEMORY_SET
+#undef SHARED_MEMORY_ADD
+#undef SHARED_MEMORY_AND_SIGNED
+#undef SHARED_MEMORY_AND_UNSIGNED
+#undef SHARED_MEMORY_COMPARE_EXCHANGE
+#undef SHARED_MEMORY_EXCHANGE
+#undef SHARED_MEMORY_LOAD
+#undef SHARED_MEMORY_OR_SIGNED
+#undef SHARED_MEMORY_OR_UNSIGNED
+#undef SHARED_MEMORY_STORE
+#undef SHARED_MEMORY_SUB
+#undef SHARED_MEMORY_XOR_SIGNED
+#undef SHARED_MEMORY_XOR_UNSIGNED
+#undef FOR_ALL_TYPES
+#undef FOR_SIGNED_TYPES
+#undef FOR_UNSIGNED_TYPES
 
 }  // namespace ark::ets::intrinsics

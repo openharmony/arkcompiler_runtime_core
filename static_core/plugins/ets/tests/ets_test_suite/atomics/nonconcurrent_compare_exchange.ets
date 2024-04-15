@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,25 @@
  */
 
 let buf: SharedArrayBuffer;
-let arr: Int8Array; 
+let buf_2: SharedArrayBuffer;
+let arr: Int8Array;
+let arr_2: BigUint64Array; 
 
 function main() {
     buf = new SharedArrayBuffer(1);
+    buf_2 = new SharedArrayBuffer(8);
     arr = new Int8Array(buf, 0, 1);
+    arr_2 = new BigUint64Array(buf_2, 0, 1);
 
     for (let i = 1; i < 100; i++) {
         let old = Atomics.compareExchange(arr, 0, (i - 1) as byte, i as byte)
         assert(old == i - 1)
     }
     assert(Atomics.load(arr, 0) == 99)
+
+    for (let i = 1; i < 100; i++) {
+        let old = Atomics.compareExchange(arr_2, 0, (i - 1) as long, i as long)
+        assert(old == i - 1)
+    }
+    assert(Atomics.load(arr_2, 0) == 99)
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H_
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H
+#define PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H
 
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/utils/type_helpers.h"
@@ -36,7 +36,9 @@ enum class EtsClassRoot {
     BYTE_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_I8),
     CHAR_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_U16),
     SHORT_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_I16),
+    UINT_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_U32),
     INT_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_I32),
+    ULONG_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_U64),
     LONG_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_I64),
     FLOAT_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_F32),
     DOUBLE_ARRAY = helpers::ToUnderlying(ClassRoot::ARRAY_F64),
@@ -113,4 +115,4 @@ inline EtsClassRoot ToEtsClassRoot(ClassRoot classRoot)
 
 }  // namespace ark::ets
 
-#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H_
+#endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_CLASS_ROOT_H
