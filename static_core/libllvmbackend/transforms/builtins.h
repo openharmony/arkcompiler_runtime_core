@@ -28,7 +28,7 @@ llvm::Function *LenArray(llvm::Module *module);
 llvm::Function *LoadClass(llvm::Module *module);
 llvm::Function *LoadInitClass(llvm::Module *module);
 llvm::Function *PreWRB(llvm::Module *module, unsigned addrSpace);
-llvm::Function *PostWRB(llvm::Module *module);
+llvm::Function *PostWRB(llvm::Module *module, unsigned addrSpace);
 llvm::Function *LoadString(llvm::Module *module);
 llvm::Function *ResolveVirtual(llvm::Module *module);
 llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst,
@@ -40,6 +40,7 @@ constexpr auto LOAD_INIT_CLASS_BUILTIN = "__builtin_load_init_class";
 constexpr auto PRE_WRB_BUILTIN = "__builtin_pre_wrb";
 constexpr auto PRE_WRB_GCADR_BUILTIN = "__builtin_pre_wrb_gcadr";
 constexpr auto POST_WRB_BUILTIN = "__builtin_post_wrb";
+constexpr auto POST_WRB_GCADR_BUILTIN = "__builtin_post_wrb_gcadr";
 constexpr auto LOAD_STRING_BUILTIN = "__builtin_load_string";
 constexpr auto RESOLVE_VIRTUAL_BUILTIN = "__builtin_resolve_virtual";
 }  // namespace ark::llvmbackend::builtins

@@ -28,8 +28,6 @@
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 
 using ark::llvmbackend::LLVMArkInterface;
-using ark::llvmbackend::gc_barriers::EmitPostWRB;
-using ark::llvmbackend::gc_barriers::EmitPreWRB;
 using ark::llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT;
 using ark::llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT;
 using ark::llvmbackend::runtime_calls::CreateEntrypointCallCommon;
@@ -76,7 +74,7 @@ llvm::Value *PostWRBHelper(llvm::IRBuilder<> *builder, llvm::CallInst *inst, LLV
 
     ASSERT(!arkInterface->IsIrtocMode());
     auto threadReg = GetThreadRegValue(builder, arkInterface);
-    EmitPostWRB(builder, mem, offset, value, arkInterface, threadReg, nullptr);
+    ark::llvmbackend::gc_barriers::EmitPostWRB(builder, mem, offset, value, arkInterface, threadReg, nullptr);
     return nullptr;
 }
 llvm::Value *FastClassLoadingHelper(llvm::IRBuilder<> *builder, LLVMArkInterface *arkInterface,
@@ -193,7 +191,7 @@ llvm::Value *PreWRBHelper(llvm::IRBuilder<> *builder, llvm::CallInst *inst, LLVM
     initialBb->back().eraseFromParent();
     builder->SetInsertPoint(initialBb);
     auto threadRegValue = GetThreadRegValue(builder, arkInterface);
-    EmitPreWRB(builder, mem, isVolatileMem, continuation, arkInterface, threadRegValue);
+    ark::llvmbackend::gc_barriers::EmitPreWRB(builder, mem, isVolatileMem, continuation, arkInterface, threadRegValue);
     return nullptr;
 }
 }  // namespace
@@ -251,7 +249,7 @@ llvm::Function *LoadInitClass(llvm::Module *module)
 
 llvm::Function *PreWRB(llvm::Module *module, unsigned addrSpace)
 {
-    auto builtinName = ((addrSpace == LLVMArkInterface::GC_ADDR_SPACE) ? PRE_WRB_GCADR_BUILTIN : PRE_WRB_BUILTIN);
+    auto builtinName = (addrSpace == LLVMArkInterface::GC_ADDR_SPACE) ? PRE_WRB_GCADR_BUILTIN : PRE_WRB_BUILTIN;
     auto function = module->getFunction(builtinName);
     if (function != nullptr) {
         return function;
@@ -267,23 +265,24 @@ llvm::Function *PreWRB(llvm::Module *module, unsigned addrSpace)
     return function;
 }
 
-llvm::Function *PostWRB(llvm::Module *module)
+llvm::Function *PostWRB(llvm::Module *module, unsigned addrSpace)
 {
-    auto function = module->getFunction(POST_WRB_BUILTIN);
+    auto builtinName = (addrSpace == LLVMArkInterface::GC_ADDR_SPACE) ? POST_WRB_GCADR_BUILTIN : POST_WRB_BUILTIN;
+    auto function = module->getFunction(builtinName);
     if (function != nullptr) {
         return function;
     }
     auto &ctx = module->getContext();
     auto type = llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
-                                        {llvm::PointerType::get(ctx, LLVMArkInterface::GC_ADDR_SPACE),
-                                         llvm::Type::getInt32Ty(ctx),
+                                        {llvm::PointerType::get(ctx, addrSpace), llvm::Type::getInt32Ty(ctx),
                                          llvm::PointerType::get(ctx, LLVMArkInterface::GC_ADDR_SPACE)},
                                         false);
-    function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, POST_WRB_BUILTIN, module);
+    function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, builtinName, module);
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);
     function->addFnAttr(llvm::Attribute::ArgMemOnly);
     function->addParamAttr(0U, llvm::Attribute::ReadNone);
+    function->addParamAttr(2U, llvm::Attribute::ReadNone);
     return function;
 }
 
@@ -343,7 +342,7 @@ llvm::Value *LowerLoadString(llvm::IRBuilder<> *builder, llvm::CallInst *inst, L
 
     auto slotPtr = builder->CreateInBoundsGEP(arrayType, aotGot, {builder->getInt32(0), slotId});
     auto str = builder->CreateLoad(builder->getInt64Ty(), slotPtr);
-    auto limit = ark::compiler::RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT;
+    auto limit = compiler::RuntimeInterface::RESOLVE_STRING_AOT_COUNTER_LIMIT;
     auto cmp = builder->CreateICmpULT(str, builder->getInt64(limit));
 
     llvm::Instruction *ifi;
@@ -357,7 +356,7 @@ llvm::Value *LowerLoadString(llvm::IRBuilder<> *builder, llvm::CallInst *inst, L
 
     builder->SetInsertPoint(ifi);
     auto method = function->arg_begin();
-    auto eid = ark::compiler::RuntimeInterface::EntrypointId::RESOLVE_STRING_AOT;
+    auto eid = compiler::RuntimeInterface::EntrypointId::RESOLVE_STRING_AOT;
     auto freshStr = CreateEntrypointCallHelper(builder, eid, {method, typeId, slotPtr}, arkInterface, inst);
     freshStr->setName("fresh_str");
 
@@ -379,13 +378,13 @@ llvm::Value *LowerResolveVirtual(llvm::IRBuilder<> *builder, llvm::CallInst *ins
     auto thiz = inst->getOperand(0U);
     auto methodId = inst->getOperand(1U);
     if (!arkInterface->IsArm64() || !llvm::isa<llvm::ConstantInt>(methodId)) {
-        static constexpr auto ENTRYPOINT_ID = ark::compiler::RuntimeInterface::EntrypointId::RESOLVE_VIRTUAL_CALL_AOT;
+        static constexpr auto ENTRYPOINT_ID = compiler::RuntimeInterface::EntrypointId::RESOLVE_VIRTUAL_CALL_AOT;
         auto offset = builder->getInt64(0);
         entrypointAddress =
             CreateEntrypointCallHelper(builder, ENTRYPOINT_ID, {method, thiz, methodId, offset}, arkInterface, inst);
     } else {
         auto offset = inst->getOperand(2U);
-        static constexpr auto ENTRYPOINT_ID = ark::compiler::RuntimeInterface::EntrypointId::INTF_INLINE_CACHE;
+        static constexpr auto ENTRYPOINT_ID = compiler::RuntimeInterface::EntrypointId::INTF_INLINE_CACHE;
         entrypointAddress =
             CreateEntrypointCallHelper(builder, ENTRYPOINT_ID, {method, thiz, methodId, offset}, arkInterface, inst);
         entrypointAddress->setCallingConv(llvm::CallingConv::ArkFast4);
@@ -407,13 +406,10 @@ llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst, LLVM
     if (funcName.equals(LOAD_INIT_CLASS_BUILTIN)) {
         return LowerLoadClassHelper(builder, inst, arkInterface, true);
     }
-    if (funcName.equals(PRE_WRB_BUILTIN)) {
+    if (funcName.equals(PRE_WRB_GCADR_BUILTIN) || funcName.equals(PRE_WRB_BUILTIN)) {
         return PreWRBHelper(builder, inst, arkInterface);
     }
-    if (funcName.equals(PRE_WRB_GCADR_BUILTIN)) {
-        return PreWRBHelper(builder, inst, arkInterface);
-    }
-    if (funcName.equals(POST_WRB_BUILTIN)) {
+    if (funcName.equals(POST_WRB_GCADR_BUILTIN) || funcName.equals(POST_WRB_BUILTIN)) {
         return PostWRBHelper(builder, inst, arkInterface);
     }
     if (funcName.equals(LOAD_STRING_BUILTIN)) {

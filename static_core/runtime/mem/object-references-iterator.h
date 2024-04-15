@@ -38,10 +38,17 @@ private:
     static bool IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateClassReferences(Class *cls, Handler *handler);
+    static bool IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateRange(ObjectPointerType *start, const ObjectPointerType *end, Handler *handler);
+    static bool IterateClassReferences(Class *cls, Handler *handler, void *begin, void *end);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool IterateRange(ObjectPointerType *refStart, const ObjectPointerType *refEnd, Handler *handler);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool IterateRange(ObjectPointerType *refStart, ObjectPointerType *refEnd, Handler *handler, void *begin,
+                             void *end);
 };
 
 /// Provides functionality to iterate through references in object for dynamic languages
@@ -54,10 +61,10 @@ public:
 
 private:
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler);
+    static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler, void *begin, void *end);
 
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler);
+    static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler, void *begin, void *end);
 };
 }  // namespace ark::mem
 
