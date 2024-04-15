@@ -18,16 +18,22 @@
 
 #include "abc_file_entity_processor.h"
 #include "annotation_data_accessor.h"
+#include "common/abc_file_utils.h"
 
 namespace panda::abc2program {
 
 class AbcAnnotationProcessor : public AbcFileEntityProcessor {
 public:
-    AbcAnnotationProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container);
+    AbcAnnotationProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container,
+                           pandasm::Function &function);
     void FillProgramData() override;
 
 private:
+    void FillAnnotation();
+    void FillAnnotationElements(std::vector<pandasm::AnnotationElement> &elements);
     std::unique_ptr<panda_file::AnnotationDataAccessor> annotation_data_accessor_;
+    pandasm::Function &function_;
+    std::string annotation_name_;
 }; // class AbcAnnotationProcessor
 
 } // namespace panda::abc2program

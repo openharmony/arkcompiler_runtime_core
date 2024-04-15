@@ -16,6 +16,7 @@
 #ifndef ABC2PROGRAM_ABC_METHOD_PROCESSOR_H
 #define ABC2PROGRAM_ABC_METHOD_PROCESSOR_H
 
+#include "abc_annotation_processor.h"
 #include "abc_file_entity_processor.h"
 #include "method_data_accessor-inl.h"
 #include "common/abc_type_converter.h"
@@ -38,6 +39,9 @@ class AbcMethodProcessor : public AbcFileEntityProcessor {
     void AddFunctionIntoFunctionTable();
     void FillDebugInfo();
     void FillSourceFile();
+    void FillFuncAnnotation();
+    void FillSlotsNum();
+    void FillConcurrentModuleRequests();
     AbcTypeConverter type_converter_;
     pandasm::Function function_;
     std::unique_ptr<panda_file::MethodDataAccessor> method_data_accessor_;
