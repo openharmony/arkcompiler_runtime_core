@@ -24,15 +24,6 @@
 #include <string_view>
 
 namespace panda::abc2program {
-
-constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 77;
-
-constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".HelloWorld";
-
-constexpr std::string_view FUNC_NAME_FOO = ".foo";
-
-constexpr std::string_view FUNC_NAME_GOO = ".goo";
-
 class Abc2ProgramTestUtils {
 public:
     static bool ValidateProgramStrings(const std::set<std::string> &program_strings);

@@ -19,9 +19,10 @@
 
 namespace panda::abc2program {
 
-std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"", ".HelloWorld", ".Lit", ".foo",
-                                                                                    ".goo", ".instance_initializer",
-                                                                                    "HelloWorld", "a_var", "error",
+std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"", ".HelloWorld", ".Lit",
+                                                                                    ".foo", ".goo", ".hoo",
+                                                                                    ".instance_initializer",
+                                                                                    "HelloWorld", "varA", "error",
                                                                                     "inner catch",
                                                                                     "masg", "max", "min", "msg",
                                                                                     "null", "outter catch",

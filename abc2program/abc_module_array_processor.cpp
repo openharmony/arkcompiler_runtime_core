@@ -174,14 +174,19 @@ void AbcModuleArrayProcessor::FillEntrySize(std::vector<panda::pandasm::LiteralA
 {
     // Insert literals of regular_import_num, namespace_import_num, local_export_num,
     // indirect_export_num, star_export_num to literal_vec.
-    uint32_t idx_num = num_vec[0];
+    uint32_t idx_num = num_vec[0] + 1;
     for (size_t index = 1; index < num_vec.size(); ++index) {
+        auto num = num_vec[index];
         panda::pandasm::LiteralArray::Literal entry_size = {
             .tag_ = panda::panda_file::LiteralTag::INTEGER,
-            .value_ = static_cast<uint32_t>(num_vec[index])
+            .value_ = static_cast<uint32_t>(num)
         };
-        literal_vec.insert(literal_vec.begin() + idx_num + index, entry_size);
-        idx_num += num_vec[index];
+        literal_vec.insert(literal_vec.begin() + idx_num, entry_size);
+        // '1' stands for each entry_size, which has been inserted into literal vec
+        idx_num += 1;
+        ASSERT(index - 1 < sizeof(LITERAL_NUMS)/sizeof(LITERAL_NUMS[0]));
+        // skip total num of module literals for each module kind
+        idx_num += LITERAL_NUMS[index-1] * num;
     }
 }
-}
+} // namespace panda::abc2program
