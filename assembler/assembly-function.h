@@ -212,6 +212,8 @@ struct Function {
     }
 
     void DebugDump() const;
+
+    std::set<std::string> CollectStringsFromFunctionInsns() const;
 };
 
 }  // namespace panda::pandasm

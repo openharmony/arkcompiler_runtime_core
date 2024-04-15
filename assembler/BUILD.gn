@@ -24,6 +24,7 @@ config("arkassembler_public_config") {
 }
 
 libarkassembler_sources = [
+  "$target_gen_dir/function_collect_string.cpp",
   "$target_gen_dir/ins_to_string.cpp",
   "annotation.cpp",
   "assembly-emitter.cpp",
@@ -73,6 +74,7 @@ ohos_static_library("libarkassembler_static") {
   deps = [
     ":ark_asm_meta_gen_h",
     ":ark_asm_register_extensions_h",
+    ":isa_gen_libarkassembler_function_collect_string_cpp",
     ":isa_gen_libarkassembler_ins_create_api_h",
     ":isa_gen_libarkassembler_ins_emit_h",
     ":isa_gen_libarkassembler_ins_to_string_cpp",
@@ -115,6 +117,7 @@ ohos_source_set("libarkassembler_frontend_set_static") {
   deps = [
     ":ark_asm_meta_gen_h",
     ":ark_asm_register_extensions_h",
+    ":isa_gen_libarkassembler_function_collect_string_cpp",
     ":isa_gen_libarkassembler_ins_create_api_h",
     ":isa_gen_libarkassembler_ins_emit_h",
     ":isa_gen_libarkassembler_ins_to_string_cpp",
@@ -184,6 +187,7 @@ ohos_executable("ark_asm") {
 ark_isa_gen("isa_gen_libarkassembler") {
   template_files = [
     "isa.h.erb",
+    "function_collect_string.cpp.erb",
     "ins_emit.h.erb",
     "ins_to_string.cpp.erb",
     "ins_create_api.h.erb",
