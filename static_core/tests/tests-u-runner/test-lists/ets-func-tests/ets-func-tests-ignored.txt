@@ -581,7 +581,6 @@ std/core/std_core_array_map_long_array_func_long_int_long_array.ets
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
-<<<<<<< HEAD
 ### Issue 1661
 spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_03.ets
 ### Issue 1661 end
@@ -619,7 +618,6 @@ spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_000
 ### Issue 1661
 spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/src/issue15393_03.ets
 ### Issue 1661 end
-=======
 
 
 
@@ -634,4 +632,3 @@ spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/
 
 
 
->>>>>>> 6da09bde (Test contains updated folder structure for frontend  functional tests)
