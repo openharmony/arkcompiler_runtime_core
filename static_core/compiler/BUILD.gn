@@ -17,11 +17,14 @@ import("//build/ohos.gni")
 import("$ark_root/irtoc/irtoc.gni")
 import("$ark_root/plugins/plugins.gni")
 
-group("libarktscompiler_package") {
+ohos_static_library("libarktscompiler_package") {
   deps = []
   if (enable_static_vm) {
     deps += [ ":libarktscompiler_frontend_static" ]
   }
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 config("arkcompiler_public_config") {

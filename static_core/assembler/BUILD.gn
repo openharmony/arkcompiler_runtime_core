@@ -14,11 +14,14 @@ import("//arkcompiler/runtime_core/static_vm_config.gni")
 import("//build/ohos.gni")
 import("$ark_root/plugins/plugins.gni")
 
-group("libarktsassembler_package") {
+ohos_static_library("libarktsassembler_package") {
   deps = []
   if (enable_static_vm) {
     deps += [ ":libarktsassembler_frontend_static" ]
   }
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 config("arkassembler_public_config") {
