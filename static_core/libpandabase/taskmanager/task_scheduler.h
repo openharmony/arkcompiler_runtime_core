@@ -18,9 +18,11 @@
 
 #include "libpandabase/taskmanager/task_queue.h"
 #include "libpandabase/taskmanager/task_statistics/task_statistics.h"
+#include "libpandabase/taskmanager/utils/wait_list.h"
 #include "libpandabase/taskmanager/worker_thread.h"
 #include <vector>
 #include <map>
+#include <queue>
 
 namespace ark::taskmanager {
 /**
@@ -34,7 +36,9 @@ public:
     NO_COPY_SEMANTIC(TaskScheduler);
     NO_MOVE_SEMANTIC(TaskScheduler);
 
-    static constexpr uint64_t TASK_WAIT_TIMEOUT = 500U;
+    static constexpr uint64_t TASK_WAIT_TIMEOUT = 1U;
+
+    using LocalTaskQueue = std::queue<Task>;
 
     /**
      * @brief Creates an instance of TaskScheduler.
@@ -144,6 +148,30 @@ public:
      */
     PANDA_PUBLIC_API void WaitForFinishAllTasksWithProperties(TaskProperties properties);
 
+    /**
+     * @brief Adds the task to the wait list with timeout. After the timeout expires, the task will be added
+     * to its corresponding TaskQueue.
+     * @param task: instance of task
+     * @param time: waiting time in milliseconds
+     * @returns unique waiter id. It can be used to signal wait list to add task to TaskQueue
+     */
+    PANDA_PUBLIC_API WaiterId AddTaskToWaitListWithTimeout(Task &&task, uint64_t time);
+
+    /**
+     * @brief Adds the task to the wait list.
+     * @param task: instance of task
+     * @returns unique waiter id. It can be used to signal wait list to add task to TaskQueue
+     * @see TaskScheduler::SignalWaitList
+     */
+    PANDA_PUBLIC_API WaiterId AddTaskToWaitList(Task &&task);
+
+    /**
+     * @brief Signals wait list to add task in TaskQueue.
+     * @param waiterId: unique waiter id
+     * @see TaskScheduler::AddTaskToWaitListWithTimeout, TaskScheduler::AddTaskToWaitList
+     */
+    PANDA_PUBLIC_API void SignalWaitList(WaiterId waiterId);
+
     /// @brief This method indicates that workers can no longer wait for new tasks and be completed.
     PANDA_PUBLIC_API void Finalize();
 
@@ -216,6 +244,16 @@ private:
 
     internal::SchedulableTaskQueueInterface *GetQueue(TaskQueueId id) const;
 
+    void PutWaitTaskInLocalQueue(LocalTaskQueue &queue) REQUIRES(taskSchedulerStateLock_);
+
+    void PutTaskInTaskQueues(LocalTaskQueue &queue);
+
+    /**
+     * @brief Method waits until new tasks coming or finishing of Task Scheduler usage
+     * @return true if TaskScheduler have tasks to manager
+     */
+    bool WaitUntilNewTasks() REQUIRES(taskSchedulerStateLock_);
+
     static TaskScheduler *instance_;
 
     size_t workersCount_;
@@ -284,6 +322,8 @@ private:
 
     TaskStatistics *taskStatistics_ = nullptr;
     internal::TaskSelector selector_;
+
+    WaitList<Task> waitList_ GUARDED_BY(taskSchedulerStateLock_);
 };
 
 }  // namespace ark::taskmanager

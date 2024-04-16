@@ -56,7 +56,8 @@ size_t WorkerThread::CountOfTasksWithProperties(TaskProperties properties) const
 void WorkerThread::WorkerLoop()
 {
     WaitForStart();
-    while (true) {
+    auto finishCond = false;
+    while (!finishCond) {
         ASSERT(finishedTasksCounterMap_.empty());
         // Worker will steal tasks only if all queues are empty and it's possible to find worker for stealing
         if (UNLIKELY(scheduler_->AreQueuesEmpty() && !scheduler_->AreWorkersEmpty())) {
@@ -66,15 +67,9 @@ void WorkerThread::WorkerLoop()
             }
             ExecuteStolenTask();
         } else {  // Else it will try get/wait tasks.
-            auto finishCond = scheduler_->FillWithTasks(this);
-            if (UNLIKELY(finishCond)) {
-                break;
-            }
-            if (UNLIKELY(localQueue_.IsEmpty())) {
-                continue;
-            }
-            ExecuteTasksFromLocalQueue();
+            finishCond = scheduler_->FillWithTasks(this);
         }
+        ExecuteTasksFromLocalQueue();
         [[maybe_unused]] size_t countOfTasks = scheduler_->IncrementCounterOfExecutedTasks(finishedTasksCounterMap_);
         LOG(DEBUG, TASK_MANAGER) << GetWorkerName() << ": executed tasks: " << countOfTasks;
         countOfExecutedTask_ += countOfTasks;
@@ -101,9 +96,15 @@ size_t WorkerThread::ExecuteTasksFromLocalQueue()
 
 void WorkerThread::ExecuteStolenTask()
 {
-    auto prop = stolenTask_.GetTaskProperties();
-    stolenTask_.RunTask();
-    stolenTask_.MakeInvalid();
+    ExecuteTask(&stolenTask_);
+}
+
+void WorkerThread::ExecuteTask(Task *task)
+{
+    ASSERT(task != nullptr);
+    auto prop = task->GetTaskProperties();
+    task->RunTask();
+    task->MakeInvalid();
     finishedTasksCounterMap_[prop]++;
 }
 
@@ -120,6 +121,42 @@ void WorkerThread::WaitForStart()
     while (!start_) {
         startWaitCondVar_.Wait(&startWaitLock_);
     }
+}
+
+void WorkerThread::RegisterAllWorkersInLocalQueue(const std::vector<WorkerThread *> &workers)
+{
+    for (auto *worker : workers) {
+        if (worker == this) {
+            continue;
+        }
+        perWorkerPopId_[worker] = localQueue_.RegisterConsumer();
+    }
+}
+
+std::string WorkerThread::GetWorkerName() const
+{
+    return name_;
+}
+
+size_t WorkerThread::GetLocalWorkerQueuePopId(WorkerThread *worker) const
+{
+    return perWorkerPopId_.at(worker);
+}
+
+size_t WorkerThread::GetLocalWorkerQueueSchedulerPopId() const
+{
+    return schedulerPopId_;
+}
+
+void WorkerThread::SetStolenTask(Task &&stolenTask)
+{
+    ASSERT(stolenTask_.IsInvalid());
+    stolenTask_ = std::move(stolenTask);
+}
+
+void WorkerThread::TryDeleteRetiredPtrs()
+{
+    localQueue_.TryDeleteRetiredPtrs();
 }
 
 WorkerThread::~WorkerThread()

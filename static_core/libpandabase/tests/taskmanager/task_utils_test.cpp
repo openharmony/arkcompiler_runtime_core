@@ -14,6 +14,8 @@
  */
 
 #include "libpandabase/taskmanager/utils/sp_mc_lock_free_queue.h"
+#include "libpandabase/taskmanager/utils/wait_list.h"
+#include "libpandabase/os/thread.h"
 #include <gtest/gtest.h>
 #include <thread>
 
@@ -97,6 +99,44 @@ TEST_F(TaskUtilityTest, SPMCLockFreeQueueSPMCTest)
         consumer.join();
     }
     ASSERT_EQ(producerCounter, consumerCounter);
+}
+
+TEST_F(TaskUtilityTest, WaitListTests)
+{
+    WaitList<size_t> waitList;
+    constexpr size_t RETURN_VALUE_1 = 42U;
+    constexpr size_t WAIT_TIME_MS = 10U;
+    // First test should show correct work of WaitList with waiting
+    waitList.AddValueToWait(RETURN_VALUE_1, WAIT_TIME_MS);
+    os::thread::NativeSleep(WAIT_TIME_MS);
+    auto value = waitList.GetReadyValue();
+    ASSERT_TRUE(value.has_value() && value.value() == RETURN_VALUE_1 && !waitList.HaveReadyValue());
+
+    // Second test should show correct work of WaitList with large time to wait and correct signal
+    constexpr size_t RETURN_VALUE_2 = 12345U;
+    constexpr size_t LARG_TIME_TO_WAIT_MS = 1'000'000'000;  // it's about 11.5 days
+    auto id = waitList.AddValueToWait(RETURN_VALUE_2, LARG_TIME_TO_WAIT_MS);
+    value = waitList.GetReadyValue();
+    ASSERT_TRUE(!value.has_value());
+
+    ASSERT_TRUE(id != INVALID_WAITER_ID);
+    value = waitList.GetValueById(id);
+    ASSERT_TRUE(value.has_value() && value.value() == RETURN_VALUE_2 && !waitList.HaveReadyValue());
+
+    // Final test: adding of 2 values with both cases that was showed previously
+    id = waitList.AddValueToWait(RETURN_VALUE_2, LARG_TIME_TO_WAIT_MS);
+    waitList.AddValueToWait(RETURN_VALUE_1, WAIT_TIME_MS);
+
+    os::thread::NativeSleep(WAIT_TIME_MS);
+    value = waitList.GetReadyValue();
+    ASSERT_TRUE(value.has_value() && value.value() == RETURN_VALUE_1 && !waitList.HaveReadyValue());
+    value = waitList.GetReadyValue();
+    ASSERT_TRUE(!value.has_value());
+
+    ASSERT_TRUE(id != INVALID_WAITER_ID);
+    value = waitList.GetValueById(id);
+
+    ASSERT_TRUE(value.has_value() && value.value() == RETURN_VALUE_2 && !waitList.HaveReadyValue());
 }
 
 }  // namespace ark::taskmanager

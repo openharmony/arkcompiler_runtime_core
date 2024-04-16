@@ -44,6 +44,14 @@ public:
     {
     }
     ~SchedulableTaskQueueInterface() override = default;
+
+    /**
+     * @brief The method adds a task to the queue without execution the new task callback. This method should only be
+     * used with tasks that have already triggered this callback.
+     * @param task: instance of Task
+     */
+    void virtual AddTaskWithoutNewTaskCallbackExecution(Task &&task) = 0;
+
     /**
      * @brief Pops task from task queue. Operation is thread-safe. The method will wait new task if queue is empty and
      * method WaitForQueueEmptyAndFinish has not been executed. Otherwise it will return std::nullopt.

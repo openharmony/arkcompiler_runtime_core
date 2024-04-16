@@ -477,6 +477,37 @@ TEST_P(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
     TaskScheduler::Destroy();
 }
 
+TEST_P(TaskSchedulerTest, TaskSchedulerAddTaskToWaitListWithTimeTest)
+{
+    srand(GetSeed());
+    // Create TaskScheduler
+    constexpr size_t THREADS_COUNT = 1;
+    auto taskStatisticsType = GetParam();
+    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    // Create and register 2 queues
+    constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
+    TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
+    // Initialize tm workers
+    tm->Initialize();
+
+    constexpr size_t WAIT_LIST_USAGE_COUNT = 5;
+    std::atomic_size_t sleepCount = 0;
+    std::function<void()> taskRunner = [tm, &sleepCount, &taskRunner]() {
+        if (sleepCount < WAIT_LIST_USAGE_COUNT) {
+            sleepCount++;
+            [[maybe_unused]] auto id = tm->AddTaskToWaitListWithTimeout(
+                Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND}, taskRunner), 1U);
+            ASSERT(id != INVALID_WAITER_ID);
+        }
+    };
+    gcQueue->AddTask(Task::Create({TaskType::GC, VMType::STATIC_VM, TaskExecutionMode::FOREGROUND}, taskRunner));
+    tm->Finalize();
+    ASSERT_EQ(sleepCount, WAIT_LIST_USAGE_COUNT);
+    // Fill queues with tasks that increment counter with its type.
+    tm->UnregisterAndDestroyTaskQueue<>(gcQueue);
+    TaskScheduler::Destroy();
+}
+
 INSTANTIATE_TEST_SUITE_P(TaskStatisticsTypeSet, TaskSchedulerTest,
                          ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
                                            TaskStatisticsImplType::LOCK_FREE, TaskStatisticsImplType::NO_STAT));
