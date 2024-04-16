@@ -39,6 +39,10 @@ ohos_source_set("libarkziparchive_static") {
     public_external_deps = [ "zlib:shared_libz" ]
   }
 
+  if (enable_hilog) {
+    public_external_deps += [ "hilog:libhilog" ]
+  }
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
