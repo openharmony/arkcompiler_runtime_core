@@ -44,10 +44,10 @@ public:
         dead_marker_ = graph_->NewMarker();
         for (auto bb : graph_->GetBlocksRPO()) {
             for (auto inst : bb->AllInstsSafe()) {
-                if (inst->IsMarked(dead_marker_)) {
+                if (!inst->IsPhi() && inst->GetOpcode() != Opcode::CatchPhi) {
                     continue;
                 }
-                if (!inst->IsPhi() && inst->GetOpcode() != Opcode::CatchPhi) {
+                if (inst->IsMarked(dead_marker_)) {
                     continue;
                 }
                 if (inst->HasType() || (!inst->GetUsers().Empty() && CheckPhiInputs(inst))) {
