@@ -107,80 +107,6 @@ void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir
     }
 }
 
-static void ExtractTypeInfo(const pandasm::Function &function, compiler::RuntimeInterface *adapter,
-                            std::unordered_map<int32_t, TypeInfoIndex> *order_type_map, const pandasm::Program *prog)
-{
-    const auto &annos = function.metadata->GetAnnotations();
-    const auto type_anno = std::find_if(annos.begin(), annos.end(),
-                                        [](const auto &an) { return an.GetName() == TSTYPE_ANNO_RECORD_NAME; });
-    if (type_anno == annos.end()) {
-        return;
-    }
-    const auto &elems = type_anno->GetElements();
-    const auto type_elem = std::find_if(elems.begin(), elems.end(),
-                                        [](const auto &e) { return e.GetName() == TSTYPE_ANNO_ELEMENT_NAME; });
-    if (type_elem == elems.end()) {
-        return;
-    }
-    const auto *key_val = type_elem->GetValue();
-    ASSERT(key_val != nullptr);
-    ASSERT(key_val->GetType() == pandasm::Value::Type::LITERALARRAY);
-    const auto key = key_val->GetAsScalar()->GetValue<std::string>();
-    adapter->SetTypeLiteralArrayKey(key);
-    auto array_iter = prog->literalarray_table.find(key);
-    ASSERT(array_iter != prog->literalarray_table.end());
-    const auto &array = array_iter->second.literals_;
-    // 4: size must be multiple of 4 because values consits of tuple of tag, order, tag, type
-    ASSERT(array.size() % 4 == 0);
-    size_t i = 1;
-    while (i < array.size()) {
-        auto order = bit_cast<int32_t>(std::get<uint32_t>(array[i].value_));
-        i += 2;  // 2: skip tag between order and type
-        TypeInfoIndex type;
-        if (array[i].tag_ == panda_file::LiteralTag::LITERALARRAY) {
-            type = std::get<std::string>(array[i].value_);
-        } else {
-            ASSERT(array[i].tag_ == panda_file::LiteralTag::BUILTINTYPEINDEX);
-            type = std::get<BuiltinIndexType>(array[i].value_);
-        }
-
-        if (order < 0) {
-            adapter->AddPcTypePair(order, type);  // arguments
-        } else {
-            order_type_map->emplace(order, type);  // instructions
-        }
-        i += 2;  // 2: skip tag between type and order
-    }
-}
-
-static void BuildMapFromPcToType(const pandasm::Function &function, const compiler::Graph *graph,
-                                 compiler::RuntimeInterface::MethodPtr method_ptr, const pandasm::Program *prog)
-{
-    std::unordered_map<int32_t, TypeInfoIndex> tmp_order_type_map;
-    ExtractTypeInfo(function, graph->GetRuntime(), &tmp_order_type_map, prog);
-    if (tmp_order_type_map.empty()) {
-        return;
-    }
-    const auto *instruction_buf = graph->GetRuntime()->GetMethodCode(method_ptr);
-    compiler::BytecodeInstructions instructions(instruction_buf, graph->GetRuntime()->GetMethodCodeSize(method_ptr));
-    int32_t order = 0;
-    size_t num_collected = 0;
-    for (const auto &insn : instructions) {
-        const auto it = tmp_order_type_map.find(order++);
-        if (it == tmp_order_type_map.end()) {
-            continue;
-        }
-        auto pc = static_cast<int32_t>(instructions.GetPc(insn));
-        graph->GetRuntime()->AddPcTypePair(pc, it->second);
-        num_collected++;
-
-        // stop when all typeinfo has been collected
-        if (num_collected == tmp_order_type_map.size()) {
-            break;
-        }
-    }
-}
-
 static void ColumnNumberPropagate(pandasm::Function *function)
 {
     auto &ins_vec = function->ins;
@@ -313,8 +239,6 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     if (SkipFunction(function, func_name)) {
         return false;
     }
-
-    BuildMapFromPcToType(function, graph, method_ptr, prog);
 
     // build map from pc to pandasm::ins (to re-build line-number info in BytecodeGen)
     BuildMapFromPcToIns(function, ir_interface, graph, method_ptr);

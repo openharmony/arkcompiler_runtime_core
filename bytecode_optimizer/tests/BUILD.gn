@@ -58,7 +58,6 @@ foreach(file, graph_test_js_files) {
 host_unittest_action("BytecodeOptimizerTest") {
   module_out_path = module_output_path
   sources = [
-    "bcopt_type_adaption_test.cpp",
     "codegen_test.cpp",
     "excluded_keys_test.cpp",
     "optimize_bytecode_test.cpp",

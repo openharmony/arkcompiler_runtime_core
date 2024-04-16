@@ -966,7 +966,7 @@ HWTEST_F(CompilerInstTest, compiler_inst_test_034, TestSize.Level1)
 
 /**
  * @tc.name: compiler_inst_test_035
- * @tc.desc: Verify the HasInsTypeinfo function.
+ * @tc.desc: Verify the ResolveOffsetByIndex function.
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -992,18 +992,12 @@ HWTEST_F(CompilerInstTest, compiler_inst_test_035, TestSize.Level1)
         EXPECT_EQ(interface.GetMethodRegistersCount(method), 0);
         EXPECT_EQ(interface.GetClassNameFromMethod(method), "UnknownClass");
         EXPECT_EQ(interface.GetMethodName(method), "UnknownMethod");
-        EXPECT_FALSE(interface.SetTypeLiteralArrayKey("test"));
         EXPECT_EQ(interface.GetMethodCode(method), nullptr);
         EXPECT_EQ(interface.GetMethodCodeSize(method), 0);
         EXPECT_EQ(interface.GetMethodSourceLanguage(method), SourceLanguage::PANDA_ASSEMBLY);
         EXPECT_EQ(interface.GetClass(method), nullptr);
         EXPECT_EQ(interface.GetMethodFullName(method, true), "UnknownMethod");
         EXPECT_EQ(interface.GetClassIdForMethod(method), 0);
-        EXPECT_EQ(interface.GetTypeInfoIndexByInstId(0), NO_EXPLICIT_TYPE);
-        EXPECT_FALSE(interface.IsPcBindType(0));
-        EXPECT_FALSE(interface.FillInstIdTypePairByPc(0, 0));
-        EXPECT_EQ(interface.GetTypeLiteralArrayKey(), nullptr);
-        EXPECT_FALSE(interface.HasInsTypeinfo());
     });
     EXPECT_TRUE(status);
 }
