@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@ desc: A name is explicitly used with alias and implicitly without alias. Sine is
 ---*/
 
 import {sin as Sine} from "std/math";
-import * from "std/math";
+import * as all from "std/math";
 
 function main(): void {
   let x = Sine(1.0);

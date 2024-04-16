@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
  tags: 
  files: [./to_export.ets]
  ---*/
-import * from "./to_export"
+import * as all from "./to_export"
 
 function main(): void {
-  let P = new Point(1, 2)
+  let P = new all.Point(1, 2)
 }

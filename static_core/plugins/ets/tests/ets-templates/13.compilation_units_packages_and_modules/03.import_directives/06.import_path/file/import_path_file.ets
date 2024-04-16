@@ -27,7 +27,7 @@ files: [module_a.ets, nesteddir/module_a.ets, nesteddir/../module_a.ets, ../modu
 {{stmt}}
 
 function main(): void {
-  importedFromFile()
+  all.importedFromFile()
 }
 
 {% endfor %}

@@ -12,12 +12,12 @@
 # limitations under the License.
 
 import_stmts:
-  - import * from "./module_a"
-  - import * from "./module_a.ets"
-  - import * from "./nesteddir/module_a"
-  - import * from "./nesteddir/module_a.ets"
-  - import * from "./nesteddir/../module_a"
-  - import * from "./nesteddir/../module_a.ets"
-  - import * from "../module_a"
-  - import * from "../module_a.ets"
+  - import * as all from "./module_a"
+  - import * as all from "./module_a.ets"
+  - import * as all from "./nesteddir/module_a"
+  - import * as all from "./nesteddir/module_a.ets"
+  - import * as all from "./nesteddir/../module_a"
+  - import * as all from "./nesteddir/../module_a.ets"
+  - import * as all from "../module_a"
+  - import * as all from "../module_a.ets"
   
