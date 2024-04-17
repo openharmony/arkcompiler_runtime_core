@@ -196,6 +196,10 @@ ohos_source_set("libarkbase_static") {
 
   deps = libarkbase_deps
 
+  if (is_arkui_x) {
+    deps += ["$ark_third_party_root/bounds_checking_function:libsec_static"]
+  }
+
   external_deps = [ sdk_libc_secshared_dep ]
 
   external_deps = []
