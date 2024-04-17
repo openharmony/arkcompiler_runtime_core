@@ -108,6 +108,9 @@ ohos_source_set("libarkfile_static") {
     "$ark_root/libpandabase:libarkbase_static",
     "$ark_root/libziparchive:libarkziparchive_static",
   ]
+  if (is_arkui_x) {
+    deps += ["$ark_third_party_root/bounds_checking_function:libsec_static"]
+  }
 
   external_deps = [ sdk_libc_secshared_dep ]
 
