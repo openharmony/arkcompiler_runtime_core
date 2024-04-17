@@ -81,11 +81,6 @@ spec/unions/union_cast_n_03.ets
 spec/unions/union_compare_n_10.ets
 spec/unions/union_param_n_01.ets
 spec/unions/union_param_n_02.ets
-### Issue 14165
-spec/unions/union_compare_02_04.ets
-### Issue 15312
-### Issue 15965, 14165
-spec/unions/union_compare_02_02.ets
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
@@ -255,8 +250,6 @@ spec/nullables/nullable-lambda-default-param_1.ets
 spec/nullables/nullable-lambda-default-param_4.ets
 spec/nullables/nullable-lambda-default-param_6.ets
 spec/nullables/nullable-method-default-param_7.ets
-spec/nullables/nullable-method-param_0.ets
-spec/nullables/nullable-method-result_0.ets
 ### End Issue 14495
 ### Issue 14584
 spec/nullables/nullable-lambda-default-param_3.ets
@@ -324,9 +317,6 @@ std/core/std_core_string_String_fromCharCode_006.ets
 ### Not implemented
 std/core/std_core_string_String_split_RegExp_int.ets
 std/core/std_core_string_String_split_RegExp_number.ets
-### Issue 15306
-std/core/std_core_string_String_replace_RegExp_String.ets
-std/core/std_core_string_String_replaceAll_RegExp_String.ets
 ### Issue 14343
 spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_03.ets
 spec/import_export/07.export_directives/03.re-export_directives/re_export_all_2.ets
@@ -379,8 +369,6 @@ arkui/dollar_dollar_11.ets
 arkui/dollar_dollar_12.ets
 arkui/dollar_dollar_13.ets
 ### End Of Built-In Component Two Way Value Synchronization
-# #16098
-arkui/dollar_dollar_10.ets
 ### Annotations issues
 ### Issue 14040 -> Annotations not yet implemented
 spec/16.Support_for_GUI_Programming/annotations/annotation_@Builder.ets
@@ -402,11 +390,6 @@ spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch_2.ets
 ### End of Issue 14040
 ### End of Annotations
 
-### Issue I8MB96 begin
-spec/bigint/bigint-arithmetic-expr-4-operands-3.ets
-spec/bigint/bigint-arithmetic-expr-4-operands-4.ets
-spec/bigint/bigint-arithmetic-expr-4-operands-5.ets
-### Issue I8MB96 end
 ### Issue 14907 begin
 spec/bigint/bigint-arithmetic-add-2-operands-union.ets
 spec/bigint/bigint-arithmetic-div-2-operands-union.ets
