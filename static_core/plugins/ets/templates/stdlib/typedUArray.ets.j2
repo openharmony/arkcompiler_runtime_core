@@ -1458,44 +1458,45 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Finds the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return {{elType}} | undefined as in JS
+     * @returns {{elType}} | undefined
      */
-    public find(fn: () => boolean): {{elType}}|undefined {
-        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
-            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn() }
-        return this.find(newF)
+    public find(predicate: () => boolean): {{elType}} | undefined {
+        return this.find((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate())
     }
 
     /**
-     * Finds the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return {{elType}} | undefined as in JS
+     * @returns {{elType}} | undefined
      */
-    public find(fn: (value: {{elType}}) => boolean): {{elType}}|undefined {
-        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
-            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value) }
-        return this.find(newF)
+    public find(predicate: (value: {{elType}}) => boolean): {{elType}} | undefined {
+        return this.find((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value))
     }
 
     /**
-     * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns {{idxType}}
      */
-    public findIndex(fn: (value: {{elType}}) => boolean): {{idxType}} {
-        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
-            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value) }
-        return this.findIndex(newF){{castToIdx}}
+    public findIndex(predicate: (value: {{elType}}) => boolean): {{idxType}} {
+        return this.findIndex((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value)){{castToIdx}}
     }
 
     /**
@@ -1764,17 +1765,19 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Finds the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return {{elType}} | undefined as in JS
+     * @returns {{elType}} | undefined
      */
-    public find(fn: (value: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{elType}}|undefined {
+    public find(predicate: (value: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): {{elType}} | undefined {
         for (let i = 0; i < this.lengthInt; i++) {
             let val = {{castToEl % 'this.getUnsafe(i)'}}
-            if (fn(val, i{{castToIdx}}, this)) {
+            if (predicate(val, i{{castToIdx}}, this)) {
                 return val
             }
         }
@@ -1782,29 +1785,32 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Finds the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return {{elType}} | undefined as in JS
+     * @returns {{elType}} | undefined
      */
-    public find(fn: (value: {{elType}}, index: {{idxType}}) => boolean): {{elType}}|undefined {
-        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
-            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value, index) }
-        return this.find(newF)
+    public find(predicate: (value: {{elType}}, index: {{idxType}}) => boolean): {{elType}} | undefined {
+        return this.find((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns {{idxType}}
      */
-    public findIndex(fn: (value: {{elType}}, index: {{idxType}}, obj: {{element['name']}}Array) => boolean): {{idxType}} {
+    public findIndex(predicate: (value: {{elType}}, index: {{idxType}}, obj: {{element['name']}}Array) => boolean): {{idxType}} {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)) {
+            if (predicate({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)) {
                 return i{{castToIdx}}
             }
         }
@@ -1812,29 +1818,31 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns {{idxType}}
      */
-    public findIndex(fn: (value: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
-        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
-            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn(value, index) }
-        return this.findIndex(newF)
+    public findIndex(predicate: (value: {{elType}}, index: {{idxType}}) => boolean): {{idxType}} {
+        return this.findIndex((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the {{element['name']}}Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns {{idxType}}
      */
-    public findIndex(fn: () => boolean): {{idxType}} {
-        let newF: (value: {{elType}}, index: number, obj: {{element['name']}}Array) => boolean =
-            (value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => { return fn() }
-        return this.findIndex(newF)
+    public findIndex(predicate: () => boolean): {{idxType}} {
+        return this.findIndex((value: {{elType}}, index: number, obj: {{element['name']}}Array): boolean => predicate())
     }
 
     /**
