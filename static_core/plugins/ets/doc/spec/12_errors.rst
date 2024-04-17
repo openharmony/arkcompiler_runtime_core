@@ -82,8 +82,13 @@ Exceptions are described in the chapter Experimental Features (see
 
 |
 
+.. _Errors:
+
 Errors
 ******
+
+.. meta:
+    frontend_status: Partly
 
 ``Error`` is the base class of all errors. Defining a new error class is
 normally not required because error classes for various cases (e.g.,
@@ -120,8 +125,8 @@ handling is provided below:
 A compile-time error occurs if a generic class is directly or indirectly
 a subclass of ``Error``.
 
-In most cases, errors are caused by the Virtual Machine, or by the
-standard libraries.
+In most cases, errors are raised by the |LANG| runtime system, or by the
+standard library (see :ref:`Standard Library`) code.
 
 The ``throw`` statements (see :ref:`Throw Statements`) allow throwing both
 exceptions and errors. Throwing exceptions provide a structured way to

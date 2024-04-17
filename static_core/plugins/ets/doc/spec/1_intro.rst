@@ -530,16 +530,11 @@ as used in other languages, application areas, or industries.
      handle any exception or error that is not handled by a preceding clause.
 
    overloading
-     -- situation where different imported functions, or a function of
-     the current module and an imported function have the same name but
-     different signatures.
+     -- situation where different methods inherited by or declared in the same
+     class or interface have the same name but different signatures.
 
    shadowing
-     -- situation where a function of the current module and an imported
-     function have the same name and signature. Shadowing causes a
-     compile-time error where function declarations are duplicated (i.e.,
-     the name and override-equivalent signatures of an imported function are
-     the same as those of a function declared in the current compilation unit).
+     -- situation where ... TBD
 
    package level scope
       -- name that is declared on the package level, and accessible throughout

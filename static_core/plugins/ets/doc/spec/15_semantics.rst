@@ -22,9 +22,7 @@ This Chapter contains semantic rules to be used throughout the Specification
 document.
 
 Note that the description of the rules is more or less informal.
-
-Some details are omitted to simplify the understanding. See the
-formal language description for more information.
+Some details are omitted to simplify the understanding.
 
 |
 
@@ -36,11 +34,11 @@ Subtyping
 .. meta:
     frontend_status: Done
 
-The *subtype* relationships are binary relationships of types.
+The *subtype* relationship between two types *S* and *T*, where *S* is a subtype
+of *T* (recorded as ``S<:T``), means that any object of type *S* can be safely
+used in any context in place of an object of type *T*.
 
-The subtyping relation of *S* as a subtype of *T* is recorded as ``S<:T``.
-It means that any object of type *S* can be safely used in any context
-in place of an object of type *T*.
+The opposite relation is called *supertype* relationship (recorded as ``T:>S``).
 
 By the definition of ``S<:T``, type *T* belongs to the set of *supertypes*
 of type *S*. The set of *supertypes* includes all *direct supertypes* (see
@@ -48,7 +46,7 @@ below), and all their respective *supertypes*.
 
 .. index::
    subtyping
-   binary relationship
+   subtype
    object
    type
    direct supertype
@@ -56,6 +54,9 @@ below), and all their respective *supertypes*.
 
 More formally speaking, the set is obtained by reflexive and transitive
 closure over the direct supertype relation.
+
+Terms *subclass*, *subinterafce*, *superclass*, and *superinterface* are used
+when considering class or interface types.
 
 *Direct supertypes* of a non-generic class, or of the interface type *C*
 are **all** of the following:
@@ -67,7 +68,7 @@ are **all** of the following:
 -  The direct superinterfaces of *C* (as mentioned in the implementation
    clause of *C*, see :ref:`Class Implementation Clause`).
 
--  Type ``Object`` if *C* is an interface type with no direct superinterfaces
+-  Class ``Object`` if *C* is an interface type with no direct superinterfaces
    (see :ref:`Superinterfaces and Subinterfaces`).
 
 
@@ -191,14 +192,17 @@ Then the code below is valid:
       // invariance: parameter type and return type are unchanged
       override method_one(p: Base): Base {}  
 
-      // covariance for the return type  
+      // covariance for the return type: Derived is a subtype of Base  
       override method_two(p: Derived): Derived {}
 
-      // contravariance for parameter types
+      // contravariance for parameter types: Base is a super type for Derived
       override method_three(p: Base): Derived {} 
    }
 
 The following code causes compile-time errors:
+
+.. code-block-meta:
+   expect-cte
 
 .. code-block:: typescript
    :linenos:
@@ -211,198 +215,6 @@ The following code causes compile-time errors:
       // contravariance for the return type is prohibited
       override method_tree(p: Derived): Base {}
    }
-
-
-|
-
-.. _Override-Equivalent Signatures:
-
-Override-Equivalent Signatures
-******************************
-
-.. meta:
-    frontend_status: Done
-
-Two functions, methods, or constructors *M* and *N* have the *same signature*
-if their names, type parameters (if any, see :ref:`Generic Declarations`), and
-formal parameter types are the same after the formal parameter types of *N*
-are adapted to type parameters of *M*.
-
-Two signatures in the following example are *the same signatures*:
-
-``M`` < ``T``:sub:`1` ``, ... T``:sub:`k` > (``U``:sub:`1` ``, ... U``:sub:`p`) ``:R``:sub:`M`
-
-``N`` < ``P``:sub:`1` ``, ... P``:sub:`n` > (``S``:sub:`1` ``, ... S``:sub:`q`) ``:R``:sub:`N`
-
----if all conditions below are satisfied:
-
-- `k = n`;
-- For any `i` in 1 .. k, Constraint (*T*:sub:`i`) fits Constraint (*P*:sub:`i`);
-- `p = q`;
-- For any `j` in 1 .. p, Constraint (*U*:sub:`j`) fits Constraint (*S*:sub:`j`).
-
-In this example, Constraint of any type except type parameter returns the type
-itself, and *fits* means that the types:
-
-  - Are identical;
-  - Are different but the intersection of the data sets of the first
-    and the second type is empty; or
-  - Do not have forms like *T* and rest parameters of ``T[]``.
-
-.. code-block:: typescript
-
-    type T1 = A | B
-    type T2 = A | C
-    // Types T1 and T2 fit each other as their data values have intersection with data values of type A
-
-Signatures *S*:sub:`1` and *S*:sub:`2` are *override-equivalent* only if
-*S*:sub:`1` and *S*:sub:`2` are identical.
-
-A compile-time error occurs if:
-
--  A package declares two or more functions with *override-equivalent*
-   signatures.
-
--  A class declares two or more methods or constructors with
-   *override-equivalent* signatures.
-
--  An interface declares two or more methods with *override-equivalent*
-   signatures.
-
-The examples below illustrate the concept:
-
-.. code-block:: typescript
-   :linenos:
-
-   // The same signatures
-
-   foo <T1, T2> ()
-   foo <G1, G2> ()
-   // The same number of type parameters and their constraints are identical
-
-   foo <T extends U1> (p1: U1, p2: U2)
-   foo <V extends U1> (r1: V, r2: U2)
-   /* The same number of parameters and their types are identical replacing
-      type parameter with its constraint */
-
-   foo (p1: U1, p2: U2): R1
-   foo (q1: U1, q2: U2): R2
-   // The same number of parameters and their types are identical
-
-   class Base {}
-   class Derived extends Base {}
-
-   foo (p: Base)
-   foo (p: Derived)
-   /* The same number of parameters and intersection of data values of Derived
-      and Base produce data set of Derived values */
-
-   foo (p: A | B)
-   foo (p: A | C)
-   /* The same number of parameters and intersection of data values of A | B
-      and A | C produce data set of A values */
-
-   foo (p1: String)
-   foo (...p2: String[])
-   // The same due to ambiguity of the type String and rest parameter String[]
-   // foo("some string") fits both signatures
-
-
-   // Different signatures
-
-   foo (p1: String)
-   foo (p2: String[])
-   // As signatures String and String[] do not lead to call ambiguities
-   // foo ("some string") fits the first signature
-   // foo (["some string"]) fits the second one
-
-
-.. index::
-   override-equivalent signature
-   function
-   method
-   constructor
-   signature
-   type parameter
-   generic declaration
-   formal parameter type
-
-|
-
-.. _Compatible Signature:
-
-Compatible Signature
-********************
-
-.. meta:
-    frontend_status: None
-
-Signature *S*:sub:`1` with *n* parameters is compatible with the signature
-*S*:sub:`2` with *m* parameters if:
-
--  *n <= m*;
--  All *n* parameter types in *S*:sub:`2` are compatible (see :ref:`Type Compatibility`)
-   with parameter types in the same positions in *S*:sub:`1` (*contravariance*); and
--  All *S*:sub:`2` parameters in positions from *m - n* up to *m* are optional
-   (see :ref:`Optional Parameters`).
-
-A return type, if available, is present in both signatures, and the return
-type of *S*:sub:`1` is compatible (see :ref:`Type Compatibility`) with the
-return type of *S*:sub:`2` (*covariance*).
-
-|
-
-.. _Overload Signature Compatibility:
-
-Overload Signature Compatibility
-********************************
-
-If several functions, methods, or constructors share the same body
-(implementation) or the same method with no implementation in an interface,
-then all first signatures without body must *fit* into the last signature with
-or without the actual implementation for the interface method. Otherwise, a
-compile-time error occurs.
-
-Signature *S*:sub:`1` with *n* parameters *fits* into signature *S*:sub:`2`
-if:
-
-- *S*:sub:`1` has *n* parameters, *S*:sub:`2` has *m* parameters; and:
-  
-   -  *n <= m*;
-   -  All *n* parameter types in *S*:sub:`1` are compatible (see
-      :ref:`Type Compatibility`) with parameter types in the same positions
-      in *S*:sub:`2`; and
-   -  If *n < m*, then all *S*:sub:`2` parameters in positions from *n + 1*
-      up to *m* are optional (see :ref:`Optional Parameters`).
-
-- Both *S*:sub:`1` and *S*:sub:`2` have return types, and the return type of
-  *S*:sub:`2` is compatible with the return type of *S*:sub:`1` (see
-  :ref:`Type Compatibility`).
-
-It is illustrated by the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base { ... }
-   class Derived1 extends Base { ... }
-   class Derived2 extends Base { ... }
-   class SomeClass { ... }
-
-   interface Base1 { ... }
-   interface Base2 { ... }
-   class Derived3 implements Base1, Base2 { ... }
-
-   function foo (p: Derived2): Base1 // signature #1
-   function foo (p: Derived1): Base2 // signature #2
-   function foo (p: Derived2): Base1 // signature #1
-   function foo (p: Derived1): Base2 // signature #2
-   // function foo (p: SomeClass): SomeClass 
-      // Error as 'SomeClass' is not compatible with 'Base'
-   // function foo (p: number) 
-      // Error as 'number' is not compatible with 'Base' and implicit return type 'void' also incompatible with Base
-   function foo (p1: Base, p2?: SomeClass): Derived3 // // signature #3: implementation signature
-       { return p }
 
 
 |
@@ -422,12 +234,583 @@ Type *T*:sub:`1` is compatible with type *T*:sub:`2` if:
 -  There is an *implicit conversion* (see :ref:`Implicit Conversions`)
    that allows converting type *T*:sub:`1` to type *T*:sub:`2`.
 
+*Type compatibility* relationship  is asymmetric, i.e., that *T*:sub:`1`
+is compatible with type *T*:sub:`2` does not imply that *T*:sub:`2` is
+compatible with type *T*:sub:`1`.
+
 .. index::
    type compatibility
    conversion
 
 |
 
+.. _Overloading and Overriding:
+
+Overloading and Overriding
+**************************
+
+There are two important concepts applied to different contexts and entities
+throughout this specification.
+
+*Overloading* allows defining and using functions (in general sense, including
+methods and constructors) with the same name but different signatures.
+The actual function to be called is determined at compile time, and
+*overloading* is thus related to compile-time polymorphism.
+
+*Overriding* is closely connected with inheritance, and is applied for methods
+but not for functions. Overriding allows a subclass to offer a specific
+implementation of a method already defined in its parent class. The actual
+method to be called is determined at runtime based on the object's type, and
+overriding is thus related to runtime polymorphism.
+
+|LANG| uses two semantic rules: *overload-equivalence* (see
+:ref:`Overload-Equivalent Signatures`) and *override-compatibility* (see
+:ref:`Override-Compatible Signatures`).
+
+The *overload-equivalence* rule: the *overloading* of two entities is correct
+if their signatures are **not** *overload-equivalent*.
+
+The *override-compatibility* rule: the *overriding* of two entities is correct
+if their signatures are *override-compatible*.
+
+See :ref:`Overloading for Functions`,
+:ref:`Overloading and Overriding in Classes`, and
+:ref:`Overloading and Overriding in Interfaces` for details.
+
+|
+
+.. _Overload-Equivalent Signatures:
+
+Overload-Equivalent Signatures
+==============================
+
+Signatures *S*:sub:`1` with *n* parameters,
+and *S*:sub:`2` with *m* parameters are
+*overload-equivalent* if:
+
+-  ``n = m``;
+
+-  A parameter type at some position in *S*:sub:`1` is a *type parameter*
+   (see :ref:`Generic Parameters`), and a parameter type at the same position
+   in *S*:sub:`2` is any reference type or type parameter;
+
+-  A parameter type at some position in *S*:sub:`1` is a *generic type*
+   *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
+   same position in *S*:sub:`2` is also *G* with any list of type arguments;
+
+-  All other parameter types in *S*:sub:`1` are equal
+   to parameter types in the same positions in *S*:sub:`2`.
+
+
+Parameter names and return types do not influence *override-equivalence*.
+The following signatures are *overload-equivalent*:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   (x: number): void
+   (y: number): void
+
+and
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   (x: number): void
+   (y: number): number
+   
+and
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   class G<T>
+   (y: Number): void
+   (x: T): void 
+
+and
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   class G<T>
+   (y: G<Number>): void
+   (x: G<T>): void 
+
+The following signatures are not *overload-equivalent*:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   (x: number): void
+   (y: string): void
+
+and
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   class A { /*body*/}
+   class B extends A { /*body*/}
+   (x: A): void
+   (y: B): void
+
+
+|
+
+.. _Override-Compatible Signatures:
+
+Override-Compatible Signatures
+==============================
+
+If there are two classes, ``Base`` and ``Derived``, and class ``Derived``
+overrides the method ``foo()`` of ``Base``, then ``foo()`` in ``Base`` has
+signature ``S``:sub:`1` <``V``:sub:`1` ``, ... V``:sub:`k`>
+(``U``:sub:`1` ``, ..., U``:sub:`n`) ``:U``:sub:`n+1`, and ``foo()`` in
+``Derived`` has signature ``S``:sub:`2` <``W``:sub:`1` ``, ... W``:sub:`l`>
+(``T``:sub:`1` ``, ..., T``:sub:`m`) ``:T``:sub:`m+1` as illustrated by the
+example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+       foo <V1, ... Vk> (p1: U1, ... pn: Un): Un+1
+    }
+    class Derived extends Base {
+       override foo <W1, ... Wl> (p1: T1, ... pm: Tm): Tm+1
+    }
+
+The signature ``S``:sub:`2` is override-compatible with ``S``:sub:`1` only
+if **all** of the following conditions are met:
+
+1. The number of parameters of both methods is the same, i.e., ``n = m``.
+2. Each type ``T``:sub:`i` is override-compatible with type ``U``:sub:`i`
+   for ``i`` in ``1..n+1``. Type override compatibility is defined below.
+3. The number of type parameters of either method is the same, i.e.,
+   ``k = l``.
+
+There are two cases of type override-compatibilty, as types are used as either
+parameter types, or return types. For each case there are five kinds of types:
+
+- Class/interface type;
+- Function type;
+- Primitive type;
+- Array type; and
+- Tuple type.
+
+Every type is override-compatible with itself, and that is a case of invariance
+(see :ref:`Invariance`).
+
+Mixed override-compatibility between types of different kinds is always false,
+except the compatibilty with class type ``Object`` as any type is a subtype of
+``Object``.
+
+Variances to be used for types that can be override-compatible in different
+positions are represented in the following table:
+
++-+-----------------------+---------------------+-------------------+
+| | **Positions ==>**     | **Parameter Types** | **Return Types**  |
++-+-----------------------+---------------------+-------------------+
+| | **Type Kinds**        |                     |                   |
++=+=======================+=====================+===================+
+|1| Class/interface types | Contravariance >:   | Covariance <:     |
++-+-----------------------+---------------------+-------------------+
+|2| Function types        | Covariance <:       | Contravariance >: |
++-+-----------------------+---------------------+-------------------+
+|3| Primitive types       | Invariance          | Invariance        |
++-+-----------------------+---------------------+-------------------+
+|4| Array types           | Covariance <:       | Covariance <:     |
++-+-----------------------+---------------------+-------------------+
+|5| Tuple types           | Covariance <:       | Covariance <:     |
++-+-----------------------+---------------------+-------------------+
+
+The semantics is illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+       kinds_of_parameters(
+          p1: Derived, p2: (q: Base)=>Derived, p3: number,
+          p4: Number, p5: Base[], p6: [Base, Base]
+       )
+       kinds_of_return_type1(): Base
+       kinds_of_return_type2(): (q: Derived)=> Base
+       kinds_of_return_type3(): number
+       kinds_of_return_type4(): Number 
+       kinds_of_return_type5(): Base[] 
+       kinds_of_return_type6(): [Base, Base]
+    }
+    class Derived extends Base {
+       // Overriding kinds for parameters
+       override kinds_of_parameters(
+          p1: Base, // contravaraint parameter type
+          p2: (q: Derived)=>Base, // covariant parameter type, contravariant return type
+          p3: Number, // compile-time error: parameter type is not override-compatible
+          p4: number, // compile-time error: parameter type is not override-compatible
+          p5: Derived[],  // covariant array element type
+          p6: [Derived, Derived] // covariant tuple type elements
+       )
+       // Overriding kinds for return type
+       override kinds_of_return_type1(): Derived // covariant return type
+       override kinds_of_return_type2(): (q: Base)=> Derived // contravariant parameter type, covariant return type
+       override kinds_of_return_type3(): Number // compile-time error: return type is not override-compatible
+       override kinds_of_return_type4(): number // compile-time error: return type is not override-compatible
+       override kinds_of_return_type5(): Derived[] // covariant array element type
+       override kinds_of_return_type6(): [Derived, Derived] // covariant tuple type elements
+    }
+
+The example below illustrates override-compatibility with ``Object``:
+
+.. code-block:: typescript
+   :linenos:
+    
+    class Base {
+       kinds_of_parameters( // It represents all possible parameter type kinds
+          p1: Derived, p2: (q: Base)=>Derived, p3: number,
+          p4: Number, p5: Base[], p6: [Base, Base]
+       )
+       kinds_of_return_type(): Object // It can be overrided by all subtypes except primitive ones
+    }
+    class Derived extends Base {
+       override kinds_of_parameters( // Object is a supertype for all types except primitie ones
+          p1: Object, p2: Object,
+          p3: Object, //  compile-time error: number and Object are not override-compatible
+          p4: Object, p5: Object, p6: Object
+       )
+    class Derived1 extends Base { 
+       override kinds_of_return_type(): Base // valid overriding
+    }
+    class Derived2 extends Base {
+       override kinds_of_return_type(): (q: Derived)=> Base // valid overriding
+    }
+    class Derived3 extends Base {
+       override kinds_of_return_type(): number // compile-time error: number and Object are not override-compatible
+    }
+    class Derived4 extends Base {
+       override kinds_of_return_type(): Number // valid overriding
+    }
+    class Derived5 extends Base {
+       override kinds_of_return_type(): Base[] // valid overriding
+    }
+    class Derived6 extends Base {
+       override kinds_of_return_type(): [Base, Base] // valid overriding
+    }
+
+|
+
+.. _Overloading for Functions:
+
+Overloading for Functions
+=========================
+
+Only *overloading* must be considered for functions because inheritance for
+functions is not defined.
+
+The correctness check for functions overloading is performed if two or more
+functions with the same name are accessible in a scope.
+A function can be defined in or imported to the scope.
+
+Semantic check for such two functions is as follows:
+
+- If signtatures of such functions are *overload-equivalent*, then
+  a compile-time error occurs.
+
+-  Otherwise, *overloading* is valid.
+
+|
+
+.. _Overloading and Overriding in Classes:
+
+Overloading and Overriding in Classes
+=====================================
+
+Both *overloading* and *overriding* must be considered in case of classes for
+methods and partly for constructors.
+
+**Note**: Only accesible methods are subject for overloading and overriding.
+For example, if a superclass contains a ``private`` method, and a subclass
+has a method with the same name, then neither overriding nor overloading
+is considered.
+
+**Note**: Accessors are considered methods here.
+
+Semantic rules that work in various contexts are represented in the following
+table:
+
++-------------------------------------+------------------------------------------+
+| **Context**                         | **Semantic Check**                       |
++=====================================+==========================================+
+| Two *instance methods*,             | If signatures are *overload-equivalent*, |
+| two *static methods* with the same  | then a compile-time error occurs.        |
+| name or, two *constructors* are     | Otherwise, *overloading* is used.        |
+| defined in the same class.          |                                          |
++-------------------------------------+------------------------------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   class aClass {
+
+      instance_method_1() {}
+      instance_method_1() {} // compile-time error: instance method duplication
+
+      static static_method_1() {}
+      static static_method_1() {} // compile-time error: static method duplication
+
+      instance_method_2() {}
+      instance_method_2(p: number) {} // valid overloading
+
+      static static_method_2() {}
+      static static_method_2(p: string) {} // valid overloading
+
+      constructor() {}
+      constructor() {} // compile-time error: constructor duplication
+
+      constructor(p: number) {}
+      constructor(p: string) {} // valid overloading
+
+   }
+
++-------------------------------------+------------------------------------------+
+| An *instance method* is defined     | If signatures are *override-compatible*, |
+| in a subclass with the same name    | then *overriding* is used.               |
+| as the *instance method* in a       | Otherwise, *overloading* is used.        |
+| superclass.                         |                                          |
++-------------------------------------+------------------------------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      method_1() {}
+      method_2(p: number) {}
+   }
+   class Derived extends Base {
+      override method_1() {} // overriding
+      method_2(p: string) {} // overloading
+   }
+
++-------------------------------------+------------------------------------------+
+| A *static method* is defined        | If signatures are *overload-equivalent*, |
+| in a subclass with the same name    | then the static method in the subclass   |
+| as the *static method* in a         | *hides* the previous static method.      |
+| superclass.                         | Otherwise, *overloading* is used.        |
++-------------------------------------+------------------------------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      static method_1() {}
+      static method_2(p: number) {}
+   }
+   class Derived extends Base {
+      static method_1() {} // hiding
+      static method_2(p: string) {} // overloading
+   }
+
+
++-------------------------------------+--------------------------------------------+
+| A *constructor* is defined          | All base class constructor are avaialble   |
+| in a subclass.                      | for call in all derived class constructors.|
++-------------------------------------+--------------------------------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      constructor() {}
+      constructor(p: number) {}
+   }
+   class Derived extends Base {
+      constructor(p: string) {
+           super()
+           super(5)
+      }
+   }
+
+|
+
+.. _Overloading and Overriding in Interfaces:
+
+Overloading and Overriding in Interfaces
+========================================
+
+.. meta:
+    frontend_status: Done
+
++-------------------------------------+------------------------------------------+
+| **Context**                         | **Semantic Check**                       |
++=====================================+==========================================+
+| An *instance method* is defined     | If signatures are *override-compatible*, |
+| in a subinterface with the same     | then *overriding* is used. Otherwise,    |
+| name as the *instance method* in    | *overloading* is used.                   |
+| the superinterface.                 |                                          |
++-------------------------------------+------------------------------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Base {
+      method_1()
+      method_2(p: number)
+   }
+   interface Derived extends Base {
+      method_1() // overriding
+      method_2(p: string) // overloading
+   }
+
++-------------------------------------+------------------------------------------+
+| A *static method* is defined        | If signatures are *overload-equivalent*, |
+| in a subinterface with the same     | then the static method in the subclass   |
+| name as the *static method* in a    | *hides* the previous static method.      |
+| superinterface.                     | Otherwise, *overloading* is used.        |
+|                                     |                                          |
++-------------------------------------+------------------------------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   interface Base {
+      static method_1() {}
+      static method_2(p: number) {}
+   }
+   interface Derived extends Base {
+      static method_1() {} // hiding
+      static method_2(p: string) {} // overloading
+   }
+
+
++-------------------------------------+------------------------------------------+
+| Two *instance methods* or           | If signatures are *overload-equivalent*, |
+| two *static methods* with the same  | then a compile-time error occurs.        |
+| name are defined in the same        | Otherwise, *overloading* is used.        |
+| interface.                          |                                          |
++-------------------------------------+------------------------------------------+
+
+.. code-block:: typescript
+   :linenos:
+
+   interface anInterface {
+      instance_method_1() 
+      instance_method_1()  // compile-time error: instance method duplication
+
+      static static_method_1() {}
+      static static_method_1() {} // compile-time error: static method duplication
+
+      instance_method_2() 
+      instance_method_2(p: number)  // valid overloading
+
+      static static_method_2() {}
+      static static_method_2(p: string) {} // valid overloading
+
+   }
+
+|
+
+.. _Overload Signatures:
+
+Overload Signatures
+*******************
+
+|LANG| supports *overload signatures* to ensure better alignment with |TS|
+for functions (:ref:`Function Overload Signatures`),
+static and instance methods (:ref:`Method Overload Signatures`),
+and constructors (:ref:`Constructor Overload Signatures`).
+
+All signatures except the last *implementation signature*
+are considered *syntactic sugar*. The compiler only uses the *implementation
+signature* as it considers overloading, overriding, shadowing, or calls.
+
+|
+
+.. _Overload Signature Correctness Check:
+
+Overload Signature Correctness Check
+====================================
+
+If a function, method, or constructor has several *overload signatures*
+that share the same body, then all first signatures without bodies must
+*fit* into the *implementation signature* that has the body. Otherwise,
+a compile-time error occurs.
+
+Signature *S*:sub:`i` with *n* parameters *fits* into implementation signature
+*IS* if **all** of the following conditions are met:
+
+- *S*:sub:`i` has *n* parameters, *IS* has *m* parameters, and:
+
+   -  ``n <= m``;
+   -  All ``n`` parameter types in *S*:sub:`i` are compatible (see
+      :ref:`Type Compatibility`) with parameter types in the same positions
+      in *IS*:sub:`2`;
+   -  All *IS* parameters in positions from ``n + 1`` up to ``m`` are optional
+      (see :ref:`Optional Parameters`) if ``n < m``.
+
+- *IS* return type is ``void``, then *S*:sub:`i` return type must also be ``void``.
+
+- *IS* return type is not ``void``, then *S*:sub:`i` return type must be
+  ``void`` or compatible with the return type of *IS* (see
+  :ref:`Type Compatibility`).
+
+
+Valid overload signatures are illustrated by the examples below:
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1(): void
+    function f1(x: number): void
+    function f1(x?: number): void {
+        /*body*/
+    }
+
+    function f2(x: number): void
+    function f2(x: string): void
+    function f2(x: number | string): void {
+        /*body*/
+    }
+
+    function f3(x: number): void
+    function f3(x: string): number
+    function f3(x: number | string): number {
+        return 1
+    }
+
+Code with compile-time errors is represented in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function f4(x: number): void
+    function f4(x: boolean): number // this signature does not fit
+    function f4(x: number | string): void {
+        /*body*/
+    }
+
+    function f5(x: number): void
+    function f5(x: string): number // wrong return type
+    function f5(x: number | string): void {
+        /*body*/
+    }
+
+|
 
 .. _Compatibility Features:
 
@@ -487,11 +870,13 @@ be handled as ``true`` or ``false`` as described in the table below:
 +======================================+========================================+===================================+=================================+
 | ``string``                           | empty string                           | non-empty string                  | ``s.length == 0``               |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``boolean``                          | ``false``                              | true                              | ``x``                           |
+| ``boolean``                          | ``false``                              | ``true``                          | ``x``                           |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``enum``                             | ``enum`` constant treated as ``false`` | enum constant treated as ``true`` | ``x.getValue()``                |
+| ``enum``                             | ``enum`` constant                      | enum constant                     | ``x.getValue()``                |
+|                                      |                                        |                                   |                                 |
+|                                      | handled as ``false``                   | handled as ``true``               |                                 |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
-| ``number`` (``double``/``float``)    | *0* or ``NaN``                         | any other number                  | ``n != 0 && n != NaN``          |
+| ``number`` (``double``/``float``)    | ``0`` or ``NaN``                       | any other number                  | ``n != 0 && n != NaN``          |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
 | any integer type                     | ``== 0``                               | ``!= 0``                          | ``i != 0``                      |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
@@ -514,6 +899,8 @@ be handled as ``true`` or ``false`` as described in the table below:
 The example below illustrates the way this approach works in practice. Any
 ``nonzero`` number is handled as ``true``. The loop continues until it becomes
 ``zero`` that is handled as ``false``:
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:

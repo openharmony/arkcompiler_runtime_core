@@ -21,8 +21,8 @@ Interfaces
 An interface declaration declares an *interface type*, i.e., a reference
 type that:
 
--  Includes constants, properties, and methods as its members;
--  Has no instance variables;
+-  Includes properties and methods as its members;
+-  Has no instance variables (fields);
 -  Usually declares one or more methods;
 -  Allows otherwise unrelated classes to provide implementations for the
    methods, and so implement the interface.
@@ -32,7 +32,6 @@ type that:
    interface type
    reference type
    instance variable
-   constant
    property
    method
    member
@@ -46,7 +45,7 @@ Interfaces can be *top-level* and local (see :ref:`Local Classes And Interfaces`
 
 An interface can be declared a *direct extension* of one or more other
 interfaces. In that case the interface inherits all members from the interfaces
-it extends (except any members it *overrides* or *hides*).
+it extends. Inherited members can be optionally overridden or hidden.
 
 A class can be declared to *directly implement* one or more interfaces. Any
 instance of the class implements all methods specified by the interface(s).
@@ -66,7 +65,7 @@ support common behaviors without sharing a superclass.
    superclass
    object
    overriding
-   hiding
+   shadowing
 
 The value of a variable declared as an interface type can be a reference
 to any instance of the class that implements the specified interface.
@@ -128,7 +127,7 @@ interface in :ref:`Generic Declarations`.
 
 The scope of an interface declaration is defined in :ref:`Scopes`.
 
-The interface declaration shadowing is specified in :ref:`Shadowing Parameters`.
+.. The interface declaration shadowing is specified in :ref:`Shadowing by Parameter`.
 
 .. index::
    identifier
@@ -137,8 +136,6 @@ The interface declaration shadowing is specified in :ref:`Shadowing Parameters`.
    generic interface
    generic declaration
    scope
-   shadowing
-   shadowing parameter
 
 |
 
@@ -173,8 +170,8 @@ A compile-time error occurs if:
 -  Type arguments of ``typeReference`` denote a parameterized type that
    is not well-formed (see :ref:`Generic Instantiations`).
 -  There is a cycle in ``extends`` graph.
--  At least one ``typeReference`` is an alias of one of primitive or
-   enum types.
+-  At least one ``typeReference`` is an alias of one of primitive, enumeration,
+   union, or function  types.
 -  Any type argument is a wildcard type.
 
 
@@ -246,19 +243,6 @@ The interface *K* is a superinterface of the interface *I* if:
 There is no single interface to which all interfaces are extensions (unlike
 class ``Object`` to which every class is an extension).
 
-If the ``extends`` clause of *I* mentions *T* as a superinterface, or as a
-qualifier in the fully qualified form of a superinterface name, then the
-interface *I* *directly depends* on type *T*.
-
-Moreover, the interface *I* *depends* on a reference type *T* if:
-
--  *I* directly depends on *T*; or
--  *I* directly depends on the class *C* that depends on *T* (see
-   :ref:`Classes`); or
--  *I* directly depends on the interface *J* that, in its turn, depends
-   on *T*.
-
-
 A compile-time error occurs if an interface depends on itself.
 
 ``ClassCircularityError`` is thrown if circularly declared interfaces
@@ -280,8 +264,8 @@ Interface Body
     frontend_status: Done
 
 The body of an interface may declare members of the interface, i.e.,
-properties (see :ref:`Interface Declarations`) and methods (see
-:ref:`Method Declarations`).
+properties (see :ref:`Interface Properties`) and methods (see
+:ref:`Interface Method Declarations`).
 
 .. code-block:: abnf
 
@@ -319,65 +303,39 @@ Interface type members are as follows:
 -  Members inherited from a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
 
-An interface without a direct superinterface implicitly declares the following:
-
-   -  Abstract-member method *m* (see :ref:`Interface Method Declarations`)
-      with signature *s*;
-   -  Return type *r* and ``throws`` clause *t* that correspond to each
-      ``public`` instance method *m* with signature *s*;
-   -  Return type *r* and ``throws`` clause *t* declared in ``Object`` (see
-      :ref:`Object Class Type`);
-
-
----if the interface does not explicitly declare an abstract method (see
-:ref:`Interface Method Declarations`) with the same signature and return
-type, and a compatible ``throws`` clause.
-
-
-A compile-time error occurs if the interface explicitly declares:
-
-   -  Method *m* that ``Object`` declares as ``final``.
-   -  A method with a signature that is override-equivalent (see
-      :ref:`Signatures`) to the ``Object``’s ``public`` method, but is not
-      *abstract*, and has a different return type or an incompatible
-      ``throws`` clause.
+A compile-time error occurs if the names of the method explicitly declared
+by the interface, and of the ``Object``’s ``public`` method are the same,
+but their signatures are different.
 
 .. index::
    interface member
    compile-time error
    interface body
    inheritance
-   inherited member
    direct superinterface
    interface
    abstract member method
    public method
-   direct superinterface
    Object
    public method
    abstract method
    signature
    interface method declaration
-   throws clause
    instance method
    return type
-   override-equivalent signature
 
-An interface normally inherits all members of the interfaces it extends.
-However, an interface does not inherit the following:
+An interface inherits all members of the interfaces it extends
+(see :ref:`Interface Inheritance`).
 
--  Fields it hides;
--  Methods it overrides (see :ref:`Inheritance and Overriding`).
-
-A name in a declaration scope must be unique, i.e., the names of fields and
-methods of an interface type must not be the same (see :ref:`Interface Declarations`).
+A name in a declaration scope must be unique, i.e., the names of properties and
+methods of an interface type must not be the same (see
+:ref:`Interface Declarations`).
 
 .. index::
    inheritance
    interface
-   field
+   property
    method
-   overriding
    declaration scope
    interface type
    interface declaration
@@ -406,7 +364,7 @@ An interface property can be defined in the form of a field or an accessor
 If a property is defined in the form of a field, then it implicitly defines
 the following:
 
--  A getter, if a field is marked as ``readonly``;
+-  A getter, if a property is marked as ``readonly``;
 -  Otherwise, both a getter and a setter with the same name.
 
 If '``?``' is used after the name of the property, then its actual type is
@@ -414,9 +372,9 @@ If '``?``' is used after the name of the property, then its actual type is
 
 
 .. index::
-   field
+   property
+   readonly property
    getter
-   readonly field
    setter
 
 As a result, the effect of the following definitions is the same:
@@ -441,7 +399,7 @@ an accessor notation (see :ref:`Implementing Interface Properties`).
    interface
    field
    accessor notation
-   interface property
+   property
    accessor notation
 
 |
@@ -458,8 +416,8 @@ Interface Method Declarations
 An ordinary interface method declaration that specifies the method's name and
 signature is called *abstract*.
 
-As experimental features, an interface method can have a body (see
-:ref:`Default Method Declarations`) and be ``static`` (see :ref:`Static Method Declarations`).
+An interface method can have a body (see :ref:`Default Method Declarations`)
+and be ``static`` (see :ref:`Static Method Declarations`) as experimental features.
 
 .. index::
    interface method declaration
@@ -471,7 +429,6 @@ As experimental features, an interface method can have a body (see
 .. code-block:: abnf
 
     interfaceMethodDeclaration:
-        interfaceMethodOverloadSignature*
         identifier signature
         | interfaceDefaultMethodDeclaration
         | interfaceStaticMethodDeclaration
@@ -479,261 +436,122 @@ As experimental features, an interface method can have a body (see
 
 The methods declared within interface bodies are implicitly ``public``.
 
-A compile-time error occurs if the body of an interface declares:
-
--  A method with a name already used for a field in this declaration.
--  Two methods (overridden explicitly or implicitly) with override-equivalent
-   signatures (see :ref:`Signatures`), if such signatures are not inherited
-   (see :ref:`Inheritance and Overriding`).
+A compile-time error occurs if the body of an interface declares a method
+with a name that is already used for a property in this declaration.
 
 .. index::
    compile-time error
    interface body
    method
-   override-equivalent signature
    signature
    inheritance
    overriding
 
 |
 
-.. _Interface Methods Overload Signatures:
+.. _Interface Method Overloading:
 
-Interface Method Overload Signatures
-====================================
-
-.. meta:
-    frontend_status: None
-
-|LANG| allows specifying a method that can have several *overload signatures*
-but a single name.
-
-.. code-block:: abnf
-
-    interfaceMethodOverloadSignature:
-        identifier signature
-        ;
-
-Calling a method with *overload signatures* means that that the method called
-implements the overload signature that is textually the last.
-
-The *Overload signature* compatibility requirements are discussed in
-:ref:`Overload Signature Compatibility`.
-
-In the example below, one overload signature is parameterless, and the other
-two have one parameter each:
-
-.. code-block:: typescript
-   :linenos:
-
-    interface C {
-        foo(): void           // 1st signature
-        foo(x: string): void  // 2nd signature
-        foo(x?: string): void // 3rd - implementation signature
-    }
-    function demo (c: C) {
-       c.foo()           // ok, call fits 1st and 3rd signatures
-       c.foo("aa")       // ok, call fits 2nd and 3rd signatures
-       c.foo(undefined)  // ok, call fits the 3rd signature
-    }
-
-If a class implements an interface that has a method with an overload
-signature, then the class must also provide a method that has an overload
-signature.
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base { ... }
-    class Derived extends Base { ... }
-
-    interface Interface {
-      foo (p: Derived)
-      foo (p: Base)
-    }
-
-    class Class implements Interface {
-      foo (p: Derived)
-      foo (p: Base) { ... }
-    }
-
-
-.. index::
-   interface method
-   overload signature
-   method header
-   signature
-   method overload signature
-   compile-time error
-   call
-   overload signature
-   overload signature compatibility
-
-|
-
-.. _Inheritance and Overriding:
-
-Inheritance and Overriding
-==========================
+Interface Method Overloading
+============================
 
 .. meta:
     frontend_status: Done
 
-The interface *I* inherits any abstract and default method *m* from its
-direct superinterfaces if **all** of the following is true:
+|LANG| allows specifying several interface methods with a single name.
 
--  *m* is a member of *I*’s direct superinterface *J*;
--  *I* declares no method with a signature that is compatible with the
-   signature of *m* (see :ref:`Compatible Signature`);
--  No method :math:`m'` that is a member of *I*’s direct superinterface
-   :math:`J'` (where *m* is distinct from :math:`m'`, and *J* from :math:`J'`)
-   overrides the declaration of the method *m* from :math:`J'`.
+A compile-time error occurs if signatures of these methods are
+overload-equivalent (see :ref:`Overload-Equivalent Signatures`).
 
+A class that implements such interface can use :ref:`Class Method Overloading`
+or :ref:`Method Overload Signatures`. *Method overloading* is recommended.
+
+In the example below, overloading methods are used in a class:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        foo(): void           // 1st method
+        foo(x: string): void  // 2st method
+    }
+    class C implements I {
+        foo(): void {/*1st method body*/}
+        foo(x: string): void  {/*2nd method body*/}
+    }
+
+    function demo(i: I) {
+       i.foo()           // ok, 1st method is called
+       i.foo("aa")       // ok, 2nd method is called
+    }
+
+In the example below, overload signatures are used:
+
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        foo(): void           // 1st method
+        foo(x: string): void  // 2st method
+    }
+    class C implements I {
+        foo(): void;
+        foo(x: string): void;
+        foo(x?: string): void { // implementation method
+            /*body*/
+        }
+    }
+    function demo(i: I) {
+       i.foo()           // ok, implementation method is called
+       i.foo("aa")       // ok, implementation method is called
+    }
+
+Class ``C`` above defines ony the *implementation* method that is called in
+all cases.
+
+|
+
+.. _Interface Inheritance:
+
+Interface Inheritance
+*********************
+
+.. meta:
+    frontend_status: Done
+
+The interface *I* inherits all properties and methods from its
+direct superinterfaces.
+Semantic checks are described in
+:ref:`Overloading and Overriding in Interfaces`.
+
+**Note**: As any interface property implicitly defines a getter, a setter,
+or both, the semantic rules for methods are applied to properties.
+
+Private methods defined in superinterfaces are not accessible
+in the interface body.
 
 .. index::
    inheritance
-   overriding
-   interface
-   abstract method
-   default method
-   direct superinterface
-   subsignature
-   signature
-   overriding
-   method declaration
-
-An interface does not inherit ``private`` or ``static`` methods from its
-superinterfaces.
 
 A compile-time error occurs if:
 
--  The interface *I* declares a ``private`` or ``static`` method *m*;
+-  The interface *I* declares a ``private`` method *m*;
 -  The signature of *m* is compatible with the ``public`` instance method
-   :math:`m'` in a superinterface of *I* (see :ref:`Compatible Signature`); and
+   :math:`m'` in a superinterface of *I* (see :ref:`Override-Compatible Signatures`); and
 -  :math:`m'` is otherwise accessible to code in *I*.
 
 .. index::
    compile-time error
    interface
    superinterface
-   inheritance
    private method
-   static method
-   signature
-   subsignature
-   public instance
-   access
-
-|
-
-.. _Overriding by Instance Methods in Interfaces:
-
-Overriding by Instance Methods
-==============================
-
-.. meta:
-    frontend_status: Done
-
-The instance method *m*:sub:`I` (declared in, or inherited by the interface *I*)
-overrides another instance method *m*:sub:`J` of *I* (declared in interface *J*)
-if **all** of the following is true:
-
--  *J* is a superinterface of *I*;
--  *I* does not inherit *m*:sub:`J`;
--  The signature of *m*:sub:`I` is compatible with (see
-   :ref:`Compatible Signature`) the signature of *m*:sub:`J`; and
--  *m*:sub:`J` is ``public``.
-
-.. index::
-   overriding
-   instance method
-   inheritance
-   interface
-   instance method
-   interface
-   superinterface
-   subsignature
    signature
 
 |
-
-.. _Overriding Requirements:
-
-Overriding Requirements
-=======================
-
-.. meta:
-    frontend_status: Done
-
-The following kinds of relationships are described in :ref:`Requirements in Overriding and Hiding`:
-
--  The relationship between the return type of an interface and that of any
-   overridden interface method.
--  The relationship between the ``throws`` clause of an interface method and
-   that of any overridden interface method.
--  The relationship between the signatures of an interface method and that
-   of any overridden interface method.
--  The relationship between the accessibility of an interface method and that
-   of any overridden interface method.
-
-A compile-time error occurs if a default method is override-equivalent to a
-non-``private`` method of the class ``Object``. Any class that implements
-interface must inherit the method's own implementation.
-
-.. index::
-   overriding
-   return type
-   interface
-   throws clause
-   interface method
-   overridden interface
-   overridden interface method
-   compile-time error
-   override-equivalent method
-   private method
-   Object
-   implementation
-
-|
-
-.. _Interfaces Inheriting Methods with Override-Equivalent Signatures:
-
-Interfaces Inheriting Methods with Override-Equivalent Signatures
-=================================================================
-
-.. meta:
-    frontend_status: Done
-
-An interface can inherit several methods with override-equivalent signatures
-(see :ref:`Override-Equivalent Signatures`).
-
-A compile-time error occurs if the interface *I* inherits a default method with
-a signature that is override-equivalent to an abstract or default method
-inherited by *I*.
-
-However, the interface *I* inherits all methods that are abstract.
-
-A compile-time error occurs if one of the inherited methods for every other
-inherited method is not return-type-substitutable. A ``throws`` clause causes
-no error in such cases.
-
-The same method declaration can use multiple paths of inheritance from an
-interface. It causes no compile-time error on its own.
-
-.. index::
-   interface inheriting method
-   override-equivalent signature
-   interface
-   inheritance
-   compile-time error
-   inheritance method
-   return-type-substitutable method
-   throws clause
-   error
-   method declaration
-   compile-time error
-   inherited method
-   abstract method
 
 .. raw:: pdf
 

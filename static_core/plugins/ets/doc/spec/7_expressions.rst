@@ -33,32 +33,14 @@ evaluation of  expressions, except for the expressions related to coroutines
 .. code-block:: abnf
 
     expression:
-        literal
-        | qualifiedName
-        | arrayLiteral
-        | objectLiteral
-        | spreadExpression
-        | parenthesizedExpression
-        | thisExpression
-        | methodCallExpression
-        | fieldAccessExpression
-        | indexingExpression
-        | functionCallExpression
-        | newExpression
+        primaryExpression
         | castExpression
         | instanceOfExpression
         | typeOfExpression
-        | ensureNotNullishExpression
         | nullishCoalescingExpression
+        | spreadExpression
         | unaryExpression
-        | multiplicativeExpression
-        | additiveExpression
-        | shiftExpression
-        | relationalExpression
-        | equalityExpression
-        | bitwiseAndLogicalExpression
-        | conditionalAndExpression
-        | conditionalOrExpression
+        | binaryExpression
         | assignmentExpression
         | conditionalExpression
         | stringInterpolation
@@ -67,21 +49,58 @@ evaluation of  expressions, except for the expressions related to coroutines
         | launchExpression
         | awaitExpression
         ;
+    primaryExpression:
+        literal
+        | qualifiedName
+        | arrayLiteral
+        | objectLiteral
+        | thisExpression
+        | parenthesizedExpression
+        | methodCallExpression
+        | fieldAccessExpression
+        | indexingExpression
+        | functionCallExpression
+        | newExpression
+        | ensureNotNullishExpression		
+        ;
+    binaryExpression:
+        multiplicativeExpression
+        | additiveExpression
+        | shiftExpression
+        | relationalExpression
+        | equalityExpression
+        | bitwiseAndLogicalExpression
+        | conditionalAndExpression
+        | conditionalOrExpression
+        ;
 
-The grammar rules below introduce the productions to be used by other forms
-of expression productions:
-
-.. index::
-   production
-   expression production
+The grammar rules below introduce several productions to be used by other
+expression rules:
 
 .. code-block:: abnf
 
     objectReference:
         typeReference
         | super
-        | expression
+        | primaryExpression
         ;
+
+There are three options the ``objectReference`` refers to:
+
+- Class or interface that are to handle static members;
+- ``Super`` that is to access shadowed fields or constructors declared in the
+  superclass, or the overriden method version of the superclass;
+- *primaryExpression* that is to refer to an instance variable of a class
+  or interface type after evaluation, unless the manner of the evaluation
+  is altered by the chaining operator '?.' (see :ref:`Chaining Operator`).
+
+If the form of *primaryExpression* is *thisExpression*, then the pattern
+"this?." is handled as a compile-time error.
+
+If the form of *primaryExpression* is *super*, then the pattern "super?."
+is handled as a compile-time error.
+
+.. code-block:: abnf
 
     arguments:
         '(' argumentSequence? ')'
@@ -96,13 +115,10 @@ of expression productions:
         '...'? expression
         ;
 
-The ``objectReference`` refers to class or interface in the first two cases,
-and thus allows handling static members. The last case refers to an
-instance variable of class or interface type unless the expression within
-*potentiallyNullishExpression* is evaluated to ``undefined``.
+The *arguments* grammar rule refers to the list of arguments of a call. Only
+the last argument can have the form of a spread expression (see
+:ref:`Spread Expression`).
 
-The *arguments* refers to the list of arguments of a call. The last argument
-can be prefixed by the spread operator '``...``'.
 
 .. index::
    interface
@@ -196,29 +212,28 @@ in the value attached to the exception or error object.
    exception
    value
 
-The predefined operators throw runtime errors as follows:
+Runtime errors can occur as a result of expression or operator evaluation as
+follows:
 
--  If an array reference expression has the value ``null``, then an array
-   access expression throws ``NullPointerError``.
--  If an array reference expression has the value ``null``, then an
-   *indexing expression* (see :ref:`Indexing Expression`) throws
+-  If an *array reference expression* has the value ``null``, then an *array
+   indexing expression* (see :ref:`Array Indexing Expression`) throws
    ``NullPointerError``.
--  If an array index expression has a value that is negative, greater than,
-   or equal to the length of the array, then an *indexing expression* (see
-   :ref:`Indexing Expression`) throws ``ArrayIndexOutOfBoundsError``.
--  If a cast cannot be performed at runtime, then cast expressions (see
-   :ref:`Cast Expressions`) throw ``ClassCastError``.
+-  If the value of an array index expression is negative, or greater than or
+   equal to the length of the array, then an *array indexing expression* (see
+   :ref:`Array Indexing Expression`) throws ``ArrayIndexOutOfBoundsError``.
+-  If a cast cannot be performed at runtime, then a *cast expression* (see
+   :ref:`Cast Expressions`) throws ``ClassCastError``.
 -  If the right-hand operand expression has the zero value, then integer
    division (see :ref:`Division`), or integer remainder (see :ref:`Remainder`)
    operators throw ``ArithmeticError``.
--  If the boxing conversion (see :ref:`Boxing Conversions`)
-   occurs, then an assignment to an array element of a reference type (see
-   :ref:`Array Literal`), method call expression (see
-   :ref:`Method Call Expression`), or prefix/postfix increment/decrement (see
-   :ref:`Unary Expressions`) operators throw ``OutOfMemoryError``.
--  If the type of an array element is incompatible with the value that
-   is being assigned, then an assignment to an array element of a
-   reference type (see :ref:`Array Literal`) throws ``ArrayStoreError``.
+-  If the boxing conversion (see :ref:`Boxing Conversions`) occurs while
+   performing an assignment to an array element of a reference type, then a
+   method call expression (see :ref:`Method Call Expression`), or prefix/postfix
+   increment/decrement (see :ref:`Unary Expressions`) operators can throw
+   ``OutOfMemoryError``.
+-  If the type of an array element is not compatible with the value that is
+   being assigned, then assignment to an array element of a reference type
+   throws ``ArrayStoreError``.
 
 .. index::
    predefined operator
@@ -462,7 +477,7 @@ evaluation of the following expressions requires specific explanation:
 
 -  Class instance creation expressions (see :ref:`New Expressions`);
 -  Array creation expressions (see :ref:`Array Creation Expressions`);
--  Indexing expressions (see :ref:`Indexing Expression`);
+-  Indexing expressions (see :ref:`Indexing Expressions`);
 -  Method call expressions (see :ref:`Method Call Expression`);
 -  Assignments involving indexing (see :ref:`Assignment`);
 -  Lambda expressions (see :ref:`Lambda Expressions`).
@@ -1342,7 +1357,7 @@ The value denoted by ``this`` in a lambda body and in the surrounding context
 is the same.
 
 The class of the actual object referred to at runtime can be *T* if *T*
-is a class type, or a class that is a subtype of *T*.
+is a class type, or a class that is a subtype (see :ref:`Subtyping`) of *T*.
 
 .. index::
    keyword this
@@ -1361,26 +1376,23 @@ is a class type, or a class that is a subtype of *T*.
 
 |
 
-.. _Field Access Expressions:
+.. _Field Access Expression:
 
-Field Access Expressions
-************************
+Field Access Expression
+***********************
 
 .. meta:
     frontend_status: Done
 
 A *field access expression* can access a field of an object that is referred to
-by the value of the object reference. The object reference value can have
-different forms described in detail in :ref:`Accessing Current Object Fields`
-and :ref:`Accessing Superclass Fields`.
+by the object reference. The object reference can have different forms
+described in detail in :ref:`Accessing Current Object Fields` and
+:ref:`Accessing Superclass Fields`.
+
 
 .. index::
    field access expression
-   access
-   field
-   value
    object reference
-   superclass
 
 .. code-block:: abnf
 
@@ -1388,51 +1400,18 @@ and :ref:`Accessing Superclass Fields`.
         objectReference ('.' | '?.') identifier
         ;
 
-This object reference cannot denote a package, class type, or interface type.
-
-Otherwise, the meaning of that expression is determined by the same rules as
-the meanings of qualified names.
-
-A field access that contains '``?.``' (see :ref:`Chaining Operator`)
-is called *safe field access* because it handles nullish values safely.
+A field access expression that contains '``?.``' (see :ref:`Chaining Operator`)
+is called *safe field access* because it handles nullish object references
+safely.
 
 If object reference evaluation completes abruptly, then so does the entire
 field access expression.
 
-.. index::
-   object reference
-   package
-   class type
-   interface type
-   expression
-   qualified name
-   reference evaluation
-   safe field access
-   nullish value
-   field access
-   field access expression
-
-|
-
-.. _Accessing Current Object Fields:
-
-Accessing Current Object Fields
-===============================
-
-.. meta:
-    frontend_status: Done
-
 An object reference used for Field Access must be a non-nullish reference
 type *T*. Otherwise, a compile-time error occurs.
 
-Field access expression is valid if the identifier refers to a single
-accessible member field in type *T*.
-
-A compile-time error occurs if:
-
--  The identifier names several accessible member fields (see :ref:`Scopes`)
-   in type *T*.
--  The identifier does not name an accessible member field in type *T*.
+Field access expression is valid if the identifier refers to an accessible
+member field in type *T*. A compile-time error occurs otherwise.
 
 .. index::
    access
@@ -1445,26 +1424,33 @@ A compile-time error occurs if:
    identifier
    accessible member field
 
-The result of the field access expression is computed at runtime as follows:
+|
 
-a. For a *static* field:
+.. _Accessing Current Object Fields:
 
-The result of an *object reference expression* evaluation is discarded.
+Accessing Current Object Fields
+===============================
 
-The result of the *field access expression* is ``value`` or ``variable``
-of the static field in the class or interface that is the type of the
-*object reference expression*:
+.. meta:
+    frontend_status: Done
 
--  If the field is not ``readonly``, then the result is ``variable``,
-   and its value can be changed.
+The result of the field access expression is computed at runtime as described
+below.
 
--  If the field is ``readonly``, then the result is ``value`` (except where the
-   *field access* occurs in a class initializer, see :ref:`Class Initializer`).
+a. *Static* field access (*objectReference* is evaluated in the form *typeReference*)
+
+The evaluation of *typeReference* is performed. The result of the *field access
+expression* of a static field in a class or interface is as follows:
+
+-  ``variable`` if the field is not ``readonly``. The resultant value can
+   then be changed.
+
+-  ``value`` if the field is ``readonly``, except where the *field access*
+   occurs in a class initializer (see :ref:`Class Initializer`).
 
 
 .. index::
    field access expression
-   runtime
    object reference expression
    evaluation
    static field
@@ -1478,25 +1464,23 @@ of the static field in the class or interface that is the type of the
    static initializer
    variable initializer
 
-b. For a non-``static`` field:
 
-The object reference expression is evaluated.
+b. *Instance* field access (*objectReference* is evaluated in the form *primaryExpression*)
 
-The result of the *field access expression* is ``value`` or ``variable``
-of the instance field in the class or interface that is the type of the
-*object reference expression*:
+The evaluation of *primaryExpression* is performed. The result of the *field
+access expression* of an instance field in the class or interface is as follows:
 
--  If the field is not ``readonly``, then the result is ``variable``,
-   and its value can be changed.
+-  ``variable`` if the field is not ``readonly``. The the resultant value can
+   then be changed.
 
--  If the field is ``readonly``, then the result is ``value`` (except where the
-   *field access* occurs in a constructor, see :ref:`Constructor Declaration`).
+-  ``value`` if the field is ``readonly``, except where the *field access*
+   occurs in a constructor (see :ref:`Constructor Declaration`).
 
-Only the object reference type (not the class type of an actual object
+Only the *primaryExpression* type (not the class type of an actual object
 referred at runtime) is used to determine the field to be accessed.
 
 .. index::
-   non-static field
+   instance field
    object reference expression
    evaluation
    access
@@ -1518,13 +1502,9 @@ Accessing Superclass Fields
 .. meta:
     frontend_status: Done
 
-A field access expression cannot denote a package, class type, or interface
-type. Otherwise, the meaning of that expression is determined by the same
-rules as the meaning of a qualified name.
-
 The form ``super.identifier`` refers to the field named ``identifier`` of the
-current object. That current object is viewed as an instance of the
-superclass of the current class.
+current object that is inherited by or declared in the superclass, and shadowed
+by another field of the current object's class type.
 
 The forms that use the keyword ``super`` are valid only in:
 
@@ -1536,27 +1516,20 @@ The forms that use the keyword ``super`` are valid only in:
 .. index::
    access
    superclass field
-   expression
-   package
    class type
-   interface type
-   qualified name
    identifier
    instance
    superclass
    constructor
    instance variable
    keyword super
-   lexically enclosing instance
    instance initializer
    initializer
 
-A compile-time error occurs if forms with the keyword ``super``:
+A compile-time error occurs if forms with the keyword ``super`` occur:
 
--  Occur elsewhere;
--  Occur in the declaration of class ``Object`` (since ``Object``
-   has no superclass).
-
+-  Elsewhere;
+-  In the declaration of class ``Object`` (since ``Object`` has no superclass).
 
 The field access expression *super.f* is handled in the same way as the
 expression *this.f* in the body of class *S*. Assuming that *super.f*
@@ -1566,7 +1539,6 @@ appears within class *C*, *f* is accessible in *S* from class *C* (see
 -  The direct superclass of *C* is class *S*;
 -  The direct superclass of the class denoted by *T* is a class with *S*
    as its fully qualified name.
-
 
 A compile-time error occurs otherwise (particularly if the current class
 is not *T*).
@@ -1580,7 +1552,6 @@ is not *T*).
    access
    direct superclass
    qualified name
-
 
 
 |
@@ -1606,7 +1577,7 @@ an interface.
 .. code-block:: abnf
 
     methodCallExpression:
-        objectReference ('.' | '?.) identifier typeArguments? arguments block?
+        objectReference ('.' | '?.') identifier typeArguments? arguments block?
         ;
 
 The syntax form that has a block associated with the method call is a special
@@ -1650,23 +1621,23 @@ Step 1: Selection of Type to Use
 .. meta:
     frontend_status: Done
 
-The object reference and the method identifier are used to determine the
-type in which to search the method. The following options must be considered:
+The *object reference* is used to determine the type in which to search the method.
+Three forms of *object reference* are avaialble:
 
-+----------------------------------+-----------------------------------------------+
-| **Form of object reference**     | **Type to use**                               |
-+==================================+===============================================+
-| ``typeReference.identifier``     | Type denoted by ``typeReference``.            |
-+----------------------------------+-----------------------------------------------+
-| ``expression.identifier``, where | *T* if *T* is a class or interface,           |
-| *expression* is of type *T*      | *T*’s constraint                              |
-|                                  | (:ref:`Type Parameter Constraint`) if *T* is  |
-|                                  | a type parameter. A compile-time error occurs |
-|                                  | otherwise.                                    |
-+----------------------------------+-----------------------------------------------+
-| ``super.identifier``             | The superclass of the class that contains     |
-|                                  | the method call.                              |
-+----------------------------------+-----------------------------------------------+
++------------------------------+-----------------------------------------------+
+| **Form of object reference** | **Type to use**                               |
++==============================+===============================================+
+| ``typeReference``            | Type denoted by ``typeReference``.            |
++------------------------------+-----------------------------------------------+
+| ``expression`` of type *T*   | *T* if *T* is a class, interface, or union;   |
+|                              | *T*’s constraint                              |
+|                              | (:ref:`Type Parameter Constraint`) if *T* is  |
+|                              | a type parameter. A compile-time error occurs |
+|                              | otherwise.                                    |
++------------------------------+-----------------------------------------------+
+| ``super``                    | The superclass of the class that contains     |
+|                              | the method call.                              |
++------------------------------+-----------------------------------------------+
 
 .. index::
    type
@@ -1736,7 +1707,8 @@ and the following set of semantic checks must be performed:
    must not be declared ``static``. Otherwise, a compile-time error occurs.
 
 -  If the method call has the form ``super.identifier``, then the method must
-   not be declared ``abstract``. Otherwise, a compile-time error occurs.
+   not be declared ``abstract`` or ``static``. Otherwise, a compile-time error
+   occurs.
 
 -  If the last argument of a method call has the spread operator '``...``',
    then ``objectReference`` that follows that argument must refer to an array
@@ -1806,7 +1778,9 @@ is described below:
   length of the *TA* list, then the candidate is not added to the set *A*.
 
   The examples are presented below:
-  
+
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
@@ -1817,7 +1791,7 @@ is described below:
 
     foo(new A) // three applicable candidates for this call: 1,2,4
 
-    funciton goo (p1: Base)                // 1
+    function goo (p1: Base)                // 1
     function goo (p2: Base|SomeOtherType)  // 2
     function goo (...p3: Base[])           // 3
     
@@ -1838,7 +1812,7 @@ is described below:
   list of applicable candidates.
 
   The examples are presented below:
-  
+
 .. code-block:: typescript
    :linenos:
 
@@ -1880,6 +1854,8 @@ is described below:
   check is added to the *A* list of applicable candidates.
 
 The examples are presented below:
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -2035,18 +2011,18 @@ function declaration (see :ref:`Type Compatibility`).
 
 |
 
-.. _Indexing Expression:
+.. _Indexing Expressions:
 
-Indexing Expression
-*******************
+Indexing Expressions
+********************
 
 .. meta:
     frontend_status: Partly
     todo: finish array indexing expressions
 
-An indexing expression is used to access elements of arrays (see
+Indexing expressions are used to access elements of arrays (see
 :ref:`Array Types`) and ``Record`` instances (see :ref:`Record Utility Type`).
-It can also be applied to instances of indexable types (see
+Indexing expressions can also be applied to instances of indexable types (see
 :ref:`Indexable Types`):
 
 .. code-block:: abnf
@@ -2055,11 +2031,10 @@ It can also be applied to instances of indexable types (see
         expression ('?.')? '[' expression ']'
         ;
 
-An indexing expression contains two subexpressions as follows:
+Any indexing expression has two subexpressions:
 
 -  *Object reference expression* before the left bracket; and
 -  *Index expression* inside the brackets.
-
 
 .. index::
    indexing expression
@@ -2072,8 +2047,8 @@ An indexing expression contains two subexpressions as follows:
    object reference expression
    index expression
 
-If '``?.``' (see :ref:`Chaining Operator`) is present in an indexing expression,
-then:
+If the operator '``?.``' (see :ref:`Chaining Operator`) is present in an
+indexing expression, then:
 
 -  The type of the object reference expression must be a nullish type based
    on an array type or on the ``Record`` type. Otherwise, a compile-time error
@@ -2088,7 +2063,7 @@ compile-time error occurs.
 
 .. index::
    chaining operator
-   indexing expression
+   indexing expressions
    object reference expression
    nullish type
    record type
@@ -2121,12 +2096,13 @@ A numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on *index expression* to ensure that the resultant type is ``int``.
 Otherwise, a compile-time error occurs.
 
-If the type of *object reference expression* after applying of the chaining
-operator '``?.``' (see :ref:`Chaining Operator`) is an array type ``T[]``,
-then the type of the indexing expression is *T*.
+If the type of *object reference expression*, after applying of the chaining
+operator '``?.``' (see :ref:`Chaining Operator`) if it is present, is an array
+type ``T[]`` then it will be a valid *array reference expression*, and the type
+of the array indexing expression is *T*.
 
-The result of an indexing expression is a variable of type *T* (i.e., a
-variable within the array selected by the value of that *index expression*).
+The result of an array indexing expression is a variable of type *T* (i.e., an
+element of the array selected by the value of that *index expression*).
 
 It is essential that, if type *T* is a reference type, then the fields of array
 elements can be modified by changing the resultant variable fields:
@@ -2179,8 +2155,8 @@ An array indexing expression evaluated at runtime behaves as follows:
    expression, and the index expression is not evaluated.
 -  If the evaluation completes normally, then the index expression is evaluated.
    The resultant value of the object reference expression refers to an array.
--  If the index expression value of an array is less than zero, greater
-   than, or equal to the array’s *length*, then ``ArrayIndexOutOfBoundsError``
+-  If the index expression value of an array is less than zero, greater than
+   or equal to that array’s *length*, then the ``ArrayIndexOutOfBoundsError``
    is thrown.
 -  Otherwise, the result of the array access is a type *T* variable within
    the array selected by the value of the index expression.
@@ -2223,6 +2199,9 @@ The following two cases are to be considered separately:
 the *index expression* can only be one of the literals listed in the type.
 The result of an indexing expression is of type ``Value``.
 
+.. code-block-meta:
+
+
 .. code-block:: typescript
    :linenos:
    
@@ -2249,6 +2228,8 @@ For this type ``Key``, the compiler guarantees that an object of
 
 **Case 2.** There is no restriction on an *index expression*.
 The result of an indexing expression is of type ``Value | undefined``.
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -2322,14 +2303,17 @@ Chaining Operator
 The *chaining operator* '``?.``' is used to effectively access values of
 nullish types. It can be used in the following contexts:
 
-- :ref:`Field Access Expressions`, 
-- :ref:`Method Call Expression`, 
+- :ref:`Field Access Expression`,
+- :ref:`Method Call Expression`,
 - :ref:`Function Call Expression`,
-- :ref:`Indexing Expression`.
+- :ref:`Indexing Expressions`.
 
 If the value of the expression to the left of '``?.``' is ``undefined`` or
-``null``, then the evaluation of the entire surrounding expression is omitted.
-The result of the entire expression is then ``undefined``.
+``null``, then the evaluation of the entire surrounding *primary expression* stops.
+The result of the entire primary expression is then ``undefined``.
+
+
+.. code-block-meta:
 
 .. code-block:: typescript
    :linenos:
@@ -2403,17 +2387,15 @@ The creation of array instances is an experimental feature discussed in
 .. code-block:: abnf
 
     newClassInstance:
-        'new' typeArguments? typeReference arguments? classBody?
+        'new' typeArguments? typeReference arguments?
         ;
 
 A *class instance creation expression* specifies a class to be instantiated.
 It optionally lists all actual arguments for the constructor.
 
-A *class instance creation expression* can throw an error as specified in
-:ref:`Error Handling`.
+A *class instance creation expression* can throw an error or
+an exception (see :ref:`Error Handling`, :ref:`Constructor Declaration`).
 
-A class instance creation expression is ``standalone`` if it has no assignment
-or call context (see :ref:`Assignment-like Contexts`).
 
 The execution of a class instance creation expression is performed as follows:
 
@@ -2622,11 +2604,26 @@ evaluation:
 |                                 |                         |  let B: Boolean             |
 |                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
+| ``bigint``/``BigInt``           | "bigint"                | .. code-block:: typescript  |
+|                                 |                         |                             |
+|                                 |                         |  let b: bigint              |
+|                                 |                         |  typeof b                   |
+|                                 |                         |  let B: BigInt              |
+|                                 |                         |  typeof B                   |
++---------------------------------+-------------------------+-----------------------------+
 | any class or interface          | "object"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let a: Object[]            |
 |                                 |                         |  typeof a                   |
 +---------------------------------+-------------------------+-----------------------------+
+
+|
+
+(table cont'd)
+
++---------------------------------+-------------------------+-----------------------------+
+|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
++=================================+=========================+=============================+
 | any function type               | "function"              | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let f: () => void =        |
@@ -2641,14 +2638,6 @@ evaluation:
 |                                 |                         |                             |
 |                                 |                         |  typeof null                |
 +---------------------------------+-------------------------+-----------------------------+
-
-|
-
-(table cont'd)
-
-+---------------------------------+-------------------------+-----------------------------+
-|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
-+=================================+=========================+=============================+
 | ``T|null``, when ``T`` is a     | "object"                | .. code-block:: typescript  |
 | class, interface or array       |                         |                             |
 |                                 |                         |  let x: Object |= null      |
@@ -2660,14 +2649,14 @@ evaluation:
 |                                 |                         |  let c: C                   |
 |                                 |                         |  typeof c                   |
 +---------------------------------+-------------------------+-----------------------------+
-| All high-performance numeric    | "byte", "short", "int", | .. code-block:: typescript  |
-| value types and their boxed     | "long", "float", and    |                             |
-| versions:                       | "double"                |  let x: byte                |
+| All high-performance numeric    | "number"                | .. code-block:: typescript  |
+| value types and their boxed     |                         |                             |
+| versions:                       |                         |  let x: byte                |
 | ``byte``, ``short``, ``int``,   |                         |  typeof x                   |
-| ``long*, ``float``, ``double``, |                         |  ...                        |
+| ``long``, ``float``, ``double``,|                         |  ...                        |
 | ``Byte``, ``Short``, ``Int``,   |                         |                             |
 | ``long``, ``Long``, ``Float``,  |                         |                             |
-| and ``Double``                  |                         |                             |
+| ``Double``, ``char``, ``Char``  |                         |                             |
 +---------------------------------+-------------------------+-----------------------------+
 
 The ``typeof`` expression value of all other types is to be evaluated during
@@ -2800,10 +2789,10 @@ following example:
 
     let x = expression1 ?? expression2
 
-    let x = expression1
-    if (x == null) x = expression2
+    let x$ = expression1
+    if (x$ == null) {x = expression2} else x = x$!
     
-    // Type of x is Type(expression1)|Type(expression2)
+    // Type of x is NonNullishType(expression1)|Type(expression2)
 
 
 A compile-time error occurs if the nullish-coalescing operator is mixed
@@ -3734,12 +3723,12 @@ The additive operators group left-to-right.
 If either operand of the operator is '``+``' of type ``string``, then the
 operation is a string concatenation (see :ref:`String Concatenation`). In all
 other cases, the type of each operand of the operator '``+``' must be
-convertible (see :ref:`Implicit Conversions`) to a numeric type. Otherwise,
-a compile-time error occurs.
+convertible (see :ref:`Primitive Types Conversions`) to a numeric type.
+Otherwise, a compile-time error occurs.
 
 The type of each operand of the binary operator '``-``' in all cases must be
-convertible (see :ref:`Implicit Conversions`) to a numeric type. Otherwise,
-a compile-time error occurs.
+convertible (see :ref:`Primitive Types Conversions`) to a numeric type.
+Otherwise, a compile-time error occurs.
 
 .. index::
    additive expression
@@ -3797,17 +3786,20 @@ Additive Operators for Numeric Types
    frontend_status: Done
    todo: The sum of two infinities of opposite sign should be NaN, but it is -NaN
 
-The binary operator '``+``' applied to two numeric type operands performs
-addition and produces the sum of such operands.
+The primitive types conversion (see :ref:`Primitive Types Conversions`)
+performed on a pair of operands ensures that both operands are of a numeric
+type. If the conversion fails, then a compile-time error occurs.
+
+The binary operator '``+``' performs addition and produces the sum of such
+operands.
 
 The binary operator '``-``' performs subtraction and produces the difference
 of two numeric operands.
 
-The numeric types conversion (see :ref:`Primitive Types Conversions`)
-is performed on the operands.
+The type of an additive expression performed on numeric operands is the
+largest type (see :ref:`Numeric Types Hierarchy`) the operands of that
+expression are converted to.
 
-The type of an additive expression on numeric operands is the promoted type of
-that expression’s operands.
 If the promoted type is ``int`` or ``long``, then integer arithmetic is
 performed.
 If the promoted type is ``float`` or ``double``, then floating-point arithmetic
@@ -4178,13 +4170,13 @@ Results of all string comparisons are defined as follows:
    operand is lexicographically less than the string value of the right-hand
    operand, or ``false`` otherwise.
 -  The operator '``<=``' delivers ``true`` if the string value of the left-hand
-   operand is lexicographically less or equal than the string value of the
+   operand is lexicographically less than or equal to the string value of the
    right-hand operand, or ``false`` otherwise.
 -  The operator '``>``' delivers ``true`` if the string value of the left-hand
    operand is lexicographically greater than the string value of the right-hand
    operand, or ``false`` otherwise.
 -  The operator '``>=``' delivers ``true`` if the string value of the left-hand
-   operand is lexicographically greater or equal than the string value of the
+   operand is lexicographically greater than or equal to the string value of the
    right-hand operand, or ``false`` otherwise.
 
 .. index::
@@ -4264,18 +4256,17 @@ lower precedence (:math:`a < b==c < d` is ``true`` if both :math:`a < b`
 and :math:`c < d` have the same ``truth`` value).
 
 The choice of *value equality* or *reference equality* depends on the
-equality operator and the types of operands used:
+the types of operands used:
 
--  *Value equality* is applied to entities of primitive types, their boxed
-   versions, and strings.
--  *Reference equality* is applied to entities of reference types.
+-  *Value equality* is applied to entities of primitive types
+   (see :ref:`Value Types`), their boxed versions (see :ref:`Boxed Types`),
+   ``strings`` (see :ref:`Type string`), and ``BigInt`` (see :ref:`BigInt Type`).
+-  *Reference equality* is applied to entities of reference types
+   (see :ref:`Reference Types`) except ``string`` and ``BigInt``.
 
-For operators '``===``' and '`!==`', :ref:`Reference Equality` is used if both
-operands are of reference types. Otherwise, a compile-time error occurs.
+Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
-For operators '``==``' and '`!=`', the following is used:
-
-- :ref:`Value Equality for Numeric Types` if operands are of numeric types
+- :ref:`Value Equality for Numeric Types` if operands are of numeric types,
   or boxed version of numeric types;
 
 - :ref:`Value Equality for Booleans` if both operands are of type ``boolean``
@@ -4379,13 +4370,13 @@ The following example illustrates *value equality*:
    5 == 5 // true
    5 != 5 // false
    
-   5 === 5 // compile-time error
+   5 === 5 // true
    
    5 == new Number(5) // true
-   5 === new Number(5) // compile-time error
+   5 === new Number(5) // true
    
    new Number(5) == new Number(5) // true
-   5 = 5.0 // true
+   5 == 5.0 // true
 
 .. index::
    NaN
@@ -4414,6 +4405,7 @@ Two strings are equal if they represent the same sequence of characters:
    :linenos:
 
    "abc" == "abc" // true
+   "abc" === "ab" + "c" // true
    
    function foo(s: string) {
       console.log(s == "hello")
@@ -4526,6 +4518,9 @@ as one of its types.
 
 The following comparisons evaluate to ``false`` at compile time:
 
+.. code-block-meta:
+
+
 .. code-block:: typescript
    :linenos:
 
@@ -4595,7 +4590,7 @@ This semantics is illustrated by the following example:
    x1 == x2 // true, as x1 and x2 refer to the same object
    x1 === x2 // true, the same
 
-   new Number(5) === new Number(5) // false, different objects
+   new Number(5) === new Number(5) // true, value equality is used
 
    new Number(5) == new Number(5) // true, value equality is used
 
@@ -4902,8 +4897,8 @@ expression1) must be one of the following:
 -  A named variable, such as a local variable, or a field of the current
    object or class;
 -  A computed variable resultant from a field access (see
-   :ref:`Field Access Expressions`); or
--  An array or record component access (see :ref:`Indexing Expression`).
+   :ref:`Field Access Expression`); or
+-  An array or record component access (see :ref:`Indexing Expressions`).
 
 .. index::
    assignment
@@ -4954,7 +4949,7 @@ the type of the variable (see :ref:`Generic Parameters`). Otherwise,
 the expression is evaluated at runtime in one of the following ways:
 
 1. If the left-hand operand *expression1* is a field access expression
-   *e.f* (see :ref:`Field Access Expressions`), possibly enclosed in a
+   *e.f* (see :ref:`Field Access Expression`), possibly enclosed in a
    pair of parentheses, then:
 
    #. *expression1* *e* is evaluated: if the evaluation of *e*
@@ -5516,7 +5511,7 @@ lambda expressions and function declarations (see :ref:`Function Declarations`).
 Lambda expressions and function declarations have the same syntax and semantics.
 
 See :ref:`Scopes` for the specification of the scope, and
-:ref:`Shadowing Parameters` for the shadowing details of formal parameter
+:ref:`Shadowing by Parameter` for the shadowing details of formal parameter
 declarations.
 
 A compile-time error occurs if a lambda expression declares two formal

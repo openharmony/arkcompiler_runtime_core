@@ -106,7 +106,9 @@ Block
 .. meta:
     frontend_status: Done
 
-A sequence of statements enclosed in balanced braces forms a *block*:
+
+A sequence of statements (see :ref:`Statements`) enclosed in balanced braces
+forms a *block*:
 
 .. code-block:: abnf
 
@@ -116,12 +118,15 @@ A sequence of statements enclosed in balanced braces forms a *block*:
 
 The execution of a block means that all block statements, except type
 declarations, are executed one by one in the textual order of their
-appearance within the block if no exception, error, or return occurs.
+appearance within the block until exception (see :ref:`Exceptions`), error
+(see :ref:`Errors`), or return (see :ref:`Return Statements`) occurs.
 
-If a block is the body of a ``functionDeclaration`` or a ``classMethodDeclaration``,
-which was declared implicitly or explicitly with return type ``void``, then the
-block can contain no return statement at all. Such a block is equivalent to a
-block ending in the ``return`` statement, and is executed accordingly.
+If a block is the body of a ``functionDeclaration`` (see
+:ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
+:ref:`Method Declarations`) declared implicitly or explicitly with
+return type ``void``, then the block can contain no return statement at all.
+Such a block is equivalent to one that ends in a ``return`` statement, and
+is executed accordingly.
 
 .. index::
    sequence of statements
@@ -410,6 +415,10 @@ feature (see :ref:`For-of Type Annotation`).
    assignment
    for-of type annotation
    type annotation
+
+
+.. code-block-meta:
+    not-subset
 
 .. code-block:: typescript
    :linenos:

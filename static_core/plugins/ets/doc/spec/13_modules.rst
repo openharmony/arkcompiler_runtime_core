@@ -794,6 +794,9 @@ export scheme. It allows specifying no declared name when importing (see
 :ref:`Default Import Binding` for details). A :index:`compile-time error`
 occurs if more than one top-level declaration is marked as ``default``.
 
+.. code-block-meta:
+
+
 .. code-block:: typescript
    :linenos:
 
@@ -1093,6 +1096,9 @@ No overloading is allowed for an entry point function.
 
 Different forms of valid and invalid entry points are shown in the example
 below:
+
+.. code-block-meta:
+   expect-cte:
 
 .. code-block:: typescript
    :linenos:

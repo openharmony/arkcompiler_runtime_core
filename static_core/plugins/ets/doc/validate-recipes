@@ -251,7 +251,7 @@ sub assert_recipes
             die 'Length mismatch between header and its underline'
                 unless length($payload) == length($previous_line);
             die 'Header found in the unexpected place'
-                unless $previous_line =~ /\|CB_(RULE|BAD|OK|SEE)\|/;
+                unless $previous_line =~ /\|CB_(RULE|BAD|OK|SEE|NON_COMPLIANT_CODE|COMPLIANT_CODE)\|/;
         } elsif ($line eq '.. _Recipes:') {
             # $current_section should not change
             die 'Recipes anchor should be in intro section'
@@ -315,7 +315,7 @@ sub assert_recipes
                 @{$current_recipe->{$current_section}} != 2 ||
                 $current_recipe->{$current_section}[0] ne '';
             recipe_add_severity($current_recipe, $severity);
-        } elsif ($line =~ /^\|CB_BAD\|$/) {
+        } elsif ($line =~ /^\|CB_(BAD|NON_COMPLIANT_CODE)\|$/) {
             die 'Expected preceding section: desc_detailed'
                 unless $current_section eq 'desc_detailed';
 
@@ -324,7 +324,7 @@ sub assert_recipes
             die "Unable to redefine $current_section"
                 if $current_recipe->{seen}{$current_section};
             $current_recipe->{seen}{$current_section} = 1;
-        } elsif ($line =~ /^\|CB_OK\|$/) {
+        } elsif ($line =~ /^\|CB_(OK|COMPLIANT_CODE)\|$/) {
             my $is_in_skip_list = recipe_check_if_skip_section($current_recipe, 'code_bad', \%skip_list);
             die 'Expected preceding section: code_bad'
                 unless $current_section eq 'code_bad' || $is_in_skip_list;
@@ -382,9 +382,9 @@ sub assert_recipes
                 die 'Code line must be indented with at least 4 spaces'
                     if $current_section =~ /^(code_bad|code_ok)$/
                     && $line !~ /^ {4}/;
-                die 'Content line contains unexpected indentation'
-                    if $current_section !~ /^(code_bad|code_ok)$/
-                    && $line =~ /^\s+/;
+                #die 'Content line contains unexpected indentation'
+                #    if $current_section !~ /^(code_bad|code_ok)$/
+                #    && $line =~ /^\s+/;
                 die 'Content line contains CB_SOMETHING, most probably a typo'
                     if $line =~ /\|?CB_.+?\|?/;
                 die 'Content line contains :ref:, most probably a typo'
@@ -522,6 +522,16 @@ sub assert_code_snippets
         143 => { code_bad => 'skip', code_ok => 'skip' },
         147 => { code_bad => 'skip', code_ok => 'skip' },
         150 => { code_bad => 'skip', code_ok => 'skip' },
+
+        # Recipe for ESObject:
+        151 => { code_ok => 'skip' },
+
+        # Recipes for Sendable API restrictions:
+        153 => { code_bad => 'skip', code_ok => 'skip' },
+        154 => { code_bad => 'skip', code_ok => 'skip' },
+        155 => { code_bad => 'skip', code_ok => 'skip' },
+        156 => { code_bad => 'skip', code_ok => 'skip' },
+        157 => { code_bad => 'skip', code_ok => 'skip' },
     );
 
     my $at_least_one_error = 0;

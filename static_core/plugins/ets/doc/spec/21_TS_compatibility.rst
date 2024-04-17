@@ -34,6 +34,9 @@ Undefined is Not a Universal Value
 |LANG| raises a compile-time or a runtime error in many cases, in which
 |TS| uses ``undefined`` as runtime value.
 
+.. code-block-meta:
+   expect-cte
+
 .. code-block:: typescript
    :linenos:
 
@@ -59,6 +62,8 @@ numbers.
 |LANG| interprets ``number`` as a variety of |LANG| types. Calculations depend
 on the context and can produce different results:
 
+.. code-block-meta:
+
 .. code-block:: typescript
    :linenos:
 
@@ -79,7 +84,7 @@ Covariant Overriding
 .. meta:
     frontend_status: Done
 
-The |TS| object runtime model enables |TS| to handle situations where a
+|TS| object runtime model enables |TS| to handle situations where a
 non-existing property is accessed from some object during program execution.
 
 |LANG| allows generating highly efficient code that relies on an objects'
@@ -95,15 +100,15 @@ by compiler-generated compile-time errors:
     }
     class Derived extends Base {
        override foo (p: Derived)
-          // |LANG| will issue a compile-time error - incorrect overriding
+          // ArkTS will issue a compile-time error - incorrect overriding
        {
            console.log ("p.field unassigned = ", p.field)
-              // |TS| will print 'p.field unassigned =  undefined'
+              // TypeScript will print 'p.field unassigned =  undefined'
            p.field = 666 // Access the field
            console.log ("p.field assigned   = ", p.field)
-              // |TS| will print 'p.field assigned   =  666'
+              // TypeScript will print 'p.field assigned   =  666'
            p.method() // Call the method
-              // |TS| will generate runtime error: TypeError: p.method is not a function
+              // TypeScript will generate runtime error: p.method is not a function
        }
        method () {}
        field: number = 0
@@ -111,6 +116,118 @@ by compiler-generated compile-time errors:
 
     let base: Base = new Derived
     base.foo (new Base)
+
+.. _Difference in Overload Signatures:
+
+Difference in Overload Signatures
+*********************************
+
+.. meta:
+    frontend_status: Partly
+
+*Implementaion signature* is considered as an accesible entity. The following
+code is valid in |LANG| (while it causes a compile-time error in |TS|):
+
+.. code-block-meta:
+   not-subset
+
+.. code-block:: typescript
+   :linenos:
+   
+    function foo(): void
+    function foo(x: string): void
+    function foo(x?: string): void {
+        /*body*/
+    }
+
+    foo(undefined) // compile-time error in TS
+
+|LANG| supports calling function or method only with the number of arguments
+that corresponds to the number of the parameters. |TS|, in some cases, allows
+providing more arguments than the actual function or method has.
+
+.. code-block-meta:
+   expect-cte
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(p1: string, p2: boolean): void
+    function foo(p: string): void
+       { console.log ("1st parameter := ", p)  }
+
+    foo("1st argument", true) // compile-time error in ArkTS while OK for Typescript
+
+|
+
+.. _Class fields while inheriting:
+
+Class fields while inheriting
+*****************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| allows overriding class fields with the field in the subclass with
+the invariant or covarint type, and potentially with a new initial value.
+
+|LANG| supports shadowing if a new field in a subclass is just a physically
+different field with the same name.
+
+As a result, the number of fields in a derived object, and the semantics of
+*super* can be differnt. An attempt to access ``super.field_name`` in |TS|
+returns *undefined*. However, the same code in |LANG| returns the shadowed
+field declared in or inherited from the direct superclass.
+
+These situations are illustrated by the examples below:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+
+   class Base {
+     field: number = 666
+   }
+   class Derived extends Base {
+     field: number = 555
+     foo () {
+        console.log (this.field, super.field)
+     }
+   }
+   let d = new Derived
+   console.log (d)
+   d.foo()
+   // TypeScript output
+   // Derived { field: 555 }
+   // 555 undefined
+   // ArkTS output
+   // { field: 666, field: 555 }
+   // 555 666
+
+
+.. _Overriding for primitive types:
+
+Overriding for primitive types
+******************************
+
+|TS| allows overriding class type version of the primitive type into a pure
+primitive type. |LANG| does not allow such overiding.
+
+These situation is illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+
+   class Base {
+     foo(): Number { return 5 }
+   }
+   class Derived extends Base {
+     foo(): number { return 5 } // Such overriding is prohibited
+   }
+
 
 
 .. _Differences in Math.pow:
@@ -122,19 +239,17 @@ Differences in Math.pow
     frontend_status: Done
 
 The function ``Math.pow`` in |LANG| conforms to the latest IEEE 754-2019
-standard, and the following calls:
+standard, and the following calls produce the result *1* (one):
 
-- ``Math.pow(1, Infinity)``
-- ``Math.pow(-1, Infinity)``
-- ``Math.pow(1, -Infinity)``
-- ``Math.pow(-1, -Infinity)``
+- ``Math.pow(1, Infinity)``,
+- ``Math.pow(-1, Infinity)``,
+- ``Math.pow(1, -Infinity)``,
+- ``Math.pow(-1, -Infinity)``.
 
----produce the result *1* (one).
 
 The function ``Math.pow`` in |TS| conforms to the outdated 2008 version of the
 standard, and the same calls produce ``NaN``.
 
 .. index::
    IEEE 754
-
 
