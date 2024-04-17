@@ -59,6 +59,16 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
     )
 
     add_custom_target(${TARGET} DEPENDS ${OUTPUT_ABC})
+
+    if(TARGET etsstdlib)
+        if (NOT TARGET regenerate_and_check_stdlib)
+            # Note(ivan-tyulyanin): -P replaces CMAKE_CURRENT_SOURCE_DIR so using ETS_PLUGIN_SOURCE_DIR
+            add_custom_target(regenerate_and_check_stdlib
+                COMMAND ${CMAKE_COMMAND} -DETS_PLUGIN_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/GenerateStdLib.cmake)
+            add_dependencies(etsstdlib regenerate_and_check_stdlib)
+        endif()
+    endif()
+
 endfunction()
 
 
@@ -94,7 +104,7 @@ add_subdirectory(tools)
 
 add_subdirectory(arkts_header)
 
-# TODO(nsizov): change this logic when ets compiler moved into ets plugin
+# NOTE(nsizov): change this logic when ets compiler moved into ets plugin
 if(TARGET es2panda)
     compile_ets_code(GEN_STD_LIB "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc" etsstdlib)
 

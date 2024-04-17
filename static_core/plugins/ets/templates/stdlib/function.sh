@@ -14,13 +14,11 @@
 
 set -eu -o pipefail
 
-SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-readonly SCRIPT_DIR
+readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 readonly GENPATH="${SCRIPT_DIR}/../../stdlib/std/core"
 
 mkdir -p "${GENPATH}"
 
-echo "Generating Function..."
-jinja2 "${SCRIPT_DIR}/Function.ets.j2" > "$GENPATH/Function.ets"
-
-echo "Done."
+readonly FUNC="$GENPATH/Function.ets"
+echo "Generating ${FUNC}"
+jinja2 "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"

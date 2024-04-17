@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,18 +14,16 @@
 
 set -eu -o pipefail
 
-SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-readonly SCRIPT_DIR
+readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 readonly GENPATH="${SCRIPT_DIR}/../../stdlib/escompat"
 
 mkdir -p "${GENPATH}"
 
-echo "Generating DataView..."
-jinja2 "${SCRIPT_DIR}/DataView.ets.j2" > "$GENPATH/DataView.ets"
+echo "Generating $GENPATH/DataView.ets"
+jinja2 "${SCRIPT_DIR}/DataView.ets.j2" -o "$GENPATH/DataView.ets"
 
-echo "Generating Unsigned arrays..."
-jinja2 "${SCRIPT_DIR}/typedUArray.ets.j2" > "$GENPATH/TypedUArrays.ets"
-echo "Generating Signed arrays..."
-jinja2 "${SCRIPT_DIR}/typedArray.ets.j2" > "$GENPATH/TypedArrays.ets"
+echo "Generating $GENPATH/TypedArrays.ets"
+jinja2 "${SCRIPT_DIR}/typedArray.ets.j2" -o "$GENPATH/TypedArrays.ets"
 
-echo "Done."
+echo "Generating $GENPATH/TypedUArrays.ets"
+jinja2 "${SCRIPT_DIR}/typedUArray.ets.j2" -o "$GENPATH/TypedUArrays.ets"
