@@ -126,8 +126,9 @@ public:
     /**
      * @brief Method increment counter of finished tasks and signal Finalize waiter
      * @param counterMap - map from id to count of finished tasks
+     * @return count of executed tasks
      */
-    void IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap);
+    size_t IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap);
 
     /**
      * @brief Executes tasks with specific properties. It will get them from queue or steal from workers.

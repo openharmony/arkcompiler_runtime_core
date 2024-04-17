@@ -14,6 +14,7 @@
  */
 
 #include "libpandabase/taskmanager/task_scheduler.h"
+#include "libpandabase/utils/logger.h"
 #include "libpandabase/os/thread.h"
 
 namespace ark::taskmanager {
@@ -74,9 +75,12 @@ void WorkerThread::WorkerLoop()
             }
             ExecuteTasksFromLocalQueue();
         }
-        scheduler_->IncrementCounterOfExecutedTasks(finishedTasksCounterMap_);
+        [[maybe_unused]] size_t countOfTasks = scheduler_->IncrementCounterOfExecutedTasks(finishedTasksCounterMap_);
+        LOG(DEBUG, TASK_MANAGER) << GetWorkerName() << ": executed tasks: " << countOfTasks;
+        countOfExecutedTask_ += countOfTasks;
         finishedTasksCounterMap_.clear();
     }
+    LOG(DEBUG, TASK_MANAGER) << GetWorkerName() << " have executed tasks at all: " << countOfExecutedTask_;
 }
 
 size_t WorkerThread::ExecuteTasksFromLocalQueue()

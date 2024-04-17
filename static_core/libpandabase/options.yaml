@@ -78,6 +78,7 @@ options:
   - ecmascript
   - scheduler
   - coroutines
+  - task_manager
   description: Enable logs from specified components
   delimiter: ":"
 

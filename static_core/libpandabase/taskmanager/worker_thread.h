@@ -206,6 +206,8 @@ private:
      * @see TaskScheduler::StealTaskFromOtherWorker
      */
     size_t schedulerPopId_ {0};
+
+    size_t countOfExecutedTask_ {0};
 };
 
 }  // namespace ark::taskmanager
