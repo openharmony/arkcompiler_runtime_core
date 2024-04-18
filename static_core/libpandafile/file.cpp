@@ -139,8 +139,6 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
 {
     uint32_t uncompressedLength = entry.GetUncompressedSize();
     if (uncompressedLength == 0) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Panda file has zero length!";
         return nullptr;
     }
@@ -148,8 +146,6 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
     size_t sizeToMmap = AlignUp(uncompressedLength, ark::os::mem::GetPageSize());
     void *mem = os::mem::MapRWAnonymousRaw(sizeToMmap, false);
     if (mem == nullptr) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't mmap anonymous!";
         return nullptr;
     }
@@ -159,16 +155,12 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
     auto it = AnonMemSet::GetInstance().Insert(std::string(location), ss.str());
     auto ret = os::mem::TagAnonymousMemory(reinterpret_cast<void *>(ptr.Get()), sizeToMmap, it->second.c_str());
     if (ret.has_value()) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't tag mmap anonymous!";
         return nullptr;
     }
 
     auto extractError = ExtractToMemory(handle, reinterpret_cast<uint8_t *>(ptr.Get()), sizeToMmap);
     if (extractError != 0) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't extract!";
         return nullptr;
     }
@@ -265,10 +257,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         GetCurrentFileOffset(zipfile, &entry);
         file = HandleArchive(zipfile, fp, location, entry, archiveFilename, openMode);
         CloseCurrentFile(zipfile);
-        if (ark::CloseArchiveFile(zipfile) != 0) {
-            LOG(ERROR, PANDAFILE) << "CloseArchive failed!";
-            return nullptr;
-        }
+        OpenPandaFileFromZipErrorHandler(zipfile);
     } else {
         file = panda_file::File::Open(location, openMode);
     }
