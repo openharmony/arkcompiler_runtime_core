@@ -123,7 +123,7 @@ std::string Abc2ProgramEntityContainer::GetFullRecordNameById(const panda_file::
     }
     std::string name = string_table_.GetStringById(class_id);
     pandasm::Type type = pandasm::Type::FromDescriptor(name);
-    std::string record_full_name = type.GetPandasmName();
+    std::string record_full_name = type.GetName();
     record_full_name_map_.emplace(class_id_offset, record_full_name);
     return record_full_name;
 }

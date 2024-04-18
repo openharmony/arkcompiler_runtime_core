@@ -44,7 +44,7 @@ void AbcClassProcessor::FillRecord()
     pandasm::Record record("", panda_file::SourceLang::ECMASCRIPT);
     record.name = entity_container_.GetFullRecordNameById(entity_id_);
     if (record.name == SLOT_NUMBER_RECORD_NAME || record.name == CONCURRENT_MODULE_REQUEST_RECORD_NAME) {
-        return;
+        record.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
     }
     ASSERT(program_->record_table.find(record.name) == program_->record_table.end());
     FillRecordData(record);

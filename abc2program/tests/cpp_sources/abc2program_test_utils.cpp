@@ -29,6 +29,8 @@ std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_
                                                                                     "print", "prototype", "str",
                                                                                     "string", "toString", "x"};
 std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {"_ESModuleRecord",
+                                                                                    "_ESTypeInfoRecord",
+                                                                                    "_ESSlotNumberAnnotation",
                                                                                     "_GLOBAL"};
 
 std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 8, 21};

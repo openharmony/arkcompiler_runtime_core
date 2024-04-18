@@ -24,7 +24,8 @@ AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entity
     : AbcFileEntityProcessor(entity_id, entity_container), function_(function)
 {
     annotation_data_accessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entity_id_);
-    annotation_name_ = string_table_->GetStringById(annotation_data_accessor_->GetClassId());
+    auto typeDescriptorName = string_table_->GetStringById(annotation_data_accessor_->GetClassId());
+    annotation_name_ = pandasm::Type::FromDescriptor(typeDescriptorName).GetName();
 }
 
 void AbcAnnotationProcessor::FillProgramData()
