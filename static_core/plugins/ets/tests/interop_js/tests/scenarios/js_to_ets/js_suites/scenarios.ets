@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,5 @@
  * limitations under the License.
  */
 
-package std.interop.js;
-
-export final class JSValue {
-    private __internal_field_0: long;
-    private __internal_field_1: long;
-
-    public native toString(): String;
-}
-
-// NOTE: vpukhov. decide what to do with nullish JSValues
-export type JSValueN = JSValue | null | undefined;
+export declare function optional_call(x?: Int, y?: Int, z?: int): Int;
+export declare function single_required(x: Int, y?: Int, z?: Int): Int;

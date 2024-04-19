@@ -167,6 +167,15 @@ function functionReturnTypePrimitive() {
   return true;
 }
 
+
+function optional_call(x=123, y=130, z=1) {
+  return x + y + z;
+}
+
+function single_required(z, x=123, y=123) {
+  return x + y + z;
+}
+
 exports.standaloneFunctionJs = standaloneFunctionJs;
 exports.ClassWithMethodJs = ClassWithMethodJs;
 exports.newInterfaceWithMethod = newInterfaceWithMethod;
@@ -191,3 +200,5 @@ exports.functionDefaultFloatParameterFunction = functionDefaultFloatParameterFun
 exports.functionArgTypeOptionalPrimitive = functionArgTypeOptionalPrimitive;
 exports.functionArgTypePrimitive = functionArgTypePrimitive;
 exports.functionReturnTypePrimitive = functionReturnTypePrimitive;
+exports.optional_call = optional_call;
+exports.single_required = single_required;

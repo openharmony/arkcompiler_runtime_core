@@ -346,6 +346,20 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::JSRuntimeStrictEqualIntrinsic
     clear_flags: [can_throw, heap_inv]
 
+####################
+# std.js.JSValue #
+####################
+  - name: JSValueToString
+    space: ets
+    class_name: std.interop.js.JSValue
+    method_name: toString
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::interop::js::intrinsics::JSValueToStringIntrinsic
+    clear_flags: [ ]
+
 #######################
 # Internal intrinsics #
 #######################
