@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,15 +21,11 @@ tags: []
 ---*/
 
 enum ConstExpr {
-    A = 5 * 2,
-    B = 77 / 7,
-    C = 28 % 15,
-    D = 15 + (2 * (5 + 4) - 3) / 5,
+    A = Int.MAX_VALUE + 1;
+    B = 1 - 100;
 }
 
 function main(): void {
-    assert ConstExpr.A.getValue() == 10
-    assert ConstExpr.B.getValue() == 11
-    assert ConstExpr.C.getValue() == 13
-    assert ConstExpr.D.getValue() == 18
+    assert ConstExpr.A.getValue() == Int.MAX_VALUE + 1;
+    assert ConstExpr.B.getValue() == -99
 }
