@@ -54,3 +54,9 @@ sub:
       - method: findIndex
         params:
           - paramOf *bool_lambdas
+      - method: "some"
+        params:
+          - paramOf *bool_lambdas
+      - method: "every"
+        params:
+          - paramOf *bool_lambdas

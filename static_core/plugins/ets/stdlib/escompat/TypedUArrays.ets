@@ -1317,16 +1317,17 @@ export class Uint8ClampedArray implements Iterable<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Checks that all elements of Uint8ClampedArray satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts one argument.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
-            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element) }
-        return this.every(newF)
+    public every(predicate: (element: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element))
     }
 
     /**
@@ -1437,16 +1438,17 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint8ClampedArray satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
-            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts one argument.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element))
     }
 
     /**
@@ -1472,15 +1474,18 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint8ClampedArray satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number, array: Uint8ClampedArray) => boolean): boolean {
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts three arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number, array: Uint8ClampedArray) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -1488,16 +1493,31 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint8ClampedArray satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
-            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element, index) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts two arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts no arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: () => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate())
     }
 
     /**
@@ -1932,15 +1952,18 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint8ClampedArray satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts three arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number, array: Uint8ClampedArray) => boolean): boolean {
+    public every(predicate: (element: number, index: number, array: Uint8ClampedArray) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -1948,16 +1971,31 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint8ClampedArray satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts two arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8ClampedArray) => boolean =
-            (element: number, index: number, array: Uint8ClampedArray): boolean => { return fn(element, index) }
-        return this.every(newF)
+    public every(predicate: (element: number, index: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for all elements of an array.
+     *
+     * @param predicate A function that accepts no arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
+     *
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
+     */
+    public every(predicate: () => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint8ClampedArray): boolean => predicate())
     }
 
     /**
@@ -3600,16 +3638,17 @@ export class Uint8Array implements Iterable<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Checks that all elements of Uint8Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts one argument.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8Array) => boolean =
-            (element: number, index: number, array: Uint8Array): boolean => { return fn(element) }
-        return this.every(newF)
+    public every(predicate: (element: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint8Array): boolean => predicate(element))
     }
 
     /**
@@ -3720,16 +3759,17 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8Array) => boolean =
-            (element: number, index: number, array: Uint8Array): boolean => { return fn(element) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts one argument.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint8Array): boolean => predicate(element))
     }
 
     /**
@@ -3755,15 +3795,18 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number, array: Uint8Array) => boolean): boolean {
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts three arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number, array: Uint8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -3771,16 +3814,31 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint8Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8Array) => boolean =
-            (element: number, index: number, array: Uint8Array): boolean => { return fn(element, index) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts two arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint8Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts no arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: () => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint8Array): boolean => predicate())
     }
 
     /**
@@ -4215,15 +4273,18 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint8Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts three arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number, array: Uint8Array) => boolean): boolean {
+    public every(predicate: (element: number, index: number, array: Uint8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -4231,16 +4292,31 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint8Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts two arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint8Array) => boolean =
-            (element: number, index: number, array: Uint8Array): boolean => { return fn(element, index) }
-        return this.every(newF)
+    public every(predicate: (element: number, index: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint8Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for all elements of an array.
+     *
+     * @param predicate A function that accepts no arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
+     *
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
+     */
+    public every(predicate: () => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint8Array): boolean => predicate())
     }
 
     /**
@@ -5884,16 +5960,17 @@ export class Uint16Array implements Iterable<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Checks that all elements of Uint16Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts one argument.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint16Array) => boolean =
-            (element: number, index: number, array: Uint16Array): boolean => { return fn(element) }
-        return this.every(newF)
+    public every(predicate: (element: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint16Array): boolean => predicate(element))
     }
 
     /**
@@ -6004,16 +6081,17 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint16Array) => boolean =
-            (element: number, index: number, array: Uint16Array): boolean => { return fn(element) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts one argument.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint16Array): boolean => predicate(element))
     }
 
     /**
@@ -6039,15 +6117,18 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number, array: Uint16Array) => boolean): boolean {
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts three arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number, array: Uint16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -6055,16 +6136,31 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint16Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint16Array) => boolean =
-            (element: number, index: number, array: Uint16Array): boolean => { return fn(element, index) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts two arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint16Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts no arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: () => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint16Array): boolean => predicate())
     }
 
     /**
@@ -6499,15 +6595,18 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint16Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts three arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number, array: Uint16Array) => boolean): boolean {
+    public every(predicate: (element: number, index: number, array: Uint16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -6515,16 +6614,31 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint16Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts two arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint16Array) => boolean =
-            (element: number, index: number, array: Uint16Array): boolean => { return fn(element, index) }
-        return this.every(newF)
+    public every(predicate: (element: number, index: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint16Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for all elements of an array.
+     *
+     * @param predicate A function that accepts no arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
+     *
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
+     */
+    public every(predicate: () => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint16Array): boolean => predicate())
     }
 
     /**
@@ -8195,16 +8309,17 @@ export class Uint32Array implements Iterable<Number> {
     /// === with element lambda functions ===
 
     /**
-     * Checks that all elements of Uint32Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts one argument.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint32Array) => boolean =
-            (element: number, index: number, array: Uint32Array): boolean => { return fn(element) }
-        return this.every(newF)
+    public every(predicate: (element: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint32Array): boolean => predicate(element))
     }
 
     /**
@@ -8315,16 +8430,17 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint32Array) => boolean =
-            (element: number, index: number, array: Uint32Array): boolean => { return fn(element) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts one argument.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint32Array): boolean => predicate(element))
     }
 
     /**
@@ -8350,15 +8466,18 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number, array: Uint32Array) => boolean): boolean {
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts three arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number, array: Uint32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return true
             }
         }
@@ -8366,16 +8485,31 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that at least one element of Uint32Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint32Array) => boolean =
-            (element: number, index: number, array: Uint32Array): boolean => { return fn(element, index) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts two arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: number, index: number) => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint32Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts no arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: () => boolean): boolean {
+        return this.some((element: number, index: number, array: Uint32Array): boolean => predicate())
     }
 
     /**
@@ -8810,15 +8944,18 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint32Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts three arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number, array: Uint32Array) => boolean): boolean {
+    public every(predicate: (element: number, index: number, array: Uint32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (!fn(this.getUnsafe(i) as number, i as number, this)) {
+            if (!predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return false
             }
         }
@@ -8826,16 +8963,31 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Checks that all elements of Uint32Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts two arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: number, index: number) => boolean): boolean {
-        let newF: (element: number, index: number, array: Uint32Array) => boolean =
-            (element: number, index: number, array: Uint32Array): boolean => { return fn(element, index) }
-        return this.every(newF)
+    public every(predicate: (element: number, index: number) => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint32Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for all elements of an array.
+     *
+     * @param predicate A function that accepts no arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
+     *
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
+     */
+    public every(predicate: () => boolean): boolean {
+        return this.every((element: number, index: number, array: Uint32Array): boolean => predicate())
     }
 
     /**
@@ -10506,16 +10658,17 @@ export class BigUint64Array implements Iterable<BigInt> {
     /// === with element lambda functions ===
 
     /**
-     * Checks that all elements of BigUint64Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts one argument.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: BigInt) => boolean): boolean {
-        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
-            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(element) }
-        return this.every(newF)
+    public every(predicate: (element: BigInt) => boolean): boolean {
+        return this.every((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element))
     }
 
     /**
@@ -10626,16 +10779,17 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Checks that at least one element of BigUint64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: BigInt) => boolean): boolean {
-        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
-            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(element) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts one argument.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: BigInt) => boolean): boolean {
+        return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element))
     }
 
     /**
@@ -10661,15 +10815,18 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Checks that at least one element of BigUint64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: BigInt, index: number, array: BigUint64Array) => boolean): boolean {
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts three arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: BigInt, index: number, array: BigUint64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (fn(new BigInt(this.getUnsafe(i)), i as number, this)) {
+            if (predicate(new BigInt(this.getUnsafe(i)), i as number, this)) {
                 return true
             }
         }
@@ -10677,16 +10834,31 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Checks that at least one element of BigUint64Array satisfies the passed function
-     *
-     * @param fn check function
-     *
-     * @returns true if some element satisfies fn
-     */
-    public some(fn: (element: BigInt, index: number) => boolean): boolean {
-        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
-            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(element, index) }
-        return this.some(newF)
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts two arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: (element: BigInt, index: number) => boolean): boolean {
+        return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for any element of an array.
+     * 
+     * @param predicate A function that accepts no arguments.
+     * The some method calls the predicate function for each element in the array 
+     * until the predicate returns a true or until the end of the array.
+     * 
+     * @returns false unless predicate function returns true for an array element, 
+     * in which case true is immediately returned.
+     */ 
+    public some(predicate: () => boolean): boolean {
+        return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate())
     }
 
     /**
@@ -11121,15 +11293,18 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Checks that all elements of BigUint64Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts three arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: BigInt, index: number, array: BigUint64Array) => boolean): boolean {
+    public every(predicate: (element: BigInt, index: number, array: BigUint64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
-            if (!fn(new BigInt(this.getUnsafe(i)), i as number, this)) {
+            if (!predicate(new BigInt(this.getUnsafe(i)), i as number, this)) {
                 return false
             }
         }
@@ -11137,16 +11312,31 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Checks that all elements of BigUint64Array satisfy the passed function
+     * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param fn check function
+     * @param predicate A function that accepts two arguments. 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
      *
-     * @returns true if all elements satisfy fn
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
      */
-    public every(fn: (element: BigInt, index: number) => boolean): boolean {
-        let newF: (element: BigInt, index: number, array: BigUint64Array) => boolean =
-            (element: BigInt, index: number, array: BigUint64Array): boolean => { return fn(element, index) }
-        return this.every(newF)
+    public every(predicate: (element: BigInt, index: number) => boolean): boolean {
+        return this.every((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element, index))
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for all elements of an array.
+     *
+     * @param predicate A function that accepts no arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * or until the end of the array.
+     *
+     * @returns true unless predicate function returns a false for an array element, 
+     * in which case false is immediately returned.
+     */
+    public every(predicate: () => boolean): boolean {
+        return this.every((element: BigInt, index: number, array: BigUint64Array): boolean => predicate())
     }
 
     /**
