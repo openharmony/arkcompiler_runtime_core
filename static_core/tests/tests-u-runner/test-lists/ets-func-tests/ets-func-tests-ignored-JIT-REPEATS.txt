@@ -1,19 +1,11 @@
 # #16231 #16362
-spec/bigint/bigint-arithmetic-mul-4-operands-1.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-mul-4-operands-1.ets
 # #16186
-spec/bigint/bigint-arithmetic-div-equal-zero.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-div-equal-zero.ets
 # #16083
-spec/bigint/bigint-arithmetic-div-2-operands-zero.ets
-# #16457
-spec/bigint/bigint-arithmetic-div-2-operands-2.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-div-2-operands-zero.ets
 # #16100
-spec/bigint/bigint-arithmetic-expr-4-operands-1-1.ets
-# #16374
-spec/bigint/bigint-bitwise-neg-2.ets
-# #16424
-std/core/EscapeUnescapeURITest.ets
-# #16444
-std/core/Object.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-1-1.ets
 # #16217
 std/core/std_core_typedarrays__Int16Array.ets
 
