@@ -137,7 +137,7 @@ export final class DataView implements ArrayBufferView {
      * @param littleEndian read as little or big endian
      */
     public set{{methodName}}(byteOffset: number, value: {{type2nameCompat[bit]}}, littleEndian?: boolean): void {
-        if (littleEndian !== undefined && littleEndian!.valueOf() == true) {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             this.set{{methodName}}Little(byteOffset, value)
         } else {
             this.set{{methodName}}Big(byteOffset, value)
@@ -164,7 +164,7 @@ export final class DataView implements ArrayBufferView {
      * @returns read value
      */
     public get{{methodName}}(byteOffset: number, littleEndian?: boolean): {{type2nameCompat[bit]}} {
-        if (littleEndian !== undefined && littleEndian!.valueOf() == true) {
+        if (littleEndian !== undefined && littleEndian.valueOf() == true) {
             return this.get{{methodName}}Little(byteOffset)
         } else {
             return this.get{{methodName}}Big(byteOffset)
@@ -218,7 +218,7 @@ export final class DataView implements ArrayBufferView {
         return DataView.bigintFromULong(res)
         {%- else %}
         return res;
-        {% endif %}
+        {%- endif %}
     }
 
     private set{{methodName}}{{suffix}}(byteOffset: int, value: {{type2name[bit]}}): void {
@@ -245,7 +245,7 @@ export final class DataView implements ArrayBufferView {
         const val: {{type2name[bit]}} = value.getLong();
         {%- else %}
         const val: {{type2name[bit]}} = value as {{type2name[bit]}};
-        {% endif %}
+        {%- endif %}
         this.set{{methodName}}{{suffix}}(byteOffset as int, val)
     }
     {%- endfor %}

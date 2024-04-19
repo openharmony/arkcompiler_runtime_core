@@ -1358,29 +1358,45 @@ export final class Int8Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Int8Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
-        return this.find(newF)
+    public find(predicate: () => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int8Array): boolean => predicate())
     }
 
     /**
-     * Finds an index of the first element in the Int8Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number | undefined
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as number
+    public find(predicate: (value: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int8Array): boolean => predicate(value))
+    }
+
+    /**
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
+     *
+     * @returns number
+     */
+    public findIndex(predicate: (value: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int8Array): boolean => predicate(value)) as number
     }
 
     /**
@@ -1469,8 +1485,7 @@ export final class Int8Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: byte, b: byte) => boolean =
             //     (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
@@ -1687,50 +1702,52 @@ export final class Int8Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Int8Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return byte | undefined as in JS
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number, array: Int8Array) => boolean): Number | undefined {
+    public find(predicate: (value: number, index: number, obj: Int8Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (predicate(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
     }
 
     /**
-     * Finds the first element in the Int8Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index) }
-        return this.find(newF)
+    public find(predicate: (value: number, index: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int8Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the Int8Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number, array: Int8Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: number, obj: Int8Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -1738,29 +1755,31 @@ export final class Int8Array implements Iterable<Number> {
     }
 
     /**
-     * Finds an index of the first element in the Int8Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn(val, index as number) }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: (value: number, index: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int8Array): boolean => predicate(value, index as number)) as number
     }
 
     /**
-     * Finds an index of the first element in the Int8Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Int8Array) => boolean =
-            (val: number, index: number, array: Int8Array): boolean => { return fn() }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: () => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int8Array): boolean => predicate()) as number
     }
 
     /**
@@ -3310,29 +3329,45 @@ export final class Int16Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Int16Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
-        return this.find(newF)
+    public find(predicate: () => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int16Array): boolean => predicate())
     }
 
     /**
-     * Finds an index of the first element in the Int16Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number | undefined
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as number
+    public find(predicate: (value: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int16Array): boolean => predicate(value))
+    }
+
+    /**
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
+     *
+     * @returns number
+     */
+    public findIndex(predicate: (value: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int16Array): boolean => predicate(value)) as number
     }
 
     /**
@@ -3421,8 +3456,7 @@ export final class Int16Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: short, b: short) => boolean =
             //     (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
@@ -3639,50 +3673,52 @@ export final class Int16Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Int16Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return short | undefined as in JS
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number, array: Int16Array) => boolean): Number | undefined {
+    public find(predicate: (value: number, index: number, obj: Int16Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (predicate(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
     }
 
     /**
-     * Finds the first element in the Int16Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index) }
-        return this.find(newF)
+    public find(predicate: (value: number, index: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int16Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the Int16Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number, array: Int16Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: number, obj: Int16Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -3690,29 +3726,31 @@ export final class Int16Array implements Iterable<Number> {
     }
 
     /**
-     * Finds an index of the first element in the Int16Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn(val, index as number) }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: (value: number, index: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int16Array): boolean => predicate(value, index as number)) as number
     }
 
     /**
-     * Finds an index of the first element in the Int16Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Int16Array) => boolean =
-            (val: number, index: number, array: Int16Array): boolean => { return fn() }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: () => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int16Array): boolean => predicate()) as number
     }
 
     /**
@@ -5239,29 +5277,45 @@ export final class Int32Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Int32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
-        return this.find(newF)
+    public find(predicate: () => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int32Array): boolean => predicate())
     }
 
     /**
-     * Finds an index of the first element in the Int32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number | undefined
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as number
+    public find(predicate: (value: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int32Array): boolean => predicate(value))
+    }
+
+    /**
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
+     *
+     * @returns number
+     */
+    public findIndex(predicate: (value: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int32Array): boolean => predicate(value)) as number
     }
 
     /**
@@ -5350,8 +5404,7 @@ export final class Int32Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: int, b: int) => boolean =
             //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
@@ -5568,50 +5621,52 @@ export final class Int32Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Int32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return int | undefined as in JS
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number, array: Int32Array) => boolean): Number | undefined {
+    public find(predicate: (value: number, index: number, obj: Int32Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (predicate(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
     }
 
     /**
-     * Finds the first element in the Int32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index) }
-        return this.find(newF)
+    public find(predicate: (value: number, index: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Int32Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the Int32Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number, array: Int32Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: number, obj: Int32Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -5619,29 +5674,31 @@ export final class Int32Array implements Iterable<Number> {
     }
 
     /**
-     * Finds an index of the first element in the Int32Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn(val, index as number) }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: (value: number, index: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int32Array): boolean => predicate(value, index as number)) as number
     }
 
     /**
-     * Finds an index of the first element in the Int32Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Int32Array) => boolean =
-            (val: number, index: number, array: Int32Array): boolean => { return fn() }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: () => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Int32Array): boolean => predicate()) as number
     }
 
     /**
@@ -7195,29 +7252,45 @@ export final class BigInt64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Finds the first element in the BigInt64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns BigInt | undefined
      */
-    public find(fn: (val: BigInt) => boolean): BigInt | undefined {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
-        return this.find(newF)
+    public find(predicate: () => boolean): BigInt | undefined {
+        return this.find((value: BigInt, index: number, obj: BigInt64Array): boolean => predicate())
     }
 
     /**
-     * Finds an index of the first element in the BigInt64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns BigInt | undefined
      */
-    public findIndex(fn: (val: BigInt) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as number
+    public find(predicate: (value: BigInt) => boolean): BigInt | undefined {
+        return this.find((value: BigInt, index: number, obj: BigInt64Array): boolean => predicate(value))
+    }
+
+    /**
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
+     *
+     * @returns number
+     */
+    public findIndex(predicate: (value: BigInt) => boolean): number {
+        return this.findIndex((value: BigInt, index: number, obj: BigInt64Array): boolean => predicate(value)) as number
     }
 
     /**
@@ -7306,8 +7379,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: long, b: long) => boolean =
             //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
@@ -7524,50 +7596,52 @@ export final class BigInt64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Finds the first element in the BigInt64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return long | undefined as in JS
+     * @returns BigInt | undefined
      */
-    public find(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): BigInt | undefined {
+    public find(predicate: (value: BigInt, index: number, obj: BigInt64Array) => boolean): BigInt | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val, i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (predicate(new BigInt(val), i as number, this)) {
+                return new BigInt(val)
             }
         }
         return undefined
     }
 
     /**
-     * Finds the first element in the BigInt64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns BigInt | undefined
      */
-    public find(fn: (val: BigInt, index: number) => boolean): BigInt | undefined {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index) }
-        return this.find(newF)
+    public find(predicate: (value: BigInt, index: number) => boolean): BigInt | undefined {
+        return this.find((value: BigInt, index: number, obj: BigInt64Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the BigInt64Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: BigInt, index: number, array: BigInt64Array) => boolean): number {
+    public findIndex(predicate: (value: BigInt, index: number, obj: BigInt64Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(new BigInt(val), i as number, this)) {
+            if (predicate(new BigInt(this.getUnsafe(i)), i as number, this)) {
                 return i as number
             }
         }
@@ -7575,29 +7649,31 @@ export final class BigInt64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Finds an index of the first element in the BigInt64Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: BigInt, index: number) => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn(val, index as number) }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: (value: BigInt, index: number) => boolean): number {
+        return this.findIndex((value: BigInt, index: number, obj: BigInt64Array): boolean => predicate(value, index as number)) as number
     }
 
     /**
-     * Finds an index of the first element in the BigInt64Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: () => boolean): number {
-        let newF: (val: BigInt, index: number, array: BigInt64Array) => boolean =
-            (val: BigInt, index: number, array: BigInt64Array): boolean => { return fn() }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: () => boolean): number {
+        return this.findIndex((value: BigInt, index: number, obj: BigInt64Array): boolean => predicate()) as number
     }
 
     /**
@@ -9132,29 +9208,45 @@ export final class Float32Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Float32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
-        return this.find(newF)
+    public find(predicate: () => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Float32Array): boolean => predicate())
     }
 
     /**
-     * Finds an index of the first element in the Float32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number | undefined
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as number
+    public find(predicate: (value: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Float32Array): boolean => predicate(value))
+    }
+
+    /**
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
+     *
+     * @returns number
+     */
+    public findIndex(predicate: (value: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Float32Array): boolean => predicate(value)) as number
     }
 
     /**
@@ -9243,8 +9335,7 @@ export final class Float32Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: float, b: float) => boolean =
             //     (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
@@ -9461,50 +9552,52 @@ export final class Float32Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Float32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return float | undefined as in JS
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number, array: Float32Array) => boolean): Number | undefined {
+    public find(predicate: (value: number, index: number, obj: Float32Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (predicate(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
     }
 
     /**
-     * Finds the first element in the Float32Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index) }
-        return this.find(newF)
+    public find(predicate: (value: number, index: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Float32Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the Float32Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number, array: Float32Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: number, obj: Float32Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -9512,29 +9605,31 @@ export final class Float32Array implements Iterable<Number> {
     }
 
     /**
-     * Finds an index of the first element in the Float32Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn(val, index as number) }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: (value: number, index: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Float32Array): boolean => predicate(value, index as number)) as number
     }
 
     /**
-     * Finds an index of the first element in the Float32Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Float32Array) => boolean =
-            (val: number, index: number, array: Float32Array): boolean => { return fn() }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: () => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Float32Array): boolean => predicate()) as number
     }
 
     /**
@@ -10946,29 +11041,45 @@ export final class Float64Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Float64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
-        return this.find(newF)
+    public find(predicate: () => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Float64Array): boolean => predicate())
     }
 
     /**
-     * Finds an index of the first element in the Float64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number | undefined
      */
-    public findIndex(fn: (val: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val) }
-        return this.findIndex(newF) as number
+    public find(predicate: (value: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Float64Array): boolean => predicate(value))
+    }
+
+    /**
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
+     *
+     * @returns number
+     */
+    public findIndex(predicate: (value: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Float64Array): boolean => predicate(value)) as number
     }
 
     /**
@@ -11057,8 +11168,7 @@ export final class Float64Array implements Iterable<Number> {
             for (let i = 0; i < this.length as int; ++i) {
                 this.set(i, arr[i])
             }
-        }
-        else {
+        } else {
             // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
             // let mustPrecede: (a: double, b: double) => boolean =
             //     (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
@@ -11275,50 +11385,52 @@ export final class Float64Array implements Iterable<Number> {
     }
 
     /**
-     * Finds the first element in the Float64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn the condition to apply for each element
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
-     * NOTE: return double | undefined as in JS
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number, array: Float64Array) => boolean): Number | undefined {
+    public find(predicate: (value: number, index: number, obj: Float64Array) => boolean): number | undefined {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.at(i)
-            if (val == undefined) {
-                return undefined
-            }
-            if (fn(val.valueOf(), i as number, this)) {
-                return val
+            let val = this.getUnsafe(i)
+            if (predicate(val as number, i as number, this)) {
+                return val as number
             }
         }
         return undefined
     }
 
     /**
-     * Finds the first element in the Float64Array that satisfies the condition
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined
      *
-     * @returns the first element that satisfies fn
+     * @returns number | undefined
      */
-    public find(fn: (val: number, index: number) => boolean): Number | undefined {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index) }
-        return this.find(newF)
+    public find(predicate: (value: number, index: number) => boolean): number | undefined {
+        return this.find((value: number, index: number, obj: Float64Array): boolean => predicate(value, index))
     }
 
     /**
-     * Finds an index of the first element in the Float64Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number, array: Float64Array) => boolean): number {
+    public findIndex(predicate: (value: number, index: number, obj: Float64Array) => boolean): number {
         for (let i = 0; i < this.length as int; ++i) {
-            let val = this.getUnsafe(i)
-            if (fn(val as number, i as number, this)) {
+            if (predicate(this.getUnsafe(i) as number, i as number, this)) {
                 return i as number
             }
         }
@@ -11326,29 +11438,31 @@ export final class Float64Array implements Iterable<Number> {
     }
 
     /**
-     * Finds an index of the first element in the Float64Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: (val: number, index: number) => boolean): number {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn(val, index as number) }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: (value: number, index: number) => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Float64Array): boolean => predicate(value, index as number)) as number
     }
 
     /**
-     * Finds an index of the first element in the Float64Array that satisfies the condition
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise
      *
-     * @param fn condition
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1
      *
-     * @returns the index of the first element that satisfies fn
+     * @returns number
      */
-    public findIndex(fn: () => boolean): number {
-        let newF: (val: number, index: number, array: Float64Array) => boolean =
-            (val: number, index: number, array: Float64Array): boolean => { return fn() }
-        return this.findIndex(newF) as number
+    public findIndex(predicate: () => boolean): number {
+        return this.findIndex((value: number, index: number, obj: Float64Array): boolean => predicate()) as number
     }
 
     /**

@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#-Infinity as number,  NaN as number, -NaN as number, Infinity as number
-
 category: Float32Array
 sub:
   - self:

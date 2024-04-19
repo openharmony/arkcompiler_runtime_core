@@ -126,7 +126,6 @@ export final class DataView implements ArrayBufferView {
     private getInt8Big(byteOffset: number): number {
         let res = this.getInt8Big(byteOffset as int)
         return res;
-
     }
 
     private setInt8Big(byteOffset: int, value: int): void {
@@ -142,7 +141,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setInt8Big(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setInt8Big(byteOffset as int, val)
     }
     // === Uint8 ===
@@ -196,7 +194,6 @@ export final class DataView implements ArrayBufferView {
     private getUint8Big(byteOffset: number): number {
         let res = this.getUint8Big(byteOffset as int)
         return res;
-
     }
 
     private setUint8Big(byteOffset: int, value: int): void {
@@ -212,7 +209,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setUint8Big(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setUint8Big(byteOffset as int, val)
     }
     // === Int16 ===
@@ -302,7 +298,6 @@ export final class DataView implements ArrayBufferView {
     private getInt16Little(byteOffset: number): number {
         let res = this.getInt16Little(byteOffset as int)
         return res;
-
     }
 
     private setInt16Little(byteOffset: int, value: int): void {
@@ -318,7 +313,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setInt16Little(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setInt16Little(byteOffset as int, val)
     }
     private getInt16Big(byteOffset: int): int {
@@ -337,7 +331,6 @@ export final class DataView implements ArrayBufferView {
     private getInt16Big(byteOffset: number): number {
         let res = this.getInt16Big(byteOffset as int)
         return res;
-
     }
 
     private setInt16Big(byteOffset: int, value: int): void {
@@ -353,7 +346,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setInt16Big(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setInt16Big(byteOffset as int, val)
     }
     // === Uint16 ===
@@ -443,7 +435,6 @@ export final class DataView implements ArrayBufferView {
     private getUint16Little(byteOffset: number): number {
         let res = this.getUint16Little(byteOffset as int)
         return res;
-
     }
 
     private setUint16Little(byteOffset: int, value: int): void {
@@ -459,7 +450,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setUint16Little(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setUint16Little(byteOffset as int, val)
     }
     private getUint16Big(byteOffset: int): int {
@@ -478,7 +468,6 @@ export final class DataView implements ArrayBufferView {
     private getUint16Big(byteOffset: number): number {
         let res = this.getUint16Big(byteOffset as int)
         return res;
-
     }
 
     private setUint16Big(byteOffset: int, value: int): void {
@@ -494,7 +483,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setUint16Big(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setUint16Big(byteOffset as int, val)
     }
     // === Int32 ===
@@ -584,7 +572,6 @@ export final class DataView implements ArrayBufferView {
     private getInt32Little(byteOffset: number): number {
         let res = this.getInt32Little(byteOffset as int)
         return res;
-
     }
 
     private setInt32Little(byteOffset: int, value: int): void {
@@ -600,7 +587,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setInt32Little(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setInt32Little(byteOffset as int, val)
     }
     private getInt32Big(byteOffset: int): int {
@@ -619,7 +605,6 @@ export final class DataView implements ArrayBufferView {
     private getInt32Big(byteOffset: number): number {
         let res = this.getInt32Big(byteOffset as int)
         return res;
-
     }
 
     private setInt32Big(byteOffset: int, value: int): void {
@@ -635,7 +620,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setInt32Big(byteOffset: number, value: number): void {
         const val: int = value as int;
-
         this.setInt32Big(byteOffset as int, val)
     }
     // === Uint32 ===
@@ -725,7 +709,6 @@ export final class DataView implements ArrayBufferView {
     private getUint32Little(byteOffset: number): number {
         let res = this.getUint32Little(byteOffset as int)
         return res;
-
     }
 
     private setUint32Little(byteOffset: int, value: long): void {
@@ -741,7 +724,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setUint32Little(byteOffset: number, value: number): void {
         const val: long = value as long;
-
         this.setUint32Little(byteOffset as int, val)
     }
     private getUint32Big(byteOffset: int): long {
@@ -760,7 +742,6 @@ export final class DataView implements ArrayBufferView {
     private getUint32Big(byteOffset: number): number {
         let res = this.getUint32Big(byteOffset as int)
         return res;
-
     }
 
     private setUint32Big(byteOffset: int, value: long): void {
@@ -776,7 +757,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setUint32Big(byteOffset: number, value: number): void {
         const val: long = value as long;
-
         this.setUint32Big(byteOffset as int, val)
     }
     // === Float32 ===
@@ -866,7 +846,6 @@ export final class DataView implements ArrayBufferView {
     private getFloat32Little(byteOffset: number): number {
         let res = this.getFloat32Little(byteOffset as int)
         return res;
-
     }
 
     private setFloat32Little(byteOffset: int, value: float): void {
@@ -882,7 +861,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setFloat32Little(byteOffset: number, value: number): void {
         const val: float = value as float;
-
         this.setFloat32Little(byteOffset as int, val)
     }
     private getFloat32Big(byteOffset: int): float {
@@ -901,7 +879,6 @@ export final class DataView implements ArrayBufferView {
     private getFloat32Big(byteOffset: number): number {
         let res = this.getFloat32Big(byteOffset as int)
         return res;
-
     }
 
     private setFloat32Big(byteOffset: int, value: float): void {
@@ -917,7 +894,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setFloat32Big(byteOffset: number, value: number): void {
         const val: float = value as float;
-
         this.setFloat32Big(byteOffset as int, val)
     }
     // === Int64 ===
@@ -1281,7 +1257,6 @@ export final class DataView implements ArrayBufferView {
     private getFloat64Little(byteOffset: number): number {
         let res = this.getFloat64Little(byteOffset as int)
         return res;
-
     }
 
     private setFloat64Little(byteOffset: int, value: number): void {
@@ -1297,7 +1272,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setFloat64Little(byteOffset: number, value: number): void {
         const val: number = value as number;
-
         this.setFloat64Little(byteOffset as int, val)
     }
     private getFloat64Big(byteOffset: int): number {
@@ -1316,7 +1290,6 @@ export final class DataView implements ArrayBufferView {
     private getFloat64Big(byteOffset: number): number {
         let res = this.getFloat64Big(byteOffset as int)
         return res;
-
     }
 
     private setFloat64Big(byteOffset: int, value: number): void {
@@ -1332,7 +1305,6 @@ export final class DataView implements ArrayBufferView {
     }
     private setFloat64Big(byteOffset: number, value: number): void {
         const val: number = value as number;
-
         this.setFloat64Big(byteOffset as int, val)
     }
 
