@@ -192,32 +192,32 @@ spec/lambda/propertyLookupWithTypeAlias_03.ets
 spec/lambda/lambdaExpressionWithoutParenthesis.ets
 ### lambda issues end
 ### Undefined type
-spec/undefined-type/array-and-undefined-union_3.ets
-spec/undefined-type/array-of-class-and-undefined_4.ets
-spec/undefined-type/define/define-class-member-as-undefined-in-other-class_1.ets
-spec/undefined-type/undefined-and-array-of-class-and-undefined_9.ets
-spec/undefined-type/undefined-and-array-of-class-and-undefined_10.ets
-spec/undefined-type/undefined-union-array-type_1.ets
-spec/undefined-type/undefined-union-array-type_2.ets
+spec/03.types/References_Types/Type_undefined/array-and-undefined-union_3.ets
+spec/03.types/References_Types/Type_undefined/array-of-class-and-undefined_4.ets
+spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-in-other-class_1.ets
+spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_10.ets
+spec/03.types/References_Types/Type_undefined/undefined-and-array-of-class-and-undefined_9.ets
+spec/03.types/References_Types/Type_undefined/undefined-union-array-type_1.ets
+spec/03.types/References_Types/Type_undefined/undefined-union-array-type_2.ets
 ###### Issue 14595
-spec/undefined-type/set-add/add-undefined-to-undefined.ets
-spec/undefined-type/assign/assign-undefined-to-undefined_1.ets
-spec/undefined-type/undefined-union-array-type_3.ets
+spec/03.types/References_Types/Type_undefined/set-add/add-undefined-to-undefined.ets
+spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-undefined_1.ets
+spec/03.types/References_Types/Type_undefined/undefined-union-array-type_3.ets
 ###### End Issue 14495
-spec/undefined-type/define/define-class-member-as-undefined-and-assign-1.ets
+spec/03.types/References_Types/Type_undefined/define/define-class-member-as-undefined-and-assign-1.ets
 ###### Issue 14166
-spec/undefined-type/assign/assign-undefined-to-untyped_1.ets
+spec/03.types/References_Types/Type_undefined/assign/assign-undefined-to-untyped_1.ets
 ###### End Issue 14166
 ###### Issue 14108
-spec/undefined-type/array-of-complex-type.ets
-spec/undefined-type/complex-type.ets
+spec/03.types/References_Types/Type_undefined/array-of-complex-type.ets
+spec/03.types/References_Types/Type_undefined/complex-type.ets
 ###### End Issue 14108
 ###### Issue 14035
-spec/undefined-type/define/define-class-member-as-question-and-assign.ets
+spec/03.types/References_Types/Type_undefined/define/define-class-member-as-question-and-assign.ets
 ###### End Issue 14035
 ###### Issue 13874
-spec/undefined-type/array-of-type_0.ets
-spec/undefined-type/array-of-type_1.ets
+spec/03.types/References_Types/Type_undefined/array-of-type_0.ets
+spec/03.types/References_Types/Type_undefined/array-of-type_1.ets
 ###### End Issue 13874
 ###### EOF Undefined type
 ### Feature: Callable classes
@@ -226,6 +226,11 @@ spec/16.Support_for_GUI_Programming/callable-classes/type-call-instantiate_7.ets
 ### issue 14539
 ### End of Feature: Callable classes
 
+### Start never issues
+### Issue 14472
+spec/03.types/References_Types/Type_never/useWithLambdaAndUnion.ets
+### Negative test
+### End never issues
 ### Feature: Null safety tests
 ### Issue 14510
 spec/nullables/nullable-function-result_2.ets
@@ -479,21 +484,25 @@ spec/09.classes/Accessor_Declarations/issue-15142_8.ets
 ### end of accessors
 
 ### tuples
-spec/tuples/tuple_as_rest_param_0.ets
+spec/03.types/References_Types/Tuples_type/tuple_as_rest_param_0.ets
 ### Issue 15032
-spec/tuples/recursive3.ets
+spec/03.types/References_Types/Tuples_type/recursive3.ets
 ### Issue 15034
-spec/tuples/func_tuple_1.ets
+spec/03.types/References_Types/Tuples_type/func_tuple_1.ets
 ### Issue 15184
-spec/tuples/tuple_as_generic_7.ets
+spec/03.types/References_Types/Tuples_type/tuple_as_generic_7.ets
 ### Issue 15192
-spec/tuples/tuple_as_param_default_0.ets
+spec/03.types/References_Types/Tuples_type/tuple_as_param_default_0.ets
 ### Issue 15191
 spec/tuples/tuple_as_param_3.ets
+spec/03.types/References_Types/Tuples_type/tuple_as_param_3.ets
+### Issue 15207
+spec/03.types/Tuples_type/tuple_union_0.ets
+spec/03.types/Tuples_type/tuple_union_1.ets
 ### Issue 15394
-spec/tuples/tuple_write_6.ets
+spec/03.types/References_Types/Tuples_type/tuple_write_6.ets
 ### Issue 15493
-spec/tuples/tuple_write_7.ets
+spec/03.types/References_Types/Tuples_type/tuple_write_7.ets
 ### end of tuples
 
 ### Interfaces overriding issues
@@ -558,7 +567,7 @@ std/core/std_core_string_String_codePointAt_number.ets
 
 ## Tuples overloading issue(s)
 ### Issue (gitee) I909BB
-spec/tuples/tuple_as_param_default_1.ets
+spec/03.types/References_Types/Tuples_type/tuple_as_param_default_1.ets
 ### Issue I909BB end
 
 ### VariableHasEnclosingScopeForAll, VariableHasScopeForAll
@@ -652,3 +661,6 @@ spec/10.Interfaces/method_overiding_0005.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/override_static_instance_0011.ets
 # Issue 16623
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_static_instance_0002.ets
+### STDLIB test Failures begin
+std/core/std_core_string_String_localeCompare_string_005.ets
+### STDLIB test Failures end
