@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,12 @@
 #include <ctime>
 #include <clocale>
 #include <sstream>
+#include "unicode/timezone.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets::intrinsics {
 
-constexpr const int32_t MINS_IN_HOUR = 60;
+constexpr const int32_t MS_IN_MINUTES = 60000;
 constexpr const int32_t MS_IN_SECOND = 1000;
 
 extern "C" double EscompatDateNow()
@@ -31,26 +32,31 @@ extern "C" double EscompatDateNow()
     return nowMs.time_since_epoch().count();
 }
 
-extern "C" int64_t EscompatDateGetLocalTimezoneOffset()
+extern "C" int64_t EscompatDateGetLocalTimezoneOffset(int64_t ms)
 {
-    time_t now;
-    struct tm gmt {};
-    struct tm local {};
-    int64_t seconds;
-
-    std::time(&now);
-    local = *localtime(&now);
-    gmt = *gmtime(&now);
-
-    seconds = static_cast<int64_t>(difftime(mktime(&gmt), mktime(&local)));
-
-    return seconds / MINS_IN_HOUR;
+    UErrorCode success = U_ZERO_ERROR;
+    int32_t stdOffset;
+    int32_t dstOffset;
+    icu::TimeZone *tzlocal = icu::TimeZone::createDefault();
+    tzlocal->getOffset(ms, 1, stdOffset, dstOffset, success);
+    delete tzlocal;
+    return -(stdOffset + dstOffset) / MS_IN_MINUTES;
 }
 
-extern "C" EtsString *EscompatDateGetTimezoneName()
+extern "C" EtsString *EscompatDateGetTimezoneName(int64_t ms)
 {
-    std::string s = std::string(*tzname);
-    return EtsString::CreateFromMUtf8(s.c_str());
+    UErrorCode success = U_ZERO_ERROR;
+    int32_t stdOffset;
+    int32_t dstOffset;
+    icu::TimeZone *tzlocal = icu::TimeZone::createDefault();
+    icu::UnicodeString s;
+    std::string result;
+    tzlocal->getOffset(ms, 0, stdOffset, dstOffset, success);
+    bool inDayLight = (dstOffset != 0);
+    tzlocal->getDisplayName(static_cast<UBool>(inDayLight), icu::TimeZone::EDisplayType::LONG, s);
+    s.toUTF8String(result);
+    delete tzlocal;
+    return EtsString::CreateFromMUtf8(result.c_str());
 }
 
 extern "C" EtsString *EscompatDateGetLocaleString(EtsString *format, EtsString *locale, int64_t ms, uint8_t isUtc)

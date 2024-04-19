@@ -434,11 +434,7 @@ export final class Date {
 
         let date = new Date();
 
-        let timeZone = date.TZOffset * msPerSecond;
-        if (dateStrLen < 5) {
-            timeZone = 0;
-        }
-
+        let timeZone: long = 0;
         const years = Date.parseIfContains(dateStr, 0, 4);
         const months = Date.parseIfContains(dateStr, 5, 7);
         const days = Date.parseIfContains(dateStr, 8, 10);
@@ -460,9 +456,9 @@ export final class Date {
             if (days > maxDaysInMonth || days <= 0) {
                 throw new InvalidDate();
             }
-            date.setUTCDate((days - 1) as byte);
+            date.setUTCDate((days) as byte);
         } else {
-            date.setUTCDate(0 as byte);
+            date.setUTCDate(1 as byte);
         }
         if (hours != Date.UNSUCCESSFUL_PARSING) {
             if (hours > hoursPerDay || hours < 0) {
@@ -504,9 +500,11 @@ export final class Date {
                 timeZoneSignChar = dateStr.at(23);
             } catch (e) {}
             if (timeZoneSignChar == c'-') {
-                timeZoneSign = -1;
-            } else if (timeZoneSignChar == c'+') {
                 timeZoneSign = 1;
+            } else if (timeZoneSignChar == c'Z') {
+                timeZoneSign = 0;
+            } else if (timeZoneSignChar == c'+') {
+                timeZoneSign = -1;
             } else {
                 throw new InvalidDate();
             }
@@ -546,8 +544,11 @@ export final class Date {
             }
 
             timeZone *= timeZoneSign;
+        } 
+        if (dateStrLen == 23) {
+            timeZone = Date.getLocalTimezoneOffset(date.valueOf() as long) *  msPerMinute;
         }
-        return date.valueOf() - timeZone;
+        return date.valueOf() + timeZone ;
     }
     /**
      * Default constructor.
@@ -558,135 +559,33 @@ export final class Date {
      */
     constructor() {
         this.ms = Date.now() as long;
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-    /**
-     * `Date` constructor.
-     *
-     * @param d
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initializes `Date` instance with another `Date` instance.
-     */
-
-    constructor(d: Date) {
-        this.ms = d.valueOf() as long;
-        this.TZOffset = Date.getLocalTimezoneOffset()
+        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long)
     }
 
     /**
      * `Date` constructor.
      *
-     * @param ms
+     * @param value
      *
      * @see ECMA-262, 21.4.2.1
      *
-     * @description Initialize `Date` instance with milliseconds given.
+     * @description Initializes `Date` instance with `number` or `string` or another `Date` instance.
+     * NOTE: Dates before `1921-01-01T00:00:00 GMT` can be represented as UTC milliseconds in different ways then TS do.
      */
-    constructor(ms: long) {
-        this.ms = ms
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
 
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initialize `Date` instance with year and month given.
-     */
-    constructor(year: long, month: long) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, 1 as long), ecmaMakeTime(0 as long, 0 as long, 0 as long, 0 as long))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initialize `Date` instance with year, month and day given.
-     */
-    constructor(year: long, month: long, day: long) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(0 as long, 0 as long, 0 as long, 0 as long))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initialize `Date` instance with year, month, day and hours given.
-     */
-    constructor(year: long, month: long, day: long, hours: long) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, 0 as long, 0 as long, 0 as long))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @param minutes
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initialize `Date` instance with year, month, day, hours and minutes given.
-     */
-    constructor(year: long, month: long, day: long, hours: long, minutes: long) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, 0 as long, 0 as long))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @param minutes
-     *
-     * @param seconds
-     *
-     * @see ECMA-262, 21.4.2.1
-     *
-     * @description Initialize `Date` instance with year, month, day, hours, minutes and seconds given.
-     */
-    constructor(year: long, month: long, day: long, hours: long, minutes: long, seconds: long) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, 0 as long))
-        this.TZOffset = Date.getLocalTimezoneOffset()
+    constructor(value: number | string | Date) {
+        
+        if (value instanceof Date) {
+            this.ms = trunc((value as Date).valueOf() as number) as long
+            this.TZOffset = (value as Date).getTimezoneOffset() as long
+        }
+        else if (typeof value == "string") {
+            this.ms = (Date.parseDateFromString(value as string) as long);
+        }
+        else {
+            this.ms = trunc(value as number) as long;
+        }
+        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long);
     }
 
     /**
@@ -709,137 +608,26 @@ export final class Date {
      * @see ECMA-262, 21.4.2.1
      *
      * @description Initialize `Date` instance with year, month, day, hours, minutes, seconds and milliseconds given.
+     * NOTE: Dates before `1921-01-01T00:00:00 GMT` can be represented as UTC milliseconds in different ways then TS do.
      */
-    constructor(year: long, month: long, day: long, hours: long, minutes: long, seconds: long, ms: long) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, ms))
-        this.TZOffset = Date.getLocalTimezoneOffset()
+    constructor(year: number, monthIndex: number, day?: number, hours?: number, minutes?: number, seconds?: number, ms?: number) {
+        this.ms = ecmaMakeDate(
+            ecmaMakeDay(
+                year,
+                monthIndex,
+                day != undefined ? day as number: 1
+            ), 
+            ecmaMakeTime(
+                hours != undefined ? hours as number : 0, 
+                minutes != undefined ? minutes as number : 0,
+                seconds != undefined ? seconds as number : 0,
+                ms != undefined ? ms as number : 0
+            )
+        );
+        this.TZOffset = Date.getLocalTimezoneOffset(this.ms as long);   
+        this.ms += this.TZOffset * msPerMinute
     }
 
-    /**
-     * `Date` constructor.
-     *
-     * @param ms
-     *
-     * @see ECMA-262, 21.4.2.1
-     */
-    constructor(ms: double) {
-        this.ms = trunc(ms) as long;
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @see ECMA-262, 21.4.2.1
-     */
-    constructor(year: double, month: double) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @see ECMA-262, 21.4.2.1
-     */
-    constructor(year: double, month: double, day: double) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(0.0, 0.0, 0.0, 0.0))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @see ECMA-262, 21.4.2.1
-     */
-    constructor(year: double, month: double, day: double, hours: double) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, 0.0, 0.0, 0.0))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @param minutes
-     *
-     * @see ECMA-262, 21.4.2.1
-     */
-    constructor(year: double, month: double, day: double, hours: double, minutes: double) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, 0.0, 0.0))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @param minutes
-     *
-     * @param seconds
-     *
-     * @see ECMA-262, 21.4.2.1
-     */
-    constructor(year: double, month: double, day: double, hours: double, minutes: double, seconds: double) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, 0.0))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
-
-    /**
-     * `Date` constructor.
-     *
-     * @param year
-     *
-     * @param month
-     *
-     * @param day
-     *
-     * @param hours
-     *
-     * @param minutes
-     *
-     * @param seconds
-     *
-     * @param ms
-     *
-     * @see ECMA-262, 21.4.2.1
-     */
-    constructor(year: double, month: double, day: double, hours: double, minutes: double, seconds: double, ms: double) {
-        this.ms = ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, ms))
-        this.TZOffset = Date.getLocalTimezoneOffset()
-    }
 
     /**
      * The `isDateValid()` method checks if given date `ms` is maximum of ±100,000,000
@@ -894,14 +682,14 @@ export final class Date {
      *
      * @returns local time offset.
      */
-    public static native getLocalTimezoneOffset(): long;
+    public static native getLocalTimezoneOffset(ms: long): long;
 
     /**
      * Gets time zone name.
      *
      * @returns time zone name.
      */
-    public static native getTimezoneName(): String;
+    public static native getTimezoneName(ms: long): String;
 
     /**
      * Gets locale string representation according to format.
@@ -1035,7 +823,7 @@ export final class Date {
         let day: int = ecmaDayFromTime(localTime) - ecmaDayFromYear(ecmaYearFromTime(localTime));
         let inLeapYear = ecmaInLeapYear(this.getFullYear() as int);
         let firstDay: int = getFirstDayInMonth(inLeapYear, ecmaMonthFromTime(localTime));
-        return (day - firstDay) as number;
+        return (day - firstDay + 1) as number;
     }
 
     /**
@@ -1156,7 +944,7 @@ export final class Date {
      *
      * @param value new year
      */
-    public setUTCFullYear(value: number, month?: Number, date?: Number): number {
+    public setUTCFullYear(value: number, month?: number, date?: number): number {
         this.setUTCFullYear(value as int);
         if (month !== undefined) {
             this.setUTCMonth(month.intValue());
@@ -1267,7 +1055,7 @@ export final class Date {
      *
      * @param value new hours
      */
-    public setHours(value: number, min?: Number, sec?: Number, ms?: Number): number {
+    public setHours(value: number, min?: number, sec?: number, ms?: number): number {
         this.setHours(value as byte);
         if (min !== undefined) {
             this.setMinutes(min.byteValue());
@@ -1298,7 +1086,7 @@ export final class Date {
      *
      * @param value new hours
      */
-    public setUTCHours(value: number, min?: Number, sec?: Number, ms?: Number): number {
+    public setUTCHours(value: number, min?: number, sec?: number, ms?: number): number {
         this.setUTCHours(value as byte);
         if (min !== undefined) {
             this.setUTCMinutes(min.byteValue());
@@ -1354,139 +1142,6 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: long): long {
-        return ecmaMakeDate(ecmaMakeDay(year, 0 as long, 1 as long), ecmaMakeTime(0 as long, 0 as long, 0 as long, 0 as long))
-    }
-
-    /**
-     * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param year to be converted to milliseconds.
-     *
-     * @param month to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     */
-    public static UTC(year: long, month: long): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, 1 as long), ecmaMakeTime(0 as long, 0 as long, 0 as long, 0 as long))
-    }
-
-    /**
-     * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param year to be converted to milliseconds.
-     *
-     * @param month to be converted to milliseconds.
-     *
-     * @param day to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     */
-    public static UTC(year: long, month: long, day: long): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(0 as long, 0 as long, 0 as long, 0 as long))
-    }
-
-    /**
-     * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param year to be converted to milliseconds.
-     *
-     * @param month to be converted to milliseconds.
-     *
-     * @param day to be converted to milliseconds.
-     *
-     * @param hours to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     */
-    public static UTC(year: long, month: long, day: long, hours: long): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, 0 as long, 0 as long, 0 as long))
-    }
-
-    /**
-     * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param year to be converted to milliseconds.
-     *
-     * @param month to be converted to milliseconds.
-     *
-     * @param day to be converted to milliseconds.
-     *
-     * @param hours to be converted to milliseconds.
-     *
-     * @param minutes to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     */
-    public static UTC(year: long, month: long, day: long, hours: long, minutes: long): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, 0 as long, 0 as long))
-    }
-
-    /**
-     * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param year to be converted to milliseconds.
-     *
-     * @param month to be converted to milliseconds.
-     *
-     * @param day to be converted to milliseconds.
-     *
-     * @param hours to be converted to milliseconds.
-     *
-     * @param minutes to be converted to milliseconds.
-     *
-     * @param seconds to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     */
-    public static UTC(year: long, month: long, day: long, hours: long, minutes: long, seconds: long): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, 0 as long))
-    }
-
-    /**
-     * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param year to be converted to milliseconds.
-     *
-     * @param month to be converted to milliseconds.
-     *
-     * @param day to be converted to milliseconds.
-     *
-     * @param hours to be converted to milliseconds.
-     *
-     * @param minutes to be converted to milliseconds.
-     *
-     * @param seconds to be converted to milliseconds.
-     *
-     * @param ms to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     */
-    public static UTC(year: long, month: long, day: long, hours: long, minutes: long, seconds: long, ms: long): long {
-        return ecmaMakeDate(ecmaMakeDay(year, month, day), ecmaMakeTime(hours, minutes, seconds, ms))
-    }
-
-    /**
-     * Returns the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     *
-     * @param year to be converted to milliseconds.
-     *
-     * @returns A number representing the number of milliseconds elapsed since the epoch,
-     * which is defined as the midnight at the beginning of January 1, 1970, UTC.
-     */
     public static UTC(year: number): number {
         return ecmaMakeDate(ecmaMakeDay(year, 0.0, 1.0), ecmaMakeTime(0.0, 0.0, 0.0, 0.0)) as number
     }
@@ -1512,13 +1167,21 @@ export final class Date {
      * @returns A number representing the number of milliseconds elapsed since the epoch,
      * which is defined as the midnight at the beginning of January 1, 1970, UTC.
      */
-    public static UTC(year: number, month: number, day?: Number, hours?: Number, minutes?: Number, seconds?: Number, ms?: Number): number {
-        let defaultDay = day !== undefined ? day.valueOf() : 1.0;
-        let defaultHours = hours !== undefined ? hours.valueOf() : 0.0;
-        let defaultMinutes = minutes !== undefined ? minutes.valueOf() : 0.0;
-        let defaultSeconds = seconds !== undefined ? seconds.valueOf() : 0.0;
-        let defaultMS = ms !== undefined ? ms.valueOf() : 0.0;
-        return ecmaMakeDate(ecmaMakeDay(year, month, defaultDay), ecmaMakeTime(defaultHours, defaultMinutes, defaultSeconds, defaultMS)) as number;
+
+    public static UTC(year: number, month: number, day?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): number {
+        return ecmaMakeDate(
+            ecmaMakeDay(
+                year,
+                month,
+                day != undefined ? day as number: 1.0
+            ), 
+            ecmaMakeTime(
+                hours != undefined ? hours as number : 0, 
+                minutes != undefined ? minutes as number : 0,
+                seconds != undefined ? seconds as number : 0,
+                ms != undefined ? ms as number : 0
+            )
+        ) as number;
     }
 
     /**
@@ -1605,7 +1268,7 @@ export final class Date {
      *
      * @param value new seconds
      */
-    public setSeconds(value: number, ms?: Number): number {
+    public setSeconds(value: number, ms?: number): number {
         this.setSeconds(value as byte);
         if (ms !== undefined) {
             this.setMilliseconds(ms.shortValue());
@@ -1642,7 +1305,7 @@ export final class Date {
      *
      * @param value new seconds
      */
-    public setUTCSeconds(value: number, ms?: Number): number {
+    public setUTCSeconds(value: number, ms?: number): number {
         this.setUTCSeconds(value as byte);
         if (ms !== undefined) {
             this.setUTCMilliseconds(ms.shortValue());
@@ -1722,7 +1385,7 @@ export final class Date {
      *
      * @param value new minutes
      */
-    public setMinutes(value: number, sec?: Number, ms?: Number): number {
+    public setMinutes(value: number, sec?: number, ms?: number): number {
         this.setMinutes(value as byte);
         if (sec !== undefined) {
             this.setSeconds(sec.byteValue());
@@ -1768,7 +1431,7 @@ export final class Date {
      *
      * @param month new month
      */
-    public setMonth(month: number, date?: Number): number {
+    public setMonth(month: number, date?: number): number {
         this.setMonth(month as int);
         if (date !== undefined) {
             this.setDate(date.byteValue());
@@ -1794,7 +1457,7 @@ export final class Date {
      *
      * @param month new month
      */
-    public setUTCMonth(month: number, date?: Number): number {
+    public setUTCMonth(month: number, date?: number): number {
         this.setUTCMonth(month as int);
         if (date !== undefined) {
             this.setUTCDate(date.byteValue());
@@ -1929,25 +1592,26 @@ export final class Date {
      */
     public toISOString(): string {
         let sb = new StringBuilder();
-        let year = this.getUTCFullYear();
-        if(year < 0 || year > 9999) {
-            if(year < 0) {
-                sb.append("-");
-            }
-            year = abs(year) as int;
-            sb.append(year / 100000);
-            sb.append((year / 10000) % 10);
+        let y = this.getUTCFullYear();
+        if (y < 0) {
+            sb.append("-");
         }
-        sb.append((year / 1000) % 10);
-        sb.append((year / 100) % 10);
-        sb.append((year / 10) % 10);
-        sb.append(year % 10);
+        if (abs(y) < 1000) {
+            sb.append("0");
+        }
+        if (abs(y) < 100) {
+            sb.append("0");
+        }
+        if (abs(y) < 10) {
+            sb.append("0");
+        }
+        sb.append(abs(y) as long);
         sb.append("-");
-        let month = this.getUTCMonth();
+        let month = this.getUTCMonth() + 1;
         if(month < 10){
             sb.append("0");
         }
-        sb.append(month + 1);
+        sb.append(month);
         sb.append("-");
         let day = this.getUTCDate();
         if(day < 10){
@@ -1974,9 +1638,16 @@ export final class Date {
         sb.append(s);
         sb.append(".");
         let ms = this.getUTCMilliseconds();
-        sb.append(ms / 100);
-        sb.append((ms / 10) % 10);
-        sb.append(ms % 10);
+        if (ms < 10) {
+           sb.append("00")
+        }
+        else if (ms < 100) {
+            sb.append("0")
+        }
+        // sb.append(ms / 100);
+        // sb.append((ms / 10) % 10);
+        // sb.append(ms % 10);
+        sb.append(trunc(ms))
         sb.append("Z");
         return sb.toString();
     }
@@ -2112,7 +1783,7 @@ export final class Date {
         }
         sb.append(minutes);
         sb.append(" (");
-        sb.append(Date.getTimezoneName());
+        sb.append(Date.getTimezoneName(this.ms));
         sb.append(")");
 
         return sb.toString();
@@ -2156,10 +1827,61 @@ export final class Date {
         if (!this.isDateValid()) {
             throw new Error("Invalid Date");
         }
-        this.ms -= this.TZOffset * 60 * msPerSecond;
-        let s: String = this.toDateString() + " " + this.toTimeString();
-        this.ms += this.TZOffset * 60 * msPerSecond;
+        let s: String = this.toUTCDateString() + " " + this.toUTCTimeString();
         return s;
+    }
+
+    private toUTCDateString(): string {
+        let sb = new StringBuilder();
+        sb.append(dayNames[this.getUTCDay() as int]);
+        sb.append(", ");
+        let d = this.getUTCDate();
+        if (d < 10) {
+            sb.append("0");
+        }
+        sb.append(d);
+        sb.append(" ");
+        sb.append(monthNames[this.getUTCMonth() as int]);
+        sb.append(" ");
+        let y = this.getUTCFullYear();
+        if (y < 0) {
+            sb.append("-");
+        }
+        y = abs(y);
+        if (y < 1000) {
+            sb.append("0");
+        }
+        if (y < 100) {
+            sb.append("0");
+        }
+        if (y < 10) {
+            sb.append("0");
+        }
+        sb.append(y as long);
+        return sb.toString();
+    }
+
+    private toUTCTimeString(): string {
+        let sb = new StringBuilder();
+        let h = this.getUTCHours();
+        if (h < 10) {
+            sb.append("0");
+        }
+        sb.append(h);
+        sb.append(":");
+        let m = this.getUTCMinutes();
+        if (m < 10) {
+            sb.append("0");
+        }
+        sb.append(m);
+        sb.append(":");
+        let s = this.getUTCSeconds();
+        if (s < 10) {
+            sb.append("0");
+        }
+        sb.append(s);
+        sb.append(" GMT")
+        return sb.toString();
     }
 
     /**
