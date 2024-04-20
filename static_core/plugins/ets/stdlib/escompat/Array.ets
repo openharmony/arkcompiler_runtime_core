@@ -88,7 +88,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     public $_get(idx: int): T {
-        if (idx >= this.actualLength) {
+        if (idx >= this.actualLength || idx < 0) {
             throw new RangeError("Out of bounds")
         }
         return this.buffer[idx] as T
