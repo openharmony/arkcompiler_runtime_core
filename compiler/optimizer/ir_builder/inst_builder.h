@@ -121,12 +121,6 @@ public:
     static void SetParamSpillFill(Graph *graph, ParameterInst *param_inst, size_t num_args, size_t i,
                                   DataType::Type type);
 
-    void TryFillInstIdTypePair(size_t id, int32_t pc)
-    {
-        ASSERT(GetGraph()->IsBytecodeOptimizer());
-        ASSERT(GetGraph()->IsDynamicMethod());
-        GetGraph()->GetRuntime()->FillInstIdTypePairByPc(id, pc);
-    }
 private:
     void UpdateDefsForCatch();
     void UpdateDefsForLoopHead();

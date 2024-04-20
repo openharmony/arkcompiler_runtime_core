@@ -31,7 +31,7 @@ class Tool(ToolBase):
     def __init__(self, *args):
         super().__init__(*args)
         self.sdk = os.environ.get('OHOS_SDK', '')
-        self.opts = '--type-extractor --module --merge-abc --extension=ts'
+        self.opts = '--module --merge-abc --extension=ts'
         if not os.path.isdir(self.sdk):
             raise RuntimeError('OHOS_SDK not found.')
         self.es2abc = os.path.join(

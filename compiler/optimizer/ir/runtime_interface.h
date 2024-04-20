@@ -149,47 +149,6 @@ public:
 
     #include <ecma_intrinsics_enum.inl>
 
-    // TypeInfoIndex adaption
-    virtual TypeInfoIndex GetTypeInfoIndexByInstId([[maybe_unused]] size_t id) const
-    {
-        return NO_EXPLICIT_TYPE;
-    }
-
-    virtual bool IsPcBindType([[maybe_unused]] int32_t pc) const
-    {
-        return false;
-    }
-
-    virtual bool FillInstIdTypePairByPc([[maybe_unused]] size_t id, [[maybe_unused]] int32_t pc)
-    {
-        return false;
-    }
-
-    virtual bool HasInsTypeinfo() const
-    {
-        return false;
-    }
-
-    virtual bool AddPcTypePair([[maybe_unused]] int32_t pc, [[maybe_unused]] TypeInfoIndex type)
-    {
-        return false;
-    }
-
-    virtual bool FillArgTypePairs([[maybe_unused]] std::unordered_map<int32_t, TypeInfoIndex> *map) const
-    {
-        return false;
-    }
-
-    virtual bool SetTypeLiteralArrayKey([[maybe_unused]] std::string key)
-    {
-        return false;
-    }
-
-    virtual const std::string *GetTypeLiteralArrayKey() const
-    {
-        return nullptr;
-    }
-
     NO_COPY_SEMANTIC(RuntimeInterface);
     NO_MOVE_SEMANTIC(RuntimeInterface);
 

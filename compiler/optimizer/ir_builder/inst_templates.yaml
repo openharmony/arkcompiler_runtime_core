@@ -116,11 +116,6 @@ templates:
     % end
   sta: |-
     UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), GetDefinitionAcc());
-    % if inst.properties.include? "dynamic"
-    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
-        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
-    }
-    % end
   lda: |-
     % if inst.acc_and_operands[1].imm?
     %   if inst.mnemonic == "ldai"
@@ -132,19 +127,11 @@ templates:
     %   else
     UpdateDefinitionAcc(FindOrCreateConstant(instruction->GetImm<<%=inst.get_format%>, 0>()));
     %     if inst.properties.include? "dynamic"
-    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
-        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
-    }
     BuildCastToAnyNumber(instruction);
     %     end
     %   end
     % elsif inst.acc_and_operands[1].id?
     BuildLoadFromPool<Opcode::<%= inst.opcode =~ /lda_type/ ? 'LoadType' : 'LoadString' %>>(instruction);
-    %       if inst.opcode =~ /lda_str/
-    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
-        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
-    }
-    %       end
     % else
     % raise "Unsupported instruction type" unless inst.acc_and_operands[1].reg?
     UpdateDefinitionAcc(GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));
@@ -153,9 +140,6 @@ templates:
     auto imm = bit_cast<double>(instruction->GetImm<<%=inst.get_format%>, 0>());
     UpdateDefinitionAcc(FindOrCreateDoubleConstant(imm));
     % if inst.properties.include? "dynamic"
-    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod()) {
-        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), static_cast<int>(GetPc(instruction->GetAddress())));
-    }
     BuildCastToAnyNumber(instruction);
     % end
   operands: |-
@@ -218,10 +202,6 @@ templates:
     AddInstruction(jmp_inst);
     % else
     BuildEcma(instruction);
-    auto pc = static_cast<int>(GetPc(instruction->GetAddress()));
-    if (GetGraph()->IsBytecodeOptimizer() && GetGraph()->IsDynamicMethod() && GetGraph()->GetRuntime()->IsPcBindType(pc)) {
-        TryFillInstIdTypePair(GetDefinitionAcc()->GetId(), pc);
-    }
     % end
   nop: |-
   unimplemented: |-

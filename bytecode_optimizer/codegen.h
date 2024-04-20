@@ -134,18 +134,6 @@ private:
                           const compiler::BasicBlock *catch_begin, const compiler::BasicBlock *catch_end = nullptr);
     void VisitTryBegin(const compiler::BasicBlock *bb);
 
-    // TypeInfoIndex typeinfo adaption
-    using Literal = panda::pandasm::LiteralArray::Literal;
-    using TypeInfoComponents = std::vector<Literal>;
-    void AddTypeInfoIndexForArguments(TypeInfoComponents *elements) const;
-    void AddOrderAndTypeInfoIndex(int32_t order, TypeInfoIndex type, TypeInfoComponents *elements) const;
-    void AddTypeInfoIndexForIns(int32_t order, size_t id, TypeInfoComponents *elements) const;
-    void UpdateTypeInfoIndexAnnotation(const TypeInfoComponents *elements);
-    pandasm::Program *GetProgram() const
-    {
-        return program_;
-    }
-
 private:
     pandasm::Function *function_;
     const BytecodeOptIrInterface *ir_interface_;

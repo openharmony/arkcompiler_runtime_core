@@ -321,7 +321,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_010, TestSize.Level1)
     {
         panda::verifier::Verifier ver {target_file_name};
         ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolContent());
+        EXPECT_TRUE(ver.VerifyConstantPoolContent());
     }
 }
 

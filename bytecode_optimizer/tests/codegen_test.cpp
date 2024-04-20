@@ -526,13 +526,6 @@ HWTEST_F(CodegenTest, codegen_test_015, TestSize.Level1)
         &ir_interface, &prog, &status](Graph* graph) {
 
         EXPECT_NE(graph, nullptr);
-        int32_t pc = -1;  // -1: It's a random number
-        uint8_t id1 = 2;  // 2: It's a random number
-        TypeInfoIndex type = static_cast<BuiltinIndexType>(id1);
-        graph->GetRuntime()->AddPcTypePair(pc, type);
-
-        size_t id = 13;  // 13: It's a random number
-        graph->GetRuntime()->FillInstIdTypePairByPc(id, pc);
 
         for (auto bb : graph->GetBlocksRPO()) {
             EXPECT_NE(bb, nullptr);
@@ -542,10 +535,6 @@ HWTEST_F(CodegenTest, codegen_test_015, TestSize.Level1)
             }
         }
         EXPECT_TRUE(graph->RunPass<compiler::Cleanup>());
-        LiteralArray lit;
-        const auto &key = *(graph->GetRuntime()->GetTypeLiteralArrayKey());
-        prog.literalarray_table[key] = lit;
-
         EXPECT_FALSE(graph->RunPass<compiler::Cleanup>());
         EXPECT_FALSE(graph->RunPass<panda::compiler::ValNum>());
         EXPECT_TRUE(graph->RunPass<panda::compiler::Lowering>());
