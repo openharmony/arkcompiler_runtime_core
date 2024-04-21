@@ -26,9 +26,10 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_SCCP_H
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_SCCP_H
+#ifndef BYTECODE_OPTIMIZER_CONSTANT_PROPAGATION_CONSTANT_PROPAGATION_H
+#define BYTECODE_OPTIMIZER_CONSTANT_PROPAGATION_CONSTANT_PROPAGATION_H
 
+#include "bytecode_optimizer/ir_interface.h"
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/graph_visitor.h"
@@ -36,10 +37,16 @@
 #include "lattice_element.h"
 #include "utils/hash.h"
 
-namespace panda::compiler {
-class ConstantPropagation : public Optimization, public GraphVisitor {
+namespace panda::bytecodeopt {
+
+using compiler::BasicBlock;
+using compiler::Inst;
+using compiler::Opcode;
+using compiler::RuntimeInterface;
+
+class ConstantPropagation : public compiler::Optimization, public compiler::GraphVisitor {
 public:
-    explicit ConstantPropagation(Graph *graph);
+    explicit ConstantPropagation(compiler::Graph *graph, const BytecodeOptIrInterface *iface);
     NO_MOVE_SEMANTIC(ConstantPropagation);
     NO_COPY_SEMANTIC(ConstantPropagation);
     ~ConstantPropagation() override = default;
@@ -85,6 +92,7 @@ protected:
     static void VisitIfImm(GraphVisitor *v, Inst *inst);
     static void VisitCompare(GraphVisitor *v, Inst *inst);
     static void VisitConstant(GraphVisitor *v, Inst *inst);
+    static void VisitLoadString(GraphVisitor *v, Inst *inst);
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst);
     static void VisitCastValueToAnyType(GraphVisitor *v, Inst *inst);
 
@@ -96,17 +104,22 @@ private:
     void RunFlowEdge();
     void VisitInsts(BasicBlock *bb);
     void AddUntraversedFlowEdges(BasicBlock *src, BasicBlock *dst);
-    bool GetIfTargetBlock(IfImmInst *inst, uint64_t val);
+    bool GetIfTargetBlock(compiler::IfImmInst *inst, uint64_t val);
     LatticeElement *GetOrCreateDefaultLattice(Inst *inst);
+    LatticeElement *FoldingModuleOperation(compiler::IntrinsicInst *inst);
     LatticeElement *FoldingConstant(RuntimeInterface::IntrinsicId id);
     LatticeElement *FoldingConstant(ConstantElement *lattice, RuntimeInterface::IntrinsicId id);
     LatticeElement *FoldingConstant(ConstantElement *left, ConstantElement *right, RuntimeInterface::IntrinsicId id);
-    LatticeElement *FoldingCompare(const ConstantElement *left, const ConstantElement *right, ConditionCode cc);
+    LatticeElement *FoldingCompare(const ConstantElement *left, const ConstantElement *right,
+                                   compiler::ConditionCode cc);
 
     LatticeElement *FoldingGreater(const ConstantElement *left, const ConstantElement *right, bool equal = false);
     LatticeElement *FoldingLess(const ConstantElement *left, const ConstantElement *right, bool equal = false);
     LatticeElement *FoldingEq(const ConstantElement *left, const ConstantElement *right);
     LatticeElement *FoldingNotEq(const ConstantElement *left, const ConstantElement *right);
+    LatticeElement *FoldingLdlocalmodulevar(compiler::IntrinsicInst *inst);
+    LatticeElement *FoldingLdexternalmodulevar(compiler::IntrinsicInst *inst);
+    LatticeElement *FoldingLdobjbyname(compiler::IntrinsicInst *inst);
 
     Inst *CreateReplaceInst(Inst *base_inst, ConstantElement *lattice);
     void InsertSaveState(Inst *base_inst, Inst *save_state);
@@ -118,6 +131,10 @@ private:
     ArenaQueue<Inst *> ssa_edges_;
     ArenaUnorderedSet<Edge, EdgeHash, EdgeEqual> executable_flag_;
     ArenaUnorderedSet<uint32_t> executed_node_;
+    std::string record_name_;
+    const BytecodeOptIrInterface *ir_interface_;
 };
-}  // namespace panda::compiler
-#endif
+
+}  // namespace panda::bytecodeopt
+
+#endif  // BYTECODE_OPTIMIZER_CONSTANT_PROPAGATION_CONSTANT_PROPAGATION_H

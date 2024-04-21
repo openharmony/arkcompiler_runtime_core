@@ -22,6 +22,7 @@
 #include "libpandafile/code_data_accessor.h"
 #include "libpandafile/field_data_accessor.h"
 #include "libpandafile/file.h"
+#include "libpandafile/file-inl.h"
 #include "libpandafile/file_items.h"
 #include "libpandafile/method_data_accessor.h"
 #include "libpandafile/proto_data_accessor.h"

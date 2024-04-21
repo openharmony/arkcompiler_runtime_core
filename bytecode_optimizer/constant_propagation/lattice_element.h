@@ -26,17 +26,19 @@
  * limitations under the License.
  */
 
-#ifndef COMPILER_OPTIMIZER_OPTIMIZATIONS_LATTICE_H
-#define COMPILER_OPTIMIZER_OPTIMIZATIONS_LATTICE_H
+#ifndef BYTECODE_OPTIMIZER_CONSTANT_PROPAGATION_LATTICE_ELEMENT_H
+#define BYTECODE_OPTIMIZER_CONSTANT_PROPAGATION_LATTICE_ELEMENT_H
 
 #include <variant>
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/graph_visitor.h"
 #include "compiler/optimizer/pass.h"
+#include "constant_value.h"
 #include "utils/hash.h"
 
-namespace panda::compiler {
+namespace panda::bytecodeopt {
+
 class ConstantElement;
 class LatticeElement {
 public:
@@ -106,33 +108,39 @@ protected:
 
 class ConstantElement : public LatticeElement {
 public:
-    enum ConstantType { CONSTANT_BOOL, CONSTANT_INT32, CONSTANT_INT64, CONSTANT_DOUBLE };
-
     NO_MOVE_SEMANTIC(ConstantElement);
     NO_COPY_SEMANTIC(ConstantElement);
     explicit ConstantElement(bool val);
     explicit ConstantElement(int32_t val);
     explicit ConstantElement(int64_t val);
     explicit ConstantElement(double val);
+    explicit ConstantElement(std::string val);
+    explicit ConstantElement(const ConstantValue &val);
     ~ConstantElement() override = default;
     LatticeElement *Meet(LatticeElement *other) override;
     std::string ToString() override;
     ConstantElement *AsConstant() override;
 
-    auto &GetVal() const
+    template<class T>
+    T GetValue() const
     {
-        return val_;
+        return value_.GetValue<T>();
     }
 
-    ConstantType GetType() const
+    auto &GetValue() const
     {
-        return type_;
+        return value_.GetValue();
+    }
+
+    ConstantValue::ConstantType GetType() const
+    {
+        return value_.GetType();
     }
 
 private:
-    ConstantType type_;
-    std::variant<bool, int32_t, int64_t, double> val_;
+    ConstantValue value_;
 };
-}  // namespace panda::compiler
 
-#endif
+}  // namespace panda::bytecodeopt
+
+#endif  // BYTECODE_OPTIMIZER_CONSTANT_PROPAGATION_LATTICE_ELEMENT_H

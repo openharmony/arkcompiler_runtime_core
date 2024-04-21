@@ -380,11 +380,9 @@ function sccpFoldStrictNotEqNoEffect()
     print(a !== b);
 }
 
-function sccpNoEffectNan() {
+function sccpNoEffectNanWithInt() {
     let a = NaN;
     let intVal = 1;
-    let trueVal = true;
-    let falseVal = false;
     let intMaxVal = 2147483647;
     let intMinVal = -2147483648;
     print(a === intVal);
@@ -394,6 +392,33 @@ function sccpNoEffectNan() {
     print(a >= intVal);
     print(b >= intVal);
     print(b > intVal);
+
+    // Check NAN with int min.
+    print(a === intMinVal);
+    print(a !== intMinVal);
+    print(a > intMinVal);
+    print(a >= intMinVal);
+    print(a < intMinVal);
+    print(a <= intMinVal);
+    print(a == intMinVal);
+    print(a != intMinVal);
+
+    // Check NAN with int maxVal.
+    print(a === intMaxVal);
+    print(a !== intMaxVal);
+    print(a > intMaxVal);
+    print(a >= intMaxVal);
+    print(a < intMaxVal);
+    print(a <= intMaxVal);
+    print(a == intMaxVal);
+    print(a != intMaxVal);
+}
+
+function sccpNoEffectNanWithBoolAndDouble() {
+    let a = NaN;
+    let doubleVal = 1.1;
+    let trueVal = true;
+    let falseVal = false;
 
     // Check NAN with double val.
     print(a === doubleVal);
@@ -424,8 +449,23 @@ function sccpNoEffectNan() {
     print(a <= falseVal);
     print(a == falseVal);
     print(a != falseVal);
+}
 
-    // Check NAN with int min.
+function sccpNoEffectInfinityWithInt() {
+    let a = Infinity;
+    let intVal = 1;
+    let intMaxVal = 2147483647;
+    let intMinVal = -2147483648;
+
+    print(a === intVal);
+    print(a != intVal);
+    print(a !== intVal);
+    print(a > intVal);
+    print(a >= intVal);
+    print(b >= intVal);
+    print(b > intVal);
+
+    // Check Infinity with int min.
     print(a === intMinVal);
     print(a !== intMinVal);
     print(a > intMinVal);
@@ -435,7 +475,7 @@ function sccpNoEffectNan() {
     print(a == intMinVal);
     print(a != intMinVal);
 
-    // Check NAN with int maxVal.
+    // Check Infinity with int maxVal.
     print(a === intMaxVal);
     print(a !== intMaxVal);
     print(a > intMaxVal);
@@ -446,20 +486,10 @@ function sccpNoEffectNan() {
     print(a != intMaxVal);
 }
 
-function sccpNoEffectInfinity() {
-    let a = Infinity;
-    let intVal = 1;
+function sccpNoEffectInfinityWithBoolAndDouble() {
+    let doubleVal = 1.1;
     let trueVal = true;
     let falseVal = false;
-    let intMaxVal = 2147483647;
-    let intMinVal = -2147483648;
-    print(a === intVal);
-    print(a != intVal);
-    print(a !== intVal);
-    print(a > intVal);
-    print(a >= intVal);
-    print(b >= intVal);
-    print(b > intVal);
 
     // Check Infinity with double val.
     print(a === doubleVal);
@@ -490,26 +520,6 @@ function sccpNoEffectInfinity() {
     print(a <= falseVal);
     print(a == falseVal);
     print(a != falseVal);
-
-    // Check Infinity with int min.
-    print(a === intMinVal);
-    print(a !== intMinVal);
-    print(a > intMinVal);
-    print(a >= intMinVal);
-    print(a < intMinVal);
-    print(a <= intMinVal);
-    print(a == intMinVal);
-    print(a != intMinVal);
-
-    // Check Infinity with int maxVal.
-    print(a === intMaxVal);
-    print(a !== intMaxVal);
-    print(a > intMaxVal);
-    print(a >= intMaxVal);
-    print(a < intMaxVal);
-    print(a <= intMaxVal);
-    print(a == intMaxVal);
-    print(a != intMaxVal);
 }
 
 function sccpNoEffectArithmetic() {
@@ -544,20 +554,20 @@ function sccpIfCheck() {
     }
     let a = 1;
     let b = 2;
-    if(a < b) {
+    if (a < b) {
         print(true);
     }
 
-    if(a > b) {
+    if (a > b) {
         print(true);
     }
 }
 
 function sccpPhi(a) {
     let b = a;
-    if(a){
+    if (a) {
         b = true;
-    }else {
+    } else {
         b = true;
     }
     print(b);
@@ -576,11 +586,10 @@ function sccpPhi2()
 
 function sccpPhiNoEffect(a) {
     let b = a;
-    if(a){
+    if (a){
         b = true;
-    }else {
+    } else {
         b = false;
     }
     print(b);
 }
-

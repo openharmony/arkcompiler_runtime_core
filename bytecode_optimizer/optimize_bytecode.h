@@ -22,6 +22,8 @@
 #include "ir_interface.h"
 
 namespace panda::bytecodeopt {
+bool AnalysisBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
+                      const std::string &pandafile_name, bool is_dynamic = false, bool has_memory_pool = false);
 bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface = nullptr);
 bool OptimizeBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
                       const std::string &pandafile_name, bool is_dynamic = false, bool has_memory_pool = false);

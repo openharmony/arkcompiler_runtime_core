@@ -19,6 +19,7 @@
 #include "assembler/extensions/extensions.h"
 #include "bytecode_instruction.h"
 #include "bytecodeopt_options.h"
+#include "bytecode_analysis_results.h"
 #include "codegen.h"
 #include "common.h"
 #include "compiler/optimizer/ir/constants.h"
@@ -26,16 +27,19 @@
 #include "compiler/optimizer/ir_builder/pbc_iterator.h"
 #include "compiler/optimizer/optimizations/branch_elimination.h"
 #include "compiler/optimizer/optimizations/cleanup.h"
-#include "compiler/optimizer/optimizations/constant_propagation/constant_propagation.h"
 #include "compiler/optimizer/optimizations/lowering.h"
 #include "compiler/optimizer/optimizations/move_constants.h"
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc.h"
 #include "compiler/optimizer/optimizations/vn.h"
+#include "constant_propagation/constant_propagation.h"
 #include "libpandabase/mem/arena_allocator.h"
 #include "libpandabase/mem/pool_manager.h"
 #include "libpandafile/class_data_accessor.h"
 #include "libpandafile/class_data_accessor-inl.h"
 #include "libpandafile/method_data_accessor.h"
+#include "libpandafile/field_data_accessor.h"
+#include "libpandafile/module_data_accessor-inl.h"
+#include "module_constant_analyzer.h"
 #include "reg_acc_alloc.h"
 #include "reg_encoder.h"
 #include "runtime_adapter.h"
@@ -72,7 +76,7 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
     ASSERT(graph->IsDynamicMethod());
 
     if (compiler::options.IsCompilerBranchElimination()) {
-        RunOpts<compiler::ConstantPropagation>(graph);
+        graph->RunPass<ConstantPropagation>(iface);
         RunOpts<compiler::BranchElimination>(graph);
     }
 
@@ -216,7 +220,205 @@ static void SetCompilerOptions(bool is_dynamic)
     if (is_dynamic) {
         panda::bytecodeopt::options.SetSkipMethodsWithEh(true);
     }
-    compiler::options.SetCompilerBranchElimination(false);
+}
+
+static bool StringStartsWith(const std::string &str, const std::string &prefix)
+{
+    return (str.size() >= prefix.size()) &&
+        std::equal(prefix.begin(), prefix.end(), str.begin());
+}
+
+static std::string ModuleRequestOffsetToRecordName(const panda_file::File &pfile,
+                                                   uint32_t module_request_offset)
+{
+    constexpr char AND_TOKEN = '&';
+    const std::string BUNDLE_PREFIX = "@bundle:";
+    const std::string PACKAGE_PREFIX = "@package:";
+    const std::string NORMALIZED_NON_NATIVE_PREFIX = "@normalized:N&";
+
+    auto record_ohmurl = GetStringFromPandaFile(pfile, module_request_offset);
+    // Assumptions of the current possible ohmurl formats:
+    // @bundle:record_name
+    // @package:record_name
+    // @normalized:N&xxxx&record_name
+    // Extract record_name from each possible cases.
+    if (StringStartsWith(record_ohmurl, BUNDLE_PREFIX)) {
+        return record_ohmurl.substr(BUNDLE_PREFIX.size());
+    } else if (StringStartsWith(record_ohmurl, PACKAGE_PREFIX)) {
+        return record_ohmurl.substr(PACKAGE_PREFIX.size());
+    } else if (StringStartsWith(record_ohmurl, NORMALIZED_NON_NATIVE_PREFIX)) {
+        size_t second_and_pos = record_ohmurl.find(AND_TOKEN, NORMALIZED_NON_NATIVE_PREFIX.size());
+        if (second_and_pos != std::string::npos) {
+            return record_ohmurl.substr(second_and_pos + 1);
+        }
+    }
+    // Otherwise, return empty string to represent no ohmurl is found
+    return "";
+}
+
+static void AnalysisModuleRecordInfoOfModuleDataAccessor(const panda_file::File &pfile,
+                                                         panda_file::ModuleDataAccessor &mda,
+                                                         BytecodeAnalysisResult &result)
+{
+    const auto &request_modules_offsets = mda.getRequestModules();
+    int regular_import_idx = 0;
+    std::unordered_set<std::string> local_export_local_names;
+    mda.EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset,
+                                  uint32_t request_module_idx, uint32_t import_name_offset,
+                                  uint32_t local_name_offset) {
+        switch (tag) {
+            case panda_file::ModuleTag::LOCAL_EXPORT: {
+                std::string export_name = GetStringFromPandaFile(pfile, export_name_offset);
+                std::string local_name = GetStringFromPandaFile(pfile, local_name_offset);
+                // Slot of stmodulevar/ldlocalmodulevar is the index of its local name, while
+                // one local name can match multiple external names with "export...as...".
+                // Local export entries are sorted by their local name, thus using an unrodered_set
+                // can get the correct index form (size - 1) (starts from 0).
+                // See SourceTextModuleRecord::AssignIndexToModuleVariable for more details
+                local_export_local_names.insert(local_name);
+                result.SetLocalExportInfo(local_export_local_names.size() - 1, export_name);
+                break;
+            }
+            case panda_file::ModuleTag::REGULAR_IMPORT: {
+                std::string request_module_name =
+                    ModuleRequestOffsetToRecordName(pfile, request_modules_offsets[request_module_idx]);
+                if (!request_module_name.empty()) {
+                    std::string import_name = GetStringFromPandaFile(pfile, import_name_offset);
+                    result.SetRegularImportInfo(regular_import_idx, import_name, request_module_name);
+                }
+                regular_import_idx++;
+                break;
+            }
+            case panda_file::ModuleTag::NAMESPACE_IMPORT: {
+                // Slot of getmodulenamespace bytecode is its request_module_idx
+                std::string namespace_name =
+                    ModuleRequestOffsetToRecordName(pfile, request_modules_offsets[request_module_idx]);
+                if (!namespace_name.empty()) {
+                    result.SetNamespaceImportInfo(request_module_idx, namespace_name);
+                }
+                break;
+            }
+            default:
+                break;
+        }
+    });
+}
+
+static void AnalysisModuleRecordInfo(const panda_file::File &pfile,
+                                     panda_file::ClassDataAccessor &cda,
+                                     BytecodeAnalysisResult &result)
+{
+    const std::string MODULE_RECORD_IDX_FIELD_NAME = "moduleRecordIdx";
+    // RequireGlobalOptimization is true only under mergeAbc mode, where module record is stored
+    // in the moduleRecordIdx field according to Emitter::AddSourceTextModuleRecord
+    cda.EnumerateFields([&](panda_file::FieldDataAccessor &fda) -> void {
+        if (fda.IsExternal()) {
+            return;
+        }
+        std::string field_name = GetStringFromPandaFile(pfile, fda.GetNameId().GetOffset());
+        if (field_name == MODULE_RECORD_IDX_FIELD_NAME) {
+            panda_file::File::EntityId module_entity_id(fda.GetValue<uint32_t>().value());
+            panda_file::ModuleDataAccessor mda(pfile, module_entity_id);
+            AnalysisModuleRecordInfoOfModuleDataAccessor(pfile, mda, result);
+        }
+    });
+}
+
+static void AnalysisModuleConstantValue(panda_file::ClassDataAccessor &cda, const std::string &record_name,
+                                        bool is_dynamic, const BytecodeOptIrInterface &ir_interface,
+                                        BytecodeAnalysisResult &result)
+{
+    const std::string MAIN_METHOD_NAME = ".func_main_0";
+    cda.EnumerateMethods([MAIN_METHOD_NAME, record_name, is_dynamic, ir_interface, &result](
+            panda_file::MethodDataAccessor &mda) {
+        if (mda.IsExternal()) {
+            return false;
+        }
+
+        // Only analysis func_main_0 for now, since the assignment instruction of all exported constants
+        // are in func_main_0, and the bytecode analysis phase only contains analysing initial value of
+        // module constants for branch-elimination for now
+        auto func_name = ir_interface.GetMethodIdByOffset(mda.GetMethodId().GetOffset());
+        if (func_name != record_name + MAIN_METHOD_NAME) {
+            return true;
+        }
+
+        ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};
+        ArenaAllocator local_allocator {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
+
+        auto *prog = ir_interface.GetProgram();
+        auto it = prog->function_table.find(func_name);
+        if (it == prog->function_table.end()) {
+            LOG(ERROR, BYTECODE_OPTIMIZER) << "Cannot find function: " << func_name;
+            return false;
+        }
+
+        panda::pandasm::Function &function = it->second;
+        if (SkipFunction(function, func_name)) {
+            return false;
+        }
+
+        auto method_ptr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
+        panda::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
+        auto graph = allocator.New<compiler::Graph>(&allocator, &local_allocator, Arch::NONE, method_ptr, &adapter,
+                                                    false, nullptr, is_dynamic, true);
+        if ((graph == nullptr) || !graph->RunPass<panda::compiler::IrBuilder>()) {
+            LOG(ERROR, BYTECODE_OPTIMIZER) << "Analysis " << func_name << ": IR builder failed!";
+            return false;
+        }
+
+        ModuleConstantAnalysisResult module_constant_results;
+        ModuleConstantAnalyzer analyzer(graph, result.GetConstantLocalExportSlots(),
+                                        module_constant_results, &ir_interface);
+        graph->RunPass<ModuleConstantAnalyzer>(&analyzer);
+        result.SetModuleConstantAnalysisResult(module_constant_results);
+        return true;
+    });
+}
+
+bool AnalysisBytecode(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
+                      const std::string &pfile_name, bool is_dynamic, bool has_memory_pool)
+{
+    if (!has_memory_pool) {
+        PoolManager::Initialize(PoolType::MALLOC);
+    }
+
+    auto pfile = panda_file::OpenPandaFile(pfile_name);
+    if (!pfile) {
+        LOG(FATAL, BYTECODE_OPTIMIZER) << "Can not open binary file: " << pfile_name;
+        return false;
+    }
+
+    for (uint32_t id : pfile->GetClasses()) {
+        panda_file::File::EntityId record_id {id};
+
+        if (pfile->IsExternal(record_id)) {
+            continue;
+        }
+
+        panda_file::ClassDataAccessor cda {*pfile, record_id};
+        // Skip annotation records since they do not contain real code for now
+        if (cda.IsAnnotation()) {
+            continue;
+        }
+        std::string record_type_descriptor(utf::Mutf8AsCString(cda.GetName().data));
+        std::string record_name = pandasm::Type::FromDescriptor(record_type_descriptor).GetName();
+
+        bool exists = false;
+        auto &result = BytecodeAnalysisResults::GetOrCreateBytecodeAnalysisResult(record_name, exists);
+        if (exists) {
+            return true;
+        }
+        auto ir_interface = BytecodeOptIrInterface(maps, prog);
+        AnalysisModuleRecordInfo(*pfile, cda, result);
+        AnalysisModuleConstantValue(cda, record_name, is_dynamic, ir_interface, result);
+    }
+
+    if (!has_memory_pool) {
+        PoolManager::Finalize();
+    }
+
+    return true;
 }
 
 bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,

@@ -148,6 +148,11 @@ public:
         return prog_ != nullptr ? prog_->lang : panda_file::SourceLang::PANDA_ASSEMBLY;
     }
 
+    pandasm::Program *GetProgram() const
+    {
+        return prog_;
+    }
+
 private:
     pandasm::Program *prog_ {nullptr};
     const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps_ {nullptr};
