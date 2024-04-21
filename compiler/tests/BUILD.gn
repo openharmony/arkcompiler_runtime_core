@@ -61,6 +61,22 @@ foreach(file, graph_test_js_files) {
   }
 }
 
+graph_test_js_files_un_opt = [ "constantProgagation" ]
+
+foreach(file, graph_test_js_files_un_opt) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_path}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_js)
+    dst_file = rebase_path(test_abc)
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+
+    extra_args = [ "--debug" ]
+  }
+}
 host_unittest_action("GraphInterfaceTest") {
   module_out_path = module_output_path
   sources = [
@@ -68,6 +84,7 @@ host_unittest_action("GraphInterfaceTest") {
     "compiler_graph_test.cpp",
     "compiler_inst_test.cpp",
     "compiler_optimizations_test.cpp",
+    "constant_propagation_test.cpp",
     "dominators_tree_new_test.cpp",
     "dump_test.cpp",
     "graph_checker_test.cpp",
@@ -86,6 +103,9 @@ host_unittest_action("GraphInterfaceTest") {
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
   foreach(file, graph_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+  foreach(file, graph_test_js_files_un_opt) {
     deps += [ ":gen_${file}_abc" ]
   }
 }
