@@ -26,8 +26,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <cstddef>
+#include <gtest/gtest.h>
 #include <sstream>
 
 #include "graph_test.h"
@@ -48,7 +48,7 @@ public:
     auto IsInSet(unsigned expect_edges[][2], size_t count, unsigned a, unsigned b)
     {
         ASSERT(expect_edges != nullptr);
-        for (int i = 0; i < count; i++) {
+        for (size_t i = 0; i < count; i++) {
             if ((a == expect_edges[i][0] && b == expect_edges[i][1]) ||
                 (b == expect_edges[i][0] && a == expect_edges[i][1])) {
                 return true;
@@ -85,7 +85,7 @@ public:
  * @tc.name: reg_alloc_interference_test_001
  * @tc.desc: Verify the AddEdge function of GraphMatrix.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_001, TestSize.Level1)
 {
@@ -98,7 +98,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_001, TestSize.Lev
     EXPECT_FALSE(matrix.AddEdge(7, 4));
     for (unsigned i = 0; i < 10; i++) {
         for (unsigned j = 0; j < 10; j++) {
-            ASSERT_EQ(matrix.HasEdge(i, j), IsInSet(test_edges, 2, i, j));
+            EXPECT_EQ(matrix.HasEdge(i, j), IsInSet(test_edges, 2, i, j));
         }
     }
     EXPECT_GE(matrix.GetCapacity(), 10);
@@ -108,7 +108,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_001, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_002
  * @tc.desc: Verify the AddAffinityEdge function of GraphMatrix.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_002, TestSize.Level1)
 {
@@ -121,7 +121,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_002, TestSize.Lev
     EXPECT_FALSE(matrix.AddAffinityEdge(7, 4));
     for (unsigned i = 0; i < 10; i++) {
         for (unsigned j = 0; j < 10; j++) {
-            ASSERT_EQ(matrix.HasAffinityEdge(i, j), IsInSet(test_edges, 2, i, j));
+            EXPECT_EQ(matrix.HasAffinityEdge(i, j), IsInSet(test_edges, 2, i, j));
         }
     }
     EXPECT_GE(matrix.GetCapacity(), 10);
@@ -131,7 +131,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_002, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_003
  * @tc.desc: Verify the GetNumber function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_003, TestSize.Level1)
 {
@@ -146,7 +146,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_003, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_004
  * @tc.desc: Verify the SetColor function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_004, TestSize.Level1)
 {
@@ -162,7 +162,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_004, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_005
  * @tc.desc: Verify the SetFixedColor function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_005, TestSize.Level1)
 {
@@ -182,7 +182,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_005, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_006
  * @tc.desc: Verify the SetBias function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_006, TestSize.Level1)
 {
@@ -200,7 +200,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_006, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_007
  * @tc.desc: Verify the Assign function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_007, TestSize.Level1)
 {
@@ -215,7 +215,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_007, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_008
  * @tc.desc: Verify the AddCallsite function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_008, TestSize.Level1)
 {
@@ -232,7 +232,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_008, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_009
  * @tc.desc: Verify the AllocNode function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_009, TestSize.Level1)
 {
@@ -255,7 +255,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_009, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_010
  * @tc.desc: Verify the AddBias function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_010, TestSize.Level1)
 {
@@ -272,7 +272,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_010, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_011
  * @tc.desc: Verify the LexBFS function of InterferenceGraph in simple case.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_011, TestSize.Level1)
 {
@@ -294,7 +294,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_011, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_012
  * @tc.desc: Verify the LexBFS function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_012, TestSize.Level1)
 {
@@ -306,11 +306,9 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_012, TestSize.Lev
     InterferenceGraph ig(&allocator);
     ig.Reserve(DEFAULT_CAPACITY);
     
-    ig.AllocNode();
-    ig.AllocNode();
-    ig.AllocNode();
-    ig.AllocNode();
-    ig.AllocNode();
+    for (unsigned i = 0; i < DEFAULT_CAPACITY; i++) {
+        ig.AllocNode();
+    }
     
     for (unsigned i = 0; i < DEFAULT_CAPACITY; i++) {
         auto x = test_edges[i].first;
@@ -332,7 +330,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_012, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_013
  * @tc.desc: Verify the AssignColors function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_013, TestSize.Level1)
 {
@@ -369,7 +367,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_013, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_014
  * @tc.desc: Verify the AssignColors function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_014, TestSize.Level1)
 {
@@ -454,7 +452,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_014, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_015
  * @tc.desc: Verify the Dump function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_015, TestSize.Level1)
 {
@@ -565,7 +563,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_015, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_016
  * @tc.desc: Verify the Dump function with empty InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_016, TestSize.Level1)
 {
@@ -586,7 +584,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_016, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_017
  * @tc.desc: Verify the Dump function with same color error.
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: issueNumber
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_017, TestSize.Level1)
 {
@@ -602,7 +600,6 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_017, TestSize.Lev
 
         LiveRange range(i, i);
         auto intervals = allocator.New<LifeIntervals>(&allocator, inst, range);
-        
         node->Assign(intervals);
 
         // set same color
