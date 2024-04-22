@@ -67,16 +67,21 @@ bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(ObjectHeader *obj, Handler *handl
     if (cls->IsClassClass()) {
         auto *objectClass = ark::Class::FromClassObject(obj);
         if (objectClass->IsInitializing() || objectClass->IsInitialized()) {
-            if (!IterateClassReferences<INTERRUPTIBLE>(objectClass, handler)) {
+            if (!IterateClassReferences<INTERRUPTIBLE>(objectClass, handler, begin, end)) {
                 return false;
             }
         }
     }
-    return IterateObjectReferences<INTERRUPTIBLE>(obj, cls, handler);
+
+    if (obj >= begin && !cls->IsVariableSize() && ToUintPtr(obj) + cls->GetObjectSize() <= ToUintPtr(end)) {
+        return IterateObjectReferences<INTERRUPTIBLE>(obj, cls, handler);
+    }
+
+    return IterateObjectReferences<INTERRUPTIBLE>(obj, cls, handler, begin, end);
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handler *handler)
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handler *handler, void *begin, void *end)
 {
     auto refNum = cls->GetRefFieldsNum<true>();
     if (refNum > 0) {
@@ -85,7 +90,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handle
         auto *refStart = reinterpret_cast<ObjectPointerType *>(ToUintPtr(cls) + offset);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto *refEnd = refStart + refNum;
-        return IterateRange<INTERRUPTIBLE>(refStart, refEnd, handler);
+        return IterateRange<INTERRUPTIBLE>(refStart, refEnd, handler, begin, end);
     }
     return true;
 }
@@ -120,11 +125,61 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectPointerType *start, const ObjectPointerType *end,
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler,
+                                                               void *begin, void *end)
+{
+    ASSERT(cls != nullptr);
+    ASSERT(!cls->IsDynamicClass());
+    while (cls != nullptr) {
+        auto refNum = cls->GetRefFieldsNum<false>();
+        if (refNum == 0) {
+            cls = cls->GetBase();
+            continue;
+        }
+
+        auto offset = cls->GetRefFieldsOffset<false>();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto *refStart = reinterpret_cast<ObjectPointerType *>(ToUintPtr(object) + offset);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto *refEnd = refStart + refNum;
+        [[maybe_unused]] auto cont = IterateRange<INTERRUPTIBLE>(refStart, refEnd, handler, begin, end);
+        if constexpr (INTERRUPTIBLE) {
+            if (!cont) {
+                return false;
+            }
+        }
+
+        cls = cls->GetBase();
+    }
+    return true;
+}
+
+template <bool INTERRUPTIBLE, typename Handler>
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectPointerType *refStart, const ObjectPointerType *refEnd,
                                                     Handler *handler)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto *p = start; p < end; p++) {
+    for (auto *p = refStart; p < refEnd; p++) {
+        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(p);
+        if constexpr (INTERRUPTIBLE) {
+            if (!cont) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+template <bool INTERRUPTIBLE, typename Handler>
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectPointerType *refStart, ObjectPointerType *refEnd,
+                                                    Handler *handler, void *begin, void *end)
+{
+    auto *p = begin < refStart ? refStart : reinterpret_cast<ObjectPointerType *>(begin);
+    if (end > refEnd) {
+        end = refEnd;
+    }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    for (; p < end; p++) {
         [[maybe_unused]] auto cont = handler->ProcessObjectPointer(p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
@@ -148,14 +203,15 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(ObjectHeader *obj, Handler *hand
                                                                        begin, end);
     }
     if (cls->IsHClass()) {
-        return IterateClassReferences<INTERRUPTIBLE>(coretypes::DynClass::Cast(obj), handler);
+        return IterateClassReferences<INTERRUPTIBLE>(coretypes::DynClass::Cast(obj), handler, begin, end);
     }
 
-    return IterateObjectReferences<INTERRUPTIBLE>(obj, cls, handler);
+    return IterateObjectReferences<INTERRUPTIBLE>(obj, cls, handler, begin, end);
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler)
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler,
+                                                               void *begin, void *end)
 {
     auto hklassSize = dynClass->ClassAddr<HClass>()->GetObjectSize() - sizeof(coretypes::DynClass);
     auto bodySize = hklassSize - sizeof(HClass);
@@ -165,8 +221,12 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynCla
     auto *fieldStart = reinterpret_cast<TaggedType *>(ToUintPtr(dynClass) + fieldOffset);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto *fieldEnd = fieldStart + numOfFields;
+    auto *p = begin < fieldStart ? fieldStart : reinterpret_cast<TaggedType *>(begin);
+    if (end > fieldEnd) {
+        end = fieldEnd;
+    }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto *p = fieldStart; p < fieldEnd; p++) {
+    for (; p < end; p++) {
         [[maybe_unused]] auto cont = handler->ProcessObjectPointer(p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
@@ -178,7 +238,8 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynCla
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler)
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler,
+                                                                void *begin, void *end)
 {
     ASSERT(cls->IsDynamicClass());
     LOG(DEBUG, GC) << "TraverseObject Current object: " << GetDebugInfoAboutObject(object);
@@ -190,9 +251,13 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *ob
     auto *fieldStart = reinterpret_cast<TaggedType *>(ToUintPtr(object) + dataOffset);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto *fieldEnd = fieldStart + numOfFields;
+    auto *p = begin < fieldStart ? fieldStart : reinterpret_cast<TaggedType *>(begin);
+    if (end > fieldEnd) {
+        end = fieldEnd;
+    }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (auto *p = fieldStart; p < fieldEnd; p++, dataOffset += TaggedValue::TaggedTypeSize()) {
-        if (cls->IsNativeField(dataOffset)) {
+    for (; p < end; p++) {
+        if (cls->IsNativeField(ToUintPtr(p) - ToUintPtr(object))) {
             continue;
         }
         [[maybe_unused]] auto cont = handler->ProcessObjectPointer(p);

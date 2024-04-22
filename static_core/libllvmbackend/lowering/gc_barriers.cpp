@@ -86,30 +86,33 @@ void EmitPostWRB(llvm::IRBuilder<> *builder, llvm::Value *mem, llvm::Value *offs
 
     auto gcPtrTy = builder->getPtrTy(LLVMArkInterface::GC_ADDR_SPACE);
     auto ptrTy = builder->getPtrTy();
+    auto memTy = mem->getType();
     auto int32Ty = builder->getInt32Ty();
     auto threadRegPtr = builder->CreateIntToPtr(threadRegValue, ptrTy);
     auto addr = builder->CreateConstInBoundsGEP1_64(builder->getInt8Ty(), threadRegPtr, tlsOffset);
     auto callee = builder->CreateLoad(ptrTy, addr, "post_wrb_one_object_addr");
+
+    ASSERT(mem->getType()->isPointerTy());
     ASSERT(value->getType()->isPointerTy() &&
            value->getType()->getPointerAddressSpace() == LLVMArkInterface::GC_ADDR_SPACE);
 
     if (!arkInterface->IsIrtocMode()) {
         // LLVM AOT, only 3 parameters
-        auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy}, false);
+        auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {memTy, int32Ty, gcPtrTy}, false);
         auto call = builder->CreateCall(funcTy, callee, {mem, offset, value});
         call->setCallingConv(llvm::CallingConv::ArkFast3);
         return;
     }
     if (arkInterface->IsArm64()) {
         // Arm64 Irtoc, 4 params (add thread)
-        auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy, ptrTy}, false);
+        auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {memTy, int32Ty, gcPtrTy, ptrTy}, false);
         auto call = builder->CreateCall(funcTy, callee, {mem, offset, value, threadRegPtr});
         call->setCallingConv(llvm::CallingConv::ArkFast3);
         return;
     }
     // X86_64 Irtoc, 5 params (add thread, fp)
     ASSERT(frameRegValue != nullptr);
-    auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {gcPtrTy, int32Ty, gcPtrTy, ptrTy, ptrTy}, false);
+    auto funcTy = llvm::FunctionType::get(builder->getVoidTy(), {memTy, int32Ty, gcPtrTy, ptrTy, ptrTy}, false);
     auto frameRegPtr = builder->CreateIntToPtr(frameRegValue, ptrTy);
     auto call = builder->CreateCall(funcTy, callee, {mem, offset, value, threadRegPtr, frameRegPtr});
     call->setCallingConv(llvm::CallingConv::ArkFast3);

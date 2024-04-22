@@ -1359,7 +1359,17 @@ void EncodeVisitor::VisitStoreStatic(GraphVisitor *visitor, Inst *inst)
     } else {
         enc->GetEncoder()->EncodeStr(src1, mem);
     }
-    if (inst->CastToStoreStatic()->GetNeedBarrier()) {
+    if (!inst->CastToStoreStatic()->GetNeedBarrier()) {
+        return;
+    }
+    auto barrierType {runtime->GetPostType()};
+    // We should decide here pass to barrier class+offset or managed object.
+    // For other store we already pass obj+offset and while call EncodeInterGenerationalBarrier offset is ignored.
+    // StaticStore is specific case where gen GC expects barrier for managed object instead of class which field is
+    // updated.
+    if (barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER) {
+        enc->GetCodegen()->CreatePostWRB(inst, mem, src1, INVALID_REGISTER);
+    } else {
         auto arch = enc->GetEncoder()->GetArch();
         auto tmpReg = enc->GetCodegen()->ConvertInstTmpReg(inst, DataType::GetIntTypeForReference(arch));
         enc->GetEncoder()->EncodeLdr(tmpReg, false, MemRef(src0, runtime->GetManagedClassOffset(enc->GetArch())));

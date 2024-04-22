@@ -44,11 +44,7 @@ using ark::llvmbackend::builtins::LenArray;
 using ark::llvmbackend::builtins::LoadClass;
 using ark::llvmbackend::builtins::LoadInitClass;
 using ark::llvmbackend::builtins::LoadString;
-using ark::llvmbackend::builtins::PostWRB;
-using ark::llvmbackend::builtins::PreWRB;
 using ark::llvmbackend::builtins::ResolveVirtual;
-using ark::llvmbackend::gc_barriers::EmitPostWRB;
-using ark::llvmbackend::gc_barriers::EmitPreWRB;
 using ark::llvmbackend::irtoc_function_utils::IsNoAliasIrtocFunction;
 #ifndef NDEBUG
 using ark::llvmbackend::irtoc_function_utils::IsPtrIgnIrtocFunction;
@@ -1983,7 +1979,7 @@ void LLVMIrConstructor::CreateDeoptimizationBranch(Inst *inst, llvm::Value *deop
         call->addFnAttr(llvm::Attribute::get(call->getContext(), "may-deoptimize"));
     } else {
         if (exception == RuntimeInterface::EntrypointId::NULL_POINTER_EXCEPTION &&
-            ark::compiler::g_options.IsCompilerImplicitNullCheck()) {
+            compiler::g_options.IsCompilerImplicitNullCheck()) {
             ASSERT(inst->IsNullCheck());
             auto *metadata = llvm::MDNode::get(ctx, {});
             branch->setMetadata(llvm::LLVMContext::MD_make_implicit, metadata);
@@ -2050,31 +2046,32 @@ ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Ins
 void LLVMIrConstructor::CreatePreWRB(Inst *inst, llvm::Value *mem)
 {
     auto barrierType = GetGraph()->GetRuntime()->GetPreType();
-    if (barrierType == ark::mem::BarrierType::PRE_WRB_NONE) {
+    auto isVolatile = IsVolatileMemInst(inst);
+    if (barrierType == mem::BarrierType::PRE_WRB_NONE) {
         ASSERT(GetGraph()->SupportManagedCode());
         return;
     }
-    ASSERT(barrierType == ark::mem::BarrierType::PRE_SATB_BARRIER);
+    ASSERT(barrierType == mem::BarrierType::PRE_SATB_BARRIER);
 
     if (llvmbackend::g_options.IsLlvmBuiltinWrb() && !arkInterface_->IsIrtocMode()) {
-        auto builtin = PreWRB(func_->getParent(), mem->getType()->getPointerAddressSpace());
-        builder_.CreateCall(builtin, {mem, builder_.getInt1(IsVolatileMemInst(inst))});
+        auto builtin = llvmbackend::builtins::PreWRB(func_->getParent(), mem->getType()->getPointerAddressSpace());
+        builder_.CreateCall(builtin, {mem, builder_.getInt1(isVolatile)});
         return;
     }
     auto &ctx = func_->getContext();
     auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "pre_wrb_out"), func_);
-    EmitPreWRB(&builder_, mem, IsVolatileMemInst(inst), outBb, arkInterface_, GetThreadRegValue());
+    llvmbackend::gc_barriers::EmitPreWRB(&builder_, mem, isVolatile, outBb, arkInterface_, GetThreadRegValue());
 }
 
 void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value *offset, llvm::Value *value)
 {
     auto barrierType = GetGraph()->GetRuntime()->GetPostType();
-    if (barrierType == ark::mem::BarrierType::POST_WRB_NONE) {
+    if (barrierType == mem::BarrierType::POST_WRB_NONE) {
         ASSERT(GetGraph()->SupportManagedCode());
         return;
     }
-    ASSERT(barrierType == ark::mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
-           barrierType == ark::mem::BarrierType::POST_INTERREGION_BARRIER);
+    ASSERT(barrierType == mem::BarrierType::POST_INTERGENERATIONAL_BARRIER ||
+           barrierType == mem::BarrierType::POST_INTERREGION_BARRIER);
 
     Inst *secondValue;
     Inst *val = InstStoredValue(inst, &secondValue);
@@ -2084,16 +2081,14 @@ void LLVMIrConstructor::CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value 
         return;
     }
 
-    if (llvmbackend::g_options.IsLlvmBuiltinWrb() && !arkInterface_->IsIrtocMode()) {
-        auto builtin = PostWRB(func_->getParent());
+    bool irtoc = arkInterface_->IsIrtocMode();
+    if (!irtoc && llvmbackend::g_options.IsLlvmBuiltinWrb()) {
+        auto builtin = llvmbackend::builtins::PostWRB(func_->getParent(), mem->getType()->getPointerAddressSpace());
         builder_.CreateCall(builtin, {mem, offset, value});
         return;
     }
-    llvm::Value *frameRegValue = nullptr;
-    if (arkInterface_->IsIrtocMode() && GetGraph()->GetArch() == Arch::X86_64) {
-        frameRegValue = GetRealFrameRegValue();
-    }
-    EmitPostWRB(&builder_, mem, offset, value, arkInterface_, GetThreadRegValue(), frameRegValue);
+    auto frame = (irtoc && GetGraph()->GetArch() == Arch::X86_64) ? GetRealFrameRegValue() : nullptr;
+    llvmbackend::gc_barriers::EmitPostWRB(&builder_, mem, offset, value, arkInterface_, GetThreadRegValue(), frame);
 }
 
 llvm::Value *LLVMIrConstructor::CreateMemoryFence(memory_order::Order order)
@@ -2954,7 +2949,7 @@ void LLVMIrConstructor::VisitNullCheck(GraphVisitor *v, Inst *inst)
     auto obj = ctor->GetInputValue(inst, 0);
     auto obj64 = obj;
 
-    if (ark::compiler::g_options.IsCompilerImplicitNullCheck()) {
+    if (compiler::g_options.IsCompilerImplicitNullCheck()) {
         // LLVM's ImplicitNullChecks pass can't operate with 32-bit pointers, but it is enough
         // to create address space cast to an usual 64-bit pointer before comparing with null.
         obj64 = ctor->builder_.CreateAddrSpaceCast(obj, ctor->builder_.getPtrTy());
@@ -4311,7 +4306,8 @@ void LLVMIrConstructor::VisitStoreStatic(GraphVisitor *v, Inst *inst)
     ASSERT_TYPE(klass, ctor->builder_.getPtrTy());
     auto value = ctor->GetInputValue(inst, 1);
 
-    auto offset = ctor->GetGraph()->GetRuntime()->GetFieldOffset(inst->CastToStoreStatic()->GetObjField());
+    auto runtime = ctor->GetGraph()->GetRuntime();
+    auto offset = runtime->GetFieldOffset(inst->CastToStoreStatic()->GetObjField());
     auto fieldPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), klass, offset);
 
     // Pre
@@ -4322,8 +4318,13 @@ void LLVMIrConstructor::VisitStoreStatic(GraphVisitor *v, Inst *inst)
     ctor->CreateStoreWithOrdering(value, fieldPtr, ToAtomicOrdering(inst->CastToStoreStatic()->GetVolatile()));
     // Post
     if (inst->CastToStoreStatic()->GetNeedBarrier()) {
-        auto managed = ctor->CreateLoadManagedClassFromClass(klass);
-        ctor->CreatePostWRB(inst, managed, ctor->builder_.getInt32(0), value);
+        auto barrierType = runtime->GetPostType();
+        if (barrierType == mem::BarrierType::POST_INTERREGION_BARRIER) {
+            ctor->CreatePostWRB(inst, klass, ctor->builder_.getInt32(offset), value);
+        } else {
+            auto managed = ctor->CreateLoadManagedClassFromClass(klass);
+            ctor->CreatePostWRB(inst, managed, ctor->builder_.getInt32(0), value);
+        }
     }
 }
 
@@ -4612,7 +4613,7 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
     arkInterface_->PutFunction(graph_->GetMethod(), func_);
 
     if (graph->SupportManagedCode()) {
-        func_->setGC(std::string {ark::llvmbackend::LLVMArkInterface::GC_STRATEGY});
+        func_->setGC(std::string {llvmbackend::LLVMArkInterface::GC_STRATEGY});
     }
 
     auto klassId = graph_->GetRuntime()->GetClassIdForMethod(graph_->GetMethod());
