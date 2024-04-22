@@ -391,12 +391,12 @@ groups:
         acc: inout:top
         opcode_idx: [0x66]
         format: [op_none]
-      - sig: getiterator imm
+      - sig: getiterator imm:u16
         acc: inout:top
         opcode_idx: [0x67, 0xab]
         format: [op_imm_8, op_imm_16]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: closeiterator imm, v:in:top
+      - sig: closeiterator imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x68, 0xac]
         format: [op_imm_8_v_8, op_imm_16_v_8]
@@ -406,27 +406,27 @@ groups:
         opcode_idx: [0x02]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
-      - sig: getasynciterator imm
+      - sig: getasynciterator imm:u8
         acc: inout:top
         opcode_idx: [0xd7]
         format: [op_imm_8]
         properties: [ic_slot, eight_bit_ic]
-      - sig: ldprivateproperty imm1, imm2, imm3
+      - sig: ldprivateproperty imm1:u8, imm2:u16, imm3:u16
         acc: inout:top
         opcode_idx: [0xd8]
         format: [op_imm1_8_imm2_16_imm3_16]
         properties: [ic_slot, two_slot, eight_bit_ic]
-      - sig: stprivateproperty imm1, imm2, imm3, v:in:top
+      - sig: stprivateproperty imm1:u8, imm2:u16, imm3:u16, v:in:top
         acc: in:top
         opcode_idx: [0xd9]
         format: [op_imm1_8_imm2_16_imm3_16_v_8]
         properties: [ic_slot, two_slot, eight_bit_ic]
-      - sig: testin imm1, imm2, imm3
+      - sig: testin imm1:u8, imm2:u16, imm3:u16
         acc: inout:top
         opcode_idx: [0xda]
         format: [op_imm1_8_imm2_16_imm3_16]
         properties: [ic_slot, two_slot, eight_bit_ic]
-      - sig: definefieldbyname imm, string_id, v:in:top
+      - sig: definefieldbyname imm:u8, string_id, v:in:top
         acc: in:top
         opcode_idx: [0xdb]
         format: [op_imm_8_id_16_v_8]
@@ -451,7 +451,7 @@ groups:
         acc: out:top
         opcode_idx: [0x04]
         format: [op_none]
-      - sig: createemptyarray imm
+      - sig: createemptyarray imm:u16
         acc: out:top
         opcode_idx: [0x05, 0x80]
         format: [op_imm_8, op_imm_16]
@@ -464,70 +464,70 @@ groups:
         acc: out:top
         opcode_idx: [0xb2]
         format: [op_v1_8_v2_8]
-      - sig: createobjectwithexcludedkeys imm, v1:in:top, v2:in:top
+      - sig: createobjectwithexcludedkeys imm:u8, v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0xb3]
         format: [op_imm_8_v1_8_v2_8]
-      - sig: wide.createobjectwithexcludedkeys imm, v1:in:top, v2:in:top
+      - sig: wide.createobjectwithexcludedkeys imm:u16, v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x00]
         format: [pref_op_imm_16_v1_8_v2_8]
         prefix: wide
-      - sig: createarraywithbuffer imm, literalarray_id
+      - sig: createarraywithbuffer imm:u16, literalarray_id
         acc: out:top
         opcode_idx: [0x06, 0x81]
         format: [op_imm_8_id_16, op_imm_16_id_16]
         properties: [ic_slot, one_slot, eight_sixteen_bit_ic, literalarray_id]
-      - sig: deprecated.createarraywithbuffer imm
+      - sig: deprecated.createarraywithbuffer imm:u16
         acc: out:top
         opcode_idx: [0x03]
         format: [pref_op_imm_16]
         prefix: deprecated
-      - sig: createobjectwithbuffer imm, literalarray_id
+      - sig: createobjectwithbuffer imm:u16, literalarray_id
         opcode_idx: [0x07, 0x82]
         acc: out:top
         format: [op_imm_8_id_16, op_imm_16_id_16]
         properties: [ic_slot, one_slot, eight_sixteen_bit_ic, literalarray_id]
-      - sig: deprecated.createobjectwithbuffer imm
+      - sig: deprecated.createobjectwithbuffer imm:u16
         acc: out:top
         opcode_idx: [0x04]
         format: [pref_op_imm_16]
         prefix: deprecated
-      - sig: createregexpwithliteral imm1, string_id, imm2
+      - sig: createregexpwithliteral imm1:u16, string_id, imm2:u8
         acc: out:top
         opcode_idx: [0x71, 0x72]
         format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
         properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: newobjapply imm, v:in:top
+      - sig: newobjapply imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0xb4, 0xb5]
         format: [op_imm_8_v_8, op_imm_16_v_8]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: newobjrange imm1, imm2, v:in:top
+      - sig: newobjrange imm1:u16, imm2:u8, v:in:top
         acc: out:top
         opcode_idx: [0x08, 0x83]
         format: [op_imm1_8_imm2_8_v_8, op_imm1_16_imm2_8_v_8]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: wide.newobjrange imm, v:in:top
+      - sig: wide.newobjrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x01]
         format: [pref_op_imm_16_v_8]
         prefix: wide
-      - sig: newlexenv imm
+      - sig: newlexenv imm:u8
         acc: out:top
         opcode_idx: [0x09]
         format: [op_imm_8]
-      - sig: wide.newlexenv imm
+      - sig: wide.newlexenv imm:u16
         acc: out:top
         opcode_idx: [0x02]
         format: [pref_op_imm_16]
         prefix: wide
-      - sig: newlexenvwithname imm, literalarray_id
+      - sig: newlexenvwithname imm:u8, literalarray_id
         acc: out:top
         opcode_idx: [0xb6]
         format: [op_imm_8_id_16]
         properties: [literalarray_id]
-      - sig: wide.newlexenvwithname imm, literalarray_id
+      - sig: wide.newlexenvwithname imm:u16, literalarray_id
         acc: out:top
         opcode_idx: [0x03]
         format: [pref_op_imm_16_id_16]
@@ -557,92 +557,92 @@ groups:
     semantics: |
       skip
     instructions:
-      - sig: add2 imm, v:in:top
+      - sig: add2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x0a]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: sub2 imm, v:in:top
+      - sig: sub2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x0b]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: mul2 imm, v:in:top
+      - sig: mul2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x0c]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: div2 imm, v:in:top
+      - sig: div2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x0d]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: mod2 imm, v:in:top
+      - sig: mod2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x0e]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: eq imm, v:in:top
+      - sig: eq imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x0f]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: noteq imm, v:in:top
+      - sig: noteq imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x10]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: less imm, v:in:top
+      - sig: less imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x11]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: lesseq imm, v:in:top
+      - sig: lesseq imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x12]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: greater imm, v:in:top
+      - sig: greater imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x13]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: greatereq imm, v:in:top
+      - sig: greatereq imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x14]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: shl2 imm, v:in:top
+      - sig: shl2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x15]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: shr2 imm, v:in:top
+      - sig: shr2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x16]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: ashr2 imm, v:in:top
+      - sig: ashr2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x17]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: and2 imm, v:in:top
+      - sig: and2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x18]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: or2 imm, v:in:top
+      - sig: or2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x19]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: xor2 imm, v:in:top
+      - sig: xor2 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x1a]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: exp imm, v:in:top
+      - sig: exp imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x1b]
         format: [op_imm_8_v_8]
@@ -663,12 +663,12 @@ groups:
     semantics: |
       skip
     instructions:
-      - sig: typeof imm
+      - sig: typeof imm:u16
         acc: inout:top
         opcode_idx: [0x1c, 0x84]
         format: [op_imm_8, op_imm_16]
         properties: [ic_slot, two_slot, sixteen_bit_ic]
-      - sig: tonumber imm
+      - sig: tonumber imm:u8
         acc: inout:top
         opcode_idx: [0x1d]
         format: [op_imm_8]
@@ -678,7 +678,7 @@ groups:
         opcode_idx: [0x05]
         format: [pref_op_v_8]
         prefix: deprecated
-      - sig: tonumeric imm
+      - sig: tonumeric imm:u8
         acc: inout:top
         opcode_idx: [0x1e]
         format: [op_imm_8]
@@ -688,7 +688,7 @@ groups:
         acc: inout:top
         prefix: deprecated
         format: [pref_op_v_8]
-      - sig: neg imm
+      - sig: neg imm:u8
         acc: inout:top
         opcode_idx: [0x1f]
         format: [op_imm_8]
@@ -698,7 +698,7 @@ groups:
         opcode_idx: [0x07]
         format: [pref_op_v_8]
         prefix: deprecated
-      - sig: not imm
+      - sig: not imm:u8
         acc: inout:top
         opcode_idx: [0x20]
         format: [op_imm_8]
@@ -708,7 +708,7 @@ groups:
         opcode_idx: [0x08]
         prefix: deprecated
         format: [pref_op_v_8]
-      - sig: inc imm
+      - sig: inc imm:u8
         acc: inout:top
         opcode_idx: [0x21]
         format: [op_imm_8]
@@ -718,7 +718,7 @@ groups:
         opcode_idx: [0x09]
         prefix: deprecated
         format: [pref_op_v_8]
-      - sig: dec imm
+      - sig: dec imm:u8
         acc: inout:top
         opcode_idx: [0x22]
         format: [op_imm_8]
@@ -752,22 +752,22 @@ groups:
     semantics: |
       skip
     instructions:
-      - sig: isin imm, v:in:top
+      - sig: isin imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x25]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: instanceof imm, v:in:top
+      - sig: instanceof imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x26]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: strictnoteq imm, v:in:top
+      - sig: strictnoteq imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x27]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, one_slot, eight_bit_ic]
-      - sig: stricteq imm, v:in:top
+      - sig: stricteq imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x28]
         format: [op_imm_8_v_8]
@@ -793,13 +793,13 @@ groups:
         opcode_idx: [0x00]
         format: [pref_op_none]
         prefix: callruntime
-      - sig: callruntime.definefieldbyvalue imm, v1:in:top, v2:in:top
+      - sig: callruntime.definefieldbyvalue imm:u8, v1:in:top, v2:in:top
         acc: in:top
         opcode_idx: [0x01]
         prefix: callruntime
         format: [pref_op_imm_8_v1_8_v2_8]
         properties: [ic_slot, two_slot, eight_bit_ic]
-      - sig: callruntime.definefieldbyindex imm1, imm2, v:in:top
+      - sig: callruntime.definefieldbyindex imm1:u8, imm2:u32, v:in:top
         acc: in:top
         opcode_idx: [0x02]
         prefix: callruntime
@@ -810,41 +810,41 @@ groups:
         opcode_idx: [0x03]
         format: [pref_op_none]
         prefix: callruntime
-      - sig: callruntime.createprivateproperty imm, literalarray_id
+      - sig: callruntime.createprivateproperty imm:u16, literalarray_id
         acc: none
         opcode_idx: [0x04]
         format: [pref_op_imm_16_id_16]
         prefix: callruntime
         properties: [literalarray_id]
-      - sig: callruntime.defineprivateproperty imm1, imm2, imm3, v:in:top
+      - sig: callruntime.defineprivateproperty imm1:u8, imm2:u16, imm3:u16, v:in:top
         acc: in:top
         opcode_idx: [0x05]
         format: [pref_op_imm1_8_imm2_16_imm3_16_v_8]
         prefix: callruntime
         properties: [ic_slot, two_slot, eight_bit_ic]
-      - sig: callruntime.callinit imm, v:in:top
+      - sig: callruntime.callinit imm:u8, v:in:top
         acc: in:top
         opcode_idx: [0x06]
         format: [pref_op_imm_8_v_8]
         prefix: callruntime
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: callruntime.definesendableclass imm1, method_id, literalarray_id, imm2, v:in:top
+      - sig: callruntime.definesendableclass imm1:u16, method_id, literalarray_id, imm2:u16, v:in:top
         acc: out:top
         opcode_idx: [0x07]
         format: [pref_op_imm1_16_id1_16_id2_16_imm2_16_v_8]
         prefix: callruntime
         properties: [method_id, ic_slot, one_slot, sixteen_bit_ic, literalarray_id]
-      - sig: callruntime.ldsendableclass imm
+      - sig: callruntime.ldsendableclass imm:u16
         acc: out:top
         opcode_idx: [0x08]
         format: [pref_op_imm_16]
         prefix: callruntime
-      - sig: callruntime.ldsendableexternalmodulevar imm
+      - sig: callruntime.ldsendableexternalmodulevar imm:u8
         acc: out:top
         opcode_idx: [0x09]
         format: [pref_op_imm_8]
         prefix: callruntime
-      - sig: callruntime.wideldsendableexternalmodulevar imm
+      - sig: callruntime.wideldsendableexternalmodulevar imm:u16
         acc: out:top
         opcode_idx: [0x0a]
         format: [pref_op_imm_16]
@@ -902,7 +902,7 @@ groups:
         opcode_idx: [0x06]
         format: [pref_op_v1_8_v2_8]
         prefix: throw
-      - sig: throw.ifsupernotcorrectcall imm
+      - sig: throw.ifsupernotcorrectcall imm:u16
         acc: in:top
         opcode_idx: [0x07, 0x08]
         format: [pref_op_imm_8, pref_op_imm_16]
@@ -929,7 +929,7 @@ groups:
     semantics: |
       skip
     instructions:
-      - sig: callarg0 imm
+      - sig: callarg0 imm:u8
         acc: inout:top
         opcode_idx: [0x29]
         format: [op_imm_8]
@@ -939,7 +939,7 @@ groups:
         opcode_idx: [0x0b]
         format: [pref_op_v_8]
         prefix: deprecated
-      - sig: callarg1 imm, v:in:top
+      - sig: callarg1 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x2a]
         format: [op_imm_8_v_8]
@@ -949,7 +949,7 @@ groups:
         opcode_idx: [0x0c]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
-      - sig: callargs2 imm, v1:in:top, v2:in:top
+      - sig: callargs2 imm:u8, v1:in:top, v2:in:top
         acc: inout:top
         opcode_idx: [0x2b]
         format: [op_imm_8_v1_8_v2_8]
@@ -959,7 +959,7 @@ groups:
         opcode_idx: [0x0d]
         format: [pref_op_v1_8_v2_8_v3_8]
         prefix: deprecated
-      - sig: callargs3 imm, v1:in:top, v2:in:top, v3:in:top
+      - sig: callargs3 imm:u8, v1:in:top, v2:in:top, v3:in:top
         acc: inout:top
         opcode_idx: [0x2c]
         format: [op_imm_8_v1_8_v2_8_v3_8]
@@ -969,27 +969,27 @@ groups:
         opcode_idx: [0x0e]
         format: [pref_op_v1_8_v2_8_v3_8_v4_8]
         prefix: deprecated
-      - sig: callrange imm1, imm2, v:in:top
+      - sig: callrange imm1:u8, imm2:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x73]
         format: [op_imm1_8_imm2_8_v_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: wide.callrange imm, v:in:top
+      - sig: wide.callrange imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x04]
         format: [pref_op_imm_16_v_8]
         prefix: wide
-      - sig: deprecated.callrange imm, v:in:top
+      - sig: deprecated.callrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x0f]
         format: [pref_op_imm_16_v_8]
         prefix: deprecated
-      - sig: supercallspread imm, v:in:top
+      - sig: supercallspread imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0xb9]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: apply imm, v1:in:top, v2:in:top
+      - sig: apply imm:u8, v1:in:top, v2:in:top
         acc: inout:top
         opcode_idx: [0xba]
         format: [op_imm_8_v1_8_v2_8]
@@ -999,57 +999,57 @@ groups:
         opcode_idx: [0x10]
         format: [pref_op_v1_8_v2_8_v3_8]
         prefix: deprecated
-      - sig: callthis0 imm, v:in:top
+      - sig: callthis0 imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x2d]
         format: [op_imm_8_v_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: callthis1 imm, v1:in:top, v2:in:top
+      - sig: callthis1 imm:u8, v1:in:top, v2:in:top
         acc: inout:top
         opcode_idx: [0x2e]
         format: [op_imm_8_v1_8_v2_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: callthis2 imm, v1:in:top, v2:in:top, v3:in:top
+      - sig: callthis2 imm:u8, v1:in:top, v2:in:top, v3:in:top
         acc: inout:top
         opcode_idx: [0x2f]
         format: [op_imm_8_v1_8_v2_8_v3_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: callthis3 imm, v1:in:top, v2:in:top, v3:in:top, v4:in:top
+      - sig: callthis3 imm:u8, v1:in:top, v2:in:top, v3:in:top, v4:in:top
         acc: inout:top
         opcode_idx: [0x30]
         format: [op_imm_8_v1_8_v2_8_v3_8_v4_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: callthisrange imm1, imm2, v:in:top
+      - sig: callthisrange imm1:u8, imm2:u8, v:in:top
         acc: inout:top
         opcode_idx: [0x31]
         format: [op_imm1_8_imm2_8_v_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: wide.callthisrange imm, v:in:top
+      - sig: wide.callthisrange imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x05]
         format: [pref_op_imm_16_v_8]
         prefix: wide
-      - sig: deprecated.callthisrange imm, v:in:top
+      - sig: deprecated.callthisrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x11]
         format: [pref_op_imm_16_v_8]
         prefix: deprecated
-      - sig: supercallthisrange imm1, imm2, v:in:top
+      - sig: supercallthisrange imm1:u8, imm2:u8, v:in:top
         acc: out:top
         opcode_idx: [0x32]
         format: [op_imm1_8_imm2_8_v_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: wide.supercallthisrange imm, v:in:top
+      - sig: wide.supercallthisrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x06]
         format: [pref_op_imm_16_v_8]
         prefix: wide
-      - sig: supercallarrowrange imm1, imm2, v:in:top
+      - sig: supercallarrowrange imm1:u8, imm2:u8, v:in:top
         acc: inout:top
         opcode_idx: [0xbb]
         format: [op_imm1_8_imm2_8_v_8]
         properties: [jit_ic_slot, two_slot, eight_bit_ic]
-      - sig: wide.supercallarrowrange imm, v:in:top
+      - sig: wide.supercallarrowrange imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x07]
         format: [pref_op_imm_16_v_8]
@@ -1074,22 +1074,22 @@ groups:
         acc: inout:top
         opcode_idx: [0xbc]
         format: [op_v1_8_v2_8_v3_8_v4_8]
-      - sig: definefunc imm1, method_id, imm2
+      - sig: definefunc imm1:u16, method_id, imm2:u8
         acc: out:top
         opcode_idx: [0x33, 0x74]
         format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
         properties: [method_id, ic_slot, one_slot, eight_sixteen_bit_ic]
-      - sig: definemethod imm1, method_id, imm2
+      - sig: definemethod imm1:u16, method_id, imm2:u8
         acc: inout:top
         opcode_idx: [0x34, 0xbe]
         format: [op_imm1_8_id_16_imm2_8, op_imm1_16_id_16_imm2_8]
         properties: [method_id, ic_slot, one_slot, eight_sixteen_bit_ic]
-      - sig: defineclasswithbuffer imm1, method_id, literalarray_id, imm2, v:in:top
+      - sig: defineclasswithbuffer imm1:u16, method_id, literalarray_id, imm2:u16, v:in:top
         acc: out:top
         opcode_idx: [0x35, 0x75]
         format: [op_imm1_8_id1_16_id2_16_imm2_16_v_8, op_imm1_16_id1_16_id2_16_imm2_16_v_8]
         properties: [method_id, ic_slot, one_slot, eight_sixteen_bit_ic, literalarray_id]
-      - sig: deprecated.defineclasswithbuffer method_id, imm1, imm2, v1:in:top, v2:in:top
+      - sig: deprecated.defineclasswithbuffer method_id, imm1:u16, imm2:u16, v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x12]
         format: [pref_op_id_16_imm1_16_imm2_16_v1_8_v2_8]
@@ -1129,7 +1129,7 @@ groups:
         opcode_idx: [0x14]
         format: [pref_op_v_8]
         prefix: deprecated
-      - sig: gettemplateobject imm
+      - sig: gettemplateobject imm:u16
         acc: inout:top
         opcode_idx: [0x76, 0xc1]
         format: [op_imm_8, op_imm_16]
@@ -1183,7 +1183,7 @@ groups:
         acc: inout:top
         opcode_idx: [0xc6]
         format: [op_v1_8_v2_8]
-      - sig: setobjectwithproto imm, v:in:top
+      - sig: setobjectwithproto imm:u16, v:in:top
         acc: in:top
         opcode_idx: [0x77, 0xc7]
         format: [op_imm_8_v_8, op_imm_16_v_8]
@@ -1193,7 +1193,7 @@ groups:
         opcode_idx: [0x1a]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
-      - sig: ldobjbyvalue imm, v:in:top
+      - sig: ldobjbyvalue imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x37, 0x85]
         format: [op_imm_8_v_8, op_imm_16_v_8]
@@ -1203,17 +1203,17 @@ groups:
         opcode_idx: [0x1b]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
-      - sig: stobjbyvalue imm, v1:in:top, v2:in:top
+      - sig: stobjbyvalue imm:u16, v1:in:top, v2:in:top
         acc: in:top
         opcode_idx: [0x38, 0x86]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: stownbyvalue imm, v1:in:top, v2:in:top
+      - sig: stownbyvalue imm:u16, v1:in:top, v2:in:top
         acc: in:top
         opcode_idx: [0x78, 0xc8]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: ldsuperbyvalue imm, v:in:top
+      - sig: ldsuperbyvalue imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x39, 0x87]
         format: [op_imm_8_v_8, op_imm_16_v_8]
@@ -1223,42 +1223,42 @@ groups:
         opcode_idx: [0x1c]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
-      - sig: stsuperbyvalue imm, v1:in:top, v2:in:top
+      - sig: stsuperbyvalue imm:u16, v1:in:top, v2:in:top
         acc: in:top
         opcode_idx: [0xc9, 0xca]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: ldobjbyindex imm1, imm2
+      - sig: ldobjbyindex imm1:u16, imm2:u16
         acc: inout:top
         opcode_idx: [0x3a, 0x88]
         format: [op_imm1_8_imm2_16, op_imm1_16_imm2_16]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: wide.ldobjbyindex imm
+      - sig: wide.ldobjbyindex imm:u32
         acc: inout:top
         opcode_idx: [0x08]
         format: [pref_op_imm_32]
         prefix: wide
-      - sig: deprecated.ldobjbyindex v:in:top, imm
+      - sig: deprecated.ldobjbyindex v:in:top, imm:u32
         acc: out:top
         opcode_idx: [0x1d]
         format: [pref_op_v_8_imm_32]
         prefix: deprecated
-      - sig: stobjbyindex imm1, v:in:top, imm2
+      - sig: stobjbyindex imm1:u16, v:in:top, imm2:u16
         acc: in:top
         opcode_idx: [0x3b, 0x89]
         format: [op_imm1_8_v_8_imm2_16, op_imm1_16_v_8_imm2_16]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: wide.stobjbyindex v:in:top, imm
+      - sig: wide.stobjbyindex v:in:top, imm:u32
         acc: in:top
         opcode_idx: [0x09]
         format: [pref_op_v_8_imm_32]
         prefix: wide
-      - sig: stownbyindex imm1, v:in:top, imm2
+      - sig: stownbyindex imm1:u16, v:in:top, imm2:u16
         acc: in:top
         opcode_idx: [0x79, 0xcb]
         format: [op_imm1_8_v_8_imm2_16, op_imm1_16_v_8_imm2_16]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: wide.stownbyindex v:in:top, imm
+      - sig: wide.stownbyindex v:in:top, imm:u32
         acc: in:top
         opcode_idx: [0x0a]
         format: [pref_op_v_8_imm_32]
@@ -1281,43 +1281,43 @@ groups:
         opcode_idx: [0x1f]
         format: [pref_op_v1_8_v2_8_v3_8]
         prefix: deprecated
-      - sig: copyrestargs imm
+      - sig: copyrestargs imm:u8
         acc: out:top
         opcode_idx: [0xcf]
         format: [op_imm_8]
-      - sig: wide.copyrestargs imm
+      - sig: wide.copyrestargs imm:u16
         acc: out:top
         opcode_idx: [0x0b]
         format: [pref_op_imm_16]
         prefix: wide
-      - sig: ldlexvar imm1, imm2
+      - sig: ldlexvar imm1:u8, imm2:u8
         acc: out:top
         opcode_idx: [0x3c, 0x8a]
         format: [op_imm1_4_imm2_4, op_imm1_8_imm2_8]
-      - sig: wide.ldlexvar imm1, imm2
+      - sig: wide.ldlexvar imm1:u16, imm2:u16
         acc: out:top
         opcode_idx: [0x0c]
         format: [pref_op_imm1_16_imm2_16]
         prefix: wide
-      - sig: stlexvar imm1, imm2
+      - sig: stlexvar imm1:u8, imm2:u8
         acc: in:top
         opcode_idx: [0x3d, 0x8b]
         format: [op_imm1_4_imm2_4, op_imm1_8_imm2_8]
-      - sig: wide.stlexvar imm1, imm2
+      - sig: wide.stlexvar imm1:u16, imm2:u16
         acc: in:top
         opcode_idx: [0x0d]
         format: [pref_op_imm1_16_imm2_16]
         prefix: wide
-      - sig: deprecated.stlexvar imm1, imm2, v:in:top
+      - sig: deprecated.stlexvar imm1:u16, imm2:u16, v:in:top
         acc: none
         opcode_idx: [0x20, 0x21, 0x22]
         format: [pref_op_imm1_4_imm2_4_v_8, pref_op_imm1_8_imm2_8_v_8, pref_op_imm1_16_imm2_16_v_8]
         prefix: deprecated
-      - sig: getmodulenamespace imm
+      - sig: getmodulenamespace imm:u8
         acc: out:top
         opcode_idx: [0x7b]
         format: [op_imm_8]
-      - sig: wide.getmodulenamespace imm
+      - sig: wide.getmodulenamespace imm:u16
         acc: out:top
         opcode_idx: [0x0e]
         format: [pref_op_imm_16]
@@ -1328,11 +1328,11 @@ groups:
         format: [pref_op_id_32]
         properties: [string_id]
         prefix: deprecated
-      - sig: stmodulevar imm
+      - sig: stmodulevar imm:u8
         acc: in:top
         opcode_idx: [0x7c]
         format: [op_imm_8]
-      - sig: wide.stmodulevar imm
+      - sig: wide.stmodulevar imm:u16
         acc: in:top
         opcode_idx: [0x0f]
         format: [pref_op_imm_16]
@@ -1343,27 +1343,27 @@ groups:
         format: [pref_op_id_32]
         properties: [string_id]
         prefix: deprecated
-      - sig: tryldglobalbyname imm, string_id
+      - sig: tryldglobalbyname imm:u16, string_id
         acc: out:top
         opcode_idx: [0x3f, 0x8c]
         format: [op_imm_8_id_16, op_imm_16_id_16]
         properties: [string_id, ic_slot, one_slot, eight_sixteen_bit_ic]
-      - sig: trystglobalbyname imm, string_id
+      - sig: trystglobalbyname imm:u16, string_id
         acc: in:top
         opcode_idx: [0x40, 0x8d]
         format: [op_imm_8_id_16, op_imm_16_id_16]
         properties: [string_id, ic_slot, one_slot, eight_sixteen_bit_ic]
-      - sig: ldglobalvar imm, string_id
+      - sig: ldglobalvar imm:u16, string_id
         acc: out:top
         opcode_idx: [0x41]
         format: [op_imm_16_id_16]
         properties: [string_id, ic_slot, one_slot, sixteen_bit_ic]
-      - sig: stglobalvar imm, string_id
+      - sig: stglobalvar imm:u16, string_id
         acc: in:top
         opcode_idx: [0x7f]
         format: [op_imm_16_id_16]
         properties: [string_id, ic_slot, one_slot, sixteen_bit_ic]
-      - sig: ldobjbyname imm, string_id
+      - sig: ldobjbyname imm:u16, string_id
         acc: inout:top
         opcode_idx: [0x42, 0x90]
         format: [op_imm_8_id_16, op_imm_16_id_16]
@@ -1374,17 +1374,17 @@ groups:
         format: [pref_op_id_32_v_8]
         properties: [string_id]
         prefix: deprecated
-      - sig: stobjbyname imm, string_id, v:in:top
+      - sig: stobjbyname imm:u16, string_id, v:in:top
         acc: in:top
         opcode_idx: [0x43, 0x91]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
         properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: stownbyname imm, string_id, v:in:top
+      - sig: stownbyname imm:u16, string_id, v:in:top
         acc: in:top
         opcode_idx: [0x7a, 0xcc]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
         properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: ldsuperbyname imm, string_id
+      - sig: ldsuperbyname imm:u16, string_id
         acc: inout:top
         opcode_idx: [0x46, 0x92]
         format: [op_imm_8_id_16, op_imm_16_id_16]
@@ -1395,36 +1395,36 @@ groups:
         format: [pref_op_id_32_v_8]
         properties: [string_id]
         prefix: deprecated
-      - sig: stsuperbyname imm, string_id, v:in:top
+      - sig: stsuperbyname imm:u16, string_id, v:in:top
         acc: in:top
         opcode_idx: [0xd0, 0xd1]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
         properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: ldlocalmodulevar imm
+      - sig: ldlocalmodulevar imm:u8
         opcode_idx: [0x7d]
         acc: out:top
         format: [op_imm_8]
-      - sig: wide.ldlocalmodulevar imm
+      - sig: wide.ldlocalmodulevar imm:u16
         acc: out:top
         opcode_idx: [0x10]
         format: [pref_op_imm_16]
         prefix: wide
-      - sig: ldexternalmodulevar imm
+      - sig: ldexternalmodulevar imm:u8
         acc: out:top
         opcode_idx: [0x7e]
         format: [op_imm_8]
-      - sig: wide.ldexternalmodulevar imm
+      - sig: wide.ldexternalmodulevar imm:u16
         acc: out:top
         opcode_idx: [0x11]
         format: [pref_op_imm_16]
         prefix: wide
-      - sig: deprecated.ldmodulevar string_id, imm
+      - sig: deprecated.ldmodulevar string_id, imm:u8
         acc: out:top
         opcode_idx: [0x27]
         format: [pref_op_id_32_imm_8]
         prefix: deprecated
         properties: [string_id]
-      - sig: stconsttoglobalrecord imm, string_id
+      - sig: stconsttoglobalrecord imm:u16, string_id
         acc: in:top
         opcode_idx: [0x47]
         format: [op_imm_16_id_16]
@@ -1435,7 +1435,7 @@ groups:
         format: [pref_op_id_32]
         properties: [string_id]
         prefix: deprecated
-      - sig: sttoglobalrecord imm, string_id
+      - sig: sttoglobalrecord imm:u16, string_id
         acc: in:top
         opcode_idx: [0x48]
         format: [op_imm_16_id_16]
@@ -1457,17 +1457,17 @@ groups:
         opcode_idx: [0x2b]
         format: [pref_op_none]
         prefix: deprecated
-      - sig: deprecated.createobjecthavingmethod imm
+      - sig: deprecated.createobjecthavingmethod imm:u16
         acc: inout:top
         opcode_idx: [0x2c]
         format: [pref_op_imm_16]
         prefix: deprecated
-      - sig: stownbyvaluewithnameset imm, v1:in:top, v2:in:top
+      - sig: stownbyvaluewithnameset imm:u16, v1:in:top, v2:in:top
         acc: in:top
         opcode_idx: [0x99, 0xd2]
         format: [op_imm_8_v1_8_v2_8, op_imm_16_v1_8_v2_8]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: stownbynamewithnameset imm, string_id, v:in:top
+      - sig: stownbynamewithnameset imm:u16, string_id, v:in:top
         acc: in:top
         opcode_idx: [0x8e, 0xd4]
         format: [op_imm_8_id_16_v_8, op_imm_16_id_16_v_8]
@@ -1477,32 +1477,32 @@ groups:
         opcode_idx: [0xd3]
         format: [op_id_16]
         properties: [string_id]
-      - sig: ldthisbyname imm, string_id
+      - sig: ldthisbyname imm:u16, string_id
         acc: out:top
         opcode_idx: [0x49, 0x93]
         format: [op_imm_8_id_16, op_imm_16_id_16]
         properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: stthisbyname imm, string_id
+      - sig: stthisbyname imm:u16, string_id
         acc: in:top
         opcode_idx: [0x4a, 0x94]
         format: [op_imm_8_id_16, op_imm_16_id_16]
         properties: [string_id, ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: ldthisbyvalue imm
+      - sig: ldthisbyvalue imm:u16
         acc: inout:top
         opcode_idx: [0x4b, 0x95]
         format: [op_imm_8, op_imm_16]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: stthisbyvalue imm, v:in:top
+      - sig: stthisbyvalue imm:u16, v:in:top
         acc: in:top
         opcode_idx: [0x4c, 0x96]
         format: [op_imm_8_v_8, op_imm_16_v_8]
         properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
-      - sig: wide.ldpatchvar imm
+      - sig: wide.ldpatchvar imm:u16
         acc: out:top
         opcode_idx: [0x12]
         format: [pref_op_imm_16]
         prefix: wide
-      - sig: wide.stpatchvar imm
+      - sig: wide.stpatchvar imm:u16
         acc: in:top
         opcode_idx: [0x13]
         format: [pref_op_imm_16]
@@ -1525,7 +1525,7 @@ groups:
         opcode_idx: [0x2e]
         format: [pref_op_v1_8_v2_8]
         prefix: deprecated
-      - sig: setgeneratorstate imm
+      - sig: setgeneratorstate imm:u8
         acc: in:top
         opcode_idx: [0xd6]
         format: [op_imm_8]
@@ -1563,86 +1563,86 @@ groups:
     pseudo: |
       pc += imm
     instructions:
-      - sig: jmp imm
+      - sig: jmp imm:i32
         acc: none
         opcode_idx: [0x4d, 0x4e, 0x98]
         format: [op_imm_8, op_imm_16, op_imm_32]
-      - sig: jeqz imm
+      - sig: jeqz imm:i32
         acc: in:top
         opcode_idx: [0x4f, 0x50, 0x9a]
         format: [op_imm_8, op_imm_16, op_imm_32]
         properties: [conditional]
-      - sig: jnez imm
+      - sig: jnez imm:i32
         acc: in:top
         opcode_idx: [0x51, 0x9b, 0x9c]
         format: [op_imm_8, op_imm_16, op_imm_32]
         properties: [conditional]
-      - sig: jstricteqz imm
+      - sig: jstricteqz imm:i16
         acc: in:top
         opcode_idx: [0x52, 0x9d]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jnstricteqz imm
+      - sig: jnstricteqz imm:i16
         acc: in:top
         opcode_idx: [0x53, 0x9e]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jeqnull imm
+      - sig: jeqnull imm:i16
         acc: in:top
         opcode_idx: [0x54, 0x9f]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jnenull imm
+      - sig: jnenull imm:i16
         acc: in:top
         opcode_idx: [0x55, 0xa0]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jstricteqnull imm
+      - sig: jstricteqnull imm:i16
         acc: in:top
         opcode_idx: [0x56, 0xa1]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jnstricteqnull imm
+      - sig: jnstricteqnull imm:i16
         acc: in:top
         opcode_idx: [0x57, 0xa2]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jequndefined imm
+      - sig: jequndefined imm:i16
         acc: in:top
         opcode_idx: [0x58, 0xa3]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jneundefined imm
+      - sig: jneundefined imm:i16
         acc: in:top
         opcode_idx: [0x59, 0xa4]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jstrictequndefined imm
+      - sig: jstrictequndefined imm:i16
         acc: in:top
         opcode_idx: [0x5a, 0xa5]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jnstrictequndefined imm
+      - sig: jnstrictequndefined imm:i16
         acc: in:top
         opcode_idx: [0x5b, 0xa6]
         format: [op_imm_8, op_imm_16]
         properties: [conditional]
-      - sig: jeq v:in:top, imm
+      - sig: jeq v:in:top, imm:i16
         acc: in:top
         opcode_idx: [0x5c, 0xa7]
         format: [op_v_8_imm_8, op_v_8_imm_16]
         properties: [conditional]
-      - sig: jne v:in:top, imm
+      - sig: jne v:in:top, imm:i16
         acc: in:top
         opcode_idx: [0x5d, 0xa8]
         format: [op_v_8_imm_8, op_v_8_imm_16]
         properties: [conditional]
-      - sig: jstricteq v:in:top, imm
+      - sig: jstricteq v:in:top, imm:i16
         acc: in:top
         opcode_idx: [0x5e, 0xa9]
         format: [op_v_8_imm_8, op_v_8_imm_16]
         properties: [conditional]
-      - sig: jnstricteq v:in:top, imm
+      - sig: jnstricteq v:in:top, imm:i16
         acc: in:top
         opcode_idx: [0x5f, 0xaa]
         format: [op_v_8_imm_8, op_v_8_imm_16]

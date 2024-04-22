@@ -73,6 +73,8 @@ public:
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;
+    pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
+                                                         panda_file::File::EntityId method_id) const;
 
     const ProgInfo &GetProgInfo() const
     {
@@ -172,8 +174,6 @@ private:
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode o) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(uint8_t o) const;
 
-    pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
-                                                         panda_file::File::EntityId method_id) const;
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
 
     panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;

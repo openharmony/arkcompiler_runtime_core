@@ -25,35 +25,39 @@ pandasm::Ins Disassembler::BytecodeInstructionToPandasmInstruction(BytecodeInstr
 
     const BytecodeInstruction::Format format = bc_ins.GetFormat();
 
-    switch (format) {
-% insns_uniq_sort_fmts.each do |i| # Panda::formats.each do |fmt|
+    switch (bc_ins.GetOpcode()) {
+% Panda::instructions.each do |inst|
 %   imm_count = 0
 %   reg_count = 0
 %   id_count = 0
-    case BytecodeInstruction::Format::<%=i.format.pretty.upcase%>:
+        case BytecodeInstruction::Opcode::<%= inst.opcode.upcase %>:
 %
-%   i.operands.each do |operand|
-%      if (operand.name == :imm)
-%         if (operand.type != "i64")
-        ins.imms.push_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
-%         else 
-        ins.imms.push_back(bc_ins.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>());        
+%   inst.operands.each do |op|
+%      if op.imm?
+%         if op.is_float_imm?
+            ins.imms.push_back(bit_cast<double>(bc_ins.GetImm<BytecodeInstruction::Format::<%=inst.format.pretty.upcase%>, <%=imm_count%>, true>()));
+%         elsif op.is_signed_imm?
+            ins.imms.push_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=inst.format.pretty.upcase%>, <%=imm_count%>, true>()));
+%         elsif op.is_unsigned_imm?
+            ins.imms.push_back(static_cast<int64_t>(bc_ins.GetImm<BytecodeInstruction::Format::<%=inst.format.pretty.upcase%>, <%=imm_count%>, false>()));
+%         else
+%            raise "Incorrect imm type #{op.type}"
 %         end
 %         imm_count += 1
 %
-%      elsif (operand.name == :v)
-        ins.regs.push_back(bc_ins.GetVReg(<%=reg_count%>));
+%      elsif op.reg?
+            ins.regs.push_back(bc_ins.GetVReg(<%=reg_count%>));
 %         reg_count += 1
-%      elsif (i.operands.count(&:id?) != 0)
-        ins.ids.push_back(IDToString(bc_ins, method_id, <%=id_count%>));
+%      elsif op.id?
+            ins.ids.push_back(IDToString(bc_ins, method_id, <%=id_count%>));
 %         id_count += 1
 %      end   
 %   end
-        break;
+            break;
 % end
-    default:
-        break;
-    }
+        default:
+            break;
+        }
 
     if (ins.IsCall()) {
         // clearing excessive arguments if there are any

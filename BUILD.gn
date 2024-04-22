@@ -360,6 +360,11 @@ if (!ark_standalone_build) {
     ]
   }
 
+  group("verifier_host_unittest") {
+    testonly = true
+    deps = [ "$ark_root/verifier/tests:host_unittest" ]
+  }
+
   group("compiler_host_unittest") {
     testonly = true
     deps = [ "$ark_root/compiler/tests:host_unittest" ]
