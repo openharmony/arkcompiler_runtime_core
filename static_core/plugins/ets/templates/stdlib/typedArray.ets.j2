@@ -798,12 +798,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: {{elementCompat}}[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos as int + i, v{{fromElementCompat}})
+            this.setUnsafe(offset + i, v{{fromElementCompat}})
         {%- else %}
-            this.setUnsafe(insertPos as int + i, arr[i]{{fromElementCompat}})
+            this.setUnsafe(offset + i, arr[i]{{fromElementCompat}})
         {%- endif %}
         }
     }
@@ -818,12 +822,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: {{T}}[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos + i, v)
+            this.setUnsafe(offset + i, v)
         {%- else %}
-            this.setUnsafe(insertPos + i, arr[i])
+            this.setUnsafe(offset + i, arr[i])
         {%- endif %}
         }
     }
@@ -846,6 +854,28 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      */
     public set(arr: {{T}}[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the {{N}}Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<{% if N == 'BigInt64'%}BigInt{% else %}number{% endif %}>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+        {%- if (N != 'Float32') and (N != 'Float64') %}
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafe(insertPos + i, v{{fromElementCompat}})
+        {%- else %}
+            this.setUnsafe(insertPos + i, array[i]{{fromElementCompat}})
+        {%- endif %}
+        }
     }
 
     /**

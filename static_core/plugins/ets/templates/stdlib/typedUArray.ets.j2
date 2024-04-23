@@ -864,6 +864,28 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
+     * Copies elements from an ArrayLike object to the {{element['name']}}Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<{% if element['name'] == 'BigUint64' %}BigInt{% else %}number{% endif %}>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length; i++) {
+        {%- if element.get('name') != 'Uint8Clamped' %}
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafeClamp(insertPos as int + i as int, {{fromElementCompat % 'v'}})
+        {%- else %}
+            this.setUnsafeClamp(insertPos as int + i as int, {{fromElementCompat % 'array[i]'}})
+        {%- endif %}
+        }
+    }
+
+    /**
      * Creates an {{element['name']}}Array from array-like argument
      *
      * @param o array-like object to initialize {{element['name']}}Array

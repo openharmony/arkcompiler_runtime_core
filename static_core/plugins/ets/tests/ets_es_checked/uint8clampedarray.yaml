@@ -109,3 +109,9 @@ sub:
         params:
           - paramOf(*reduce_u_lambdas)
           - paramOf("''")
+      - method: "set"
+        params:
+          - paramOf("new Array<number>(-1, 0, 1024, -1024, 0.1, 2.5, -2.5, Infinity, -Infinity, NaN)")
+          - paramOf(*default_inds)
+        ret_type: void
+        mandatory: 1

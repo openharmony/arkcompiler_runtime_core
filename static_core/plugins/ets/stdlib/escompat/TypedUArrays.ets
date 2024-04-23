@@ -758,6 +758,23 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
+     * Copies elements from an ArrayLike object to the Uint8ClampedArray.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length; i++) {
+            this.setUnsafeClamp(insertPos as int + i as int, array[i] as int)
+        }
+    }
+
+    /**
      * Creates an Uint8ClampedArray from array-like argument
      *
      * @param o array-like object to initialize Uint8ClampedArray
@@ -3076,6 +3093,24 @@ export class Uint8Array implements Iterable<Number> {
      */
     public set(arr: int[]): void {
         this.set(arr, 0)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the Uint8Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length; i++) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafeClamp(insertPos as int + i as int, v as int)
+        }
     }
 
     /**
@@ -5398,6 +5433,24 @@ export class Uint16Array implements Iterable<Number> {
      */
     public set(arr: int[]): void {
         this.set(arr, 0)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the Uint16Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length; i++) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafeClamp(insertPos as int + i as int, v as int)
+        }
     }
 
     /**
@@ -7750,6 +7803,24 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
+     * Copies elements from an ArrayLike object to the Uint32Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length; i++) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafeClamp(insertPos as int + i as int, v as long)
+        }
+    }
+
+    /**
      * Creates an Uint32Array from array-like argument
      *
      * @param o array-like object to initialize Uint32Array
@@ -10096,6 +10167,24 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public set(arr: long[]): void {
         this.set(arr, 0)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the BigUint64Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<BigInt>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length; i++) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafeClamp(insertPos as int + i as int, v.getULong())
+        }
     }
 
     /**

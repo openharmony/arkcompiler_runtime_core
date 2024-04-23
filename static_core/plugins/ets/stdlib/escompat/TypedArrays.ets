@@ -706,9 +706,13 @@ export final class Int8Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: number[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos as int + i, v as byte)
+            this.setUnsafe(offset + i, v as byte)
         }
     }
 
@@ -722,9 +726,13 @@ export final class Int8Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: byte[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos + i, v)
+            this.setUnsafe(offset + i, v)
         }
     }
 
@@ -744,6 +752,24 @@ export final class Int8Array implements Iterable<Number> {
      */
     public set(arr: byte[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the Int8Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafe(insertPos + i, v as byte)
+        }
     }
 
     /**
@@ -3045,9 +3071,13 @@ export final class Int16Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: number[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos as int + i, v as short)
+            this.setUnsafe(offset + i, v as short)
         }
     }
 
@@ -3061,9 +3091,13 @@ export final class Int16Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: short[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos + i, v)
+            this.setUnsafe(offset + i, v)
         }
     }
 
@@ -3083,6 +3117,24 @@ export final class Int16Array implements Iterable<Number> {
      */
     public set(arr: short[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the Int16Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafe(insertPos + i, v as short)
+        }
     }
 
     /**
@@ -5361,9 +5413,13 @@ export final class Int32Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: number[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos as int + i, v as int)
+            this.setUnsafe(offset + i, v as int)
         }
     }
 
@@ -5377,9 +5433,13 @@ export final class Int32Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: int[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos + i, v)
+            this.setUnsafe(offset + i, v)
         }
     }
 
@@ -5399,6 +5459,24 @@ export final class Int32Array implements Iterable<Number> {
      */
     public set(arr: int[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the Int32Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafe(insertPos + i, v as int)
+        }
     }
 
     /**
@@ -7704,9 +7782,13 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: BigInt[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos as int + i, v.getLong())
+            this.setUnsafe(offset + i, v.getLong())
         }
     }
 
@@ -7720,9 +7802,13 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: long[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos + i, v)
+            this.setUnsafe(offset + i, v)
         }
     }
 
@@ -7742,6 +7828,24 @@ export final class BigInt64Array implements Iterable<BigInt> {
      */
     public set(arr: long[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the BigInt64Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<BigInt>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafe(insertPos + i, v.getLong())
+        }
     }
 
     /**
@@ -10030,8 +10134,12 @@ export final class Float32Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: number[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(insertPos as int + i, arr[i] as float)
+            this.setUnsafe(offset + i, arr[i] as float)
         }
     }
 
@@ -10045,8 +10153,12 @@ export final class Float32Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: float[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(insertPos + i, arr[i])
+            this.setUnsafe(offset + i, arr[i])
         }
     }
 
@@ -10066,6 +10178,23 @@ export final class Float32Array implements Iterable<Number> {
      */
     public set(arr: float[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the Float32Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+            this.setUnsafe(insertPos + i, array[i] as float)
+        }
     }
 
     /**
@@ -12273,8 +12402,12 @@ export final class Float64Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: number[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(insertPos as int + i, arr[i] as double)
+            this.setUnsafe(offset + i, arr[i] as double)
         }
     }
 
@@ -12288,8 +12421,12 @@ export final class Float64Array implements Iterable<Number> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: double[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
-            this.setUnsafe(insertPos + i, arr[i])
+            this.setUnsafe(offset + i, arr[i])
         }
     }
 
@@ -12300,6 +12437,23 @@ export final class Float64Array implements Iterable<Number> {
      */
     public set(arr: double[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the Float64Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<number>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.length) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+            this.setUnsafe(insertPos + i, array[i] as double)
+        }
     }
 
     /**
