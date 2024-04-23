@@ -31,8 +31,8 @@
 #include <sstream>
 
 #include "graph_test.h"
-#include "optimizer/ir/inst.h"
 #include "optimizer/analysis/liveness_analyzer.h"
+#include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/regalloc/interference_graph.h"
 
 using namespace testing::ext;
@@ -60,8 +60,8 @@ public:
     // To prevent adding "remove edge" interfaces to main code,
     // edge removing is simulated via building new graph without it.
     InterferenceGraph BuildSubgraph(InterferenceGraph &orig_ig, ArenaAllocator *alloc,
-                                    std::pair<unsigned, unsigned> *edges, unsigned count,
-                                    ArenaVector<unsigned> &peo, unsigned peo_count)
+                                    std::pair<unsigned, unsigned> *edges, size_t count,
+                                    ArenaVector<unsigned> &peo, size_t peo_count)
     {
         InterferenceGraph ig(alloc);
         ig.Reserve(orig_ig.Size());
@@ -85,7 +85,7 @@ public:
  * @tc.name: reg_alloc_interference_test_001
  * @tc.desc: Verify the AddEdge function of GraphMatrix.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_001, TestSize.Level1)
 {
@@ -108,7 +108,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_001, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_002
  * @tc.desc: Verify the AddAffinityEdge function of GraphMatrix.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_002, TestSize.Level1)
 {
@@ -131,7 +131,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_002, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_003
  * @tc.desc: Verify the GetNumber function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_003, TestSize.Level1)
 {
@@ -146,7 +146,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_003, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_004
  * @tc.desc: Verify the SetColor function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_004, TestSize.Level1)
 {
@@ -162,7 +162,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_004, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_005
  * @tc.desc: Verify the SetFixedColor function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_005, TestSize.Level1)
 {
@@ -182,7 +182,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_005, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_006
  * @tc.desc: Verify the SetBias function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_006, TestSize.Level1)
 {
@@ -200,7 +200,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_006, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_007
  * @tc.desc: Verify the Assign function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_007, TestSize.Level1)
 {
@@ -215,7 +215,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_007, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_008
  * @tc.desc: Verify the AddCallsite function of ColorNode.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_008, TestSize.Level1)
 {
@@ -232,7 +232,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_008, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_009
  * @tc.desc: Verify the AllocNode function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_009, TestSize.Level1)
 {
@@ -255,7 +255,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_009, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_010
  * @tc.desc: Verify the AddBias function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_010, TestSize.Level1)
 {
@@ -272,7 +272,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_010, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_011
  * @tc.desc: Verify the LexBFS function of InterferenceGraph in simple case.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_011, TestSize.Level1)
 {
@@ -294,23 +294,23 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_011, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_012
  * @tc.desc: Verify the LexBFS function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_012, TestSize.Level1)
 {
-    const unsigned DEFAULT_CAPACITY = 5;
-    const unsigned DEFAULT_EDGES = 6;
+    const size_t DEFAULT_CAPACITY = 5;
+    const size_t DEFAULT_EDGES = 6;
     std::pair<unsigned, unsigned> test_edges[DEFAULT_EDGES] = {{0, 1}, {1, 2}, {2, 0}, {0, 3}, {2, 3}, {3, 4}};
 
     ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};
     InterferenceGraph ig(&allocator);
     ig.Reserve(DEFAULT_CAPACITY);
     
-    for (unsigned i = 0; i < DEFAULT_CAPACITY; i++) {
+    for (size_t i = 0; i < DEFAULT_CAPACITY; i++) {
         ig.AllocNode();
     }
     
-    for (unsigned i = 0; i < DEFAULT_CAPACITY; i++) {
+    for (size_t i = 0; i < DEFAULT_CAPACITY; i++) {
         auto x = test_edges[i].first;
         auto y = test_edges[i].second;
         ig.AddEdge(x, y);
@@ -320,7 +320,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_012, TestSize.Lev
     EXPECT_EQ(peo.size(), DEFAULT_CAPACITY);
     std::reverse(peo.begin(), peo.end());
 
-    for (unsigned i = 0; i < DEFAULT_CAPACITY - 1; i++) {
+    for (size_t i = 0; i < DEFAULT_CAPACITY - 1; i++) {
         auto ig2 = BuildSubgraph(ig, &allocator, test_edges, DEFAULT_EDGES, peo, i);
         EXPECT_TRUE(ig2.IsChordal());
     }
@@ -330,7 +330,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_012, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_013
  * @tc.desc: Verify the AssignColors function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_013, TestSize.Level1)
 {
@@ -346,7 +346,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_013, TestSize.Lev
     auto *nd3 = ig.AllocNode();
     auto *nd4 = ig.AllocNode();
 
-    for (unsigned i = 0; i < 6; i++) {
+    for (size_t i = 0; i < 6; i++) {
         auto x = test_edges[i].first;
         auto y = test_edges[i].second;
         ig.AddEdge(x, y);
@@ -367,13 +367,13 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_013, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_014
  * @tc.desc: Verify the AssignColors function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_014, TestSize.Level1)
 {
-    const unsigned DEFAULT_CAPACITY = 11;
-    const unsigned DEFAULT_EDGES = 12;
-    const unsigned DEFAULT_AEDGES = 4;
+    const size_t DEFAULT_CAPACITY = 11;
+    const size_t DEFAULT_EDGES = 12;
+    const size_t DEFAULT_AEDGES = 4;
     std::pair<unsigned, unsigned> test_edges[DEFAULT_EDGES] = {{0, 1}, {1, 2}, {2, 0}, {0, 3}, {2, 3},  {3, 4},
                                                                {6, 5}, {5, 7}, {6, 7}, {9, 8}, {9, 10}, {8, 10}};
     std::pair<unsigned, unsigned> test_aedges[DEFAULT_AEDGES] = {{3, 6}, {6, 9}, {2, 5}, {7, 8}};
@@ -394,12 +394,12 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_014, TestSize.Lev
     auto *nd9 = ig.AllocNode();
     auto *nd10 = ig.AllocNode();
 
-    for (unsigned i = 0; i < DEFAULT_EDGES; i++) {
+    for (size_t i = 0; i < DEFAULT_EDGES; i++) {
         auto x = test_edges[i].first;
         auto y = test_edges[i].second;
         ig.AddEdge(x, y);
     }
-    for (unsigned i = 0; i < DEFAULT_AEDGES; i++) {
+    for (size_t i = 0; i < DEFAULT_AEDGES; i++) {
         auto x = test_aedges[i].first;
         auto y = test_aedges[i].second;
         ig.AddAffinityEdge(x, y);
@@ -452,17 +452,17 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_014, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_015
  * @tc.desc: Verify the Dump function of InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_015, TestSize.Level1)
 {
-    const unsigned DEFAULT_PHISICALS = 3;
-    const unsigned DEFAULT_NONPHISICALS = 11;
+    const size_t DEFAULT_PHISICALS = 3;
+    const size_t DEFAULT_NONPHISICALS = 11;
 
-    const unsigned DEFAULT_CAPACITY = DEFAULT_PHISICALS + DEFAULT_NONPHISICALS;
-    const unsigned DEFAULT_EDGES = 14;
-    const unsigned DEFAULT_AEDGES = 4;
-    const unsigned DEFAULT_BIASES = 3;
+    const size_t DEFAULT_CAPACITY = DEFAULT_PHISICALS + DEFAULT_NONPHISICALS;
+    const size_t DEFAULT_EDGES = 14;
+    const size_t DEFAULT_AEDGES = 4;
+    const size_t DEFAULT_BIASES = 3;
     std::pair<unsigned, unsigned> test_edges[DEFAULT_EDGES] = {{0, 1},  {1, 2},  {2, 0},   {0, 3}, {2, 3},
                                                                {3, 4},  {6, 5},  {5, 7},   {6, 7}, {9, 8},
                                                                {9, 10}, {8, 10}, {11, 12}, {12, 0}};
@@ -472,7 +472,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_015, TestSize.Lev
     InterferenceGraph ig(&allocator);
     ig.Reserve(DEFAULT_CAPACITY);
 
-    for (unsigned i = 0; i < DEFAULT_CAPACITY; i++) {
+    for (size_t i = 0; i < DEFAULT_CAPACITY; i++) {
         auto node = ig.AllocNode();
 
         auto inst = allocator.New<ConstantInst>(Opcode::Constant, 0);
@@ -484,23 +484,23 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_015, TestSize.Lev
         node->Assign(intervals);
     }
 
-    for (unsigned i = DEFAULT_NONPHISICALS; i < DEFAULT_CAPACITY; i++) {
+    for (size_t i = DEFAULT_NONPHISICALS; i < DEFAULT_CAPACITY; i++) {
         ig.GetNode(i).SetFixedColor(251 + i, true);
     }
 
-    for (unsigned i = 0; i < DEFAULT_EDGES; i++) {
+    for (size_t i = 0; i < DEFAULT_EDGES; i++) {
         auto x = test_edges[i].first;
         auto y = test_edges[i].second;
         ig.AddEdge(x, y);
     }
 
-    for (unsigned i = 0; i < DEFAULT_AEDGES; i++) {
+    for (size_t i = 0; i < DEFAULT_AEDGES; i++) {
         auto x = test_aedges[i].first;
         auto y = test_aedges[i].second;
         ig.AddAffinityEdge(x, y);
     }
 
-    for (unsigned i = 0; i < DEFAULT_BIASES; i++) {
+    for (size_t i = 0; i < DEFAULT_BIASES; i++) {
         ig.AddBias();
     }
 
@@ -563,7 +563,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_015, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_016
  * @tc.desc: Verify the Dump function with empty InterferenceGraph.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_016, TestSize.Level1)
 {
@@ -584,7 +584,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_016, TestSize.Lev
  * @tc.name: reg_alloc_interference_test_017
  * @tc.desc: Verify the Dump function with same color error.
  * @tc.type: FUNC
- * @tc.require: issueNumber
+ * @tc.require:
  */
 HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_017, TestSize.Level1)
 {
@@ -592,7 +592,7 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_017, TestSize.Lev
     InterferenceGraph ig(&allocator);
     ig.Reserve(2);
 
-    for (unsigned i = 0; i < 2; i++) {
+    for (size_t i = 0; i < 2; i++) {
         auto node = ig.AllocNode();
 
         auto inst = allocator.New<ConstantInst>(Opcode::Constant, i);
@@ -621,4 +621,4 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_017, TestSize.Lev
                              "}\n";
     EXPECT_EQ(out.str(), expect_str);
 }
-} // namespace panda::compiler
+}  // namespace panda::compiler
