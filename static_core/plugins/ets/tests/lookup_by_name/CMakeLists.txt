@@ -142,13 +142,23 @@ add_ets_verifier_test(FILE "field_case_8bit")
 add_ets_verifier_test(FILE "field_case_32bit")
 add_ets_verifier_test(FILE "field_case_64bit")
 add_ets_verifier_test(FILE "field_case_ref")
-add_ets_verifier_test(FILE "no_field_case" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
-add_ets_verifier_test(FILE "no_field_case_2" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
-add_ets_verifier_test(FILE "no_getter_case" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
-add_ets_verifier_test(FILE "no_setter_case" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
-add_ets_verifier_test(FILE "wrong_setter_args_case" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
-add_ets_verifier_test(FILE "wrong_setter_args_case_2" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
+
+# currently all union types are encoded as single one class “$UNION_FIELD_DUMMY_CLASS”
+# at bytecode level, thus we do not have accurate union type info to verify each variables
+# so the current temporary solution would be to skip verification for union types.This
+# actually introduce insecure possibilities here. Accurate verification for union types
+# will need redesign for union types support in the future
+#
+# based on the above,here we skip:
+# 1. checking whether a field existed in the union or not
+# 2. skip checking member access violiations
+add_ets_verifier_test(FILE "no_field_case")
+add_ets_verifier_test(FILE "no_field_case_2")
+add_ets_verifier_test(FILE "no_getter_case")
+add_ets_verifier_test(FILE "no_setter_case")
+add_ets_verifier_test(FILE "wrong_setter_args_case")
+add_ets_verifier_test(FILE "wrong_setter_args_case_2")
 add_ets_verifier_test(FILE "wrong_setter_args_case_3" VERIFIER_FAIL_TEST SEARCH_STDERR "Inconsistent register and field types")
-add_ets_verifier_test(FILE "wrong_setter_args_case_4" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
-add_ets_verifier_test(FILE "wrong_getter_args_case" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
-add_ets_verifier_test(FILE "wrong_getter_args_case_2" VERIFIER_FAIL_TEST SEARCH_STDERR "Bad field name or bit width")
+add_ets_verifier_test(FILE "wrong_setter_args_case_4")
+add_ets_verifier_test(FILE "wrong_getter_args_case")
+add_ets_verifier_test(FILE "wrong_getter_args_case_2")
