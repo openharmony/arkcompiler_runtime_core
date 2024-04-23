@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@ function test(byteToChange: int) {
     let bytearr = new Int8Array(buf, 0, 4);
 
     (new Console()).println("Testing for byte: " + byteToChange)
-    Atomics.store(bytearr, byteToChange, 1 as byte);
+    Atomics.store(bytearr, byteToChange, 1);
     let x = Atomics.wait(arr, 0, 0)
     assert(x == "not-equal")
 }
@@ -29,4 +29,3 @@ function main() {
         test(i)
     }
 }
-

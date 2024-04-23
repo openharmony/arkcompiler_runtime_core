@@ -55,909 +55,864 @@ export class Atomics {
         return byteSize == 4
     }
 
-    public static add(typedArray: Int8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue + value) as byte
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddI8(indexedPosition, value as byte)
-        }
-    }
-    public static add(typedArray: Int16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue + value) as short
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddI16(indexedPosition, value as short)
-        }
-    }
-    public static add(typedArray: Int32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue + value) as int
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddI32(indexedPosition, value as int)
-        }
-    }
-    public static add(typedArray: BigInt64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue + value) as long
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddI64(indexedPosition, value as long)
-        }
-    }
-    public static add(typedArray: Uint8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue + value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddU8(indexedPosition, value as byte)
-        }
-    }
-    public static add(typedArray: Uint16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue + value) as short
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddU16(indexedPosition, value as short)
-        }
-    }
-    public static add(typedArray: Uint32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue + value) as int
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddU32(indexedPosition, value as int)
-        }
-    }
-    public static add(typedArray: BigUint64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getULong()
-            let newValue = (oldValue + value) as long
-            typedArray.set(indexedPosition, new BigInt(newValue))
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAddU64(indexedPosition, value as long)
+    public static add(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue + value) as byte
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddI8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue + value) as short
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddI16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue + value) as int
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddI32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue + value) as long
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddI64(indexedPosition, value as long)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue + value) as byte
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddU8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue + value) as short
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddU16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue + value) as int
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddU32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getULong()
+                let newValue = (oldValue + value) as long
+                typedArray.set(indexedPosition, new BigInt(newValue))
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAddU64(indexedPosition, value as long)
+            }
         }
     }
 
-    public static and(typedArray: Int8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue & value) as byte
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndI8(indexedPosition, value as byte)
-        }
+    public static and(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue & value) as byte
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndI8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue & value) as short
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndI16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue & value) as int
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndI32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue & value) as long
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndI64(indexedPosition, value as long)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue & value) as byte
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndU8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue & value) as short
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndU16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue & value) as int
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndU32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue & value) as long
+                typedArray.set(indexedPosition, new BigInt(newValue))
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicAndU64(indexedPosition, value as long)
+            }
+        } 
     }
-    public static and(typedArray: Int16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue & value) as short
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndI16(indexedPosition, value as short)
-        }
-    }
-    public static and(typedArray: Int32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue & value) as int
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndI32(indexedPosition, value as int)
-        }
-    }
-    public static and(typedArray: BigInt64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue & value) as long
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndI64(indexedPosition, value as long)
-        }
-    }
-    public static and(typedArray: Uint8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue & value) as byte
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndU8(indexedPosition, value as byte)
-        }
-    }
-    public static and(typedArray: Uint16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue & value) as short
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndU16(indexedPosition, value as short)
-        }
-    }
-    public static and(typedArray: Uint32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue & value) as int
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndU32(indexedPosition, value as int)
-        }
-    }
-    public static and(typedArray: BigUint64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue & value) as long
-            typedArray.set(indexedPosition, new BigInt(newValue))
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicAndU64(indexedPosition, value as long)
+
+    public static compareExchange(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, expectedValue: number, replacementValue: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, replacementValue as byte)
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeI8(indexedPosition, expectedValue as byte, replacementValue as byte)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, replacementValue as short)
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeI16(indexedPosition, expectedValue as short, replacementValue as short)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, replacementValue as int)
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeI32(indexedPosition, expectedValue as int, replacementValue as int)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, replacementValue as long)
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeI64(indexedPosition, expectedValue as long, replacementValue as long)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, replacementValue as byte)
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeU8(indexedPosition, expectedValue as byte, replacementValue as byte)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, replacementValue as short)
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeU16(indexedPosition, expectedValue as short, replacementValue as short)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, replacementValue as int)
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeU32(indexedPosition, expectedValue as int, replacementValue as int)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                if (oldValue == expectedValue) {
+                    typedArray.set(indexedPosition, new BigInt(replacementValue))
+                }
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicCompareExchangeU64(indexedPosition, expectedValue as long, replacementValue as long)
+            }
         }
     }
 
-    public static compareExchange(typedArray: Int8Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, replacementValue as byte)
+    public static exchange(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                typedArray.set(indexedPosition, value as byte)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeI8(indexedPosition, value as byte)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeI8(indexedPosition, expectedValue as byte, replacementValue as byte)
-        }
-    }
-    public static compareExchange(typedArray: Int16Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, replacementValue as short)
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                typedArray.set(indexedPosition, value as short)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeI16(indexedPosition, value as short)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeI16(indexedPosition, expectedValue as short, replacementValue as short)
-        }
-    }
-    public static compareExchange(typedArray: Int32Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, replacementValue as int)
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                typedArray.set(indexedPosition, value as int)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeI32(indexedPosition, value as int)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeI32(indexedPosition, expectedValue as int, replacementValue as int)
-        }
-    }
-    public static compareExchange(typedArray: BigInt64Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, replacementValue as long)
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                typedArray.set(indexedPosition, value as long)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeI64(indexedPosition, value as long)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeI64(indexedPosition, expectedValue as long, replacementValue as long)
-        }
-    }
-    public static compareExchange(typedArray: Uint8Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, replacementValue as byte)
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                typedArray.set(indexedPosition, value as byte)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeU8(indexedPosition, value as byte)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeU8(indexedPosition, expectedValue as byte, replacementValue as byte)
-        }
-    }
-    public static compareExchange(typedArray: Uint16Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, replacementValue as short)
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                typedArray.set(indexedPosition, value as short)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeU16(indexedPosition, value as short)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeU16(indexedPosition, expectedValue as short, replacementValue as short)
-        }
-    }
-    public static compareExchange(typedArray: Uint32Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, replacementValue as int)
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                typedArray.set(indexedPosition, value as int)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeU32(indexedPosition, value as int)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeU32(indexedPosition, expectedValue as int, replacementValue as int)
-        }
-    }
-    public static compareExchange(typedArray: BigUint64Array, index: int, expectedValue: number, replacementValue: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            if (oldValue == expectedValue) {
-                typedArray.set(indexedPosition, new BigInt(replacementValue))
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                typedArray.set(indexedPosition, new BigInt(value))
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicExchangeU64(indexedPosition, value as long)
             }
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicCompareExchangeU64(indexedPosition, expectedValue as long, replacementValue as long)
         }
     }
 
-    public static exchange(typedArray: Int8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            typedArray.set(indexedPosition, value as byte)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeI8(indexedPosition, value as byte)
-        }
-    }
-    public static exchange(typedArray: Int16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            typedArray.set(indexedPosition, value as short)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeI16(indexedPosition, value as short)
-        }
-    }
-    public static exchange(typedArray: Int32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            typedArray.set(indexedPosition, value as int)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeI32(indexedPosition, value as int)
-        }
-    }
-    public static exchange(typedArray: BigInt64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            typedArray.set(indexedPosition, value as long)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeI64(indexedPosition, value as long)
-        }
-    }
-    public static exchange(typedArray: Uint8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            typedArray.set(indexedPosition, value as byte)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeU8(indexedPosition, value as byte)
-        }
-    }
-    public static exchange(typedArray: Uint16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            typedArray.set(indexedPosition, value as short)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeU16(indexedPosition, value as short)
-        }
-    }
-    public static exchange(typedArray: Uint32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            typedArray.set(indexedPosition, value as int)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeU32(indexedPosition, value as int)
-        }
-    }
-    public static exchange(typedArray: BigUint64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            typedArray.set(indexedPosition, new BigInt(value))
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicExchangeU64(indexedPosition, value as long)
+    public static load(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition]
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadI8(indexedPosition)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition]
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadI16(indexedPosition)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition]
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadI32(indexedPosition)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition].getLong()
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadI64(indexedPosition)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition]
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadU8(indexedPosition)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition]
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadU16(indexedPosition)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition]
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadU32(indexedPosition)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return typedArray[indexedPosition].getLong()
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicLoadU64(indexedPosition)
+            }
         }
     }
 
-    public static load(typedArray: Int8Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition]
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadI8(indexedPosition)
-        }
-    }
-    public static load(typedArray: Int16Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition]
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadI16(indexedPosition)
-        }
-    }
-    public static load(typedArray: Int32Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition]
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadI32(indexedPosition)
-        }
-    }
-    public static load(typedArray: BigInt64Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition].getLong()
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadI64(indexedPosition)
-        }
-    }
-    public static load(typedArray: Uint8Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition]
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadU8(indexedPosition)
-        }
-    }
-    public static load(typedArray: Uint16Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition]
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadU16(indexedPosition)
-        }
-    }
-    public static load(typedArray: Uint32Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition]
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadU32(indexedPosition)
-        }
-    }
-    public static load(typedArray: BigUint64Array, index: int): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return typedArray[indexedPosition].getLong()
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicLoadU64(indexedPosition)
-        }
-    }
-
-    public static or(typedArray: Int8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue | value) as byte
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrI8(indexedPosition, value as byte)
-        }
-    }
-    public static or(typedArray: Int16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue | value) as short
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrI16(indexedPosition, value as short)
-        }
-    }
-    public static or(typedArray: Int32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue | value) as int
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrI32(indexedPosition, value as int)
-        }
-    }
-    public static or(typedArray: BigInt64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue | value) as long
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrI64(indexedPosition, value as long)
-        }
-    }
-    public static or(typedArray: Uint8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue | value) as byte
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrU8(indexedPosition, value as byte)
-        }
-    }
-    public static or(typedArray: Uint16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue | value) as short
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrU16(indexedPosition, value as short)
-        }
-    }
-    public static or(typedArray: Uint32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue | value) as int
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrU32(indexedPosition, value as int)
-        }
-    }
-    public static or(typedArray: BigUint64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue | value) as long
-            typedArray.set(indexedPosition, new BigInt(newValue))
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicOrU64(indexedPosition, value as long)
+    public static or(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue | value) as byte
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrI8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue | value) as short
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrI16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue | value) as int
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrI32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue | value) as long
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrI64(indexedPosition, value as long)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue | value) as byte
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrU8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue | value) as short
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrU16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue | value) as int
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrU32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue | value) as long
+                typedArray.set(indexedPosition, new BigInt(newValue))
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicOrU64(indexedPosition, value as long)
+            }
         }
     }
 
-    public static store(typedArray: Int8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, value as byte)
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreI8(indexedPosition, value as byte)
-        }
-    }
-    public static store(typedArray: Int16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, value as short)
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreI16(indexedPosition, value as short)
-        }
-    }
-    public static store(typedArray: Int32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, value as int)
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreI32(indexedPosition, value as int)
-        }
-    }
-    public static store(typedArray: BigInt64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, value as long)
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreI64(indexedPosition, value as long)
-        }
-    }
-    public static store(typedArray: Uint8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, value as byte)
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreU8(indexedPosition, value as byte)
-        }
-    }
-    public static store(typedArray: Uint16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, value as short)
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreU16(indexedPosition, value as short)
-        }
-    }
-    public static store(typedArray: Uint32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, value as int)
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreU32(indexedPosition, value as int)
-        }
-    }
-    public static store(typedArray: BigUint64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            typedArray.set(indexedPosition, new BigInt(value))
-            return value
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicStoreU64(indexedPosition, value as long)
+    public static store(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, value as byte)
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreI8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, value as short)
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreI16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, value as int)
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreI32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, value as long)
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreI64(indexedPosition, value as long)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, value as byte)
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreU8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, value as short)
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreU16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, value as int)
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreU32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                typedArray.set(indexedPosition, new BigInt(value))
+                return value
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicStoreU64(indexedPosition, value as long)
+            }
         }
     }
 
-    public static sub(typedArray: Int8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubI8(indexedPosition, value as byte)
-        }
-    }
-    public static sub(typedArray: Int16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubI16(indexedPosition, value as short)
-        }
-    }
-    public static sub(typedArray: Int32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubI32(indexedPosition, value as int)
-        }
-    }
-    public static sub(typedArray: BigInt64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, newValue as long)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubI64(indexedPosition, value as long)
-        }
-    }
-    public static sub(typedArray: Uint8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubU8(indexedPosition, value as byte)
-        }
-    }
-    public static sub(typedArray: Uint16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubU16(indexedPosition, value as short)
-        }
-    }
-    public static sub(typedArray: Uint32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubU32(indexedPosition, value as int)
-        }
-    }
-    public static sub(typedArray: BigUint64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue - value)
-            typedArray.set(indexedPosition, new BigInt(newValue))
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicSubU64(indexedPosition, value as long)
+    public static sub(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubI8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubI16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubI32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, newValue as long)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubI64(indexedPosition, value as long)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubU8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubU16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubU32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue - value)
+                typedArray.set(indexedPosition, new BigInt(newValue))
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicSubU64(indexedPosition, value as long)
+            }
         }
     }
 
-    public static xor(typedArray: Int8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorI8(indexedPosition, value as byte)
-        }
-    }
-    public static xor(typedArray: Int16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorI16(indexedPosition, value as short)
-        }
-    }
-    public static xor(typedArray: Int32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorI32(indexedPosition, value as int)
-        }
-    }
-    public static xor(typedArray: BigInt64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorI64(indexedPosition, value as long)
-        }
-    }
-    public static xor(typedArray: Uint8Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorU8(indexedPosition, value as byte)
-        }
-    }
-    public static xor(typedArray: Uint16Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorU16(indexedPosition, value as short)
-        }
-    }
-    public static xor(typedArray: Uint32Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition]
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, newValue)
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorU32(indexedPosition, value as int)
-        }
-    }
-    public static xor(typedArray: BigUint64Array, index: int, value: number): number {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            let oldValue = typedArray[indexedPosition].getLong()
-            let newValue = (oldValue ^ value)
-            typedArray.set(indexedPosition, new BigInt(newValue))
-            return oldValue
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicXorU64(indexedPosition, value as long)
-        }
+    public static xor(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
+        if (typedArray instanceof Int8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorI8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Int16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorI16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorI32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorI64(indexedPosition, value as long)
+            }
+        } else if (typedArray instanceof Uint8Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint8Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorU8(indexedPosition, value as byte)
+            }
+        } else if (typedArray instanceof Uint16Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint16Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorU16(indexedPosition, value as short)
+            }
+        } else if (typedArray instanceof Uint32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Uint32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition]
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, newValue)
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorU32(indexedPosition, value as int)
+            }
+        } else if (typedArray instanceof BigUint64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigUint64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, index)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                let oldValue = typedArray[indexedPosition].getLong()
+                let newValue = (oldValue ^ value)
+                typedArray.set(indexedPosition, new BigInt(newValue))
+                return oldValue
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicXorU64(indexedPosition, value as long)
+            }
+        } 
     }
 
     /**
