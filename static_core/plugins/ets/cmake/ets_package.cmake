@@ -78,14 +78,47 @@ function(do_panda_ets_package TARGET)
     # Convert *.ets -> classes.abc
     set(OUTPUT_ABC ${BUILD_DIR}/src/classes.abc)
     if(DEFINED ARG_ETS_SOURCES)
-        add_custom_command(
-            OUTPUT ${OUTPUT_ABC}
-            COMMENT "${TARGET}: Convert ets files to ${OUTPUT_ABC}"
-            COMMAND rm -rf ${BUILD_DIR}/src
-            COMMAND mkdir -p ${BUILD_DIR}/src
-            COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
-            DEPENDS etsstdlib ${es2panda_target} ${ARG_ETS_SOURCES}
-        )
+        list(LENGTH ARG_ETS_SOURCES list_length)
+
+        if (list_length EQUAL 1)
+            # Compile one .ets file to OUTPUT_ABC
+            add_custom_command(
+                OUTPUT ${OUTPUT_ABC}
+                COMMENT "${TARGET}: Convert ets files to ${OUTPUT_ABC}"
+                COMMAND mkdir -p ${BUILD_DIR}/src
+                COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
+                DEPENDS etsstdlib ${es2panda_target} ${ARG_ETS_SOURCES}
+            )
+        else()
+            # Compile several .ets files and link them to OUTPUT_ABC
+            set(ABC_FILES)
+            set(ETS_MODULE_KEY "")
+            foreach(ETS_SOURCE ${ARG_ETS_SOURCES})
+                get_filename_component(CLEAR_NAME ${ETS_SOURCE} NAME_WE)
+                set(CUR_OUTPUT_ABC ${BUILD_DIR}/src/${CLEAR_NAME}.abc)
+                list(APPEND ABC_FILES ${CUR_OUTPUT_ABC})
+
+                add_custom_command(
+                    OUTPUT ${CUR_OUTPUT_ABC}
+                    COMMENT "${TARGET}: Convert ets files to ${CUR_OUTPUT_ABC}"
+                    COMMAND mkdir -p ${BUILD_DIR}/src
+                    COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} ${ETS_MODULE_KEY} --output=${CUR_OUTPUT_ABC} ${ETS_SOURCE}
+                    DEPENDS etsstdlib ${es2panda_target} ${ETS_SOURCE}
+                )
+                if (ETS_MODULE_KEY STREQUAL "")
+                    set(ETS_MODULE_KEY "--ets-module")
+                endif()
+            endforeach()
+
+            # Link .abc files into single .abc file
+            add_custom_command(
+                OUTPUT ${OUTPUT_ABC}
+                COMMENT "Linking ABC files: ${ABC_FILES}"
+                COMMAND $<TARGET_FILE:ark_link> --output ${OUTPUT_ABC} -- ${ABC_FILES}
+                DEPENDS ark_link ${ABC_FILES}
+            )
+        endif()
+
         if (ARG_VERIFY_SOURCES)
             add_custom_command(
                 TARGET ${TARGET}

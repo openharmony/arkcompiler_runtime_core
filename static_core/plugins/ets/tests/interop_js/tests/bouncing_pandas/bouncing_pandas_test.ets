@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "ets_interop_js_gtest.h"
+import { bouncing_pandas } from "/plugins/ets/tests/interop_js/tests/bouncing_pandas/bouncing_pandas.js"
 
-namespace ark::ets::interop::js::testing {
-
-class EtsInteropJsBouncingPandasTest : public EtsInteropTest {};
-
-TEST_F(EtsInteropJsBouncingPandasTest, BouncingPandasTest)
-{
-    // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<bool>("Test1");
-    ASSERT_EQ(ret, true);
+function Test1(): boolean {
+    let ret = bouncing_pandas()
+    if(ret as number == 1) {
+        return false
+    } else {
+        return true
+    }
 }
-
-}  // namespace ark::ets::interop::js::testing

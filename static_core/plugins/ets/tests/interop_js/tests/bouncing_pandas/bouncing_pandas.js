@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,28 +30,35 @@ class SBody {
     m = 0;
 };
 
-var vec = new Vec2(1200, 800);
-var countSB = 512;
-var arrSBody = [];
-var step = 13;
-for (var i = 0; i < countSB; ++i) {
-    arrSBody[i] = new SBody;
-    arrSBody[i].rad = 11;
-    arrSBody[i].m = 11 * 11;
-    arrSBody[i].r.x = step * i % 1200;
-    arrSBody[i].r.y = Math.round(step * ((step * i / 1200) + 1));
-    arrSBody[i].v.x = 5;
-    arrSBody[i].v.y = 5;
-}
-var resArr = gtest.etsVm.callWithCopy("recomputeFrameSBody", arrSBody, vec);
-var result_hash = 0;
-for (let i=0; i < countSB; ++i) {
-    result_hash += resArr[i].r.x + resArr[i].r.y + resArr[i].v.x + resArr[i].v.y + resArr[i].rad + resArr[i].m;
+function bouncing_pandas()
+{
+    var vec = new Vec2(1200, 800);
+    var countSB = 512;
+    var arrSBody = [];
+    var step = 13;
+    for (var i = 0; i < countSB; ++i) {
+        arrSBody[i] = new SBody;
+        arrSBody[i].rad = 11;
+        arrSBody[i].m = 11 * 11;
+        arrSBody[i].r.x = step * i % 1200;
+        arrSBody[i].r.y = Math.round(step * ((step * i / 1200) + 1));
+        arrSBody[i].v.x = 5;
+        arrSBody[i].v.y = 5;
+    }
+    var resArr = gtest.etsVm.callWithCopy("bouncing_pandas.recomputeFrameSBody", arrSBody, vec);
+    var result_hash = 0;
+    for (let i=0; i < countSB; ++i) {
+        result_hash += resArr[i].r.x + resArr[i].r.y + resArr[i].v.x + resArr[i].v.y + resArr[i].rad + resArr[i].m;
+    }
+
+    if (Math.round(result_hash) != 395799) {
+        console.log("Wrong result hash " + Math.round(result_hash))
+        gtest.ret = 1;
+        return 1;
+    } else {
+        gtest.ret = 0;
+        return 0;
+    }
 }
 
-if (Math.round(result_hash) != 395799) {
-    console.log("Wrong result hash " + Math.round(result_hash))
-    gtest.ret = 1;
-} else {
-    gtest.ret = 0;
-}
+exports.bouncing_pandas = bouncing_pandas;
