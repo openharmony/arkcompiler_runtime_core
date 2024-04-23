@@ -65,7 +65,7 @@ function(:StringConcat2Tlab,
     dst_str_data1 := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
 
     # has no uncompressed then everyting is compressed, data is stored as bytes
-    IfImm(has_uncompressed).Imm(0).EQ.b {
+    If(has_uncompressed, 0).EQ.b {
       copy_bytes(src_str_data1, dst_str_data1, count1)
 
       offset := count1
@@ -76,7 +76,7 @@ function(:StringConcat2Tlab,
       Goto(:EndCopy)
     }
 
-    IfImm(AndI(length1).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length1).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data1, dst_str_data1, count1)
     } Else {
       copy_chars(src_str_data1, dst_str_data1, count1)
@@ -86,7 +86,7 @@ function(:StringConcat2Tlab,
     src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset).ptr
 
-    IfImm(AndI(length2).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length2).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data2, dst_str_data2, count2)
     } Else {
       copy_chars(src_str_data2, dst_str_data2, count2)
@@ -142,7 +142,7 @@ function(:StringConcat3Tlab,
     offset2 := Add(offset1, ShlI(count2).Imm(1).u32).u32
 
     # everything is compressed
-    IfImm(has_uncompressed).Imm(0).EQ.b {
+    If(has_uncompressed, 0).EQ.b {
       copy_bytes(src_str_data1, dst_str_data1, count1)
 
       offset1_ := ShrI(offset1).Imm(1).u32
@@ -159,7 +159,7 @@ function(:StringConcat3Tlab,
       Goto(:EndCopy)
     }
 
-    IfImm(AndI(length1).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length1).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data1, dst_str_data1, count1)
     } Else {
       copy_chars(src_str_data1, dst_str_data1, count1)
@@ -168,7 +168,7 @@ function(:StringConcat3Tlab,
     src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
 
-    IfImm(AndI(length2).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length2).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data2, dst_str_data2, count2)
     } Else {
       copy_chars(src_str_data2, dst_str_data2, count2)
@@ -177,7 +177,7 @@ function(:StringConcat3Tlab,
     src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
 
-    IfImm(AndI(length3).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length3).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data3, dst_str_data3, count3)
     } Else {
       copy_chars(src_str_data3, dst_str_data3, count3)
@@ -236,7 +236,7 @@ function(:StringConcat4Tlab,
     offset3 := Add(offset2, ShlI(count3).Imm(1).u32).u32
 
     # has no uncompressed then everything is compressed, data is stored as bytes
-    IfImm(has_uncompressed).Imm(0).EQ.b {
+    If(has_uncompressed, 0).EQ.b {
       copy_bytes(src_str_data1, dst_str_data1, count1)
 
       offset1_ := ShrI(offset1).Imm(1).u32
@@ -259,7 +259,7 @@ function(:StringConcat4Tlab,
       Goto(:EndCopy)
     }
 
-    IfImm(AndI(length1).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length1).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data1, dst_str_data1, count1)
     } Else {
       copy_chars(src_str_data1, dst_str_data1, count1)
@@ -268,7 +268,7 @@ function(:StringConcat4Tlab,
     src_str_data2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data2 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset1).ptr
 
-    IfImm(AndI(length2).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length2).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data2, dst_str_data2, count2)
     } Else {
       copy_chars(src_str_data2, dst_str_data2, count2)
@@ -277,7 +277,7 @@ function(:StringConcat4Tlab,
     src_str_data3 := AddI(str3).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data3 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset2).ptr
 
-    IfImm(AndI(length3).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length3).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data3, dst_str_data3, count3)
     } Else {
       copy_chars(src_str_data3, dst_str_data3, count3)
@@ -286,7 +286,7 @@ function(:StringConcat4Tlab,
     src_str_data4 := AddI(str4).Imm(Constants::STRING_DATA_OFFSET).ptr
     dst_str_data4 := Add(AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr, offset3).ptr
 
-    IfImm(AndI(length4).Imm(1).u32).Imm(0).EQ.b {
+    If(AndI(length4).Imm(1).u32, 0).EQ.b {
       expand_u8_to_u16(src_str_data4, dst_str_data4, count4)
     } Else {
       copy_chars(src_str_data4, dst_str_data4, count4)

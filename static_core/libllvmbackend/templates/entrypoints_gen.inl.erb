@@ -14,6 +14,21 @@
  */
 
 // NOLINTNEXTLINE(readability-function-size)
+ark::llvmbackend::BridgeType GetBridgeTypeInternal(ark::compiler::RuntimeInterface::EntrypointId id)
+{
+    switch (id) {
+% Compiler::entrypoints.each do |entrypoint|
+        case ark::compiler::RuntimeInterface::EntrypointId::<%= entrypoint.enum_name %>:
+            return ark::llvmbackend::BridgeType::<%= entrypoint.bridge %>;
+% end
+        default:
+            ASSERT_DO(false, (std::cerr << "Cannot get bridge for EntrypointId = " << static_cast<int>(id)
+                                        << std::endl));
+            UNREACHABLE();
+    }
+}
+
+// NOLINTNEXTLINE(readability-function-size)
 llvm::FunctionType *GetEntrypointDeclaration(llvm::LLVMContext &ctx, llvm::Module *module, ark::compiler::RuntimeInterface::EntrypointId id)
 {
     constexpr auto GC_SPACE = ark::llvmbackend::LLVMArkInterface::GC_ADDR_SPACE;

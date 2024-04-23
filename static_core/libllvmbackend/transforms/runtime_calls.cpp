@@ -62,6 +62,34 @@ llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Val
 
     auto calleeFuncTy = llvm::cast<llvm::FunctionType>(functionProto);
     auto call = builder->CreateCall(calleeFuncTy, callee, arguments, bundle);
+
+    auto bridgeType = arkInterface->GetBridgeType(eid);
+    ASSERT(bridgeType != BridgeType::SLOW_PATH && bridgeType != BridgeType::ODD_SAVED);
+    ASSERT(call->getCallingConv() == llvm::CallingConv::C);
+
+    // Entrypoint bridges preserve a lot of registers, so we can put appropriate ArkFast convention for them.
+    if (bridgeType == BridgeType::ENTRYPOINT) {
+        llvm::CallingConv::ID cc = 0;
+        auto argsSize = arguments.size();
+        switch (argsSize) {
+            case 0U:
+                cc = call->getType()->isVoidTy() ? llvm::CallingConv::ArkFast0 : llvm::CallingConv::ArkFast1;
+                break;
+            case 1U:
+            case 2U:
+                cc = llvm::CallingConv::ArkFast2;
+                break;
+            case 3U:
+            case 4U:
+                cc = llvm::CallingConv::ArkFast4;
+                break;
+            case 5U:  // NOTE(zhroma): it is possible to introduce ArkFast6 for this case
+            default:
+                cc = llvm::CallingConv::C;
+        }
+        call->setCallingConv(cc);
+    }
+
     return call;
 }
 

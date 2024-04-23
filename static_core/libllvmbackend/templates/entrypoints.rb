@@ -92,6 +92,11 @@ class Entrypoint
     @dscr['properties']&.include? prop
   end
 
+  def bridge
+    bridge = @dscr['bridge']
+    return bridge.upcase
+  end
+
 end
 
 module Compiler
