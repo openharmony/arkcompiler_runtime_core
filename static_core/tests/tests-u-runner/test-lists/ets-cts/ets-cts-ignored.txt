@@ -17,6 +17,37 @@
 17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.ets
 # end of es2panda fails
 
+# 16761 Compiler fails on typeof of string-based enum
+07.expressions/17.typeof_expression/tof_const_16.ets
+07.expressions/17.typeof_expression/tof_vars_16.ets
+07.expressions/17.typeof_expression/tof_func_16.ets
+07.expressions/17.typeof_expression/tof_meth_16.ets
+07.expressions/17.typeof_expression/tof_obj_16.ets
+
+# 16343 Improve typeof result inference, move it to ETSAnalyzer
+07.expressions/17.typeof_expression/tof_const_1.ets
+07.expressions/17.typeof_expression/tof_vars_1.ets
+07.expressions/17.typeof_expression/tof_func_1.ets
+07.expressions/17.typeof_expression/tof_meth_1.ets
+07.expressions/17.typeof_expression/tof_obj_1.ets
+07.expressions/17.typeof_expression/tof_const_4.ets
+07.expressions/17.typeof_expression/tof_vars_4.ets
+07.expressions/17.typeof_expression/tof_func_4.ets
+07.expressions/17.typeof_expression/tof_meth_4.ets
+07.expressions/17.typeof_expression/tof_obj_4.ets
+07.expressions/17.typeof_expression/tof_const_6.ets
+07.expressions/17.typeof_expression/tof_vars_6.ets
+07.expressions/17.typeof_expression/tof_func_6.ets
+07.expressions/17.typeof_expression/tof_meth_6.ets
+07.expressions/17.typeof_expression/tof_obj_6.ets
+07.expressions/17.typeof_expression/tof_const_21.ets
+07.expressions/17.typeof_expression/tof_vars_21.ets
+07.expressions/17.typeof_expression/tof_func_21.ets
+07.expressions/17.typeof_expression/tof_meth_21.ets
+07.expressions/17.typeof_expression/tof_obj_21.ets
+07.expressions/17.typeof_expression/type_params_0.ets
+07.expressions/01.evaluation_of_expressions/03.operator_precedence/typeof.ets
+
 # es2panda fails: panda Not implemented
 17.experimental_features/02.array_creation_expressions/expr_n_10.ets
 17.experimental_features/02.array_creation_expressions/expr_n_11.ets
