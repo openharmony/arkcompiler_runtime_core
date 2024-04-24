@@ -155,7 +155,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
     std::vector<uint8_t> new_string_id = {0x0f, 0x00}; // The known literal id in the abc file
     std::vector<uint8_t> string_id = {0x0c, 0x00}; // The known string id in the abc file
 
-    for (size_t i = 0; i < buffer.size(); ++i) {
+    for (size_t i = sizeof(panda_file::File::Header); i < buffer.size(); ++i) {
         if (buffer[i] == string_id[0] && buffer[i + 1] == string_id[1]) {
             buffer[i] = static_cast<unsigned char>(new_string_id[0]);
             buffer[i + 1] = static_cast<unsigned char>(new_string_id[1]);

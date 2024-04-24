@@ -29,6 +29,7 @@ public:
     void FillProgramData() override;
 
 private:
+    void InitAnnotationName();
     void FillAnnotation();
     void FillAnnotationElements(std::vector<pandasm::AnnotationElement> &elements);
     std::unique_ptr<panda_file::AnnotationDataAccessor> annotation_data_accessor_;

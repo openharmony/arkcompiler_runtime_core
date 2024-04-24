@@ -27,9 +27,12 @@ class Abc2ProgramCompiler {
 public:
     bool OpenAbcFile(const std::string &file_path);
     bool FillProgramData(pandasm::Program &program);
+    bool CheckFileVersionIsSupported(uint8_t min_api_version, uint8_t target_api_version) const;
     const panda_file::File &GetAbcFile() const;
     AbcStringTable &GetAbcStringTable() const;
 private:
+    bool IsVersionLessEqual(const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_1,
+        const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_2) const;
     std::unique_ptr<const panda_file::File> file_;
     std::unique_ptr<AbcStringTable> string_table_;
     std::unique_ptr<Abc2ProgramEntityContainer> entity_container_;

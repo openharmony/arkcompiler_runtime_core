@@ -137,25 +137,23 @@ void AbcMethodProcessor::FillFuncAnnotation()
 void AbcMethodProcessor::FillSlotsNum()
 {
     for (auto annotation : function_.metadata->GetAnnotations()) {
-        if (annotation.GetName() == SLOT_NUMBER_ANN_RECORD_TYPE_DESCRIPTOR && !annotation.GetElements().empty()) {
+        if (annotation.GetName() == SLOT_NUMBER_RECORD_NAME && !annotation.GetElements().empty()) {
             uint32_t slots_num = annotation.GetElements()[0].GetValue()->GetAsScalar()->GetValue<uint32_t>();
             function_.SetSlotsNum(static_cast<size_t>(slots_num));
         }
     }
-    function_.metadata->DeleteAnnotationByName(SLOT_NUMBER_ANN_RECORD_TYPE_DESCRIPTOR);
 }
 
 void AbcMethodProcessor::FillConcurrentModuleRequests()
 {
     for (auto annotation : function_.metadata->GetAnnotations()) {
-        if (annotation.GetName() != CONCURRENT_MODULE_REQUEST_ANN_RECORD_TYPE_DESCRIPTOR) {
+        if (annotation.GetName() != CONCURRENT_MODULE_REQUEST_RECORD_NAME) {
             continue;
         }
         for (auto &elem : annotation.GetElements()) {
             function_.concurrent_module_requests.emplace_back(elem.GetValue()->GetAsScalar()->GetValue<uint32_t>());
         }
     }
-    function_.metadata->DeleteAnnotationByName(CONCURRENT_MODULE_REQUEST_ANN_RECORD_TYPE_DESCRIPTOR);
 }
 
 } // namespace panda::abc2program
