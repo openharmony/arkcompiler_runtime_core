@@ -39,6 +39,7 @@ class AbcMethodProcessor : public AbcFileEntityProcessor {
     void AddFunctionIntoFunctionTable();
     void FillDebugInfo();
     void FillSourceFile();
+    void FillSourceCode();
     void FillFuncAnnotation();
     void FillSlotsNum();
     void FillConcurrentModuleRequests();

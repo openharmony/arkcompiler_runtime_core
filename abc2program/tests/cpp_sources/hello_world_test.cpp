@@ -31,9 +31,10 @@ constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".HelloWorld";
 constexpr std::string_view FUNC_NAME_FOO = ".foo";
 constexpr std::string_view FUNC_NAME_GOO = ".goo";
 constexpr std::string_view FUNC_NAME_HOO = ".hoo";
-constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 4;
+constexpr std::string_view FUNC_NAME_MAIN = ".func_main_0";
+constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 7;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
-constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 3;
+constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 4;
 constexpr uint8_t TOTAL_NUM_OF_MODULE_LITERALS = 21;
 constexpr uint8_t NUM_OF_MODULE_REQUESTS = 4;
 constexpr uint8_t NUM_OF_REGULAR_IMPORTS = 1;
@@ -63,6 +64,9 @@ public:
             if (it.first == FUNC_NAME_HOO) {
                 hoo_function_ = &(it.second);
             }
+            if (it.first == FUNC_NAME_MAIN) {
+                main_function_ = &(it.second);
+            }
         }
     }
 
@@ -74,6 +78,7 @@ public:
     const pandasm::Function *foo_function_ = nullptr;
     const pandasm::Function *goo_function_ = nullptr;
     const pandasm::Function *hoo_function_ = nullptr;
+    const pandasm::Function *main_function_ = nullptr;
 };
 
 /**
@@ -443,17 +448,19 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
 {
     const pandasm::Function &function = *goo_function_;
     size_t regs_num = function.regs_num;
-    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 2;
+    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 5;
     EXPECT_TRUE(function.name == FUNC_NAME_GOO);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_GOO_METHOD_INS);
     // check ins[0]
-    const pandasm::Ins &ins0 = function.ins[0];
+    constexpr uint32_t INDEX_OF_FUNC_LDUNDEFINED = 3;
+    const pandasm::Ins &ins0 = function.ins[INDEX_OF_FUNC_LDUNDEFINED];
     std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str0 == "ldundefined");
     EXPECT_TRUE(ins0.label == "");
     EXPECT_FALSE(ins0.set_label);
     // check ins[1]
-    const pandasm::Ins &ins1 = function.ins[1];
+    constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 4;
+    const pandasm::Ins &ins1 = function.ins[INDEX_OF_FUNC_RETURNUNDEFINED];
     std::string pa_ins_str1 = ins1.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str1 == "returnundefined");
     EXPECT_TRUE(ins1.label == "");
@@ -476,6 +483,19 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_source_file, Te
 }
 
 /**
+ * @tc.name: abc2program_hello_world_test_source_code
+ * @tc.desc: Verify the source code
+ * @tc.type: FUNC
+ * @tc.require: issueI9DT0V
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_source_code, TestSize.Level1)
+{
+    const pandasm::Function &function = *main_function_;
+    std::string source_code = function.source_code;
+    EXPECT_TRUE(source_code.find("import {a} from './a'") != std::string::npos);
+}
+
+/**
  * @tc.name: abc2program_code_imm_of_FLDAI
  * @tc.desc: get and check immediate number of opcode FLDAI.
  * @tc.type: FUNC
@@ -485,7 +505,8 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_imm_of_FLDAI, TestSize.Leve
 {
     const pandasm::Function &hoo = *hoo_function_;
     EXPECT_EQ(hoo.ins.size(), INS_SIZE_OF_FUNCTION_HOO);
-    auto &ins_fldai = hoo.ins[0];
+    constexpr uint32_t INDEX_OF_FUNC_FLDAI = 3;
+    auto &ins_fldai = hoo.ins[INDEX_OF_FUNC_FLDAI];
     EXPECT_TRUE(ins_fldai.opcode == pandasm::Opcode::FLDAI);
     // check imm of FLDAI
     EXPECT_EQ(ins_fldai.imms.size(), IMMS_SIZE_OF_OPCODE_FLDAI);
@@ -536,4 +557,54 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_module_literal_entry_test, TestS
     idx += NUM_OF_STAR_EXPORTS * LITERAL_NUM_OF_STAR_EXPORT + 1;
     EXPECT_EQ(idx, TOTAL_NUM_OF_MODULE_LITERALS);
 }
+
+/**
+ * @tc.name: abc2program_hello_world_test_local_variable
+ * @tc.desc: get local variables
+ * @tc.type: FUNC
+ * @tc.require: issueI9DT0V
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_local_variable, TestSize.Level1)
+{
+    const pandasm::Function &function = *foo_function_;
+    EXPECT_FALSE(function.local_variable_debug.empty());
+    EXPECT_TRUE(function.local_variable_debug[0].name.find("4funcObj") != std::string::npos);
+    EXPECT_TRUE(function.local_variable_debug[0].signature.find("any") != std::string::npos);
+    EXPECT_TRUE(function.local_variable_debug[0].signature_type.find("any") != std::string::npos);
+    EXPECT_TRUE(function.local_variable_debug[0].reg == 0);
+    EXPECT_TRUE(function.local_variable_debug[0].start == 3);
+    EXPECT_TRUE(function.local_variable_debug[0].length == 74);
+}
+
+/**
+ * @tc.name: abc2program_hello_world_test_ins_debug
+ * @tc.desc: get ins_debug line number and column number
+ * @tc.type: FUNC
+ * @tc.require: issueI9DT0V
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_ins_debug, TestSize.Level1)
+{
+    const pandasm::Function &function = *foo_function_;
+    size_t regs_num = function.regs_num;
+    EXPECT_FALSE(function.local_variable_debug.empty());
+
+    const pandasm::Ins &ins0 = function.ins[0];
+    std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str0 == "mov v0, a0");
+    EXPECT_TRUE(ins0.ins_debug.line_number == -1);
+    EXPECT_TRUE(ins0.ins_debug.column_number == -1);
+
+    const pandasm::Ins &ins3 = function.ins[3];
+    std::string pa_ins_str3 = ins3.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str3 == "ldundefined");
+    EXPECT_TRUE(ins3.ins_debug.line_number == 32);
+    EXPECT_TRUE(ins3.ins_debug.column_number == 2);
+
+    const pandasm::Ins &ins5 = function.ins[5];
+    std::string pa_ins_str5 = ins5.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str5 == "label@5: ldai 0xb");
+    EXPECT_TRUE(ins5.ins_debug.line_number == 33);
+    EXPECT_TRUE(ins5.ins_debug.column_number == 11);
+}
+
 };  // panda::abc2program

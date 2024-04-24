@@ -61,6 +61,9 @@ private:
     void DumpFunctionIns(std::ostream &os, const pandasm::Function &function);
     void DumpFunctionIns4PandaAssembly(std::ostream &os, const pandasm::Function &function);
     void DumpFunctionIns4EcmaScript(std::ostream &os, const pandasm::Function &function);
+    void DumpFunctionDebugInfo(std::ostream &os, const pandasm::Function &function);
+    void UpdateLocalVarMap(const pandasm::Function &function,
+        std::map<int32_t, panda::pandasm::debuginfo::LocalVariable>& local_variable_table);
     void DumpAnnotationData(std::ostream &os, const pandasm::AnnotationData &anno) const;
     void DumpArrayValue(std::ostream &os, const pandasm::ArrayValue &array) const;
     void DumpScalarValue(std::ostream &os, const pandasm::ScalarValue &scalar) const;
@@ -131,6 +134,8 @@ private:
     LabelMap finally_label_map_;
     const pandasm::Program *program_ = nullptr;
     size_t regs_num_ = 0;
+    std::unordered_map<pandasm::Ins*, uint32_t> original_ins_index_map_;
+    std::unordered_map<pandasm::Ins*, uint32_t> final_ins_index_map_;
 };
 
 } // namespace panda::abc2program

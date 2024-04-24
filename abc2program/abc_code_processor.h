@@ -48,6 +48,14 @@ private:
     void FillCatchBlockLabels(pandasm::Function::CatchBlock &pa_catch_block) const;
     void FillExceptionRecord(panda_file::CodeDataAccessor::CatchBlock &catch_block,
                              pandasm::Function::CatchBlock &pa_catch_block) const;
+    void FillLocalVariableTable();
+    template <typename T>
+    void SkipToNextEntryIfNeeded(uint32_t &idx,
+                                 uint32_t &offset_start,
+                                 uint32_t &offset_end,
+                                 uint32_t ins_offset,
+                                 const T &table);
+    void FillInsDebug();
     uint32_t GetInstIdxByInstPc(uint32_t inst_pc) const;
     uint32_t GetInstPcByInstIdx(uint32_t inst_idx) const;
     panda_file::File::EntityId method_id_;
@@ -55,13 +63,14 @@ private:
     std::unique_ptr<panda_file::CodeDataAccessor> code_data_accessor_;
     std::unique_ptr<AbcCodeConverter> code_converter_;
     std::vector<uint32_t> jump_inst_idx_vec_;
-    std::unordered_map<uint32_t, uint32_t> inst_pc_idx_map_;
+    std::map<uint32_t, uint32_t> inst_pc_idx_map_;
     std::unordered_map<uint32_t, uint32_t> inst_idx_pc_map_;
     uint32_t ins_size_ = 0;
     uint32_t curr_try_begin_inst_pc_ = 0;
     uint32_t curr_try_end_inst_pc_ = 0;
     uint32_t curr_catch_begin_pc_ = 0;
     uint32_t curr_catch_end_pc_ = 0;
+    panda_file::DebugInfoExtractor &debug_info_extractor_;
 }; // AbcCodeProcessor
 
 } // namespace panda::abc2program

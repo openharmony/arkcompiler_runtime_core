@@ -58,9 +58,13 @@ constexpr std::string_view DUMP_TITLE_CATCH_ALL = ".catchall :";
 constexpr std::string_view DUMP_TITLE_CATCH = ".catch :";
 constexpr std::string_view DUMP_TITLE_STRING = "# STRING\n";
 constexpr std::string_view DUMP_TITLE_SEPARATOR = "# ====================\n";
+constexpr std::string_view DUMP_TITLE_LOCAL_VAR_TABLE = "# LOCAL_VARIABLE_TABLE:";
 constexpr std::string_view DUMP_CONTENT_ECMASCRIPT = "ECMAScript";
 constexpr std::string_view DUMP_CONTENT_PANDA_ASSEMBLY = "PandaAssembly";
 constexpr std::string_view DUMP_CONTENT_SPACE = " ";
+constexpr std::string_view DUMP_CONTENT_DOUBLE_SPACES = "  ";
+constexpr std::string_view DUMP_CONTENT_TRIPLE_SPACES = "   ";
+constexpr std::string_view DUMP_CONTENT_NONUPLE_SPACES = "         ";
 constexpr std::string_view DUMP_CONTENT_TAB = "\t";
 constexpr std::string_view DUMP_CONTENT_SINGLE_ENDL = "\n";
 constexpr std::string_view DUMP_CONTENT_DOUBLE_ENDL = "\n\n";
@@ -71,8 +75,19 @@ constexpr std::string_view DUMP_CONTENT_TRY_BEGIN_LABEL = "try_begin_label : ";
 constexpr std::string_view DUMP_CONTENT_TRY_END_LABEL = "try_end_label : ";
 constexpr std::string_view DUMP_CONTENT_CATCH_BEGIN_LABEL = "catch_begin_label : ";
 constexpr std::string_view DUMP_CONTENT_CATCH_END_LABEL = "catch_end_label : ";
+constexpr std::string_view DUMP_CONTENT_LOCAL_VAR_TABLE = "#\t Start   Length  Register           Name   Signature\n";
+constexpr std::string_view DUMP_CONTENT_LINE_NUMBER = " # line: ";
+constexpr std::string_view DUMP_CONTENT_COLUMN_NUMBER = " # column: ";
 constexpr std::string_view STR_LITERAL_ARRAY_ID = ".LITERAL_ARRAY_ID:";
 constexpr std::string_view DUMP_CONTENT_NESTED_LITERALARRAY = "$$NESTED-LITERALARRAY$$";
+
+// width constant
+constexpr uint32_t LINE_WIDTH = 40;
+constexpr uint32_t COLUMN_WIDTH = 10;
+constexpr uint32_t START_WIDTH = 5;
+constexpr uint32_t END_WIDTH = 6;
+constexpr uint32_t REG_WIDTH = 8;
+constexpr uint32_t NAME_WIDTH = 13;
 
 // ins constant
 constexpr std::string_view LABEL_PREFIX = "label@";
