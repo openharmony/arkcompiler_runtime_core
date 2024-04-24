@@ -54,15 +54,15 @@
 ## 编译构建
 **Linux平台**
 ```
-$ ./build.sh --product-name hispark_taurus_standard --build-target ark_host_linux_tools_packages
+$ ./build.sh --product-name rk3568 --build-target arkcompiler/runtime_core:ark_host_linux_tools_packages
 ```
 **Windows平台**
 ```
-$ ./build.sh --product-name hispark_taurus_standard --build-target ark_host_windows_tools_packages
+$ ./build.sh --product-name rk3568 --build-target arkcompiler/runtime_core:ark_host_windows_tools_packages
 ```
 **Mac平台**
 ```
-$ ./build.sh --product-name hispark_taurus_standard --build-target ark_host_mac_tools_packages
+$ ./build.sh --product-name rk3568 --build-target arkcompiler/runtime_core:ark_host_mac_tools_packages
 ```
 
 ## 说明

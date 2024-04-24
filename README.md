@@ -54,15 +54,15 @@ For more information, see: [ARK Runtime Subsystem](https://gitee.com/openharmony
 
 **Linux platform**
 ```
-$ ./build.sh --product-name hispark_taurus_standard --build-target ark_host_linux_tools_packages
+$ ./build.sh --product-name rk3568 --build-target arkcompiler/runtime_core:ark_host_linux_tools_packages
 ```
 **Windows platform**
 ```
-$ ./build.sh --product-name hispark_taurus_standard --build-target ark_host_windows_tools_packages
+$ ./build.sh --product-name rk3568 --build-target arkcompiler/runtime_core:ark_host_windows_tools_packages
 ```
 **Mac platform**
 ```
-$ ./build.sh --product-name hispark_taurus_standard --build-target ark_host_mac_tools_packages
+$ ./build.sh --product-name rk3568 --build-target arkcompiler/runtime_core:ark_host_mac_tools_packages
 ```
 
 ## Guidelines
