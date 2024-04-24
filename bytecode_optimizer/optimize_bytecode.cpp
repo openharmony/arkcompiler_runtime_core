@@ -24,7 +24,9 @@
 #include "compiler/optimizer/ir/constants.h"
 #include "compiler/optimizer/ir_builder/ir_builder.h"
 #include "compiler/optimizer/ir_builder/pbc_iterator.h"
+#include "compiler/optimizer/optimizations/branch_elimination.h"
 #include "compiler/optimizer/optimizations/cleanup.h"
+#include "compiler/optimizer/optimizations/constant_propagation/constant_propagation.h"
 #include "compiler/optimizer/optimizations/lowering.h"
 #include "compiler/optimizer/optimizations/move_constants.h"
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc.h"
@@ -68,6 +70,12 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
 
     graph->RunPass<compiler::Cleanup>();
     ASSERT(graph->IsDynamicMethod());
+
+    if (compiler::options.IsCompilerBranchElimination()) {
+        RunOpts<compiler::ConstantPropagation>(graph);
+        RunOpts<compiler::BranchElimination>(graph);
+    }
+
     RunOpts<compiler::ValNum, compiler::Lowering, compiler::MoveConstants>(graph);
 
     // this pass should run just before register allocator
@@ -208,6 +216,7 @@ static void SetCompilerOptions(bool is_dynamic)
     if (is_dynamic) {
         panda::bytecodeopt::options.SetSkipMethodsWithEh(true);
     }
+    compiler::options.SetCompilerBranchElimination(false);
 }
 
 bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
