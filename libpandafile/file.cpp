@@ -143,8 +143,6 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
     size_t size_to_mmap = AlignUp(uncompressed_length, panda::os::mem::GetPageSize());
     void *mem = os::mem::MapRWAnonymousRaw(size_to_mmap, false);
     if (mem == nullptr) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't mmap anonymous!";
         return nullptr;
     }
@@ -154,16 +152,12 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
     auto it = AnonMemSet::GetInstance().Insert(std::string(location), ss.str());
     auto ret = os::mem::TagAnonymousMemory(reinterpret_cast<void *>(ptr.Get()), size_to_mmap, it->second.c_str());
     if (ret.has_value()) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't tag mmap anonymous!";
         return nullptr;
     }
 
     auto extract_error = ExtractToMemory(handle, reinterpret_cast<uint8_t *>(ptr.Get()), size_to_mmap);
     if (extract_error != 0) {
-        CloseCurrentFile(handle);
-        OpenPandaFileFromZipErrorHandler(handle);
         LOG(ERROR, PANDAFILE) << "Can't extract!";
         return nullptr;
     }
@@ -265,11 +259,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
         GetCurrentFileOffset(zipfile, &entry);
         file = HandleArchive(zipfile, fp, location, entry, archive_filename, open_mode);
         CloseCurrentFile(zipfile);
-        if (panda::CloseArchiveFile(zipfile) != 0) {
-            LOG(ERROR, PANDAFILE) << "CloseArchive failed!";
-            fclose(fp);
-            return nullptr;
-        }
+        OpenPandaFileFromZipErrorHandler(zipfile);
     } else {
         file = panda_file::File::Open(location, open_mode);
     }
