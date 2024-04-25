@@ -96,6 +96,7 @@ host_unittest_action("GraphInterfaceTest") {
     "linear_order_new_test.cpp",
     "liveness_analyzer_new_test.cpp",
     "loop_analyzer_new_test.cpp",
+    "reg_alloc_interference_graph_new_test.cpp",
   ]
   configs = compiler_test_configs
   deps = compiler_test_deps
