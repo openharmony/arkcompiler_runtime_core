@@ -35,7 +35,6 @@ export final class WeakMap<K, V> {
      */
     set(k: K, v: V): WeakMap<K, V> {
         throw new Error("Not implemented");
-        return this;
     }
     /**
      * The has() method returns a boolean indicating whether
@@ -44,7 +43,6 @@ export final class WeakMap<K, V> {
      */
     has(k: K): boolean {
         throw new Error("Not implemented");
-        return false;
     }
 
     /**
@@ -53,7 +51,6 @@ export final class WeakMap<K, V> {
      */
     get(k: K): V | null {
         throw new Error("Not implemented");
-        return null;
     }
 
     /**
@@ -62,6 +59,5 @@ export final class WeakMap<K, V> {
      */
     delete(k: K): boolean {
         throw new Error("Not implemented");
-        return false;
     }
 }

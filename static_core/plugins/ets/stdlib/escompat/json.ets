@@ -759,7 +759,6 @@ export class JSONParser {
         this.getNextChar()
         if (this.curChar  != c':') {
             throw new SyntaxError("Expected : \",\" at " + this.getCurPosDescr() + " got \"" + this.curChar + "\"")
-            return res
         }
         res.values.push(this.parse(new JSONValue()))
         return res

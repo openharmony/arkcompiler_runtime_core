@@ -153,6 +153,9 @@ export class Atomics {
                 return mem.atomicAddU64(indexedPosition, value as long)
             }
         }
+        else {
+            throw new Error("Unhandled array type!")
+        }
     }
 
     public static and(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
@@ -252,7 +255,10 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicAndU64(indexedPosition, value as long)
             }
-        } 
+        }
+        else {
+            throw new Error("Unhandled array type!")
+        }
     }
 
     public static compareExchange(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, expectedValue: number, replacementValue: number): number {
@@ -361,6 +367,9 @@ export class Atomics {
                 return mem.atomicCompareExchangeU64(indexedPosition, expectedValue as long, replacementValue as long)
             }
         }
+        else {
+            throw new Error("Unhandled array type!")
+        }
     }
 
     public static exchange(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
@@ -453,6 +462,9 @@ export class Atomics {
                 return mem.atomicExchangeU64(indexedPosition, value as long)
             }
         }
+        else {
+            throw new Error("Unhandled array type!")
+        }
     }
 
     public static load(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int): number {
@@ -528,6 +540,9 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicLoadU64(indexedPosition)
             }
+        }
+        else {
+            throw new Error("Unhandled array type!")
         }
     }
 
@@ -629,6 +644,9 @@ export class Atomics {
                 return mem.atomicOrU64(indexedPosition, value as long)
             }
         }
+        else {
+            throw new Error("Unhandled array type!")
+        }
     }
 
     public static store(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
@@ -712,6 +730,9 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicStoreU64(indexedPosition, value as long)
             }
+        }
+        else {
+            throw new Error("Unhandled array type!")
         }
     }
 
@@ -813,6 +834,9 @@ export class Atomics {
                 return mem.atomicSubU64(indexedPosition, value as long)
             }
         }
+        else {
+            throw new Error("Unhandled array type!")
+        }
     }
 
     public static xor(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
@@ -912,7 +936,10 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicXorU64(indexedPosition, value as long)
             }
-        } 
+        }
+        else {
+            throw new Error("Unhandled array type!")
+        }
     }
 
     /**
