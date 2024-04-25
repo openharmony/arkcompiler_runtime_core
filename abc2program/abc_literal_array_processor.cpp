@@ -152,18 +152,4 @@ void AbcLiteralArrayProcessor::FillLiteralData(pandasm::LiteralArray *lit_array,
     lit_array->literals_.emplace_back(value_lit);
 }
 
-void AbcLiteralArrayProcessor::FillLiteralData4Method(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                      pandasm::LiteralArray::Literal &lit) const
-{
-    panda_file::MethodDataAccessor mda(*file_, panda_file::File::EntityId(std::get<uint32_t>(value)));
-    lit.value_ = string_table_->GetStringById(mda.GetNameId());
-}
-
-void AbcLiteralArrayProcessor::FillLiteralData4LiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                            pandasm::LiteralArray::Literal &lit) const
-{
-    uint32_t literal_array_id = std::get<uint32_t>(value);
-    lit.value_ = entity_container_.GetLiteralArrayIdName(literal_array_id);
-}
-
 } // namespace panda::abc2program

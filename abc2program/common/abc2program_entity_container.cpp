@@ -210,15 +210,15 @@ void Abc2ProgramEntityContainer::TryAddUnprocessedNestedLiteralArrayId(uint32_t 
     unprocessed_nested_literal_array_id_set_.insert(nested_literal_array_id);
 }
 
-std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(uint32_t literal_array_id) const
+std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(uint32_t literal_array_id)
 {
     std::stringstream name;
-    const std::string file_abs_path = GetAbcFileAbsolutePath();
-    name << file_abs_path << STR_LITERAL_ARRAY_ID << "0x" << std::hex << literal_array_id;
+    auto cur_record_name = GetFullRecordNameById(panda_file::File::EntityId(current_class_id_));
+    name << cur_record_name << UNDERLINE << literal_array_id;
     return name.str();
 }
 
-std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id) const
+std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id)
 {
     return GetLiteralArrayIdName(literal_array_id.GetOffset());
 }
@@ -231,6 +231,19 @@ void Abc2ProgramEntityContainer::AddProgramString(const std::string &str) const
 std::string Abc2ProgramEntityContainer::GetAbcFileAbsolutePath() const
 {
     return os::file::File::GetAbsolutePath(file_.GetFilename()).Value();
+}
+
+void Abc2ProgramEntityContainer::SetCurrentClassId(uint32_t class_id)
+{
+    current_class_id_ = class_id;
+}
+
+void Abc2ProgramEntityContainer::ClearLiteralArrayIdSet()
+{
+    module_literal_array_id_set_.clear();
+    unnested_literal_array_id_set_.clear();
+    processed_nested_literal_array_id_set_.clear();
+    unprocessed_nested_literal_array_id_set_.clear();
 }
 
 }  // namespace panda::abc2program

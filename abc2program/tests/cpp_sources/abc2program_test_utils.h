@@ -28,12 +28,14 @@ class Abc2ProgramTestUtils {
 public:
     static bool ValidateProgramStrings(const std::set<std::string> &program_strings);
     static bool ValidateRecordNames(const std::vector<std::string> &record_names);
+    static bool ValidateLiteralArrayKeys(const std::vector<std::string> &literal_array_keys);
     static bool ValidateLiteralsSizes(const std::set<size_t> &literals_sizes);
 private:
     template <typename T>
     static bool ValidateStrings(const T &strings, const T &expected_strings);
     static std::set<std::string> helloworld_expected_program_strings_;
     static std::vector<std::string> helloworld_expected_record_names_;
+    static std::vector<std::string> helloworld_expected_literal_array_keys_;
     static std::set<size_t> helloworld_expected_literals_sizes_;
 };  // class Abc2ProgramTestUtils
 
