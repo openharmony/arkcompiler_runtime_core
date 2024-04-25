@@ -137,6 +137,5 @@ function main(): int {
     assert Esc.trimRight() == Empty;
     assert RusChars.trimRight() == RusChars;
 
-    console.println("PASS");
     return 0;
 }

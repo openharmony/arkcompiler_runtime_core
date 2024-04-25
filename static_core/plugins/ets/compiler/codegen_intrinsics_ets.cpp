@@ -471,4 +471,23 @@ void Codegen::CreateStringEndsWith(IntrinsicInst *inst, Reg dst, SRCREGS src)
     auto idx = src[THIRD_OPERAND];
     CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_ENDS_WITH, dst, {}, str, sfx, idx);
 }
+
+void Codegen::CreateStringGetBytesTlab([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto entrypointId = EntrypointId::STRING_GET_BYTES_TLAB;
+    auto runtime = GetGraph()->GetRuntime();
+    if (GetGraph()->IsAotMode()) {
+        ScopedTmpReg klassReg(GetEncoder());
+        GetEncoder()->EncodeLdr(klassReg, false,
+                                MemRef(ThreadReg(), runtime->GetArrayU8ClassPointerTlsOffset(GetArch())));
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                     klassReg);
+    } else {
+        auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetArrayU8Class(GetGraph()->GetMethod())));
+        CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
+                     klassImm);
+    }
+}
+
 }  // namespace ark::compiler

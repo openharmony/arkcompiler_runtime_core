@@ -160,6 +160,5 @@ function main(): int {
         console.println("FAIL");
         return 127;
     }
-    console.println("PASS");
     return 0;
 }

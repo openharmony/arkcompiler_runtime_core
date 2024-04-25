@@ -352,3 +352,18 @@ bool LLVMIrConstructor::EmitStringEndsWith(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_ENDS_WITH, 3U);
 }
+
+bool LLVMIrConstructor::EmitStringGetBytesTlab(Inst *inst)
+{
+    auto offset = GetGraph()->GetRuntime()->GetArrayU8ClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
+    auto eid = RuntimeInterface::EntrypointId::STRING_GET_BYTES_TLAB;
+    auto result = CreateEntrypointCall(eid, inst,
+                                       {GetInputValue(inst, 0), GetInputValue(inst, 1), GetInputValue(inst, 2), klass});
+    ASSERT(result->getCallingConv() == llvm::CallingConv::C);
+    result->setCallingConv(llvm::CallingConv::ArkFast4);
+    result->addRetAttr(llvm::Attribute::NonNull);
+    result->addRetAttr(llvm::Attribute::NoAlias);
+    ValueMapAdd(inst, result);
+    return true;
+}

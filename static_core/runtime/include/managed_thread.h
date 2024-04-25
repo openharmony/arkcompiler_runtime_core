@@ -233,6 +233,11 @@ public:
         stringClassPtr_ = p;
     }
 
+    void SetArrayU8ClassPtr(void *p)
+    {
+        arrayU8ClassPtr_ = p;
+    }
+
     void SetArrayU16ClassPtr(void *p)
     {
         arrayU16ClassPtr_ = p;
@@ -393,6 +398,10 @@ public:
     static constexpr uint32_t GetTlsStringClassPointerOffset()
     {
         return MEMBER_OFFSET(ManagedThread, stringClassPtr_);
+    }
+    static constexpr uint32_t GetTlsArrayU8ClassPointerOffset()
+    {
+        return MEMBER_OFFSET(ManagedThread, arrayU8ClassPtr_);
     }
     static constexpr uint32_t GetTlsArrayU16ClassPointerOffset()
     {

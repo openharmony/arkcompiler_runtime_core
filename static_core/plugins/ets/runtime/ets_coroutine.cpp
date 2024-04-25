@@ -59,6 +59,7 @@ void EtsCoroutine::Initialize()
         auto *linkExt = GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
         SetStringClassPtr(linkExt->GetClassRoot(ClassRoot::STRING));
         SetArrayU16ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U16));
+        SetArrayU8ClassPtr(linkExt->GetClassRoot(ClassRoot::ARRAY_U8));
     }
     ASSERT(promiseClassPtr_ != nullptr || !HasManagedEntrypoint());
 

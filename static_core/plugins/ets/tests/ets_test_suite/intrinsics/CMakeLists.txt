@@ -23,6 +23,7 @@ set(intrinsics_tests
     string_from_chars
     string_substring
     string_getchars
+    string_getbytes
     string_hashcode
     string_concat
     string_trim

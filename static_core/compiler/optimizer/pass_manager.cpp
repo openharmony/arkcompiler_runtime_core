@@ -111,7 +111,6 @@ void PassManager::DumpGraph([[maybe_unused]] const char *passName)
     }
     ASSERT(strm.is_open());
     GetGraph()->Dump(&strm);
-    LOG(DEBUG, COMPILER) << "Dump IR to " << fileName;
 #endif  // ENABLE_IR_DUMP
 }
 void PassManager::DumpLifeIntervals([[maybe_unused]] const char *passName)

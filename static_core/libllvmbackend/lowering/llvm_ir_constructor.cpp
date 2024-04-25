@@ -2319,15 +2319,14 @@ void LLVMIrConstructor::CreateCompressUtf16ToUtf8CharsUsingSimd(Inst *inst)
     ASSERT(inst->GetInputType(0) == DataType::POINTER);
     ASSERT(inst->GetInputType(1) == DataType::POINTER);
     static_assert(VECTOR_SIZE == VECTOR_SIZE_8 || VECTOR_SIZE == VECTOR_SIZE_16, "Unexpected vector size");
-    auto intrinsicId = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_ld2;
-    auto vecTy = llvm::VectorType::get(builder_.getInt8Ty(), VECTOR_SIZE, false);
+    auto vecInTy = llvm::VectorType::get(builder_.getInt16Ty(), VECTOR_SIZE, false);
+    auto vecOutTy = llvm::VectorType::get(builder_.getInt8Ty(), VECTOR_SIZE, false);
 
     auto u16Ptr = GetInputValue(inst, 0);  // ptr to src array of utf16 chars
     auto u8Ptr = GetInputValue(inst, 1);   // ptr to dst array of utf8 chars
-    auto ld2 = llvm::Intrinsic::getDeclaration(func_->getParent(), intrinsicId, {vecTy, u16Ptr->getType()});
-    auto vld2 = builder_.CreateCall(ld2, {u16Ptr});
-    auto u8Vec = builder_.CreateExtractValue(vld2, {0});
-    builder_.CreateStore(u8Vec, u8Ptr);
+    auto inVec = builder_.CreateLoad(vecInTy, u16Ptr);
+    auto outVec = builder_.CreateTrunc(inVec, vecOutTy);
+    builder_.CreateStore(outVec, u8Ptr);
 }
 
 // Getters

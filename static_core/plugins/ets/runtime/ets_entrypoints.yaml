@@ -618,3 +618,34 @@
     - ark::ObjectHeader*  # string to check
     - ark::ObjectHeader*  # suffix to check
     - int32_t             # index of char to stop at
+
+- name: StringGetBytesTlab
+  entrypoint: StringGetBytesTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::Array*   # resulting array of uint8
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+    - ark::Class*              # Array u16 class pointer
+
+- name: StringGetBytes4Arg
+  entrypoint: StdCoreStringGetBytes
+  bridge: odd_saved4
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::Array*   # resulting array of utf16 chars
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index
+
+- name: StringGetBytesSlowPath
+  entrypoint: StdCoreStringGetBytes
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::coretypes::Array*   # resulting array of int8
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # begin index
+    - int32_t                  # end index

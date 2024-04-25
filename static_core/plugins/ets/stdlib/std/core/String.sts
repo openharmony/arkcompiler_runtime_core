@@ -318,17 +318,9 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @throws StringIndexOutOfBoundsError if end >= length
      * @throws AssertionError if begin > end
      *
-     * @returns char[] array
+     * @returns byte[] array
      */
-    public getBytes(begin: int, end: int): byte[] {
-        assert begin <= end: "Begin idx must be less then end idx";
-        let resChars: char[] = this.getChars(begin, end);
-        let resBytes: byte[] = new byte[resChars.length];
-        for (let i: int = 0; i < resChars.length; i++) {
-            resBytes[i] = resChars[i] as byte;
-        }
-        return resBytes;
-    }
+    public native getBytes(begin: int, end: int): byte[];
 
     /**
      * Compares the given StringBuilder to this String. The

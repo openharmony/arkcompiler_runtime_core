@@ -60,6 +60,5 @@ function main(): int {
     assert Nature.startsWith("界", 2) == true
     assert Nature.startsWith("界", 3) == false
 
-    console.println("PASS");
     return 0;
 }
