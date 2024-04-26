@@ -682,6 +682,65 @@ TEST_F(BoundsAnalysisTest, Different_types)
     ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(2U)), BoundsRange(INT64_MIN, INT64_MAX));
     ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(3U)), BoundsRange(INT64_MIN, INT64_MAX));
 }
+
+/*
+ *              [0]
+ *               |
+ *               v
+ *      /------>[2]------\
+ *      |        |       |
+ *      |       [3]      |
+ *      |       / \      |
+ *      |      v   v     v
+ *      |     [4] [5]   [7]
+ *      |       \ /      |
+ *      \-------[6]    [exit]
+ *
+ */
+TEST_F(BoundsAnalysisTest, LoopWithBranch)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).b();
+        CONSTANT(1U, 0U);
+        CONSTANT(15U, 1U);
+        CONSTANT(2U, 2U);
+        CONSTANT(25U, 10U);
+        BASIC_BLOCK(2U, 3U, 7U)
+        {
+            INST(3U, Opcode::Phi).Inputs(1U, 9U).u64();   // index
+            INST(35U, Opcode::Phi).Inputs(1U, 8U).u64();  // init
+            INST(4U, Opcode::Compare).CC(CC_LT).b().Inputs(3U, 25U);
+            INST(45U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
+        }
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(0U);
+        }
+        BASIC_BLOCK(4U, 6U)
+        {
+            INST(6U, Opcode::Add).Inputs(35U, 2U).u64();
+        }
+        BASIC_BLOCK(5U, 6U)
+        {
+            INST(7U, Opcode::Add).Inputs(35U, 15U).u64();
+        }
+        BASIC_BLOCK(6U, 2U)
+        {
+            INST(8U, Opcode::Phi).Inputs(6U, 7U).u64();  // update
+            INST(9U, Opcode::Add).Inputs(3U, 15U).u64();
+        }
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(10U, Opcode::Return).Inputs(35U).u64();
+        }
+    }
+    auto bri = GetGraph()->GetBoundsRangeInfo();
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(3U)), BoundsRange(0U, 9U));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(35U)), BoundsRange(0U, 20U));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(6U), &INS(8U)), BoundsRange(10U, 20U));
+}
+
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler

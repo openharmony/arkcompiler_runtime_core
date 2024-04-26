@@ -241,6 +241,23 @@ BoundsRange BoundsRange::Shl(const BoundsRange &range, DataType::Type type)
     return BoundsRange(l, r);
 }
 
+/**
+ * Count difference between range and current range. Type of current range is saved.
+ * DIFF([x1, x2], [y1, y2]) = [x1 - y1, x2 - y2]
+ * If result range is incorrect (left > right), it returns maximal range
+ */
+BoundsRange BoundsRange::Diff(const BoundsRange &range) const
+{
+    auto negLeft = (range.GetLeft() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetLeft());
+    auto left = AddWithOverflowCheck(left_, negLeft);
+    auto negRight = (range.GetRight() == MIN_RANGE_VALUE ? MAX_RANGE_VALUE : -range.GetRight());
+    auto right = AddWithOverflowCheck(right_, negRight);
+    if (!left || !right || left.value() > right.value()) {
+        return BoundsRange();
+    }
+    return BoundsRange(left.value(), right.value());
+}
+
 BoundsRange BoundsRange::And(const BoundsRange &range)
 {
     if (!range.IsConst()) {
@@ -738,12 +755,16 @@ void BoundsRangeInfo::SetBoundsRange(const BasicBlock *block, const Inst *inst, 
     }
 }
 
-BoundsAnalysis::BoundsAnalysis(Graph *graph) : Analysis(graph), boundsRangeInfo_(graph->GetAllocator()) {}
+BoundsAnalysis::BoundsAnalysis(Graph *graph)
+    : Analysis(graph), boundsRangeInfo_(graph->GetAllocator()), loopsInfoTable_(graph->GetAllocator()->Adapter())
+{
+}
 
 bool BoundsAnalysis::RunImpl()
 {
     ASSERT(!GetGraph()->IsBytecodeOptimizer());
     boundsRangeInfo_.Clear();
+    loopsInfoTable_.clear();
 
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
@@ -887,17 +908,35 @@ void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
     if (IsFloatType(inst->GetType()) || inst->GetType() == DataType::ANY || inst->GetType() == DataType::POINTER) {
         return;
     }
-    auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
+    auto boundsAnalysis = static_cast<BoundsAnalysis *>(v);
+    auto bri = boundsAnalysis->GetBoundsRangeInfo();
     auto phi = inst->CastToPhi();
-    if (inst->GetType() != DataType::REFERENCE && ProcessCountableLoop(phi, bri)) {
+    // for phi in a countable loop
+    if (inst->GetType() != DataType::REFERENCE && boundsAnalysis->ProcessCountableLoop(phi, bri)) {
         return;
     }
+    // for other phis
+    MergePhiPredecessors(phi, bri);
+}
+
+template <bool CHECK_TYPE>
+bool BoundsAnalysis::MergePhiPredecessors(PhiInst *phi, BoundsRangeInfo *bri)
+{
     auto phiBlock = phi->GetBasicBlock();
     ArenaVector<BoundsRange> ranges(phiBlock->GetGraph()->GetLocalAllocator()->Adapter());
-    for (auto &block : phiBlock->GetPredsBlocks()) {
-        ranges.emplace_back(bri->FindBoundsRange(block, phi->GetPhiInput(block)));
+    for (auto *block : phiBlock->GetPredsBlocks()) {
+        auto *inst = phi->GetPhiInput(block);
+        if constexpr (CHECK_TYPE) {
+            if (!(inst->IsAddSub() && (inst->GetInput(0).GetInst()->IsPhi() || inst->GetInput(1).GetInst()->IsPhi())) &&
+                !inst->IsPhi()) {
+                // NOTE: support Mul-Div and maybe more cases
+                return false;
+            }
+        }
+        ranges.emplace_back(bri->FindBoundsRange(block, inst));
     }
     bri->SetBoundsRange(phiBlock, phi, BoundsRange::Union(ranges).FitInType(phi->GetType()));
+    return true;
 }
 
 void BoundsAnalysis::VisitNullCheck(GraphVisitor *v, Inst *inst)
@@ -905,21 +944,110 @@ void BoundsAnalysis::VisitNullCheck(GraphVisitor *v, Inst *inst)
     ProcessNullCheck(v, inst, inst->GetDataFlowInput(0));
 }
 
-bool BoundsAnalysis::ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri)
+std::optional<uint64_t> BoundsAnalysis::GetNestedLoopIterations(Loop *loop, CountableLoopInfo &loopInfo)
 {
-    auto phiBlock = phi->GetBasicBlock();
-    auto phiType = phi->GetType();
-    auto loop = phiBlock->GetLoop();
+    auto iterations = CountableLoopParser::GetLoopIterations(loopInfo);
+    if (!iterations.has_value()) {
+        return std::nullopt;
+    }
+    auto iterationsValue = iterations.value();
+    auto *outer = loop->GetOuterLoop();
+    if (outer->IsRoot()) {
+        return iterationsValue;
+    }
+    auto it = loopsInfoTable_.find(loop->GetOuterLoop());
+    if (it == loopsInfoTable_.end()) {
+        return std::nullopt;
+    }
+    auto outerLoopInfo = (*it).second;
+    if (!outerLoopInfo.has_value()) {
+        return std::nullopt;
+    }
+    auto outerIters = outerLoopInfo.value().second;
+    if (outerIters == std::numeric_limits<uint64_t>::max()) {
+        return outerIters;
+    }
+    return iterationsValue * outerIters;
+}
+
+std::optional<LoopIterationsInfo> BoundsAnalysis::GetSimpleLoopIterationsInfo(Loop *loop)
+{
     auto loopParser = CountableLoopParser(*loop);
     auto loopInfo = loopParser.Parse();
-    // check that loop is countable and phi is index
-    if (!loopInfo || phi != loopInfo->index) {
-        return false;
+    if (!loopInfo.has_value()) {
+        // Loop is not countable
+        loopsInfoTable_.emplace(std::make_pair(loop, std::nullopt));
+        return std::nullopt;
     }
     auto loopInfoValue = loopInfo.value();
+    // Generally speaking, countable loop can have compile-time unknown number of iterations,
+    // i.e. when its init instruction is not a constant
+    // In this case it is possible to get the index phi range, but not for other phis
+    auto iterations = GetNestedLoopIterations(loop, loopInfoValue);
+    auto iterationsValue = std::numeric_limits<uint64_t>::max();
+    if (iterations.has_value()) {
+        iterationsValue = iterations.value();
+    }
+    auto loopIterInfo = std::make_pair(loopInfoValue, iterationsValue);
+    loopsInfoTable_.emplace(std::make_pair(loop, loopIterInfo));
+    return loopIterInfo;
+}
+
+std::optional<LoopIterationsInfo> BoundsAnalysis::GetNestedLoopIterationsInfo(Loop *loop)
+{
+    auto it = loopsInfoTable_.find(loop);
+    if (it == loopsInfoTable_.end()) {
+        auto loopIterInfo = GetSimpleLoopIterationsInfo(loop);
+        // If loop is visited first time - parse loop and fill the table
+        for (auto *innerLoop : loop->GetInnerLoops()) {
+            // If some of inner loops is not countable - we cannot process phis, except index
+            if (!GetSimpleLoopIterationsInfo(innerLoop).has_value()) {
+                return std::nullopt;
+            }
+        }
+        return loopIterInfo;
+    }
+    auto loopIterInfo = (*it).second;
+    if (!loopIterInfo.has_value()) {
+        // Loop has been visited and it is not countable
+        return std::nullopt;
+    }
+    return loopIterInfo.value();
+}
+
+bool BoundsAnalysis::ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri)
+{
+    auto *phiBlock = phi->GetBasicBlock();
+    auto *loop = phiBlock->GetLoop();
+    auto loopIterInfo = GetNestedLoopIterationsInfo(loop);
+    if (!loopIterInfo.has_value()) {
+        // loop is not countable
+        return false;
+    }
+    [[maybe_unused]] auto [loopInfo, iterations] = loopIterInfo.value();
+    if (phi == loopInfo.index) {
+        // Index phi was processed while parsing the loop
+        return loopsRevisiting_ ? true : ProcessIndexPhi(loop, bri, loopInfo);
+    }
+    if (iterations != std::numeric_limits<uint64_t>::max()) {
+        if (phiBlock == loop->GetHeader()) {
+            // At the beginning assign init phi a value range from its input
+            return ProcessInitPhi(phi, bri);
+        } else {  // NOLINT(readability-else-after-return)
+            // For update phi merge predecessors and propagate bounds info to a loop
+            return ProcessUpdatePhi(phi, bri, iterations);
+        }
+    }
+    return false;
+}
+
+bool BoundsAnalysis::ProcessIndexPhi(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfoValue)
+{
+    auto *indexPhi = loopInfoValue.index;
+    auto *phiBlock = indexPhi->GetBasicBlock();
     ASSERT(loopInfoValue.update->IsAddSub());
-    auto lower = loopInfoValue.init;
-    auto upper = loopInfoValue.test;
+    auto *lower = loopInfoValue.init;
+    auto *upper = loopInfoValue.test;
     auto cc = loopInfoValue.normalizedCc;
     ASSERT(cc == CC_LE || cc == CC_LT || cc == CC_GE || cc == CC_GT);
     if (!loopInfoValue.isInc) {
@@ -939,6 +1067,7 @@ bool BoundsAnalysis::ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri)
     if (lowerRange.GetLeft() > upperRange.GetRight()) {
         return false;
     }
+    auto phiType = indexPhi->GetType();
     auto left = lowerRange.GetLeft();
     auto right = upperRange.GetRight();
     auto lenArray = upperRange.GetLenArray();
@@ -956,7 +1085,7 @@ bool BoundsAnalysis::ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri)
             }
             if (nextLoopBlock != phiBlock) {
                 auto range = BoundsRange(left, right, lenArray);
-                bri->SetBoundsRange(nextLoopBlock, phi, range.FitInType(phiType));
+                bri->SetBoundsRange(nextLoopBlock, indexPhi, range.FitInType(phiType));
             }
         }
         // index can be more (less) than loop bound on first iteration
@@ -968,8 +1097,151 @@ bool BoundsAnalysis::ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri)
         }
     }
     auto range = BoundsRange(left, right, lenArray);
-    bri->SetBoundsRange(phiBlock, phi, range.FitInType(phiType));
+    bri->SetBoundsRange(phiBlock, indexPhi, range.FitInType(phiType));
     return true;
+}
+
+bool BoundsAnalysis::ProcessInitPhi(PhiInst *initPhi, BoundsRangeInfo *bri)
+{
+    auto *phiBlock = initPhi->GetBasicBlock();
+    auto *curLoop = phiBlock->GetLoop();
+    auto inputs = initPhi->GetInputs();
+
+    // Find an init instruction, coming inside of the current loop
+    auto *initInst = inputs[0].GetInst();
+    auto *updateInst = inputs[1].GetInst();
+    if (curLoop->IsInside(updateInst->GetBasicBlock()->GetLoop())) {
+        std::swap(initInst, updateInst);
+    }
+
+    if (!loopsRevisiting_) {
+        if (!updateInst->IsPhi()) {
+            // For cases, when an init phi has no corresponding update phi
+            return false;
+        }
+        auto initRange = bri->FindBoundsRange(initInst->GetBasicBlock(), initInst);
+        bri->SetBoundsRange(phiBlock, initPhi, initRange.FitInType(initPhi->GetType()));
+        return true;
+    }
+
+    // Else init phi range is the union range
+    // (which is [min(init.left, update.left), max(init.right, update.right)])
+    auto updateRange = bri->FindBoundsRange(updateInst->GetBasicBlock(), updateInst);
+    if (updateRange.IsMaxRange(initPhi->GetType())) {
+        // If corresponding update phi was not processed yet
+        return true;
+    }
+    auto *lenArray = bri->FindBoundsRange(initPhi->GetBasicBlock(), initPhi).GetLenArray();
+    MergePhiPredecessors<false>(initPhi, bri);
+    if (lenArray != nullptr) {
+        bri->FindBoundsRange(initPhi->GetBasicBlock(), initPhi).SetLenArray(lenArray);
+    }
+    return true;
+}
+
+bool BoundsAnalysis::ProcessUpdatePhi(PhiInst *updatePhi, BoundsRangeInfo *bri, uint64_t iterations)
+{
+    auto *updatePhiBlock = updatePhi->GetBasicBlock();
+    auto *loop = updatePhiBlock->GetLoop();
+    auto *header = loop->GetHeader();
+    bool invalidateInit = false;
+
+    // Unite inputs' bounds range info
+    if (!MergePhiPredecessors<true>(updatePhi, bri)) {
+        // Cannot count update phi range => need to invalidate init phi range
+        invalidateInit = true;
+    }
+
+    // While revisiting, we just merge predecessors, because they can be changed
+    if (loopsRevisiting_) {
+        return true;
+    }
+
+    // Find corresponding init phi
+    auto *initPhi = TryFindCorrespondingInitPhi(updatePhi, header);
+    if (initPhi == nullptr) {
+        // For the case, when an update phi has no init phi prototype in the header
+        // (i.e. some local loop variable control flow)
+        // it is not required to reprocess the loop
+        return true;
+    }
+
+    if (invalidateInit) {
+        // Set maximal possible range and revisit loop to invalidate dependent ranges
+        bri->SetBoundsRange(header, initPhi, BoundsRange(initPhi->GetType()));
+        VisitLoop(header, updatePhiBlock);
+        return false;
+    }
+
+    auto initRange = bri->FindBoundsRange(header, initPhi);
+    auto updateRange = bri->FindBoundsRange(updatePhiBlock, updatePhi);
+    auto iterRange = BoundsRange(iterations);
+
+    // Update phi range is changing by adding a range difference multiplied by iterations number
+    auto diffRange = updateRange.Diff(initRange);
+    auto updateNewRange = initRange.Add(diffRange.Mul(iterRange));
+    bri->SetBoundsRange(updatePhiBlock, updatePhi, updateNewRange.FitInType(updatePhi->GetType()));
+
+    // Propagate init phi bounds info to a loop
+    VisitLoop(header, updatePhiBlock);
+    return true;
+}
+
+Inst *BoundsAnalysis::TryFindCorrespondingInitPhi(PhiInst *updatePhi, BasicBlock *header)
+{
+    for (auto &user : updatePhi->GetUsers()) {
+        if (user.GetInst()->GetBasicBlock() != header) {
+            continue;
+        }
+        auto initPhi = user.GetInst();
+        ASSERT(initPhi->IsPhi());
+        return initPhi;
+    }
+    return nullptr;
+}
+
+void BoundsAnalysis::VisitLoop(BasicBlock *header, BasicBlock *updatePhiBlock)
+{
+    auto &rpo = GetGraph()->GetBlocksRPO();
+    auto *curLoop = header->GetLoop();
+    auto startIt = std::find(rpo.begin(), rpo.end(), header);
+    auto endIt = std::find(rpo.begin(), rpo.end(), updatePhiBlock);
+    loopsRevisiting_ = true;  // To avoid complex recalculations and not to loop the algorithm
+
+    // First part: revisit current loop and its inner loops, which have been visited before
+    for (auto it = startIt; it != endIt; ++it) {
+        auto *block = *it;
+        // Process loop and its nested loops only
+        if (block->GetLoop() != curLoop && !block->GetLoop()->IsInside(curLoop)) {
+            continue;
+        }
+        for (auto *inst : block->AllInsts()) {
+            TABLE[static_cast<unsigned>(inst->GetOpcode())](this, inst);
+        }
+    }
+
+    // Second part: revisit outer loops, going out of nest
+    curLoop = curLoop->GetOuterLoop();
+    auto *innerHeader = header;
+    while (!curLoop->IsRoot()) {
+        auto *curHeader = curLoop->GetHeader();
+        startIt = std::find(rpo.begin(), rpo.end(), curHeader);
+        endIt = std::find(rpo.begin(), rpo.end(), innerHeader);
+        for (auto it = startIt; it != endIt; ++it) {
+            auto *block = *it;
+            // Process this loop only
+            if (block->GetLoop() != curLoop) {
+                continue;
+            }
+            for (auto *inst : block->AllInsts()) {
+                TABLE[static_cast<unsigned>(inst->GetOpcode())](this, inst);
+            }
+        }
+        curLoop = curLoop->GetOuterLoop();
+        innerHeader = curHeader;
+    }
+
+    loopsRevisiting_ = false;
 }
 
 bool BoundsAnalysis::CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgtBlock)
