@@ -135,3 +135,6 @@ sub:
       - method: trimLeft
       - method: trimRight
       - method: valueOf
+      - method: at
+        params:
+          - paramOf(*inds)

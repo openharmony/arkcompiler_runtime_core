@@ -497,7 +497,7 @@ export final class Date {
             let timeZoneSign = 0;
             let timeZoneSignChar = c'+';
             try {
-                timeZoneSignChar = dateStr.at(23);
+                timeZoneSignChar = dateStr.charAt(23);
             } catch (e) {}
             if (timeZoneSignChar == c'-') {
                 timeZoneSign = 1;

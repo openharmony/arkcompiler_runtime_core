@@ -1139,26 +1139,18 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @returns A String consisting of the single UTF-16 code unit located at the specified position.
      * Returns undefined if the given index can not be found.
      */
-    public at(index: number): String throws {
-        throw new Error("not implemented")
-    }
-
-    /**
-     * The at() method takes an integer value and returns a new String consisting of the single UTF-16 code unit located
-     * at the specified offset. This method allows for positive and negative integers. Negative integers count back from the last string character.
-     *
-     * @returns A String consisting of the single UTF-16 code unit located at the specified position.
-     * Returns undefined if the given index can not be found.
-     */
-    public at(index: int): Char throws {
-        let n = this.getLength();
-        if(index < 0 && -index <= n) {
-            index += n
-            return this.charAt(index)
-        } else if (index >= 0 && index < n) {
-            return this.charAt(index)
+    public at(index: number): string | undefined {
+        if (isNaN(index)) {
+            index = 0;
         }
-        throw new ArgumentOutOfRangeException("undefined");
+        const n = this.getLength();
+        if (index < 0) {
+            index += n;
+        }
+        if (index < 0 || index >= n) {
+            return undefined;
+        }
+        return new String(this.charAt(index as int));
     }
 
     private CreateHTMLString(tag: String, param: String): String{

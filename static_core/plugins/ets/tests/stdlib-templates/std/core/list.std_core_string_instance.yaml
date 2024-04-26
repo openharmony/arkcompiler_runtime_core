@@ -1846,26 +1846,6 @@
   }
 
 - {
-    method_name: at,
-    object_type: String,
-    method_throws: true,
-
-    init_object_data_type: "String[]",
-    init_object_data: '["All mimsy were the borgoves", "Twas brillig, and the slithy toves"]',
-
-    param_types: {index: int},
-    param_nature: {index: primitive},
-    param_init_data_types: {index: "int[]"},
-    param_list: {index: '[0, -1]'},
-
-    method_return_type: char,
-    expected_test_data_item_type: char,
-    expected_data_type: "char[]",
-    expected_test_data: "[c'A', c's']",
-    verify_test_result_function: comparePrimitiveValue
-  }
-
-- {
     method_name: search,
     object_type: String,
     init_object_data_type: "String[]",
