@@ -17,46 +17,28 @@ const success: int = 0;
 const fail:    int = 1;
 
 function main(): int {
-    let failures: int = 0;
+  let failures: int = 0;
+
+  failures += check(createTAFromNonEmptyArrayBufferOneParamNoOffset(),"Create default empty {{.item.objectType}} from non empty source one param");
+  failures += check(createTAFromNonEmptyArrayBufferTwoParams(),"Create default empty {{.item.objectType}} from non empty source two params");
+
+  failures += check(createArrayFromArray(), "Create Array object from source array");
+  failures += check(createArrayFromArrayWithOffset(), "Create Array object from source array with given offset");
+
+  failures += check(createFilteredArrayFromGiven(), "Create Array object from source array with applied filter");
+
+  failures += check(testLastIndexOfNotFound(), "Try to find missed item");
+  failures += check(testLastIndexOf4(), "Try to find last item at 4");
+  failures += check(testLastIndexOf3(), "Try to find last item at 3");
 
 
-    failures += check(createDefault(),"Create default empty {{.item.objectType}}")
+  failures += check(testMap(), "Try to Array map function");
 
-    failures += check(createTAFromEmptyArrayBuffer(),"Create default empty {{.item.objectType}} from empty source");
-    failures += check(createTAFromEmptyArrayBufferOneParamNoOffset(),"Create default empty {{.item.objectType}} from empty source one param");
-    failures += check(createTAFromEmptyArrayBufferTwoParams(),"Create default empty {{.item.objectType}} from empty source two params");
+  failures += check(createArray_Set_And_Get(), "Create Array from source data");
 
-    failures += check(createTAFromNonEmptyArrayBuffer(),"Create default empty {{.item.objectType}} from non empty source");
-    failures += check(createTAFromNonEmptyArrayBufferOneParamNoOffset(),"Create default empty {{.item.objectType}} from non empty source one param");
-    failures += check(createTAFromNonEmptyArrayBufferTwoParams(),"Create default empty {{.item.objectType}} from non empty source two params");
-
-    failures += check(createTAFromNonEmptyArrayBufferOneParamWithOffset(),"Create default empty {{.item.objectType}} from non empty source with offset");
-    failures += check(createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(),"Create default empty {{.item.objectType}} from non empty source with offset and size");
-
-
-    failures += check(createArrayFromArray(), "Create Array object from source array");
-    failures += check(createArrayFromArrayWithOffset(), "Create Array object from source array with given offset");
-
-    failures += check(createFilteredArrayFromGiven(), "Create Array object from source array with applied filter");
-
-
-    failures += check(testLastIndexOfNotFound(), "Try to find missed item");
-    failures += check(testLastIndexOf4(), "Try to find last item at 4");
-    failures += check(testLastIndexOf3(), "Try to find last item at 3");
-
-
-    failures += check(testMap(), "Try to Array map function");
-
-
-    failures += check(testSlice0(), "Try to Array slice(0) function");
-    failures += check(testSlice1(), "Try to Array slice(1) function");
-    failures += check(testSlice2(), "Try to Array slice(2) function");
-    failures += check(createArraySetAndGet(), "Create Array from source data");
-
-
-    {% for ci in copyWithin -%}
-    failures += check({{.ci.name}}(), "Test262: {{.ci.name}}");
-    {%+ endfor %}
+  {% for ci in copyWithin -%}
+  failures += check({{.ci.name}}(), "Test262: {{.ci.name}}");
+  {%+ endfor %}
 
 
     if (failures > 0) { return fail; }
@@ -68,114 +50,6 @@ function check(result: int, message: String): int {
         return success;
     }
     console.println("\nFAILED: " + message);
-    return fail;
-}
-
-  function createDefault(): int {
-    let target: {{.item.objectType}} = new {{.item.objectType}}();
-    if (target.length as int == 0 && target.byteOffset as int == 0) { return success; }
-    return fail;
-}
-
-function createTAFromEmptyArrayBuffer(): int {
-    let ss = new ArrayBuffer(0);  // Buffer 0-bytes length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.length as int == 0 && target.byteOffset as int == 0) { return success; }
-    return fail;
-}
-
-function createTAFromNonEmptyArrayBuffer(): int {
-    let ss = new ArrayBuffer(5*{{.item.primitiveSizeBytes}});  // Buffer 5-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) { return success; }
-    console.println("Error: Actual bytes length: " + target.byteLength);
-    return fail;
-}
-
-
-function createTAFromEmptyArrayBufferOneParamNoOffset(): int {
-    let ss = new ArrayBuffer(0);
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 0);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.length as int == 0 && target.byteOffset as int == 0) { return success; }
-    return fail;
-}
-
-function createTAFromNonEmptyArrayBufferOneParamNoOffset(): int {
-    let ss = new ArrayBuffer(5*{{.item.primitiveSizeBytes}});  // Buffer 5-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 0);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) { return success; }
-    console.println("Error: Actual bytes length: " + target.byteLength);
-    return fail;
-}
-
-function createTAFromNonEmptyArrayBufferOneParamWithOffset(): int {
-    let ss = new ArrayBuffer(7*{{.item.primitiveSizeBytes}});  // Buffer 7-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}});
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}}) { return success; }
-    console.println("Error: Actual bytes length: " + target.byteLength);
-    console.println("Error: Actual bytes offset: " + target.byteOffset);
-    return fail;
-}
-
-function createTAFromNonEmptyArrayBufferOneParamWithOffsetAndSize(): int {
-    let ss = new ArrayBuffer(7*{{.item.primitiveSizeBytes}});  // Buffer 7-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 2*{{.item.primitiveSizeBytes}}, 4);
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 2*{{.item.primitiveSizeBytes}} && target.length as int == 4) return success;
-    console.println("Error: Actual bytes length: " + target.byteLength);
-    console.println("Error: Actual bytes offset: " + target.byteOffset);
-    return fail;
-}
-
-
-
-function createTAFromEmptyArrayBufferTwoParams(): int {
-    let ss = new ArrayBuffer(0);
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 0, 0);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.length as int == 0 && target.byteOffset as int == 0) { return success; }
     return fail;
 }
 
@@ -447,137 +321,6 @@ function testMap(): int {
 
     for (let i: int = 0; i< source.length as int; i++) {
         if (target[i] as {{.item.primitiveType}} != -source[i]) {
-            console.println("Array data mismatch");
-            return fail;
-        }
-    }
-    return success;
-}
-
-
-function testSlice0(): int {
-    let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
-    let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
-
-    let origin: {{.item.objectType}};
-
-    try {
-        origin = new {{.item.objectType}}(ss);
-        origin.set(source);
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-
-    let target: {{.item.objectType}};
-
-    try {
-        target = origin.slice();
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    if (target.length as int != origin.length as int) {
-        console.println("Array length mismatch on slice");
-        return fail;
-    }
-
-    //Check all the data copied;
-    for (let i: int = 0; i< origin.length as int; i++) {
-        let tv = target[i] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
-        console.println(source[i] + "->" + tv + "->" + ov);
-        if (tv != ov) {
-            console.println("Array data mismatch");
-            return fail;
-        }
-    }
-    return success;
-}
-
-function testSlice1(): int {
-    let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
-    let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
-
-    let origin: {{.item.objectType}};
-
-    try {
-        origin = new {{.item.objectType}}(ss);
-        origin.set(source);
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    let sliceStart: int = 1;
-    let sliceEnd: int = origin.length as int;
-
-    let target: {{.item.objectType}};
-
-    try {
-        target = origin.slice(sliceStart);
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    if (target.length as int != origin.length as int - sliceStart) {
-        console.println("Array length mismatch on slice1");
-        return fail;
-    }
-
-    //Check all the data copied;
-    for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
-        console.println(source[i] + "->" + tv + "->" + ov);
-        if (tv != ov) {
-            console.println("Array data mismatch");
-            return fail;
-        }
-    }
-    return success;
-}
-
-function testSlice2(): int {
-    let source: {{.item.primitiveType}}[] = [10, 20, 30, 40, 50, 60];
-    let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
-
-    let origin: {{.item.objectType}};
-
-    try {
-        origin = new {{.item.objectType}}(ss);
-        origin.set(source);
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    let sliceStart: int = 1;
-    let sliceEnd: int = 4;
-
-    let target: {{.item.objectType}};
-
-    try {
-        target = origin.slice(sliceStart, sliceEnd);
-    } catch(e) {
-        console.println(e);
-        return fail;
-    }
-
-    if (target.length as int != sliceEnd - sliceStart) {
-        console.println("Array length mismatch on slice2");
-        return fail;
-    }
-
-    //Check all the data copied;
-    for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
-        console.println(source[i] + "->" + tv + "->" + ov);
-        if (tv != ov) {
             console.println("Array data mismatch");
             return fail;
         }
