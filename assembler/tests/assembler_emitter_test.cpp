@@ -168,7 +168,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_002, TestSize.Level1)
 
         panda_file::ClassDataAccessor cda(*pf, class_id);
         EXPECT_EQ(cda.GetSuperClassId().GetOffset(), 0U);
-        EXPECT_EQ(cda.GetAccessFlags(), 0U);
+        EXPECT_EQ(cda.GetAccessFlags(), ACC_PUBLIC);
         EXPECT_EQ(cda.GetFieldsNumber(), 2U);
         EXPECT_EQ(cda.GetMethodsNumber(), 0U);
         EXPECT_EQ(cda.GetIfacesNumber(), 0U);
