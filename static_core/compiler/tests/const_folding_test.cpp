@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@
 #include <optional>
 
 namespace ark::compiler {
+
+// NOLINTBEGIN(readability-magic-numbers)
 class ConstFoldingTest : public CommonTest {
 public:
     ConstFoldingTest() : graph_(CreateGraphStartEndBlocks()) {}
@@ -30,6 +32,8 @@ public:
 
     NO_COPY_SEMANTIC(ConstFoldingTest);
     NO_MOVE_SEMANTIC(ConstFoldingTest);
+
+    using ConstFoldingFunc = bool (*)(Inst *inst);
 
     Graph *GetGraph()
     {
@@ -135,11 +139,213 @@ public:
         GraphChecker(graph).Check();
     }
 
+    enum InputValue : char {
+        NAN1_F = 0,
+        NAN2_F,
+        NAN1_D,
+        NAN2_D,
+        NUMBER_F,
+        NUMBER_D,
+    };
+
+    void CheckCompareWithNan(DataType::Type sourceType, InputValue input0, InputValue input1, ConditionCode cc,
+                             bool result)
+    {
+        // Check that position is not changed
+        static_assert(InputValue::NAN1_F == 0U && InputValue::NAN2_F == 1U && InputValue::NAN1_D == 2U &&
+                      InputValue::NAN2_D == 3U && InputValue::NUMBER_F == 4U && InputValue::NUMBER_D == 5U);
+        const auto nan1ValueF = bit_cast<float>(NAN_FLOAT);
+        const auto nan2ValueF = bit_cast<float>(NAN_FLOAT | 0x1U);
+        const auto nan1ValueD = bit_cast<double>(NAN_DOUBLE);
+        const auto nan2ValueD = bit_cast<double>(NAN_DOUBLE | 0x1U);
+
+        auto graph = CreateEmptyGraph();
+        GRAPH(graph)
+        {
+            CONSTANT(0U, nan1ValueF).f32();
+            CONSTANT(1U, nan2ValueF).f32();
+            CONSTANT(2U, nan1ValueD).f64();
+            CONSTANT(3U, nan2ValueD).f64();
+            PARAMETER(4U, 1.0F).f32();
+            PARAMETER(5U, 2.0_D).f64();
+            CONSTANT(8U, 1U);  // It is bool True
+            CONSTANT(9U, 0U);  // It is bool False
+
+            BASIC_BLOCK(2U, 1U)
+            {
+                // Indexes in InputValue is equal id in graph. Assert at the begin of the function is check that
+                INST(6U, Opcode::Compare)
+                    .b()
+                    .SrcType(sourceType)
+                    .CC(cc)
+                    .Inputs(static_cast<size_t>(input0), static_cast<size_t>(input1));
+                INST(7U, Opcode::Return).b().Inputs(6U);
+            }
+        }
+
+        ConstFoldingCompare(&INS(6U));
+        ASSERT_EQ(INS(7U).GetInput(0U).GetInst(), result ? &INS(8U) : &INS(9U));
+    }
+
+    void CheckNegNan(InputValue input, bool isOptimized)
+    {
+        // Check that position is not changed
+        static_assert(InputValue::NAN1_F == 0U && InputValue::NAN2_F == 1U && InputValue::NAN1_D == 2U &&
+                      InputValue::NAN2_D == 3U && InputValue::NUMBER_F == 4U && InputValue::NUMBER_D == 5U);
+
+        const auto nan1ValueF = bit_cast<float>(NAN_FLOAT);
+        const auto nan2ValueF = bit_cast<float>(NAN_FLOAT | 0x1U);
+        const auto nan1ValueD = bit_cast<double>(NAN_DOUBLE);
+        const auto nan2ValueD = bit_cast<double>(NAN_DOUBLE | 0x1U);
+
+        bool isFloat32 = IsFloat32InputValue(input);
+        auto graph = CreateEmptyGraph();
+        GRAPH(graph)
+        {
+            CONSTANT(0U, nan1ValueF).f32();
+            CONSTANT(1U, nan2ValueF).f32();
+            CONSTANT(2U, nan1ValueD).f64();
+            CONSTANT(3U, nan2ValueD).f64();
+            PARAMETER(4U, 1.0F).f32();
+            PARAMETER(5U, 2.0_D).f64();
+
+            BASIC_BLOCK(2U, 1U)
+            {
+                // Indexes in InputValue is equal id in graph. Assert at the begin of the function is check that
+                if (isFloat32) {
+                    INST(6U, Opcode::Neg).f32().Inputs(static_cast<size_t>(input));
+                    INST(7U, Opcode::Return).f32().Inputs(6U);
+                } else {
+                    INST(6U, Opcode::Neg).f64().Inputs(static_cast<size_t>(input));
+                    INST(7U, Opcode::Return).f64().Inputs(6U);
+                }
+            }
+        }
+
+        ConstFoldingNeg(&INS(6U));
+        ASSERT_EQ(INS(7U).GetInput(0U).GetInst(), isOptimized ? &INS(input) : &INS(6U));
+    }
+
+    void CheckBinaryMathWithNan(Opcode opc, InputValue input0, InputValue input1, bool isOptimized)
+    {
+        // Check that position is not changed
+        static_assert(InputValue::NAN1_F == 0U && InputValue::NAN2_F == 1U && InputValue::NAN1_D == 2U &&
+                      InputValue::NAN2_D == 3U && InputValue::NUMBER_F == 4U && InputValue::NUMBER_D == 5U);
+
+        const auto nan1ValueF = bit_cast<float>(NAN_FLOAT);
+        const auto nan2ValueF = bit_cast<float>(NAN_FLOAT | 0x1U);
+        const auto nan1ValueD = bit_cast<double>(NAN_DOUBLE);
+        const auto nan2ValueD = bit_cast<double>(NAN_DOUBLE | 0x1U);
+
+        bool isFloat32 = IsFloat32InputValue(input0);
+        auto graph = CreateEmptyGraph();
+        GRAPH(graph)
+        {
+            CONSTANT(0U, nan1ValueF).f32();
+            CONSTANT(1U, nan2ValueF).f32();
+            CONSTANT(2U, nan1ValueD).f64();
+            CONSTANT(3U, nan2ValueD).f64();
+            PARAMETER(4U, 1.0F).f32();
+            PARAMETER(5U, 2.0_D).f64();
+
+            BASIC_BLOCK(2U, 1U)
+            {
+                // Indexes in InputValue is equal id in graph. Assert at the begin of the function is check that
+                if (isFloat32) {
+                    INST(6U, opc).f32().Inputs(static_cast<size_t>(input0), static_cast<size_t>(input1));
+                    INST(7U, Opcode::Return).f32().Inputs(6U);
+                } else {
+                    INST(6U, opc).f64().Inputs(static_cast<size_t>(input0), static_cast<size_t>(input1));
+                    INST(7U, Opcode::Return).f64().Inputs(6U);
+                }
+            }
+        }
+        auto func = GetConstFoldingFunc(opc);
+        ASSERT_EQ(func(&INS(6U)), isOptimized);
+        if (isOptimized) {
+            ASSERT_EQ(INS(7U).GetInput(0U).GetInst()->IsConst(), true);
+            ASSERT_EQ(INS(7U).GetInput(0U).GetInst()->CastToConstant()->IsNaNConst(), true);
+        } else {
+            ASSERT_EQ(INS(7U).GetInput(0U).GetInst(), &INS(6U));
+        }
+    }
+
+    void CheckNanBinaryMathManyCases(Opcode opc)
+    {
+        ASSERT(opc == Opcode::Mul || opc == Opcode::Div || opc == Opcode::Mod || opc == Opcode::Add ||
+               opc == Opcode::Sub || opc == Opcode::Min || opc == Opcode::Max);
+
+        // opc number and Nan
+        CheckBinaryMathWithNan(opc, InputValue::NAN1_F, InputValue::NUMBER_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN2_F, InputValue::NUMBER_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN1_D, InputValue::NUMBER_D, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN2_D, InputValue::NUMBER_D, true);
+
+        // opc Nan and number
+        CheckBinaryMathWithNan(opc, InputValue::NUMBER_F, InputValue::NAN1_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NUMBER_F, InputValue::NAN2_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NUMBER_D, InputValue::NAN1_D, true);
+        CheckBinaryMathWithNan(opc, InputValue::NUMBER_D, InputValue::NAN2_D, true);
+
+        // opc with same Nan
+        CheckBinaryMathWithNan(opc, InputValue::NAN1_F, InputValue::NAN1_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN2_F, InputValue::NAN2_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN1_D, InputValue::NAN1_D, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN2_D, InputValue::NAN2_D, true);
+
+        // opc with different Nan
+        CheckBinaryMathWithNan(opc, InputValue::NAN1_F, InputValue::NAN2_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN2_F, InputValue::NAN1_F, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN1_D, InputValue::NAN2_D, true);
+        CheckBinaryMathWithNan(opc, InputValue::NAN2_D, InputValue::NAN1_D, true);
+
+        CheckBinaryMathWithNan(opc, InputValue::NUMBER_F, InputValue::NUMBER_F, false);
+        CheckBinaryMathWithNan(opc, InputValue::NUMBER_D, InputValue::NUMBER_D, false);
+    }
+
+private:
+    bool IsFloat32InputValue(InputValue input)
+    {
+        switch (input) {
+            case NAN1_F:
+            case NAN2_F:
+            case NUMBER_F:
+                return true;
+            case NAN1_D:
+            case NAN2_D:
+            case NUMBER_D:
+                return false;
+            default:
+                UNREACHABLE();
+        }
+    }
+
+    ConstFoldingFunc GetConstFoldingFunc(Opcode opc)
+    {
+        switch (opc) {
+            case Opcode::Mul:
+                return ConstFoldingMul;
+            case Opcode::Div:
+                return ConstFoldingDiv;
+            case Opcode::Mod:
+                return ConstFoldingMod;
+            case Opcode::Add:
+                return ConstFoldingAdd;
+            case Opcode::Sub:
+                return ConstFoldingSub;
+            case Opcode::Min:
+                return ConstFoldingMin;
+            case Opcode::Max:
+                return ConstFoldingMax;
+            default:
+                UNREACHABLE();
+        }
+    }
+
 private:
     Graph *graph_;
 };
 
-// NOLINTBEGIN(readability-magic-numbers)
 TEST_F(ConstFoldingTest, NegInt64Test)
 {
     GRAPH(GetGraph())
@@ -670,6 +876,41 @@ TEST_F(ConstFoldingTest, MulIntTest)
     GraphChecker(GetGraph()).Check();
 }
 
+TEST_F(ConstFoldingTest, MulWithNan)
+{
+    CheckNanBinaryMathManyCases(Opcode::Mul);
+}
+
+TEST_F(ConstFoldingTest, DivWithNan)
+{
+    CheckNanBinaryMathManyCases(Opcode::Div);
+}
+
+TEST_F(ConstFoldingTest, ModWithNan)
+{
+    CheckNanBinaryMathManyCases(Opcode::Mod);
+}
+
+TEST_F(ConstFoldingTest, AddWithNan)
+{
+    CheckNanBinaryMathManyCases(Opcode::Div);
+}
+
+TEST_F(ConstFoldingTest, SubWithNan)
+{
+    CheckNanBinaryMathManyCases(Opcode::Mod);
+}
+
+TEST_F(ConstFoldingTest, MinWithNan)
+{
+    CheckNanBinaryMathManyCases(Opcode::Min);
+}
+
+TEST_F(ConstFoldingTest, MaxWithNan)
+{
+    CheckNanBinaryMathManyCases(Opcode::Max);
+}
+
 TEST_F(ConstFoldingTest, Constant32MulIntTest)
 {
     auto graph = CreateEmptyBytecodeGraph();
@@ -1087,6 +1328,128 @@ TEST_F(ConstFoldingTest, MinDoubleNaNTest)
     ASSERT_EQ(ConstFoldingMin(&INS(3U)), true);
     ASSERT_EQ(INS(4U).GetInput(1U).GetInst(), inst);
     GraphChecker(GetGraph()).Check();
+}
+
+TEST_F(ConstFoldingTest, CompareFloatNan)
+{
+    // Not equal number and NaN
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN1_F, InputValue::NUMBER_F, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN2_F, InputValue::NUMBER_F, ConditionCode::CC_NE, true);
+    // Not equal NaN and number
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NUMBER_F, InputValue::NAN1_F, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NUMBER_F, InputValue::NAN2_F, ConditionCode::CC_NE, true);
+    // Equal with different NaN
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN1_F, InputValue::NAN2_F, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN2_F, InputValue::NAN1_F, ConditionCode::CC_NE, true);
+    // Not equal with same NaN
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN1_F, InputValue::NAN1_F, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN2_F, InputValue::NAN2_F, ConditionCode::CC_NE, true);
+
+    // Cases CC_EQ, CC_LT, CC_LE, CC_GT, CC_GE always return false
+    std::array<ConditionCode, 5U> allCcWithFalse = {CC_EQ, CC_LT, CC_LE, CC_GT, CC_GE};
+    for (auto cc : allCcWithFalse) {
+        // Equal with different NaN
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN1_F, InputValue::NAN2_F, cc, false);
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN2_F, InputValue::NAN1_F, cc, false);
+        // Equal with same NaN
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN1_F, InputValue::NAN1_F, cc, false);
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN2_F, InputValue::NAN2_F, cc, false);
+
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NUMBER_F, InputValue::NAN1_F, cc, false);
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NUMBER_F, InputValue::NAN2_F, cc, false);
+        // Equal with NaN and number
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN1_F, InputValue::NUMBER_F, cc, false);
+        CheckCompareWithNan(DataType::FLOAT32, InputValue::NAN2_F, InputValue::NUMBER_F, cc, false);
+    }
+}
+
+TEST_F(ConstFoldingTest, CompareDoubleNan)
+{
+    // Not equal number and NaN
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN1_D, InputValue::NUMBER_D, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN2_D, InputValue::NUMBER_D, ConditionCode::CC_NE, true);
+    // Not equal NaN and number
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NUMBER_D, InputValue::NAN1_D, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NUMBER_D, InputValue::NAN2_D, ConditionCode::CC_NE, true);
+    // Equal with different NaN
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN1_D, InputValue::NAN2_D, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN2_D, InputValue::NAN1_D, ConditionCode::CC_NE, true);
+    // Not equal with same NaN
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN1_D, InputValue::NAN1_D, ConditionCode::CC_NE, true);
+    CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN2_D, InputValue::NAN2_D, ConditionCode::CC_NE, true);
+
+    // Cases CC_EQ, CC_LT, CC_LE, CC_GT, CC_GE always return false
+    std::array<ConditionCode, 5U> allCcWithFalse = {CC_EQ, CC_LT, CC_LE, CC_GT, CC_GE};
+    for (auto cc : allCcWithFalse) {
+        // Equal with different NaN
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN1_D, InputValue::NAN2_D, cc, false);
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN2_D, InputValue::NAN1_D, cc, false);
+        // Equal with same NaN
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN1_D, InputValue::NAN1_D, cc, false);
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN2_D, InputValue::NAN2_D, cc, false);
+
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NUMBER_D, InputValue::NAN1_D, cc, false);
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NUMBER_D, InputValue::NAN2_D, cc, false);
+        // Equal with NaN and number
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN1_D, InputValue::NUMBER_D, cc, false);
+        CheckCompareWithNan(DataType::FLOAT64, InputValue::NAN2_D, InputValue::NUMBER_D, cc, false);
+    }
+}
+
+TEST_F(ConstFoldingTest, CmpNan)
+{
+    const auto nan1ValueF = bit_cast<float>(NAN_FLOAT);
+    const auto nan1ValueD = bit_cast<double>(NAN_DOUBLE);
+
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        CONSTANT(0U, nan1ValueF).f32();
+        CONSTANT(2U, nan1ValueD).f64();
+        PARAMETER(4U, 1.0F).f32();
+        PARAMETER(5U, 2.0_D).f64();
+        CONSTANT(8U, 1L);   // It is bool True
+        CONSTANT(9U, -1L);  // It is bool False
+
+        BASIC_BLOCK(2U, 1U)
+        {
+            // Replace with constant 1
+            INST(10U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(true).Inputs(2U, 5U);
+            INST(11U, Opcode::Neg).s32().Inputs(10U);
+
+            // Replace with constant -1
+            INST(12U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(false).Inputs(2U, 5U);
+            INST(13U, Opcode::Neg).s32().Inputs(12U);
+
+            // Replace with constant 1
+            INST(14U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(true).Inputs(0U, 4U);
+            INST(15U, Opcode::Neg).s32().Inputs(14U);
+
+            // Replace with constant -1
+            INST(16U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(false).Inputs(0U, 4U);
+            INST(17U, Opcode::Neg).s32().Inputs(16U);
+            INST(7U, Opcode::Return).b().Inputs(8U);
+        }
+    }
+
+    ConstFoldingCmp(&INS(10U));
+    ConstFoldingCmp(&INS(12U));
+    ConstFoldingCmp(&INS(14U));
+    ConstFoldingCmp(&INS(16U));
+    ASSERT_EQ(INS(11U).GetInput(0U).GetInst(), &INS(8U));
+    ASSERT_EQ(INS(13U).GetInput(0U).GetInst(), &INS(9U));
+    ASSERT_EQ(INS(15U).GetInput(0U).GetInst(), &INS(8U));
+    ASSERT_EQ(INS(17U).GetInput(0U).GetInst(), &INS(9U));
+}
+
+TEST_F(ConstFoldingTest, NegationNan)
+{
+    CheckNegNan(InputValue::NAN1_F, true);
+    CheckNegNan(InputValue::NAN2_F, true);
+    CheckNegNan(InputValue::NUMBER_F, false);
+    CheckNegNan(InputValue::NAN1_D, true);
+    CheckNegNan(InputValue::NAN2_D, true);
+    CheckNegNan(InputValue::NUMBER_D, false);
 }
 
 TEST_F(ConstFoldingTest, MaxIntTest)
