@@ -254,3 +254,30 @@
   signature:
     - ark::ObjectHeader*  # string builder (result)
     - ark::ObjectHeader*  # string builder
+
+- name: StringBuilderToString
+  entrypoint: StringBuilderToString
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::Class*         # string class pointer
+
+- name: StringBuilderToStringSlowPath
+  entrypoint: StringBuilderToStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::Class*         # string class pointer
+
+- name: StringBuilderToStringUsual
+  entrypoint: StringBuilderToStringEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::Class*         # string class pointer

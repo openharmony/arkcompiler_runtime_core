@@ -297,4 +297,10 @@ extern "C" bool CompareETSValueTypedEntrypoint(ManagedThread *thread, ObjectHead
     return EtsValueTypedEquals(coro, eobj1, eobj2);
 }
 
+extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb, [[maybe_unused]] Class *stringKlass)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderToString(sb)->GetCoreType();
+}
+
 }  // namespace ark::ets
