@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,7 +121,7 @@ private:
     os::memory::Mutex lock_;
 };
 
-class DetailAllocTracker final : public AllocTracker {
+class PANDA_PUBLIC_API DetailAllocTracker final : public AllocTracker {
 public:
     static constexpr uint32_t ALLOC_TAG = 1;
     static constexpr uint32_t FREE_TAG = 2;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,31 @@ void ClassLinker::FreeClassData(Class *classPtr)
             // Therefore, we should delete it via InternalAllocator too.
             allocator->Free(method.GetProfilingData());
         }
+
+        // Free copied method's ProfileData if it is necessary.
+        for (auto &method : classPtr->GetCopiedMethods()) {
+            auto id = method.GetFileId();
+            auto pf = method.GetPandaFile();
+
+            // There is a possibility that ProfilingData can be borrowed from the original method. Example:
+            // 1. create a base interface class with a default method,
+            // 2. call StartProfiling(),
+            // 3. create a derived class and do not override the default method from the base interface,
+            // 4. call StartProfiling() for the derived class.
+            // Currently this example is impossible (the default method cannot be called from the interface) because
+            // there is no such a language where #2 step will be executed.
+            // Need more investigations to eliminate this extra check.
+            Span<Method> originalMethods = method.GetClass()->GetMethods();
+            auto it = std::find_if(originalMethods.begin(), originalMethods.end(),
+                                   [id, pf](const auto &m) { return m.GetFileId() == id && m.GetPandaFile() == pf; });
+
+            // Free method's ProfileData if it was set after copying of the original method.
+            auto ptr = method.GetProfilingData();
+            if (it == originalMethods.end() || it->GetProfilingDataWithoutCheck() != ptr) {
+                allocator->Free(ptr);
+            }
+        }
+
         allocator_->Free(methods.begin());
         classPtr->SetMethods(Span<Method>(), 0, 0);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -956,6 +956,31 @@ TEST(libpandargs, IncorrectCompoundArgs)
     /* Test that incorrect using of compound argument syntax for non-compound argument produces error*/
     static const char *argv[] = {"gtest_app", "--list:list_arg1:list_arg2"};
     ASSERT_FALSE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
+}
+
+TEST(libpandargs, IncorrectIntArgs)
+{
+    PandArg<int> pai("int", 0, "Sample int argument");
+    PandArg<uint32_t> pau32("uint32", 0, "Sample uin32 argument");
+    PandArg<uint64_t> pau64("uint64", 0, "Sample uin64 argument");
+
+    PandArgParser paParser;
+    EXPECT_TRUE(paParser.Add(&pai));
+    EXPECT_TRUE(paParser.Add(&pau32));
+    EXPECT_TRUE(paParser.Add(&pau64));
+
+    {
+        static const char *argv[] = {"int", "20000000000000000000"};  // > 2^64
+        ASSERT_FALSE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
+    }
+    {
+        static const char *argv[] = {"uint32", "5000000000"};  // > 2^32
+        ASSERT_FALSE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
+    }
+    {
+        static const char *argv[] = {"uint64", "20000000000000000000"};  // > 2^64
+        ASSERT_FALSE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
+    }
 }
 
 // NOLINTEND(modernize-avoid-c-arrays)
