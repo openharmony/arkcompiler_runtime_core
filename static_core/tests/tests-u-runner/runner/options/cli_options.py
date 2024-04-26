@@ -81,6 +81,10 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
         '--hermes', action='store_true', dest='hermes',
         default=None,
         help='run Hermes tests')
+    parser.add_argument(
+        '--ets-system-tests', action='store_true', dest='system',
+        default=None,
+        help='run ets-system-tests')
     ets_mutex_group = parser.add_mutually_exclusive_group(required=False)
     ets_mutex_group.add_argument(
         '--ets-func-tests', action='store_true', dest='ets_func_tests',
@@ -317,6 +321,9 @@ def add_es2panda_args(parser: argparse.ArgumentParser) -> None:
         '--arktsconfig', action='store', dest='arktsconfig',
         type=is_file, default=None,
         help='path to arktsconfig file')
+    parser.add_argument(
+        '--es2panda-args', action='append', dest='es2panda_args', default=None,
+        help='Additional arguments that will be passed to es2panda')
 
 
 def add_verifier_args(parser: argparse.ArgumentParser) -> None:

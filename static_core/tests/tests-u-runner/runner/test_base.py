@@ -115,7 +115,6 @@ class Test:
         config_cmd = self.test_env.config.get_command_line()
         reproduce_message = [
             f'{self.test_env.config.general.static_core_root}/tests/tests-u-runner/runner.sh',
-            self.test_env.config.general.static_core_root,
             config_cmd
         ]
         if config_cmd.find('--test-file') < 0:

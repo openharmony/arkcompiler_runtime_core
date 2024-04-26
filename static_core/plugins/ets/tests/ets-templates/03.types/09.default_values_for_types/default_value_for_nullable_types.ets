@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,11 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for i in default_value %}
+
 /*---
-desc: Default values for nullable type
+desc: Default values for nullable types
 ---*/
 
 function main(): void {
-  let x: Int|null;
-  assert x == null;
+  let x: {{i.type}};
+  assert x == {{i.value}};
 }
+
+{% endfor %}
