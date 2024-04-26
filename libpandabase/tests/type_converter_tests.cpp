@@ -110,4 +110,20 @@ HWTEST(TypeConverterTest, ValueConverterTest, testing::ext::TestSize.Level0)
     ASSERT_EQ(ValueConverter(number, ValueType::VALUE_TYPE_OBJECT), ValueUnit(number, ""));
 }
 
+HWTEST(TypeConverterTest, DumpTest, testing::ext::TestSize.Level0)
+{
+    const uint64_t number_one = 1UL;
+
+    std::stringstream ss;
+    ss << ValueUnit(10.27, "MB");
+    ASSERT_EQ(ss.str(), "10.270MB");
+
+    ss.str("");
+    ss << ValueConverter(11'119'272, ValueType::VALUE_TYPE_TIME);
+    ASSERT_EQ(ss.str(), "11.119ms");
+
+    ss.str("");
+    ss << ValueUnit(number_one, "KB");
+    ASSERT_EQ(ss.str(), "1KB");
+}
 }  // namespace panda::helpers::test

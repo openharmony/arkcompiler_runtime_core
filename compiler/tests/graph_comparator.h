@@ -16,8 +16,12 @@
 #ifndef COMPILER_TESTS_GRAPH_COMPARATOR_H
 #define COMPILER_TESTS_GRAPH_COMPARATOR_H
 
-#include "optimizer/ir/ir_constructor.h"
+#include <algorithm>
+#include <iostream>
 #include "optimizer/analysis/rpo.h"
+#include "optimizer/ir/basicblock.h"
+#include "optimizer/ir/graph.h"
+#include "optimizer/ir/inst.h"
 
 namespace panda::compiler {
 
@@ -25,6 +29,8 @@ class GraphComparator {
 public:
     bool Compare(Graph *graph1, Graph *graph2)
     {
+        ASSERT(graph1 != nullptr);
+        ASSERT(graph2 != nullptr);
         graph1->InvalidateAnalysis<Rpo>();
         graph2->InvalidateAnalysis<Rpo>();
         if (graph1->GetBlocksRPO().size() != graph2->GetBlocksRPO().size()) {
@@ -44,6 +50,8 @@ public:
 
     bool Compare(BasicBlock *block1, BasicBlock *block2)
     {
+        ASSERT(block1 != nullptr);
+        ASSERT(block2 != nullptr);
         if (block1->GetPredsBlocks().size() != block2->GetPredsBlocks().size()) {
             std::cerr << "Different number of preds blocks\n";
             block1->Dump(&std::cerr);
@@ -72,6 +80,8 @@ public:
 
     bool Compare(Inst *inst1, Inst *inst2)
     {
+        ASSERT(inst1 != nullptr);
+        ASSERT(inst2 != nullptr);
         if (auto it = inst_compare_map_.insert({inst1, inst2}); !it.second) {
             if (inst2 == it.first->second) {
                 return true;
@@ -96,126 +106,57 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
 #define CAST(Opc) CastTo##Opc()
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
-#define CHECK(Opc, Getter)                                                                               \
+#define CHECK_INST(Opc, Getter)                                                                               \
     if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
         inst_compare_map_.erase(inst1);                                                                  \
         return false;                                                                                    \
     }
-        CHECK(Cast, GetOperandsType)
-        CHECK(Cmp, GetOperandsType)
+        CHECK_INST(CastAnyTypeValue, GetDeducedType)
 
-        CHECK(Compare, GetCc)
-        CHECK(Compare, GetOperandsType)
+        CHECK_INST(Cmp, GetOperandsType)
 
-        CHECK(If, GetCc)
-        CHECK(If, GetOperandsType)
+        CHECK_INST(Compare, GetCc)
+        CHECK_INST(Compare, GetOperandsType)
 
-        CHECK(IfImm, GetCc)
-        CHECK(IfImm, GetImm)
-        CHECK(IfImm, GetOperandsType)
+        CHECK_INST(If, GetCc)
+        CHECK_INST(If, GetOperandsType)
 
-        CHECK(Select, GetCc)
-        CHECK(Select, GetOperandsType)
+        CHECK_INST(IfImm, GetCc)
+        CHECK_INST(IfImm, GetImm)
+        CHECK_INST(IfImm, GetOperandsType)
 
-        CHECK(SelectImm, GetCc)
-        CHECK(SelectImm, GetImm)
-        CHECK(SelectImm, GetOperandsType)
+        CHECK_INST(LoadString, GetNeedBarrier)
 
-        CHECK(LoadArrayI, GetImm)
-        CHECK(LoadArrayPairI, GetImm)
-        CHECK(LoadPairPart, GetImm)
-        CHECK(StoreArrayI, GetImm)
-        CHECK(StoreArrayPairI, GetImm)
-        CHECK(BoundsCheckI, GetImm)
-        CHECK(ReturnI, GetImm)
-        CHECK(AddI, GetImm)
-        CHECK(SubI, GetImm)
-        CHECK(ShlI, GetImm)
-        CHECK(ShrI, GetImm)
-        CHECK(AShrI, GetImm)
-        CHECK(AndI, GetImm)
-        CHECK(OrI, GetImm)
-        CHECK(XorI, GetImm)
-
-        CHECK(LoadArray, GetNeedBarrier)
-        CHECK(LoadArrayPair, GetNeedBarrier)
-        CHECK(StoreArray, GetNeedBarrier)
-        CHECK(StoreArrayPair, GetNeedBarrier)
-        CHECK(LoadArrayI, GetNeedBarrier)
-        CHECK(LoadArrayPairI, GetNeedBarrier)
-        CHECK(StoreArrayI, GetNeedBarrier)
-        CHECK(StoreArrayPairI, GetNeedBarrier)
-        CHECK(LoadStatic, GetNeedBarrier)
-        CHECK(StoreStatic, GetNeedBarrier)
-        CHECK(LoadObject, GetNeedBarrier)
-        CHECK(StoreObject, GetNeedBarrier)
-        CHECK(LoadStatic, GetVolatile)
-        CHECK(StoreStatic, GetVolatile)
-        CHECK(LoadObject, GetVolatile)
-        CHECK(StoreObject, GetVolatile)
-        CHECK(NewObject, GetNeedBarrier)
-        CHECK(NewArray, GetNeedBarrier)
-        CHECK(CheckCast, GetNeedBarrier)
-        CHECK(IsInstance, GetNeedBarrier)
-        CHECK(LoadString, GetNeedBarrier)
-        CHECK(LoadConstArray, GetNeedBarrier)
-        CHECK(LoadType, GetNeedBarrier)
-
-        CHECK(CallStatic, IsInlined)
-        CHECK(CallVirtual, IsInlined)
-
-        CHECK(LoadArray, IsArray)
-        CHECK(LenArray, IsArray)
-
-        CHECK(Deoptimize, GetDeoptimizeType)
-        CHECK(DeoptimizeIf, GetDeoptimizeType)
-
-        CHECK(CompareAnyType, GetAnyType)
-        CHECK(CastValueToAnyType, GetAnyType)
-        CHECK(CastAnyTypeValue, GetAnyType)
-        CHECK(AnyTypeCheck, GetAnyType)
+        CHECK_INST(CompareAnyType, GetAnyType)
+        CHECK_INST(CastValueToAnyType, GetAnyType)
+        CHECK_INST(CastAnyTypeValue, GetAnyType)
 
         // Those below can fail because unit test Graph don't have proper Runtime links
-        // CHECK(Intrinsic, GetEntrypointId)
-        // CHECK(CallStatic, GetCallMethodId)
-        // CHECK(CallVirtual, GetCallMethodId)
+        // CHECK_INST(Intrinsic, GetEntrypointId)
+        // CHECK_INST(CallStatic, GetCallMethodId)
+        // CHECK_INST(CallVirtual, GetCallMethodId)
 
-        // CHECK(InitClass, GetTypeId)
-        // CHECK(LoadAndInitClass, GetTypeId)
-        // CHECK(LoadStatic, GetTypeId)
-        // CHECK(StoreStatic, GetTypeId)
-        // CHECK(LoadObject, GetTypeId)
-        // CHECK(StoreObject, GetTypeId)
-        // CHECK(NewObject, GetTypeId)
-        // CHECK(InitObject, GetTypeId)
-        // CHECK(NewArray, GetTypeId)
-        // CHECK(LoadConstArray, GetTypeId)
-        // CHECK(CheckCast, GetTypeId)
-        // CHECK(IsInstance, GetTypeId)
-        // CHECK(LoadString, GetTypeId)
-        // CHECK(LoadType, GetTypeId)
-#undef CHECK
+        // CHECK_INST(InitClass, GetTypeId)
+        // CHECK_INST(LoadAndInitClass, GetTypeId)
+        // CHECK_INST(LoadStatic, GetTypeId)
+        // CHECK_INST(StoreStatic, GetTypeId)
+        // CHECK_INST(LoadObject, GetTypeId)
+        // CHECK_INST(StoreObject, GetTypeId)
+        // CHECK_INST(NewObject, GetTypeId)
+        // CHECK_INST(InitObject, GetTypeId)
+        // CHECK_INST(NewArray, GetTypeId)
+        // CHECK_INST(LoadConstArray, GetTypeId)
+        // CHECK_INST(CHECK_INSTCast, GetTypeId)
+        // CHECK_INST(IsInstance, GetTypeId)
+        // CHECK_INST(LoadString, GetTypeId)
+        // CHECK_INST(LoadType, GetTypeId)
+#undef CHECK_INST
 #undef CAST
-
-        if (inst1->GetOpcode() == Opcode::Constant) {
-            if (!CompareConstantInst(inst1, inst2)) {
-                inst_compare_map_.erase(inst1);
-                return false;
-            }
-        }
-
-        if (inst1->GetOpcode() == Opcode::Cmp && IsFloatType(inst1->GetInput(0).GetInst()->GetType())) {
-            auto cmp1 = static_cast<CmpInst *>(inst1);
-            auto cmp2 = static_cast<CmpInst *>(inst2);
-            if (cmp1->IsFcmpg() != cmp2->IsFcmpg()) {
-                inst_compare_map_.erase(inst1);
-                return false;
-            }
-        }
-
-        if (!CompareInputTypes(inst1, inst2) || !CompareSaveStateInst(inst1, inst2)) {
-                inst_compare_map_.erase(inst1);
-                return false;
+        if (!CompareInputTypes(inst1, inst2)
+            || !CompareIntrinsicInst(inst1, inst2) || !CompareConstantInst(inst1, inst2)
+            || !CompareFcmpgInst(inst1, inst2) || !CompareSaveStateInst(inst1, inst2)) {
+            inst_compare_map_.erase(inst1);
+            return false;
         }
 
         return true;
@@ -256,8 +197,29 @@ private:
         return true;
     }
 
+    bool CompareIntrinsicInst(Inst *inst1, Inst *inst2)
+    {
+        if (inst1->GetOpcode() != Opcode::Intrinsic) {
+            return true;
+        }
+
+        auto intrinsic1 = inst1->CastToIntrinsic();
+        auto intrinsic2 = inst2->CastToIntrinsic();
+        auto same = intrinsic1->GetIntrinsicId() == intrinsic2->GetIntrinsicId();
+        if (intrinsic1->HasImms()) {
+            auto imms1 = intrinsic1->GetImms();
+            auto imms2 = intrinsic2->GetImms();
+            same = same && std::equal(imms1.begin(), imms1.end(), imms2.begin(), imms2.end());
+        }
+        return same;
+    }
+
     bool CompareConstantInst(Inst *inst1, Inst *inst2)
     {
+        if (inst1->GetOpcode() != Opcode::Constant) {
+            return true;
+        }
+
         auto c1 = inst1->CastToConstant();
         auto c2 = inst2->CastToConstant();
         bool same = false;
@@ -271,6 +233,17 @@ private:
                 break;
         }
         return same;
+    }
+
+    bool CompareFcmpgInst(Inst *inst1, Inst *inst2)
+    {
+        if (inst1->GetOpcode() != Opcode::Cmp || !IsFloatType(inst1->GetInput(0).GetInst()->GetType())) {
+            return true;
+        }
+
+        auto cmp1 = static_cast<CmpInst *>(inst1);
+        auto cmp2 = static_cast<CmpInst *>(inst2);
+        return cmp1->IsFcmpg() == cmp2->IsFcmpg();
     }
 
     bool CompareInputTypes(Inst *inst1, Inst *inst2)

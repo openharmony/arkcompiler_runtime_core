@@ -55,3 +55,14 @@ function func5(a) {
     a += 1;
   }
 }
+
+function func6(o) {
+  var x = 42;
+
+  try {
+    throw o;
+  }
+  catch (e) {
+    return x;
+  }
+}

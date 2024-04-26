@@ -29,6 +29,11 @@
 #include "inst.h"
 #include "locations.h"
 #include "mem/pool_manager.h"
+#include "optimizer/analysis/linear_order.h"
+#include "optimizer/optimizations/cleanup.h"
+#include "optimizer/optimizations/move_constants.h"
+#include "optimizer/optimizations/regalloc/reg_alloc.h"
+#include "reg_acc_alloc.h"
 
 using namespace testing::ext;
 
@@ -66,6 +71,57 @@ HWTEST_F(GraphCheckerTest, graph_checker_test_001, TestSize.Level1)
         EXPECT_TRUE(graph->RunPass<LoopAnalyzer>());
         GraphChecker gChecker(graph);
         gChecker.Check();
+    });
+    EXPECT_TRUE(status);
+}
+
+/**
+ * @tc.name: graph_checker_test_002
+ * @tc.desc: Verify the IsTryCatchDomination function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GraphCheckerTest, graph_checker_test_002, TestSize.Level1)
+{
+    std::string pfile = GRAPH_TEST_ABC_DIR "testTryCatch.abc";
+    const char *test_method_name = "func6";
+    bool status = false;
+    graphTest_.TestBuildGraphFromFile(pfile, [&test_method_name, &status](Graph* graph, std::string &method_name) {
+        if (test_method_name != method_name) {
+            return;
+        }
+
+        EXPECT_TRUE(graph->RunPass<MoveConstants>());
+        EXPECT_TRUE(graph->RunPass<bytecodeopt::RegAccAlloc>());
+        EXPECT_TRUE(RegAlloc(graph));
+
+        GraphChecker gChecker(graph);
+        gChecker.Check();
+
+        status = true;
+    });
+    EXPECT_TRUE(status);
+}
+
+/**
+ * @tc.name: graph_checker_test_003
+ * @tc.desc: Verify the Check function with infinite loop.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GraphCheckerTest, graph_checker_test_003, TestSize.Level1)
+{
+    std::string pfile = GRAPH_TEST_ABC_DIR "graphTest.abc";
+    const char *test_method_name = "loop2";
+    bool status = false;
+    graphTest_.TestBuildGraphFromFile(pfile, [&test_method_name, &status](Graph* graph, std::string &method_name) {
+        if (test_method_name != method_name) {
+            return;
+        }
+
+        GraphChecker gChecker(graph);
+        gChecker.Check();
+        status = true;
     });
     EXPECT_TRUE(status);
 }

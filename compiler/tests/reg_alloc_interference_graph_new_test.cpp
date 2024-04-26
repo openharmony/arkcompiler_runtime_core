@@ -621,4 +621,36 @@ HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_017, TestSize.Lev
                              "}\n";
     EXPECT_EQ(out.str(), expect_str);
 }
+
+/**
+ * @tc.name: reg_alloc_interference_test_018
+ * @tc.desc: Verify the IsChordal function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RegAllocInterferenceTest, reg_alloc_interference_test_018, TestSize.Level1)
+{
+    ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};
+    InterferenceGraph ig(&allocator);
+    ig.Reserve(5);
+
+    for (size_t i = 0; i < 5; i++) {
+        ig.AllocNode();
+        EXPECT_TRUE(ig.IsChordal());
+    }
+    ig.AddEdge(0, 1);
+    EXPECT_TRUE(ig.IsChordal());
+    ig.AddEdge(1, 2);
+    EXPECT_TRUE(ig.IsChordal());
+    ig.AddEdge(2, 0);
+    EXPECT_TRUE(ig.IsChordal());
+
+    ig.AddEdge(3, 4);
+    ig.AddEdge(1, 3);
+    ig.AddEdge(2, 4);
+    EXPECT_FALSE(ig.IsChordal());
+
+    ig.AddEdge(1, 4);
+    EXPECT_TRUE(ig.IsChordal());
+}
 }  // namespace panda::compiler

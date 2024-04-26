@@ -15,6 +15,7 @@
 
 #include "utils/utf.h"
 
+#include <cstddef>
 #include <cstdint>
 
 #include <vector>
@@ -90,6 +91,50 @@ HWTEST(Utf, ConvertMUtf8ToUtf16_2, testing::ext::TestSize.Level0)
     }
 }
 
+/**
+ * @tc.name: MUtf8ToUtf16Size
+ * @tc.desc: Verify the MUtf8ToUtf16Size function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(Utf, MUtf8ToUtf16Size, testing::ext::TestSize.Level0)
+{
+    // 2-byte mutf-8 U+0000
+    {
+        const std::vector<uint8_t> in {0xc0, 0x80};
+        size_t res = MUtf8ToUtf16Size(in.data(), in.size());
+        EXPECT_EQ(res, 1U);
+    }
+
+    // 1-byte mutf-8: 0xxxxxxx
+    {
+        const std::vector<uint8_t> in {0x7f};
+        size_t res = MUtf8ToUtf16Size(in.data(), in.size());
+        EXPECT_EQ(res, 1U);
+    }
+
+    // 2-byte mutf-8: 110xxxxx 10xxxxxx
+    {
+        const std::vector<uint8_t> in {0xc2, 0xa7, 0x33};
+        size_t res = MUtf8ToUtf16Size(in.data(), in.size());
+        EXPECT_EQ(res, 2U);
+    }
+
+    // 3-byte mutf-8: 1110xxxx 10xxxxxx 10xxxxxx
+    {
+        const std::vector<uint8_t> in {0xef, 0xbf, 0x83, 0x33};
+        size_t res = MUtf8ToUtf16Size(in.data(), in.size());
+        EXPECT_EQ(res, 2U);
+    }
+
+    // double 3-byte mutf-8: 11101101 1010xxxx 10xxxxxx 11101101 1011xxxx 10xxxxxx
+    {
+        const std::vector<uint8_t> in {0xed, 0xa0, 0x81, 0xed, 0xb0, 0xb7};
+        size_t res = MUtf8ToUtf16Size(in.data(), in.size());
+        EXPECT_EQ(res, 2U);
+    }
+}
+
 HWTEST(Utf, Utf16ToMUtf8Size, testing::ext::TestSize.Level0)
 {
     // 2-byte mutf-8 U+0000
@@ -131,6 +176,66 @@ HWTEST(Utf, Utf16ToMUtf8Size, testing::ext::TestSize.Level0)
         const std::vector<uint16_t> in {0xd801, 0xdc37};
         size_t res = Utf16ToMUtf8Size(in.data(), in.size());
         EXPECT_EQ(res, 5U);
+    }
+}
+
+/**
+ * @tc.name: ConvertRegionMUtf8ToUtf16
+ * @tc.desc: Verify the ConvertRegionMUtf8ToUtf16 function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(Utf, ConvertRegionMUtf8ToUtf16, testing::ext::TestSize.Level0)
+{
+    // 2-byte mutf-8 U+0000
+    {
+        const std::vector<uint8_t> in {0xc0, 0x80, 0x00};
+        const std::vector<uint16_t> res {0x0};
+        std::vector<uint16_t> out(res.size());
+        ConvertRegionMUtf8ToUtf16(in.data(), out.data(), utf::Mutf8Size(in.data()), res.size() * sizeof(uint16_t), 0);
+        EXPECT_EQ(out, res);
+    }
+
+    // 1-byte mutf-8: 0xxxxxxx
+    {
+        const std::vector<uint8_t> in {0x7f, 0x00};
+        const std::vector<uint16_t> res {0x7f};
+        std::vector<uint16_t> out(res.size());
+        ConvertRegionMUtf8ToUtf16(in.data(), out.data(), utf::Mutf8Size(in.data()), res.size() * sizeof(uint16_t), 0);
+        EXPECT_EQ(out, res);
+    }
+
+    // 2-byte mutf-8: 110xxxxx 10xxxxxx
+    {
+        const std::vector<uint8_t> in {0xc2, 0xa7, 0x33, 0x00};
+        const std::vector<uint16_t> res {0xa7, 0x33};
+        std::vector<uint16_t> out(res.size());
+        ConvertRegionMUtf8ToUtf16(in.data(), out.data(), utf::Mutf8Size(in.data()), res.size() * sizeof(uint16_t), 0);
+        EXPECT_EQ(out, res);
+    }
+
+    // 3-byte mutf-8: 1110xxxx 10xxxxxx 10xxxxxx
+    {
+        const std::vector<uint8_t> in {0xef, 0xbf, 0x83, 0x33, 0x00};
+        const std::vector<uint16_t> res {0xffc3, 0x33};
+        std::vector<uint16_t> out(res.size());
+        ConvertRegionMUtf8ToUtf16(in.data(), out.data(), utf::Mutf8Size(in.data()), res.size() * sizeof(uint16_t), 0);
+        EXPECT_EQ(out, res);
+    }
+
+    // double 3-byte mutf-8: 11101101 1010xxxx 10xxxxxx 11101101 1011xxxx 10xxxxxx
+    {
+        const std::vector<uint8_t> in {0xed, 0xa0, 0x81, 0xed, 0xb0, 0xb7, 0x00};
+        const std::vector<uint16_t> res1 {0xd801, 0xdc37};
+        const std::vector<uint16_t> res2 {0xdc37};
+        std::vector<uint16_t> out1(res1.size());
+        std::vector<uint16_t> out2(res2.size());
+        size_t in_len1 = utf::Mutf8Size(in.data());
+        size_t in_len2 = utf::Mutf8Size(in.data() + 3);
+        ConvertRegionMUtf8ToUtf16(in.data(), out1.data(), in_len1, res1.size() * sizeof(uint16_t), 0);
+        ConvertRegionMUtf8ToUtf16(in.data(), out2.data(), in_len1, res2.size() * sizeof(uint16_t), in_len1 - in_len2);
+        EXPECT_EQ(out1, res1);
+        EXPECT_EQ(out2, res2);
     }
 }
 

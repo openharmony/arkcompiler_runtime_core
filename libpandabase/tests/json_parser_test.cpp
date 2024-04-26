@@ -14,6 +14,7 @@
  */
 
 #include <cstdio>
+#include <sstream>
 
 #include "utils/json_parser.h"
 #include <gtest/gtest.h>
@@ -208,5 +209,38 @@ HWTEST(JsonParser, InvalidJson, testing::ext::TestSize.Level0)
 
     JsonObject obj(repeated_keys);
     ASSERT_FALSE(obj.IsValid());
+}
+
+/**
+ * @tc.name: UnescapeString
+ * @tc.desc: Verify the json parser with unescape string.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(JsonParser, UnescapeString, testing::ext::TestSize.Level0)
+{
+    std::stringstream ss(R"(
+    {
+        "key_0" : "\ttest_string1\r\n",
+        "key_1" : "\ftest_string2\b"
+    }
+    )");
+
+    JsonObject obj(ss.rdbuf());
+    ASSERT_TRUE(obj.IsValid());
+
+    ASSERT_NE(obj.GetValue<JsonObject::StringT>("key_0"), nullptr);
+    ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_0"), "\ttest_string1\r\n");
+
+    ASSERT_NE(obj.GetValue<JsonObject::StringT>("key_1"), nullptr);
+    ASSERT_EQ(*obj.GetValue<JsonObject::StringT>("key_1"), "\ftest_string2\b");
+
+    auto invalid_unescape_str(R"(
+    {
+        "key_0" : "\a"
+    }
+    )");
+    JsonObject invalid_obj(invalid_unescape_str);
+    ASSERT_FALSE(invalid_obj.IsValid());
 }
 }  // namespace panda::json_parser::test
