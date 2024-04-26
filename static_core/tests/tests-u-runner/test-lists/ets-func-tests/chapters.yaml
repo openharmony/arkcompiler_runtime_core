@@ -14,7 +14,9 @@
 chapters:
   - all:
     - algorithms
+    - arkui
     - escompat
+    - koala-related-benchmarks
     - regression
     - spec
     - std
@@ -22,8 +24,12 @@ chapters:
   # One folder - one chapter
   - algorithms-dir:
     - algorithms
+  - arkui-dir:
+    - arkui
   - escompat-dir:
     - escompat
+  - koala-related-benchmarks-dir:
+    - koala-related-benchmarks
   - regression-dir:
     - regression
   - std-containers-dir:

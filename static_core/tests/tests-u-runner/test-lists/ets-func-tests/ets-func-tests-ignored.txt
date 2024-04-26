@@ -1,5 +1,4 @@
 std/core/std_core_string_String_fromCharCode_005.ets
-std/core/std_core_string_String_localeCompare_string.ets
 std/core/std_core_string_String_localeCompare_string_001.ets
 ### Issue 10945, 11969 begin
 std/core/std_core_char_static_Char_isPartOfSurrogatePair.ets
@@ -183,7 +182,6 @@ spec/lambda/callAsyncMethodFromAsyncLambda1.ets
 spec/lambda/callMethodFromAsyncLambda1.ets
 ### Issue 14209
 spec/lambda/callAsyncMethodFromAsyncLambda2.ets
-spec/lambda/callMethodFromAsyncLambda2.ets
 ### Issue 14131
 spec/lambda/callRegularLambdaWithAsyncOverload.ets
 ### Negative tests
@@ -310,8 +308,6 @@ spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.
 spec/import_export/03.import_directives/t_is_proxed_through_chain_of_files_2.ets
 ### Issue 14660
 spec/import_export/03.import_directives/05.default_import_binding/default_import_binding.ets
-### Issue 15693
-std/core/std_core_string_String_localeCompare_string_005.ets
 ### Issue 15119
 std/core/std_core_string_String_fromCharCode_006.ets
 ### Issue 15304
@@ -550,23 +546,6 @@ spec/functions/Issue-14273_3.ets
 spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
 ### Issue 15763 end
 
-### Functional interface overriding, type erased generics
-std/core/std_core_array_map_short_array_func_short_int_short_array.ets
-std/core/std_core_array_map_boolean_array_func_boolean_int_boolean_array.ets
-std/core/std_core_array_map_byte_array_func_byte.ets
-std/core/std_core_array_map_char_array_func_char_int_char_array.ets
-std/core/std_core_array_map_double_array_func_double.ets
-std/core/std_core_array_map_boolean_array_func_boolean.ets
-std/core/std_core_array_map_char_array_func_char.ets
-std/core/std_core_array_map_long_array_func_long.ets
-std/core/std_core_array_map_float_array_func_float.ets
-std/core/std_core_array_map_int_array_func_int_int_int_array.ets
-std/core/std_core_array_map_int_array_func_int.ets
-std/core/std_core_array_map_double_array_func_double_int_double_array.ets
-std/core/std_core_array_map_byte_array_func_byte_int_byte_array.ets
-std/core/std_core_array_map_short_array_func_short.ets
-std/core/std_core_array_map_float_array_func_float_int_float_array.ets
-std/core/std_core_array_map_long_array_func_long_int_long_array.ets
 ### issue 15523
 spec/10.interfaces/overriding/15523_0000_iterable_override.ets
 spec/10.interfaces/overriding/15523_0001_iterable_override.ets
