@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,14 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for m in cases %}
+
 /*---
-desc: For loop with new variable (implicit type)
+desc: {{m.doc}}
 ---*/
 
+{{m.add}}
+
 function main(): void {
-  let sum = 0;
-  for (let i = 1; i < 4; i++) {
-    sum += i;
-  }
-  assert sum == 6;
+  {{m.decl}}
 }
+
+{% endfor %}
