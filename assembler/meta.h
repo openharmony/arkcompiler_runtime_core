@@ -496,6 +496,11 @@ public:
         access_flags_ = access_flags;
     }
 
+    void AddAccessFlags(uint32_t access_flags)
+    {
+        access_flags_ = access_flags_ | access_flags;
+    }
+
     bool IsForeign() const;
 
 private:

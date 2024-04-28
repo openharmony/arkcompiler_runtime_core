@@ -46,11 +46,13 @@ struct Record {
           metadata(extensions::MetadataExtension::CreateRecordMetadata(lang)),
           file_location({f_c, b_l, b_r, l_n, d})
     {
+        metadata->SetAccessFlags(panda::ACC_PUBLIC);
     }
 
     Record(std::string s, panda::panda_file::SourceLang lang)
         : name(std::move(s)), language(lang), metadata(extensions::MetadataExtension::CreateRecordMetadata(lang))
     {
+        metadata->SetAccessFlags(panda::ACC_PUBLIC);
     }
 
     bool HasImplementation() const

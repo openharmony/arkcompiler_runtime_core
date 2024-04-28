@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//arkcompiler/runtime_core/ark_config.gni")
 import("$ark_root/tests/test_helper.gni")
 
@@ -30,11 +31,31 @@ config("module_private_config") {
   defines = [ "PANDA_WITH_ECMASCRIPT" ]
 }
 
+assembler_test_js_files = [ "test_class_access_flags" ]
+
+test_js_path = "//arkcompiler/runtime_core/assembler/tests/js/"
+
+foreach(file, assembler_test_js_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_path}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_js)
+    dst_file = rebase_path(test_abc)
+
+    extra_args = [ "--merge-abc" ]
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
 host_unittest_action("AssemblerTest") {
   module_out_path = module_output_path
 
   sources = [
     "annotation_test.cpp",
+    "assembler_access_flag_test.cpp",
     "assembler_emitter_test.cpp",
     "assembler_ins_test.cpp",
     "assembler_lexer_test.cpp",
@@ -65,6 +86,11 @@ host_unittest_action("AssemblerTest") {
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+  foreach(file, assembler_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
 }
 
 group("host_unittest") {

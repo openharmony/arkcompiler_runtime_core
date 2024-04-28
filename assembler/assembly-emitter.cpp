@@ -1329,7 +1329,7 @@ static void MakeSlotNumberRecord(Program *prog)
 {
     static const std::string SLOT_NUMBER = "_ESSlotNumberAnnotation";
     pandasm::Record record(SLOT_NUMBER, pandasm::extensions::Language::ECMASCRIPT);
-    record.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
+    record.metadata->AddAccessFlags(panda::ACC_ANNOTATION);
     prog->record_table.emplace(SLOT_NUMBER, std::move(record));
 }
 
@@ -1358,7 +1358,7 @@ static void MakeConcurrentModuleRequestsRecord(Program *prog)
 {
     static const std::string CONCURRENT_MODULE_REQUESTS = "_ESConcurrentModuleRequestsAnnotation";
     pandasm::Record record(CONCURRENT_MODULE_REQUESTS, pandasm::extensions::Language::ECMASCRIPT);
-    record.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
+    record.metadata->AddAccessFlags(panda::ACC_ANNOTATION);
     prog->record_table.emplace(CONCURRENT_MODULE_REQUESTS, std::move(record));
 }
 
