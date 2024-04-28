@@ -22,6 +22,7 @@
 #include "include/mem/panda_containers.h"
 #include "include/method.h"
 #include "include/runtime.h"
+#include "libpandafile/type_helper.h"
 #include "macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/thread_scopes.h"
@@ -2648,6 +2649,20 @@ public:
             END_SHOW_MSG();
             return false;
         }
+
+        // currently all union types are encoded as single one class “$UNION_FIELD_DUMMY_CLASS”
+        // at bytecode level, thus we do not have accurate union type info to verify each variables
+        // so the current temporary solution would be to skip verification for union types.This
+        // actually introduce insecure possibilities here. Accurate verification for union types
+        // will need redesign for union types support in the future
+        //
+        // based on the above,here we skip:
+        // 1. checking whether a field existed in the union or not
+        // 2. skip checking member access violiations
+        if (ark::panda_file::IsDummyClassName(rawField->GetClass()->GetName())) {
+            return true;
+        }
+
         auto objClass = objType.GetClass();
         auto field = objClass->LookupFieldByName(rawField->GetName());
         Type fieldType;
