@@ -35,6 +35,10 @@ using namespace pandasm;
 using namespace panda;
 class CodegenTest : public testing::Test {
 public:
+    CodegenTest()
+    {
+        options.SetCompilerUseSafepoint(false);
+    }
     static void SetUpTestCase(void) {}
     static void TearDownTestCase(void) {}
     void SetUp() {}
