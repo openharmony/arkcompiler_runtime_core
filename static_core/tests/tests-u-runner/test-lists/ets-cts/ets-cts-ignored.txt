@@ -1540,3 +1540,29 @@
 # es2panda: 16603 verifier error - ensure non-nullish result of expression with ternary conditional operator
 07.expressions/18.ensure-not-nullish_expression/undefined_4.ets
 # end of es2panda failure
+
+# es2panda: 16519 CTE if no expression set for the For loop
+08.statements/08.for_statements/for_loop_parameters_0.ets
+08.statements/08.for_statements/for_loop_parameters_1.ets
+08.statements/08.for_statements/for_loop_parameters_4.ets
+08.statements/08.for_statements/for_loop_parameters_6.ets
+# end of es2panda fails
+
+# partially implemented: 16371
+08.statements/09.for_of_statements/for_of_20.ets
+# end of 16371
+
+# es2panda: 16655 CTE in equality of int literal/lambda with null/undefined
+07.expressions/25.equality_expressions/05.equality_with_null_or_undefined/null_and_undefined_equality_9.ets
+07.expressions/25.equality_expressions/05.equality_with_null_or_undefined/null_and_undefined_equality_10.ets
+07.expressions/25.equality_expressions/05.equality_with_null_or_undefined/null_and_undefined_equality_11.ets
+07.expressions/25.equality_expressions/05.equality_with_null_or_undefined/null_and_undefined_equality_12.ets
+# end of 16655
+
+# es2panda: 16676 CTE in for-of with iterable class
+08.statements/09.for_of_statements/for_of_27.ets
+# end of 16676
+
+# es2panda: 16707 error working with string
+08.statements/08.for_statements/for_loop_parameters_12.ets
+# end of 16707

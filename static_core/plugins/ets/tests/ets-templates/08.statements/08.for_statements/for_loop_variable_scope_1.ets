@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,13 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: For loop with new variable
+desc: Access variable of the For Loop body outside of the For Loop
+tags: [negative, compile-only]
 ---*/
 
 function main(): void {
-  let sum = 0;
   for (let i: int = 1; i < 4; i++) {
-    sum += i;
+    let a = i;
   }
-  assert sum == 6;
+  assert a == 4;
 }
