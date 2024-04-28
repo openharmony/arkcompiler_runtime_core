@@ -26,6 +26,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 #include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/language_context.h"
@@ -540,6 +541,11 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     boxDoubleClass_ = CacheClass(BOX_DOUBLE, [](auto *c) { c->SetValueTyped(); });
     bigintClass_ = CacheClass(BIG_INT, [](auto *c) { c->SetValueTyped(); });
     promiseClass_ = CacheClass(PROMISE);
+    if (promiseClass_ != nullptr) {
+        subscribeOnAnotherPromiseMethod_ = EtsMethod::ToRuntimeMethod(
+            EtsClass::FromRuntimeClass(promiseClass_)->GetMethod("subscribeOnAnotherPromise"));
+        ASSERT(subscribeOnAnotherPromiseMethod_ != nullptr);
+    }
     arraybufClass_ = CacheClass(ARRAY_BUFFER);
     stringBuilderClass_ = CacheClass(STRING_BUILDER);
     arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);

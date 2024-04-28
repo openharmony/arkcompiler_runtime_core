@@ -17,11 +17,13 @@
 #include "plugins/ets/runtime/lambda_utils.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/coroutines/coroutine_manager.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/job_queue.h"
+#include "runtime/coroutines/stackful_coroutine.h"
 
 namespace ark::ets::intrinsics {
 
@@ -50,6 +52,25 @@ static void OnPromiseCompletion(EtsCoroutine *coro, EtsHandle<EtsPromise> &promi
     coro->GetPandaVM()->FirePromiseStateChanged(promise);
 }
 
+void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise)
+{
+    PandaVector<Value> args {Value(outsidePromise), Value(internalPromise)};
+
+    auto subscribeOnAnotherPromise = [&args]() {
+        EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetSubscribeOnAnotherPromiseMethod()->Invoke(
+            EtsCoroutine::GetCurrent(), args.data());
+    };
+
+    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
+    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
+    if (Coroutine::GetCurrent() != mainCoro) {
+        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
+            &subscribeOnAnotherPromise, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
+    } else {
+        subscribeOnAnotherPromise();
+    }
+}
+
 void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
@@ -63,6 +84,21 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
     }
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
+
+    if (value != nullptr && value->IsInstanceOf(coro->GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
+        auto internalPromise = EtsPromise::FromEtsObject(value);
+        EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
+        if (hInternalPromise->IsPending() || coro->GetCoroutineManager()->IsJsMode()) {
+            SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
+            return;
+        }
+        if (hInternalPromise->IsRejected()) {
+            EtsPromiseReject(hpromise.GetPtr(), hInternalPromise->GetValue(coro));
+            return;
+        }
+        // We can use internal promise's value as return value
+        value = hInternalPromise->GetValue(coro);
+    }
     EtsHandle<EtsObjectArray> thenQueue(coro, hpromise->GetThenQueue(coro));
     hpromise->Resolve(coro, value);
     OnPromiseCompletion(coro, hpromise, thenQueue, hpromise->GetThenQueueSize());

@@ -168,6 +168,12 @@ public:
     void SetSchedulingPolicy(CoroutineSchedulingPolicy policy);
     CoroutineSchedulingPolicy GetSchedulingPolicy() const;
 
+    /// @return true if js compatibility mode is selected for the coroutine manager
+    virtual bool IsJsMode()
+    {
+        return false;
+    }
+
     /* debugging tools */
     /**
      * Disable coroutine switch for the current worker.

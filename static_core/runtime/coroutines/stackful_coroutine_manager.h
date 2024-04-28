@@ -80,6 +80,7 @@ public:
     void DisableCoroutineSwitch() override;
     void EnableCoroutineSwitch() override;
     bool IsCoroutineSwitchDisabled() override;
+    bool IsJsMode() override;
 
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
@@ -92,7 +93,6 @@ protected:
 
     StackfulCoroutineContext *GetCurrentContext();
     StackfulCoroutineWorker *GetCurrentWorker();
-    bool IsJsMode();
 
     /**
      * @brief reuse a cached coroutine instance in case when coroutine pool is enabled

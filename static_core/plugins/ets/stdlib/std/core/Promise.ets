@@ -238,6 +238,15 @@ export final class Promise<out T> {
         ++this.catchQueueSize;
     }
 
+    private subscribeOnAnotherPromise(internalPromise: Promise<T>): void {
+        let thisPromise = this;
+        internalPromise.then<undefined>((value: T): undefined => {
+            thisPromise.resolveImpl(value);
+        }, (error: NullableType): undefined => {
+            thisPromise.rejectImpl(error);
+        });
+    }
+
     public native awaitResolution(): T;
 
     private native resolveImpl(value: T): void;
