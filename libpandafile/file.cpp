@@ -302,6 +302,12 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
 std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_t size)
 {
     if (buffer == nullptr) {
+        PLOG(ERROR, PANDAFILE) << "OpenPandaFileFromSecureMemory buffer is nullptr'";
+        return nullptr;
+    }
+
+    if (!CheckSecureMem(reinterpret_cast<uintptr_t>(buffer))) {
+        PLOG(ERROR, PANDAFILE) << "Secure memory check failed, please execute in secure memory.";
         return nullptr;
     }
 
