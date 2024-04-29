@@ -25,8 +25,10 @@ std::string ProfileOptimizer::GetNameInfo(const std::unique_ptr<BaseItem> &item)
     if (item->GetName() == CLASS_ITEM) {
         identity = static_cast<ClassItem *>(item.get())->GetNameItem()->GetData();
         ASSERT(identity.find('L') == 0);                        // the first character must be 'L'
-        ASSERT(identity.find(";\0") == identity.length() - 2);  // must end with ";\0"
-        identity = identity.substr(1, identity.length() - 3);   // remove 'L' and ";\0"
+        // must end with ";\0",2 indicates the end mark of the count
+        ASSERT(identity.find(";\0") == identity.length() - 2);
+        // remove 'L' and ";\0",3 indicates the number of characters that need to be removed
+        identity = identity.substr(1, identity.length() - 3);
         std::replace(identity.begin(), identity.end(), '/', '.');
     } else if (item->GetName() == STRING_ITEM) {
         identity = static_cast<StringItem *>(item.get())->GetData();

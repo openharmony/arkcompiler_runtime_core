@@ -36,7 +36,7 @@ constexpr auto ToUnsigned(T v)
     return static_cast<unsigned_type>(v);
 }
 
-template <typename T, std::enable_if_t<std::is_enum_v<T>> * = nullptr>
+template <typename T, std::enable_if_t<std::is_enum_v<T>>* = nullptr>
 constexpr auto ToUnderlying(T value)
 {
     return static_cast<std::underlying_type_t<T>>(value);

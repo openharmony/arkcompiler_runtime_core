@@ -91,7 +91,6 @@ private:
     void SetIntegerFieldValue(FieldDataAccessor *field_acc, FieldItem *field_item)
     {
         auto value = field_acc->GetValue<T>();
-
         if (!value) {
             return;
         }
@@ -111,7 +110,6 @@ private:
     void SetFloatFieldValue(FieldDataAccessor *field_acc, FieldItem *field_item)
     {
         auto value = field_acc->GetValue<T>();
-
         if (!value) {
             return;
         }
@@ -130,7 +128,6 @@ private:
     void SetStringFieldValue(FieldDataAccessor *field_acc, FieldItem *field_item)
     {
         auto value = field_acc->GetValue<uint32_t>();
-
         if (value) {
             panda_file::File::EntityId string_id(value.value());
             auto data = file_->GetStringData(string_id);
