@@ -31,6 +31,7 @@ llvm::Function *PreWRB(llvm::Module *module, unsigned addrSpace);
 llvm::Function *PostWRB(llvm::Module *module, unsigned addrSpace);
 llvm::Function *LoadString(llvm::Module *module);
 llvm::Function *ResolveVirtual(llvm::Module *module);
+llvm::Function *BarrierReturnVoid(llvm::Module *module);
 llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst,
                           ark::llvmbackend::LLVMArkInterface *arkInterface);
 constexpr auto BUILTIN_SECTION = ".builtins";
@@ -43,6 +44,7 @@ constexpr auto POST_WRB_BUILTIN = "__builtin_post_wrb";
 constexpr auto POST_WRB_GCADR_BUILTIN = "__builtin_post_wrb_gcadr";
 constexpr auto LOAD_STRING_BUILTIN = "__builtin_load_string";
 constexpr auto RESOLVE_VIRTUAL_BUILTIN = "__builtin_resolve_virtual";
+constexpr auto BARRIER_RETURN_VOID_BUILTIN = "__builtin_barrier_return_void";
 }  // namespace ark::llvmbackend::builtins
 
 #endif  // LIBLLVMBACKEND_TRANSFORMS_BUILTINS_H

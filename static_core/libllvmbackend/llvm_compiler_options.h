@@ -32,7 +32,6 @@ struct LLVMCompilerOptions {
     bool dumpModuleAfterOptimizations;
     std::string inlineModuleFile;
     std::string pipelineFile;
-    uint32_t llvmaotThreads;
     // Internal options
     bool doIrtocInline;
 };

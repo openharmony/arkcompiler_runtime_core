@@ -40,6 +40,10 @@ case "$ARGUMENT" in
     -paoc-regex=*)
     PAOC_REGEX="--compiler-regex=${ARGUMENT#*=}"
     ;;
+    *)
+    echo "Unexpected argument: '${ARGUMENT}'"
+    exit 1
+    ;;
 esac
 done
 

@@ -138,7 +138,6 @@ ark::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOption
     llvmCompilerOptions.dumpModuleBeforeOptimizations = g_options.IsLlvmDumpBefore();
     llvmCompilerOptions.inlineModuleFile = g_options.GetLlvmInlineModule();
     llvmCompilerOptions.pipelineFile = g_options.GetLlvmPipeline();
-    llvmCompilerOptions.llvmaotThreads = g_options.GetLlvmaotThreads();
 
     llvmCompilerOptions.inlining = !IsInliningDisabled();
     llvmCompilerOptions.recursiveInlining = g_options.IsLlvmRecursiveInlining();
@@ -153,6 +152,9 @@ void LLVMCompiler::InitializeDefaultLLVMOptions()
         constexpr auto DISABLE = llvm::cl::boolOrDefault::BOU_FALSE;
         SetLLVMOption("fast-isel", DISABLE);
         SetLLVMOption("global-isel", DISABLE);
+    } else {
+        SetLLVMOption("fixup-allow-gcptr-in-csr", true);
+        SetLLVMOption("max-registers-for-gc-values", std::numeric_limits<int>::max());
     }
 }
 

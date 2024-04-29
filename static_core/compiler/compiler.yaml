@@ -180,7 +180,7 @@ options:
 - name: compiler-encode-intrinsics
   type: bool
   default: true
-  description: If false, we always call C impementation of an intrinsic
+  description: If false, we always call C implementation of an intrinsic
   tags: [test]
 
 - name: compiler-lowering

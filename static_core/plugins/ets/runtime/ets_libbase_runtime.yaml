@@ -960,6 +960,7 @@ intrinsics:
         ret: i32
         args: [ std.core.String ]
     codegen_func: CreateStringCompareTo
+    llvm_codegen_func: EmitStringCompareTo
     codegen_arch: [arm64, amd64]
     impl: ark::ets::intrinsics::StdCoreStringCompareTo
     safe_intrinsic: true
@@ -1162,6 +1163,7 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreStringBuilderToString
     clear_flags: []
     codegen_func: CreateStringBuilderToString
+    llvm_codegen_func: EmitStringBuilderToString
     codegen_arch: [arm64, amd64]
 
 #################

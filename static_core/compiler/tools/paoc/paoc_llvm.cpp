@@ -70,7 +70,7 @@ Paoc::LLVMCompilerStatus PaocLLVM::TryLLVM(CompilingContext *ctx)
 bool PaocLLVM::EndLLVM()
 {
     ASSERT(IsLLVMAotMode());
-    llvmAotCompiler_->CompileAll();
+    llvmAotCompiler_->FinishCompile();
     if (!ShouldIgnoreFailures() && llvmAotCompiler_->IsIrFailed()) {
         return false;
     }

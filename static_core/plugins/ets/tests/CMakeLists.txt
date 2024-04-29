@@ -424,7 +424,7 @@ function(compile_stdlib TARGET_ARCH)
     if (TARGET_ARCH STREQUAL "arm64")
         add_custom_target(ets-compile-stdlib-osr-${TARGET_ARCH}
             COMMENT "Running ark_aot compilation for etsstdlib for ${TARGET_ARCH} with osr mode"
-            COMMAND ${ARK_AOT_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=osr -compiler-options=${COMPILER_OPTIONS_OSR} -paoc-output=etsstdlib_osr_${TARGET_ARCH}.an
+            COMMAND ${ARK_AOT_RUNNER} --binary-dir=${CMAKE_BINARY_DIR} --target-arch=${TARGET_ARCH} --paoc-mode=osr -compiler-options="${COMPILER_OPTIONS_OSR}" -paoc-output=etsstdlib_osr_${TARGET_ARCH}.an
             DEPENDS ark_aot etsstdlib
         )
         add_dependencies(ets-compile-stdlib ets-compile-stdlib-osr-${TARGET_ARCH})

@@ -28,7 +28,7 @@ namespace ark::llvmbackend::passes {
 
 class MemBarriers : public llvm::PassInfoMixin<MemBarriers> {
 public:
-    explicit MemBarriers(bool optimize = false);
+    explicit MemBarriers(LLVMArkInterface *arkInterface, bool optimize);
 
     static bool ShouldInsert([[maybe_unused]] const ark::llvmbackend::LLVMCompilerOptions *options)
     {
@@ -41,6 +41,13 @@ public:
     llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysisManager);
 
 private:
+    bool GrabsGuarded(llvm::Instruction *inst, llvm::SmallVector<llvm::Instruction *> &mergeSet);
+    void MergeBarriers(llvm::SmallVector<llvm::Instruction *> &mergeSet,
+                       llvm::SmallVector<llvm::Instruction *> &needsBarrier);
+    bool RelaxBarriers(llvm::Function &function);
+
+private:
+    LLVMArkInterface *arkInterface_;
     bool optimize_;
 
 public:

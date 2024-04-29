@@ -57,16 +57,15 @@
 #! EVENT_NEXT   /Exception,.*__noinline__call_stobj_obj.*NULL_CHECK/
 
 # In LLVMAOT:
-#  * stobj_f64 can't be implicit due to complex contruction of double constant
+#  * NOTE(zdenis) arrays to be rechecked after CSR
+#  * stobj_f64 can't be implicit due to complex construction of double constant
 #  * stobj_obj can't be implicit because it has write barrier
 #! CHECKER      Use implicit NullCheck for array and object in LLVM AOT
 #! SKIP_IF      @architecture == "arm32"
 #! SKIP_IF      @architecture == "x64"
-#! RUN_LLVM     options: "--llvm-dump-before"
+#! RUN_LLVM     options: ""
 #! RUN          options: "", entry: "_GLOBAL::main"
-#! EVENT        /ImplicitNullcheck,.*/
-#! EVENT_NEXT   /Exception,.*__noinline__call_ldarray.*NULL_CHECK/
-#! EVENT_NEXT   /ImplicitNullcheck,.*/
+#! EVENT        /Exception,.*__noinline__call_ldarray.*NULL_CHECK/
 #! EVENT_NEXT   /Exception,.*__noinline__call_starray.*NULL_CHECK/
 #! EVENT_NEXT   /ImplicitNullcheck,.*/
 #! EVENT_NEXT   /Exception,.*__noinline__call_ldobj_i32.*NULL_CHECK/

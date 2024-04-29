@@ -94,16 +94,18 @@ private:
     using GvnBuiltins = llvm::SmallVector<llvm::Function *, BuiltinType::NONE>;
 
 private:
-    void RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree &tree, bool &changed,
-                         const GvnBuiltins &builtins);
+    bool RunOnFunction(const llvm::DominatorTree &tree, const GvnBuiltins &builtins);
+    bool RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree &tree, const GvnBuiltins &builtins);
 
     BuiltinKey ParseBuiltin(const llvm::CallInst *callInst, const GvnBuiltins &builtins);
 
-    llvm::Value *FindDominantCall(const BuiltinKey &curBuiltin);
+    llvm::Value *FindDominantCall(const BuiltinKey &curBuiltin, llvm::BasicBlock *block,
+                                  const llvm::DominatorTree &tree);
 
 private:
     LLVMArkInterface *arkInterface_;
-    std::vector<LocalTable> dfsState_;
+    std::vector<llvm::BasicBlock *> workStack_;
+    llvm::DenseMap<llvm::BasicBlock *, LocalTable> bbTables_;
 
 public:
     static constexpr llvm::StringRef ARG_NAME = "ark-gvn";

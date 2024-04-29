@@ -69,9 +69,8 @@ llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Val
 
     // Entrypoint bridges preserve a lot of registers, so we can put appropriate ArkFast convention for them.
     if (bridgeType == BridgeType::ENTRYPOINT) {
-        llvm::CallingConv::ID cc = 0;
-        auto argsSize = arguments.size();
-        switch (argsSize) {
+        llvm::CallingConv::ID cc = llvm::CallingConv::C;
+        switch (arguments.size()) {
             case 0U:
                 cc = call->getType()->isVoidTy() ? llvm::CallingConv::ArkFast0 : llvm::CallingConv::ArkFast1;
                 break;
@@ -83,9 +82,12 @@ llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Val
             case 4U:
                 cc = llvm::CallingConv::ArkFast4;
                 break;
-            case 5U:  // NOTE(zhroma): it is possible to introduce ArkFast6 for this case
+            case 5U:
+            case 6U:
+                cc = llvm::CallingConv::ArkFast6;
+                break;
             default:
-                cc = llvm::CallingConv::C;
+                llvm_unreachable("Entrypoints with 7 and more arguments are not supported");
         }
         call->setCallingConv(cc);
     }

@@ -212,6 +212,22 @@ llvm::Function *LenArray(llvm::Module *module)
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);
     function->addFnAttr(llvm::Attribute::ReadNone);
+    function->addFnAttr(llvm::Attribute::WillReturn);
+    return function;
+}
+
+llvm::Function *BarrierReturnVoid(llvm::Module *module)
+{
+    auto function = module->getFunction(BARRIER_RETURN_VOID_BUILTIN);
+    if (function != nullptr) {
+        return function;
+    }
+
+    auto type = llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()), {}, false);
+    function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, BARRIER_RETURN_VOID_BUILTIN, module);
+    function->setDoesNotThrow();
+    function->setSectionPrefix(BUILTIN_SECTION);
+    function->addFnAttr(llvm::Attribute::WillReturn);
     return function;
 }
 
@@ -261,6 +277,7 @@ llvm::Function *PreWRB(llvm::Module *module, unsigned addrSpace)
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);
     function->addFnAttr(llvm::Attribute::ArgMemOnly);
+    function->addFnAttr(llvm::Attribute::WillReturn);
     function->addParamAttr(0U, llvm::Attribute::ReadOnly);
     return function;
 }
@@ -281,6 +298,7 @@ llvm::Function *PostWRB(llvm::Module *module, unsigned addrSpace)
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);
     function->addFnAttr(llvm::Attribute::ArgMemOnly);
+    function->addFnAttr(llvm::Attribute::WillReturn);
     function->addParamAttr(0U, llvm::Attribute::ReadNone);
     function->addParamAttr(2U, llvm::Attribute::ReadNone);
     return function;
@@ -418,6 +436,9 @@ llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst, LLVM
     }
     if (funcName.equals(RESOLVE_VIRTUAL_BUILTIN)) {
         return LowerResolveVirtual(builder, inst, arkInterface);
+    }
+    if (funcName.equals(BARRIER_RETURN_VOID_BUILTIN)) {
+        return nullptr;
     }
     UNREACHABLE();
 }

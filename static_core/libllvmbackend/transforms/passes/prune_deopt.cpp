@@ -72,7 +72,7 @@ CallInst *PruneDeopt::GetUpdatedCallInst(CallInst *call, const OperandBundleUse 
 {
     CallInst *updated;
     if (!IsCaughtDeoptimization(bundle.Inputs) && !call->hasFnAttr("may-deoptimize")) {
-        LLVM_DEBUG(llvm::dbgs() << "Pruning deopt for: " << call << "\n");
+        LLVM_DEBUG(llvm::dbgs() << "Pruning deopt for: " << *call << "\n");
         ASSERT(call->getNumOperandBundles() == 1);
         updated = CallInst::Create(call, llvm::None);
         auto iinfo = GetInlineInfo(bundle.Inputs);
@@ -80,13 +80,13 @@ CallInst *PruneDeopt::GetUpdatedCallInst(CallInst *call, const OperandBundleUse 
             updated->addFnAttr(llvm::Attribute::get(updated->getContext(), "inline-info", iinfo));
         }
     } else {
-        LLVM_DEBUG(llvm::dbgs() << "Encoding deopt bundle: " << call << "\n");
+        LLVM_DEBUG(llvm::dbgs() << "Encoding deopt bundle: " << *call << "\n");
         ASSERT(call->getNumOperandBundles() == 1);
         OperandBundleDef encodedBundle {"deopt", EncodeDeoptBundle(call, bundle)};
         updated = CallInst::Create(call, {encodedBundle});
     }
-    LLVM_DEBUG(llvm::dbgs() << "Replacing with: " << *updated << "\n");
     ReplaceInstWithInst(call, updated);
+    LLVM_DEBUG(llvm::dbgs() << "Replaced with: " << *updated << "\n");
     return updated;
 }
 

@@ -52,7 +52,6 @@
 // Suppress warning about forward Pass declaration defined in another namespace
 #include <llvm/Pass.h>
 #include <llvm/Support/Debug.h>
-#include <llvm/Support/ThreadPool.h>
 
 /* Be careful this file also includes elf.h, which has a lot of defines */
 #include "aot/aot_builder/llvm_aot_builder.h"
@@ -193,10 +192,45 @@ bool LLVMAotCompiler::AddGraph(compiler::Graph *graph)
     ASSERT(graph->SupportManagedCode());
     auto method = static_cast<Method *>(graph->GetMethod());
     auto module = spreader_->GetModuleForMethod(method);
+    if (currentModule_ == nullptr) {
+        currentModule_ = module;
+    }
+    if (threadPool_ == nullptr && currentModule_ != module) {
+        // Compile finished module immediately before emitting the next one
+        CompileModule(*currentModule_);
+    }
+    if (threadPool_ != nullptr && currentModule_ != module) {
+        // Launch compilation on parallel worker
+        auto thread = runtime_->GetCurrentThread();
+        threadPool_->async(
+            [this, thread](auto it) -> void {
+                auto oldThread = runtime_->GetCurrentThread();
+                runtime_->SetCurrentThread(thread);
+                CompileModule(*it);
+                runtime_->SetCurrentThread(oldThread);
+                {
+                    std::lock_guard<decltype(mutex_)> lock {mutex_};
+                    semaphore_++;
+                }
+                cv_.notify_all();
+            },
+            currentModule_);
+        // If all workers busy, wait here before emitting next module
+        {
+            std::unique_lock<decltype(mutex_)> lock {mutex_};
+            cv_.wait(lock, [&]() { return semaphore_ > 0; });
+            --semaphore_;
+        }
+    }
+    currentModule_ = module;
+
+    // Proceed with the Graph
     bool result = AddGraphToModule(graph, *module, AddGraphMode::PRIMARY_FUNCTION);
     module->AddMethod(method);
     methods_.push_back(method);
-    AddInlineFunctionsByDepth(*module, graph, 0);
+    if (result) {
+        AddInlineFunctionsByDepth(*module, graph, 0);
+    }
     return result;
 }
 
@@ -351,6 +385,15 @@ LLVMAotCompiler::LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::
     spreader_ = std::make_unique<FixedCountSpreader>(
         runtime_, g_options.GetLlvmaotMethodsPerModule(),
         [this](uint32_t moduleId) { return std::make_shared<WrappedModule>(CreateModule(moduleId)); });
+    int32_t numThreads = g_options.GetLlvmaotThreads();
+    if (numThreads >= 0) {
+        auto strategy = llvm::hardware_concurrency(numThreads);
+        threadPool_ = std::make_unique<llvm::ThreadPool>(strategy);
+
+        numThreads = strategy.compute_thread_count();
+        ASSERT(numThreads > 0);
+        semaphore_ = numThreads;
+    }
 }
 
 /* static */
@@ -490,34 +533,35 @@ ArkAotLinker::RoDataSections LLVMAotCompiler::LinkModule(WrappedModule *wrappedM
     return linker->GetLinkedRoDataSections();
 }
 
-void LLVMAotCompiler::CompileAll()
+void LLVMAotCompiler::FinishCompile()
 {
     // No need to do anything if we have no methods
     if (methods_.empty()) {
         return;
     }
+    ASSERT(currentModule_ != nullptr);
     ASSERT_PRINT(!compiled_, "Cannot compile twice");
 
-    auto modules = spreader_->GetModules();
-    uint32_t numThreads = g_options.GetLlvmaotThreads();
-    if (numThreads == 1U || modules.size() <= 1U) {
-        std::for_each(modules.begin(), modules.end(), [this](auto module) -> void { CompileModule(*module); });
-    } else {
-        llvm::ThreadPool threadPool {llvm::hardware_concurrency(numThreads)};
+    if (threadPool_ != nullptr) {
+        // Proceed with last module
         auto thread = runtime_->GetCurrentThread();
-        ASSERT(thread != nullptr);
-        for (auto &module : modules) {
-            threadPool.async(
-                [this, thread](auto it) -> void {
-                    auto oldThread = runtime_->GetCurrentThread();
-                    runtime_->SetCurrentThread(thread);
-                    CompileModule(*it);
-                    runtime_->SetCurrentThread(oldThread);
-                },
-                module);
-        }
+        threadPool_->async(
+            [this, thread](auto it) -> void {
+                auto oldThread = runtime_->GetCurrentThread();
+                runtime_->SetCurrentThread(thread);
+                CompileModule(*it);
+                runtime_->SetCurrentThread(oldThread);
+            },
+            currentModule_);
+
+        // Wait all workers to finish
+        threadPool_->wait();
+    } else {
+        // Last module
+        CompileModule(*currentModule_);
     }
 
+    auto modules = spreader_->GetModules();
     std::vector<ark::compiler::RoData> roDatas;
     auto offsets = CollectAotBuilderOffsets(modules);
     for (auto &wrappedModule : modules) {

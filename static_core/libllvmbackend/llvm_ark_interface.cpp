@@ -614,6 +614,13 @@ int32_t LLVMArkInterface::GetClassIndexInAotGot(const llvm::Function *caller, ui
     return index;
 }
 
+int32_t LLVMArkInterface::GetStringSlotId(AotData *aotData, uint32_t typeId)
+{
+    ASSERT(aotData != nullptr);
+    llvm::sys::ScopedLock scopedLock {*lock_};
+    return aotData->GetStringSlotId(typeId);
+}
+
 LLVMArkInterface::RuntimeCallee LLVMArkInterface::GetEntrypointCallee(EntrypointId id) const
 {
     using PandaEntrypointId = ark::compiler::RuntimeInterface::EntrypointId;

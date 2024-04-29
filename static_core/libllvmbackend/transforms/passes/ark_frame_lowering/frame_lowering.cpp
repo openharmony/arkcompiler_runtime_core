@@ -67,9 +67,6 @@ public:
             constexpr uint32_t SLOT_SIZE = 8U;
             ASSERT(frameInfo.stackSize >= SLOT_SIZE);
             frameInfo.stackSize -= 2U * SLOT_SIZE;
-
-            [[maybe_unused]] constexpr uint32_t MAX_IMM_12 = 4096;
-            ASSERT(frameInfo.stackSize < MAX_IMM_12);
         }
         FrameBuilderT frameBuilder(frameInfo,
                                    [this](FrameConstantDescriptor descr) { return GetConstantFromRuntime(descr); });
@@ -154,7 +151,7 @@ public:
             if ((idx >= XMM0_IDX && idx < XMM0_IDX + XMM_COUNT) || (idx >= XMM16_IDX && idx < XMM16_IDX + XMM_COUNT)) {
                 std::get<1>(masks) |= 1U << (idx - XMM0_IDX);
             } else {
-                idx = ark::compiler::ConvertRegNumberX86(idx);
+                idx = ark::llvmbackend::LLVMArkInterface::X86RegNumberConvert(idx);
                 std::get<0>(masks) |= 1U << (idx - RAX_IDX);
             }
         };

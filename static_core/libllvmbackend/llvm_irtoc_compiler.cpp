@@ -101,6 +101,8 @@ static llvm::CallingConv::ID GetFastPathCallingConv(uint32_t numArgs)
             return llvm::CallingConv::ArkFast4;
         case 5U:
             return llvm::CallingConv::ArkFast5;
+        case 6U:
+            return llvm::CallingConv::ArkFast6;
         default:
             UNREACHABLE();
     }
@@ -154,7 +156,7 @@ Expected<bool, std::string> LLVMIrtocCompiler::CanCompile(ark::compiler::Graph *
     return LLVMIrConstructor::CanCompile(graph);
 }
 
-void LLVMIrtocCompiler::CompileAll()
+void LLVMIrtocCompiler::FinishCompile()
 {
     // Compile even if there are no methods because we have to produce an object file, even an empty one
     ASSERT_PRINT(!HasCompiledCode(), "Cannot compile twice");
@@ -232,7 +234,7 @@ void LLVMIrtocCompiler::InitializeModule()
 
 void LLVMIrtocCompiler::WriteObjectFile(std::string_view output)
 {
-    ASSERT_PRINT(HasCompiledCode(), "Call CompileAll first");
+    ASSERT_PRINT(HasCompiledCode(), "Call FinishCompile first");
     objectFile_->WriteTo(output);
 }
 

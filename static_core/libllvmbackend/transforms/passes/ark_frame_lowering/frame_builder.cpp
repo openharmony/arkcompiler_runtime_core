@@ -14,6 +14,7 @@
  */
 
 #include "frame_builder.h"
+#include "llvm_ark_interface.h"
 
 #include "utils/bit_field.h"
 #include "libpandabase/utils/cframe_layout.h"
@@ -85,6 +86,10 @@ bool IsStackUsed(FrameInfo::RegMasks masks, ark::Arch arch)
 {
     auto spIndex = GetDwarfSP(arch);
     auto fpIndex = GetDwarfFP(arch);
+    if (arch == ark::Arch::X86_64) {
+        spIndex = ark::llvmbackend::LLVMArkInterface::X86RegNumberConvert(spIndex);
+        fpIndex = ark::llvmbackend::LLVMArkInterface::X86RegNumberConvert(fpIndex);
+    }
     auto xregsMask = std::get<0>(masks);
     return ((xregsMask >> spIndex) & 1U) != 0 || ((xregsMask >> fpIndex) & 1U) != 0;
 }
@@ -276,7 +281,12 @@ void ARM64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
                                arm_frame_helpers::V_CALLEE_OFFSET);
     }
 
-    builder.CreateInlineAsm("sub sp, fp, ${0:c}", {frameInfo_.stackSize});
+    constexpr uint32_t MAX_IMM_12 = 4096;
+    builder.CreateInlineAsm("sub sp, fp, ${0:c}", {frameInfo_.stackSize % MAX_IMM_12});
+    ASSERT(frameInfo_.stackSize / MAX_IMM_12 < MAX_IMM_12);
+    if (frameInfo_.stackSize / MAX_IMM_12 > 0) {
+        builder.CreateInlineAsm("sub sp, sp, ${0:c}", {MAX_IMM_12 * (frameInfo_.stackSize / MAX_IMM_12)});
+    }
 
     // StackOverflow check
     builder.CreateInlineAsm("add x30, sp, ${0:c}", {frameInfo_.soOffset});

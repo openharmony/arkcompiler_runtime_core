@@ -43,6 +43,7 @@ class Method;
 
 namespace ark::compiler {
 class AotBuilder;
+class AotData;
 class RuntimeInterface;
 class Graph;
 }  // namespace ark::compiler
@@ -122,6 +123,7 @@ public:
 
     int32_t GetPltSlotId(const llvm::Function *caller, const llvm::Function *callee) const;
     int32_t GetClassIndexInAotGot(const llvm::Function *caller, uint32_t klassId, bool initialized);
+    int32_t GetStringSlotId(ark::compiler::AotData *aotData, uint32_t typeId);
     uint64_t GetMethodStackSize(MethodPtr method) const;
     void PutMethodStackSize(const llvm::Function *method, size_t size);
     uint32_t GetVirtualRegistersCount(MethodPtr method) const;
@@ -156,6 +158,29 @@ public:
     }
 
     bool DeoptsEnabled();
+
+    // Convert given dwarfReg id into Ark register id
+    // For dwarf numbering see https://www.ucw.cz/~hubicka/papers/abi/node14.html
+    // For Ark see static_core/compiler/optimizer/code_generator/target_info.h
+    static constexpr size_t X86RegNumberConvert(size_t dwarfReg)
+    {
+        constexpr size_t RAX = 0U;   // dwarf 0
+        constexpr size_t RDX = 2U;   // dwarf 1
+        constexpr size_t RCX = 1U;   // dwarf 2
+        constexpr size_t RBX = 11U;  // dwarf 3
+        constexpr size_t RSI = 6U;   // dwarf 4
+        constexpr size_t RDI = 7U;   // dwarf 5
+        constexpr size_t RBP = 9U;   // dwarf 6
+        constexpr size_t RSP = 10U;  // dwarf 7
+        constexpr size_t R8 = 8U;    // dwarf 8
+        constexpr size_t R9 = 5U;    // dwarf 9
+        constexpr size_t R10 = 4U;   // dwarf 10
+        constexpr size_t R11 = 3U;   // dwarf 11
+        constexpr size_t R12 = 12U;  // dwarf 12
+
+        constexpr std::array<size_t, R12> TO_ARK = {RAX, RDX, RCX, RBX, RSI, RDI, RBP, RSP, R8, R9, R10, R11};
+        return dwarfReg >= R12 ? dwarfReg : TO_ARK[dwarfReg];
+    }
 
 private:
     IntrinsicId GetPluginIntrinsicId(const llvm::Instruction *instruction) const;
