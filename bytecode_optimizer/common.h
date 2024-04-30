@@ -30,6 +30,9 @@ static constexpr uint32_t MAX_BYTECODE_SIZE = 100000U;
 // Get the position where accumulator read happens.
 uint8_t AccReadIndex(const compiler::Inst *inst);
 
+// Get string from offset of a panda file
+std::string GetStringFromPandaFile(const panda_file::File &pfile, uint32_t offset);
+
 }  // namespace panda::bytecodeopt
 
 #endif  // BYTECODE_OPTIMIZER_COMMON_H

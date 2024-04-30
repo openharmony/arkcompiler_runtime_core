@@ -95,6 +95,7 @@ void BranchElimination::BranchEliminationIntrinsic(BasicBlock *ifBlock)
                                      << ifBlock->GetId();
 
     bool constValue = conditionInst->GetIntrinsicId() == IntrinsicInst::IntrinsicId::LDTRUE;
+    ASSERT(ifImm->GetImm() == 0);
     bool condResult = (constValue == ifImm->GetImm());
     if (ifImm->GetCc() == CC_NE) {
         condResult = !condResult;

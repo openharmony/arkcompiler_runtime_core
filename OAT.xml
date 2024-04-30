@@ -57,6 +57,7 @@
                 <policyitem type="license" name="*" path="disassembler/tests/expected/.*" rule="may" group="defaultGroup" filefilter="defaultPolicyFilter" desc=""/>
                 <policyitem type="copyright" name="*" path="disassembler/tests/expected/.*" rule="may" group="defaultGroup" filefilter="copyrightPolicyFilter" desc=""/>
                 <policyitem type="copyright" name="Shenzhen Kaihong Digital Industry Development Co., Ltd." path="compiler/.*" rule="may" group="defaultGroup" filefilter="copyrightPolicyFilter" desc=""/>
+                <policyitem type="copyright" name="Shenzhen Kaihong Digital Industry Development Co., Ltd." path="bytecode_optimizer/.*" rule="may" group="defaultGroup" filefilter="copyrightPolicyFilter" desc=""/>
             </policy>
         </policylist>
 

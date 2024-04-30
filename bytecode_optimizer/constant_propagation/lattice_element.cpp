@@ -28,7 +28,8 @@
 
 #include "constant_propagation.h"
 
-namespace panda::compiler {
+namespace panda::bytecodeopt {
+
 LatticeElement::LatticeElement(LatticeType type) : type_(type) {}
 
 TopElement::TopElement() : LatticeElement(LatticeType::LATTICE_TOP) {}
@@ -68,22 +69,32 @@ std::string BottomElement::ToString()
 }
 
 ConstantElement::ConstantElement(bool val)
-    : LatticeElement(LatticeType::LATTICE_CONSTANT), type_(ConstantType::CONSTANT_BOOL), val_(val)
+    : LatticeElement(LatticeType::LATTICE_CONSTANT), value_(val)
 {
 }
 
 ConstantElement::ConstantElement(int32_t val)
-    : LatticeElement(LatticeType::LATTICE_CONSTANT), type_(ConstantType::CONSTANT_INT32), val_(val)
+    : LatticeElement(LatticeType::LATTICE_CONSTANT), value_(val)
 {
 }
 
 ConstantElement::ConstantElement(int64_t val)
-    : LatticeElement(LatticeType::LATTICE_CONSTANT), type_(ConstantType::CONSTANT_INT64), val_(val)
+    : LatticeElement(LatticeType::LATTICE_CONSTANT), value_(val)
 {
 }
 
 ConstantElement::ConstantElement(double val)
-    : LatticeElement(LatticeType::LATTICE_CONSTANT), type_(ConstantType::CONSTANT_DOUBLE), val_(val)
+    : LatticeElement(LatticeType::LATTICE_CONSTANT), value_(val)
+{
+}
+
+ConstantElement::ConstantElement(std::string val)
+    : LatticeElement(LatticeType::LATTICE_CONSTANT), value_(val)
+{
+}
+
+ConstantElement::ConstantElement(const ConstantValue &val)
+    : LatticeElement(LatticeType::LATTICE_CONSTANT), value_(val)
 {
 }
 
@@ -96,7 +107,7 @@ LatticeElement *ConstantElement::Meet(LatticeElement *other)
         return other;
     }
 
-    if ((type_ == other->AsConstant()->GetType()) && (val_ == other->AsConstant()->GetVal())) {
+    if (value_ == other->AsConstant()->value_) {
         return this;
     }
 
@@ -105,11 +116,12 @@ LatticeElement *ConstantElement::Meet(LatticeElement *other)
 
 std::string ConstantElement::ToString()
 {
-    return "Constant";
+    return "Constant: " + value_.ToString();
 }
 
 ConstantElement *ConstantElement::AsConstant()
 {
     return this;
 }
-}  // namespace panda::compiler
+
+}  // namespace panda::bytecodeopt

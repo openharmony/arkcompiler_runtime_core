@@ -24,8 +24,12 @@ config("bytecodeopt_public_config") {
 }
 
 libarkbytecodeopt_sources = [
+  "$ark_root/bytecode_optimizer/bytecode_analysis_results.cpp",
   "$ark_root/bytecode_optimizer/codegen.cpp",
   "$ark_root/bytecode_optimizer/common.cpp",
+  "$ark_root/bytecode_optimizer/constant_propagation/constant_propagation.cpp",
+  "$ark_root/bytecode_optimizer/constant_propagation/lattice_element.cpp",
+  "$ark_root/bytecode_optimizer/module_constant_analyzer.cpp",
   "$ark_root/bytecode_optimizer/optimize_bytecode.cpp",
   "$ark_root/bytecode_optimizer/reg_acc_alloc.cpp",
   "$ark_root/bytecode_optimizer/reg_encoder.cpp",

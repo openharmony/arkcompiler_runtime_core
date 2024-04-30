@@ -19,6 +19,7 @@ module_out_path = "$ark_root/bytecode_optimizer"
 
 bcopt_test_config = [
   "$ark_root:ark_config",
+  "$ark_root/abc2program:abc2program_public_config",
   "$ark_root/assembler:arkassembler_public_config",
   "$ark_root/libpandabase:arkbase_public_config",
   "$ark_root/libpandafile:arkfile_public_config",
@@ -28,6 +29,7 @@ bcopt_test_config = [
 ]
 
 bcopt_test_deps = [
+  "$ark_root/abc2program:abc2program",
   "$ark_root/assembler:libarkassembler",
   "$ark_root/bytecode_optimizer:libarkbytecodeopt",
   "$ark_root/compiler:libarkcompiler",
@@ -55,10 +57,36 @@ foreach(file, graph_test_js_files) {
   }
 }
 
+graph_test_js_files_un_opt = [
+  "bytecodeAnalysis",
+  "constantProgagation",
+]
+
+foreach(file, graph_test_js_files_un_opt) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_path}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_js)
+    dst_file = rebase_path(test_abc)
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+
+    extra_args = [
+      "--debug",
+      "--module",
+      "--merge-abc",
+    ]
+  }
+}
+
 host_unittest_action("BytecodeOptimizerTest") {
   module_out_path = module_output_path
   sources = [
+    "analysis_bytecode_test.cpp",
     "codegen_test.cpp",
+    "constant_propagation_test.cpp",
     "excluded_keys_test.cpp",
     "optimize_bytecode_test.cpp",
     "reg_encoder_test.cpp",
@@ -71,6 +99,9 @@ host_unittest_action("BytecodeOptimizerTest") {
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
   foreach(file, graph_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+  foreach(file, graph_test_js_files_un_opt) {
     deps += [ ":gen_${file}_abc" ]
   }
 

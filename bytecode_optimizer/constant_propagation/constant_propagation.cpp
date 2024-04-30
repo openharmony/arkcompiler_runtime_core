@@ -27,28 +27,31 @@
  */
 
 #include "constant_propagation.h"
+#include "bytecode_optimizer/bytecode_analysis_results.h"
 #include "compiler_logger.h"
-#include "compiler/optimizer/optimizations/cleanup.h"
 #include "compiler/optimizer/optimizations/lowering.h"
-#include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/inst.h"
 
-namespace panda::compiler {
+namespace panda::bytecodeopt {
+
 enum class InputCount {
     NONE_INPUT,
     ONE_INPUT,
     TWO_INPUT,
 };
 
-ConstantPropagation::ConstantPropagation(Graph *graph)
+ConstantPropagation::ConstantPropagation(compiler::Graph *graph, const BytecodeOptIrInterface *iface)
     : Optimization(graph),
       lattices_(graph->GetLocalAllocator()->Adapter()),
       flow_edges_(graph->GetLocalAllocator()->Adapter()),
       ssa_edges_(graph->GetLocalAllocator()->Adapter()),
       executable_flag_(graph->GetLocalAllocator()->Adapter()),
-      executed_node_(graph->GetLocalAllocator()->Adapter())
+      executed_node_(graph->GetLocalAllocator()->Adapter()),
+      ir_interface_(iface)
 {
+    std::string classname = GetGraph()->GetRuntime()->GetClassNameFromMethod(GetGraph()->GetMethod());
+    record_name_ = pandasm::Type::FromDescriptor(classname).GetName();
 }
 
 bool ConstantPropagation::RunImpl()
@@ -109,24 +112,44 @@ void ConstantPropagation::ReWriteInst()
         if (!pair.second->IsConstantElement() || pair.first->IsConst()) {
             continue;
         }
-        // Skip the CastValueToAnyType instruction to preserve the original IR structure of "Constant(double) ->
-        // CastValueToAnyType". This structure is necessary for certain GraphChecker checks.
+        // Skip the CastValueToAnyType instruction to preserve the original IR structure of
+        // "LoadString/Constant(double) -> CastValueToAnyType".
+        // This structure is necessary for certain GraphChecker checks.
         if (pair.first->GetOpcode() == compiler::Opcode::CastValueToAnyType) {
             continue;
         }
-        // Skip Intrisic.ldtrue and Intrisic.ldfalse
+        // Skip generate replacement inst for string constants for now, since it requires generating
+        // a string with a unique offset
+        if (pair.second->AsConstant()->GetType() == ConstantValue::CONSTANT_STRING) {
+            continue;
+        }
         if (pair.first->IsIntrinsic()) {
             auto id = pair.first->CastToIntrinsic()->GetIntrinsicId();
-            if (id == RuntimeInterface::IntrinsicId::LDFALSE || id == RuntimeInterface::IntrinsicId::LDTRUE) {
-                // Clear flag NO_DCE, this inst will be cleanup if it has any user.
-                pair.first->ClearFlag(compiler::inst_flags::NO_DCE);
-                continue;
+            // Skip Intrinsic.ldtrue and Intrinsic.ldfalse since replacing them would create the same instruction.
+            // Skip ldlocal/externalmodulevar and ldobjbyname in case of possible side effects when accessing module
+            // constants.
+            switch (id) {
+                case compiler::RuntimeInterface::IntrinsicId::LDFALSE:
+                case compiler::RuntimeInterface::IntrinsicId::LDTRUE:
+                    pair.first->ClearFlag(compiler::inst_flags::NO_DCE);
+                    continue;
+                case RuntimeInterface::IntrinsicId::LDLOCALMODULEVAR_IMM8:
+                case RuntimeInterface::IntrinsicId::WIDE_LDLOCALMODULEVAR_PREF_IMM16:
+                case RuntimeInterface::IntrinsicId::LDEXTERNALMODULEVAR_IMM8:
+                case RuntimeInterface::IntrinsicId::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16:
+                case RuntimeInterface::IntrinsicId::LDOBJBYNAME_IMM8_ID16:
+                case RuntimeInterface::IntrinsicId::LDOBJBYNAME_IMM16_ID16:
+                    continue;
+                default:
+                    break;
             }
         }
         auto replace_inst = CreateReplaceInst(pair.first, pair.second->AsConstant());
-        for (auto &user : pair.first->GetUsers()) {
-            user.GetInst()->ReplaceInput(pair.first, replace_inst);
+        // This should never happen, but left here as a precaution for unexpected scenarios.
+        if (replace_inst == nullptr) {
+            continue;
         }
+        pair.first->ReplaceUsers(replace_inst);
         pair.first->ClearFlag(compiler::inst_flags::NO_DCE);
     }
 }
@@ -169,9 +192,8 @@ void ConstantPropagation::VisitIfImm(GraphVisitor *v, Inst *inst)
     auto bb = inst->GetBasicBlock();
     // According to inst_builder_gen.cpp.erb, the input of the IfImm IR is always a Compare IR generates DataType::BOOL.
     if (input_lattice->IsConstantElement() &&
-        input_lattice->AsConstant()->GetType() == ConstantElement::CONSTANT_BOOL) {
-        auto cst =
-            static_cast<uint64_t>(std::get<ConstantElement::CONSTANT_BOOL>(input_lattice->AsConstant()->GetVal()));
+        input_lattice->AsConstant()->GetType() == ConstantValue::CONSTANT_BOOL) {
+        auto cst = static_cast<uint64_t>(input_lattice->AsConstant()->GetValue<bool>());
         auto dstBlock =
             propagation->GetIfTargetBlock(inst->CastToIfImm(), cst) ? bb->GetTrueSuccessor() : bb->GetFalseSuccessor();
         propagation->AddUntraversedFlowEdges(bb, dstBlock);
@@ -212,7 +234,12 @@ void ConstantPropagation::VisitIntrinsic(GraphVisitor *v, Inst *inst)
         return;
     }
     auto id = inst->CastToIntrinsic()->GetIntrinsicId();
-    LatticeElement *element = BottomElement::GetInstance();
+    LatticeElement *element = propagation->FoldingModuleOperation(inst->CastToIntrinsic());
+    if (element != nullptr) {
+        propagation->CheckAndAddToSsaEdge(inst, current, element);
+        return;
+    }
+    element = BottomElement::GetInstance();
     auto count = inst->GetInputsCount();
     if (inst->RequireState()) {
         count--;
@@ -225,9 +252,7 @@ void ConstantPropagation::VisitIntrinsic(GraphVisitor *v, Inst *inst)
             auto lattices0 = propagation->GetOrCreateDefaultLattice(input0);
             auto lattices1 = propagation->GetOrCreateDefaultLattice(input1);
             if (lattices0->IsConstantElement() && lattices1->IsConstantElement()) {
-                auto const0 = lattices0->AsConstant();
-                auto const1 = lattices1->AsConstant();
-                element = propagation->FoldingConstant(const0, const1, id);
+                element = propagation->FoldingConstant(lattices0->AsConstant(), lattices1->AsConstant(), id);
             }
             break;
         }
@@ -260,12 +285,19 @@ void ConstantPropagation::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
     }
     LatticeElement *element = BottomElement::GetInstance();
     auto type = inst->CastToCastValueToAnyType()->GetAnyType();
-    // According to inst_builder.cpp, the fldai bytecode will generate an IR sequence as follows: Constant(double) ->
-    // CastValueToAnyType. We create the lattice value of the original double constant here and leave the IR unchanged.
+    // According to inst_builder.cpp:
+    // 1. The fldai bytecode will generate: Constant(double) -> CastValueToAnyType(ECMASCRIPT_DOUBLE_TYPE).
+    // 2. The lda.str bytecode will generate: LoadString -> CastValueToAnyType(ECMASCRIPT_STRING_TYPE).
+    // We create the lattice value of the original constant here and leave the IR unchanged.
     if (type == compiler::AnyBaseType::ECMASCRIPT_DOUBLE_TYPE) {
-        ASSERT(inst->GetInput(0).GetInst()->IsConst());
+        ASSERT(inst->GetDataFlowInput(0)->IsConst());
         element = propagation->GetGraph()->GetLocalAllocator()->New<ConstantElement>(
-            inst->GetInput(0).GetInst()->CastToConstant()->GetDoubleValue());
+            inst->GetDataFlowInput(0)->CastToConstant()->GetDoubleValue());
+    } else if (type == compiler::AnyBaseType::ECMASCRIPT_STRING_TYPE) {
+        ASSERT(inst->GetDataFlowInput(0)->GetOpcode() == compiler::Opcode::LoadString);
+        auto load_string_inst = inst->GetDataFlowInput(0)->CastToLoadString();
+        element = propagation->GetGraph()->GetLocalAllocator()->New<ConstantElement>(
+            propagation->ir_interface_->GetStringIdByOffset(load_string_inst->GetTypeId()));
     }
     propagation->CheckAndAddToSsaEdge(inst, current, element);
 }
@@ -273,25 +305,49 @@ void ConstantPropagation::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
 void ConstantPropagation::VisitConstant(GraphVisitor *v, Inst *inst)
 {
     ASSERT(v);
-    ASSERT(inst->IsConst());
+    ASSERT(inst && inst->IsConst());
     auto propagation = static_cast<ConstantPropagation *>(v);
     auto const_inst = inst->CastToConstant();
-    if (propagation->lattices_.find(inst) == propagation->lattices_.end()) {
-        ConstantElement *element = nullptr;
-        if (const_inst->GetType() == DataType::INT32) {
+    auto current = propagation->GetOrCreateDefaultLattice(inst);
+    if (current->IsBottomElement()) {
+        return;
+    }
+    LatticeElement *element = BottomElement::GetInstance();
+    switch (const_inst->GetType()) {
+        case compiler::DataType::INT32: {
             auto val = static_cast<int32_t>(const_inst->GetInt32Value());
             element = propagation->GetGraph()->GetLocalAllocator()->New<ConstantElement>(val);
-        } else if (const_inst->GetType() == DataType::INT64) {
+            break;
+        }
+        case compiler::DataType::INT64: {
             auto val = static_cast<int64_t>(const_inst->GetRawValue());
             element = propagation->GetGraph()->GetLocalAllocator()->New<ConstantElement>(val);
-        } else if (const_inst->GetType() == DataType::FLOAT64) {
+            break;
+        }
+        case compiler::DataType::FLOAT64: {
             auto val = const_inst->GetDoubleValue();
             element = propagation->GetGraph()->GetLocalAllocator()->New<ConstantElement>(val);
-        } else {
-            UNREACHABLE();
+            break;
         }
-        propagation->lattices_.emplace(inst, element);
+        default:
+            break;
     }
+    propagation->CheckAndAddToSsaEdge(inst, current, element);
+}
+
+void ConstantPropagation::VisitLoadString(GraphVisitor *v, Inst *inst)
+{
+    ASSERT(v);
+    ASSERT(inst && inst->GetOpcode() == compiler::Opcode::LoadString);
+    auto propagation = static_cast<ConstantPropagation *>(v);
+    auto load_string_inst = inst->CastToLoadString();
+    auto current = propagation->GetOrCreateDefaultLattice(inst);
+    if (current->IsBottomElement()) {
+        return;
+    }
+    auto val = propagation->ir_interface_->GetStringIdByOffset(load_string_inst->GetTypeId());
+    LatticeElement *element = propagation->GetGraph()->GetLocalAllocator()->New<ConstantElement>(val);
+    propagation->CheckAndAddToSsaEdge(inst, current, element);
 }
 
 void ConstantPropagation::VisitPhi(GraphVisitor *v, Inst *inst)
@@ -327,14 +383,14 @@ void ConstantPropagation::AddUntraversedFlowEdges(BasicBlock *src, BasicBlock *d
     flow_edges_.push(edge);
 }
 
-bool ConstantPropagation::GetIfTargetBlock(IfImmInst *inst, uint64_t val)
+bool ConstantPropagation::GetIfTargetBlock(compiler::IfImmInst *inst, uint64_t val)
 {
     auto imm = inst->GetImm();
     auto cc = inst->GetCc();
     switch (cc) {
-        case ConditionCode::CC_NE:
+        case compiler::ConditionCode::CC_NE:
             return imm != val;
-        case ConditionCode::CC_EQ:
+        case compiler::ConditionCode::CC_EQ:
             return imm == val;
         default:
             UNREACHABLE();
@@ -377,6 +433,24 @@ LatticeElement *ConstantPropagation::FoldingConstant(ConstantElement *left, Cons
     }
 }
 
+LatticeElement *ConstantPropagation::FoldingModuleOperation(compiler::IntrinsicInst *inst)
+{
+    auto id = inst->GetIntrinsicId();
+    switch (id) {
+        case RuntimeInterface::IntrinsicId::LDLOCALMODULEVAR_IMM8:
+        case RuntimeInterface::IntrinsicId::WIDE_LDLOCALMODULEVAR_PREF_IMM16:
+            return FoldingLdlocalmodulevar(inst);
+        case RuntimeInterface::IntrinsicId::LDEXTERNALMODULEVAR_IMM8:
+        case RuntimeInterface::IntrinsicId::WIDE_LDEXTERNALMODULEVAR_PREF_IMM16:
+            return FoldingLdexternalmodulevar(inst);
+        case RuntimeInterface::IntrinsicId::LDOBJBYNAME_IMM8_ID16:
+        case RuntimeInterface::IntrinsicId::LDOBJBYNAME_IMM16_ID16:
+            return FoldingLdobjbyname(inst);
+        default:
+            return nullptr;
+    }
+}
+
 LatticeElement *ConstantPropagation::FoldingConstant(RuntimeInterface::IntrinsicId id)
 {
     switch (id) {
@@ -394,10 +468,10 @@ LatticeElement *ConstantPropagation::FoldingConstant(ConstantElement *lattice, R
     switch (id) {
         case RuntimeInterface::IntrinsicId::ISFALSE:
         case RuntimeInterface::IntrinsicId::ISTRUE: {
-            if (lattice->GetType() != ConstantElement::CONSTANT_BOOL) {
+            if (lattice->GetType() != ConstantValue::CONSTANT_BOOL) {
                 return BottomElement::GetInstance();
             }
-            auto cst = std::get<ConstantElement::CONSTANT_BOOL>(lattice->GetVal());
+            auto cst = lattice->GetValue<bool>();
             return GetGraph()->GetLocalAllocator()->New<ConstantElement>(
                 id == RuntimeInterface::IntrinsicId::ISTRUE ? cst : !cst);
         }
@@ -407,24 +481,24 @@ LatticeElement *ConstantPropagation::FoldingConstant(ConstantElement *lattice, R
 }
 
 LatticeElement *ConstantPropagation::FoldingCompare(const ConstantElement *left, const ConstantElement *right,
-                                                    ConditionCode cc)
+                                                    compiler::ConditionCode cc)
 {
     ASSERT(left);
     ASSERT(right);
     // According to inst_builder_gen.cpp.erb, the input of the Compare IR are always ISTRUE/ISFALSE and a zero of i64.
-    if (left->GetType() != ConstantElement::CONSTANT_BOOL || right->GetType() != ConstantElement::CONSTANT_INT64) {
+    if (left->GetType() != ConstantValue::CONSTANT_BOOL || right->GetType() != ConstantValue::CONSTANT_INT64) {
         return BottomElement::GetInstance();
     }
-    auto left_value = std::get<ConstantElement::CONSTANT_BOOL>(left->GetVal());
-    auto right_value = std::get<ConstantElement::CONSTANT_INT64>(right->GetVal());
+    auto left_value = left->GetValue<bool>();
+    auto right_value = right->GetValue<int64_t>();
     if ((right_value != 0) && (right_value != 1)) {
         return BottomElement::GetInstance();
     }
     switch (cc) {
-        case CC_EQ: {
+        case compiler::CC_EQ: {
             return GetGraph()->GetLocalAllocator()->New<ConstantElement>(left_value == right_value);
         }
-        case CC_NE: {
+        case compiler::CC_NE: {
             return GetGraph()->GetLocalAllocator()->New<ConstantElement>(left_value != right_value);
         }
         default:
@@ -435,22 +509,22 @@ LatticeElement *ConstantPropagation::FoldingCompare(const ConstantElement *left,
 LatticeElement *ConstantPropagation::FoldingGreater(const ConstantElement *left, const ConstantElement *right,
                                                     bool equal)
 {
-    if (left->GetType() != right->GetType()) {
+    if (left->GetType() != right->GetType() || left->GetType() == ConstantValue::CONSTANT_STRING) {
         return BottomElement::GetInstance();
     }
-    auto left_value = left->GetVal();
-    auto right_value = right->GetVal();
+    auto left_value = left->GetValue();
+    auto right_value = right->GetValue();
     auto result = equal ? left_value >= right_value : left_value > right_value;
     return GetGraph()->GetLocalAllocator()->New<ConstantElement>(result);
 }
 
 LatticeElement *ConstantPropagation::FoldingLess(const ConstantElement *left, const ConstantElement *right, bool equal)
 {
-    if (left->GetType() != right->GetType()) {
+    if (left->GetType() != right->GetType() || left->GetType() == ConstantValue::CONSTANT_STRING) {
         return BottomElement::GetInstance();
     }
-    auto left_value = left->GetVal();
-    auto right_value = right->GetVal();
+    auto left_value = left->GetValue();
+    auto right_value = right->GetValue();
     auto result = equal ? left_value <= right_value : left_value < right_value;
     return GetGraph()->GetLocalAllocator()->New<ConstantElement>(result);
 }
@@ -460,8 +534,8 @@ LatticeElement *ConstantPropagation::FoldingEq(const ConstantElement *left, cons
     if (left->GetType() != right->GetType()) {
         return BottomElement::GetInstance();
     }
-    auto left_value = left->GetVal();
-    auto right_value = right->GetVal();
+    auto left_value = left->GetValue();
+    auto right_value = right->GetValue();
     return GetGraph()->GetLocalAllocator()->New<ConstantElement>(left_value == right_value);
 }
 
@@ -470,54 +544,99 @@ LatticeElement *ConstantPropagation::FoldingNotEq(const ConstantElement *left, c
     if (left->GetType() != right->GetType()) {
         return BottomElement::GetInstance();
     }
-    auto left_value = left->GetVal();
-    auto right_value = right->GetVal();
+    auto left_value = left->GetValue();
+    auto right_value = right->GetValue();
     return GetGraph()->GetLocalAllocator()->New<ConstantElement>(left_value != right_value);
+}
+
+LatticeElement *ConstantPropagation::FoldingLdlocalmodulevar(compiler::IntrinsicInst *inst)
+{
+    constexpr uint32_t LOCAL_EXPORT_SLOT_IDX = 0;
+    uint32_t local_export_slot = inst->GetImms()[LOCAL_EXPORT_SLOT_IDX];
+    ConstantValue constant_value;
+    if (bytecodeopt::BytecodeAnalysisResults::GetLocalExportConstForRecord(record_name_,
+                                                                           local_export_slot,
+                                                                           constant_value)) {
+        return GetGraph()->GetLocalAllocator()->New<ConstantElement>(constant_value);
+    }
+    return BottomElement::GetInstance();
+}
+
+LatticeElement *ConstantPropagation::FoldingLdexternalmodulevar(compiler::IntrinsicInst *inst)
+{
+    constexpr uint32_t REGULAR_IMPORT_SLOT_IDX = 0;
+    auto regular_import_slot = inst->GetImms()[REGULAR_IMPORT_SLOT_IDX];
+    ConstantValue constant_value;
+    if (bytecodeopt::BytecodeAnalysisResults::GetRegularImportConstForRecord(record_name_,
+                                                                             regular_import_slot,
+                                                                             constant_value)) {
+        return GetGraph()->GetLocalAllocator()->New<ConstantElement>(constant_value);
+    }
+    return BottomElement::GetInstance();
+}
+
+LatticeElement *ConstantPropagation::FoldingLdobjbyname(compiler::IntrinsicInst *inst)
+{
+    constexpr uint32_t PROPERTY_NAME_STRING_OFFSET_IDX = 1;
+    constexpr uint32_t MODULE_NAMESPACE_SLOT_IDX = 0;
+    constexpr uint32_t OBJECT_INPUT_IDX = 0;
+    Inst *object_inst = inst->GetDataFlowInput(OBJECT_INPUT_IDX);
+    if (object_inst->IsIntrinsic()) {
+        auto id = object_inst->CastToIntrinsic()->GetIntrinsicId();
+        if (id == RuntimeInterface::IntrinsicId::GETMODULENAMESPACE_IMM8 ||
+            id == RuntimeInterface::IntrinsicId::WIDE_GETMODULENAMESPACE_PREF_IMM16) {
+            uint32_t property_name_offset = inst->GetImms()[PROPERTY_NAME_STRING_OFFSET_IDX];
+            std::string property_name = ir_interface_->GetStringIdByOffset(property_name_offset);
+            uint32_t module_namespace_slot = object_inst->CastToIntrinsic()->GetImms()[MODULE_NAMESPACE_SLOT_IDX];
+            ConstantValue constant_value;
+            if (bytecodeopt::BytecodeAnalysisResults::GetModuleNamespaceConstForRecord(record_name_,
+                                                                                       module_namespace_slot,
+                                                                                       property_name,
+                                                                                       constant_value)) {
+                return GetGraph()->GetLocalAllocator()->New<ConstantElement>(constant_value);
+            }
+        }
+    }
+    return BottomElement::GetInstance();
 }
 
 Inst *ConstantPropagation::CreateReplaceInst(Inst *base_inst, ConstantElement *lattice)
 {
-    auto const_val = lattice->GetVal();
     auto const_type = lattice->GetType();
     Inst *replace_inst = nullptr;
     switch (const_type) {
-        case ConstantElement::CONSTANT_BOOL: {
-            auto inst = GetGraph()->CreateInstIntrinsic(compiler::DataType::ANY, base_inst->GetPc(),
-                                                        std::get<ConstantElement::CONSTANT_BOOL>(const_val)
-                                                            ? RuntimeInterface::IntrinsicId::LDTRUE
-                                                            : RuntimeInterface::IntrinsicId::LDFALSE);
+        case ConstantValue::CONSTANT_BOOL: {
+            auto inst_intrinsic_id = lattice->GetValue<bool>() ? RuntimeInterface::IntrinsicId::LDTRUE
+                                                               : RuntimeInterface::IntrinsicId::LDFALSE;
+            auto inst = GetGraph()->CreateInstIntrinsic(compiler::DataType::ANY, base_inst->GetPc(), inst_intrinsic_id);
             size_t args_count {1U};  // 1: input count
             inst->ReserveInputs(args_count);
             inst->AllocateInputTypes(GetGraph()->GetAllocator(), args_count);
-            SaveStateInst *save_state_inst = GetGraph()->CreateInstSaveState();
+            compiler::SaveStateInst *save_state_inst = GetGraph()->CreateInstSaveState();
             save_state_inst->SetPc(base_inst->GetPc());
             save_state_inst->SetMethod(GetGraph()->GetMethod());
             save_state_inst->ReserveInputs(0);
             inst->SetFlag(compiler::inst_flags::ACC_WRITE);
             inst->ClearFlag(compiler::inst_flags::NO_DCE);
             inst->AppendInput(save_state_inst);
-            inst->AddInputType(DataType::NO_TYPE);
+            inst->AddInputType(compiler::DataType::NO_TYPE);
             InsertSaveState(base_inst, save_state_inst);
             base_inst->GetBasicBlock()->InsertAfter(inst, save_state_inst);
             replace_inst = inst;
             break;
         }
-        case ConstantElement::CONSTANT_INT32: {
-            replace_inst = GetGraph()->FindOrCreateConstant(
-                static_cast<uint32_t>(std::get<ConstantElement::CONSTANT_INT32>(const_val)));
+        case ConstantValue::CONSTANT_INT32: {
+            replace_inst = GetGraph()->FindOrCreateConstant(static_cast<uint32_t>(lattice->GetValue<int32_t>()));
             break;
         }
-        case ConstantElement::CONSTANT_INT64: {
-            replace_inst = GetGraph()->FindOrCreateConstant(
-                static_cast<uint64_t>(std::get<ConstantElement::CONSTANT_INT64>(const_val)));
+        case ConstantValue::CONSTANT_INT64: {
+            replace_inst = GetGraph()->FindOrCreateConstant(static_cast<uint64_t>(lattice->GetValue<int64_t>()));
             break;
         }
-
-        case ConstantElement::CONSTANT_DOUBLE: {
-            replace_inst = GetGraph()->FindOrCreateConstant(std::get<ConstantElement::CONSTANT_DOUBLE>(const_val));
+        case ConstantValue::CONSTANT_DOUBLE: {
+            replace_inst = GetGraph()->FindOrCreateConstant(lattice->GetValue<double>());
             break;
         }
-
         default:
             UNREACHABLE();
     }
@@ -548,4 +667,5 @@ void ConstantPropagation::CheckAndAddToSsaEdge(Inst *inst, LatticeElement *curre
         lattices_[inst] = dst;
     }
 }
-}  // namespace panda::compiler
+
+}  // namespace panda::bytecodeopt

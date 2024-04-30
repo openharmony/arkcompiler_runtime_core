@@ -16,6 +16,8 @@
 #include "common.h"
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/ir/graph.h"
+#include "libpandafile/file.h"
+#include "libpandafile/file-inl.h"
 
 namespace panda::bytecodeopt {
 
@@ -27,5 +29,12 @@ uint8_t AccReadIndex(const compiler::Inst *inst)
         return inst->GetInputsCount() - 2U;
     }
     return 0;
+}
+
+std::string GetStringFromPandaFile(const panda_file::File &pfile, uint32_t offset)
+{
+    const auto sd = pfile.GetStringData(panda_file::File::EntityId(offset));
+    std::string str(utf::Mutf8AsCString(sd.data));
+    return str;
 }
 }  // namespace panda::bytecodeopt

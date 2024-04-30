@@ -40,6 +40,11 @@ public:
         return (access_flags_ & ACC_INTERFACE) != 0;
     }
 
+    bool IsAnnotation() const
+    {
+        return (access_flags_ & ACC_ANNOTATION) != 0;
+    }
+
     uint32_t GetAccessFlags() const
     {
         return access_flags_;

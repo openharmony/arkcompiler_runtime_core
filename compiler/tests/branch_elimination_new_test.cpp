@@ -28,14 +28,15 @@
 
 #include <cstdint>
 #include <set>
-#include "graph_test.h"
+#include "bytecode_optimizer/constant_propagation/constant_propagation.h"
+#include "bytecode_optimizer/ir_interface.h"
+#include "compiler/tests/graph_test.h"
 #include "gtest/gtest.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/cleanup.h"
-#include "optimizer/optimizations/constant_propagation/constant_propagation.h"
 
 using namespace testing::ext;
 
@@ -155,12 +156,15 @@ HWTEST_F(BranchEliminationTest, branch_elimination_test_001, TestSize.Level1)
             return;
         }
         EXPECT_NE(graph, nullptr);
-
-        graph->RunPass<ConstantPropagation>();
+        pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
+        pandasm::Program *prog = nullptr;
+        bytecodeopt::BytecodeOptIrInterface interface(&maps, prog);
+        graph->RunPass<bytecodeopt::ConstantPropagation>(&interface);
 
         std::set<uint32_t> dead_if_insts;
         std::set<uint32_t> dead_blocks;
         CollectDeadBlocksWithIfInst(graph, dead_if_insts, dead_blocks);
+
         EXPECT_FALSE(dead_if_insts.empty());
         EXPECT_FALSE(dead_blocks.empty());
 
