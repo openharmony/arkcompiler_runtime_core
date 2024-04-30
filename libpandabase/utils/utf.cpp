@@ -214,6 +214,7 @@ size_t ConvertRegionMUtf8ToUtf16(const uint8_t *mutf8_in, uint16_t *utf16_out, s
         }
 
         if (p_hi != 0) {
+            ASSERT(utf16_len >= 1);
             if (out_pos++ >= utf16_len - 1) {  // check for place for two uint16
                 --out_pos;
                 break;

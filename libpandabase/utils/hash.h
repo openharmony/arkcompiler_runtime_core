@@ -101,6 +101,7 @@ inline uint32_t PseudoFnvHashString(const uint8_t *str, uint32_t hash = FNV_INIT
 {
     while (true) {
         // NOLINTNEXTLINE(readability-implicit-bool-conversion, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // 0,1,2,3 is the index value, check whether the character with index 0,1,2,3
         if (!str[0] || !str[1] || !str[2] || !str[3]) {
             break;
         }

@@ -555,6 +555,7 @@ void ItemContainer::AddIndexDependecies(BaseItem *item)
         }
     }
     if (item->GetName() == "method_item") {
+        ASSERT(index_section_item_.GetNumHeaders() >= 1);
         static_cast<BaseMethodItem *>(item)->SetHeaderIndex(index_section_item_.GetNumHeaders() - 1);
     }
 }
