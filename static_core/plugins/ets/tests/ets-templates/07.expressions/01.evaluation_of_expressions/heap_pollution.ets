@@ -41,7 +41,7 @@ function main(): int {
 
     try {
         let s: String = stringBox.get();
-    } catch (e: ClassCastException) {
+    } catch (e: ClassCastError) {
         return 0;
     }
     return 1;

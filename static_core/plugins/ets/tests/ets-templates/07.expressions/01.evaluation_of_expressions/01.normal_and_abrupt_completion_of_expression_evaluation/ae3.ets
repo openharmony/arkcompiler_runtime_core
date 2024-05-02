@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: ArithmeticException is thrown by an integer division or integer
+desc: ArithmeticError is thrown by an integer division or integer
   remainder operator if the right-hand operand expression has the zero value.
 ---*/
 
@@ -27,7 +27,7 @@ function main(): int {
   try {
     let v: String = "X" + (a = 2) + (i as int) / (j as int) / (b = 2);
     return 1;
-  } catch (e: ArithmeticException) {
+  } catch (e: ArithmeticError) {
     if (a != 2 || b != 1) return 1;
     return 0;
   } catch (e) {

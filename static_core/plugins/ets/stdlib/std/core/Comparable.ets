@@ -28,7 +28,7 @@ export interface Comparable<T> {
      *
      * @param other object to compare with
      *
-     * @throws ClassCastException if other is not a `T`
+     * @throws ClassCastError if other is not a `T`
      *
      * @returns result of the comparison
      */

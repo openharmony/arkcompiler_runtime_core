@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,14 +26,14 @@ function RegisterNativeAllocation(): void {
     let exception_catched: boolean = false;
     try {
         GC.registerNativeAllocation(-size);
-    } catch(error: NegativeArraySizeException) {
+    } catch(error: NegativeArraySizeError) {
         exception_catched = true;
     }
     assert exception_catched : "Didn't catch the exception";
     exception_catched = false;
     try {
         GC.registerNativeFree(-size);
-    } catch(error: NegativeArraySizeException) {
+    } catch(error: NegativeArraySizeError) {
         exception_catched = true;
     }
     assert exception_catched : "Didn't catch the exception";

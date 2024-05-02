@@ -65,7 +65,7 @@ function createArrayBufferOfVariousLengths(): int {
     new ArrayBuffer(-1)
     return 1
   } catch (e) {
-    if (!(e instanceof NegativeArraySizeException)) return 1
+    if (!(e instanceof NegativeArraySizeError)) return 1
     // expected
   }
 

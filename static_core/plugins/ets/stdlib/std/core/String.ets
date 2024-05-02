@@ -70,7 +70,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns char value at index
      *
-     * @throws StringIndexOutOfBoundsException if index is negative or >= length
+     * @throws StringIndexOutOfBoundsError if index is negative or >= length
      */
     public $_get(index: int): char {
         return this.charAt(index);
@@ -114,7 +114,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns char value at index
      *
-     * @throws StringIndexOutOfBoundsException if index is negative or >= length
+     * @throws StringIndexOutOfBoundsError if index is negative or >= length
      *
      * @remarks
      * Implemented as native function,  @see `charAt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L585).
@@ -135,7 +135,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns char value at index
      *
-     * @throws StringIndexOutOfBoundsException if index is negative or >= length
+     * @throws StringIndexOutOfBoundsError if index is negative or >= length
      *
      * @remarks
      * Implemented as native function,  @see `charAt()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L585).
@@ -160,7 +160,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param index index of the potential surrogate pair
      *
-     * @throws StringIndexOutOfBoundsException if index is negative or >= length
+     * @throws StringIndexOutOfBoundsError if index is negative or >= length
      *
      * @returns the codepoint at the specified index
      */
@@ -180,7 +180,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param index index of the potential surrogate pair
      *
-     * @throws StringIndexOutOfBoundsException if index is negative or >= length
+     * @throws StringIndexOutOfBoundsError if index is negative or >= length
      *
      * @returns the codepoint at the specified index
      */
@@ -205,8 +205,8 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param begin index to start from
      * @param end past the ending index
      *
-     * @throws StringIndexOutOfBoundsException if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsException if end >= length
+     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
+     * @throws StringIndexOutOfBoundsError if end >= length
      * @throws AssertionError if begin > end
      *
      * @returns the amount of completed codepoints
@@ -223,8 +223,8 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param begin index to start from
      * @param end past the ending index
      *
-     * @throws StringIndexOutOfBoundsException if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsException if end >= length
+     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
+     * @throws StringIndexOutOfBoundsError if end >= length
      * @throws AssertionError if begin > end
      *
      * @returns the amount of completed codepoints
@@ -261,9 +261,9 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param begin index to start from
      * @param end past the ending index
      *
-     * @throws StringIndexOutOfBoundsException if begin > end
-     * @throws StringIndexOutOfBoundsException if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsException if end > length
+     * @throws StringIndexOutOfBoundsError if begin > end
+     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
+     * @throws StringIndexOutOfBoundsError if end > length
      *
      * @returns char[] array
      *
@@ -280,8 +280,8 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param begin index to start from
      * @param end past the ending index
      *
-     * @throws StringIndexOutOfBoundsException if begin is negative or >= length
-     * @throws StringIndexOutOfBoundsException if end >= length
+     * @throws StringIndexOutOfBoundsError if begin is negative or >= length
+     * @throws StringIndexOutOfBoundsError if end >= length
      * @throws AssertionError if begin > end
      *
      * @returns char[] array
@@ -303,7 +303,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param sb StringBuilder to compare to
      *
-     * @throws NullPointerException if sb param is null
+     * @throws NullPointerError if sb param is null
      *
      * @returns true if StringBuilder has the same String
      */
@@ -318,7 +318,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param other String to compare with
      *
-     * @throws NullPointerException if to param is null
+     * @throws NullPointerError if to param is null
      *
      * @returns the comparison result
      */
@@ -333,7 +333,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param locale String representing the BCP47 language tag
      *
      * @throws RangeError if the locale tag is invalid or not found
-     * @throws NullPointerException if another or locale is null
+     * @throws NullPointerError if another or locale is null
      *
      * @returns the comparison result
      */
@@ -347,7 +347,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param another String to compare with
      *
      * @throws RangeError if the locale tag is invalid or not found
-     * @throws NullPointerException if another param is null
+     * @throws NullPointerError if another param is null
      *
      * @returns the comparison result
      */
@@ -364,7 +364,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param prefix prefix string
      * @param fromIndex index to start from
      *
-     * @throws NullPointerException if prefix param is null
+     * @throws NullPointerError if prefix param is null
      *
      * @returns true if the substring begins with prefix
      */
@@ -382,8 +382,8 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param prefix prefix string
      * @param fromIndex index to start from
      *
-     * @throws NullPointerException if prefix param is null
-     * @throws StringIndexOutOfBoundsException if fromIndex param is negative or >= length
+     * @throws NullPointerError if prefix param is null
+     * @throws StringIndexOutOfBoundsError if fromIndex param is negative or >= length
      *
      * @returns true if the substring begins with prefix
      */
@@ -411,7 +411,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param endPosition at which suffix is expected to be found. Defaults to str.length.
      *
-     * @throws NullPointerException if suffix param is null
+     * @throws NullPointerError if suffix param is null
      *
      * @returns true if this string ends with suffix
      */
@@ -528,7 +528,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param fromIndex to start searching from
     *
-     * @throws NullPointerException if str param is null
+     * @throws NullPointerError if str param is null
      *
      * @returns index of the str from the beginning of this string, or -1 if not found
      */
@@ -679,7 +679,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param str string to search
      * @param fromIndex index to start search from
      *
-     * @throws NullPointerException if str param is null
+     * @throws NullPointerError if str param is null
      *
      * @returns true if this String contains str and false otherwise
      */
@@ -694,8 +694,8 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param str string to search
      * @param fromIndex index to start search from
      *
-     * @throws NullPointerException if str param is null
-     * @throws StringIndexOutOfBoundsException if fromIndex param is negative or >= length
+     * @throws NullPointerError if str param is null
+     * @throws StringIndexOutOfBoundsError if fromIndex param is negative or >= length
      *
      * @returns true if this String contains str and false otherwise
      */
@@ -726,7 +726,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param pattern String or RegExp to split by
      * @param limit max length of the returned array. If it's negative then there is no limit.
      *
-     * @throws NullPointerException if pattern param is null
+     * @throws NullPointerError if pattern param is null
      *
      * @returns string array contains substrings from this String
      */
@@ -787,8 +787,8 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param strings string array
      * @param delim separator between all elements
      *
-     * @throws NullPointerException if strings param is null
-     * @throws NullPointerException if delim param is null
+     * @throws NullPointerError if strings param is null
+     * @throws NullPointerError if delim param is null
      *
      * @returns newly created string from string array and delimiter
      */
@@ -807,10 +807,10 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param prefix prefix before each element
      * @param suffix suffix after each element
      *
-     * @throws NullPointerException if strings param is null
-     * @throws NullPointerException if delim param is null
-     * @throws NullPointerException if prefix param is null
-     * @throws NullPointerException if suffix param is null
+     * @throws NullPointerError if strings param is null
+     * @throws NullPointerError if delim param is null
+     * @throws NullPointerError if prefix param is null
+     * @throws NullPointerError if suffix param is null
      *
      * @returns newly created string from string array, prefix, suffix and delimiter
      */
@@ -922,7 +922,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      * @param ch character to search
      * @param data char array to search in
      *
-     * @throws NullPointerException if data param is null
+     * @throws NullPointerError if data param is null
      *
      * @returns true if ch is in the data and false otherwise
      */
@@ -941,7 +941,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param remove that contains the characters to trim
      *
-     * @throws NullPointerException if remove param is null
+     * @throws NullPointerError if remove param is null
      *
      * @returns new trimmed string
      */
@@ -980,7 +980,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param remove that contains the characters to trim
      *
-     * @throws NullPointerException if remove param is null
+     * @throws NullPointerError if remove param is null
      *
      * @returns new left trimmed string
      */
@@ -1003,7 +1003,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @param remove that contains the characters to trim
      *
-     * @throws NullPointerException if remove param is null
+     * @throws NullPointerError if remove param is null
      *
      * @returns new right trimmed string
      */

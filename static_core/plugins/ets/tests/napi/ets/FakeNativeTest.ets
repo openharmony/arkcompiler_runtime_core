@@ -28,7 +28,7 @@ class FakeNativeTest {
 
         try {
             FakeNativeTest.nativeFake();
-        } catch (e: Exception) {
+        } catch (e: Error) {
             isNativeFakeCalled = false;
         }
 

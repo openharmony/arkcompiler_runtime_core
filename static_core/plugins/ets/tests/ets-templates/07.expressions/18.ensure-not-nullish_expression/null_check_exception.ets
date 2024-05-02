@@ -15,7 +15,7 @@
 
 /*---
 desc: null safety -> Not-null operator
-assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerException.
+assert: For an expression e!, if the type of e is nullable, an ensure not-null expression checks whether the evaluation of e is equal to null and, if it is, throws a NullPointerError.
 ---*/
 
 function main(): void {
@@ -25,7 +25,7 @@ function main(): void {
 
   try {
     let x = a! + b;
-  } catch (e: NullPointerException) {
+  } catch (e: NullPointerError) {
     res = 1;
   } catch (e) {
     res = 0;

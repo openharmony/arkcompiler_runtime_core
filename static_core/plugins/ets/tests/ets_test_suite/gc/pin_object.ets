@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,82 +52,82 @@ function nullObjectPinTest(): void {
     let detected = false;
     try {
         GC.pinObject(null);
-    } catch(e: NullPointerException) {
+    } catch(e: NullPointerError) {
         detected = true;
     }
     catch (e) {}
-    assert detected == true: "GC.pinObject must throw NullPointerException for null object";
+    assert detected == true: "GC.pinObject must throw NullPointerError for null object";
 }
 
 function nullObjectUnpinTest(): void {
     let detected = false;
     try {
         GC.unpinObject(null);
-    } catch(e: NullPointerException) {
+    } catch(e: NullPointerError) {
         detected = true;
     }
     catch (e) {}
-    assert detected == true: "GC.unpinObject must throw NullPointerException for null object";
+    assert detected == true: "GC.unpinObject must throw NullPointerError for null object";
 }
 
 function allocateNegativeSizePinnedArrayTest(): void {
     let detected = 0;
     try {
         GC.allocatePinnedBooleanArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 1: "Boolean array pinning must throw NegativeArraySizeException";
+    assert detected == 1: "Boolean array pinning must throw NegativeArraySizeError";
     try {
         GC.allocatePinnedByteArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 2: "Byte array pinning must throw NegativeArraySizeException";
+    assert detected == 2: "Byte array pinning must throw NegativeArraySizeError";
     try {
         GC.allocatePinnedCharArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 3: "Char array pinning must throw NegativeArraySizeException";
+    assert detected == 3: "Char array pinning must throw NegativeArraySizeError";
     try {
         GC.allocatePinnedShortArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 4: "Short array pinning must throw NegativeArraySizeException";
+    assert detected == 4: "Short array pinning must throw NegativeArraySizeError";
     try {
         GC.allocatePinnedIntArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 5: "Int array pinning must throw NegativeArraySizeException";
+    assert detected == 5: "Int array pinning must throw NegativeArraySizeError";
     try {
         GC.allocatePinnedLongArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 6: "Long array pinning must throw NegativeArraySizeException";
+    assert detected == 6: "Long array pinning must throw NegativeArraySizeError";
     try {
         GC.allocatePinnedFloatArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 7: "Float array pinning must throw NegativeArraySizeException";
+    assert detected == 7: "Float array pinning must throw NegativeArraySizeError";
     try {
         GC.allocatePinnedDoubleArray(-1);
-    } catch(e: NegativeArraySizeException) {
+    } catch(e: NegativeArraySizeError) {
         detected += 1;
     }
     catch (e) {}
-    assert detected == 8: "Double array pinning must throw NegativeArraySizeException";
+    assert detected == 8: "Double array pinning must throw NegativeArraySizeError";
 }
 
 function main(): int {

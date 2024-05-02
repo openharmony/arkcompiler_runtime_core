@@ -67,7 +67,7 @@ function main(): int {
     }
     let s2 = nullString();
     try {
-        // The program must fall into the catch block as s2.isEmpty() throws the NullPointerException.
+        // The program must fall into the catch block as s2.isEmpty() throws the NullPointerError.
         if (s2!.isEmpty()) {
             return 3;
         }

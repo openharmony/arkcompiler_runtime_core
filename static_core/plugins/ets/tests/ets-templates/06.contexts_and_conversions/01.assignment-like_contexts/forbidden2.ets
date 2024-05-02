@@ -25,6 +25,6 @@ tags: [negative]
 function main(): int {
   let src: {{c.stype}} = {{c.sval|safe}};
   let dst: {{c.dtype}} = src as {{c.dtype}};
-  return 0;   // shouldn't reach this line, ClassCastException is expected
+  return 0;   // shouldn't reach this line, ClassCastError is expected
 }
 {% endfor %}

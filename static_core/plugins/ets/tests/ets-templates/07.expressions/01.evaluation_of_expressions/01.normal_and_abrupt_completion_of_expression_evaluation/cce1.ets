@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: ClassCastException is thrown by a cast expression
+desc: ClassCastError is thrown by a cast expression
   if at run time a cast cannot be performed.
 ---*/
 
@@ -26,7 +26,7 @@ function main(): int {
   try {
     let v: Long = (a = 2) + new Long((o as Long).unboxed()) + (b = 2);
     return 1;
-  } catch (e: ClassCastException) {
+  } catch (e: ClassCastError) {
     if (a != 2 || b != 1) return 1;
     return 0;
   } catch (e) {

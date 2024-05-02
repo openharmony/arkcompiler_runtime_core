@@ -16,7 +16,6 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/ets_errors.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
@@ -254,7 +253,7 @@ void InteropCtx::ThrowETSError(EtsCoroutine *coro, napi_value val)
 void InteropCtx::ThrowETSError(EtsCoroutine *coro, const char *msg)
 {
     ASSERT(!coro->HasPendingException());
-    ets::ThrowEtsError(coro, panda_file_items::class_descriptors::ERROR, msg);
+    ets::ThrowEtsException(coro, panda_file_items::class_descriptors::ERROR, msg);
 }
 
 void InteropCtx::ThrowJSError(napi_env env, const std::string &msg)

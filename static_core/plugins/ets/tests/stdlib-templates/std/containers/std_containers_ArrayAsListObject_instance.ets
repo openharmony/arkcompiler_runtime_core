@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,8 @@ function main(): int {
     failures += check((): int => { return updateCapacityWithIncrease()}, "Update list capacity with increase");
     failures += check((): int => { return updateCapacityWithDecrease()}, "Update list capacity with decrease");
 
-    failures += check((): int => { return createWithNegativeInitialCapacity()}, "Negative array size passed. Expected to throw NegativeArraySizeException exception");
-    failures += check((): int => { return accessOutOfBoundsValue()}, "Access value out of bounds. Expected to throw ArrayIndexOutOfBoundsException")
+    failures += check((): int => { return createWithNegativeInitialCapacity()}, "Negative array size passed. Expected to throw NegativeArraySizeError error");
+    failures += check((): int => { return accessOutOfBoundsValue()}, "Access value out of bounds. Expected to throw ArrayIndexOutOfBoundsError")
     
     return check(failures, "All tests run");
 }
@@ -58,7 +58,7 @@ function createDefault(): int {
 function createWithNegativeInitialCapacity(): int {
     try {
         new ArrayAsListObject(-1);
-    } catch(nse: NegativeArraySizeException) {
+    } catch(nse: NegativeArraySizeError) {
         return 0;
     }
     return 1;
@@ -70,7 +70,7 @@ function accessOutOfBoundsValue(): int {
         for(let i: int = 0; i< 11; i++) {
             list.at(i);
         }
-    } catch(aiobe: ArrayIndexOutOfBoundsException) {
+    } catch(aiobe: ArrayIndexOutOfBoundsError) {
         return 0;
     }
     return 1;

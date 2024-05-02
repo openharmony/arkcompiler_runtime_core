@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -137,7 +137,6 @@ add_dependencies(ets_tests_lookup_by_name ets_tests_lookup_by_name_verify)
 add_ets_verifier_test(FILE "correct_case_32bit")
 add_ets_verifier_test(FILE "correct_case_64bit")
 add_ets_verifier_test(FILE "correct_case_ref")
-add_ets_verifier_test(FILE "correct_case_ref_2")
 add_ets_verifier_test(FILE "field_case_8bit")
 add_ets_verifier_test(FILE "field_case_32bit")
 add_ets_verifier_test(FILE "field_case_64bit")

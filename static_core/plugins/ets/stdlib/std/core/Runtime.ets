@@ -112,11 +112,11 @@ export final class Runtime {
      * 
      * @returns exception object to throw
      */
-    internal static failedTypeCastException(src: NullishType, dstStr: string): ClassCastException {
+    internal static failedTypeCastException(src: NullishType, dstStr: string): ClassCastError {
         let srcStr = src === null ? "null" :
             (src === undefined ? "undefined" :
                 TypeAPIGetTypeDescriptor(src));
-        return new ClassCastException(srcStr + " cannot be cast to " + dstStr);
+        return new ClassCastError(srcStr + " cannot be cast to " + dstStr);
     }
 
     /**

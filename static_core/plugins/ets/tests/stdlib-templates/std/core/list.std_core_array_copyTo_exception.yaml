@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,8 +16,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "boolean[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_boolean_array", second: "boolean_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_boolean_array", second: "boolean_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "boolean[]",
@@ -84,8 +84,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "byte[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_byte_array", second: "byte_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_byte_array", second: "byte_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "byte[]",
@@ -152,8 +152,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "short[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_short_array", second: "short_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_short_array", second: "short_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "short[]",
@@ -220,8 +220,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "int[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_int_array", second: "int_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_int_array", second: "int_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "int[]",
@@ -288,8 +288,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "long[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_long_array", second: "long_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_long_array", second: "long_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "long[]",
@@ -356,8 +356,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "float[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_float_array", second: "float_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_float_array", second: "float_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "float[]",
@@ -424,8 +424,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "double[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_double_array", second: "double_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_double_array", second: "double_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "double[]",
@@ -492,8 +492,8 @@
     method_nature: procedure,
     result: dst,
     result_type: "char[]",
-    method_signature_desc: {first: "ArrayIndexOutOfBoundsException_char_array", second: "char_array", dstStart: int, srcStart: int, srcEnd: int},
-    method_expected_exception: ArrayIndexOutOfBoundsException,
+    method_signature_desc: {first: "ArrayIndexOutOfBoundsError_char_array", second: "char_array", dstStart: int, srcStart: int, srcEnd: int},
+    method_expected_exception: ArrayIndexOutOfBoundsError,
     method_signature:
       {
         src: "char[]",

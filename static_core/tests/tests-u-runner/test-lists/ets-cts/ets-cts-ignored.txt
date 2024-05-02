@@ -873,12 +873,6 @@
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
 # end of es2panda fails
 
-# es2panda fails: panda:14381 ArrayIndexOutOfBoundsException is thrown instead of ArrayIndexOutOfBoundsError
-07.expressions/12.indexing_expression/01.array_indexing_expression/abrupt10.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/abrupt11.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/abrupt12.ets
-# end of es2panda fails
-
 # es2panda fails: panda:14382 Char type should not be permitted in index expression
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_8.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_9.ets

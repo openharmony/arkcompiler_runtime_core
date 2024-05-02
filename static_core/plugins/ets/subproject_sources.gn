@@ -77,7 +77,6 @@ srcs_runtime = [
   "runtime/ets_coroutine.cpp",
   "runtime/ets_entrypoints.cpp",
   "runtime/ets_exceptions.cpp",
-  "runtime/ets_errors.cpp",
   "runtime/ets_itable_builder.cpp",
   "runtime/ets_language_context.cpp",
   "runtime/ets_napi_env.cpp",

@@ -80,36 +80,36 @@ static constexpr std::string_view FUNCTIONN                            = "Lstd/c
 
 // Exception classes
 static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_EXCEPTION      = "Lstd/core/ArgumentOutOfRangeException;";
-static constexpr std::string_view ARITHMETIC_EXCEPTION                 = "Lstd/core/ArithmeticException;";
-static constexpr std::string_view ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION  = "Lstd/core/ArrayIndexOutOfBoundsException;";
-static constexpr std::string_view ARRAY_STORE_EXCEPTION                = "Lstd/core/ArrayStoreException;";
-static constexpr std::string_view CLASS_CAST_EXCEPTION                 = "Lstd/core/ClassCastException;";
 static constexpr std::string_view CLASS_NOT_FOUND_EXCEPTION            = "Lstd/core/ClassNotFoundException;";
 static constexpr std::string_view FILE_NOT_FOUND_EXCEPTION             = "Lstd/core/FileNotFoundException;";
 static constexpr std::string_view ILLEGAL_ACCESS_EXCEPTION             = "Lstd/core/IllegalAccessException;";
 static constexpr std::string_view ILLEGAL_ARGUMENT_EXCEPTION           = "Lstd/core/IllegalArgumentException;";
 static constexpr std::string_view ILLEGAL_MONITOR_STATE_EXCEPTION      = "Lstd/core/IllegalMonitorStateException;";
 static constexpr std::string_view ILLEGAL_STATE_EXCEPTION              = "Lstd/core/IllegalStateException;";
-static constexpr std::string_view INDEX_OUT_OF_BOUNDS_EXCEPTION        = "Lstd/core/IndexOutOfBoundsException;";
 static constexpr std::string_view IO_EXCEPTION                         = "Lstd/core/IOException;";
-static constexpr std::string_view NEGATIVE_ARRAY_SIZE_EXCEPTION        = "Lstd/core/NegativeArraySizeException;";
-static constexpr std::string_view NULL_POINTER_EXCEPTION               = "Lstd/core/NullPointerException;";
 static constexpr std::string_view RUNTIME_EXCEPTION                    = "Lstd/core/RuntimeException;";
-static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION = "Lstd/core/StringIndexOutOfBoundsException;";
 static constexpr std::string_view UNSUPPORTED_OPERATION_EXCEPTION      = "Lstd/core/UnsupportedOperationException;";
 
 // Exceptions classes
 // Due to dependecy of runtime architecture, have confusing name
 static constexpr std::string_view ABSTRACT_METHOD_ERROR                = "Lstd/core/AbstractMethodError;";
+static constexpr std::string_view ARITHMETIC_ERROR                     = "Lstd/core/ArithmeticError;";
+static constexpr std::string_view ARRAY_STORE_ERROR                    = "Lstd/core/ArrayStoreError;";
+static constexpr std::string_view CLASS_CAST_ERROR                     = "Lstd/core/ClassCastError;";
+static constexpr std::string_view ARRAY_INDEX_OUT_OF_BOUNDS_ERROR      = "Lstd/core/ArrayIndexOutOfBoundsError;";
 static constexpr std::string_view CLASS_CIRCULARITY_ERROR              = "Lstd/core/ClassCircularityError;";
 static constexpr std::string_view EXCEPTION_IN_INITIALIZER_ERROR       = "Lstd/core/ExceptionInInitializerError;";
 static constexpr std::string_view INCOMPATIBLE_CLASS_CHANGE_ERROR      = "Lstd/core/IncompatibleClassChangeError;";
+static constexpr std::string_view INDEX_OUT_OF_BOUNDS_ERROR            = "Lstd/core/IndexOutOfBoundsError;";
 static constexpr std::string_view INSTANTIATION_ERROR                  = "Lstd/core/InstantiationError;";
+static constexpr std::string_view NEGATIVE_ARRAY_SIZE_ERROR            = "Lstd/core/NegativeArraySizeError;";
 static constexpr std::string_view NO_CLASS_DEF_FOUND_ERROR             = "Lstd/core/NoClassDefFoundError;";
 static constexpr std::string_view NO_SUCH_FIELD_ERROR                  = "Lstd/core/NoSuchFieldError;";
 static constexpr std::string_view NO_SUCH_METHOD_ERROR                 = "Lstd/core/NoSuchMethodError;";
+static constexpr std::string_view NULL_POINTER_ERROR                   = "Lstd/core/NullPointerError;";
 static constexpr std::string_view OUT_OF_MEMORY_ERROR                  = "Lstd/core/OutOfMemoryError;";
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
+static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/core/StringIndexOutOfBoundsError;";
 
 // Error classes
 static constexpr std::string_view ERROR_OPTIONS                        = "Lescompat/ErrorOptions;";

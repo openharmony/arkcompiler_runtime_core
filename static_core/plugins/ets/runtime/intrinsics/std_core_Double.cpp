@@ -26,7 +26,6 @@
 #include "utils/utf.h"
 
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/ets_errors.h"
 
 namespace ark::ets::intrinsics {
 
@@ -66,7 +65,7 @@ EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
 
     if (UNLIKELY(U_FAILURE(status))) {
         std::string message = "Language tag '" + std::string(locTag) + "' is invalid or not supported";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
 

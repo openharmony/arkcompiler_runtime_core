@@ -95,3 +95,135 @@ export final class ArrayIndexOutOfBoundsError extends Error {
         super("ArrayIndexOutOfBoundsError", message, options)
     }
 }
+
+/**
+ * @class Represents exception that is thrown when illegal arithmetic operation is occured (e.g. division by zero)
+ */
+export final class ArithmeticError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ArithmeticError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when memory allocation fails
+ */
+export class OutOfMemoryError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("OutOfMemoryError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when no such method is found in the class
+ */
+export class NoSuchMethodError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NoSuchMethodError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when the available memory is not sufficient to create the activation frame
+ */
+export class StackOverflowError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("StackOverflowError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when attempting to instantiate abstract class or an interface
+ */
+export class InstantiationError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("InstantiationError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when an internal error occured
+ */
+export class InternalError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("InternalError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when no class definition has been found
+ */
+export class NoClassDefFoundError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NoClassDefFoundError", message, options)
+    }
+}
+
+/**
+ * @class Represents an error that occurs when no such field is found in the class
+ */
+export class NoSuchFieldError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NoSuchFieldError", message, options)
+    }
+}
+
+/**
+ * @class The AbstractMethodError object represents an error that occures when abstract method get called.
+ */
+export class AbstractMethodError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("AbstractMethodError", message, options)
+    }
+}
+
+/**
+ * @class Represents exception that is thrown when provided collection index is out of bounds
+ */
+export class IndexOutOfBoundsError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("IndexOutOfBoundsError", message, options)
+    }
+}
+
+/**
+ * @class Represents exception that is thrown when provided string index is out of bounds
+ */
+export final class StringIndexOutOfBoundsError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("StringIndexOutOfBoundsError", message, options)
+    }
+}
+
+/**
+ * @class Represents exception that is thrown in case of illegal class casting
+ */
+export final class ClassCastError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ClassCastError", message, options)
+    }
+}
+
+/**
+ * @class Represents exception that is thrown when attempting to store an object of different type in array of type-erased objects
+ */
+export final class ArrayStoreError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ArrayStoreError", message, options)
+    }
+}
+
+/**
+ * @class Represents exception that is thrown when negative array size is supplied
+ */
+export final class NegativeArraySizeError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("NegativeArraySizeError", message, options)
+    }
+}
+
+export class ExceptionInInitializerError extends Error {
+    constructor(message?: String, options?: ErrorOptions) {
+        super("ExceptionInInitializerError", message, options)
+    }
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ enum class EtsNapiException {
     NO_CLASS_DEF_FOUND,
     NO_SUCH_FIELD,
     NO_SUCH_METHOD,
-    NULL_POINTER_EXCEPTION,
+    NULL_POINTER_ERROR,
     OUT_OF_MEMORY,
     STRING_INDEX_OUT_OF_BOUNDS
 };
@@ -267,10 +267,10 @@ public:
         std::string_view className {};
         switch (kind) {
             case EtsNapiException::ARRAY_INDEX_OUT_OF_BOUNDS:
-                className = panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+                className = panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR;
                 break;
             case EtsNapiException::ARRAY_STORE:
-                className = panda_file_items::class_descriptors::ARRAY_STORE_EXCEPTION;
+                className = panda_file_items::class_descriptors::ARRAY_STORE_ERROR;
                 break;
             case EtsNapiException::ILLEGAL_MONITOR_STATE:
                 className = panda_file_items::class_descriptors::ILLEGAL_MONITOR_STATE_EXCEPTION;
@@ -287,14 +287,14 @@ public:
             case EtsNapiException::NO_SUCH_METHOD:
                 className = panda_file_items::class_descriptors::NO_SUCH_METHOD_ERROR;
                 break;
-            case EtsNapiException::NULL_POINTER_EXCEPTION:
-                className = panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION;
+            case EtsNapiException::NULL_POINTER_ERROR:
+                className = panda_file_items::class_descriptors::NULL_POINTER_ERROR;
                 break;
             case EtsNapiException::OUT_OF_MEMORY:
                 className = panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR;
                 break;
             case EtsNapiException::STRING_INDEX_OUT_OF_BOUNDS:
-                className = panda_file_items::class_descriptors::STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION;
+                className = panda_file_items::class_descriptors::STRING_INDEX_OUT_OF_BOUNDS_ERROR;
                 break;
             default:
                 UNREACHABLE();

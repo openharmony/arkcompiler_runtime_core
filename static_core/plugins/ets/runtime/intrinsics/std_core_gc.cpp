@@ -293,7 +293,7 @@ template <class ResArrayType>
     ASSERT(coroutine != nullptr);
 
     if (length < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR,
                           "The value must be non negative");
         return nullptr;
     }
@@ -361,7 +361,7 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
     if (obj == nullptr) {
         auto *coroutine = EtsCoroutine::GetCurrent();
         ASSERT(coroutine != nullptr);
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION, "Non heap object");
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_ERROR, "Non heap object");
         return SpaceTypeToIndex(SpaceType::SPACE_TYPE_UNDEFINED);
     }
 
@@ -385,7 +385,7 @@ extern "C" void StdGCPinObject(EtsObject *obj)
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     if (obj == nullptr) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
                           "The value must be an object");
         return;
     }
@@ -405,7 +405,7 @@ extern "C" void StdGCUnpinObject(EtsObject *obj)
     if (obj == nullptr) {
         auto *coroutine = EtsCoroutine::GetCurrent();
         ASSERT(coroutine != nullptr);
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
                           "The value must be an object");
         return;
     }
@@ -486,7 +486,7 @@ extern "C" void StdGCRegisterNativeAllocation(EtsLong size)
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     if (size < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR,
                           "The value must be non negative");
         return;
     }
@@ -500,7 +500,7 @@ extern "C" void StdGCRegisterNativeFree(EtsLong size)
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     if (size < 0) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_EXCEPTION,
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR,
                           "The value must be non negative");
         return;
     }

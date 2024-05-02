@@ -29,6 +29,6 @@ function main(): void {
     x.foo();
     assert false;
   } catch (e) {
-    assert e instanceof NullPointerException;
+    assert e instanceof NullPointerError;
   }
 }

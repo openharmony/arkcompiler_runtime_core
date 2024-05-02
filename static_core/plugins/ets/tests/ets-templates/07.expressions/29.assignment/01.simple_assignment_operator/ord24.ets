@@ -43,7 +43,7 @@ function idx(i: int): int {
 
 function val(): int {
     result = result + "V"
-    return 1 / 0;  // get ArithmeticException
+    return 1 / 0;  // get ArithmeticError
 }
 
 function main(): int {
@@ -52,7 +52,7 @@ function main(): int {
     let s: string = ""
     try {
       s = s + ref("A")[idx(2)] = ref("B")[idx(1)] = ref("C")[idx(0)] = val()
-    } catch (e: ArithmeticException) {
+    } catch (e: ArithmeticError) {
         if (result == "A2B1C0V" && s == "") {
             return 0
         }

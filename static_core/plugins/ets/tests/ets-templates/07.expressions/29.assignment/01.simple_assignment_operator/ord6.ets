@@ -30,7 +30,7 @@ class A {
 
 function getVal(): string {
     result = result + "2"
-    return new Int(1/0).toString()  // get ArithmeticException
+    return new Int(1/0).toString()  // get ArithmeticError
 }
 
 function main(): int {
@@ -40,7 +40,7 @@ function main(): int {
     let s: string = ""
     try {
         s = ((A.fld)) = getVal()
-    } catch (e: ArithmeticException) {
+    } catch (e: ArithmeticError) {
         if (result == "2" && s == "") {
             return 0
         }

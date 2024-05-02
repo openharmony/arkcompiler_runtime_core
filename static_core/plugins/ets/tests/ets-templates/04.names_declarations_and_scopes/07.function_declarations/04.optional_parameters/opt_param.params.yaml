@@ -135,7 +135,7 @@ cases:
           try {
               foo(1)
               assert false
-          } catch (e: NullPointerException) {
+          } catch (e: NullPointerError) {
               // expected
           }
 

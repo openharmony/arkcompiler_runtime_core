@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetBoolArrayRegionErrorTests)
     ets_booleanArray arr = env_->NewBooleanArray(5U);
     EXPECT_DEATH(env_->GetBooleanArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -67,7 +67,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetByteArrayRegionErrorTests)
     ets_byteArray arr = env_->NewByteArray(5U);
     EXPECT_DEATH(env_->GetByteArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -102,7 +102,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetCharArrayRegionErrorTests)
     ets_charArray arr = env_->NewCharArray(5U);
     EXPECT_DEATH(env_->GetCharArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -137,7 +137,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetShortArrayRegionErrorTests)
     ets_shortArray arr = env_->NewShortArray(5U);
     EXPECT_DEATH(env_->GetShortArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -172,7 +172,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetIntArrayRegionErrorTests)
     ets_intArray arr = env_->NewIntArray(5U);
     EXPECT_DEATH(env_->GetIntArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -207,7 +207,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetLongArrayRegionErrorTests)
     ets_longArray arr = env_->NewLongArray(5U);
     EXPECT_DEATH(env_->GetLongArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -242,7 +242,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetFloatArrayRegionErrorTests)
     ets_floatArray arr = env_->NewFloatArray(5U);
     EXPECT_DEATH(env_->GetFloatArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -277,7 +277,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetDoubleArrayRegionErrorTests)
     ets_doubleArray arr = env_->NewDoubleArray(5U);
     EXPECT_DEATH(env_->GetDoubleArrayRegion(arr, 0, 1, nullptr), "");
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -311,7 +311,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetBoolArrayRegionErrorTests)
     ets_boolean buf[10U] = {0};
     ets_booleanArray arr = env_->NewBooleanArray(5_I);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -329,7 +329,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetByteArrayRegionErrorTests)
     ets_byte buf[10U] = {0};
     ets_byteArray arr = env_->NewByteArray(5U);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -347,7 +347,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetCharArrayRegionErrorTests)
     ets_char buf[10U] = {0};
     ets_charArray arr = env_->NewCharArray(5U);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -365,7 +365,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetShortArrayRegionErrorTests)
     ets_short buf[10U] = {0};
     ets_shortArray arr = env_->NewShortArray(5U);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -383,7 +383,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetIntArrayRegionErrorTests)
     ets_int buf[10U] = {0};
     ets_intArray arr = env_->NewIntArray(5U);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -401,7 +401,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetLongArrayRegionErrorTests)
     ets_long buf[10U] = {0};
     ets_longArray arr = env_->NewLongArray(5U);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -419,7 +419,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetFloatArrayRegionErrorTests)
     ets_float buf[10U] = {0};
     ets_floatArray arr = env_->NewFloatArray(5U);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -437,7 +437,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetDoubleArrayRegionErrorTests)
     ets_double buf[10U] = {0};
     ets_doubleArray arr = env_->NewDoubleArray(5U);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -460,7 +460,7 @@ TEST_F(EtsNativeInterfaceArrayTest, GetObjectArrayElementErrorTest)
     ets_objectArray array = env_->NewObjectsArray(5U, cls, str);
     ASSERT_NE(array, nullptr);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -503,7 +503,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetObjectArrayElementErrorTests)
     ets_string newStr = env_->NewStringUTF(newExample.c_str());
     ASSERT_NE(newStr, nullptr);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayIndexOutOfBoundsError");
     ASSERT_NE(errorClass, nullptr);
 
     {
@@ -539,7 +539,7 @@ TEST_F(EtsNativeInterfaceArrayTest, SetObjectArrayElementErrorTests2)
     ets_object intObj = env_->AllocObject(intCls);
     ASSERT_NE(intObj, nullptr);
 
-    ets_class errorClass = env_->FindClass("std/core/ArrayStoreException");
+    ets_class errorClass = env_->FindClass("std/core/ArrayStoreError");
     ASSERT_NE(errorClass, nullptr);
 
     {

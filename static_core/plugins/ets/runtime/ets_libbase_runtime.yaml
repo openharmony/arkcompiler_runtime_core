@@ -2857,7 +2857,7 @@ intrinsics:
     method_name: failedTypeCastException
     static: true
     signature:
-      ret: std.core.ClassCastException
+      ret: std.core.ClassCastError
       args: [ std.core.Object, std.core.String ]
     impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastException
     clear_flags: [ ]

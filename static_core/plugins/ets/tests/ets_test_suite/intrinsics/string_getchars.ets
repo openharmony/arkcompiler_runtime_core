@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ function main(): int {
     try {
         // end > length
         let arr: char[] = golden.getChars(1, golden.getLength() + 1);
-    } catch (e: StringIndexOutOfBoundsException) {
+    } catch (e: StringIndexOutOfBoundsError) {
         ++hits;
         if (DUMP) {
             console.println("end > length");
@@ -88,7 +88,7 @@ function main(): int {
     try {
         // begin > end
         let arr: char[] = golden.getChars(2, 1);
-    } catch (e: StringIndexOutOfBoundsException) {
+    } catch (e: StringIndexOutOfBoundsError) {
         ++hits;
         if (DUMP) {
             console.println("begin > end");
@@ -99,7 +99,7 @@ function main(): int {
     try {
         // begin < 0
         let arr: char[] = golden.getChars(-1, 1);
-    } catch (e: StringIndexOutOfBoundsException) {
+    } catch (e: StringIndexOutOfBoundsError) {
         ++hits;
         if (DUMP) {
             console.println("begin < 0");

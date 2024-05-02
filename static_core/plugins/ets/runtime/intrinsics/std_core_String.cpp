@@ -25,7 +25,6 @@
 #include "runtime/entrypoints/string_index_of.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
-#include "plugins/ets/runtime/ets_errors.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 
@@ -161,7 +160,7 @@ EtsString *StringNormalize(EtsString *str, const Normalizer2 *normalizer)
 
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Got error in process of normalization: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsError(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
 
@@ -175,7 +174,7 @@ EtsString *StdCoreStringNormalizeNFC(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFCInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -187,7 +186,7 @@ EtsString *StdCoreStringNormalizeNFD(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFDInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -199,7 +198,7 @@ EtsString *StdCoreStringNormalizeNFKC(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFKCInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFKC normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -211,7 +210,7 @@ EtsString *StdCoreStringNormalizeNFKD(EtsString *thisStr)
     auto normalizer = Normalizer2::getNFKDInstance(errorCode);
     if (UNLIKELY(U_FAILURE(errorCode))) {
         std::string message = "Cannot get NFKD normalizer: '" + std::string(u_errorName(errorCode)) + "'";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
     return StringNormalize(thisStr, normalizer);
@@ -310,7 +309,7 @@ EtsString *StdCoreStringToLocaleUpperCase(EtsString *thisStr, EtsString *langTag
     auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
     if (UNLIKELY(U_FAILURE(localeParseStatus))) {
         auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
     return ToUpperCase(thisStr, locale);
@@ -324,7 +323,7 @@ EtsString *StdCoreStringToLocaleLowerCase(EtsString *thisStr, EtsString *langTag
     auto localeParseStatus = ParseSingleBCP47LanguageTag(langTag, locale);
     if (UNLIKELY(U_FAILURE(localeParseStatus))) {
         auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return nullptr;
     }
     return ToLowerCase(thisStr, locale);
@@ -338,7 +337,7 @@ ets_double StdCoreStringLocaleCmp(EtsString *thisStr, EtsString *cmpStr, EtsStri
     auto status = ParseSingleBCP47LanguageTag(langTag, locale);
     if (UNLIKELY(U_FAILURE(status))) {
         auto message = "Language tag '" + ConvertToString(langTag->GetCoreType()) + "' is invalid or not supported";
-        ThrowEtsError(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
+        ThrowEtsException(EtsCoroutine::GetCurrent(), panda_file_items::class_descriptors::RANGE_ERROR, message);
         return 0;
     }
 
