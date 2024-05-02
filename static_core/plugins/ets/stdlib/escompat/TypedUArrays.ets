@@ -889,7 +889,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns true if e is in Uint8ClampedArray, false otherwise
      */
     public includes(e: int, fromIndex: int): boolean {
-        return this.indexOf(e, fromIndex) != -1
+        return this.indexOf(e as int, fromIndex) != -1
     }
 
     /**
@@ -915,51 +915,75 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as int, fromIndex as int)
+    public indexOf(searchElement: number, fromIndex?: number): number {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: int, fromIndex: int): int {
-        throw new Error("not implemented")
+    public indexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
+        }
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) as number == searchElement) {
+                return i
+            }
+        }
+        return -1
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number): number {
-        return this.indexOf(e as int)
+    public indexOf(searchElement: int, fromIndex: int): number {
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) == searchElement) {
+                return i
+            }
+        }
+        return -1
+
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8ClampedArray.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: int): int {
-        return this.indexOf(e, 0)
+    public indexOf(searchElement: int): number {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -994,71 +1018,88 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint8ClampedArray.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as int, fromIndex as int)
+    public lastIndexOf(searchElement: number, fromIndex?: number): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint8ClampedArray.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: int, fromIndex: int): number {
-        if (fromIndex >= this.lengthInt) {
-            fromIndex = this.lengthInt - 1
+    public lastIndexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
         }
-        if (fromIndex < 0) {
-            fromIndex = this.lengthInt + fromIndex
+        if (this.lengthInt == 0) {
+            return -1
         }
-
-        for (let i = fromIndex; i >= 0; i--) {
-            let tmp = this.at(i)
-            if (tmp == undefined) {
-                return -1 as number
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) as number == searchElement) {
+                return k
             }
-            if (tmp.intValue() == val) {
-                return i as number
-            }
+            k--
         }
-        return -1 as number
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint8ClampedArray.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as int, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int, fromIndex: int): number {
+        if (this.lengthInt == 0) {
+            return -1
+        }
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) == searchElement) {
+                return k
+            }
+            k--
+        }
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint8ClampedArray.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: int): number {
-        return this.lastIndexOf(val, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
    /**
@@ -1270,7 +1311,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns new Uint8ClampedArray with the same underlying Buffer
      */
     public subarray(begin: int, end: int): Uint8ClampedArray {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -1405,10 +1446,10 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number) => boolean): boolean {
@@ -1524,14 +1565,14 @@ export class Uint8ClampedArray implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element))
     }
@@ -1560,14 +1601,14 @@ export class Uint8ClampedArray implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts three arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number, array: Uint8ClampedArray) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
             if (predicate(this.getUnsafe(i) as number, i as number, this)) {
@@ -1579,28 +1620,28 @@ export class Uint8ClampedArray implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate(element, index))
     }
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: () => boolean): boolean {
         return this.some((element: number, index: number, array: Uint8ClampedArray): boolean => predicate())
     }
@@ -1619,7 +1660,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1642,11 +1683,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -1664,11 +1705,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -1686,11 +1727,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U) => U, 
+                callbackfn: (previousValue: U) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -1708,11 +1749,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -1754,7 +1795,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn(prevVal, currVal, currIndex))
     }
 
@@ -1772,7 +1813,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn(prevVal, currVal))
     }
 
@@ -1790,7 +1831,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn(prevVal))
     }
 
@@ -1808,7 +1849,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduce(callbackfn: () => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn())
     }
 
@@ -1826,7 +1867,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8ClampedArray) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -1849,11 +1890,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -1871,11 +1912,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -1893,11 +1934,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U, 
+                callbackfn: (previuosValue: U) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -1915,11 +1956,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8ClampedArray) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -1939,7 +1980,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        
+
         let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
         for (let i = this.lengthInt - 2; i >= 0; i--) {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
@@ -1961,7 +2002,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn(prevValue, currValue, currIndex))
     }
 
@@ -1979,7 +2020,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn(prevValue, currValue))
     }
 
@@ -1997,7 +2038,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn(prevValue))
     }
 
@@ -2015,7 +2056,7 @@ export class Uint8ClampedArray implements Iterable<Number> {
      */
     public reduceRight(callbackfn: () => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8ClampedArray) =>
                         callbackfn())
     }
 
@@ -2039,11 +2080,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts three arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts three arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number, array: Uint8ClampedArray) => boolean): boolean {
@@ -2058,11 +2099,11 @@ export class Uint8ClampedArray implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts two arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts two arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number) => boolean): boolean {
@@ -2073,10 +2114,10 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: () => boolean): boolean {
@@ -3284,7 +3325,7 @@ export class Uint8Array implements Iterable<Number> {
      * @returns true if e is in Uint8Array, false otherwise
      */
     public includes(e: int, fromIndex: int): boolean {
-        return this.indexOf(e, fromIndex) != -1
+        return this.indexOf(e as int, fromIndex) != -1
     }
 
     /**
@@ -3310,51 +3351,75 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as int, fromIndex as int)
+    public indexOf(searchElement: number, fromIndex?: number): number {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: int, fromIndex: int): int {
-        throw new Error("not implemented")
+    public indexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
+        }
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) as number == searchElement) {
+                return i
+            }
+        }
+        return -1
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number): number {
-        return this.indexOf(e as int)
+    public indexOf(searchElement: int, fromIndex: int): number {
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) == searchElement) {
+                return i
+            }
+        }
+        return -1
+
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint8Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: int): int {
-        return this.indexOf(e, 0)
+    public indexOf(searchElement: int): number {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -3389,71 +3454,88 @@ export class Uint8Array implements Iterable<Number> {
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint8Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as int, fromIndex as int)
+    public lastIndexOf(searchElement: number, fromIndex?: number): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint8Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: int, fromIndex: int): number {
-        if (fromIndex >= this.lengthInt) {
-            fromIndex = this.lengthInt - 1
+    public lastIndexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
         }
-        if (fromIndex < 0) {
-            fromIndex = this.lengthInt + fromIndex
+        if (this.lengthInt == 0) {
+            return -1
         }
-
-        for (let i = fromIndex; i >= 0; i--) {
-            let tmp = this.at(i)
-            if (tmp == undefined) {
-                return -1 as number
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) as number == searchElement) {
+                return k
             }
-            if (tmp.intValue() == val) {
-                return i as number
-            }
+            k--
         }
-        return -1 as number
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint8Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as int, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int, fromIndex: int): number {
+        if (this.lengthInt == 0) {
+            return -1
+        }
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) == searchElement) {
+                return k
+            }
+            k--
+        }
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint8Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: int): number {
-        return this.lastIndexOf(val, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
    /**
@@ -3665,7 +3747,7 @@ export class Uint8Array implements Iterable<Number> {
      * @returns new Uint8Array with the same underlying Buffer
      */
     public subarray(begin: int, end: int): Uint8Array {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -3800,10 +3882,10 @@ export class Uint8Array implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number) => boolean): boolean {
@@ -3919,14 +4001,14 @@ export class Uint8Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint8Array): boolean => predicate(element))
     }
@@ -3955,14 +4037,14 @@ export class Uint8Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts three arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number, array: Uint8Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
             if (predicate(this.getUnsafe(i) as number, i as number, this)) {
@@ -3974,28 +4056,28 @@ export class Uint8Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint8Array): boolean => predicate(element, index))
     }
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: () => boolean): boolean {
         return this.some((element: number, index: number, array: Uint8Array): boolean => predicate())
     }
@@ -4014,7 +4096,7 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8Array) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
@@ -4037,11 +4119,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -4059,11 +4141,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -4081,11 +4163,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U) => U, 
+                callbackfn: (previousValue: U) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -4103,11 +4185,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -4149,7 +4231,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
                         callbackfn(prevVal, currVal, currIndex))
     }
 
@@ -4167,7 +4249,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
                         callbackfn(prevVal, currVal))
     }
 
@@ -4185,7 +4267,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
                         callbackfn(prevVal))
     }
 
@@ -4203,7 +4285,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduce(callbackfn: () => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint8Array) =>
                         callbackfn())
     }
 
@@ -4221,7 +4303,7 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8Array) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint8Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -4244,11 +4326,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -4266,11 +4348,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -4288,11 +4370,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U, 
+                callbackfn: (previuosValue: U) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -4310,11 +4392,11 @@ export class Uint8Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint8Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -4334,7 +4416,7 @@ export class Uint8Array implements Iterable<Number> {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        
+
         let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
         for (let i = this.lengthInt - 2; i >= 0; i--) {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
@@ -4356,7 +4438,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
                         callbackfn(prevValue, currValue, currIndex))
     }
 
@@ -4374,7 +4456,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
                         callbackfn(prevValue, currValue))
     }
 
@@ -4392,7 +4474,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
                         callbackfn(prevValue))
     }
 
@@ -4410,7 +4492,7 @@ export class Uint8Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: () => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint8Array) =>
                         callbackfn())
     }
 
@@ -4434,11 +4516,11 @@ export class Uint8Array implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts three arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts three arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number, array: Uint8Array) => boolean): boolean {
@@ -4453,11 +4535,11 @@ export class Uint8Array implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts two arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts two arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number) => boolean): boolean {
@@ -4468,10 +4550,10 @@ export class Uint8Array implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: () => boolean): boolean {
@@ -5680,7 +5762,7 @@ export class Uint16Array implements Iterable<Number> {
      * @returns true if e is in Uint16Array, false otherwise
      */
     public includes(e: int, fromIndex: int): boolean {
-        return this.indexOf(e, fromIndex) != -1
+        return this.indexOf(e as int, fromIndex) != -1
     }
 
     /**
@@ -5706,51 +5788,75 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as int, fromIndex as int)
+    public indexOf(searchElement: number, fromIndex?: number): number {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: int, fromIndex: int): int {
-        throw new Error("not implemented")
+    public indexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
+        }
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) as number == searchElement) {
+                return i
+            }
+        }
+        return -1
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number): number {
-        return this.indexOf(e as int)
+    public indexOf(searchElement: int, fromIndex: int): number {
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) == searchElement) {
+                return i
+            }
+        }
+        return -1
+
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint16Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: int): int {
-        return this.indexOf(e, 0)
+    public indexOf(searchElement: int): number {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -5785,71 +5891,88 @@ export class Uint16Array implements Iterable<Number> {
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint16Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as int, fromIndex as int)
+    public lastIndexOf(searchElement: number, fromIndex?: number): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint16Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: int, fromIndex: int): number {
-        if (fromIndex >= this.lengthInt) {
-            fromIndex = this.lengthInt - 1
+    public lastIndexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
         }
-        if (fromIndex < 0) {
-            fromIndex = this.lengthInt + fromIndex
+        if (this.lengthInt == 0) {
+            return -1
         }
-
-        for (let i = fromIndex; i >= 0; i--) {
-            let tmp = this.at(i)
-            if (tmp == undefined) {
-                return -1 as number
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) as number == searchElement) {
+                return k
             }
-            if (tmp.intValue() == val) {
-                return i as number
-            }
+            k--
         }
-        return -1 as number
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint16Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as int, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int, fromIndex: int): number {
+        if (this.lengthInt == 0) {
+            return -1
+        }
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) == searchElement) {
+                return k
+            }
+            k--
+        }
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint16Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: int): number {
-        return this.lastIndexOf(val, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
    /**
@@ -6061,7 +6184,7 @@ export class Uint16Array implements Iterable<Number> {
      * @returns new Uint16Array with the same underlying Buffer
      */
     public subarray(begin: int, end: int): Uint16Array {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -6196,10 +6319,10 @@ export class Uint16Array implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number) => boolean): boolean {
@@ -6315,14 +6438,14 @@ export class Uint16Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint16Array): boolean => predicate(element))
     }
@@ -6351,14 +6474,14 @@ export class Uint16Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts three arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number, array: Uint16Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
             if (predicate(this.getUnsafe(i) as number, i as number, this)) {
@@ -6370,28 +6493,28 @@ export class Uint16Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint16Array): boolean => predicate(element, index))
     }
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: () => boolean): boolean {
         return this.some((element: number, index: number, array: Uint16Array): boolean => predicate())
     }
@@ -6410,7 +6533,7 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint16Array) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint16Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
@@ -6433,11 +6556,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -6455,11 +6578,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -6477,11 +6600,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U) => U, 
+                callbackfn: (previousValue: U) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -6499,11 +6622,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -6545,7 +6668,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
                         callbackfn(prevVal, currVal, currIndex))
     }
 
@@ -6563,7 +6686,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
                         callbackfn(prevVal, currVal))
     }
 
@@ -6581,7 +6704,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
                         callbackfn(prevVal))
     }
 
@@ -6599,7 +6722,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduce(callbackfn: () => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint16Array) =>
                         callbackfn())
     }
 
@@ -6617,7 +6740,7 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint16Array) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint16Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -6640,11 +6763,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -6662,11 +6785,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -6684,11 +6807,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U, 
+                callbackfn: (previuosValue: U) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -6706,11 +6829,11 @@ export class Uint16Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint16Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -6730,7 +6853,7 @@ export class Uint16Array implements Iterable<Number> {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        
+
         let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
         for (let i = this.lengthInt - 2; i >= 0; i--) {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
@@ -6752,7 +6875,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
                         callbackfn(prevValue, currValue, currIndex))
     }
 
@@ -6770,7 +6893,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
                         callbackfn(prevValue, currValue))
     }
 
@@ -6788,7 +6911,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
                         callbackfn(prevValue))
     }
 
@@ -6806,7 +6929,7 @@ export class Uint16Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: () => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint16Array) =>
                         callbackfn())
     }
 
@@ -6830,11 +6953,11 @@ export class Uint16Array implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts three arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts three arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number, array: Uint16Array) => boolean): boolean {
@@ -6849,11 +6972,11 @@ export class Uint16Array implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts two arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts two arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number) => boolean): boolean {
@@ -6864,10 +6987,10 @@ export class Uint16Array implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: () => boolean): boolean {
@@ -8103,7 +8226,7 @@ export class Uint32Array implements Iterable<Number> {
      * @returns true if e is in Uint32Array, false otherwise
      */
     public includes(e: long, fromIndex: int): boolean {
-        return this.indexOf(e, fromIndex) != -1
+        return this.indexOf(e as int, fromIndex) != -1
     }
 
     /**
@@ -8129,51 +8252,75 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number, fromIndex: number): number {
-        return this.indexOf(e as long, fromIndex as int)
+    public indexOf(searchElement: number, fromIndex?: number): number {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: long, fromIndex: int): int {
-        throw new Error("not implemented")
+    public indexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
+        }
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) as number == searchElement) {
+                return i
+            }
+        }
+        return -1
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: number): number {
-        return this.indexOf(e as long)
+    public indexOf(searchElement: int, fromIndex: int): number {
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) == searchElement as long) {
+                return i
+            }
+        }
+        return -1
+
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in Uint32Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: long): int {
-        return this.indexOf(e, 0)
+    public indexOf(searchElement: int): number {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -8208,71 +8355,88 @@ export class Uint32Array implements Iterable<Number> {
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint32Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number, fromIndex: number): number {
-        return this.lastIndexOf(val as long, fromIndex as int)
+    public lastIndexOf(searchElement: number, fromIndex?: number): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in Uint32Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: long, fromIndex: int): number {
-        if (fromIndex >= this.lengthInt) {
-            fromIndex = this.lengthInt - 1
+    public lastIndexOf(searchElement: number, fromIndex: int): number {
+        if (isNaN(searchElement)) {
+            return -1
         }
-        if (fromIndex < 0) {
-            fromIndex = this.lengthInt + fromIndex
+        if (this.lengthInt == 0) {
+            return -1
         }
-
-        for (let i = fromIndex; i >= 0; i--) {
-            let tmp = this.at(i)
-            if (tmp == undefined) {
-                return -1 as number
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) as number == searchElement) {
+                return k
             }
-            if (tmp.longValue() == val) {
-                return i as number
-            }
+            k--
         }
-        return -1 as number
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint32Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: number): number {
-        return this.lastIndexOf(val as long, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int, fromIndex: int): number {
+        if (this.lengthInt == 0) {
+            return -1
+        }
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) == searchElement as long) {
+                return k
+            }
+            k--
+        }
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in Uint32Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: long): number {
-        return this.lastIndexOf(val, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
    /**
@@ -8484,7 +8648,7 @@ export class Uint32Array implements Iterable<Number> {
      * @returns new Uint32Array with the same underlying Buffer
      */
     public subarray(begin: int, end: int): Uint32Array {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -8619,10 +8783,10 @@ export class Uint32Array implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number) => boolean): boolean {
@@ -8738,14 +8902,14 @@ export class Uint32Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint32Array): boolean => predicate(element))
     }
@@ -8774,14 +8938,14 @@ export class Uint32Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts three arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number, array: Uint32Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
             if (predicate(this.getUnsafe(i) as number, i as number, this)) {
@@ -8793,28 +8957,28 @@ export class Uint32Array implements Iterable<Number> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: number, index: number) => boolean): boolean {
         return this.some((element: number, index: number, array: Uint32Array): boolean => predicate(element, index))
     }
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: () => boolean): boolean {
         return this.some((element: number, index: number, array: Uint32Array): boolean => predicate())
     }
@@ -8833,7 +8997,7 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint32Array) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint32Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
@@ -8856,11 +9020,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -8878,11 +9042,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U, currentValue: number) => U, 
+                callbackfn: (previousValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -8900,11 +9064,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: (previousValue: U) => U, 
+                callbackfn: (previousValue: U) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -8922,11 +9086,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -8968,7 +9132,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
                         callbackfn(prevVal, currVal, currIndex))
     }
 
@@ -8986,7 +9150,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
                         callbackfn(prevVal, currVal))
     }
 
@@ -9004,7 +9168,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduce(callbackfn: (previousValue: number) => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
                         callbackfn(prevVal))
     }
 
@@ -9022,7 +9186,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduce(callbackfn: () => number): number {
         return this.reduce(
-                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) => 
+                (prevVal: number, currVal: number, currIndex: number, array: Uint32Array) =>
                         callbackfn())
     }
 
@@ -9040,7 +9204,7 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint32Array) => U, 
+                callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Uint32Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -9063,11 +9227,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -9085,11 +9249,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U, currentValue: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -9107,11 +9271,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: (previuosValue: U) => U, 
+                callbackfn: (previuosValue: U) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -9129,11 +9293,11 @@ export class Uint32Array implements Iterable<Number> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = number>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: number, currIndex: number, array: Uint32Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -9153,7 +9317,7 @@ export class Uint32Array implements Iterable<Number> {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        
+
         let accumulatedValue: number = this.$_get(this.lengthInt - 1) as number
         for (let i = this.lengthInt - 2; i >= 0; i--) {
             accumulatedValue = callbackfn(accumulatedValue, this.getUnsafe(i) as number, i as number, this)
@@ -9175,7 +9339,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
                         callbackfn(prevValue, currValue, currIndex))
     }
 
@@ -9193,7 +9357,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number, currentValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
                         callbackfn(prevValue, currValue))
     }
 
@@ -9211,7 +9375,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: (previousValue: number) => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
                         callbackfn(prevValue))
     }
 
@@ -9229,7 +9393,7 @@ export class Uint32Array implements Iterable<Number> {
      */
     public reduceRight(callbackfn: () => number): number {
         return this.reduceRight(
-                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) => 
+                (prevValue: number, currValue: number, currIndex: number, array: Uint32Array) =>
                         callbackfn())
     }
 
@@ -9253,11 +9417,11 @@ export class Uint32Array implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts three arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts three arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number, array: Uint32Array) => boolean): boolean {
@@ -9272,11 +9436,11 @@ export class Uint32Array implements Iterable<Number> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts two arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts two arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: number, index: number) => boolean): boolean {
@@ -9287,10 +9451,10 @@ export class Uint32Array implements Iterable<Number> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: () => boolean): boolean {
@@ -10464,7 +10628,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns true if e is in BigUint64Array, false otherwise
      */
     public includes(e: long, fromIndex: int): boolean {
-        return this.indexOf(e, fromIndex) != -1
+        return this.indexOf(e as int, fromIndex) != -1
     }
 
     /**
@@ -10490,51 +10654,72 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: BigInt, fromIndex: number): number {
-        return this.indexOf(e.getULong(), fromIndex as int)
+    public indexOf(searchElement: BigInt, fromIndex?: number): number {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: long, fromIndex: int): int {
-        throw new Error("not implemented")
+    public indexOf(searchElement: BigInt, fromIndex: int): number {
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (new BigInt(this.getUnsafe(i)) == searchElement) {
+                return i
+            }
+        }
+        return -1
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: BigInt): number {
-        return this.indexOf(e.getULong())
+    public indexOf(searchElement: int, fromIndex: int): number {
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if (this.getUnsafe(i) == searchElement as long) {
+                return i
+            }
+        }
+        return -1
+
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in BigUint64Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: long): int {
-        return this.indexOf(e, 0)
+    public indexOf(searchElement: int): number {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -10569,71 +10754,85 @@ export class BigUint64Array implements Iterable<BigInt> {
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in BigUint64Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: BigInt, fromIndex: number): number {
-        return this.lastIndexOf(val.getULong(), fromIndex as int)
+    public lastIndexOf(searchElement: BigInt, fromIndex?: number): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in BigUint64Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: long, fromIndex: int): number {
-        if (fromIndex >= this.lengthInt) {
-            fromIndex = this.lengthInt - 1
+    public lastIndexOf(searchElement: BigInt, fromIndex: int): number {
+        if (this.lengthInt == 0) {
+            return -1
         }
-        if (fromIndex < 0) {
-            fromIndex = this.lengthInt + fromIndex
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
         }
-
-        for (let i = fromIndex; i >= 0; i--) {
-            let tmp = this.at(i)
-            if (tmp == undefined) {
-                return -1 as number
+        while (k >= 0) {
+            if (new BigInt(this.getUnsafe(k)) == searchElement) {
+                return k
             }
-            if (tmp.getULong() == val) {
-                return i as number
-            }
+            k--
         }
-        return -1 as number
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in BigUint64Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: BigInt): number {
-        return this.lastIndexOf(val.getULong(), this.lengthInt - 1)
+    public lastIndexOf(searchElement: int, fromIndex: int): number {
+        if (this.lengthInt == 0) {
+            return -1
+        }
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if (this.getUnsafe(k) == searchElement as long) {
+                return k
+            }
+            k--
+        }
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in BigUint64Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: long): number {
-        return this.lastIndexOf(val, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
    /**
@@ -10845,7 +11044,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns new BigUint64Array with the same underlying Buffer
      */
     public subarray(begin: int, end: int): BigUint64Array {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -10980,10 +11179,10 @@ export class BigUint64Array implements Iterable<BigInt> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: BigInt) => boolean): boolean {
@@ -11099,14 +11298,14 @@ export class BigUint64Array implements Iterable<BigInt> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: BigInt) => boolean): boolean {
         return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element))
     }
@@ -11135,14 +11334,14 @@ export class BigUint64Array implements Iterable<BigInt> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts three arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: BigInt, index: number, array: BigUint64Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
             if (predicate(new BigInt(this.getUnsafe(i)), i as number, this)) {
@@ -11154,28 +11353,28 @@ export class BigUint64Array implements Iterable<BigInt> {
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: BigInt, index: number) => boolean): boolean {
         return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate(element, index))
     }
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: () => boolean): boolean {
         return this.some((element: BigInt, index: number, array: BigUint64Array): boolean => predicate())
     }
@@ -11194,7 +11393,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => U, 
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
@@ -11217,11 +11416,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number) => U, 
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -11239,11 +11438,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt) => U, 
+                callbackfn: (previousValue: U, currentValue: BigInt) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -11261,11 +11460,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = BigInt>(
-                callbackfn: (previousValue: U) => U, 
+                callbackfn: (previousValue: U) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -11283,11 +11482,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = BigInt>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -11329,7 +11528,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number) => BigInt): BigInt {
         return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn(prevVal, currVal, currIndex))
     }
 
@@ -11347,7 +11546,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduce(callbackfn: (previousValue: BigInt, currentValue: BigInt) => BigInt): BigInt {
         return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn(prevVal, currVal))
     }
 
@@ -11365,7 +11564,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduce(callbackfn: (previousValue: BigInt) => BigInt): BigInt {
         return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn(prevVal))
     }
 
@@ -11383,7 +11582,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduce(callbackfn: () => BigInt): BigInt {
         return this.reduce(
-                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevVal: BigInt, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn())
     }
 
@@ -11401,7 +11600,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = BigInt>(
-                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => U, 
+                callbackfn: (previousValue: U, currentValue: BigInt, currentIndex: number, array: BigUint64Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -11424,11 +11623,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = BigInt>(
-                callbackfn: (previuosValue: U, currentValue: BigInt, currentIndex: number) => U, 
+                callbackfn: (previuosValue: U, currentValue: BigInt, currentIndex: number) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -11446,11 +11645,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = BigInt>(
-                callbackfn: (previuosValue: U, currentValue: BigInt) => U, 
+                callbackfn: (previuosValue: U, currentValue: BigInt) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -11468,11 +11667,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = BigInt>(
-                callbackfn: (previuosValue: U) => U, 
+                callbackfn: (previuosValue: U) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -11490,11 +11689,11 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = BigInt>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: BigInt, currIndex: number, array: BigUint64Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -11514,7 +11713,7 @@ export class BigUint64Array implements Iterable<BigInt> {
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        
+
         let accumulatedValue: BigInt = new BigInt(this.$_get(this.lengthInt - 1))
         for (let i = this.lengthInt - 2; i >= 0; i--) {
             accumulatedValue = callbackfn(accumulatedValue, new BigInt(this.getUnsafe(i)), i as number, this)
@@ -11536,7 +11735,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt, currentIndex: number) => BigInt): BigInt {
         return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn(prevValue, currValue, currIndex))
     }
 
@@ -11554,7 +11753,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduceRight(callbackfn: (previousValue: BigInt, currentValue: BigInt) => BigInt): BigInt {
         return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn(prevValue, currValue))
     }
 
@@ -11572,7 +11771,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduceRight(callbackfn: (previousValue: BigInt) => BigInt): BigInt {
         return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn(prevValue))
     }
 
@@ -11590,7 +11789,7 @@ export class BigUint64Array implements Iterable<BigInt> {
      */
     public reduceRight(callbackfn: () => BigInt): BigInt {
         return this.reduceRight(
-                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) => 
+                (prevValue: BigInt, currValue: BigInt, currIndex: number, array: BigUint64Array) =>
                         callbackfn())
     }
 
@@ -11614,11 +11813,11 @@ export class BigUint64Array implements Iterable<BigInt> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts three arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts three arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: BigInt, index: number, array: BigUint64Array) => boolean): boolean {
@@ -11633,11 +11832,11 @@ export class BigUint64Array implements Iterable<BigInt> {
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts two arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts two arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: BigInt, index: number) => boolean): boolean {
@@ -11648,10 +11847,10 @@ export class BigUint64Array implements Iterable<BigInt> {
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: () => boolean): boolean {

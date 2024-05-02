@@ -245,7 +245,7 @@ function testLastIndexOfNotFound(): int {
     return fail;
   }
 
-  let nf: number= target.lastIndexOf(11);
+  let nf: number = target.lastIndexOf(11);
 
   if (nf == -1) { return success; }
   return fail;
@@ -265,7 +265,7 @@ function testLastIndexOf4(): int {
         return fail;
     }
 
-    let result: number= target.lastIndexOf(50, 5);
+    let result: number = target.lastIndexOf(50, 5);
     if (result == 4) { return success; }
 
     return fail;
@@ -285,7 +285,7 @@ function testLastIndexOf3(): int {
         return fail;
     }
 
-    let result: number= target.lastIndexOf(50, 3);
+    let result: number = target.lastIndexOf(50, 3);
 
     if (result == 3) { return success; }
     return fail;

@@ -1020,7 +1020,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns true if e is in {{element['name']}}Array, false otherwise
      */
     public includes(e: {{element['etsType']}}, fromIndex: int): boolean {
-        return this.indexOf(e, fromIndex) != -1
+        return this.indexOf(e as int, fromIndex) != -1
     }
 
     /**
@@ -1046,51 +1046,81 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: {{element['subsetType']}}, fromIndex: number): number {
-        return this.indexOf({{fromElementCompat % 'e'}}, fromIndex as int)
+    public indexOf(searchElement: {{element['subsetType']}}, fromIndex?: number): number {
+        return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex start index to search from
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: {{element['etsType']}}, fromIndex: int): int {
-        throw new Error("not implemented")
+    public indexOf(searchElement: {{element['subsetType']}}, fromIndex: int): number {
+        {%- if element['subsetType'] == 'number' %}
+        if (isNaN(searchElement)) {
+            return -1
+        }
+        {%- endif %}
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            if ({{asElementCompat % 'this.getUnsafe(i)'}} == searchElement) {
+                return i
+            }
+        }
+        return -1
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: {{element['subsetType']}}): number {
-        return this.indexOf({{fromElementCompat % 'e'}})
+    public indexOf(searchElement: int, fromIndex: int): number {
+        fromIndex = normalizeIndex(fromIndex, this.lengthInt)
+        for (let i = fromIndex; i < this.lengthInt; i++) {
+            {%- if element['etsType'] == 'int' %}
+            if (this.getUnsafe(i) == searchElement) {
+            {%- else %}
+            if (this.getUnsafe(i) == searchElement as {{element['etsType']}}) {
+            {%- endif %}
+                return i
+            }
+        }
+        return -1
+
     }
 
     /**
-     * Returns index of specified element
+     * Returns the index of the first occurrence of a value in {{element['name']}}Array.
      *
-     * @param e search element
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     *  search starts at index 0.
      *
      * @returns index of element if it presents, -1 otherwise
      */
-    public indexOf(e: {{element['etsType']}}): int {
-        return this.indexOf(e, 0)
+    public indexOf(searchElement: int): number {
+        return this.indexOf(searchElement, 0)
     }
 
     /**
@@ -1125,71 +1155,94 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: {{element['subsetType']}}, fromIndex: number): number {
-        return this.lastIndexOf({{fromElementCompat % 'val'}}, fromIndex as int)
+    public lastIndexOf(searchElement: {{element['subsetType']}}, fromIndex?: number): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
     }
 
     /**
-     * Moves backwards starting at fromIndex to 0 and search val.
+     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex the first index to search val at, i.e. fromIndex is included in search space
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
      *
-     * @returns right-most index of val. It must be less or equal than fromIndex. -1 if val not found
-     *
-     * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: {{element['etsType']}}, fromIndex: int): number {
-        if (fromIndex >= this.lengthInt) {
-            fromIndex = this.lengthInt - 1
+    public lastIndexOf(searchElement: {{element['subsetType']}}, fromIndex: int): number {
+        {%- if element['subsetType'] == 'number' %}
+        if (isNaN(searchElement)) {
+            return -1
         }
-        if (fromIndex < 0) {
-            fromIndex = this.lengthInt + fromIndex
+        {%- endif %}
+        if (this.lengthInt == 0) {
+            return -1
         }
-
-        for (let i = fromIndex; i >= 0; i--) {
-            let tmp = this.at(i)
-            if (tmp == undefined) {
-                return -1 as number
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            if ({{asElementCompat % 'this.getUnsafe(k)'}} == searchElement) {
+                return k
             }
-            if (tmp{{numberBigIntUndefToPrimitive}} == val) {
-                return i as number
-            }
+            k--
         }
-        return -1 as number
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: {{element['subsetType']}}): number {
-        return this.lastIndexOf({{fromElementCompat % 'val'}}, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int, fromIndex: int): number {
+        if (this.lengthInt == 0) {
+            return -1
+        }
+        let k: int = this.lengthInt + fromIndex
+        if (fromIndex >= 0) {
+            k = (this.lengthInt - 1 < fromIndex) ? this.lengthInt - 1 : fromIndex
+        }
+        while (k >= 0) {
+            {%- if element['etsType'] == 'int' %}
+            if (this.getUnsafe(k) == searchElement) {
+            {%- else %}
+            if (this.getUnsafe(k) == searchElement as {{element['etsType']}}) {
+            {%- endif %}
+                return k
+            }
+            k--
+        }
+        return -1
     }
 
     /**
-     * Moves backwards and search val.
+     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
      *
-     * @param val a value to search
+     * @param searchElement The value to locate in the array.
      *
-     * @returns right-most index of val. -1 if val not found
+     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+     * search starts at index 0.
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(val: {{element['etsType']}}): number {
-        return this.lastIndexOf(val, this.lengthInt - 1)
+    public lastIndexOf(searchElement: int): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
     }
 
    /**
@@ -1401,7 +1454,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns new {{element['name']}}Array with the same underlying Buffer
      */
     public subarray(begin: int, end: int): {{element['name']}}Array {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -1545,10 +1598,10 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts one argument.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: {{elType}}) => boolean): boolean {
@@ -1664,14 +1717,14 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts one argument.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: {{elType}}) => boolean): boolean {
         return this.some((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate(element))
     }
@@ -1700,14 +1753,14 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts three arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): boolean {
         for (let i = 0; i < this.lengthInt; i++) {
             if (predicate({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)) {
@@ -1719,28 +1772,28 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts two arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: (element: {{elType}}, index: {{idxType}}) => boolean): boolean {
         return this.some((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate(element, index))
     }
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
-     * 
+     *
      * @param predicate A function that accepts no arguments.
-     * The some method calls the predicate function for each element in the array 
+     * The some method calls the predicate function for each element in the array
      * until the predicate returns a true or until the end of the array.
-     * 
-     * @returns false unless predicate function returns true for an array element, 
+     *
+     * @returns false unless predicate function returns true for an array element,
      * in which case true is immediately returned.
-     */ 
+     */
     public some(predicate: () => boolean): boolean {
         return this.some((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate())
     }
@@ -1759,7 +1812,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = {{elType}}>(
-                callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => U, 
+                callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = 0; i < this.lengthInt; i++) {
@@ -1782,11 +1835,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = {{elType}}>(
-                callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}) => U, 
+                callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -1804,11 +1857,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = {{elType}}>(
-                callbackfn: (previousValue: U, currentValue: {{elType}}) => U, 
+                callbackfn: (previousValue: U, currentValue: {{elType}}) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -1826,11 +1879,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = {{elType}}>(
-                callbackfn: (previousValue: U) => U, 
+                callbackfn: (previousValue: U) => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -1848,11 +1901,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduce<U = {{elType}}>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduce(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -1894,7 +1947,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduce(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}) => {{elType}}): {{elType}} {
         return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn(prevVal, currVal, currIndex))
     }
 
@@ -1912,7 +1965,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduce(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}) => {{elType}}): {{elType}} {
         return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn(prevVal, currVal))
     }
 
@@ -1930,7 +1983,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduce(callbackfn: (previousValue: {{elType}}) => {{elType}}): {{elType}} {
         return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn(prevVal))
     }
 
@@ -1948,7 +2001,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduce(callbackfn: () => {{elType}}): {{elType}} {
         return this.reduce(
-                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevVal: {{elType}}, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn())
     }
 
@@ -1966,7 +2019,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = {{elType}}>(
-                callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => U, 
+                callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{element['name']}}Array) => U,
                 initialValue: U): U {
         let accumulatedValue = initialValue
         for (let i = this.lengthInt - 1; i >= 0; i--) {
@@ -1989,11 +2042,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = {{elType}}>(
-                callbackfn: (previuosValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}) => U, 
+                callbackfn: (previuosValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(prevVal, currVal, currIndex), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(prevVal, currVal, currIndex),
                 initialValue)
     }
 
@@ -2011,11 +2064,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = {{elType}}>(
-                callbackfn: (previuosValue: U, currentValue: {{elType}}) => U, 
+                callbackfn: (previuosValue: U, currentValue: {{elType}}) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(prevVal, currVal), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(prevVal, currVal),
                 initialValue)
     }
 
@@ -2033,11 +2086,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = {{elType}}>(
-                callbackfn: (previuosValue: U) => U, 
+                callbackfn: (previuosValue: U) => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(prevVal), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(prevVal),
                 initialValue)
     }
 
@@ -2055,11 +2108,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns The value that results from running the callback function to completion over the entire typed array.
      */
     public reduceRight<U = {{elType}}>(
-                callbackfn: () => U, 
+                callbackfn: () => U,
                 initialValue: U): U {
         return this.reduceRight(
-                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
-                        callbackfn(), 
+                (prevVal: U, currVal: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
+                        callbackfn(),
                 initialValue)
     }
 
@@ -2079,7 +2132,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
-        
+
         let accumulatedValue: {{elType}} = {{castToEl % 'this.$_get(this.lengthInt - 1)'}}
         for (let i = this.lengthInt - 2; i >= 0; i--) {
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
@@ -2101,7 +2154,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduceRight(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}) => {{elType}}): {{elType}} {
         return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn(prevValue, currValue, currIndex))
     }
 
@@ -2119,7 +2172,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduceRight(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}) => {{elType}}): {{elType}} {
         return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn(prevValue, currValue))
     }
 
@@ -2137,7 +2190,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduceRight(callbackfn: (previousValue: {{elType}}) => {{elType}}): {{elType}} {
         return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn(prevValue))
     }
 
@@ -2155,7 +2208,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public reduceRight(callbackfn: () => {{elType}}): {{elType}} {
         return this.reduceRight(
-                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) => 
+                (prevValue: {{elType}}, currValue: {{elType}}, currIndex: {{idxType}}, array: {{element['name']}}Array) =>
                         callbackfn())
     }
 
@@ -2179,11 +2232,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts three arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts three arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => boolean): boolean {
@@ -2198,11 +2251,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
      *
-     * @param predicate A function that accepts two arguments. 
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * @param predicate A function that accepts two arguments.
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: (element: {{elType}}, index: {{idxType}}) => boolean): boolean {
@@ -2213,10 +2266,10 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * Determines whether the specified callback function returns true for all elements of an array.
      *
      * @param predicate A function that accepts no arguments.
-     * The every method calls the predicate function for each element in the array until the predicate returns a false, 
+     * The every method calls the predicate function for each element in the array until the predicate returns a false,
      * or until the end of the array.
      *
-     * @returns true unless predicate function returns a false for an array element, 
+     * @returns true unless predicate function returns a false for an array element,
      * in which case false is immediately returned.
      */
     public every(predicate: () => boolean): boolean {
