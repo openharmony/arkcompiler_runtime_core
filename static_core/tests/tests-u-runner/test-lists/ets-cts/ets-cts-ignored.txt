@@ -599,6 +599,63 @@
 06.contexts_and_conversions/02.string_operator_contexts/conversion_9.ets
 # end of es2panda fails
 
+# 17053 Cannot create array of nullish tuples
+07.expressions/04.array_literal/array_literal_13.ets
+
+# 17051 Promise<void> should resolve as undefined
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_0.ets
+
+# 17050 SegFault on executing launch in a launched function
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_9.ets
+
+# 17022 No CTE on launching a method
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_n_6.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_n_7.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_n_8.ets
+
+# 17054 Compilation aborts on top-level array of lambdas
+07.expressions/04.array_literal/array_literal_5.ets
+
+# 17021 Verifier hangs on 'launch' expression
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_1.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_2.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_3.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_4.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_5.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_6.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_7.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_8.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_10.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_11.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_12.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_13.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_14.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_15.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_16.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_18.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_21.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_0.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_1.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_2.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_3.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_4.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_5.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_6.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_7.ets
+17.experimental_features/15.coroutines/02.awaiting_coroutine/a_8.ets
+
+# 17057 Cannot launch function returning enum
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_19.ets
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_20.ets
+
+# 17056 Fails to compile casting to Promise
+17.experimental_features/15.coroutines/01.create_and_launch_coroutine/c_17.ets
+
+# 17142 Compilation fails on multiple then/catch in Promise chain
+17.experimental_features/15.coroutines/03.promise_class/p_3.ets
+17.experimental_features/15.coroutines/03.promise_class/p_4.ets
+17.experimental_features/15.coroutines/03.promise_class/p_5.ets
+
 # es2panda fails: panda#11752
 13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_10.ets
 13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_11.ets

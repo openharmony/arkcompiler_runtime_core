@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-{% for item in array_composite %}
+{% for c in cases %}
 /*---
-desc: The number of initializer expressions enclosed in braces of the array initializer
-    determines the length of the array to be constructed.
+desc: The expressions await and wait are used while a previously launched coroutine finishes and returns a value.
+tags: [compile-only, negative]
 ---*/
 
-{{item.decl}}
-let x: {{item.type}}[] = {{item.array}}
+{{c.decl}}
 
 function main() {
-    assert x.length == {{item.len}}
+    {{c.use|indent}}
 }
 {% endfor %}
