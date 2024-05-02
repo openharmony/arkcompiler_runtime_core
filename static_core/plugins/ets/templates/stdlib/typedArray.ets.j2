@@ -78,6 +78,7 @@ class {{N}}ArrayIterator implements IterableIterator<{{subsetTypeValues}}> {
  */
 export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
     public static readonly BYTES_PER_ELEMENT: number = {{S}}
+    internal readonly lengthInt: int
 
     /**
      * Creates an empty {{N}}Array.
@@ -94,10 +95,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
         let arr = Array.from<{{subsetTypeValues}}>(elements)
         this.byteLength = arr.length * {{N}}Array.BYTES_PER_ELEMENT as int
-        this.length = arr.length
+        this.lengthInt = arr.length as int
         this.buffer = new ArrayBuffer(this.byteLength as int)
         this.byteOffset = 0
-        for (let i: int = 0; i < this.length as int; ++i) {
+        for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, arr.$_get(i){{numberBigIntToPrimitive}})
         }
     }
@@ -156,7 +157,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         }
         this.byteLength = intByteLength
         this.byteOffset = intByteOffset
-        this.length = intLength
+        this.lengthInt = intLength
         this.buffer = buf
     }
 
@@ -234,7 +235,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
             if (this.byteLength % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
                throw new RangeError("ArrayBufferLike.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
             }
-            this.length = this.byteLength as int / {{N}}Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = this.byteLength / {{N}}Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as ArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof SharedArrayBuffer) {
@@ -242,7 +243,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
             if (this.byteLength % {{N}}Array.BYTES_PER_ELEMENT as int != 0) {
                throw new RangeError("ArrayBufferLike.byteLength should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
             }
-            this.length = this.byteLength as int / {{N}}Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = this.byteLength / {{N}}Array.BYTES_PER_ELEMENT as int
             this.buffer = buf as SharedArrayBuffer
             this.byteOffset = 0
         } else if (buf instanceof ArrayLike) {
@@ -250,10 +251,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
             // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.ets
             let arr = Array.from<Number>((buf as ArrayLike<Number>))
             this.byteLength = arr.length as int * {{N}}Array.BYTES_PER_ELEMENT as int
-            this.length = arr.length as int
+            this.lengthInt = arr.length as int
             this.buffer = new ArrayBuffer(this.byteLength as int)
             this.byteOffset = 0
-            for (let i: int = 0; i < this.length as int; ++i) {
+            for (let i: int = 0; i < this.lengthInt; ++i) {
                 this.setUnsafe(i, arr.$_get(i).{{T}}Value())
             }
         } else {
@@ -270,7 +271,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         if (length < 0) {
             throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.length = length
+        this.lengthInt = length
         this.byteLength = length * {{N}}Array.BYTES_PER_ELEMENT as int
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength as int)
@@ -299,7 +300,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
             throw new Error("unexpected type of buffer")
         }
         this.byteLength = other.byteLength
-        this.length = other.length
+        this.lengthInt = other.length as int
         this.byteOffset = 0
     }
     {%- if (N != 'Float32') and (N != 'Float64') %}
@@ -343,7 +344,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      */
     public $_set(index: int, val: {{elementCompat}}): void {
         // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.length as int) {
+        if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
         {%- if (N != 'Float32') and (N != 'Float64') %}
@@ -375,7 +376,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      */
     public $_set(index: int, val: int): void {
         // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.length as int) {
+        if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
         {%- if (N != 'Float32') and (N != 'Float64') %}
@@ -408,7 +409,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      */
     public $_set(index: int, val: {{T}}): void {
         // NOTE (ikorobkov): TS doesn't throw exception. Exception was added to avoid memory's out-of-range access
-        if (index < 0 || index >= this.length as int) {
+        if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
         {%- if (N != 'Float32') and (N != 'Float64') %}
@@ -419,6 +420,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         {%- endif %}
     }
     {%- endif %}
+
+    /** Number of {{T}} stored in {{N}}Array */
+    public get length(): number {
+        return this.lengthInt
+    }
 
     /**
      * Returns an instance of {{elementCompat}} at passed index.
@@ -439,7 +445,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns a primitive at index
      */
     public $_get(index: int): {{elementCompat}} {
-        if (index < 0 || index >= this.length as int) {
+        if (index < 0 || index >= this.lengthInt) {
             throw new RangeError("invalid index")
         }
         return {{asElementCompat % 'this.getUnsafe(index)'}}
@@ -469,9 +475,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         if (index >= 0) {
             k = index;
         } else {
-            k = this.length as int + index
+            k = this.lengthInt + index
         }
-        if (k < 0 || k >= this.length as int) {
+        if (k < 0 || k >= this.lengthInt) {
             return undefined
         }
         return new Number(this.getUnsafe(k))
@@ -501,9 +507,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         if (index >= 0) {
             k = index
         } else {
-            k = this.length as int + index
+            k = this.lengthInt + index
         }
-        if (k < 0 || k >= this.length as int) {
+        if (k < 0 || k >= this.lengthInt) {
             return undefined
         }
         return {{asElementCompat % 'this.getUnsafe(k)'}}
@@ -522,7 +528,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: number, end?: number): {{N}}Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.length as int))
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -537,7 +543,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: number, end?: number): {{N}}Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.length as int))
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -552,7 +558,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: number, start: int, end?: number): {{N}}Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.length as int))
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -567,7 +573,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end?: number): {{N}}Array {
-        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.length as int))
+        return this.copyWithin(target as int, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -582,12 +588,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * See rules of parameters normalization on {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin | MDN}
      */
     public copyWithin(target: int, start: int, end: int): {{N}}Array {
-        let toPos = normalizeIndex(target, this.length as int)
-        let fromPos = normalizeIndex(start, this.length as int)
-        const finalPos = normalizeIndex(end, this.length as int)
+        let toPos = normalizeIndex(target, this.lengthInt)
+        let fromPos = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
         let count: int = finalPos - fromPos
-        if (count > (this.length as int - toPos)) {
-            count = this.length as int - toPos
+        if (count > (this.lengthInt - toPos)) {
+            count = this.lengthInt - toPos
         }
         let direction: int = 1
         if ((fromPos < toPos) && (toPos < fromPos + count)) {
@@ -626,7 +632,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin}
      */
     public copyWithin(target: int): {{N}}Array {
-        return this.copyWithin(target, 0, this.length as int)
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     {% set TBoxed = T[0].upper() + T[1:] -%}
@@ -646,7 +652,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns modified {{N}}Array
      */
     public fill(value: {{elementCompat}}, start?: number, end?: number): {{N}}Array {
-        return this.fill(value{{fromElementCompat}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.length as int))
+        return this.fill(value{{fromElementCompat}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -657,7 +663,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns modified {{N}}Array
      */
     public fill(value: {{elementCompat}}, start: int, end?: number): {{N}}Array {
-        return this.fill(value{{fromElementCompat}}, start as int, asIntOrDefault(end, this.length as int))
+        return this.fill(value{{fromElementCompat}}, start as int, asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -693,8 +699,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         {%- if N != 'Float64' %}
         return this.fill(value{{fromElementCompat}}, start as int, end as int)
         {%- else %}
-        const k = normalizeIndex(start, this.length as int)
-        const finalPos = normalizeIndex(end, this.length as int)
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
         for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
@@ -711,7 +717,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns modified {{N}}Array
      */
     public fill(value: {{T}}, start?: number, end?: number): {{N}}Array {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.length as int));
+        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt));
     }
 
     /**
@@ -722,7 +728,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns modified {{N}}Array
      */
     public fill(value: {{T}}, start: int, end?: number): {{N}}Array {
-        return this.fill(value, start as int, asIntOrDefault(end, this.length as int));
+        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt));
     }
 
     /**
@@ -755,8 +761,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns modified {{N}}Array
      */
     public fill(value: {{T}}, start: int, end: int): {{N}}Array {
-        const k = normalizeIndex(start, this.length as int)
-        const finalPos = normalizeIndex(end, this.length as int)
+        const k = normalizeIndex(start, this.lengthInt)
+        const finalPos = normalizeIndex(end, this.lengthInt)
         for (let i: int = k; i < finalPos; ++i) {
             this.setUnsafe(i, value)
         }
@@ -798,12 +804,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: {{elementCompat}}[], insertPos: number): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos as int + i, v{{fromElementCompat}})
+            this.setUnsafe(offset + i, v{{fromElementCompat}})
         {%- else %}
-            this.setUnsafe(insertPos as int + i, arr[i]{{fromElementCompat}})
+            this.setUnsafe(offset + i, arr[i]{{fromElementCompat}})
         {%- endif %}
         }
     }
@@ -818,12 +828,16 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/set}
      */
     public set(arr: {{T}}[], insertPos: int): void {
+        const offset = insertPos as int
+        if (offset < 0 || offset + arr.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
         for (let i = 0; i < arr.length as int; ++i) {
         {%- if (N != 'Float32') and (N != 'Float64') %}
             let v = this.zeroIfInfinity(arr[i])
-            this.setUnsafe(insertPos + i, v)
+            this.setUnsafe(offset + i, v)
         {%- else %}
-            this.setUnsafe(insertPos + i, arr[i])
+            this.setUnsafe(offset + i, arr[i])
         {%- endif %}
         }
     }
@@ -846,6 +860,28 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      */
     public set(arr: {{T}}[]): void {
         this.set(arr, 0 as int)
+    }
+
+    /**
+     * Copies elements from an ArrayLike object to the {{N}}Array.
+     *
+     * @param array An ArrayLike object containing the elements to copy.
+     *
+     * @param offset Optional. The offset into the target array at which to begin writing values from the source array
+     */
+    public set(array: ArrayLike<{% if N == 'BigInt64'%}BigInt{% else %}number{% endif %}>, offset: number = 0): void {
+        const insertPos = offset as int
+        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+            throw new RangeError("offset is out of bounds")
+        }
+        for (let i = 0; i < array.length as int; ++i) {
+        {%- if (N != 'Float32') and (N != 'Float64') %}
+            let v = this.zeroIfInfinity(array[i])
+            this.setUnsafe(insertPos + i, v{{fromElementCompat}})
+        {%- else %}
+            this.setUnsafe(insertPos + i, array[i]{{fromElementCompat}})
+        {%- endif %}
+        }
     }
 
     /**
@@ -900,7 +936,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns true if e is in {{N}}Array, false otherwise
      */
     public includes(e: {{T}}, fromIndex: int): boolean {
-        for (let i = fromIndex; i < this.length as int; ++i) {
+        for (let i = fromIndex; i < this.lengthInt; ++i) {
             let tmp = this.at(i)
             if (tmp == undefined) {
                 return false;
@@ -951,17 +987,17 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns index of element if it presents, -1 otherwise
      */
     public indexOf(e: {{T}}, fromIndex: int): int {
-        if (fromIndex >= this.length as int) {
+        if (fromIndex >= this.lengthInt) {
             return -1
         }
         if (fromIndex < 0) {
-            fromIndex += this.length as int
+            fromIndex += this.lengthInt
             // See TypedArray.indexOf JS docs
             if (fromIndex < 0) {
                 fromIndex = 0
             }
         }
-        for (let i = fromIndex; i < this.length as int; ++i) {
+        for (let i = fromIndex; i < this.lengthInt; ++i) {
             let tmp = this.at(i)
             if (tmp == undefined) {
                 return -1
@@ -998,12 +1034,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
             return this.join(",")
         }
         let res: StringBuilder = new StringBuilder("")
-        for (let i = 0; i < this.length as int - 1; ++i) {
+        for (let i = 0; i < this.lengthInt - 1; ++i) {
             res.append({{asElementCompat % 'this.getUnsafe(i)'}})
             res.append(s)
         }
-        if (this.length as int > 0) {
-            res.append({{asElementCompat % 'this.getUnsafe(this.length as int - 1)'}})
+        if (this.lengthInt > 0) {
+            res.append({{asElementCompat % 'this.getUnsafe(this.lengthInt - 1)'}})
         }
         return res.toString()
     }
@@ -1062,11 +1098,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/lastIndexOf
      */
     public lastIndexOf(val: {{T}}, fromIndex: int): int {
-        if (fromIndex >= this.length as int) {
-            fromIndex = this.length as int - 1
+        if (fromIndex >= this.lengthInt) {
+            fromIndex = this.lengthInt - 1
         }
         if (fromIndex < 0) {
-            fromIndex = this.length as int + fromIndex
+            fromIndex = this.lengthInt + fromIndex
         }
 
         for (let i = fromIndex; i >= 0; --i) {
@@ -1090,7 +1126,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns right-most index of val. -1 if val not found
      */
     public lastIndexOf(val: {{T}}): int {
-        return this.lastIndexOf(val, this.length as int - 1)
+        return this.lastIndexOf(val, this.lengthInt - 1)
     }
     {%- endif %}
 
@@ -1111,9 +1147,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns a new {{N}}Array using reversed data from the current one
      */
     public reverse(): {{N}}Array {
-        for (let i: int = 0; i < this.length as int / 2 as int; i++) {
-            const tmp = this.getUnsafe(this.length as int - 1 - i)
-            this.setUnsafe(this.length as int - 1 - i, this.getUnsafe(i))
+        for (let i: int = 0; i < this.lengthInt / 2 as int; i++) {
+            const tmp = this.getUnsafe(this.lengthInt - 1 - i)
+            this.setUnsafe(this.lengthInt - 1 - i, this.getUnsafe(i))
             this.setUnsafe(i, tmp)
         }
         return this
@@ -1131,7 +1167,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin?: number, end?: number): {{N}}Array {
-        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+        return this.slice(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -1191,7 +1227,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/slice
      */
     public slice(begin: int, end: int): {{N}}Array {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -1228,7 +1264,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns a new {{N}}Array with elements of current {{N}}Array[begin, this.length)
      */
     public slice(begin: int): {{N}}Array {
-        return this.slice(begin, this.length as int)
+        return this.slice(begin, this.lengthInt)
     }
 
     /**
@@ -1241,7 +1277,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns new {{N}}Array with the same underlying ArrayBufferLike
      */
     public subarray(begin?: number, end?: number): {{N}}Array {
-        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.length as int))
+        return this.subarray(asIntOrDefault(begin, 0 as int), asIntOrDefault(end, this.lengthInt))
     }
 
     /**
@@ -1293,7 +1329,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns new {{N}}Array with the same underlying ArrayBufferLike
      */
     public subarray(begin: int, end: int): {{N}}Array {
-        const len: int = this.length as int
+        const len: int = this.lengthInt
         const relStart = normalizeIndex(begin, len)
         const relEnd = normalizeIndex(end, len)
         let count = relEnd - relStart
@@ -1311,7 +1347,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns new {{N}}Array with the same ArrayBufferLike
      */
     public subarray(begin: number): {{N}}Array {
-        return this.subarray(begin as int, this.length as int)
+        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
@@ -1322,7 +1358,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns new {{N}}Array with the same ArrayBufferLike
      */
     public subarray(begin: int): {{N}}Array {
-        return this.subarray(begin as int, this.length as int)
+        return this.subarray(begin as int, this.lengthInt)
     }
 
     /**
@@ -1591,14 +1627,14 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns sorted {{N}}Array
      */
     public sort(fn?: (a: {{elType}}, b: {{elType}}) => number): {{N}}Array {
-        let arr: {{T}}[] = new {{T}}[this.length as int]
-        for (let i = 0; i < this.length as int; ++i) {
+        let arr: {{T}}[] = new {{T}}[this.lengthInt]
+        for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
         if (fn == undefined) {
             // NOTE (ikorobkov): needs to add signature for sort({{T}}[])
             //sort(arr)
-            for (let i = 0; i < this.length as int; ++i) {
+            for (let i = 0; i < this.lengthInt; ++i) {
                 this.set(i, arr[i])
             }
         } else {
@@ -1606,7 +1642,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
             // let mustPrecede: (a: {{T}}, b: {{T}}) => boolean =
             //     (a: {{T}}, b: {{T}}): boolean => { return (fn(a, b) <= 0) }
             // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.length as int; ++i) {
+            // for (let i = 0; i < this.lengthInt; ++i) {
             //     this.set(i, arr[i])
             // }
         }
@@ -1625,7 +1661,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * in which case true is immediately returned.
      */ 
     public some(predicate: (element: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             if (predicate({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)) {
                 return true
             }
@@ -1678,7 +1714,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
                 callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{N}}Array) => U, 
                 initialValue: U): U {
         let accumulatedValue = initialValue
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
         return accumulatedValue
@@ -1781,12 +1817,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * calling reduce method on an empty array without an initial value creates a TypeError
      */
     public reduce(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{N}}Array) => {{elType}}): {{elType}} {
-        if (this.length == 0) {
+        if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
         let accumulatedValue = {{castToEl % 'this.getUnsafe(0)'}}
-        for (let i = 1; i < this.length as int; ++i) {
+        for (let i = 1; i < this.lengthInt; ++i) {
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
         return accumulatedValue
@@ -1882,7 +1918,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
                 callbackfn: (previousValue: U, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{N}}Array) => U, 
                 initialValue: U): U {
         let accumulatedValue = initialValue
-        for (let i = this.length as int - 1; i >= 0; --i) {
+        for (let i = this.lengthInt - 1; i >= 0; --i) {
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
         return accumulatedValue
@@ -1985,12 +2021,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * calling reduceRight method on an empty array without an initial value creates a TypeError
      */
     public reduceRight(callbackfn: (previousValue: {{elType}}, currentValue: {{elType}}, currentIndex: {{idxType}}, array: {{N}}Array) => {{elType}}): {{elType}} {
-        if (this.length == 0) {
+        if (this.lengthInt == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
-        let accumulatedValue: {{elType}} = {{castToEl % 'this.getUnsafe(this.length as int - 1)'}}
-        for (let i = this.length as int - 2; i >= 0; --i) {
+        let accumulatedValue: {{elType}} = {{castToEl % 'this.getUnsafe(this.lengthInt - 1)'}}
+        for (let i = this.lengthInt - 2; i >= 0; --i) {
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
         return accumulatedValue
@@ -2076,9 +2112,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
     * @returns a new {{N}}Array where for each element from current {{N}}Array fn was applied
     */
     public map(fn: (val: {{elType}}, index: {{idxType}}) => {{elType}}): {{N}}Array {
-        let resBuf = new ArrayBuffer(this.length as int * {{N}}Array.BYTES_PER_ELEMENT as int)
+        let resBuf = new ArrayBuffer(this.lengthInt * {{N}}Array.BYTES_PER_ELEMENT as int)
         let res = new {{N}}Array(resBuf, 0, resBuf.getByteLength() / {{N}}Array.BYTES_PER_ELEMENT as int)
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             res.set(i, fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}){{castFromEl}})
         }
         return res
@@ -2095,7 +2131,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * in which case false is immediately returned.
      */
     public every(predicate: (element: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): boolean {
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             if (!predicate({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)) {
                 return false
             }
@@ -2139,9 +2175,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns a new {{N}}Array with elements from current {{N}}Array that satisfy condition fn
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{N}}Array {
-        let markers = new boolean[this.length as int]
+        let markers = new boolean[this.lengthInt]
         let resLen = 0
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
             if (markers[i]) {
                 ++resLen
@@ -2149,7 +2185,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         }
         let resBuf = new ArrayBuffer(resLen * {{N}}Array.BYTES_PER_ELEMENT as int)
         let res = new {{N}}Array(resBuf, 0)
-        for (let i = 0, j = 0; i < this.length as int; ++i) {
+        for (let i = 0, j = 0; i < this.lengthInt; ++i) {
             if (markers[i]) {
                 res.set(j, this.getUnsafe(i))
                 ++j
@@ -2195,7 +2231,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns {{retType}}
      */
     public find(predicate: (value: {{elType}}, index: {{idxType}}, obj: {{N}}Array) => boolean): {{retType}} {
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             let val = this.getUnsafe(i)
             if (predicate({{asElementCompat % 'val'}}, i{{castToIdx}}, this)) {
                 return {{asElementCompat % 'val'}}
@@ -2229,7 +2265,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns {{idxType}}
      */
     public findIndex(predicate: (value: {{elType}}, index: {{idxType}}, obj: {{N}}Array) => boolean): {{idxType}} {
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             if (predicate({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)) {
                 return i{{castToIdx}}
             }
@@ -2273,7 +2309,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns the last element that satisfies fn
      */
     public findLast(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{T}} {
-        for (let i = this.length as int - 1; i >= 0; --i) {
+        for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
             if (fn({{castToEl % 'val'}}, i{{castToIdx}}, this)) {
                 return val
@@ -2303,7 +2339,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns the index of the last element that satisfies fn, -1 otherwise
      */
     public findLastIndex(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{idxType}} {
-        for (let i = this.length as int - 1; i >= 0; --i) {
+        for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
             if (fn({{castToEl % 'val'}}, i{{castToIdx}}, this)) {
                 return i
@@ -2333,7 +2369,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      * @returns undefined
      */
     public forEach(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => {{T}}): void {
-        for (let i = 0; i < this.length as int; ++i) {
+        for (let i = 0; i < this.lengthInt; ++i) {
             fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
     }
@@ -2494,9 +2530,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
 
     /** Number of bytes used */
     public readonly byteLength: number
-
-    /** Number of {{T}} stored in {{N}}Array */
-    public readonly length: number
 
     /** String \"{{N}}Array\" */
     public readonly name = "{{N}}Array"
