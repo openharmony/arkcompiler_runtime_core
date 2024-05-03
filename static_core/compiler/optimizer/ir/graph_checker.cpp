@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2104,8 +2104,18 @@ void GraphChecker::VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unus
                                     << std::endl);
 
     [[maybe_unused]] auto saveState = inst->GetInput(2).GetInst();
-    ASSERT_DO_EXT_VISITOR((saveState != nullptr && saveState->GetOpcode() == Opcode::SaveState),
+    ASSERT_DO_EXT_VISITOR(saveState != nullptr,
                           std::cerr << "CheckCast instruction must have SaveState as input 2: " << *inst << std::endl);
+    if (inst->CanDeoptimize()) {
+        ASSERT_DO_EXT_VISITOR(
+            (saveState->GetOpcode() == Opcode::SaveState || saveState->GetOpcode() == Opcode::SaveStateDeoptimize),
+            std::cerr << "CheckCast D instruction must have SaveState or SaveStateDeoptimize as input 2: " << *inst
+                      << std::endl);
+    } else {
+        ASSERT_DO_EXT_VISITOR(saveState->GetOpcode() == Opcode::SaveState,
+                              std::cerr << "CheckCast instruction must have SaveState as input 2: " << *inst
+                                        << std::endl);
+    }
 }
 
 void GraphChecker::VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)

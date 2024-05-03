@@ -688,10 +688,12 @@ void EncodeVisitor::VisitRefTypeCheck(GraphVisitor *visitor, Inst *inst)
     auto arrayReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
     auto refReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
     [[maybe_unused]] constexpr int64_t IMM_2 = 2;
-    ASSERT(inst->GetInput(IMM_2).GetInst()->GetOpcode() == Opcode::SaveState);
+    ASSERT(inst->GetInput(IMM_2).GetInst()->GetOpcode() == Opcode::SaveState ||
+           inst->GetInput(IMM_2).GetInst()->GetOpcode() == Opcode::SaveStateDeoptimize);
     auto runtime = enc->cg_->GetGraph()->GetRuntime();
-    static constexpr auto ENTRYPOINT_ID = RuntimeInterface::EntrypointId::CHECK_STORE_ARRAY_REFERENCE;
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathRefCheck>(inst, ENTRYPOINT_ID);
+    auto eid = inst->CanDeoptimize() ? RuntimeInterface::EntrypointId::CHECK_STORE_ARRAY_REFERENCE_DEOPTIMIZE
+                                     : RuntimeInterface::EntrypointId::CHECK_STORE_ARRAY_REFERENCE;
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathRefCheck>(inst, eid);
     slowPath->SetRegs(arrayReg, refReg);
     slowPath->CreateBackLabel(encoder);
     // We don't check if stored object is nullptr
@@ -1507,7 +1509,9 @@ void EncodeVisitor::FillUnresolvedClass(GraphVisitor *visitor, Inst *inst)
     auto graph = enc->cg_->GetGraph();
     auto encoder = enc->GetEncoder();
     auto classReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(1), DataType::REFERENCE);
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
+    auto eid = inst->CanDeoptimize() ? RuntimeInterface::EntrypointId::CHECK_CAST_DEOPTIMIZE
+                                     : RuntimeInterface::EntrypointId::CHECK_CAST;
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, eid);
     encoder->EncodeJump(slowPath->GetLabel(), classReg, Condition::EQ);
     slowPath->CreateBackLabel(encoder);
     auto src = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);  // obj
@@ -1583,7 +1587,9 @@ void EncodeVisitor::FillArrayClass(GraphVisitor *visitor, Inst *inst, Reg tmpReg
     auto graph = enc->cg_->GetGraph();
     auto runtime = graph->GetRuntime();
     auto encoder = enc->GetEncoder();
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
+    auto eid = inst->CanDeoptimize() ? RuntimeInterface::EntrypointId::CHECK_CAST_DEOPTIMIZE
+                                     : RuntimeInterface::EntrypointId::CHECK_CAST;
+    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, eid);
     // Load Component type of Input
     encoder->EncodeLdr(tmpReg, false, MemRef(tmpReg, runtime->GetClassComponentTypeOffset(enc->GetArch())));
     // Check that src is array class
@@ -1602,8 +1608,10 @@ void EncodeVisitor::FillInterfaceClass(GraphVisitor *visitor, Inst *inst)
     auto enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto codegen = enc->GetCodegen();
-    if (codegen->GetArch() == Arch::AARCH32) {
-        auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, EntrypointId::CHECK_CAST);
+    if (inst->CanDeoptimize() || codegen->GetArch() == Arch::AARCH32) {
+        auto eid = inst->CanDeoptimize() ? RuntimeInterface::EntrypointId::CHECK_CAST_DEOPTIMIZE
+                                         : RuntimeInterface::EntrypointId::CHECK_CAST;
+        auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathEntrypoint>(inst, eid);
         encoder->EncodeJump(slowPath->GetLabel());
         slowPath->BindBackLabel(encoder);
     } else {
@@ -1628,9 +1636,15 @@ void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, La
     enc->GetCodegen()->LoadClassFromObject(tmpReg, src);
     // There is no exception if the classes are equal
     encoder->EncodeJump(endLabel, classReg, tmpReg, Condition::EQ);
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathCheckCast>(inst, EntrypointId::CLASS_CAST_EXCEPTION);
-    slowPath->SetClassReg(classReg);
-    auto throwLabel = slowPath->GetLabel();
+    LabelHolder::LabelId throwLabel;
+    if (inst->CanDeoptimize()) {
+        throwLabel =
+            enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(inst, DeoptimizeType::CHECK_CAST)->GetLabel();
+    } else {
+        auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathCheckCast>(inst, EntrypointId::CLASS_CAST_EXCEPTION);
+        slowPath->SetClassReg(classReg);
+        throwLabel = slowPath->GetLabel();
+    }
     switch (klassType) {
         // The input class should be not primitive type
         case ClassType::OBJECT_CLASS: {
