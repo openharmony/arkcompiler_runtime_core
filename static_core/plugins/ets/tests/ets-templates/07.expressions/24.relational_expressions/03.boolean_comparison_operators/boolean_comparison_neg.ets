@@ -13,17 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for case in boolean_comparison %}
+{% for case in boolean_comparison_neg %}
 
 /*---
-desc: Boolean comparison {{case.left}} {{case.op}} {{case.right}}
+desc: Comparing boolean with non-boolean types {{case.left}} {{case.op}} {{case.right}}
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-  let x: {{case.type}} = {{case.left}}
-  let y: {{case.type}} = {{case.right}}
-  assert ( {{case.left}} {{case.op}} {{case.right}} ) == {{case.result}}
-  assert ( x {{case.op}} y) == {{case.result}}
+  let x: {{case.ltype}} = {{case.left}}
+  let y: {{case.rtype}} = {{case.right}}
+  x {{case.op}} y /* CTE */
 }
 
 {% endfor %}
