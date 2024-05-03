@@ -161,7 +161,7 @@ class SpecReport:
             report = file_pointer.read()
         report = report.replace(self.REPORT_DATE, str(date.today()))
         report = report.replace(self.REPORT_TEST_SUITE, self.test_suite)
-        report = report.replace(self.REPORT_SPEC_FILE, str(self.spec_file))
+        report = report.replace(self.REPORT_SPEC_FILE, self.__fmt_str(str(self.spec_file)))
         report = report.replace(self.REPORT_SPEC_CREATION_DATE, self.spec_creation_date)
 
         if not self.has_excluded:
