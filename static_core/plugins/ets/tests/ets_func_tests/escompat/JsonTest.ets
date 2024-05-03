@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+const RESULT_SUCCESS = 0
+const RESULT_FAILURE = 1
+
 function test(result: boolean, name: String): int {
     if (result) {
         console.println("PASSED: " + name)
-        return 0
+        return RESULT_SUCCESS
     }
     console.println("FAILED: " + name)
-    return 1
+    return RESULT_FAILURE
 }
 
 function testNull(): int {
@@ -60,12 +63,19 @@ function equalObjectArrays(a: Object[], b: Object[]): boolean {
     return true
 }
 
-function testArrayBoolean(): int {
+function testArrayBooleanParse(): int {
     let booleanType = Type.of(new Boolean[1] as Object)
     let emptyArray : Boolean[] = []
     return test(equalObjectArrays(JSON.parse<Object>("[false, true]", booleanType) as Boolean[],
             [Boolean.valueOf(false), Boolean.valueOf(true)]), "[false, true]") +
         test(equalObjectArrays(JSON.parse<Object>("[]", booleanType) as Boolean[], emptyArray), "[]")
+}
+
+function testArrayBooleanStringify(): int {
+    let boxedBools = [new Boolean(true), new Boolean(false)]
+    let bools = [true, false]
+
+    return test(JSON.stringify(boxedBools) == JSON.stringify(bools), "[new Boolean(true), new Boolean(false)]")
 }
 
 function testArrayDouble(): int {
@@ -134,18 +144,260 @@ function testCheckParse(): int {
     return errors
 }
 
+class ManyFields {
+    undef1 = undefined
+
+    boxBool = new Boolean(true)
+    boxBools = [new Boolean(true)]
+
+    boxByte = new Byte(1 as byte)
+    boxBytes = [new Byte(1 as byte)]
+
+    boxShort = new Short(1 as short)
+    boxShorts = [new Short(1 as short)]
+
+    boxInt = new Int(1)
+    boxInts = [new Int(1), new Int(1)]
+
+    undef2 = undefined
+
+    boxLong = new Long(1)
+    boxLongs = [new Long(1)]
+
+    boxFloat = new Float(1.1)
+
+    // NOTE(cheezzario) without explicit type, reflection returns this field value as double[] and 1.1 becomes 1.100000023841858
+    boxFloats: Float[] = [new Float(1.1)]
+
+    boxDouble = new Double(1.1)
+    boxDoubles = [new Double(1.1)]
+
+    nan = NaN
+    posinf = Infinity
+    neginf = -Infinity
+
+    static constant = "constant"
+
+    // NOTE(cheezzario) reflection issue #17184 ( 'lambda' typed fields identified as 'InterfaceType' instead of 'LambdaType' )
+    // lambda = () => "lambda"
+
+    undef3 = undefined
+}
+
+class TimeWithToJson {
+    hours: int
+    minutes: int
+    seconds: int
+
+    constructor(hours: int, minutes: int, seconds: int) {
+        this.hours = hours
+        this.minutes = minutes
+        this.seconds = seconds
+    }
+
+    toJSON(): string {
+        return `${this.hours}:${this.minutes}:${this.seconds}`
+    }
+}
+
+class TimeWithToJsonChild extends TimeWithToJson {
+    offset: int
+
+    constructor(time: TimeWithToJson, offset: int) {
+        super(time.hours, time.minutes, time.seconds)
+        this.offset = offset
+    }
+}
+
+function testObjectFieldsStringify(): int {
+    const expectedJson = `{"boxBool":true,"boxBools":[true],"boxByte":1,"boxBytes":[1],` +
+            `"boxShort":1,"boxShorts":[1],"boxInt":1,"boxInts":[1,1],"boxLong":1,"boxLongs":[1],` +
+            `"boxFloat":1.1,"boxFloats":[1.1],"boxDouble":1.1,"boxDoubles":[1.1],` +
+            `"nan":null,"posinf":null,"neginf":null}`
+    const actualJson = JSON.stringify(new ManyFields())
+
+    let result = test(expectedJson == actualJson, "object with fields")
+    if (result != RESULT_SUCCESS) {
+        console.log(`expected "${expectedJson}" but was "${actualJson}"`)
+    }
+
+    return result
+}
+
+function testStringifyArray(): int {
+    let result = test("[null]" == JSON.stringify([null]), "array of nulls")
+
+    result += test("[null]" == JSON.stringify([undefined]), "array of 'undefine's")
+
+    return result
+}
+
+function testStringifyObjectOfDerivedClass(): int {
+    const expectedJson = `{"hours":10,"minutes":20,"seconds":30,"offset":3}`
+    const actualJson = JSON.stringify(new TimeWithToJsonChild(new TimeWithToJson(10, 20, 30), 3))
+
+    let result = test(expectedJson == actualJson, "object of derived class")
+    
+    if (result != RESULT_SUCCESS) {
+        console.log(`expected ${expectedJson} but was ${actualJson}`)
+    }
+
+    return result
+}
+
+class Node {
+    value: string
+    next: NullishType
+
+    constructor(value: string, next: NullishType = null) {
+        this.value = value
+        this.next = next
+    }
+}
+
+function testStringifyObjectWithReferenceCycle(): int {
+    const nodeA = new Node("A")
+    const nodeB = new Node("B", nodeA)
+
+    nodeA.next = nodeB
+
+    let testSuccess = false
+    try {
+        const json = JSON.stringify(nodeA)
+    } catch (ex) {
+        if (ex instanceof TypeError) {
+            testSuccess = true
+        }
+    }
+
+    return test(testSuccess, "object with reference cycle")
+}
+
+function testStringifyArrayWithReferenceCycle(): int {
+    const selfRefArray: Object[] = [new Object()]
+    selfRefArray[0] = selfRefArray
+
+    let testSuccess = false
+    try {
+        const json = JSON.stringify(selfRefArray)
+    } catch (ex) {
+        if (ex instanceof TypeError) {
+            testSuccess = true
+        }
+    }
+
+    return test(testSuccess, "array with reference cycle")
+}
+
+function testStringifyLambda(): int {
+    const lambda = () => "hello"
+
+    let testResult = test("undefined" == JSON.stringify(lambda), "standalone lambda")
+    testResult += test("[null]" == JSON.stringify([lambda]), "array of lambdas")
+
+    return testResult
+}
+
+function testStringifyTuple(): int {
+    const tuple: [string, string] = ["hello", "world"]
+
+    let testResult = test('["hello","world"]' == JSON.stringify(tuple), "standalone tuple")
+    testResult += test('[["hello","world"]]' == JSON.stringify([tuple]), "array of tuples")
+
+    return testResult
+}
+
+function hello(): string {
+    return "hello"
+}
+
+function testStringifyFunction(): int {
+    const fn: () => string = hello
+
+    let testResult = test("undefined" == JSON.stringify(fn), "standalone function")
+    testResult += test("[null]" == JSON.stringify([fn]), "array of functions")
+
+    return testResult
+}
+
+type Option<T> = T | undefined
+
+function testStringifyUnion(): int {
+    const option: Option<string> = "hello"
+
+    let testResult = test('"hello"' == JSON.stringify(option), "standalone union")
+    testResult += test('["hello"]' == JSON.stringify([option]), "array of unions")
+
+    class WithOption {
+        opt: Option<string> = "hello"
+    }
+
+    testResult += test('{"opt":"hello"}' == JSON.stringify(new WithOption()), "class with union typed field")
+
+    return testResult
+}
+
+function testStringifyInterface(): int {
+    interface Fn<A, R> {
+        apply(a: A): R 
+    }
+
+    class IdentityFn<A> implements Fn<A, A> {
+        apply(a: A): A {
+            return a
+        }
+    }
+
+    const identityNumber: Fn<number, number> = new IdentityFn<number>()
+    let testResult = test("{}" == JSON.stringify(identityNumber), "standalone interface")
+
+    class WithFn {
+        fn: Fn<number, number> = new IdentityFn<number>()
+    }
+
+    testResult = test('{"fn":{}}' == JSON.stringify(new WithFn()), "class with interface typed field")
+
+    return testResult
+}
+
+enum TrafficLightColor {
+    Red, Yellow, Green
+}
+
+class TrafficLight {
+    color: TrafficLightColor = TrafficLightColor.Yellow
+}
+
+function testStringifyEnum(): int {
+    return test('{"color":1}' == JSON.stringify(new TrafficLight()), "enum field")
+}
+
 function main(): int {
     let failures = 0
     failures += testNull()
     failures += testBoolean()
     failures += testDouble()
     failures += testString()
-    failures += testArrayBoolean()
+    failures += testArrayBooleanParse()
+    failures += testArrayBooleanStringify()
     failures += testArrayDouble()
     failures += testArrayString()
     failures += testObject()
     failures += testStringifyParse()
     failures += testCheckParse()
+    failures += testObjectFieldsStringify()
+    failures += testStringifyArray()
+    failures += testStringifyObjectOfDerivedClass()
+    failures += testStringifyObjectWithReferenceCycle()
+    failures += testStringifyArrayWithReferenceCycle()
+
+    failures += testStringifyLambda()
+    failures += testStringifyTuple()
+    failures += testStringifyFunction()
+    failures += testStringifyUnion()
+    failures += testStringifyInterface()
+    failures += testStringifyEnum()
+
     if (failures == 0) {
         console.println("PASSED: All tests run")
     } else {
