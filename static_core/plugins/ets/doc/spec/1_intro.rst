@@ -596,7 +596,7 @@ as used in other languages, application areas, or industries.
    own
      -- of a member textually declared in a class, interface, type, etc., as
      opposed to members inherited from base class (superclass), base interfaces
-     (superinteraface), base type (supertype), etc.
+     (superinterface), base type (supertype), etc.
 
    supercomponent (base component, parent component)
      -- component from which another component is derived.

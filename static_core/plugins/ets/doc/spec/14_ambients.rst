@@ -10,7 +10,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.. _Ambients:
+.. _Ambient Declarations:
 
 Ambient Declarations
 ####################
@@ -23,6 +23,8 @@ somewhere else. Ambient declarations do not introduce new entities---as regular
 declarations do---but instead provide type information for the entities that
 are included in a program by external means. Ambient declarations cannot
 include executable code. As a consequence, they have no initializers.
+
+Ambient declaration can be specified in :ref:`Declaration Modules` only.
 
 Ambient functions, methods, and constructors have no bodies.
 
@@ -41,17 +43,16 @@ Ambient functions, methods, and constructors have no bodies.
 
     ambientDeclaration:
         'declare'
-        ( ambientVariableDeclaration 
+        ( ambientConstantDeclaration 
         | ambientFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | enumDeclaration
-        | typeAlias
         )
         ;
 
-A compile-time error occurs if the modifier *declare* is used in a context
+A compile-time error occurs if the modifier ``declare`` is used in a context
 that is already ambient:
 
 .. code-block:: typescript
@@ -69,30 +70,31 @@ that is already ambient:
 
 |
 
-Ambient Variable Declarations
+Ambient Constant Declarations
 *****************************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
     
 .. code-block:: abnf
 
-    ambientVariableDeclaration:
-        ('let' | 'const') ambientVarList ';'
+    ambientConstantDeclaration:
+        'const' ambientConstList ';'
         ;
 
-    variableDeclarationList:
-        ambientVar (',' ambientVar)*
+    ambientConstList:
+        ambientConst (',' ambientConst)*
         ;
 
-    ambientVar:
-        identifier ':' type 
+    ambientConst:
+        identifier (':' type)? initializer
         ;
 
-The type annotation is mandatory for each ambient variable.
+The initializer expression for an ambinet constant
+must be a numeric or a string literal.
 
 .. index::
-   ambient variable declaration
+   ambient constant declaration
    type annotation
 
 |
@@ -172,19 +174,25 @@ Ambient Class Declarations
 .. code-block:: abnf
 
     ambientClassDeclaration:
-        classModifier? 'class' identifier typeParameters?
+        'class' identifier typeParameters?
         classExtendsClause? implementsClause?
         ambientClassBodyDeclaration*
         ;
 
     ambientClassBodyDeclaration:
-        accessModifier?
+        ambientAccessModifier?
         ( ambientFieldDeclaration 
         | ambientConstructorDeclaration
         | ambientMethodDeclaration
         | ambientAccessorDeclaration
+        | ambientIndexerDeclaration
         )
         ;
+    
+    ambientAccessModifier:
+        'public' | 'protected'
+        ;
+        
     
 
 Ambient field declarations have no initializers:
@@ -196,8 +204,12 @@ Ambient field declarations have no initializers:
 .. code-block:: abnf
 
     ambientFieldDeclaration:
-        fieldModifier* ('let' | 'const') identifier ':' type
+        ambientFieldModifier* identifier ':' type
         ;
+
+    ambientFieldModifier:
+        'static' | 'readonly'
+        ;       
 
 Ambient constructor, method, and accessor declarations have no bodies:
 
@@ -209,20 +221,38 @@ Ambient constructor, method, and accessor declarations have no bodies:
 
     ambientMethodDeclaration:
         ambientMethodOverloadSignature*
-         methodModifier* identifier signature
+        ambientMethodModifier* identifier signature
         ;
 
     ambientMethodOverloadSignature:
-        methodModifier* identifier signature ';'
+        ambientMethodModifier* identifier signature ';'
         ;
+        
+    ambientMethodModifier:
+        'static'
+        ;       
 
     ambientAccessorDeclaration:
-        accessorModifier
+        ambientMethodModifier*
         ( 'get' identifier '(' ')' returnType 
         | 'set' identifier '(' parameter ')'
         )
         ;       
-        
+       
+Ambient indexer declarations specify the indexing of a class instance
+in an ambient context. This feature is provided for compatibility with |TS|:
+
+.. code-block:: abnf
+
+    ambientIndexerDeclaration:
+        'readonly'? '[' identifier ':' indexType ']' returnType
+        ;
+
+**Restriction**: *indexType* must be ``number``.
+
+**Note**: *Ambient indexer declaration* is supported in ambient contexts only.
+If ambient class implementation is written in |LANG|, then it must conform to
+:ref:`Indexable Types`.
 
 |
 
@@ -246,20 +276,24 @@ Ambient Namespace Declarations
 
 .. meta:
     frontend_status: Done
+
+Namespaces are used to logically group multiple entities. |LANG| supports
+ambient namespaces to provide better compatibility with |TS| that often uses
+them to specify the platform API or a third-party library API.
     
 .. code-block:: abnf
 
     ambientNamespaceDeclaration:
-        'namespace' Identifier '{' ambentNamespaceElement* '}'
+        'namespace' Identifier '{' ambientNamespaceElement* '}'
         ;
 
-    ambentNamespaceElement:
-        ambentNamespaceElementDeclaration | selectiveExportDirective
+    ambientNamespaceElement:
+        ambientNamespaceElementDeclaration | selectiveExportDirective
     ;
 
-    ambentNamespaceElementDeclaration:
+    ambientNamespaceElementDeclaration:
         'export'? 
-        ( ambientVariableDeclaration
+        ( ambientConstantDeclaration
         | ambientFunctionDeclaration
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
@@ -268,6 +302,26 @@ Ambient Namespace Declarations
         | typeAlias
         )
         ;
+
+Only exported entities can be accessed outside a namespace.
+
+Namespace nesting is allowed:
+
+.. code-block:: typescript
+   :linenos:
+
+    declare namespace A {
+        export namespace B {
+            export function foo(): void;
+        }
+    }
+
+The manner the entities defined in an ambient namespace can be implemented
+in |LANG| is not yet defined (**TBD**).
+
+A namespace is not an object but just a scope for entities that can only be
+accessed by using quilified names.
+
 
 .. raw:: pdf
 

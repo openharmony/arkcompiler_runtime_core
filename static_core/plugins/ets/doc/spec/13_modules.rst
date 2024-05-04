@@ -27,22 +27,26 @@ not explicitly exported.
 A variable, function, class, interface, or other declarations exported from a
 different compilation unit must be imported first.
 
-Compilation units are *separate modules* or *packages*. Packages are
-described in the chapter Experimental Features (see :ref:`Packages`).
+There are three kinds of compilation units:
+
+- *Separate modules* (discussed below),
+- *Declaration modules* (discussed in detail in :ref:`Declaration Modules`), and
+- *Packages* (discussed in detail in :ref:`Packages`).
 
 .. code-block:: abnf
 
     compilationUnit:
         separateModuleDeclaration
         | packageDeclaration
+        | declarationModule
         ;
 
     packageDeclaration:
         packageModule+
         ;
 
-All modules are stored in a file system or a database (see
-:ref:`Compilation Units in Host System`).
+All modules (both separate modules and packages) are stored in a file
+system or a database (see :ref:`Compilation Units in Host System`).
 
 .. index::
    compilation unit
@@ -70,8 +74,8 @@ Separate Modules
 .. meta:
     frontend_status: Done
 
-A *separate module* is a module without a package header. It optionally
-consists of the following four parts:
+A *separate module* is a module without a package header. A *separate module*
+can optionally consist of the following four parts:
 
 #. Import directives that enable referring imported declarations in a module;
 
@@ -88,8 +92,9 @@ consists of the following four parts:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
         ;
 
-Every module automatically imports all exported entities from essential kernel
-packages of the standard library (see :ref:`Standard Library`).
+Every module implicitly imports (see :ref:`Implicit Import`) all exported
+entities from essential kernel packages of the standard library (see
+:ref:`Standard Library`).
 
 All entities from these packages are accessible as simple names, like the
 *console* variable:
@@ -121,6 +126,33 @@ All entities from these packages are accessible as simple names, like the
 
 |
 
+.. _Separate Module Initializer:
+
+Separate Module Initializer
+***************************
+
+.. meta:
+    frontend_status: Partly
+
+If used for import, a *separate module* is initialized only once with the
+details listed in :ref:`Compilation Unit Initialization`. The initialization process
+is performed in the following steps:
+
+- If the separate module has variable or constant declaraions (see
+  :ref:`Variable and Constant Declarations`), then their initializers are
+  executed to ensure that they all have valid initial values;
+- If the separate module has top-level statements (see :ref:`Top-Level Statements`),
+  then they are also executed.
+
+.. index::
+   initializer
+   separate module
+   initialization
+   variable declration
+   constant declaration
+
+|
+
 .. _Compilation Units in Host System:
 
 Compilation Units in Host System
@@ -131,23 +163,21 @@ Compilation Units in Host System
     todo: Implement compiling a package module as a single compilation unit - #16267
 
 Modules and packages are created and stored in a manner that is determined by a
-host system.
-
-The exact way modules and packages are stored in a file system is
-determined by a particular implementation of the compiler and other
+host system. The exact manner modules and packages are stored in a file
+system is determined by a particular implementation of the compiler and other
 tools.
 
 In a simple implementation:
 
 -  A module (package module) is stored in a single file.
 
--  Files corresponding to a package module are stored in a single folder.
+-  Files that correspond to a package module are stored in a single folder.
 
 -  A folder can store several separate modules (one source file to contain a
    separate module or a package module).
 
--  A folder that stores a single package must contain neither separate module
-   files nor package modules from other packages.
+-  A folder that stores a single package must not contain separate module
+   files or package modules from other packages.
 
 .. index::
    compilation unit
@@ -173,15 +203,16 @@ Import Directives
     frontend_status: Partly
     todo: implement type binding - #14586
 
-Import directives import entities exported from other compilation units, and
-provide such entities with bindings in the current module.
+Import directives make entities exported from other compilation units (see
+also :ref:`Declaration Modules`) avaialble for use in the current compilation
+unit by using different binding forms.
 
 An import declaration has the following two parts:
 
 -  Import path that determines a compilation unit to import from;
 
 -  Import binding that defines what entities, and in what form---qualified
-   or unqualified---can be used by the current module.
+   or unqualified---can be used by the current compilation unit.
 
 .. index::
    import directive
@@ -238,8 +269,8 @@ Any declaration added so must be distinguishable in the declaration scope (see
 :ref:`Distinguishable Declarations`). Otherwise, a :index:`compile-time error`
 occurs.
 
-Some import constructions are specific for packages. They are described in the
-chapter Experimental Features (see :ref:`Packages`).
+It is noteworthy that import directives are handled by the compiler
+during compilation and have no effect during program execution.
 
 .. index::
    binding
@@ -247,7 +278,7 @@ chapter Experimental Features (see :ref:`Packages`).
    module
    package
    declaration scope
-   import construction
+
 
 .. _Bind All with Qualified Access:
 
@@ -314,7 +345,7 @@ to the declaration scope of the current module. The name ``ident`` can only
 correspond to several entities, where ``ident`` denotes several overloaded
 functions (see :ref:`Function and Method Overloading`).
 
-The import binding ``ident* as A`` binds an exported entity (entities) with the
+The import binding ``ident as A`` binds an exported entity (entities) with the
 name *A* to the declaration scope of the current module.
 
 The bound entity is not accessible as ``ident`` because this binding does not
@@ -473,14 +504,6 @@ applied to a single name:
 |                             |     import * as M          | - M.sin is accessible.       |
 |                             |        from "..."          |                              |
 +-----------------------------+----------------------------+------------------------------+
-
-
-
-(table cont'd)
-
-+-----------------------------+----------------------------+------------------------------+
-| **Case**                    | **Sample**                 | **Rule**                     |
-+=============================+============================+==============================+
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | Compile-time error.          |
 | with alias several times.   |                            | Or warning?                  |
@@ -687,10 +710,10 @@ File name, placement, and format are implementation-specific.
 
 |
 
-.. _Default Import:
+.. _Implicit Import:
 
-Default Import
-**************
+Implicit Import
+***************
 
 .. meta:
     frontend_status: Done
@@ -698,9 +721,9 @@ Default Import
     todo: fix stdlib and tests, then import only core by default
     todo: add escompat to spec and default
 
-Any compilation unit automatically imports all entities exported from the
+Any compilation unit implicitly imports all entities exported from the
 essential kernel packages of the standard library(see :ref:`Standard Library`).
-All entities from this package can be accessed as simple names.
+All entities exported from these packages can be accessed as simple names.
 
 .. code-block:: typescript
    :linenos:
@@ -722,6 +745,75 @@ All entities from this package can be accessed as simple names.
    package
    access
    simple name
+
+|
+
+.. _Declaration Modules:
+
+Declaration Modules
+*******************
+
+.. meta:
+    frontend_status: None
+
+A *declaration module* is a special kind of compilation units that can be
+imported by using :ref:`Import Directives`. A declaration module contains
+:ref:`Ambient Declarations` and :ref:`Type Alias Declaration` only.
+
+Ambient declarations defined in the declaration module must be fully declared
+elsewhere.
+
+.. code-block:: abnf
+
+    declarationModule:
+        importDirective* 
+        ( 'export'? ambientDeclaration
+        | 'export'? typeAlias
+        | selectiveExportDirective
+        )*
+        ;
+
+The following example shows how ambient functions can be declared and exported:
+
+.. code-block:: typescript
+   :linenos:
+
+    declare function foo()
+    export declare function goo()
+    export { foo }
+
+The exact manner declaration modules are stored in the file system, and how
+they differ from separate modules is determined by a particular implementation.
+
+|
+
+.. _Compilation Unit Initialization:
+
+Compilation Unit Initialization
+*******************************
+
+.. meta:
+    frontend_status: None
+
+A compilation unit is a separate module or a package that is initialized (see
+:ref:`Separate Module Initializer` and :ref:`Package Initializer`) once
+before the first use of an entity (function, variable, or type) exported
+from the compilation unit.
+If a compilation unit has any import directive (see :ref:`Import Directives`)
+but the imported entities are not actually used, then the imported compilation
+unit (separate or package) is initialized before the entry point (see
+:ref:`Program Entry Point`) code starts.
+If different compilation units are not connected by import, then the order
+of initialization of the compilation units is not determined.
+
+.. index::
+   binding
+   declaration
+   module
+   package
+   declaration scope
+   import construction
+
 
 |
 
@@ -1020,7 +1112,7 @@ The sequence above is equal to the following:
   function, or before the access to any top-level variable of the separate
   module.
 - If a separate module is used a program, then top-level statements are used as
-  a program entry point (see :ref:`Program Entry Point main`). If the separate
+  a program entry point (see :ref:`Program Entry Point`). If the separate
   module has the ``main`` function, then it is executed after the execution of
   the top-level statements.
 
@@ -1068,10 +1160,10 @@ return statement (:ref:`Expression Statements`).
 
 |
 
-.. _Program Entry Point main:
+.. _Program Entry Point:
 
-Program Entry Point (`main`)
-****************************
+Program Entry Point
+*******************
 
 .. meta:
     frontend_status: Partly

@@ -270,7 +270,7 @@ below.
 
 - Character equality operators '``==``' and '``!=``' (see :ref:`Value Equality for Characters`);
 - All remaining operators are identical to the integer operators (see
-  :ref:`Integer Types and Operations`) in that they handle character values as
+  :ref:`Integer Types and Operations`) for they handle character values as
   integers of type *int* (see :ref:`Widening Primitive Conversions`).
 
 The class ``Char`` provides constructors, methods, and constants that are
@@ -369,6 +369,18 @@ with all parameters of the second form of optional parameters (see
       }
       let y = new A[2] // OK, as all 3 elements of array will be filled with
       // new A() objects
+
+A compile-time error occurs if ``typeReference`` is a type parameter:
+
+.. code-block:: typescript
+   :linenos:
+
+      class A<T> {
+         foo() {
+            new T[2] // compile-time error: cannot create an array of type parameter elements
+         }
+      }
+
 
 .. index::
    array creation expression
@@ -585,7 +597,7 @@ The example below defines *iterable* class *C*:
         next(): IteratorResult<string> {
           return {
             done: this.index >= this.base.data.length,
-            value: this.base.data[this.index++]
+            value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
           }
         }
       }
@@ -593,7 +605,7 @@ The example below defines *iterable* class *C*:
       let c = new C()
       for (let x of c) { 
             console.log(x) 
-          }
+      }
 
 In the example above, class *C* function ``$_iterator`` returns
 ``CIterator<string>``, which implements ``Iterator<string>``. If executed,
@@ -881,14 +893,14 @@ Function and Method Overloading
 .. meta:
     frontend_status: Done
 
-Like the |TS| language, |LANG| supports overload signatures that allow
+Similarly to |TS|, the |LANG| language supports overload signatures that allow
 specifying several headers for a function or method with different signatures.
 Most other languages support a different form of overloading that specifies
 a separate body for each overloaded header.
 
-Both approaches have their advantages and disadvantages. The experimental
-approach of |LANG| allows for improved performance because a specific body
-is executed at runtime.
+Both approaches have their advantages and disadvantages. The latter approach
+supoprted by |LANG| can deliver better performance because no extra checks
+are performed during execution of a specific body at runtime.
 
 .. index::
    function overloading
@@ -912,18 +924,19 @@ Function Overloading
 .. meta:
     frontend_status: Done
 
-If a declaration scope declares two functions with the same name but
-different signatures that are not *overload-equivalent* (see
-:ref:`Overload-Equivalent Signatures`), then the function name is *overloaded*.
-An overloaded function name causes no compile-time error on its own.
+If a declaration scope declares and/or imports two or more functions with the
+same name but different signatures that are not *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`), then such functions are *overloaded*.
+Function overloading declarations cause no :index:`compile-time error` on their
+own.
 
 No specific relationship is required between the return types, or between the
 ``throws`` clauses of the two functions with the same name but different
 signatures that are not *overload-equivalent*.
 
-When calling a function, the number of actual arguments (and any explicit type
-arguments) and compile-time types of arguments is used at compile time to
-determine the signature of the function being called (see
+When calling an overloaded function, the number of actual arguments (and any
+explicit type arguments) and compile-time argument types are used at compile
+time to determine exactly which one is to be called (see
 :ref:`Function Call Expression`).
 
 .. index::
@@ -951,20 +964,21 @@ Class Method Overloading
 .. meta:
     frontend_status: Done
 
-If two methods within a class have the same name, and their signatures are not
-*overload-equivalent*, then the methods name is considered *overloaded*.
+If two or more methods within a class have the same name, and their signatures
+are not *overload-equivalent*, then such methods are considered *overloaded*.
 
-An *overloaded* method name cannot cause a :index:`compile-time error`
-on its own.
+Method overloading declarations cause no :index:`compile-time error` on their
+own.
 
-If the signatures of two methods with the same name are not *overload-equivalent*,
-then the return types of those methods, or the ``throws`` or ``rethrows``
-clauses of those methods can have any kind of relationship.
+If the signatures of two or more methods with the same name are not
+*overload-equivalent*, then the return types of those methods, or the
+``throws`` or ``rethrows`` clauses of those methods can have any kind of
+relationship.
 
-A number of actual arguments, explicit type arguments, and compile-time types
-of the arguments is used at compile time to determine the signature of the
-method being called (see :ref:`Method Call Expression`, and
-:ref:`Step 2 Selection of Method`).
+When calling an overloaded method, the number of actual arguments (and any
+explicit type arguments) and compile-time argument types are used at compile
+time to determine exactly which one is to be called (see
+:ref:`Method Call Expression`, and :ref:`Step 2 Selection of Method`).
 
 .. index::
    class method overloading
@@ -991,7 +1005,8 @@ Constructor Overloading
 
 Constructor overloading behavior is identical to that of method overloading (see
 :ref:`Class Method Overloading`). Each class instance creation expression (see
-:ref:`New Expressions`) resolves the overloading at compile time.
+:ref:`New Expressions`) resolves the constructor overloading call if any at
+compile time.
 
 .. index::
    constructor overloading
@@ -2244,7 +2259,7 @@ If the coroutine result must be ignored, then the expression statement
     frontend_status: Done
 
 The class ``Promise<T>`` represents the values returned by launch expressions.
-It belongs to the essential kernel packages of the standard library (see
+It belongs to the core packages of the standard library (see
 :ref:`Standard Library`), and thus it is imported by default and may be used
 without any qualification.
 
@@ -2288,7 +2303,7 @@ The following methods are used as follows:
    callback
    call
 
-.. code-block:: abnf
+.. code-block:: typescript
 
         Promise<U> Promise<T>::finally<U>(finallyCallback : (
             Object:
@@ -2361,6 +2376,254 @@ functions is only supported for the sake of backward |TS| compatibility.
 
 |
 
+.. _DynamicObject Type:
+
+DynamicObject Type
+******************
+
+.. meta:
+    frontend_status: Partly
+
+The interface ``DynamicObject`` is used to provide seamless interoperability
+with dynamic languages (e.g., |JS| and |TS|), and to support advanced
+language features such as *dynamic import* (see :ref:`Dynamic Import Expression`).
+
+This interface (defined in :ref:`Standard Library`) is common for a set of
+wrappers (also defined in :ref:`Standard Library`) that provide access to
+underlying objects.
+
+An instance of ``DynamicObject`` cannot be created directly. Only an
+instance of a specific wrapper object can be instantiated. For example, a
+*dynamic import* expression (see :ref:`Dynamic Import Expression`) can produce
+an instance of the dynamic object implementation class that wraps an object
+containing exported entities of an imported module.
+
+``DynamicObject`` is a predefined type. The following operations applied to an
+object of type ``DynamicObject`` are handled by the compiler in a special manner:
+
+- Field access;
+- Method call;
+- Indexing access;
+- New;
+- Cast.
+
+.. index::
+   DynamicObject
+   interoperability
+   dynamic import
+   interface
+   wrapper
+   access
+   underlying object
+   instantiation
+   export
+   entity
+   import
+   predefined type
+   field access
+   indexing access
+   method call
+
+|
+
+.. _DynamicObject Field Access:
+
+``DynamicObject`` Field Access
+==============================
+
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+
+The field access expression *D.F*, where *D* is of type ``DynamicObject``,
+is handled as an access to a property of an underlying object.
+
+If the value of a field access is used, then it is wrapped in the instance of
+``DynamicObject``, since the actual type of the field is not known at compile
+time.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(d: DynamicObject) {
+      console.log(d.f1) // access of the property named "f1" of underlying object
+      d.f1 = 5 // set a value of the property named "f1"
+      let y = d.f1 // 'y' is of type DynamicObject
+   }
+
+The wrapper can raise an error if:
+
+- No property with the specified name exists in the underlying object; or
+- The field access is in the right-hand side of the assignment, and the
+  type of the assigned value is not compatible with the type of the property
+  (see :ref:`Type Compatibility`).
+
+.. index::
+   DynamicObject
+   wrapper
+   dynamic import
+   underlying object
+   field access
+   property
+   instance
+   assignment
+   assigned value
+
+
+|
+
+.. _DynamicObject Method Call:
+
+``DynamicObject`` Method Call
+=============================
+
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+
+The method call expression *D.F(arguments)*, where *D* is of type
+``DynamicObject``, is handled as a call of the instance method of an
+underlying object.
+
+If the result of a method call is used, then it is wrapped in the instance
+of ``DynamicObject``, since the actual type of the returned value is not known
+at compile time.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(d: DynamicObject) {
+      d.foo() // call of a method "foo" of underlying object
+      let y = d.goo() // 'y' is of type DynamicObject
+   }
+
+The wrapper must raise an error if:
+
+- No method with the specified name exists in the underlying object; or
+- The signature of the method is not compatible with the types of the
+  call arguments.
+
+.. index::
+   DynamicObject
+   wrapper
+   method
+   dynamic import
+   field access
+   property
+   instance
+   method
+
+|
+
+.. _DynamicObject Indexing Access:
+
+``DynamicObject`` Indexing Access
+=================================
+
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+
+The indexing access expression *D[index]*, where *D* is of type
+``DynamicObject``, is handled as an indexing access to an underlying object.
+
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(d: DynamicObject) {
+      let x = d[0] 
+   }
+
+The wrapper must raise an error if:
+
+- The indexing access is not supported by the underlying object;
+- The type of the *index* expression is not supported by the underlying object.
+
+.. index::
+   DynamicObject
+   indexing access
+   underlying object
+
+|
+
+.. _DynamicObject New Expression:
+
+``DynamicObject`` New Expression
+================================
+
+.. meta:
+    frontend_status: Partly
+    todo: now it supports only JSValue, need to add full abstract support
+
+The new expression *new D(arguments)* (see :ref:`New Expressions`), where
+*D* is of type ``DynamicObject``, is handled as a new expression (constructor
+call) applied to the underlying object.
+
+The result of the expression is wrapped in an instance of ``DynamicObject``,
+as the actual type of the returned value is not known at compile time.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(d: DynamicObject) {
+      let x = new d() 
+   }
+
+The wrapper must raise an error if:
+
+- A new expression is not supported by the underlying object; or
+- The signature of the constructor of the underlying object is not compatible
+  with the types of call arguments.
+
+.. index::
+   DynamicObject
+   wrapper
+   property
+   instance
+
+|
+
+.. _DynamicObject Cast Expression:
+
+``DynamicObject`` Cast Expression
+=================================
+
+.. meta:
+    frontend_status: None
+    
+The cast expression *D as T* (see :ref:`Cast Expressions`), where *D* is of
+type ``DynamicObject``, is handled as an attempt to cast the underlying object
+to a static type *T*.
+
+A compile-time error occurs if *T* is not a class or interface type.
+
+The result of a cast expression is an instance of type *T*.
+
+.. code-block:: typescript
+   :linenos:
+
+   interface I {
+      bar(): void
+   }
+
+   function foo(d: DynamicObject) {
+      let x = d as I
+      x.bar() // a call of interface method (not dynamic)
+   }
+
+The wrapper must raise an error if an underlying object cannot be converted
+to the target type specified by the cast operator.
+
+.. index::
+   DynamicObject
+   wrapper
+   cast expression
+
+|
+
 .. _Packages:
 
 Packages
@@ -2415,12 +2678,13 @@ A :index:`compile-time error` occurs if:
 -  Package headers of two package modules in the same package have
    different identifiers.
 
-A *package module* automatically imports all exported entities from the
-essential kernel packages of the standard library (see :ref:`Standard Library`).
-All entities from these packages are accessible as simple names.
+A *package module* implicitly imports (see :ref:`Implicit Import`) all exported
+entities from the core packages of the standard library (see
+:ref:`Standard Library`). All entities from these packages are accessible as
+simple names.
 
-A *package module* can automatically access all top-level entities
-declared in all modules that constitute the package.
+A *package module* can directly access all top-level entities declared in all
+modules that constitute the package.
 
 .. index::
    package module
@@ -2492,8 +2756,9 @@ Package Initializer
     frontend_status: None
 
 Among all *package modules* there can be one to contain a code that performs
-initialization of global variables across all package modules. The appropriate
-syntax is presented below:
+initialization actions (e.g., setting initial values for variables across all
+package modules) as described in detail in :ref:`Compilation Unit Initialization`.
+The appropriate syntax is presented below:
 
 .. index::
    package initializer
@@ -2509,177 +2774,6 @@ syntax is presented below:
 
 A :index:`compile-time error` occurs if a package contains more than one
 *package initializer*.
-
-A *package initializer* is executed only once right before the first activation
-of the package (calling an exported function or accessing an exported
-global variable).
-
-.. index::
-   package initializer
-   package
-   execution
-   exported function
-   access
-   exported global variable
-   function call
-
-|
-
-.. _Sub-Entity Binding:
-
-Sub-Entity Binding
-==================
-
-.. meta:
-    frontend_status: None
-
-The import bindings ``qualifiedName`` (that consists of at least two
-identifiers) or ``qualifiedName as A`` bind a sub-entity to the declaration
-scope of the current module.
-
-'*L*' is a ``static`` entity and the last identifier in the ``qualifiedName A.B.L``.
-The ``public`` access modifier of '*L*' is defined in the class or interface
-denoted in the previous part of the ``qualifiedName``. '*L*' is accessible
-regardless of the export status of the class or the interface it belongs to.
-
-An entity (or—in the case of overloaded methods—entities) is bound by its
-original name, or by an alias (if the alias is set). In the latter case, the
-original name becomes inaccessible.
-
-.. index::
-   sub-entity binding
-   import binding
-   identifier
-   module
-   declaration scope
-   static entity
-   public access modifier
-   class
-   interface
-   access
-   export status
-   entity
-   overloaded method
-   alias
-
-The following module can be considered an example:
-
-.. code-block:: typescript
-   :linenos:
-
-      class A {
-        class B {
-          public static L: int
-        }
-      }
-
-The import of this module is illustrated in the table below:
-
-+-----------------------------------+-+--------------------------------------+
-| **Import**                        | | **Usage**                            |
-+===================================+=+======================================+
-| .. code-block:: typescript        | | .. code-block:: typescript           |
-|                                   | |                                      |
-|     import {A.B.L} from "..."     | |     if (L == 0) { ... }              |
-+-----------------------------------+-+--------------------------------------+
-| .. code-block:: typescript        | | .. code-block:: typescript           |
-|                                   | |                                      |
-|     import {A.B} from "..."       | |     let x = new B() // OK            |
-|                                   | |     let y = new A() // Error: 'A' is |
-|                                   | |        not accessible                |
-+-----------------------------------+-+--------------------------------------+
-| .. code-block:: typescript        | | .. code-block:: typescript           |
-|                                   | |                                      |
-|     import {A.B.L as X} from ".." | |     if (X == 0) { ... }              |
-+-----------------------------------+-+--------------------------------------+
-
-
-(table cont'd)
-
-+-----------------------------------+-+--------------------------------------+
-| **Import**                        | | **Usage**                            |
-+===================================+=+======================================+
-| .. code-block:: typescript        | | .. code-block:: typescript           |
-|                                   | |                                      |
-|     import {A.B as AB} from "..." | |     let x = new AB()                 |
-+-----------------------------------+-+--------------------------------------+
-
-This form of binding is included in the language specifically to simplify
-the migration from the languages that support access to sub-entities as
-simple names. This feature is to be used only for migration.
-
-.. index::
-   import
-   access
-   binding
-   migration
-   sub-entity
-
-|
-
-.. _All Static Sub-Entities Binding:
-
-All Static Sub-Entities Binding
-===============================
-
-.. meta:
-    frontend_status: None
-
-The import binding ``qualifiedName.*`` binds all ``public static`` sub-entities
-of the entity denoted by the ``qualifiedName`` to the declaration scope of the
-current module.
-
-The following module can be considered an example:
-
-.. index::
-   import binding
-   static sub-entity binding
-   public static sub-entity
-   declaration scope
-   entity
-   module
-
-.. code-block:: typescript
-   :linenos:
-
-      class A {
-        class Point {
-          public static X: int
-          public static Y: int
-          public isZero(): boolean {}
-        }
-      }
-
-The examples below illustrate the import of this module:
-
-.. code-block:: typescript
-   :linenos:
-
-      // Import:
-      import A.Point.* from "..."
-
-.. code-block:: typescript
-   :linenos:
-
-      // Usage:
-      import A.Point.* from "..."
-
-      if ((X == 0) && (Y == 0)) { // OK
-         // ...
-      }
-
-      let x = isZero() / Error: 'isZero' is not static
-
-This form of binding is included into |LANG| specifically to simplify the
-migration from the languages that support access to sub-entities as simple
-names. This feature is to be used only for migration.
-
-.. index::
-   binding
-   migration
-   access
-   sub-entity
-   simple name
 
 |
 
