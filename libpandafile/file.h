@@ -17,6 +17,7 @@
 #define LIBPANDAFILE_FILE_H
 
 #include <cstdint>
+#include <fcntl.h>
 #include "helpers.h"
 #include "os/mem.h"
 #include "os/filesystem.h"
@@ -38,6 +39,8 @@ namespace panda::panda_file {
 
 class PandaCache;
 
+#define XPM_PROC_LENGTH 50
+#define PROC_SELF_XPM_REGION_PATH "/proc/self/xpm_region"
 /*
  * EntityPairHeader Describes pair for hash value of class's descriptor and its entity id offset,
  * used to quickly find class by its descriptor.
@@ -466,6 +469,52 @@ inline bool operator<(const File::StringData &string_data1, const File::StringDa
     }
 
     return string_data1.utf16_length < string_data2.utf16_length;
+}
+
+inline bool CheckSecureMem(uintptr_t mem)
+{
+    static bool hasOpen = false;
+    static uintptr_t secureMemStart = 0;
+    static uintptr_t secureMemEnd = 0;
+    if (!hasOpen) {
+        int fd = open(PROC_SELF_XPM_REGION_PATH, O_RDONLY);
+        if (fd < 0) {
+            LOG(ERROR, PANDAFILE) << "Can not open xpm proc file, do not check secure memory anymore.";
+            // No verification is performed when a file fails to be opened.
+            hasOpen = true;
+            return true;
+        }
+
+        char xpmValidateRegion[XPM_PROC_LENGTH] = {0};
+        int ret = read(fd, xpmValidateRegion, sizeof(xpmValidateRegion));
+        if (ret <= 0) {
+            LOG(ERROR, PANDAFILE) << "Read xpm proc file failed";
+            close(fd);
+            return false;
+        }
+        close(fd);
+
+        if (sscanf_s(xpmValidateRegion, "%lx-%lx", &secureMemStart, &secureMemEnd) <= 0) {
+            LOG(ERROR, PANDAFILE) << "sscanf_s xpm validate region failed";
+            return false;
+        }
+        // The check is not performed when the file is already opened.
+        hasOpen = true;
+    }
+
+    // xpm proc does not exist, the read value is 0, and the check is not performed.
+    if (secureMemStart == 0 && secureMemEnd == 0) {
+        LOG(ERROR, PANDAFILE) << "Secure memory check: xpm proc does not exist, do not check secure memory anymore.";
+        return true;
+    }
+
+    LOG(ERROR, PANDAFILE) << "Secure memory check in memory start: " << std::hex << secureMemStart
+                   << " memory end: " << secureMemEnd;
+    if (mem < secureMemStart || mem >= secureMemEnd) {
+        LOG(ERROR, PANDAFILE) << "Secure memory check failed, mem out of secure memory, mem: " << std::hex << mem;
+        return false;
+    }
+    return true;
 }
 
 /*
