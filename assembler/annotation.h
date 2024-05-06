@@ -298,6 +298,9 @@ public:
             case '*':
                 type = Type::STRING_NULLPTR;
                 break;
+            case '#':
+                type = Type::LITERALARRAY;
+                break;
             case '0':
             default:
                 type = Type::UNKNOWN;

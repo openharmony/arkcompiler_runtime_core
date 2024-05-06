@@ -68,6 +68,9 @@ public:
     void GetMethod(pandasm::Function *method, const panda_file::File::EntityId &method_id);
     void GetLiteralArray(pandasm::LiteralArray *lit_array, size_t index) const;
     std::optional<std::vector<std::string>> GetAnnotationByMethodName(const std::string &method_name) const;
+    std::optional<std::string> GetSerializedRecord(const std::string &record_name) const;
+    std::optional<std::string> GetSerializedMethodAnnotation(const std::string &method_name,
+                                                                           const std::string &anno_name) const;
     std::vector<std::string> GetStrings() const;
     std::vector<std::string> GetModuleLiterals() const;
     template <typename T>
@@ -93,12 +96,15 @@ private:
     void GetFields(pandasm::Record *record, const panda_file::File::EntityId &record_id);
 
     void GetMethods(const panda_file::File::EntityId &record_id);
+    void GetAnnotationElements(pandasm::Function &method, const panda_file::AnnotationDataAccessor &ada,
+                               const std::string &annotation_name);
     void GetMethodAnnotations(pandasm::Function &method, const panda_file::File::EntityId &method_id);
     void CreateAnnotationElement(panda_file::AnnotationDataAccessor &ada, pandasm::Function &method,
                                  const std::string &ann_name, const std::string &ann_elem_name,
                                  const std::string &ann_elem_index);
-    void AddAnnotationElement(pandasm::Function &method, const std::string &annotation_name,
-                              const std::string &key, const uint32_t &value);
+    template <typename T, typename U>
+    void AddAnnotationElement(pandasm::Function &method, const std::string &annotation_name, const std::string &key,
+                              const U &value);
     void GetParams(pandasm::Function *method, const panda_file::File::EntityId &code_id) const;
     IdList GetInstructions(pandasm::Function *method, panda_file::File::EntityId method_id,
                            panda_file::File::EntityId code_id) const;
@@ -115,6 +121,8 @@ private:
     void GetMetaData(pandasm::Record *record, const panda_file::File::EntityId &record_id) const;
     void GetMetaData(pandasm::Function *method, const panda_file::File::EntityId &method_id) const;
     void GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id, bool is_scope_names_record);
+    void GetMetadataFieldValue(panda_file::FieldDataAccessor &field_accessor, pandasm::Field *field,
+                               bool isScopeNamesRecord);
 
     void GetLanguageSpecificMetadata();
 
@@ -147,13 +155,15 @@ private:
                                const std::map<std::string, MethodInfo>::const_iterator &method_info_it,
                                bool print_method_info = false) const;
     void SerializeMethodAnnotations(const pandasm::Function &method, std::ostream &os) const;
+    void SerializeMethodAnnotation(const pandasm::AnnotationData &anno, std::ostream &os) const;
+    void SerializeAnnotationElement(const std::vector<pandasm::AnnotationElement> &elements, std::stringstream &ss,
+                                    uint32_t idx) const;
     void SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value,
                           std::ostream &os) const;
     void Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const;
     void Serialize(const pandasm::ItemMetadata &meta, const AnnotationList &ann_list, std::ostream &os) const;
     void SerializeLineNumberTable(const panda_file::LineNumberTable &line_number_table, std::ostream &os) const;
-    void SerializeColumnNumberTable(const panda_file::ColumnNumberTable &column_number_table,
-                                    std::ostream &os) const;
+    void SerializeColumnNumberTable(const panda_file::ColumnNumberTable &column_number_table, std::ostream &os) const;
     void SerializeLocalVariableTable(const panda_file::LocalVariableTable &local_variable_table,
                                      const pandasm::Function &method, std::ostream &os) const;
     bool IsModuleLiteralOffset(const panda_file::File::EntityId &id) const;
@@ -183,6 +193,10 @@ private:
     std::vector<std::string> GetModuleLiteralArray(panda_file::File::EntityId &module_id) const;
     std::string SerializeModuleLiteralArray(const std::vector<std::string> &module_array) const;
     std::string ModuleTagToString(panda_file::ModuleTag &tag) const;
+
+    std::string getLiteralArrayTypeFromValue(const pandasm::LiteralArray &literal_array) const;
+    void DumpLiteralArray(const pandasm::LiteralArray &literal_array, std::stringstream &ss) const;
+    void SerializeFieldValue(const pandasm::Field &f, std::stringstream &ss) const;
 
     std::unique_ptr<const panda_file::File> file_;
     pandasm::Program prog_;

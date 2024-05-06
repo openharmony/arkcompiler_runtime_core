@@ -65,6 +65,66 @@ foreach(file, disasm_column_test_js_files) {
   }
 }
 
+disasm_annotation_test_files = [
+  "declaration-3d-array-boolean",
+  "declaration-3d-array-enum-number",
+  "declaration-3d-array-enum-string",
+  "declaration-3d-array-number",
+  "declaration-3d-array-string",
+  "declaration-array-boolean",
+  "declaration-array-enum-number",
+  "declaration-array-enum-string",
+  "declaration-array-number",
+  "declaration-array-string",
+  "declaration-boolean",
+  "declaration-combination",
+  "declaration-empty",
+  "declaration-enum-number",
+  "declaration-enum-string",
+  "declaration-number",
+  "declaration-string",
+  "declaration-usage-3d-array-boolean",
+  "declaration-usage-3d-array-enum-number",
+  "declaration-usage-3d-array-enum-string",
+  "declaration-usage-3d-array-number",
+  "declaration-usage-3d-array-string",
+  "declaration-usage-array-boolean",
+  "declaration-usage-array-enum-number",
+  "declaration-usage-array-enum-string",
+  "declaration-usage-array-number",
+  "declaration-usage-array-string",
+  "declaration-usage-boolean",
+  "declaration-usage-combination",
+  "declaration-usage-empty",
+  "declaration-usage-enum-number",
+  "declaration-usage-enum-string",
+  "declaration-usage-number",
+  "declaration-usage-string",
+  "export",
+  "import-qualified",
+  "import-unqualified",
+  "multiple-annotations",
+]
+
+test_annotation_path =
+    "//arkcompiler/runtime_core/disassembler/tests/annotations/"
+
+foreach(file, disasm_annotation_test_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_ts = "${test_annotation_path}${file}.ts"
+    test_abc = "$target_out_dir/${file}.abc"
+    src_js = rebase_path(test_ts)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--enable-annotations",
+      "--module",
+      "--merge-abc",
+    ]
+    in_puts = [ test_ts ]
+    out_puts = [ test_abc ]
+  }
+}
+
 disasm_module_test_js_files = [
   "module-requests-annotation-import",
   "module-regular-import",
@@ -114,16 +174,16 @@ disasm_include_dirs = [
 ]
 
 script_sources = [
-  "disassembler_annotations_test.cpp",
   "disassembler_column_number_test.cpp",
   "disassembler_get_file_name_test.cpp",
   "disassembler_line_number_test.cpp",
   "disassembler_string_test.cpp",
+  "disassembler_system_annotations_test.cpp",
 ]
 
 module_sources = [
-  "disassembler_annotations_test.cpp",
   "disassembler_module_literal_test.cpp",
+  "disassembler_system_annotations_test.cpp",
 ]
 
 host_unittest_action("DisasmModuleTest") {
@@ -150,6 +210,22 @@ host_unittest_action("DisasmDebugTest") {
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
   foreach(file, disasm_column_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+}
+
+annotations_sources = [ "disassembler_user_annotations_test.cpp" ]
+
+host_unittest_action("DisasmUserAnnotationsTest") {
+  module_out_path = module_output_path
+  sources = annotations_sources
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  deps = disasm_test_deps
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+
+  foreach(file, disasm_annotation_test_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 }
@@ -183,5 +259,6 @@ group("host_unittest") {
     ":DisasmImmTestAction",
     ":DisasmModuleTestAction",
     ":DisasmScriptTestAction",
+    ":DisasmUserAnnotationsTest",
   ]
 }
