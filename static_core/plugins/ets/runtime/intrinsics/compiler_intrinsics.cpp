@@ -329,6 +329,20 @@ extern "C" ark::ObjectHeader *CompilerEtsLdObjByNameObj(ark::Method *method, int
     return CompilerEtsLdObjByName<panda_file::Type::TypeId::REFERENCE, ark::ObjectHeader *>(method, id, pc, obj);
 }
 
+extern "C" void CompilerEtsStObjByNameI8(ark::Method *method, int32_t id, uint32_t pc, ark::ObjectHeader *obj,
+                                         int8_t storeValue)
+{
+    CompilerEtsStObjByName<panda_file::Type::TypeId::I32, int32_t>(method, id, pc, obj,
+                                                                   static_cast<int32_t>(storeValue));
+}
+
+extern "C" void CompilerEtsStObjByNameI16(ark::Method *method, int32_t id, uint32_t pc, ark::ObjectHeader *obj,
+                                          int16_t storeValue)
+{
+    CompilerEtsStObjByName<panda_file::Type::TypeId::I32, int32_t>(method, id, pc, obj,
+                                                                   static_cast<int32_t>(storeValue));
+}
+
 extern "C" void CompilerEtsStObjByNameI32(ark::Method *method, int32_t id, uint32_t pc, ark::ObjectHeader *obj,
                                           int32_t storeValue)
 {

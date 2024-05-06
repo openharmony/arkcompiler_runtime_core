@@ -155,6 +155,8 @@ groups:
         prefix: ets
         intrinsic_name:
             - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32
+            - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I16
+            - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I8
             - INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F32
       - sig: ets.stobj.name.64 v:in:ref, field_id
         acc: in:b64
