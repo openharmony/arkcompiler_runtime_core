@@ -17,6 +17,36 @@
 
 namespace ark::compiler {
 
+bool IsStringBuilderInstance(Inst *inst)
+{
+    if (inst->GetOpcode() != Opcode::NewObject) {
+        return false;
+    }
+
+    auto klass = GetObjectClass(inst->CastToNewObject());
+    if (klass == nullptr) {
+        return false;
+    }
+
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    return runtime->IsClassStringBuilder(klass);
+}
+
+bool IsMethodStringConcat(Inst *inst)
+{
+    if (inst->GetOpcode() != Opcode::CallStatic && inst->GetOpcode() != Opcode::CallVirtual) {
+        return false;
+    }
+
+    auto call = static_cast<CallInst *>(inst);
+    if (call->IsInlined()) {
+        return false;
+    }
+
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    return runtime->IsMethodStringConcat(call->GetCallMethod());
+}
+
 bool IsMethodStringBuilderConstructorWithStringArg(Inst *inst)
 {
     if (inst->GetOpcode() != Opcode::CallStatic) {
@@ -89,6 +119,20 @@ void InsertAfterWithSaveState(Inst *inst, Inst *after)
     after->InsertAfter(inst);
     if (inst->RequireState()) {
         after->InsertAfter(inst->GetSaveState());
+    }
+}
+
+void InsertBeforeWithInputs(Inst *inst, Inst *before)
+{
+    for (auto &input : inst->GetInputs()) {
+        auto inputInst = input.GetInst();
+        if (inputInst->GetBasicBlock() == nullptr) {
+            InsertBeforeWithInputs(inputInst, before);
+        }
+    }
+
+    if (inst->GetBasicBlock() == nullptr) {
+        before->InsertBefore(inst);
     }
 }
 

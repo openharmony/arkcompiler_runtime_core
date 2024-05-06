@@ -146,6 +146,7 @@ options:
     - lse-opt
     - memory-coalescing
     - monitor-analysis
+    - optimize-string-concat
     - peephole
     - rle-opt
     - regalloc
@@ -204,6 +205,12 @@ options:
   type: bool
   default: true
   description: Enable Branch Elimination Pass
+  tags: [perf]
+
+- name: compiler-optimize-string-concat
+  type: bool
+  default: true
+  description: Enable Optimize String.concat Pass
   tags: [perf]
 
 - name: compiler-simplify-string-builder

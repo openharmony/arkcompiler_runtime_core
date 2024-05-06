@@ -17,6 +17,7 @@
 
 #include "ets_runtime_interface.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "types/ets_method.h"
 
 namespace ark::ets {
 compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr method, IdType id) const
@@ -144,6 +145,12 @@ uint64_t EtsRuntimeInterface::GetFuncPropNameOffset(MethodPtr methodPtr, uint32_
     return reinterpret_cast<uint64_t>(str) - reinterpret_cast<uint64_t>(pf->GetBase());
 }
 
+bool EtsRuntimeInterface::IsMethodStringConcat(MethodPtr method) const
+{
+    return GetClassNameFromMethod(method) == "std.core.String" &&
+           MethodCast(method)->GetProto().GetSignature() == "([Lstd/core/String;)Lstd/core/String;";
+}
+
 bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const
 {
     return MethodCast(method)->IsConstructor() && GetClassNameFromMethod(method) == "std.core.StringBuilder" &&
@@ -188,6 +195,31 @@ uint32_t EtsRuntimeInterface::GetClassOffsetObject(MethodPtr method) const
 {
     auto pf = MethodCast(method)->GetPandaFile();
     return pf->GetClassId(utf::CStringAsMutf8("std.core.Object")).GetOffset();
+}
+
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
+{
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(SourceLanguage::ETS);
+    return static_cast<EtsClassLinkerExtension *>(Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx))
+        ->GetStringBuilderClass();
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const
+{
+    auto classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
+    for (auto ctor : classLinker->GetStringBuilderClass()->GetConstructors()) {
+        if (IsMethodStringBuilderDefaultConstructor(ctor)) {
+            return ctor;
+        }
+    }
+
+    UNREACHABLE();
+}
+
+uint32_t EtsRuntimeInterface::GetMethodId(MethodPtr method) const
+{
+    ASSERT(method != nullptr);
+    return static_cast<EtsMethod *>(method)->GetMethodId();
 }
 
 EtsRuntimeInterface::FieldPtr EtsRuntimeInterface::GetFieldStringBuilderBuffer(ClassPtr klass) const
@@ -307,6 +339,16 @@ EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringConcatStringsIntr
 EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringIsCompressedIntrinsicId() const
 {
     return IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_COMPRESSED;
+}
+
+EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderAppendStringIntrinsicId() const
+{
+    return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING;
+}
+
+EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderToStringIntrinsicId() const
+{
+    return IntrinsicId::INTRINSIC_STD_CORE_SB_TO_STRING;
 }
 
 bool EtsRuntimeInterface::IsClassValueTyped(ClassPtr klass) const

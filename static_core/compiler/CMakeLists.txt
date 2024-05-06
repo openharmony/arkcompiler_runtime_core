@@ -202,6 +202,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/memory_barriers.cpp
         optimizer/optimizations/memory_coalescing.cpp
         optimizer/optimizations/object_type_check_elimination.cpp
+        optimizer/optimizations/optimize_string_concat.cpp
         optimizer/optimizations/peepholes.cpp
         optimizer/optimizations/phi_type_resolving.cpp
         optimizer/optimizations/redundant_loop_elimination.cpp

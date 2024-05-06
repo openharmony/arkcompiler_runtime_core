@@ -36,6 +36,7 @@ public:
     InteropCallKind GetInteropCallKind(MethodPtr methodPtr) const override;
     char *GetFuncPropName(MethodPtr methodPtr, uint32_t strId) const override;
     uint64_t GetFuncPropNameOffset(MethodPtr methodPtr, uint32_t strId) const override;
+    bool IsMethodStringConcat(MethodPtr method) const override;
     bool IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const override;
     bool IsMethodStringBuilderConstructorWithCharArrayArg(MethodPtr method) const override;
     bool IsMethodStringBuilderDefaultConstructor(MethodPtr method) const override;
@@ -44,6 +45,9 @@ public:
     bool IsClassStringBuilder(ClassPtr klass) const override;
     uint32_t GetClassOffsetObjectsArray(MethodPtr method) const override;
     uint32_t GetClassOffsetObject(MethodPtr method) const override;
+    ClassPtr GetStringBuilderClass() const override;
+    MethodPtr GetStringBuilderDefaultConstructor() const override;
+    uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
     bool IsFieldStringBuilderBuffer(FieldPtr field) const override;
     bool IsFieldStringBuilderIndex(FieldPtr field) const override;
     FieldPtr GetFieldStringBuilderBuffer(ClassPtr klass) const override;
@@ -56,6 +60,8 @@ public:
     IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId(compiler::DataType::Type type) const override;
     IntrinsicId GetStringConcatStringsIntrinsicId(size_t numArgs) const override;
     IntrinsicId GetStringIsCompressedIntrinsicId() const override;
+    IntrinsicId GetStringBuilderAppendStringIntrinsicId() const override;
+    IntrinsicId GetStringBuilderToStringIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
 
     FieldPtr ResolveLookUpField(FieldPtr rawField, ClassPtr klass) override;
