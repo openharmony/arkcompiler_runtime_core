@@ -50,7 +50,11 @@ public:
 
     inline void SetCause(EtsObject *cause)
     {
-        ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsErrorOptions, cause_), cause->GetCoreType());
+        if (cause != nullptr) {
+            ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsErrorOptions, cause_), cause->GetCoreType());
+        } else {
+            ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsErrorOptions, cause_), nullptr);
+        }
     }
 
     inline static EtsErrorOptions *Create(EtsCoroutine *etsCoroutine)
