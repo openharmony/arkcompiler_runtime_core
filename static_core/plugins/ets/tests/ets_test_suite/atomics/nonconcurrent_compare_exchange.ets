@@ -25,13 +25,13 @@ function main() {
     arr_2 = new BigUint64Array(buf_2, 0, 1);
 
     for (let i = 1; i < 100; i++) {
-        let old = Atomics.compareExchange(arr, 0, (i - 1) as byte, i as byte)
+        let old = Atomics.compareExchange(arr, 0, i - 1, i)
         assert(old == i - 1)
     }
     assert(Atomics.load(arr, 0) == 99)
 
     for (let i = 1; i < 100; i++) {
-        let old = Atomics.compareExchange(arr_2, 0, (i - 1) as long, i as long)
+        let old = Atomics.compareExchange(arr_2, 0, i - 1, i)
         assert(old == i - 1)
     }
     assert(Atomics.load(arr_2, 0) == 99)
