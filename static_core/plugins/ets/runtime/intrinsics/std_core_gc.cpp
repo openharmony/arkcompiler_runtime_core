@@ -16,7 +16,7 @@
 #include "libpandabase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
-#include "plugins/ets/runtime/lambda_utils.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"

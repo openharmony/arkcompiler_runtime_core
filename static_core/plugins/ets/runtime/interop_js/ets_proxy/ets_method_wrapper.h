@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/typed_pointer.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/wrappers_cache.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/ets_method_set.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 
@@ -32,13 +33,12 @@ namespace ark::ets::interop::js::ets_proxy {
 class EtsMethodWrapper;
 class EtsClassWrapper;
 
-using LazyEtsMethodWrapperLink = TypedPointer<Method, EtsMethodWrapper>;
-using EtsMethodWrappersCache = WrappersCache<EtsMethod *, EtsMethodWrapper>;
+using LazyEtsMethodWrapperLink = TypedPointer<EtsMethodSet, EtsMethodWrapper>;
+using EtsMethodWrappersCache = WrappersCache<EtsMethodSet *, EtsMethodWrapper>;
 
 class EtsMethodWrapper {
 public:
-    static EtsMethodWrapper *GetMethod(InteropCtx *ctx, EtsMethod *etsMethod);
-    static EtsMethodWrapper *GetFunction(InteropCtx *ctx, EtsMethod *etsMethod);
+    static EtsMethodWrapper *GetMethod(InteropCtx *ctx, EtsMethodSet *etsMethodSet);
 
     napi_value GetJsValue(napi_env env) const
     {
@@ -48,14 +48,20 @@ public:
         return jsValue;
     }
 
-    EtsMethod *GetEtsMethod() const
+    EtsMethodSet *GetMethodSet() const
     {
-        return etsMethod_;
+        return etsMethodSet_;
     }
 
-    Method *GetMethod() const
+    EtsMethod *GetEtsMethod(uint32_t parametersNum) const
     {
-        return etsMethod_->GetPandaMethod();
+        return etsMethodSet_->GetMethod(parametersNum);
+    }
+
+    Method *GetMethod(uint32_t parametersNum) const
+    {
+        EtsMethod *const etsMethod = etsMethodSet_->GetMethod(parametersNum);
+        return etsMethod != nullptr ? etsMethod->GetPandaMethod() : nullptr;
     }
 
     /**
@@ -67,8 +73,8 @@ public:
         if (LIKELY(lazyLink.IsResolved())) {
             return lazyLink.GetResolved();
         }
-        EtsMethod *etsMethod = EtsMethod::FromRuntimeMethod(lazyLink.GetUnresolved());
-        EtsMethodWrapper *wrapper = EtsMethodWrapper::GetMethod(ctx, etsMethod);
+        EtsMethodSet *etsMethodSet = lazyLink.GetUnresolved();
+        EtsMethodWrapper *wrapper = EtsMethodWrapper::GetMethod(ctx, etsMethodSet);
         if (UNLIKELY(wrapper == nullptr)) {
             return nullptr;
         }
@@ -78,18 +84,17 @@ public:
         return wrapper;
     }
 
-    static napi_property_descriptor MakeNapiProperty(Method *method, LazyEtsMethodWrapperLink *lazyLinkSpace);
+    static napi_property_descriptor MakeNapiProperty(EtsMethodSet *method, LazyEtsMethodWrapperLink *lazyLinkSpace);
 
-    template <bool IS_STATIC, bool IS_FUNC>
+    template <bool IS_STATIC>
     static napi_value EtsMethodCallHandler(napi_env env, napi_callback_info cinfo);
 
 private:
-    static std::unique_ptr<EtsMethodWrapper> CreateMethod(EtsMethod *method, EtsClassWrapper *owner);
-    static std::unique_ptr<EtsMethodWrapper> CreateFunction(InteropCtx *ctx, EtsMethod *method);
+    static std::unique_ptr<EtsMethodWrapper> CreateMethod(EtsMethodSet *etsMethodSet, EtsClassWrapper *owner);
 
-    EtsMethodWrapper(EtsMethod *method, EtsClassWrapper *owner) : etsMethod_(method), owner_(owner) {}
+    EtsMethodWrapper(EtsMethodSet *etsMethodSet, EtsClassWrapper *owner) : etsMethodSet_(etsMethodSet), owner_(owner) {}
 
-    EtsMethod *const etsMethod_ {};
+    EtsMethodSet *const etsMethodSet_;
     EtsClassWrapper *const owner_ {};  // only for instance methods
     napi_ref jsRef_ {};                // only for functions (ETSGLOBAL::)
 };

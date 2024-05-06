@@ -21,7 +21,7 @@
 
 namespace ark::ets::interop::js::ets_proxy {
 
-napi_value GetETSFunction(napi_env env, std::string_view classDescriptor, std::string_view methodName);
+napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName);
 napi_value GetETSClass(napi_env env, std::string_view classDescriptor);
 
 }  // namespace ark::ets::interop::js::ets_proxy

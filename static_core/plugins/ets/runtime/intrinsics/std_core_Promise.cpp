@@ -14,7 +14,7 @@
  */
 
 #include "intrinsics.h"
-#include "plugins/ets/runtime/lambda_utils.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"

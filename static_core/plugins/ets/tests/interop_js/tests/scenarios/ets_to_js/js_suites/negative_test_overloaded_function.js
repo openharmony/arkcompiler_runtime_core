@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-/*---
- desc: 13.06 Top-level Declarations
- name: 13.compilation_units_packages_and_modules/13.06.top-level_declarations/13.06.01.exported_declaration/exported_declaration_01
- tags: 
- files: [./to_export.ets]
- ---*/
-import * as all from "./to_export"
+const { etsVm, getTestModule } = require('scenarios.test.js');
 
-function main(): void {
-  let P = new all.Point(1, 2)
+const etsMod = getTestModule('scenarios_test');
+const overloadedFunction = etsMod.getFunction('overloaded_function');
+
+{
+  const INT_VALUE = 1;
+  const STRING_VALUE = 'Hello';
+
+  ASSERT_THROWS(TypeError, () => overloadedFunction(INT_VALUE));
+  ASSERT_THROWS(TypeError, () => overloadedFunction(STRING_VALUE));
 }

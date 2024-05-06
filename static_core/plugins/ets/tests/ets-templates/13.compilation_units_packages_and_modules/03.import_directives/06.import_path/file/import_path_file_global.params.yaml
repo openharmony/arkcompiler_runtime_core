@@ -12,5 +12,5 @@
 # limitations under the License.
 
 import_stmts:
-  - import * from "std/math/math"
-  - import * from "std/math/math.ets"
+  - import * as all from "std/math/math"
+  - import * as all from "std/math/math.ets"

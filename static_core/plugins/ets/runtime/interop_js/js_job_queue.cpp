@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #include "runtime/handle_scope-inl.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/lambda_utils.h"
+#include "plugins/ets/runtime/ets_utils.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/interop_js/js_job_queue.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"

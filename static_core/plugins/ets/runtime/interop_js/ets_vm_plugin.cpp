@@ -49,20 +49,23 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
 {
     size_t jsArgc = 0;
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, nullptr, nullptr, nullptr));
-    if (jsArgc != 2U) {
+    if (jsArgc != 2U && jsArgc != 1U) {
         InteropCtx::ThrowJSError(env, "GetEtsFunction: bad args, actual args count: " + std::to_string(jsArgc));
         return nullptr;
     }
 
     std::array<napi_value, 2U> jsArgv {};
-    ASSERT(jsArgc == jsArgv.size());
     NAPI_CHECK_FATAL(napi_get_cb_info(env, info, &jsArgc, jsArgv.data(), nullptr, nullptr));
 
-    napi_value jsClassDescriptor = jsArgv[0];
-    napi_value jsFunctionName = jsArgv[1];
+    napi_value jsFunctionName = jsArgc == 1 ? jsArgv[0] : jsArgv[1];
 
-    if (GetValueType(env, jsClassDescriptor) != napi_string) {
-        InteropCtx::ThrowJSError(env, "GetEtsFunction: class descriptor is not a string");
+    std::string packageName;
+    if (jsArgc == 2U) {
+        napi_value jsPackageName = jsArgv[0];
+        if (GetValueType(env, jsPackageName) != napi_string) {
+            InteropCtx::ThrowJSError(env, "GetEtsFunction: package name is not a string");
+        }
+        packageName = GetString(env, jsPackageName);
     }
 
     if (GetValueType(env, jsFunctionName) != napi_string) {
@@ -70,10 +73,9 @@ static napi_value GetEtsFunction(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    std::string classDescriptor = GetString(env, jsClassDescriptor);
     std::string methodName = GetString(env, jsFunctionName);
 
-    return ets_proxy::GetETSFunction(env, classDescriptor, methodName);
+    return ets_proxy::GetETSFunction(env, packageName, methodName);
 }
 
 static napi_value GetEtsClass(napi_env env, napi_callback_info info)

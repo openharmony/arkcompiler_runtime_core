@@ -106,6 +106,54 @@ function generic_type_return_value_ets<T>(arg: int, value: T): T {
    return arr[arg];
 }
 
+class ClassWithDefaultParameterMethods {
+    public int_parameter_method(arg: int = 1): int {
+        return arg;
+    }
+    
+    public static int_parameter_static_method(arg: int = 1): int {
+        return arg;
+    }
+    
+    public undefined_parameter_method(arg: JSValue|undefined = undefined): JSValue|undefined {
+        return arg;
+    }
+    
+    public static undefined_parameter_static_method(arg: JSValue|undefined = undefined): JSValue|undefined {
+        return arg;
+    }
+
+    public overloaded_method(arg: int) {
+        // do nothing
+    }
+
+    public overloaded_method(arg: string) {
+        // do nothing
+    }
+
+    public overloaded_static_method(arg: int) {
+        // do nothing
+    }
+
+    public overloaded_static_method(arg: string) {
+        // do nothing
+    }
+}
+
+class DerivedClassWithDefaultParameterMethods extends ClassWithDefaultParameterMethods {
+    public int_parameter_method(arg: int): int {
+        return -arg;
+    }
+}
+
+function overloaded_function(arg: int) {
+    // do nothing
+}
+
+function overloaded_function(arg: string) {
+    // do nothing
+}
+
 function default_int_parameter_function(arg: int = 1): int {
     return arg;
 }

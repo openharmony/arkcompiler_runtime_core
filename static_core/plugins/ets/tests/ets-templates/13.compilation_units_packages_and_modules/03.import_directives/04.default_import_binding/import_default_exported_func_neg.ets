@@ -22,8 +22,8 @@ tags:
 - negative
 ---*/
 
-import * from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
+import * as all from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
-    TestFunc(42);
+    all.TestFunc(42);
 }

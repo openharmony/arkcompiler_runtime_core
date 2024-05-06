@@ -19,8 +19,8 @@ tags: [negative]
 ---*/
 
 import {sin as Sine} from "std/math";
-import * from "std/math";
+import * as all from "std/math";
 
 function main(): void {
-  let x = sin(1.0);
+  let x = all.sin(1.0);
 }

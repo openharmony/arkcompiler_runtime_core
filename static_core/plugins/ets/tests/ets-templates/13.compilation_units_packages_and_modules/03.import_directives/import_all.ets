@@ -14,11 +14,11 @@
  */
 
 /*---
-desc: In import declarations use '*' to export all
+desc: In import declarations use '* as <alias>' to import all
 ---*/
 
-import * from "std/math";
+import * as all from "std/math";
 
 function main(): void {
-  let x = sin(1.0);
+  let x = all.sin(1.0);
 }

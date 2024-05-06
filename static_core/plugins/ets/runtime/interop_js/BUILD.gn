@@ -59,6 +59,7 @@ ohos_source_set("ets_interop_js_napi_static") {
     "call/call_js.cpp",
     "ets_proxy/ets_class_wrapper.cpp",
     "ets_proxy/ets_field_wrapper.cpp",
+    "ets_proxy/ets_method_set.cpp",
     "ets_proxy/ets_method_wrapper.cpp",
     "ets_proxy/ets_proxy.cpp",
     "ets_proxy/shared_reference.cpp",

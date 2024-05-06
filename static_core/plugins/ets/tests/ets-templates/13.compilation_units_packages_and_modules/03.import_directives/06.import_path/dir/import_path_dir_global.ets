@@ -18,7 +18,7 @@ desc: Resolving a non-relative path depends on the compilation environment.
 tags: [compile-only]
 ---*/
 
-import * from "std/math"
+import * as all from "std/math"
 
 function main(): void {
   return
