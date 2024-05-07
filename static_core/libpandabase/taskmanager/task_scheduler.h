@@ -42,7 +42,7 @@ public:
      * @param taskStatisticsType - type of TaskStatistics that will be used in TaskScheduler
      */
     PANDA_PUBLIC_API static TaskScheduler *Create(
-        size_t threadsCount, TaskStatisticsImplType taskStatisticsType = TaskStatisticsImplType::SIMPLE);
+        size_t threadsCount, TaskStatisticsImplType taskStatisticsType = TaskStatisticsImplType::NO_STAT);
 
     /**
      * @brief Returns the pointer to TaskScheduler. If you use it before the Create or after Destroy methods, it
@@ -206,6 +206,14 @@ private:
     /// @brief Method signals workers if it's needed
     void SignalWorkers();
 
+    void IncrementCountOfTasksInSystem(TaskProperties prop, size_t count);
+
+    void DecrementCountOfTasksInSystem(TaskProperties prop, size_t count);
+
+    size_t GetCountOfTasksInSystemWithTaskProperties(TaskProperties prop) const;
+
+    size_t GetCountOfTasksInSystem() const;
+
     internal::SchedulableTaskQueueInterface *GetQueue(TaskQueueId id) const;
 
     static TaskScheduler *instance_;
@@ -267,7 +275,14 @@ private:
      * - it was gotten by main thread;
      */
     TaskPropertiesCounterMap finishedTasksCount_ GUARDED_BY(taskSchedulerStateLock_);
-    TaskStatistics *taskStatistics_;
+
+    /**
+     * Represents count of tasks that exist in TaskScheduler system per TaskProperties. Task in system means that task
+     * was added but wasn't executed or popped.
+     */
+    std::unordered_map<TaskProperties, std::atomic_size_t, TaskProperties::Hash> countOfTasksInSystem_;
+
+    TaskStatistics *taskStatistics_ = nullptr;
     internal::TaskSelector selector_;
 };
 

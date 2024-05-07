@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,9 @@ std::ostream &operator<<(std::ostream &os, TaskStatisticsImplType type)
         case TaskStatisticsImplType::LOCK_FREE:
             os << "TaskStatisticsImplType::LOCK_FREE";
             break;
+        case TaskStatisticsImplType::NO_STAT:
+            os << "TaskStatisticsImplType::NO_STAT";
+            break;
         default:
             UNREACHABLE();
     }
@@ -56,6 +59,9 @@ TaskStatisticsImplType TaskStatisticsImplTypeFromString(std::string_view string)
     }
     if (string == "lock-free") {
         return TaskStatisticsImplType::LOCK_FREE;
+    }
+    if (string == "no-stat") {
+        return TaskStatisticsImplType::NO_STAT;
     }
     UNREACHABLE();
 }
