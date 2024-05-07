@@ -289,9 +289,9 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    private static createFinalizationRegistry(): FinalizationRegistry {
+    private static createFinalizationRegistry(): FinalizationRegistry<Object> {
         assert JSRuntime.finQueue == null;
-        JSRuntime.finQueue = new FinalizationRegistry((obj: Object): void => { JSRuntime.finalizationRegistryCallback(obj); });
+        JSRuntime.finQueue = new FinalizationRegistry<Object>((obj: Object): void => { JSRuntime.finalizationRegistryCallback(obj); });
         return JSRuntime.finQueue!;
     }
 
@@ -315,5 +315,5 @@ export final class JSRuntime {
         throw new Error(msg);
     }
 
-    private static finQueue: FinalizationRegistry | null = null;
+    private static finQueue: FinalizationRegistry<Object> | null = null;
 }

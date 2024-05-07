@@ -15,10 +15,14 @@
 
 package std.core;
 
-export final class FinalizationRegistry {
+export final class FinalizationRegistry<T> {
 
-    private callback: (value: Object) => void;
-    private triplets: (Object | null)[];
+    private callbackWithArg: (value: T) => void;
+    private callbackWithoutArg: () => void;
+    private isCallbackWithArg: boolean = true;
+    // Can be changed to local trimplet class when it will be implemented
+    private obj_token_refs: (Object | null)[];
+    private callback_arguments: (T | null)[];
     // Contains chains of used and free trimplet indexes, [0] serves as uselist head
     private idxarr: int[];
     private freeidx: int = -1;
@@ -31,7 +35,8 @@ export final class FinalizationRegistry {
         this.idxarr[0] = -1; // first elem reserved for useidx head
         this.enlarge_freeidx(1);
 
-        this.triplets = new Object[3 * size];
+        this.obj_token_refs = new Object[2 * size];
+        this.callback_arguments = new T[size];
     }
 
     private enlarge_arrays(newsize: int): void {
@@ -42,10 +47,15 @@ export final class FinalizationRegistry {
         }
         this.enlarge_freeidx(old_idxarr.length);
 
-        let old_triplets = this.triplets;
-        this.triplets = new Object[newsize * 3];
-        for (let i = 0; i < old_triplets.length; ++i) {
-            this.triplets[i] = old_triplets[i];
+        let old_obj_token_refs = this.obj_token_refs;
+        this.obj_token_refs = new Object[newsize * 2];
+        for (let i = 0; i < old_obj_token_refs.length; ++i) {
+            this.obj_token_refs[i] = old_obj_token_refs[i];
+        }
+        let old_callback_arguments = this.callback_arguments;
+        this.callback_arguments = new T[newsize];
+        for (let i = 0; i < old_callback_arguments.length; ++i) {
+            this.callback_arguments[i] = old_callback_arguments[i];
         }
     }
 
@@ -80,23 +90,27 @@ export final class FinalizationRegistry {
      * @param callback_value callback function which will be called
      * after registered object reclamation.
      */
-    public constructor(callback_value: (value: Object) => void) {
+    public constructor(callback_value: (value: T) => void) {
         this.init_arrays(FinalizationRegistry.FIRST_SIZE);
-        this.callback = callback_value;
+        this.callbackWithArg = callback_value;
+        this.isCallbackWithArg = true;
         FinalizationRegistry.registerInstance(this);
     }
 
     /**
-     * Registers an object with specific callback arg.
-     * After the object will be removed, the callback method
-     * will be called with the specific argument.
+     * Creates FinalizationRegistry object with the specific callback function,
+     * which doesn't have any argument
+     * One can register an object to this queue and after reclamation of this object
+     * the callback function will be called.
      *
-     * @param object a tracking object
-     *
-     * @param callbackArg callback argument for callback method
+     * @param callback_value callback function which will be called
+     * after registered object reclamation.
      */
-    public register(object: Object, callbackArg: Object | null): void {
-        this.register(object, callbackArg, null);
+    public constructor(callback_value: () => void) {
+        this.init_arrays(FinalizationRegistry.FIRST_SIZE);
+        this.callbackWithoutArg = callback_value;
+        this.isCallbackWithArg = false;
+        FinalizationRegistry.registerInstance(this);
     }
 
     /**
@@ -111,9 +125,9 @@ export final class FinalizationRegistry {
      * @param callbackArg callback argument for callback method
      *
      * @param token an object which can be used to remove
-     * this registred callback
+     * this registred callback if provided
      */
-    public register(object: Object, callbackArg: Object | null, token: Object | null): void {
+    public register(object: Object, callbackArg: T, token?: Object): void {
         let refObject = new WeakRef<Object>(object);
         let refToken: WeakRef<Object> | null = null;
         if (token != null) {
@@ -129,7 +143,7 @@ export final class FinalizationRegistry {
      *
      * @param token all registered callbacks with this token will be removed
      */
-    public unregister(token: Object | null): void {
+    public unregister(token: Object): void {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
             let refToken = this.getToken(i);
@@ -147,10 +161,14 @@ export final class FinalizationRegistry {
             if (object != null && object.deref() == null) {
                 // Remove from trimplet first to prevent
                 // calling it again in separate thread
-                let arg: Object | null = this.getCallbackArg(i);
+                let arg: T | null = this.getCallbackArg(i);
                 this.freeNextTrimplet(prev);
                 i = prev; // iterator rollback
-                this.callback(arg!);
+                if (this.isCallbackWithArg) {
+                    this.callbackWithArg(arg!);
+                } else {
+                    this.callbackWithoutArg();
+                }
             }
         }
     }
@@ -183,21 +201,21 @@ export final class FinalizationRegistry {
     }
 
     private getObject(index: int): WeakRef<Object> | null {
-        return this.triplets[3 * index] as (WeakRef<Object> | null);
+        return this.obj_token_refs[2 * index] as (WeakRef<Object> | null);
     }
 
-    private getCallbackArg(index: int): Object | null {
-        return this.triplets[3 * index + 1];
+    private getCallbackArg(index: int): T | null {
+        return this.callback_arguments[index];
     }
 
     private getToken(index: int): WeakRef<Object> | null {
-        return this.triplets[3 * index + 2] as (WeakRef<Object> | null);
+        return this.obj_token_refs[2 * index + 1] as (WeakRef<Object> | null);
     }
 
-    private setTrimplet(index: int, obj: WeakRef<Object> | null, cbArg: Object | null, token: WeakRef<Object> | null): void {
-        this.triplets[3 * index] = obj;
-        this.triplets[3 * index + 1] = cbArg;
-        this.triplets[3 * index + 2] = token;
+    private setTrimplet(index: int, obj: WeakRef<Object> | null, cbArg: T | null, token: WeakRef<Object> | null): void {
+        this.obj_token_refs[2 * index] = obj;
+        this.obj_token_refs[2 * index + 1] = token;
+        this.callback_arguments[index] = cbArg;
     }
 
     private static native registerInstance(object: Object): void;

@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-let removed_object_callbacks: boolean[] = new boolean[3];
+let removed_object_callbacks: boolean[] = new boolean[4];
 // Make it global beacuse optimizer is free to kill local variables
 let object1 : Object | null = null;
 let object2 : Object | null = null;
 let object3 : Object | null = null;
-let queue: FinalizationRegistry | null = null;
-let unused_queue: FinalizationRegistry | null = null;
+let registry: FinalizationRegistry<String> | null = null;
+let unusedRegistry: FinalizationRegistry<String> | null = null;
+let emptyArgCallbackRegistry: FinalizationRegistry<Int> | null = null;
 
 function doFullGC() {
     try {
@@ -29,8 +30,7 @@ function doFullGC() {
     }
 }
 
-function callback(object: Object): void {
-    let string: String = object as String;
+function callback(string: String): void {
     if (string.equals("First object removed")) {
         removed_object_callbacks[0] = true;
     } else if (string.equals("Third object removed")) {
@@ -41,7 +41,11 @@ function callback(object: Object): void {
     }
 }
 
-function finalizationRegistryTest(queue: FinalizationRegistry | null): void {
+function emptyArgCallback(): void {
+    removed_object_callbacks[3] = true;
+}
+
+function finalizationRegistryTest(registry: FinalizationRegistry<String> | null): void {
     object1 = new Object();
     let object1_token = new Object();
     let object1_callbackArg = new String("First object removed");
@@ -51,26 +55,26 @@ function finalizationRegistryTest(queue: FinalizationRegistry | null): void {
     object3 = new Object();
     let object3_callbackArg = new String("Third object removed");
     let unregistered_token = new Object();
-    queue!.register(object1!, object1_callbackArg as Object, object1_token);
-    queue!.register(object2!, object2_callbackArg as Object, object2_token);
-    queue!.register(object3!, object3_callbackArg as Object);
+    registry!.register(object1!, object1_callbackArg, object1_token);
+    registry!.register(object2!, object2_callbackArg, object2_token);
+    registry!.register(object3!, object3_callbackArg);
 
-    unused_queue = new FinalizationRegistry(callback);
+    unusedRegistry = new FinalizationRegistry<String>(callback);
+    emptyArgCallbackRegistry = new FinalizationRegistry<Int>(emptyArgCallback);
+    emptyArgCallbackRegistry!.register(object1!, 2, object1_token);
 
     // Try to unregister unknown tokens:
-    queue!.unregister(unregistered_token);
-    queue!.unregister(null);
-    unused_queue!.unregister(object1);
-    unused_queue!.unregister(unregistered_token);
-    unused_queue!.unregister(null);
+    registry!.unregister(unregistered_token);
+    unusedRegistry!.unregister(object1!);
+    unusedRegistry!.unregister(unregistered_token);
 
     // Check that we don't call any callbacks here
     doFullGC();
 
-    // Unregister object2, remove unused_queue
+    // Unregister object2, remove unusedRegistry
     // and check that we don't call object2 callback
-    unused_queue = null;
-    queue!.unregister(object2_token);
+    unusedRegistry = null;
+    registry!.unregister(object2_token);
     assert object2 != null : "Object 2 is alive";
     object2 = null;
     doFullGC();
@@ -87,8 +91,8 @@ function main(): void {
     for (let i = 0; i < removed_object_callbacks.length; i++) {
         removed_object_callbacks[i] = false;
     }
-    queue = new FinalizationRegistry(callback);
-    finalizationRegistryTest(queue);
+    registry = new FinalizationRegistry<String>(callback);
+    finalizationRegistryTest(registry);
     // Check that we successfully remove FinalizationRegistry instance
     // elemets and this cause no error during collection.
     doFullGC();
@@ -97,5 +101,6 @@ function main(): void {
     assert removed_object_callbacks[0] == true : "First callback hasn't been called";
     assert removed_object_callbacks[1] == false : "Second callback has been called";
     assert removed_object_callbacks[2] == true : "Third callback hasn't been called";
-    assert queue != null : "Instance still alive";
+    assert removed_object_callbacks[3] == true : "Fouth callback hasn't been called";
+    assert registry != null : "Instance still alive";
 }
