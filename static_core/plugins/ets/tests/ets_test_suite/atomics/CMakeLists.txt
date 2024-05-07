@@ -13,7 +13,7 @@
 
 set(atomics_tests
     # --- Simple non-concurrent tests
-    nonconcurrent_store_load
+    nonconcurrent_store_load_islockfree
     nonconcurrent_increment
     nonconcurrent_compare_exchange
     # nonconcurrent_wait_timeout
@@ -28,6 +28,7 @@ set(atomics_tests
     nonconcurrent_wait_not_equal
     nonconcurrent_wait_i32_not_equal
     nonconcurrent_wait_i64_not_equal
+    nonconcurrent_waitasync_store_notify
     
     # --- Concurrent wait/notify tests
     concurrent_wait_store_notify
