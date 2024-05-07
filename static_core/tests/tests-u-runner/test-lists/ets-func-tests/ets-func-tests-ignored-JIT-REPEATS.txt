@@ -1,5 +1,3 @@
-# #14817
-koala-related-benchmarks/benchmark-lambda-no-lambda-modified.ets
 # #16231 #16362
 spec/bigint/bigint-arithmetic-mul-4-operands-1.ets
 # #16186
@@ -18,8 +16,6 @@ std/core/EscapeUnescapeURITest.ets
 std/core/Object.ets
 # #16217
 std/core/std_core_typedarrays__Int16Array.ets
-# #15683
-escompat/escompat_regexp_replace_String_String.ets
 
 # Timeouts. Will be fixed when generics accept primitives as type arguments
 std/core/SortInternalTestShort.ets
