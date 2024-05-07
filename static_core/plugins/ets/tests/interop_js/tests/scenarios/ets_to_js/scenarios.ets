@@ -238,3 +238,58 @@ function GCJSRuntimeCleanup(): void {
         assert false : "Unexpected exception during GC";
     }
 }
+
+interface InterfaceWithPropsAndMethod {
+    numVal: number;
+    stringVal: string;
+
+    foo(x: int): string;
+}
+
+class ClassImplementingInterfaceWithPropsAndMethod implements InterfaceWithPropsAndMethod {
+    public numVal: number = 0;
+    public stringVal: string = '';
+
+    constructor(numVal: number, stringVal: string) {
+        this.numVal = numVal
+        this.stringVal = stringVal
+    }
+
+    public foo(x: int): string {
+        let result = this.stringVal + ' ' + this.numVal + ' ' + x;
+        return result;
+    }
+
+    public getNumVal(): number {
+        return this.numVal;
+    }
+}
+
+function function_arg_is_interface(arg: InterfaceWithPropsAndMethod): string {
+    let stringVal = arg.stringVal;
+    let numVal = arg.numVal;
+    arg.numVal = numVal * 2;
+    return arg.foo(123);
+}
+
+interface Unpackable<T> {
+    getValue(): T;
+}
+
+class Boxx<T> implements Unpackable<T> {
+    value_: T;
+
+    constructor(value: T) {
+        this.value_ = value;
+    }
+
+    public getValue(): T {
+        return this.value_;
+    }
+}
+
+function unpack_value<T>(arg: Unpackable<T>): T {
+    let result = arg.getValue();
+    return result;
+}
+

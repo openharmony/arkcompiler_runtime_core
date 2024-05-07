@@ -178,4 +178,58 @@ TEST_F(EtsInteropScenariosEtsToJs, test_rest_params)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_rest_params_call.js"));
 }
 
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_interface_arg_ets_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/ets_value.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_interface_generic_arg_ets_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/generic_ets_value.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_interface_arg_js_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/js_value.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_interface_generic_arg_js_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/generic_js_value.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_interface_arg_js_anon_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/js_anon_value.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_negative_test_interface_arg_wrong_ets_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/negative_wrong_ets_value.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_negative_test_interface_arg_incomplete_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/negative_incomplete_value.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_negative_test_interface_arg_not_callable)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/negative_not_callable.js"));
+}
+
+// NOTE #16103 enable this after interop is implemented for interrface arguments
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_negative_test_interface_arg_wrong_prop_type)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/negative_wrong_prop_type.js"));
+}
+
 }  // namespace ark::ets::interop::js::testing
