@@ -107,10 +107,10 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 12.0.1.0
+version: 12.0.2.0
 
 # 0 is default value, alaways reflects to the newest version
-api_version_map: [[0, 12.0.1.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.1.0]]
+api_version_map: [[0, 12.0.2.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.2.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.
@@ -265,7 +265,7 @@ isa_information:
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x08
+      last_callruntime_prefixed_opcode_idx: 0x12
 
 prefixes:
   - name: throw
@@ -848,6 +848,36 @@ groups:
         acc: out:top
         opcode_idx: [0x0a]
         format: [pref_op_imm_16]
+        prefix: callruntime
+      - sig: callruntime.newsendableenv imm:u8
+        acc: none
+        opcode_idx: [0x0b]
+        format: [pref_op_imm_8]
+        prefix: callruntime
+      - sig: callruntime.widenewsendableenv imm:u16
+        acc: none
+        opcode_idx: [0x0c]
+        format: [pref_op_imm_16]
+        prefix: callruntime
+      - sig: callruntime.stsendablevar imm1:u8, imm2:u8
+        acc: in:top
+        opcode_idx: [0x0d, 0x0e]
+        format: [pref_op_imm1_4_imm2_4, pref_op_imm1_8_imm2_8]
+        prefix: callruntime
+      - sig: callruntime.widestsendablevar imm1:u16, imm2:u16
+        acc: in:top
+        opcode_idx: [0x0f]
+        format: [pref_op_imm1_16_imm2_16]
+        prefix: callruntime
+      - sig: callruntime.ldsendablevar imm1:u8, imm2:u8
+        acc: out:top
+        opcode_idx: [0x10, 0x11]
+        format: [pref_op_imm1_4_imm2_4, pref_op_imm1_8_imm2_8]
+        prefix: callruntime
+      - sig: callruntime.wideldsendablevar imm1:u16, imm2:u16
+        acc: out:top
+        opcode_idx: [0x12]
+        format: [pref_op_imm1_16_imm2_16]
         prefix: callruntime
 
   - title: throw instructions
