@@ -178,6 +178,7 @@ ark::JsonArrayBuilder EtsArrayToJSON(ark::ets::EtsCoroutine *coro, ark::ets::Ets
     auto jsonBuilder = ark::JsonArrayBuilder();
     if (arrPtr->IsPrimitive()) {
         EtsTypedPrimitiveArrayToJSON(jsonBuilder, arrPtr);
+        return jsonBuilder;
     }
     auto arrObjPtr = reinterpret_cast<ark::ets::EtsObjectArray *>(arrPtr);
     auto len = arrObjPtr->GetLength();

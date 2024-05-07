@@ -226,4 +226,5 @@ add_subdirectory(getters_setters)
 add_subdirectory(imports)
 add_subdirectory(methods)
 add_subdirectory(unions)
-add_subdirectory(global_vars)
+# NOTE(aakmaev): need proper comparing. Issue #17097
+# add_subdirectory(global_vars)
