@@ -17,6 +17,7 @@
 #define PANDA_MEM_GC_G1_REM_SET_H
 
 #include <limits>
+#include <runtime/include/mem/panda_containers.h>
 
 namespace ark::mem {
 
@@ -86,6 +87,11 @@ public:
 
     void Dump(std::ostream &out);
 
+    template <typename Visitor>
+    void VisitBitmaps(const Visitor &visitor) const;
+
+    static size_t GetIdxInBitmap(uintptr_t addr, uintptr_t bitmapBeginAddr);
+
     class Bitmap {
     public:
         static constexpr size_t GetBitmapSizeInBytes()
@@ -104,6 +110,21 @@ public:
             ASSERT(elemIdx < SIZE);
             size_t bitOffset = idx - elemIdx * ELEM_BITS;
             bitmap_[elemIdx] |= 1ULL << bitOffset;
+        }
+
+        bool Check(size_t idx) const
+        {
+            size_t elemIdx = idx / ELEM_BITS;
+            ASSERT(elemIdx < SIZE);
+            size_t bitOffset = idx - elemIdx * ELEM_BITS;
+            return (bitmap_[elemIdx] & (1ULL << bitOffset)) != 0;
+        }
+
+        void AddBits(const Bitmap &other)
+        {
+            for (size_t i = 0; i < SIZE; ++i) {
+                bitmap_[i] |= other.bitmap_[i];
+            }
         }
 
         template <typename Visitor>
@@ -131,7 +152,6 @@ public:
     };
 
 private:
-    static size_t GetIdxInBitmap(uintptr_t addr, uintptr_t bitmapBeginAddr);
     template <bool NEED_LOCK>
     PandaUnorderedSet<Region *> *GetRefRegions();
     template <bool NEED_LOCK>
@@ -148,5 +168,24 @@ private:
 
     friend class test::RemSetTest;
 };
+
+class GlobalRemSet {
+public:
+    template <typename RegionContainer, typename RegionPred, typename MemVisitor>
+    void ProcessRemSets(const RegionContainer &cont, const RegionPred &regionPred, const MemVisitor &visitor);
+
+    template <typename MemVisitor>
+    bool IterateOverUniqueRange(Region *region, MemRange range, const MemVisitor &visitor);
+
+private:
+    template <typename RegionPred>
+    void FillBitmap(const RemSet<> &remSet, const RegionPred &regionPred);
+
+    template <typename MemVisitor>
+    void IterateOverBits(const MemVisitor &visitor) const;
+
+    PandaUnorderedMap<uintptr_t, RemSet<>::Bitmap> bitmaps_;
+};
+
 }  // namespace ark::mem
 #endif  // PANDA_MEM_GC_G1_REM_SET_H
