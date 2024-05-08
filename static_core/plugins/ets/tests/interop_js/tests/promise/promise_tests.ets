@@ -330,7 +330,7 @@ function resolvePendingPromise(): boolean {
     if (resolvePromiseFn == null) {
         return false;
     }
-    resolvePromiseFn("Panda");
+    (resolvePromiseFn as (value: Object) => void)("Panda");
     return true;
 }
 

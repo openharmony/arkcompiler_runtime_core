@@ -56,39 +56,39 @@ cases:
 
   # classes
   - defs: |-
-      class Box<T> {
+      class B<T> {
           public ok = true;
       }
-      type BetterBox<T> = Box<T>;
+      type BetterB<T> = B<T>;
     use: |-
-      let v: BetterBox<Int> = new BetterBox<Int>();
+      let v: BetterB<Int> = new BetterB<Int>();
       let ok: boolean = v.ok;
 
   - defs: |-
-      class Box<T> {
+      class B<T> {
           public ok = true;
       }
-      type BetterBox = Box<Int>;
+      type BetterB = B<Int>;
     use: |-
-      let v: BetterBox = new BetterBox();
+      let v: BetterB = new BetterB();
       let ok: boolean = v.ok;
 
   - defs: |-
-      class Box<T, V> {
+      class B<T, V> {
           public ok = true;
       }
-      type BetterBox<T> = Box<T, Boolean>;
+      type BetterB<T> = B<T, Boolean>;
     use: |-
-      let v: BetterBox<Long> = new Box<Long, Boolean>();
+      let v: BetterB<Long> = new B<Long, Boolean>();
       let ok: boolean = v.ok;
 
   - defs: |-
-      class Box<out T, in U, V extends Exception> {
+      class B<out T, in U, V extends Exception> {
           public ok = true;
       }
-      type BetterBox<T, U> = Box<T, U, NullPointerError>;
+      type BetterB<T, U> = B<T, U, NullPointerError>;
     use: |-
-      let v: BetterBox<Int, Long> = new BetterBox<Int, Long>();
+      let v: BetterB<Int, Long> = new BetterB<Int, Long>();
       let ok: boolean = v.ok;
 
   - defs: |-

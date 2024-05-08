@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ export class Box<T> {
         this.value = null;
     }
 
-    private constructor(value: T) {
+    public constructor(value: T) {
         this.value = value;
     }
 
@@ -43,15 +43,15 @@ export class Box<T> {
      *
      * @returns T - value in the box
      */
-    public get(): T|null {
-        return this.value;
+    public get(): T {
+        return this.value as T;
     }
 
     /**
      * Sets the value contained in the box
      */
-    public set(value: T): void {
-        this.value = value;
+    public set(value: T): T {
+        return (this.value = value) as T;
     }
 }
 
@@ -62,7 +62,7 @@ export class BooleanBox {
         this.value = false;
     }
 
-    private constructor(value: boolean) {
+    public constructor(value: boolean) {
         this.value = value;
     }
 
@@ -87,8 +87,8 @@ export class BooleanBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: boolean): void {
-        this.value = value;
+    public set(value: boolean): boolean {
+        return (this.value = value);
     }
 }
 
@@ -99,7 +99,7 @@ export class ByteBox {
         this.value = 0;
     }
 
-    private constructor(value: byte) {
+    public constructor(value: byte) {
         this.value = value;
     }
 
@@ -124,8 +124,8 @@ export class ByteBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: byte): void {
-        this.value = value;
+    public set(value: byte): byte {
+        return (this.value = value);
     }
 }
 
@@ -136,7 +136,7 @@ export class CharBox {
         this.value = 0;
     }
 
-    private constructor(value: char) {
+    public constructor(value: char) {
         this.value = value;
     }
 
@@ -161,8 +161,8 @@ export class CharBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: char): void {
-        this.value = value;
+    public set(value: char): char {
+        return (this.value = value);
     }
 }
 
@@ -173,7 +173,7 @@ export class ShortBox {
         this.value = 0;
     }
 
-    private constructor(value: short) {
+    public constructor(value: short) {
         this.value = value;
     }
 
@@ -198,8 +198,8 @@ export class ShortBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: short): void {
-        this.value = value;
+    public set(value: short): short {
+        return (this.value = value);
     }
 }
 
@@ -210,7 +210,7 @@ export class IntBox {
         this.value = 0;
     }
 
-    private constructor(value: int) {
+    public constructor(value: int) {
         this.value = value;
     }
 
@@ -235,8 +235,8 @@ export class IntBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: int): void {
-        this.value = value;
+    public set(value: int): int {
+        return (this.value = value);
     }
 }
 
@@ -247,7 +247,7 @@ export class LongBox {
         this.value = 0;
     }
 
-    private constructor(value: long) {
+    public constructor(value: long) {
         this.value = value;
     }
 
@@ -272,8 +272,8 @@ export class LongBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: long): void {
-        this.value = value;
+    public set(value: long): long {
+        return (this.value = value);
     }
 }
 
@@ -284,7 +284,7 @@ export class FloatBox {
         this.value = 0.0;
     }
 
-    private constructor(value: float) {
+    public constructor(value: float) {
         this.value = value;
     }
 
@@ -309,8 +309,8 @@ export class FloatBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: float): void {
-        this.value = value;
+    public set(value: float): float {
+        return (this.value = value);
     }
 }
 
@@ -321,7 +321,7 @@ export class DoubleBox {
         this.value = 0.0;
     }
 
-    private constructor(value: double) {
+    public constructor(value: double) {
         this.value = value;
     }
 
@@ -346,7 +346,7 @@ export class DoubleBox {
     /**
      * Sets the value contained in the box
      */
-    public set(value: double): void {
-        this.value = value;
+    public set(value: double): double {
+        return (this.value = value);
     }
 }
