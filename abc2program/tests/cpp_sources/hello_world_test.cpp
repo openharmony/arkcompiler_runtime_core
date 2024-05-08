@@ -141,12 +141,15 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_lang, TestSize.
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_literalarray_table, TestSize.Level1)
 {
     std::set<size_t> literals_sizes;
+    std::vector<std::string> literal_array_keys;
     for (const auto &it : prog_->literalarray_table) {
         const pandasm::LiteralArray &literal_array = it.second;
         size_t literals_size = literal_array.literals_.size();
         literals_sizes.insert(literals_size);
+        literal_array_keys.emplace_back(it.first);
     }
     EXPECT_TRUE(Abc2ProgramTestUtils::ValidateLiteralsSizes(literals_sizes));
+    EXPECT_TRUE(Abc2ProgramTestUtils::ValidateLiteralArrayKeys(literal_array_keys));
 }
 
 /**

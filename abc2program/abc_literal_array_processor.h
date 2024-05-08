@@ -34,10 +34,6 @@ private:
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;
     void FillLiteralData(pandasm::LiteralArray *lit_array, const panda_file::LiteralDataAccessor::LiteralValue &value,
                          const panda_file::LiteralTag &tag) const;
-    void FillLiteralData4Method(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                pandasm::LiteralArray::Literal &lit) const;
-    void FillLiteralData4LiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                      pandasm::LiteralArray::Literal &lit) const;
     panda_file::LiteralDataAccessor &literal_data_accessor_;
     pandasm::LiteralArray literal_array_;
 };

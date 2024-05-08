@@ -33,7 +33,6 @@ bool AbcFileProcessor::FillProgramData()
 {
     program_->lang = panda_file::SourceLang::ECMASCRIPT;
     FillClassesData();
-    FillLiteralArrayTable();
     return true;
 }
 
@@ -53,8 +52,11 @@ void AbcFileProcessor::FillClassesData()
         if (file_->IsExternal(record_id)) {
             continue;
         }
+        entity_container_.SetCurrentClassId(class_idx);
+        entity_container_.ClearLiteralArrayIdSet();
         AbcClassProcessor class_processor(record_id, entity_container_);
         class_processor.FillProgramData();
+        FillLiteralArrayTable();
     }
 }
 

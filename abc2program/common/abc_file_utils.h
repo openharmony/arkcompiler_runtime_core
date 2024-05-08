@@ -78,8 +78,10 @@ constexpr std::string_view DUMP_CONTENT_CATCH_END_LABEL = "catch_end_label : ";
 constexpr std::string_view DUMP_CONTENT_LOCAL_VAR_TABLE = "#\t Start   Length  Register           Name   Signature\n";
 constexpr std::string_view DUMP_CONTENT_LINE_NUMBER = " # line: ";
 constexpr std::string_view DUMP_CONTENT_COLUMN_NUMBER = " # column: ";
-constexpr std::string_view STR_LITERAL_ARRAY_ID = ".LITERAL_ARRAY_ID:";
 constexpr std::string_view DUMP_CONTENT_NESTED_LITERALARRAY = "$$NESTED-LITERALARRAY$$";
+
+// literal array name
+constexpr std::string_view UNDERLINE = "_";
 
 // width constant
 constexpr uint32_t LINE_WIDTH = 40;

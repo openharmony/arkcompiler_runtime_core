@@ -61,10 +61,13 @@ public:
     void AddUnnestedLiteralArrayId(const panda_file::File::EntityId &literal_array_id);
     void AddProcessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     void TryAddUnprocessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
-    std::string GetLiteralArrayIdName(uint32_t literal_array_id) const;
-    std::string GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id) const;
+    std::string GetLiteralArrayIdName(uint32_t literal_array_id);
+    std::string GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id);
     std::string GetAbcFileAbsolutePath() const;
     panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
+
+    void SetCurrentClassId(uint32_t class_id);
+    void ClearLiteralArrayIdSet();
 
 private:
     std::string ConcatFullMethodNameById(const panda_file::File::EntityId &method_id);
@@ -81,6 +84,7 @@ private:
     std::unordered_set<uint32_t> unnested_literal_array_id_set_;
     std::unordered_set<uint32_t> processed_nested_literal_array_id_set_;
     std::unordered_set<uint32_t> unprocessed_nested_literal_array_id_set_;
+    uint32_t current_class_id_{0};
 }; // class Abc2ProgramEntityContainer
 
 } // namespace panda::abc2program

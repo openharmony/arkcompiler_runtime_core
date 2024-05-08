@@ -31,6 +31,10 @@ std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_
 std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {"_ESModuleRecord",
                                                                                     "_ESSlotNumberAnnotation",
                                                                                     "_GLOBAL"};
+std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord_2247",
+                                                                                          "_GLOBAL_2327",
+                                                                                          "_GLOBAL_2336",
+                                                                                          "_GLOBAL_2345"};
 
 std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 8, 21};
 
@@ -57,6 +61,11 @@ bool Abc2ProgramTestUtils::ValidateProgramStrings(const std::set<std::string> &p
 bool Abc2ProgramTestUtils::ValidateRecordNames(const std::vector<std::string> &record_names)
 {
     return ValidateStrings(record_names, helloworld_expected_record_names_);
+}
+
+bool Abc2ProgramTestUtils::ValidateLiteralArrayKeys(const std::vector<std::string> &literal_array_keys)
+{
+    return ValidateStrings(literal_array_keys, helloworld_expected_literal_array_keys_);
 }
 
 bool Abc2ProgramTestUtils::ValidateLiteralsSizes(const std::set<size_t> &literal_array_sizes)
