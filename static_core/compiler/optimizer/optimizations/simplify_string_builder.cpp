@@ -1295,11 +1295,30 @@ bool SimplifyStringBuilder::HasInputFromPreHeader(PhiInst *phi) const
 
 bool SimplifyStringBuilder::HasToStringCallInput(PhiInst *phi) const
 {
+    // Returns true if
+    //  (1) 'phi' has StringBuilder.toString call as one of its inputs, and
+    //  (2) StringBuilder.toString call has no effective usages except this 'phi' itself.
+    //     Users being save states, check casts, and not used users are skipped.
+
     MarkerHolder visited {GetGraph()};
-    bool found = HasInputPhiRecursively(phi, visited.GetMarker(),
-                                        [](auto &input) { return IsStringBuilderToString(input.GetInst()); });
+
+    // (1)
+    bool hasToStringCallInput = HasInputPhiRecursively(
+        phi, visited.GetMarker(), [](auto &input) { return IsStringBuilderToString(input.GetInst()); });
+
+    // (2)
+    bool toStringCallInputUsedAnywhereExceptPhi = HasInput(phi, [phi](auto &input) {
+        return IsStringBuilderToString(input.GetInst()) && HasUser(input.GetInst(), [phi](auto &user) {
+                   auto userInst = user.GetInst();
+                   bool isPhi = userInst == phi;
+                   bool isSaveState = userInst->IsSaveState();
+                   bool isCheckCast = IsCheckCastWithoutUsers(userInst);
+                   bool hasUsers = userInst->HasUsers();
+                   return !isPhi && !isSaveState && !isCheckCast && hasUsers;
+               });
+    });
     ResetInputMarkersRecursively(phi, visited.GetMarker());
-    return found;
+    return hasToStringCallInput && !toStringCallInputUsedAnywhereExceptPhi;
 }
 
 bool SimplifyStringBuilder::HasInputInst(Inst *inputInst, Inst *inst) const
