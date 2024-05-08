@@ -115,3 +115,16 @@ sub:
           - paramOf(*default_inds)
         ret_type: void
         mandatory: 1
+      - expr: Int8Array.from(pars)
+        params: 
+          - 
+            - Array.of<number>(1, 2, 3, NaN)
+            - new Set<number>(Array.of<number>(1, 2, 3, NaN))
+      - expr: Int8Array.from<number>(pars)
+        params:
+          -
+            - Array.of<number>(1, 2, 3, NaN)
+          -
+            - |
+              (v: number, k: number): number => v * k
+

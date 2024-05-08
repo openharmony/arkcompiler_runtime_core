@@ -115,3 +115,16 @@ sub:
           - paramOf(*default_inds)
         ret_type: void
         mandatory: 1
+      - expr: Uint32Array.from(pars)
+        params: 
+          - 
+            - Array.of<number>(1, 2, 3, NaN)
+            - new Set<number>(Array.of<number>(1, 2, 3, NaN))
+      - expr: Uint32Array.from<number>(pars)
+        params:
+          -
+            - Array.of<number>(1, 2, 3, NaN)
+          -
+            - |
+              (v: number, k: number): number => v * k
+
