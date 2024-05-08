@@ -16,7 +16,9 @@
 declare const exports: any;
 let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
 
-export type IntAlias = number;
+type IntAlias = number;
+export {IntAlias};
+
 
 class Lib2Class {
     public val: number = {} as any;
