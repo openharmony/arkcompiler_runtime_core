@@ -105,7 +105,12 @@ ohos_static_library("libarkfile_static") {
     "$ark_root/libziparchive:libarkziparchive_static",
   ]
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  if (is_arkui_x) {
+    deps += ["$ark_third_party_root/bounds_checking_function:libsec_static"]
+  } else {
+    external_deps = [ sdk_libc_secshared_dep ]
+  }
+
   if (!ark_standalone_build) {
     public_external_deps = [ "zlib:libz" ]
   } else {
@@ -194,7 +199,12 @@ ohos_source_set("libarkfile_frontend_set_static") {
     "$ark_root/libziparchive:libarkziparchive_frontend_static",
   ]
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  if (is_arkui_x) {
+    deps += ["$ark_third_party_root/bounds_checking_function:libsec_static"]
+  } else {
+    external_deps = [ sdk_libc_secshared_dep ]
+  }
+
   if (!ark_standalone_build) {
     public_external_deps = [ "zlib:libz" ]
   } else {
