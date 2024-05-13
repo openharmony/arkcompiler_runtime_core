@@ -519,6 +519,11 @@ public:
 
     void SetValue(ValueItem *value);
 
+    ValueItem *GetValue() const
+    {
+        return value_;
+    }
+
     void AddRuntimeAnnotation(AnnotationItem *runtime_annotation)
     {
         runtime_annotations_.push_back(runtime_annotation);

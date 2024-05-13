@@ -74,6 +74,10 @@ public:
     }
 
 private:
+    static bool FillFields(panda_file::ItemContainer *items, const Program &program,
+                           const panda::pandasm::Record &record, const AsmEmitter::AsmEntityCollections &entities);
+    static bool CheckDuplicateField(panda_file::ValueItem &value_item, panda_file::FieldItem &field_item,
+                                    std::string &field_name);
     static void MakeStringItems(panda_file::ItemContainer *items, const Program &program,
                                 AsmEntityCollections &entities);
     static void MakeLiteralItems(panda_file::ItemContainer *items, const Program &program,

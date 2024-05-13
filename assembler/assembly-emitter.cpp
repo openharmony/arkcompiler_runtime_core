@@ -822,8 +822,11 @@ bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmE
                               const std::string &name, const Record &rec, ClassItem *record)
 {
     for (const auto &f : rec.field_list) {
-        auto *field_name = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
         std::string full_field_name = name + "." + f.name;
+        if (entities.field_items.find(full_field_name) != entities.field_items.end()) {
+            continue;
+        }
+        auto *field_name = items->GetOrCreateStringItem(pandasm::DeMangleName(f.name));
         auto *type_item = GetTypeItem(items, primitive_types, f.type, program);
         if (type_item == nullptr) {
             SetLastError("Field " + full_field_name + " has undefined type");
@@ -1079,6 +1082,48 @@ bool AsmEmitter::MakeFunctionItems(
     return true;
 }
 
+bool AsmEmitter::CheckDuplicateField(ValueItem &value_item, FieldItem &field_item, std::string &field_name)
+{
+    if (!field_item.GetValue()) {
+        return true;
+    }
+
+    if (field_item.GetValue()->IsArray() || value_item.IsArray()) {
+        SetLastError("Duplicated array type field {" + field_name + "} is not supported.");
+        return false;
+    }
+
+    if (field_item.GetValue()->GetAsScalar() == value_item.GetAsScalar()) {
+        return true;
+    }
+    SetLastError("Field {" + field_name + "} has different value.");
+    return false;
+}
+
+bool AsmEmitter::FillFields(ItemContainer *items, const Program &program, const panda::pandasm::Record &record,
+                            const AsmEmitter::AsmEntityCollections &entities)
+{
+    for (const auto &field : record.field_list) {
+        auto field_name = record.name + "." + field.name;
+        auto *field_item = static_cast<FieldItem *>(Find(entities.field_items, field_name));
+        if (!AddAnnotations(field_item, items, *field.metadata, program, entities)) {
+            SetLastError("Cannot emit annotations for field " + field_name + ": " + GetLastError());
+            return false;
+        }
+
+        auto res = field.metadata->GetValue();
+        if (res) {
+            auto value = res.value();
+            auto *item = CreateValueItem(items, &value, program, entities);
+            if (!CheckDuplicateField(*item, *field_item, field_name)) {
+                return false;
+            }
+            field_item->SetValue(item);
+        }
+    }
+    return true;
+}
+
 /* static */
 bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &program,
                                        const AsmEmitter::AsmEntityCollections &entities)
@@ -1094,20 +1139,8 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
             return false;
         }
 
-        for (const auto &field : record.field_list) {
-            auto field_name = record.name + "." + field.name;
-            auto *field_item = static_cast<FieldItem *>(Find(entities.field_items, field_name));
-            if (!AddAnnotations(field_item, items, *field.metadata, program, entities)) {
-                SetLastError("Cannot emit annotations for field " + field_name + ": " + GetLastError());
-                return false;
-            }
-
-            auto res = field.metadata->GetValue();
-            if (res) {
-                auto value = res.value();
-                auto *item = CreateValueItem(items, &value, program, entities);
-                field_item->SetValue(item);
-            }
+        if (!FillFields(items, program, record, entities)) {
+            return false;
         }
     }
     return true;
