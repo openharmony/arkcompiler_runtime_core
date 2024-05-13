@@ -1812,10 +1812,6 @@
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.ets
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_6.ets
 
-# 16335 es2panda aborts on reference equality with BigInts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_9.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-clss_9.ets
-
 # enum cannot be assigned to type Object - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_20.ets
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_21.ets
@@ -2072,10 +2068,6 @@
 # 16518 CTE expected on assignment of incompatible union types
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec2.ets
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec5b.ets
-
-# 16335 es2panda aborts on reference equality with BigInts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_const/decl-const_9.ets
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/decl_var/decl-var_9.ets
 
 # 15667 Function interfaces for throwing and rethrowing functions
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_var/decl-var_6.ets
