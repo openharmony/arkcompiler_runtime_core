@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,10 +20,20 @@
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
+#include "plugins/ets/runtime/ets_vm.h"
 
 namespace ark::mem::ets {
 
 EtsReferenceProcessor::EtsReferenceProcessor(GC *gc) : gc_(gc) {}
+
+void EtsReferenceProcessor::Initialize()
+{
+    auto *vm = ark::ets::PandaEtsVM::GetCurrent();
+    ASSERT(vm != nullptr);
+    auto *undefinedObjHeader = vm->GetUndefinedObject();
+    undefinedObject_ = ark::ets::EtsObject::FromCoreType(undefinedObjHeader);
+    ASSERT(gc_->GetObjectAllocator()->IsObjectInNonMovableSpace(undefinedObject_->GetCoreType()));
+}
 
 bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                                         const ReferenceCheckPredicateT &pred) const
@@ -38,9 +48,9 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
         const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
 
         auto *referent = etsRef->GetReferent();
-        if (referent == nullptr) {
+        if (referent == nullptr || referent == undefinedObject_) {
             LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
-                                 << " as normal object, because referent is null";
+                                 << " as normal object, because referent is nullish";
             return false;
         }
 
@@ -79,9 +89,9 @@ void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
         ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         auto *referent = weakRef->GetReferent();
-        if (referent == nullptr) {
+        if (referent == nullptr || referent == undefinedObject_) {
             LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
-                                 << " because referent is null";
+                                 << " because referent is nullish";
             continue;
         }
         auto *referentObj = referent->GetCoreType();

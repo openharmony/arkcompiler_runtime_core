@@ -248,6 +248,7 @@ bool PandaEtsVM::Initialize()
             ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
             EtsCoroutine::GetCurrent()->SetUndefinedObject(GetUndefinedObject());
         }
+        referenceProcessor_->Initialize();
     }
 
     return true;

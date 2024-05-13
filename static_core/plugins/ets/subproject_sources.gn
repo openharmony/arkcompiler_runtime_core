@@ -125,6 +125,7 @@ srcs_runtime = [
   "runtime/types/ets_typeapi_method.cpp",
   "runtime/types/ets_typeapi_field.cpp",
   "runtime/types/ets_typeapi_create.cpp",
+  "runtime/types/ets_weak_reference.cpp",
   "runtime/ets_utils.cpp",
   "runtime/interop_js/intrinsics/std_js_jsruntime.cpp",
 ]
