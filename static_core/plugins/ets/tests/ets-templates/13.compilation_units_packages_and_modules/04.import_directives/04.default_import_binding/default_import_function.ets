@@ -14,16 +14,13 @@
  */
 
 /*---
-desc: Import a default exported struct.
+desc: Import a default exported function.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct.ets
+- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
 ---*/
 
-import DefaultExportedStruct from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct"
+import DefaultExportedFunc from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
-    let test_class = new DefaultExportedStruct();
-
-    assert(test_class.hello("hello") == "hello_world");
-    assert((test_class.test_member + "_member") == "test_member");
+    assert(DefaultExportedFunc(41) == 42);
 }

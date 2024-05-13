@@ -54,9 +54,9 @@
 # end of es2panda fails
 
 # not implemented
-17.experimental_features/16.packages/05.import_and_overloading_of_function_names/shadow_function_alias.ets
-17.experimental_features/16.packages/05.import_and_overloading_of_function_names/shadow_function_explicit_name.ets
-17.experimental_features/16.packages/05.import_and_overloading_of_function_names/shadow_function_name.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/shadow_function_alias.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/shadow_function_explicit_name.ets
+17.experimental_features/17.packages/03.import_and_overloading_of_function_names/shadow_function_name.ets
 
 03.types/01.predefined_types/class_types_declaration_2.ets
 03.types/04.using_types/array_value_types_declaration_18.ets
@@ -387,13 +387,13 @@
 10.interfaces/06.interface_method_declarations/inheriting_methods_with_override_equivalent_signatures/inheritance_multiple_default_methods.ets
 10.interfaces/06.interface_method_declarations/inheriting_methods_with_override_equivalent_signatures/override_multiple_default_methods.ets
 10.interfaces/07.interface_inheritance/inheritance_static_method.ets
-13.compilation_units_packages_and_modules/03.import_directives/import_0.ets
-13.compilation_units_packages_and_modules/03.import_directives/import_1.ets
-13.compilation_units_packages_and_modules/03.import_directives/import_2.ets
-13.compilation_units_packages_and_modules/04.default_import/core_default_import_0.ets
-13.compilation_units_packages_and_modules/04.default_import/core_default_import_23.ets
-13.compilation_units_packages_and_modules/04.default_import/core_default_import_25.ets
-13.compilation_units_packages_and_modules/05.top-level_declarations/top_level_declarations_11.ets
+13.compilation_units_packages_and_modules/04.import_directives/import_0.ets
+13.compilation_units_packages_and_modules/04.import_directives/import_1.ets
+13.compilation_units_packages_and_modules/04.import_directives/import_2.ets
+13.compilation_units_packages_and_modules/05.implicit_import/core_default_import_0.ets
+13.compilation_units_packages_and_modules/05.implicit_import/core_default_import_23.ets
+13.compilation_units_packages_and_modules/05.implicit_import/core_default_import_25.ets
+13.compilation_units_packages_and_modules/08.top-level_declarations/top_level_declarations_11.ets
 17.experimental_features/14.exceptions/01.throwing_functions/lambda_call_with_catch.ets
 17.experimental_features/14.exceptions/01.throwing_functions/lambda_call_with_default_catch.ets
 17.experimental_features/14.exceptions/02.non_throwing_functions/lambda_with_default_catch.ets
@@ -600,18 +600,18 @@
 # end of es2panda fails
 
 # es2panda fails: panda#11752
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_10.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_11.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_14.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_2.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_3.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_4.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_5.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_7.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_8.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_declaration_9.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/block_execution.ets
-13.compilation_units_packages_and_modules/07.top-level_statements/multiple_block_execution.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_10.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_11.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_14.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_2.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_3.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_4.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_5.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_7.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_8.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_9.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/block_execution.ets
+13.compilation_units_packages_and_modules/10.top-level_statements/multiple_block_execution.ets
 # end of es2panda fails
 
 # es2panda fails: panda#11660 panda#11541
@@ -620,8 +620,8 @@
 # end of es2panda fails
 
 # runtime fails
-13.compilation_units_packages_and_modules/03.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_3.ets
-13.compilation_units_packages_and_modules/03.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.ets
+13.compilation_units_packages_and_modules/04.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_3.ets
+13.compilation_units_packages_and_modules/04.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.ets
 # end of runtime fails
 
 # es2panda fails: panda#14062
@@ -864,8 +864,8 @@
 # end of es2panda fails
 
 # es2panda fails: panda#14338 es2panda fails to compile overloaded functions
-15.semantic_rules/02.override-equivalent_signatures/pos_1.ets
-15.semantic_rules/02.override-equivalent_signatures/pos_6.ets
+15.semantic_rules/04.overloading_and_overriding/02.override-compatible_signatures/pos_1.ets
+15.semantic_rules/04.overloading_and_overriding/02.override-compatible_signatures/pos_6.ets
 # end of es2panda fails
 
 # es2panda fails: panda:14380 Floating-point type array indexes are not allowed
@@ -1006,7 +1006,7 @@
 # end of es2panda fails
 
 # Disable struct test according I8EM2T
-13.compilation_units_packages_and_modules/03.import_directives/04.default_import_binding/default_import_struct.ets
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_struct.ets
 # end of Disable struct test according I8EM2T
 
 # es2panda fails: panda:14622 Following function call block is always taken as trailing lambda
@@ -1052,19 +1052,19 @@
 # end of es2panda fails
 
 
-13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_0.ets
-13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_1.ets
-13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_2.ets
-13.compilation_units_packages_and_modules/03.import_directives/06.import_path/dir/import_path_dir_3.ets
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_0.ets
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_1.ets
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_2.ets
+13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_3.ets
 
 
-13.compilation_units_packages_and_modules/06.export_directives/01.selective_export_directive/selective_exports_1.ets
-13.compilation_units_packages_and_modules/06.export_directives/01.selective_export_directive/selective_exports_3.ets
-13.compilation_units_packages_and_modules/06.export_directives/01.selective_export_directive/selective_exports_4.ets
-13.compilation_units_packages_and_modules/06.export_directives/01.selective_export_directive/selective_exports_5.ets
-13.compilation_units_packages_and_modules/06.export_directives/01.selective_export_directive/selective_exports_6.ets
-13.compilation_units_packages_and_modules/06.export_directives/02.export_type_directive/export_already_declared.ets
-13.compilation_units_packages_and_modules/06.export_directives/03.re-export_directive/re-export_all_by_old_names.ets
+13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_1.ets
+13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_3.ets
+13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_4.ets
+13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_5.ets
+13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_6.ets
+13.compilation_units_packages_and_modules/09.export_directives/02.export_type_directive/export_already_declared.ets
+13.compilation_units_packages_and_modules/09.export_directives/03.re-export_directive/re-export_all_by_old_names.ets
 
 # 15095
 09.classes/06.method_declarations/hiding_by_class_methods/hiding_instance_static_method.ets

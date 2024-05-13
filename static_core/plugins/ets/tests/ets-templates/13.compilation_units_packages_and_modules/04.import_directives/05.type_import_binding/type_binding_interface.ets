@@ -14,11 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Type export interfacce.
-tags:
-- compile-only
-- not-a-test
+desc: Import interface type.
+files:
+- ../../08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_interface.ets
 ---*/
 
-interface I {}
-export type {I}
+import type {I} from "../../08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_interface"
+
+class C implements I {};
+
+function main(): void {
+    let test_class = new C();
+}

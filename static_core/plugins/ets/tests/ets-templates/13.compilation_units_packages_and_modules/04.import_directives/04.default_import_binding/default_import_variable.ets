@@ -14,16 +14,13 @@
  */
 
 /*---
-desc: Import a default exported class.
+desc: Import a default exported variable.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class.ets
+- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.ets
 ---*/
 
-import DefaultExportedClass from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class"
+import DefaultExportedVar from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
 
 function main(): void {
-    let test_class = new DefaultExportedClass();
-
-    assert(test_class.hello("hello") == "hello_world");
-    assert((test_class.test_member + "_member") == "test_member");
+    assert(DefaultExportedVar == "default_variable");
 }

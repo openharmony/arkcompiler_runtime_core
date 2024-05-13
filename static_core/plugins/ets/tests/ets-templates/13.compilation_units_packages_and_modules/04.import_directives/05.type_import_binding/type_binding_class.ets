@@ -14,15 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Import class type with alias.
+desc: Import class type.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class.ets
+- ../../08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class.ets
 ---*/
 
-import type {MyClass as MyC} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
+import type {C} from "../../08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
 
 function main(): void {
-    let test_class = new MyC();
+    let test_class = new C();
 
     assert(test_class.test() == "Hello World");
 }

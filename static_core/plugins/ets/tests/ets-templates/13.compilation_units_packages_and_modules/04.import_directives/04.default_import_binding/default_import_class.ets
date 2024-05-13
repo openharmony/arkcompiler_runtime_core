@@ -14,13 +14,16 @@
  */
 
 /*---
-desc: Import a default exported function.
+desc: Import a default exported class.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
+- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class.ets
 ---*/
 
-import DefaultExportedFunc from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
+import DefaultExportedClass from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_class"
 
 function main(): void {
-    assert(DefaultExportedFunc(41) == 42);
+    let test_class = new DefaultExportedClass();
+
+    assert(test_class.hello("hello") == "hello_world");
+    assert((test_class.test_member + "_member") == "test_member");
 }

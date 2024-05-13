@@ -14,15 +14,15 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Import interface type.
+desc: Import class type with alias.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_interface.ets
+- ../../08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class.ets
 ---*/
 
-import type {I} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_interface"
-
-class C implements I {};
+import type {MyClass as MyC} from "../../08.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
 
 function main(): void {
-    let test_class = new C();
+    let test_class = new MyC();
+
+    assert(test_class.test() == "Hello World");
 }
