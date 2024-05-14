@@ -150,8 +150,14 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::
             break;
         case DataType::UINT8:
         case DataType::INT8:
+            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I8;
+            type = DataType::INT8;
+            break;
         case DataType::UINT16:
         case DataType::INT16:
+            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I16;
+            type = DataType::INT16;
+            break;
         case DataType::UINT32:
         case DataType::INT32:
             id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32;

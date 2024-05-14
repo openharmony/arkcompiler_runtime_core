@@ -88,6 +88,28 @@ intrinsics:
     clear_flags: [  ]
     peephole_func: PeepholeStObjByName
 
+  - name: CompilerEtsStObjByNameI8
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: void
+      args: [ method, i32, u32, ref, i8 ]
+    impl: ark::ets::intrinsics::CompilerEtsStObjByNameI8
+    clear_flags: [  ]
+    peephole_func: PeepholeStObjByName
+
+  - name: CompilerEtsStObjByNameI16
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: void
+      args: [ method, i32, u32, ref, i16 ]
+    impl: ark::ets::intrinsics::CompilerEtsStObjByNameI16
+    clear_flags: [  ]
+    peephole_func: PeepholeStObjByName
+
   - name: CompilerEtsStObjByNameI32
     space: ets
     compiler_only: true

@@ -137,6 +137,8 @@ static void VisitEtsStObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
     auto bcId0 = enc->irInterface_->GetFieldIdByOffset(static_cast<uint32_t>(inst->GetImms()[0]));
     switch (inst->GetIntrinsicId()) {
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32:
+        case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I16:
+        case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I8:
         case compiler::RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F32:
             DoLda(inst->GetSrcReg(1U), enc->result_);
             enc->result_.emplace_back(pandasm::Create_ETS_STOBJ_NAME(v0, bcId0));
