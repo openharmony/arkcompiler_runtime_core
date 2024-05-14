@@ -261,6 +261,11 @@ void Encoder::EncodeReverseBytes([[maybe_unused]] Reg dst, [[maybe_unused]] Reg 
     SetFalseResult();
 }
 
+void Encoder::EncodeReverseHalfWords([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
+{
+    SetFalseResult();
+}
+
 void Encoder::EncodeReverseBits([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
 {
     SetFalseResult();
@@ -546,6 +551,11 @@ void Encoder::EncodeCompressEightUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Reg 
 }
 
 void Encoder::EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg dstAddr)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeUnsignedExtendBytesToShorts([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
 {
     SetFalseResult();
 }

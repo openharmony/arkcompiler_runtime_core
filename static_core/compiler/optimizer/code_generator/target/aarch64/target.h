@@ -301,6 +301,7 @@ public:
 
     void EncodeReverseBytes(Reg dst, Reg src) override;
     void EncodeReverseBits(Reg dst, Reg src) override;
+    void EncodeReverseHalfWords(Reg dst, Reg src) override;
     void EncodeRotate(Reg dst, Reg src1, Reg src2, bool isRor) override;
     void EncodeSignum(Reg dst, Reg src) override;
     void EncodeCompressedStringCharAt(ArgsCompressedStringCharAt &&args) override;
@@ -324,6 +325,7 @@ public:
     void EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg) override;
     void EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr) override;
     void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr) override;
+    void EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src) override;
 
     bool CanEncodeBitCount() override;
     bool CanEncodeCompressedStringCharAt() override;

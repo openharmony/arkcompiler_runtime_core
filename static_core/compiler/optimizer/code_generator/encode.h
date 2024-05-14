@@ -256,6 +256,7 @@ public:
     virtual void EncodeIsSafeInteger(Reg dst, Reg src0);
     virtual void EncodeReverseBytes(Reg dst, Reg src);
     virtual void EncodeReverseBits(Reg dst, Reg src);
+    virtual void EncodeReverseHalfWords(Reg dst, Reg src);
     virtual void EncodeBitCount(Reg dst, Reg src);
     virtual void EncodeRotate(Reg dst, Reg src1, Reg src2, bool isRor);
     virtual void EncodeSignum(Reg dst, Reg src);
@@ -320,6 +321,7 @@ public:
     virtual size_t GetCursorOffset() const;
     virtual void EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr);
     virtual void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr);
+    virtual void EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src);
     virtual void SetCursorOffset([[maybe_unused]] size_t offset) {}
     virtual void SaveRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp);
     virtual void LoadRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp);

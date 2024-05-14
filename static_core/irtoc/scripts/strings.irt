@@ -301,3 +301,81 @@ Label(:SlowPathEntrypoint)
     Intrinsic(:SLOW_PATH_ENTRY, str1, str2, str3, str4).AddImm(ep_offset).MethodAsImm("StringConcat4UsualBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
+
+function(:StringCompareTo,
+         params: {str1: 'ref', str2: 'ref'},
+         regmap: $full_regmap,
+         regalloc_set: $panda_mask,
+         mode: [:FastPath]) {
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  If(str1, str2).EQ.Unlikely.b {
+    Return(0).i32
+  }
+
+  length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+  # cover the cases of length2 being zero and both lengths being zero
+  IfImm(Compare(length2, 0).EQ.b).Imm(0).Unlikely.NE.b {
+    Return(length1).i32
+  }
+
+  IfImm(Compare(length1, 0).EQ.b).Imm(0).Unlikely.NE.b {
+    Return(-1).i32
+  }
+
+  buf1 := AddI(str1).Imm(Constants::STRING_DATA_OFFSET).ptr
+  buf2 := AddI(str2).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+  # get the least length in chars
+  length := ShrI(Cast(Min(length1, length2).i32).u64).Imm(1).u64
+
+  utf_1 := AndI(length1).Imm(1).u32
+  utf_2 := AndI(length2).Imm(1).u32
+
+  # in the unlikely case the strings are in different 
+  # encodings the comparison gets more comlicated as
+  # we have to expand the latin string to u16 first
+  If(utf_1, utf_2).NE.Unlikely.b {
+    Return(compare_mixed_strings(buf1, buf2, length, utf_1).i32).i32
+  }
+  utf := Cast(utf_1).u64
+
+  # make length be in actual bytes now
+  length := Shl(length, utf).u64
+
+  IfImm(Compare(length, 4).LE.b).Imm(0).NE.b {
+    d1 := LoadI(buf1).Imm(0).u32
+    d2 := LoadI(buf2).Imm(0).u32
+    If(d1, d2).EQ.b {
+      Return(Sub(length1, length2).i32).i32
+    }
+    Return(calculate_chars_difference(d1, d2, utf).i32).i32
+  }
+
+  # considering the data buffer to be allocated in size
+  # that is a multiple of 16 and being zeroed initially
+  # we can safely operate on 8-bytes chunks
+  i1 := 0
+Label(:Loop)  
+  i := Phi(i1, i2).u64
+  data1 := Load(buf1, i).u64
+  data2 := Load(buf2, i).u64
+  i2 := AddI(i).Imm(8).u64
+  If(data1, data2).NE.b {
+    Goto(:NotEqual)
+  }
+  If(i2, length).LT.b {
+    Goto(:Loop)
+  }
+
+  Return(Sub(length1, length2).i32).i32
+
+Label(:NotEqual)
+  Return(calculate_chars_difference(data1, data2, utf).i32).i32
+}

@@ -951,6 +951,19 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringConcat4
 
+  - name: StdCoreStringCompareTo
+    space: ets
+    class_name: std.core.String
+    method_name: compareTo
+    static: false
+    signature:
+        ret: i32
+        args: [ std.core.String ]
+    codegen_func: CreateStringCompareTo
+    codegen_arch: [arm64, amd64]
+    impl: ark::ets::intrinsics::StdCoreStringCompareTo
+    safe_intrinsic: true
+
 ##########################
 # std.core.StringBuilder #
 ##########################

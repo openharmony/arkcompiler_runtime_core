@@ -13,6 +13,7 @@
 
 set(strings_tests
     string_api
+    string_compare_to
 )
 
 set(strings_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")

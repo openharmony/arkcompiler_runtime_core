@@ -1228,3 +1228,12 @@ entrypoints:
     - ark::coretypes::String*
     - ark::coretypes::String*
     - ark::coretypes::String*
+
+- name: StringCompareTo
+  entrypoint: StringCompareTo
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t                  # compare result
+    - ark::coretypes::String*  # first string
+    - ark::coretypes::String*  # second string

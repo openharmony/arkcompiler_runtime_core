@@ -322,19 +322,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      *
      * @returns the comparison result
      */
-    public override compareTo(other: String): int {
-        let to: String = other as String;
-        let len: int = min(this.getLength(), to.getLength()) as int;
-        for (let i: int = 0; i < len; i++) {
-            let lhsCh: Char = new Char(this.charAt(i));
-            let rhsCh: Char = new Char(to.charAt(i));
-            let tmpRes: int = lhsCh.compareTo(rhsCh);
-            if (tmpRes != 0) {
-                return tmpRes;
-            }
-        }
-        return this.getLength() - to.getLength();
-    }
+    public native override compareTo(other: String): int;
 
     /**
      * Comparison between this String and another one based on locale.

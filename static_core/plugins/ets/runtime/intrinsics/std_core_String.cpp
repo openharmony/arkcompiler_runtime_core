@@ -440,4 +440,18 @@ EtsString *StdCoreStringConcat4(EtsString *str1, EtsString *str2, EtsString *str
     return reinterpret_cast<EtsString *>(CoreStringConcat4(s1, s2, s3, s4));
 }
 
+ets_int StdCoreStringCompareTo(EtsString *str1, EtsString *str2)
+{
+    /* corner cases */
+    if (str1->GetLength() == 0) {
+        return -str2->GetLength();
+    }
+    if (str2->GetLength() == 0) {
+        return str1->GetLength();
+    }
+
+    /* use the default implementation otherwise */
+    return str1->GetCoreType()->Compare(str2->GetCoreType());
+}
+
 }  // namespace ark::ets::intrinsics
