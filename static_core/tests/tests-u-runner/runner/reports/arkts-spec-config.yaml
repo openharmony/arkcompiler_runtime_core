@@ -1,0 +1,525 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+'1':
+  title: 'Introduction'
+  status: 'No testable assertions'
+
+'1.1':
+  title: 'Common Description'
+  status: 'No testable assertions'
+
+'1.2':
+  title: 'Lexical and Syntactic Notation'
+  status: 'No testable assertions'
+
+'1.3':
+  title: 'Terms and Definitions'
+  status: 'No testable assertions'
+
+'2':
+  title: 'Lexical Elements'
+  status: 'No testable assertions'
+
+'2.1':
+  title: 'Use of Unicode Characters'
+  status: 'No testable assertions'
+
+'2.2':
+  title: 'Lexical Input Elements'
+  status: 'No testable assertions'
+
+'2.5':
+  title: 'Tokens'
+  status: 'No testable assertions'
+
+'2.8':
+  title: 'Operators and Punctuators'
+  status: 'No testable assertions'
+
+'2.9':
+  title: 'Literals'
+  status: 'No testable assertions'
+
+'2.9.1':
+  title: 'Integer Literals'
+  status: 'Finished'
+
+'2.9.2':
+  title: 'Floating-Point Literals'
+  status: 'Finished'
+
+'2.9.3':
+  title: 'BigInt Literals'
+  status: 'Finished'
+
+'2.9.4':
+  title: 'Boolean Literals'
+  status: 'Finished'
+
+'2.9.5':
+  title: 'String Literals'
+  status: 'Finished'
+
+'2.9.6':
+  title: 'Template Literals'
+  status: 'Finished'
+
+'2.9.7':
+  title: 'Null Literal'
+  status: 'Finished'
+
+'2.9.8':
+  title: 'Undefined Literal'
+  status: 'Finished'
+
+'2.10':
+  title: 'Comments'
+  status: 'Finished'
+
+'2.11':
+  title: 'Semicolons'
+  status: 'Finished'
+
+'3':
+  title: 'Types'
+  status: 'No testable assertions'
+
+'3.2':
+  title: 'User-Defined Types'
+  status: 'No testable assertions'
+
+'3.3':
+  title: 'Types by Category'
+  status: 'No testable assertions'
+
+'3.7':
+  title: 'Value Types'
+  status: 'No testable assertions'
+
+'3.7.1':
+  title: 'Integer Types and Operations'
+  status: 'Finished'
+
+'3.7.2':
+  title: 'Floating-Point Types and Operations'
+  status: 'Finished'
+
+'3.7.3':
+  title: 'Numeric Types Hierarchy'
+  status: 'Finished'
+
+'3.7.4':
+  title: 'Boolean Types and Operations'
+  status: 'Finished'
+
+'3.8.1':
+  title: 'Objects'
+  status: 'Finished'
+
+'3.8.2':
+  title: 'Object Class Type'
+  status: 'Finished'
+
+'3.8.3':
+  title: 'Type string'
+  status: 'Finished'
+
+'3.8.4':
+  title: 'Type never'
+  status: 'Finished'
+
+'3.8.5':
+  title: 'Type void'
+  status: 'Finished'
+
+'3.8.6':
+  title: 'Array Types'
+  status: 'Finished'
+
+'3.8.7':
+  title: 'Function Types'
+  status: 'Finished'
+
+'3.8.8':
+  title: 'Type null'
+  status: 'Finished'
+
+'3.8.10':
+  title: 'Tuple Types'
+  status: 'Finished'
+
+'3.8.11':
+  title: 'Union Types'
+  status: 'Finished'
+
+'3.8.12':
+  title: 'Nullish Types'
+  status: 'Finished'
+
+'3.9':
+  title: 'Default Values for Types'
+  status: 'Finished'
+
+'4':
+  title: 'Names, Declarations and Scopes'
+  status: 'No testable assertions'
+
+'4.2':
+  title: 'Declarations'
+  status: 'No testable assertions'
+
+'4.3':
+  title: 'Distinguishable Declarations'
+  status: 'Finished'
+
+'4.4':
+  title: 'Scopes'
+  status: 'Finished'
+
+'4.5':
+  title: 'Type Declarations'
+  status: 'No testable assertions'
+
+'4.5.1':
+  title: 'Type Alias Declaration'
+  status: 'Finished'
+
+'4.6':
+  title: 'Variable and Constant Declarations'
+  status: 'No testable assertions'
+
+'4.6.1':
+  title: 'Variable Declarations'
+  status: 'Finished'
+
+'4.6.2':
+  title: 'Constant Declarations'
+  status: 'Finished'
+
+'4.6.3':
+  title: 'Type Compatibility with Initializer'
+  status: 'Finished'
+
+'4.6.4':
+  title: 'Type Inference from Initializer'
+  status: 'Finished'
+
+'4.7':
+  title: 'Function Declarations'
+  status: 'Finished'
+
+'4.7.1':
+  title: 'Signatures'
+  status: 'No testable assertions'
+
+'4.7.2':
+  title: 'Parameter List'
+  status: 'Finished'
+
+'4.7.4':
+  title: 'Optional Parameters'
+  status: 'Finished'
+
+'4.7.5':
+  title: 'Rest Parameter'
+  status: 'Finished'
+
+'4.7.6':
+  title: 'Shadowing by Parameter'
+  status: 'Finished'
+
+'4.7.7':
+  title: 'Return Type'
+  status: 'Finished'
+
+'4.7.8':
+  title: 'Function Overload Signatures'
+  status: 'Finished'
+
+'5':
+  title: 'Generics'
+  status: 'No testable assertions'
+
+'5.1':
+  title: 'Generic Declarations'
+  status: 'Finished'
+
+'5.2':
+  title: 'Generic Parameters'
+  status: 'Finished'
+
+'5.3':
+  title: 'Type Parameter Constraint'
+  status: 'Finished'
+
+'5.4':
+  title: 'Generic Instantiations'
+  status: 'Finished'
+
+'5.5':
+  title: 'Type Parameter Default'
+  status: 'Finished'
+
+'5.6':
+  title: 'Type Arguments'
+  status: 'Finished'
+
+'6':
+  title: 'Contexts and Conversions'
+  status: 'No testable assertions'
+
+'6.5':
+  title: 'Implicit Conversions'
+  status: 'Finished'
+
+'6.5.1':
+  title: 'Primitive Types Conversions'
+  status: 'No testable assertions'
+
+'6.5.2':
+  title: 'Widening Primitive Conversions'
+  status: 'Finished'
+
+'6.5.3':
+  title: 'Constant Narrowing Integer Conversions'
+  status: 'Finished'
+
+'6.5.4':
+  title: Boxing Conversions'
+  status: 'Finished'
+
+'6.5.5':
+  title: 'Unboxing Conversions'
+  status: 'Finished'
+
+'6.5.6':
+  title: 'Widening Union Conversions'
+  status: 'Finished'
+
+'6.5.7':
+  title: 'Widening Reference Conversions'
+  status: 'Finished'
+
+'6.5.8':
+  title: 'Character to String Conversions'
+  status: 'Finished'
+
+'6.5.9':
+  title: 'Constant String to Character Conversions'
+  status: 'Finished'
+
+'6.5.10':
+  title: 'Function Types Conversions'
+  status: 'Finished'
+
+'6.5.11':
+  title: 'Tuple Types Conversions'
+  status: 'Finished'
+
+'6.5.12':
+  title: 'Enumeration to Int Conversions'
+  status: 'Finished'
+
+'6.5.13':
+  title: 'Enumeration to String Conversions'
+  status: 'Finished'
+
+'7.1':
+  title: 'Evaluation of Expressions'
+  status: 'Finished'
+
+'7.1.1':
+  title: 'Normal and Abrupt Completion of Expression Evaluation'
+  status: 'Finished'
+
+'7.1.3':
+  title: 'Operator Precedence'
+  status: 'Finished'
+
+'7.2':
+  title: 'Literal'
+  status: 'No testable assertions'
+
+'7.26':
+  title: 'Bitwise and Logical Expressions'
+  status: 'Finished'
+
+'7.26.1':
+  title: 'Integer Bitwise Operators'
+  status: 'Finished'
+
+'7.26.2':
+  title: 'Boolean Logical Operators'
+  status: 'Finished'
+
+'8':
+  title: 'Statements'
+  status: 'No testable assertions'
+
+'8.1':
+  title: 'Normal and Abrupt Statement Execution'
+  status: 'No testable assertions'
+
+'8.16':
+  title: 'Assert Statements'  # Tested in 17.5.3 Assert Statements
+  status: 'No testable assertions'
+
+'9':
+  title: 'Classes'
+  status: 'No testable assertions'
+
+'9.6.4':
+  title: 'Final Methods'  # Tested in 17.8.2 Final Methods
+  status: 'No testable assertions'
+
+'9.6.6':
+  title: 'Native Methods'  # Tested in 17.7.2 Native Methods
+  status: 'No testable assertions'
+
+'10':
+  title: 'Interfaces'
+  status: 'No testable assertions'
+
+'11':
+  title: 'Enumerations'
+  status: 'Finished'
+
+'11.1':
+  title: 'Enumeration Integer Values'
+  status: 'Finished'
+
+'11.2':
+  title: 'Enumeration String Values'
+  status: 'Finished'
+
+'11.3':
+  title: 'Enumeration Operations'
+  status: 'Finished'
+
+'12':
+  title: 'Error Handling'
+  status: 'No testable assertions'
+
+'13':
+  title: 'Compilation Units, Packages, and Modules'
+  status: 'No testable assertions'
+
+'14':
+  title: 'Ambient Declarations'
+  status: 'No testable assertions'
+
+'15':
+  title: 'Semantic Rules'
+  status: 'No testable assertions'
+
+'15.3':
+  title: 'Type Compatibility'
+  status: 'No testable assertions'  # Implicit Conversion is tested in 6.5
+
+'15.6':
+  title: 'Compatibility Features'
+  status: 'No testable assertions'
+
+'15.6.1':
+  title: 'Extended Conditional Expressions'
+  status: 'Finished'
+
+'16':
+  title: 'Support for GUI Programming'
+  status: 'No testable assertions'
+
+'16.5':
+  title: 'Annotations List'
+  status: 'No testable assertions'
+
+'17':
+  title: 'Experimental Features'
+  status: 'No testable assertions'
+
+'17.1':
+  title: 'Character Type and Literals'
+  status: 'No testable assertions'
+
+'17.5':
+  title: 'Statements'
+  status: 'No testable assertions'
+
+'17.6':
+  title: 'Function and Method Overloading'
+  status: 'No testable assertions'
+
+'17.7':
+  title: 'Native Functions and Methods'
+  status: 'No testable assertions'
+
+'17.8':
+  title: 'Final Classes and Methods'
+  status: 'No testable assertions'
+
+'17.9':
+  title: 'Default and Static Interface Methods'
+  status: 'No testable assertions'
+
+'17.14':
+  title: 'Exceptions'
+  status: 'Finished'
+
+'17.14.1':
+  title: 'Throwing Functions'
+  status: 'Finished'
+
+'17.14.2':
+  title: 'Non-Throwing Functions'
+  status: 'Finished'
+
+'17.14.3':
+  title: 'Rethrowing Functions'
+  status: 'Finished'
+
+'17.14.4':
+  title: 'Exceptions and Initialization Expression'
+  status: 'Finished'
+
+'17.14.5':
+  title: 'Exceptions and Errors Inside Field Initializers'
+  status: 'Finished'
+
+'17.15':
+  title: 'Coroutines'
+  status: 'No testable assertions'
+
+'17.18':
+  title: 'Generics Experimental'
+  status: 'No testable assertions'
+
+'18':
+  title: 'Standard Library'
+  status: 'No testable assertions'
+
+'19':
+  title: 'Grammar Summary'
+  status: 'No testable assertions'
+
+'20':
+  title: 'Implementation Details'
+  status: 'No testable assertions'
+
+'21':
+  title: 'ArkTS-TypeScript compatibility'
+  status: 'No testable assertions'
+
+'22':
+  title: 'Contributors'
+  status: 'No testable assertions'

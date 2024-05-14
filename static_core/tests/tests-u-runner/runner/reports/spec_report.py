@@ -19,7 +19,7 @@ import re
 from datetime import date
 from os import path
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import List, Optional, Dict
 import yaml
 
 from runner.test_base import Test
@@ -42,7 +42,7 @@ class SpecReport:
     REPORT_SPEC_CREATION_DATE = "${SpecCreationDate}"
 
     TEMPLATE = "spec_report_template.md"
-    NON_TESTABLE = "arkts-non-testable.yaml"
+    SPEC_CONFIG_FILE = "arkts-spec-config.yaml"
     EXCLUDED_HEADER = " Excluded after |"
     EXCLUDED_DIVIDER = "-------|"
 
@@ -63,16 +63,13 @@ class SpecReport:
         self.spec: SpecNode = pdf_loader.get_root_node()
         self.spec_creation_date: str = pdf_loader.get_creation_date()
 
-        # get non-testable data
-        self.non_testable: Set = self.__load_non_testable()
+        # get config data
+        fpath = Path(path.dirname(path.abspath(__file__)), self.SPEC_CONFIG_FILE)
+        data = Path.read_text(fpath)
+        self.config: Dict = yaml.safe_load(data)
 
         # process test results
         self.__calculate()
-
-    def __load_non_testable(self) -> Set:
-        fpath = Path(path.dirname(path.abspath(__file__)), self.NON_TESTABLE)
-        data = Path.read_text(fpath)
-        return set(yaml.safe_load(data))
 
     def __calculate_one_test(self, test: Test) -> None:
         node = self.spec
@@ -139,16 +136,17 @@ class SpecReport:
         return str(src) if src > 0 else ""
 
     def __report_node(self, node: SpecNode) -> str:
-        non_testable = node.prefix in self.non_testable
         title = self.__fmt_str(node.prefix + " " + node.title)
-        dirs = self.__fmt_str(node.dir)
-        total = str(node.total) if node.total > 0 or not non_testable else "N/A"
+        dirs = self.__fmt_str(node.dir.replace("/", "\u200B/\u200B"))
+        node_config = self.config.get(node.prefix)
+        status = node_config.get("status", "") if node_config is not None else ""
+        total = self.__fmt_num(node.total)
         passed = self.__fmt_num(node.passed)
         failed = self.__fmt_num(node.failed)
-        ignored_passed = self.__fmt_num(node.ignored_but_passed)
+        ign_pas = self.__fmt_num(node.ignored_but_passed)
         ignored = self.__fmt_num(node.ignored)
         excluded = (" " + self.__fmt_num(node.excluded_after) + " |") if self.has_excluded else ""
-        return f"| {title} | {dirs} | {total} | {passed} | {failed} | {ignored_passed} | {ignored} |{excluded}"
+        return f"| {title} | {dirs} | {status} | {total} | {passed} | {failed} | {ign_pas} | {ignored} |{excluded}"
 
     def __report_nodes(self, nodes: List[SpecNode], lines: List[str]) -> None:
         for node in nodes:
