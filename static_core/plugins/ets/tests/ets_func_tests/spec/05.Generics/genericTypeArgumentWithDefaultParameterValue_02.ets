@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/genericTypeArgumentWithDefaultParameterValue_05
+name: 05.generics/genericTypeArgumentWithDefaultParameterValue_02
 tags: []
 ---*/
 
@@ -23,10 +23,6 @@ class Helper {}
 
 class A<T> {
     data: T
-    isData: boolean
-    constructor(isData: boolean) {
-        this.isData = isData
-    }
 }
 
 class B<T> {
@@ -34,8 +30,8 @@ class B<T> {
     constructor(data: T) {
         this.data = data
     }
-    foo<T>(isData: boolean = false): A<T> {
-        return new A<T>(isData)
+    foo<T>(): A<T> {
+        return new A<T>() // T should be taken from declaration of foo
     }
 }
 
@@ -43,8 +39,6 @@ function main(): void {
     let b = new B<String>("hello")
     let a = b.foo<Helper>();
     assert a instanceof A
-    assert a.isData == false
     a.data = new Helper()
     assert a.data instanceof Helper
 }
-

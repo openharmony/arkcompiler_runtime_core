@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,21 +15,22 @@
 
 /*---
 desc: 05 Generics
-name: issue14752.ets
-tags:
-- compile-only
+name: 05.generics/genericTypeArgumentWithDefaultParameterValue_06
+tags: []
 ---*/
 
-interface I<T> {
-    get<T>(): I<T>
+class A<T0, T1=string, T2=Long> {
+    data0: T0
+    data1: T1
+    data2: T2
 }
 
-class B<T> implements I<T> {
-    private b: B<T>
-
-    override get<T>(): I<T> { return this.b as I<T> }
-
-    foo<T>(): I<T> {
-        return true ? this.b : this.get<T>();
-    }
+function main() : void {
+    let a: A<Short> = new A();
+    assert a.data0 instanceof Short;
+    assert a.data1 instanceof string;
+    assert a.data2 instanceof Long;
 }
+
+
+

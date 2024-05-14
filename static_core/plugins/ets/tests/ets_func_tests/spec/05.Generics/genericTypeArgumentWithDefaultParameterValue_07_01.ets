@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,24 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/comparableClass
-tags: [compile-only]
+name: 05.generics/genericTypeArgumentWithDefaultParameterValue_06
+tags: []
 ---*/
 
-class X <K extends Comparable<K>> {}
+class A<T1, T2=string> {
+    data1: T1
+    data2: T2
+    constructor(p1 : T1, p2: T2 ) {
+        this.data1 = p1;
+        this.data2 = p2;
+    }
+}
 
-function main(): void {}
+function main(): void {
+    let a = new A<string>("hello", "world");
+    let a1 = new A<Int, string>(1, "world")
+    assert a.data1 instanceof string
+    assert a.data2 instanceof string
+    assert a1.data1 instanceof Int
+    assert a.data2 instanceof string
+}

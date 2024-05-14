@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,25 +15,10 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/usingInT
-tags: []
+name: 05.generics/generic_02
+
 ---*/
 
-class A {
-    private x: string;
-
-    constructor(arg: string) {
-        this.x = arg;
-    }
-}
-
-class B<in T> {
-    method1(arg: T): void {
-        assert(arg instanceof A);
-    }
-}
-
-function main(): void {
-    let b = new B<A>();
-    b.method1(new A("1"));
-}
+class A {}
+interface B<T1=A> {}
+class C<T2=B> {}

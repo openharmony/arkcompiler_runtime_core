@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,29 +15,36 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/generic_04
+name: 05.generics/genericTypeArgumentWithDefaultParameterValue_04
 tags: []
 ---*/
 
-interface Hashable {
-    hash(): number
-}
+class Helper {}
 
-class MyHashable implements Hashable {
-    override hash(): number {
-        return 6;
+class A<T> {
+    data: T
+    isData: boolean
+    constructor(isData: boolean) {
+        this.isData = isData
     }
 }
 
-class HasMap<K extends Hashable, V> {
-    public set(k: K, v: V): void {
-        let key: number = k.hash();
-        assert(key == 6);
-        assert k instanceof MyHashable;
+class B<T> {
+    data: T
+    constructor(data: T) {
+        this.data = data
+    }
+    foo<T>(isData: boolean = false): A<T> {
+        return new A<T>(isData)
     }
 }
 
 function main(): void {
-    let myHasMap = new HasMap<MyHashable, string>();
-    myHasMap.set(new MyHashable(), "F");
+    let b = new B<String>("hello")
+    let a = b.foo<Helper>(true);
+    assert a instanceof A
+    assert a.isData == true
+    a.data = new Helper()
+    assert a.data instanceof Helper
 }
+

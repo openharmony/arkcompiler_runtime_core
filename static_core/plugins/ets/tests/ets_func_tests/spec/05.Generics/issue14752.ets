@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,30 +15,21 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/genericTypeArgumentWithDefaultParameterValue_02
-tags: []
+name: issue14752.ets
+tags:
+- compile-only
 ---*/
 
-class Helper {}
-
-class A<T> {
-    data: T
+interface I<T> {
+    get<T>(): I<T>
 }
 
-class B<T> {
-    data: T
-    constructor(data: T) {
-        this.data = data
-    }
-    foo<T>(): A<T> {
-        return new A<T>() // T should be taken from declaration of foo
-    }
-}
+class B<T> implements I<T> {
+    private b: B<T>
 
-function main(): void {
-    let b = new B<String>("hello")
-    let a = b.foo<Helper>();
-    assert a instanceof A
-    a.data = new Helper()
-    assert a.data instanceof Helper
+    override get<T>(): I<T> { return this.b as I<T> }
+
+    foo<T>(): I<T> {
+        return true ? this.b : this.get<T>();
+    }
 }

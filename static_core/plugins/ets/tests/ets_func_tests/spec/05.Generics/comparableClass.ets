@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,20 +15,10 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/generic_05
-tags: [negative, compile-only]
+name: 05.generics/comparableClass
+tags: [compile-only]
 ---*/
 
-class A {}
-class B {}
-class C {}
-
-class G <A,B,C> {
-    method1(): void {
-        let a = new A();
-        let b = new B();
-        let c = new C();
-    }
-}
+class X <K extends Comparable<K>> {}
 
 function main(): void {}

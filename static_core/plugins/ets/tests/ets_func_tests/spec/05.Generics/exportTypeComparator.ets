@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,23 +15,8 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/generic_03
-tags: []
+name: 05.generics/exportTypeComparator
+tags: [compile-only]
 ---*/
 
-type fooLambda<T> = (a: T) => void
-
-class Getter {
-    get<T>(args: T): T {
-        return args;
-    }
-}
-
-function main(): void {
-    let getter = new Getter();
-    let foo: fooLambda<string> = (a: string): void => {
-        let str = getter.get<string>(a);
-        assert str instanceof string;
-    }
-    foo("F");
-}
+export type Comparator<T> = (a: T, b: T) => number

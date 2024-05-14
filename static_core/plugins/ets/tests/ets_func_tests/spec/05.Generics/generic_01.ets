@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,31 +15,17 @@
 
 /*---
 desc: 05 Generics
-name: 05.generics/genericTypeArgumentWithDefaultParameterValue_01
+name: 05.generics/generic_01
 tags: []
 ---*/
 
-class A<T> {
-    data: T
-    constructor(data: T) {
-        this.data = data
+function foo<T>(arg1: T): void {
+    const cb: (arg: T) => void = (arg: T) => {
+        assert arg instanceof string;
     }
-}
-
-class B<T> {
-    data: T
-    constructor(data: T) {
-        this.data = data
-    }
-    foo(): A<T> {
-        return new A<T>(this.data) // reuse T from declaration of B
-    }
+    cb(arg1);
 }
 
 function main(): void {
-    let b = new B<String>("hello")
-    let a = b.foo();
-    assert a instanceof A
-    assert a.data instanceof String
-    assert a.data == "hello"
+    foo<string>("F");
 }
