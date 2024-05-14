@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,18 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 
 namespace ark::ets::intrinsics {
 
 EtsString *StdCoreFloatToString(float number, int radix)
 {
-    return helpers::FpToString(number, radix);
+    if (UNLIKELY(radix != helpers::DECIMAL)) {
+        return helpers::FpToString(number, radix);
+    }
+    auto *cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
+    ASSERT(cache != nullptr);
+    return cache->GetOrCache(EtsCoroutine::GetCurrent(), number);
 }
 
 extern "C" EtsBoolean StdCoreFloatIsNan(float v)

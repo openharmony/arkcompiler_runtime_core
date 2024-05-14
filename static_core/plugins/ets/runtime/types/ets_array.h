@@ -145,6 +145,18 @@ public:
             GetImpl<std::invoke_result_t<decltype(&Component::GetCoreType), Component>>(index));
     }
 
+    void Set(uint32_t index, Component *element, std::memory_order memoryOrder)
+    {
+        auto offset = index * sizeof(ObjectPointerType);
+        GetCoreType()->SetObject(offset, element == nullptr ? nullptr : element->GetCoreType(), memoryOrder);
+    }
+
+    Component *Get(uint32_t index, std::memory_order memoryOrder)
+    {
+        auto offset = index * sizeof(ObjectPointerType);
+        return Component::FromCoreType(GetCoreType()->GetObject(offset, memoryOrder));
+    }
+
     static EtsTypedObjectArray *FromCoreType(ObjectHeader *objectHeader)
     {
         return reinterpret_cast<EtsTypedObjectArray *>(objectHeader);

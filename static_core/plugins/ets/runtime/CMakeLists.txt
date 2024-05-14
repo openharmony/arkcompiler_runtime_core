@@ -53,7 +53,9 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
     ${ETS_EXT_SOURCES}/mem/ets_reference_processor.cpp
     ${ETS_EXT_SOURCES}/napi/ets_napi_helpers.cpp
     ${ETS_EXT_SOURCES}/napi/ets_napi_invoke_interface.cpp

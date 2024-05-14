@@ -37,6 +37,8 @@
 #include "runtime/coroutines/threaded_coroutine_manager.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+
 namespace ark::ets {
 // Create MemoryManager by RuntimeOptions
 static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &options)
@@ -226,7 +228,7 @@ static void PreallocSpecialReference(PandaEtsVM *vm, mem::Reference *&ref, const
 
 bool PandaEtsVM::Initialize()
 {
-    if (!intrinsics::Initialize(ark::panda_file::SourceLang::ETS)) {
+    if (!ark::intrinsics::Initialize(ark::panda_file::SourceLang::ETS)) {
         LOG(ERROR, RUNTIME) << "Failed to initialize eTS intrinsics";
         return false;
     }
@@ -245,10 +247,19 @@ bool PandaEtsVM::Initialize()
 
         if (Thread::GetCurrent() != nullptr) {
             ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
-            EtsCoroutine::GetCurrent()->SetUndefinedObject(GetUndefinedObject());
+            auto *coro = EtsCoroutine::GetCurrent();
+            coro->SetUndefinedObject(GetUndefinedObject());
+
+            doubleToStringCache_ = DoubleToStringCache::Create(coro);
+            floatToStringCache_ = FloatToStringCache::Create(coro);
+            longToStringCache_ = LongToStringCache::Create(coro);
         }
         referenceProcessor_->Initialize();
     }
+    [[maybe_unused]] bool cachesCreated =
+        (doubleToStringCache_ != nullptr && floatToStringCache_ != nullptr && longToStringCache_ != nullptr);
+    LOG_IF(!cachesCreated, WARNING, ETS) << "Cannot initialize number-to-string caches";
+    LOG_IF(cachesCreated, DEBUG, ETS) << "Initialized number-to-string caches";
 
     return true;
 }
@@ -629,6 +640,9 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
         }
         return true;
     });
+    visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
+    visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
+    visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
 }
 
 template <bool REF_CAN_BE_NULL>

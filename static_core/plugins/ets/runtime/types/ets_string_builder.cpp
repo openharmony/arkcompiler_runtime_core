@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include <cstdint>
 #include <cmath>
 
@@ -53,6 +54,7 @@ static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle)
     ASSERT(bufLen < (UINT_MAX >> 1U));
     // Allocate the new buffer - may trigger GC
     auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), 2 * bufLen);
+    ASSERT(newBuf != nullptr);
     // Copy the old buffer data
     bufHandle->CopyDataTo(newBuf);
     EVENT_SB_BUFFER_REALLOC(ManagedThread::GetCurrent()->GetId(), newBuf, newBuf->GetLength(), newBuf->GetElementSize(),
@@ -203,16 +205,6 @@ static inline EtsCharArray *CharToCharArray(EtsChar v)
     return arr;
 }
 
-static inline EtsCharArray *LongToCharArray(EtsLong v)
-{
-    auto sign = static_cast<uint32_t>(v < 0);
-    auto nDigits = CountDigits(std::abs(v)) + sign;
-    EtsCharArray *arr = EtsCharArray::Create(nDigits);
-    auto *arrData = reinterpret_cast<EtsChar *>(arr->GetData<EtsChar>());
-    utf::UInt64ToUtf16Array(std::abs(v), arrData, nDigits, sign != 0U);
-    return arr;
-}
-
 ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb)
 {
     ASSERT(sb != nullptr);
@@ -315,23 +307,24 @@ ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v)
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
     // May trigger GC
-    auto *arr = LongToCharArray(v);
-    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+    auto *cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
+    ASSERT(cache != nullptr);
+    auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
 static inline EtsCharArray *FloatingPointToCharArray(FpType number)
 {
-    PandaString str;
-    intrinsics::helpers::FpToStringDecimalRadix(number, str);
-    auto len = str.length();
-    EtsCharArray *arr = EtsCharArray::Create(len);
-    Span<uint16_t> data(reinterpret_cast<uint16_t *>(arr->GetData<EtsChar>()), len);
-    for (size_t i = 0; i < len; ++i) {
-        ASSERT(ark::coretypes::String::IsASCIICharacter(str[i]));
-        data[i] = static_cast<uint16_t>(str[i]);
-    }
-    return arr;
+    return intrinsics::helpers::FpToStringDecimalRadix(number, [](std::string_view str) {
+        auto *arr = EtsCharArray::Create(str.length());
+        Span<uint16_t> data(reinterpret_cast<uint16_t *>(arr->GetData<EtsChar>()), str.length());
+        for (size_t i = 0; i < str.length(); ++i) {
+            ASSERT(ark::coretypes::String::IsASCIICharacter(str[i]));
+            data[i] = static_cast<uint16_t>(str[i]);
+        }
+        return arr;
+    });
 }
 
 ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
@@ -342,8 +335,10 @@ ObjectHeader *StringBuilderAppendFloat(ObjectHeader *sb, EtsFloat v)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
-    auto *arr = FloatingPointToCharArray(v);
-    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+    auto *cache = PandaEtsVM::GetCurrent()->GetFloatToStringCache();
+    ASSERT(cache != nullptr);
+    auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
 ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
@@ -354,8 +349,10 @@ ObjectHeader *StringBuilderAppendDouble(ObjectHeader *sb, EtsDouble v)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> sbHandle(coroutine, sb);
 
-    auto *arr = FloatingPointToCharArray(v);
-    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    ASSERT(cache != nullptr);
+    auto *str = cache->GetOrCache(EtsCoroutine::GetCurrent(), v);
+    return StringBuilderAppendString(sbHandle->GetCoreType(), str);
 }
 
 EtsString *StringBuilderToString(ObjectHeader *sb)

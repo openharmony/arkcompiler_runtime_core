@@ -14,6 +14,7 @@
  */
 
 #include <cstdlib>
+#include "dtoa_helper.h"
 #include "ets_intrinsics_helpers.h"
 #include "include/mem/panda_string.h"
 #include "types/ets_field.h"
@@ -402,5 +403,231 @@ double GetStdDoubleArgument(ObjectHeader *obj)
     size_t offset = fieldVal.GetOffset();
     return obj->GetFieldPrimitive<double>(offset);
 }
+
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
+void GetBase(FpType d, int digits, int *decpt, Span<char> buf)
+{
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    auto ret = snprintf_s(buf.begin(), buf.size(), buf.size() - 1, "%.*e", digits - 1, d);
+    if (ret == -1) {
+        LOG(FATAL, ETS) << "snprintf_s failed";
+        UNREACHABLE();
+    }
+    char *end = buf.begin() + ret;
+    ASSERT(*end == 0);
+    const size_t positive = (digits > 1) ? 1 : 0;
+    char *ePos = buf.begin() + digits + positive;
+    ASSERT(*ePos == 'e');
+    char *signPos = ePos + 1;
+    char *from = signPos + 1;
+    // exponent
+    if (std::from_chars(from, end, *decpt).ec != std::errc()) {
+        UNREACHABLE();
+    }
+    if (*signPos == '-') {
+        *decpt *= -1;
+    }
+    ++*decpt;
+}
+
+constexpr bool USE_GET_BASE_FAST =
+#ifdef __cpp_lib_to_chars
+    true;
+#else
+    false;
+#endif
+
+template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
+int GetBaseFast([[maybe_unused]] FpType d, int *decpt, Span<char> buf)
+{
+    ASSERT(d >= 0);
+    char *end;
+#ifdef __cpp_lib_to_chars
+    auto ret = std::to_chars(buf.begin(), buf.end(), d, std::chars_format::scientific);
+    if (ret.ec != std::errc()) {
+        LOG(FATAL, ETS) << "to_chars failed";
+        UNREACHABLE();
+    }
+    end = ret.ptr;
+#else
+    UNREACHABLE();
+#endif
+    *end = '\0';
+    // exponent
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto from = std::find(buf.begin(), end, 'e');
+    auto digits = from - buf.begin();
+    if (digits > 1) {
+        digits--;
+    }
+    ASSERT(from != end);
+    if (std::from_chars(from + 2U, end, *decpt).ec != std::errc()) {
+        UNREACHABLE();
+    }
+    if (from[1] == '-') {
+        *decpt *= -1;
+    }
+    ++*decpt;
+    return digits;
+}
+
+template <typename FpType>
+int GetBaseBinarySearch(FpType d, int *decpt, Span<char> buf)
+{
+    // find the minimum amount of digits
+    int minDigits = 1;
+    int maxDigits = std::is_same_v<FpType, double> ? DOUBLE_MAX_PRECISION : FLOAT_MAX_PRECISION;
+    int digits;
+
+    while (minDigits < maxDigits) {
+        digits = (minDigits + maxDigits) / 2_I;
+        GetBase(d, digits, decpt, buf);
+
+        bool same = StrToFp<FpType>(buf.begin(), nullptr) == d;
+        if (same) {
+            // no need to keep the trailing zeros
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            while (digits >= 2_I && buf[digits] == '0') {  // 2 means ignore the integer and point
+                digits--;
+            }
+            maxDigits = digits;
+        } else {
+            minDigits = digits + 1;
+        }
+    }
+    digits = maxDigits;
+    GetBase(d, digits, decpt, buf);
+    return digits;
+}
+
+template <typename FpType>
+[[maybe_unused]] static bool RecheckGetMinimumDigits(FpType d, Span<char> buf)
+{
+    ASSERT(StrToFp<FpType>(buf.begin(), nullptr) == d);
+    std::string str(buf.begin());
+    auto pos = str.find('e');
+    std::copy(str.begin() + pos, str.end(), str.begin() + pos - 1);
+    str[str.size() - 1] = '\0';
+    return StrToFp<FpType>(str.data(), nullptr) != d;
+}
+
+// result is written starting with buf[1]
+template <typename FpType>
+int GetMinimumDigits(FpType d, int *decpt, Span<char> buf)
+{
+    int digits;
+    if (std::is_same_v<FpType, double>) {
+        DtoaHelper::Dtoa(d, buf.begin() + 1, decpt, &digits);
+        return digits;
+    }
+    if constexpr (USE_GET_BASE_FAST) {
+        digits = GetBaseFast(d, decpt, buf);
+    } else {
+        digits = GetBaseBinarySearch(d, decpt, buf);
+    }
+    ASSERT(RecheckGetMinimumDigits(d, buf));
+    ASSERT(digits == 1 || buf[1] == '.');
+    buf[1] = buf[0];
+    return digits;
+}
+
+template <typename FpType>
+char *SmallFpToString(FpType number, bool negative, char *buffer)
+{
+    using SignedInt = typename ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, true>;
+    if (negative) {
+        *(buffer++) = '-';
+    }
+    *(buffer++) = '0';
+    *(buffer++) = '.';
+    SignedInt power = TEN;
+    SignedInt s = 0;
+    int maxDigits = std::is_same_v<FpType, double> ? DOUBLE_MAX_PRECISION : FLOAT_MAX_PRECISION;
+    int digits = maxDigits;
+    for (int k = 1; k <= maxDigits; ++k) {
+        s = static_cast<SignedInt>(number * power);
+        if (k == maxDigits || s / static_cast<FpType>(power) == number) {  // s * (10 ** -k)
+            digits = k;
+            break;
+        }
+        power *= TEN;
+    }
+    for (int k = digits - 1; k >= 0; k--) {
+        auto digit = s % TEN;
+        s /= TEN;
+        *(buffer + k) = '0' + digit;
+    }
+    return buffer + digits;
+}
+
+template <typename FpType>
+Span<char> FpToStringDecimalRadixMainCase(FpType number, bool negative, Span<char> buffer)
+{
+    auto bufferStart = buffer.begin() + 2U;
+    ASSERT(number > 0);
+    int n = 0;
+    int k = intrinsics::helpers::GetMinimumDigits(number, &n, buffer.SubSpan(1));
+    auto bufferEnd = bufferStart + k;
+
+    if (0 < n && n <= 21_I) {  // NOLINT(readability-magic-numbers)
+        if (k <= n) {
+            // 6. If k ≤ n ≤ 21, return the String consisting of the code units of the k digits of the decimal
+            // representation of s (in order, with no leading zeroes), followed by n−k occurrences of the code unit
+            // 0x0030 (DIGIT ZERO).
+            std::fill_n(bufferEnd, n - k, '0');
+            bufferEnd += n - k;
+        } else {
+            // 7. If 0 < n ≤ 21, return the String consisting of the code units of the most significant n digits of the
+            // decimal representation of s, followed by the code unit 0x002E (FULL STOP), followed by the code units of
+            // the remaining k−n digits of the decimal representation of s.
+            auto fracStart = bufferStart + n;
+            if (memmove_s(fracStart + 1, buffer.end() - (fracStart + 1), fracStart, k - n) != EOK) {
+                UNREACHABLE();
+            }
+            *fracStart = '.';
+            bufferEnd++;
+        }
+    } else if (-6_I < n && n <= 0) {  // NOLINT(readability-magic-numbers)
+        // 8. If −6 < n ≤ 0, return the String consisting of the code unit 0x0030 (DIGIT ZERO), followed by the code
+        // unit 0x002E (FULL STOP), followed by −n occurrences of the code unit 0x0030 (DIGIT ZERO), followed by the
+        // code units of the k digits of the decimal representation of s.
+        auto length = -n + 2U;
+        auto fracStart = bufferStart + length;
+        if (memmove_s(fracStart, buffer.end() - fracStart, bufferStart, k) != EOK) {
+            UNREACHABLE();
+        }
+        std::fill_n(bufferStart, length, '0');
+        bufferStart[1] = '.';
+        bufferEnd += length;
+    } else {
+        if (k == 1) {
+            // 9. Otherwise, if k = 1, return the String consisting of the code unit of the single digit of s
+            ASSERT(bufferEnd == bufferStart + 1);
+        } else {
+            *(bufferStart - 1) = *bufferStart;
+            *(bufferStart--) = '.';
+        }
+        // followed by code unit 0x0065 (LATIN SMALL LETTER E), followed by the code unit 0x002B (PLUS SIGN) or the code
+        // unit 0x002D (HYPHEN-MINUS) according to whether n−1 is positive or negative, followed by the code units of
+        // the decimal representation of the integer abs(n−1) (with no leading zeroes).
+        *(bufferEnd++) = 'e';
+        if (n >= 1) {
+            *(bufferEnd++) = '+';
+        }
+        bufferEnd = std::to_chars(bufferEnd, buffer.end(), n - 1).ptr;
+    }
+    if (negative) {
+        *--bufferStart = '-';
+    }
+    return {bufferStart, bufferEnd};
+}
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+template char *SmallFpToString<double>(double number, bool negative, char *buffer);
+template char *SmallFpToString<float>(float number, bool negative, char *buffer);
+
+template Span<char> FpToStringDecimalRadixMainCase<double>(double number, bool negative, Span<char> buffer);
+template Span<char> FpToStringDecimalRadixMainCase<float>(float number, bool negative, Span<char> buffer);
 
 }  // namespace ark::ets::intrinsics::helpers
