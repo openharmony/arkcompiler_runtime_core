@@ -927,7 +927,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         throw new Error("{{N}}Array.from: not implemented");
     {%- endif %}
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -984,7 +984,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         throw new Error("{{N}}Array.from: not implemented");
     {%- endif %}
     }
-    
+
 
     /**
      * Creates an array from an array-like or iterable object.
@@ -1195,13 +1195,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: {{elementCompat}}, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: {{elementCompat}}, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -1209,8 +1209,22 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: {{elementCompat}}): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in {{N}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -1245,8 +1259,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -1276,8 +1290,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */

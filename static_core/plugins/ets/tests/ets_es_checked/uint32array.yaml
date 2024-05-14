@@ -15,10 +15,12 @@ category: Uint32Array
 sub:
   - self:
       - |
-        ((): Uint32Array => { let b: number[] = [-Infinity as number, Infinity as number, -NaN as number, NaN as number, 0 as number, 4 as number, 1 as number, 2.1 as number, 256.0 as number, 65536.0 as number, -256.0 as number, -65536.0 as number]; let a = new Uint32Array(b.length); a.set(b); return a; })()
+        ((): Uint32Array => { let b: number[] = [-Infinity, Infinity, -NaN, NaN, 0, 4, 1, 2.1, 256.0, 65536.0, -256.0, -65536.0]; let a = new Uint32Array(b.length); a.set(b); return a; })()
     self_type: Iterable<number>
     vars:
-      default_inds: ["self.length", "-self.length", "self.length - 1.0", "-self.length + 1.0", 1.0, 5.0 , 100.0, -1.1, 2.2, "-Infinity", "Infinity", "NaN", "0x8 as number", "-0o4 as number"]
+      default_inds: ["self.length", "-self.length", "self.length - 1.0", "-self.length + 1.0", 1.0, 5.0, 100.0, -1.1, 2.2, "-Infinity", "Infinity", "NaN", "0x8 as number", "-0o4 as number", 5, 100, 0, -5, -100]
+      default_inds_undef: ["self.length", "-self.length", "self.length - 1.0", "-self.length + 1.0", 1.0, 5.0, 100.0, -1.1, 2.2, "-Infinity", "Infinity", "NaN", "0x8 as number", "-0o4 as number", 5, 100, 0, -5, -100, "undefined"]
+      default_search: ["NaN", "Infinity", "-Infinity", 0.0, "-0.0", 100, 1]
       reduce_lambdas:
         - "() => 1.0"
         - "(a: number) => a"
@@ -38,14 +40,14 @@ sub:
       - method: "slice"
         ret_type: Iterable<number>
         params:
-          - paramOf(*default_inds)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
+          - paramOf(*default_inds_undef)
         mandatory: 0
       - method: "subarray"
         ret_type: Iterable<number>
         params:
-          - paramOf(*default_inds)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
+          - paramOf(*default_inds_undef)
         mandatory: 0
       - method: toString
         params: []
@@ -86,7 +88,7 @@ sub:
         params:
           - paramOf(*default_inds)
           - paramOf(*default_inds)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
         mandatory: 2
       - method: "fill"
         ret_type: Iterable<number>
@@ -116,8 +118,8 @@ sub:
         ret_type: void
         mandatory: 1
       - expr: Uint32Array.from(pars)
-        params: 
-          - 
+        params:
+          -
             - Array.of<number>(1, 2, 3, NaN)
             - new Set<number>(Array.of<number>(1, 2, 3, NaN))
       - expr: Uint32Array.from<number>(pars)
@@ -127,4 +129,14 @@ sub:
           -
             - |
               (v: number, k: number): number => v * k
+      - method: "lastIndexOf"
+        params:
+          - paramOf(*default_search)
+          - paramOf(*default_inds_undef)
+        mandatory: 1
+      - method: "indexOf"
+        params:
+          - paramOf(*default_search)
+          - paramOf(*default_inds_undef)
+        mandatory: 1
 

@@ -806,7 +806,7 @@ export final class Int8Array implements Iterable<Number> {
     public static from(arrayLike: ArrayLike<number>): Int8Array {
         return Int8Array.from<number>(arrayLike, (x: number, k: number): number => x);
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -855,7 +855,7 @@ export final class Int8Array implements Iterable<Number> {
             i++
         }
     }
-    
+
 
     /**
      * Creates an array from an array-like or iterable object.
@@ -1046,13 +1046,13 @@ export final class Int8Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -1060,8 +1060,22 @@ export final class Int8Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: number): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in Int8Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -1090,8 +1104,8 @@ export final class Int8Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -1117,8 +1131,8 @@ export final class Int8Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -3269,7 +3283,7 @@ export final class Int16Array implements Iterable<Number> {
     public static from(arrayLike: ArrayLike<number>): Int16Array {
         return Int16Array.from<number>(arrayLike, (x: number, k: number): number => x);
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -3318,7 +3332,7 @@ export final class Int16Array implements Iterable<Number> {
             i++
         }
     }
-    
+
 
     /**
      * Creates an array from an array-like or iterable object.
@@ -3509,13 +3523,13 @@ export final class Int16Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -3523,8 +3537,22 @@ export final class Int16Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: number): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in Int16Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -3553,8 +3581,8 @@ export final class Int16Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -3580,8 +3608,8 @@ export final class Int16Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -5709,7 +5737,7 @@ export final class Int32Array implements Iterable<Number> {
     public static from(arrayLike: ArrayLike<number>): Int32Array {
         return Int32Array.from<number>(arrayLike, (x: number, k: number): number => x);
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -5758,7 +5786,7 @@ export final class Int32Array implements Iterable<Number> {
             i++
         }
     }
-    
+
 
     /**
      * Creates an array from an array-like or iterable object.
@@ -5949,13 +5977,13 @@ export final class Int32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -5963,8 +5991,22 @@ export final class Int32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: number): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in Int32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -5993,8 +6035,8 @@ export final class Int32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -6020,8 +6062,8 @@ export final class Int32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -8176,7 +8218,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
     public static from(arrayLike: ArrayLike<number>): BigInt64Array {
         throw new Error("BigInt64Array.from: not implemented");
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -8186,7 +8228,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): BigInt64Array {
         throw new Error("BigInt64Array.from: not implemented");
     }
-    
+
 
     /**
      * Creates an array from an array-like or iterable object.
@@ -8351,13 +8393,13 @@ export final class BigInt64Array implements Iterable<BigInt> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: BigInt, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: BigInt, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -8365,8 +8407,22 @@ export final class BigInt64Array implements Iterable<BigInt> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: BigInt): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in BigInt64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -8392,8 +8448,8 @@ export final class BigInt64Array implements Iterable<BigInt> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -8419,8 +8475,8 @@ export final class BigInt64Array implements Iterable<BigInt> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -10555,7 +10611,7 @@ export final class Float32Array implements Iterable<Number> {
     public static from(arrayLike: ArrayLike<number>): Float32Array {
         return Float32Array.from<number>(arrayLike, (x: number, k: number): number => x);
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -10604,7 +10660,7 @@ export final class Float32Array implements Iterable<Number> {
             i++
         }
     }
-    
+
 
     /**
      * Creates an array from an array-like or iterable object.
@@ -10795,13 +10851,13 @@ export final class Float32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -10809,8 +10865,22 @@ export final class Float32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: number): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in Float32Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -10839,8 +10909,8 @@ export final class Float32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -10866,8 +10936,8 @@ export final class Float32Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -12912,7 +12982,7 @@ export final class Float64Array implements Iterable<Number> {
     public static from(arrayLike: ArrayLike<number>): Float64Array {
         return Float64Array.from<number>(arrayLike, (x: number, k: number): number => x);
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -12961,7 +13031,7 @@ export final class Float64Array implements Iterable<Number> {
             i++
         }
     }
-    
+
 
     /**
      * Creates an array from an array-like or iterable object.
@@ -13141,13 +13211,13 @@ export final class Float64Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: number, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: number, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -13155,8 +13225,22 @@ export final class Float64Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: number): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in Float64Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -13185,8 +13269,8 @@ export final class Float64Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -13212,8 +13296,8 @@ export final class Float64Array implements Iterable<Number> {
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */

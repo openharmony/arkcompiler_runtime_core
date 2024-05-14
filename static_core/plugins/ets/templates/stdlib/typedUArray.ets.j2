@@ -929,7 +929,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         throw new Error("{{element['name']}}Array.from: not implemented")
     {%- endif %}
     }
-    
+
     /**
      * Creates an array from an array-like or iterable object.
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -937,7 +937,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns new {{element['name']}}Array
      */
     public static from(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
-    {%- if element.get('name') != 'BigUint64' %}   
+    {%- if element.get('name') != 'BigUint64' %}
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
@@ -1190,13 +1190,13 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
-    public lastIndexOf(searchElement: {{element['subsetType']}}, fromIndex?: number): number {
-        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, this.lengthInt - 1))
+    public lastIndexOf(searchElement: {{element['subsetType']}}, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0))
     }
 
     /**
@@ -1204,8 +1204,22 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
+     *
+     * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
+     */
+    public lastIndexOf(searchElement: {{element['subsetType']}}): number {
+        return this.lastIndexOf(searchElement, this.lengthInt - 1)
+    }
+
+    /**
+     * Returns the index of the last occurrence of a value in {{element['name']}}Array.
+     *
+     * @param searchElement The value to locate in the array.
+     *
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -1236,8 +1250,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
@@ -1267,8 +1281,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @param searchElement The value to locate in the array.
      *
-     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
-     * search starts at index 0.
+     * @param fromIndex The array index at which to begin the search. If fromIndex is undefined, the
+     * search starts at index 0. If fromIndex is ommited, the search begins at index length-1
      *
      * @returns right-most index of searchElement. It must be less or equal than fromIndex. -1 if not found
      */
