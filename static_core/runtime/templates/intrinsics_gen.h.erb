@@ -116,11 +116,7 @@ bool Initialize(ark::panda_file::SourceLang vmLang) {
         } else {
 #endif // PANDA_PRODUCT_BUILD
             method->SetIntrinsic(Intrinsic::<%= intrinsic.enum_name %>);
-% if intrinsic.static
-            method->SetCompiledEntryPoint(reinterpret_cast<const void *>(<%= intrinsic.impl.rpartition("::").last + "CompiledAbi" %>));
-% else
             method->SetCompiledEntryPoint(reinterpret_cast<const void *>(<%= intrinsic.impl.rpartition("::").last + "BridgeSelectorEntryPoint" %>));
-% end
 #ifndef PANDA_PRODUCT_BUILD
         }
 #endif // PANDA_PRODUCT_BUILD
