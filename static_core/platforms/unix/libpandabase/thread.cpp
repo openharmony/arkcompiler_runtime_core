@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,7 +130,7 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
     if (s == 0) {
         s += pthread_attr_getguardsize(&attr, guardSize);
         s += pthread_attr_getstack(&attr, stackAddr, stackSize);
-#if defined(PANDA_TARGET_OHOS) && !defined(NDEBUG)
+#if defined(PANDA_TARGET_OHOS)
         if (getpid() == gettid()) {
             /**
              *  konstanting:
@@ -149,7 +149,7 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
                 *stackAddr = ToVoidPtr(stackLoAddr);
             }
         }
-#endif /* defined(PANDA_TARGET_OHOS) && !defined(NDEBUG) */
+#endif /* defined(PANDA_TARGET_OHOS) */
     }
 #else  /* PANDA_TARGET_MACOS */
     s += pthread_attr_getguardsize(&attr, guardSize);
