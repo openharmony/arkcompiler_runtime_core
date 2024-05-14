@@ -234,6 +234,7 @@ void CastInst::SetVnObject(VnObject *vnObj)
 
 void LoadImmediateInst::SetVnObject(VnObject *vnObj)
 {
+    vnObj->Add(static_cast<uint64_t>(GetObjectType()));
     vnObj->Add(reinterpret_cast<uint64_t>(GetObject()));
 }
 

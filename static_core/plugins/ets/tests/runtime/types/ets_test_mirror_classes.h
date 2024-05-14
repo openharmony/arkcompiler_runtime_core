@@ -17,8 +17,10 @@
 #define PANDA_RUNTIME_ETS_TEST_MIRROR_CLASSES_H
 
 #include <cstddef>
+#include <gtest/gtest.h>
 #include <string_view>
 #include <libpandabase/macros.h>
+#include "types/ets_class.h"
 
 namespace ark::ets::test {
 
@@ -40,6 +42,19 @@ public:
     constexpr std::size_t Offset() const
     {
         return offset_;
+    }
+
+    static void CompareMemberOffsets(EtsClass *klass, const std::vector<MirrorFieldInfo> &members)
+    {
+        ASSERT_NE(nullptr, klass);
+        ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
+
+        for (const MirrorFieldInfo &memb : members) {
+            EtsField *field = klass->GetFieldIDByName(memb.Name());
+            ASSERT_NE(nullptr, field);
+            ASSERT_EQ(memb.Offset(), field->GetOffset())
+                << "Offsets of the field '" << memb.Name() << "' are different";
+        }
     }
 
 private:

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,20 +118,22 @@ TEST_F(StringTest, NotEqualStringNotCompressedStringWithCompressedRawData)
 {
     std::vector<uint8_t> data1 {0xc2, 0xa7, 0x33, 0x00};
     std::vector<uint8_t> data2 {0x02, 0x07, 0x04, 0x00};
-    uint32_t utf16Length = 2;
+    uint32_t utf16Length1 = 2;
+    uint32_t utf16Length2 = 3;
     auto *firstString =
-        String::CreateFromMUtf8(data1.data(), utf16Length, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
-    ASSERT_FALSE(String::StringsAreEqualMUtf8(firstString, data2.data(), utf16Length));
+        String::CreateFromMUtf8(data1.data(), utf16Length1, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_FALSE(String::StringsAreEqualMUtf8(firstString, data2.data(), utf16Length2));
 }
 
 TEST_F(StringTest, NotEqualCompressedStringWithUncompressedRawUtf8Data)
 {
     std::vector<uint8_t> data1 {0x02, 0x07, 0x04, 0x00};
     std::vector<uint8_t> data2 {0xc2, 0xa7, 0x33, 0x00};
-    uint32_t utf16Length = 2;
+    uint32_t utf16Length1 = 3;
+    uint32_t utf16Length2 = 2;
     auto *firstString =
-        String::CreateFromMUtf8(data1.data(), utf16Length, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
-    ASSERT_FALSE(String::StringsAreEqualMUtf8(firstString, data2.data(), utf16Length));
+        String::CreateFromMUtf8(data1.data(), utf16Length1, GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_FALSE(String::StringsAreEqualMUtf8(firstString, data2.data(), utf16Length2));
 }
 
 TEST_F(StringTest, EqualStringWithMUtf8DifferentLength)
@@ -477,7 +479,7 @@ TEST_F(StringTest, ObjectSize)
 {
     {
         std::vector<uint8_t> data {'1', '2', '3', '4', '5', 0x00};
-        uint32_t utf16Length = data.size();
+        uint32_t utf16Length = data.size() - 1;
         String *string = String::CreateFromMUtf8(data.data(), utf16Length, GetLanguageContext(),
                                                  Runtime::GetCurrent()->GetPandaVM());
         ASSERT_EQ(string->ObjectSize(), String::ComputeSizeMUtf8(utf16Length));

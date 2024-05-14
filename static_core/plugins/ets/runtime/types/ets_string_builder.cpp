@@ -157,18 +157,22 @@ static void ReconstructStringAsUtf16(EtsString *dstString, EtsObjectArray *buffe
             coretypes::Array *srcArray = reinterpret_cast<EtsCharArray *>(obj)->GetCoreType();
             auto *srcData = reinterpret_cast<EtsChar *>(srcArray->GetData());
             uint32_t n = srcArray->GetLength();
-            switch (n) {
-                case 1U:  // 2 bytes
+            ASSERT(IsAligned(ToUintPtr(srcData), sizeof(uint64_t)));
+            auto bytes = n << 1UL;
+            // equals to 2^(k + 1) when n is 2^k AND dst is aligned by 2^(k + 1)
+            auto bytesAndAligned = bytes | (ToUintPtr(dstData) & (bytes - 1));
+            switch (bytesAndAligned) {
+                case 2U:  // 2 bytes
                     *dstData = *reinterpret_cast<EtsChar *>(srcData);
                     break;
-                case 2U:  // 4 bytes
+                case 4U:  // 4 bytes
                     *reinterpret_cast<uint32_t *>(dstData) = *reinterpret_cast<uint32_t *>(srcData);
                     break;
-                case 4U:  // 8 bytes
+                case 8U:  // 8 bytes
                     *reinterpret_cast<uint64_t *>(dstData) = *reinterpret_cast<uint64_t *>(srcData);
                     break;
                 default:
-                    memcpy_s(static_cast<void *>(dstData), n << 1UL, static_cast<void *>(srcData), n << 1UL);
+                    std::copy_n(srcData, n, dstData);
             }
             dstData += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             length -= n;

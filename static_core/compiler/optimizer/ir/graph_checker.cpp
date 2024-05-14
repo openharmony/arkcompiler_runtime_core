@@ -2544,11 +2544,13 @@ void GraphChecker::VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *in
     [[maybe_unused]] auto type = inst->GetType();
     [[maybe_unused]] auto objType = loadImm->GetObjectType();
     ASSERT_EXT_VISITOR(objType != LoadImmediateInst::ObjectType::UNKNOWN);
-    ASSERT_EXT_VISITOR((type == DataType::REFERENCE && objType == LoadImmediateInst::ObjectType::CLASS) ||
-                       (type == DataType::POINTER && (objType == LoadImmediateInst::ObjectType::METHOD ||
-                                                      objType == LoadImmediateInst::ObjectType::STRING ||
-                                                      objType == LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET)) ||
-                       (type == DataType::ANY && objType == LoadImmediateInst::ObjectType::CONSTANT_POOL));
+    ASSERT_EXT_VISITOR(
+        (type == DataType::REFERENCE &&
+         (objType == LoadImmediateInst::ObjectType::CLASS || objType == LoadImmediateInst::ObjectType::OBJECT)) ||
+        (type == DataType::POINTER &&
+         (objType == LoadImmediateInst::ObjectType::METHOD || objType == LoadImmediateInst::ObjectType::STRING ||
+          objType == LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET || loadImm->IsTlsOffset())) ||
+        (type == DataType::ANY && objType == LoadImmediateInst::ObjectType::CONSTANT_POOL));
     ASSERT_EXT_VISITOR(objType != LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET ||
                        static_cast<GraphChecker *>(v)->GetGraph()->IsAotMode());
     ASSERT_EXT_VISITOR(loadImm->GetObject() != nullptr);

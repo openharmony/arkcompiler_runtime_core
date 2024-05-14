@@ -21,6 +21,7 @@
 
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 namespace ark::ets::intrinsics {
 
 constexpr static uint64_t METHOD_FLAG_MASK = 0x00000001;
@@ -377,6 +378,13 @@ extern "C" uint8_t CompilerEtsEquals(ObjectHeader *obj1, ObjectHeader *obj2)
 {
     auto coro = EtsCoroutine::GetCurrent();
     return static_cast<uint8_t>(EtsReferenceEquals(coro, EtsObject::FromCoreType(obj1), EtsObject::FromCoreType(obj2)));
+}
+
+extern "C" EtsString *CompilerDoubleToStringDecimal(ObjectHeader *cache, uint64_t number,
+                                                    [[maybe_unused]] uint64_t unused)
+{
+    ASSERT(cache != nullptr);
+    return DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number));
 }
 
 }  // namespace ark::ets::intrinsics

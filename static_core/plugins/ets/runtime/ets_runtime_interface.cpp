@@ -356,4 +356,9 @@ bool EtsRuntimeInterface::IsClassValueTyped(ClassPtr klass) const
     return EtsClass::FromRuntimeClass(ClassCast(klass))->IsValueTyped();
 }
 
+void *EtsRuntimeInterface::GetDoubleToStringCache() const
+{
+    return ark::ets::PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+}
+
 }  // namespace ark::ets

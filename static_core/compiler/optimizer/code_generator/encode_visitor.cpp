@@ -2582,9 +2582,7 @@ void EncodeVisitor::VisitLoadImmediate(GraphVisitor *visitor, Inst *inst)
     auto codegen = static_cast<EncodeVisitor *>(visitor)->GetCodegen();
     auto dst = codegen->ConvertRegister(inst->GetDstReg(), inst->GetType());
     auto loadImm = inst->CastToLoadImmediate();
-    if (loadImm->GetObjectType() != LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET) {
-        codegen->GetEncoder()->EncodeMov(dst, Imm(reinterpret_cast<uintptr_t>(loadImm->GetObject())));
-    } else {
+    if (loadImm->GetObjectType() == LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET) {
         auto runtime = codegen->GetGraph()->GetRuntime();
         auto pfOffset = runtime->GetPandaFileOffset(codegen->GetGraph()->GetArch());
         codegen->LoadMethod(dst);
@@ -2593,6 +2591,10 @@ void EncodeVisitor::VisitLoadImmediate(GraphVisitor *visitor, Inst *inst)
         codegen->GetEncoder()->EncodeLdr(dst, false, MemRef(dst, cross_values::GetFileBaseOffset(codegen->GetArch())));
         // add pointer to pf with offset to str
         codegen->GetEncoder()->EncodeAdd(dst, dst, Imm(loadImm->GetPandaFileOffset()));
+    } else if (loadImm->GetObjectType() == LoadImmediateInst::ObjectType::TLS_OFFSET) {
+        codegen->GetEncoder()->EncodeLdr(dst, false, MemRef(codegen->ThreadReg(), loadImm->GetTlsOffset()));
+    } else {
+        codegen->GetEncoder()->EncodeMov(dst, Imm(reinterpret_cast<uintptr_t>(loadImm->GetObject())));
     }
 }
 

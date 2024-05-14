@@ -1404,6 +1404,7 @@ intrinsics:
       ret: std.core.String
       args: [ f64, i32 ]
     impl: ark::ets::intrinsics::StdCoreDoubleToString
+    peephole_func: PeepholeDoubleToString
 
   - name: StdCoreDoubleToLocaleString
     space: ets

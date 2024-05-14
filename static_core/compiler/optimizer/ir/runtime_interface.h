@@ -1491,6 +1491,11 @@ public:
         UNREACHABLE();
     }
 
+    virtual void *GetDoubleToStringCache() const
+    {
+        return nullptr;
+    }
+
     NO_COPY_SEMANTIC(RuntimeInterface);
     NO_MOVE_SEMANTIC(RuntimeInterface);
 

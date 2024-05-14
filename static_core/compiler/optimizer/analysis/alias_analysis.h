@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -323,6 +323,7 @@ public:
     static void VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst);
     static void VisitGetManagedClassObject(GraphVisitor *v, Inst *inst);
     static void VisitResolveObjectFieldStatic(GraphVisitor *v, Inst *inst);
+    static void VisitBitcast(GraphVisitor *v, Inst *inst);
 
     /// Instructions that introduce static fields (global variables).
     static void VisitLoadStatic(GraphVisitor *v, Inst *inst);

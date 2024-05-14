@@ -6390,7 +6390,17 @@ public:
     using Base = Inst;
     using Base::Base;
 
-    enum class ObjectType { UNKNOWN, CLASS, METHOD, CONSTANT_POOL, STRING, PANDA_FILE_OFFSET, LAST };
+    enum class ObjectType {
+        UNKNOWN,
+        CLASS,
+        METHOD,
+        CONSTANT_POOL,
+        STRING,
+        PANDA_FILE_OFFSET,
+        OBJECT,
+        TLS_OFFSET,
+        LAST
+    };
 
     LoadImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, const void *obj,
                       ObjectType objType = ObjectType::CLASS)
@@ -6493,6 +6503,22 @@ public:
     uint64_t GetPandaFileOffset() const
     {
         ASSERT(GetObjectType() == ObjectType::PANDA_FILE_OFFSET);
+        return obj_;
+    }
+
+    bool IsObject() const
+    {
+        return GetField<ObjectTypeField>() == ObjectType::OBJECT;
+    }
+
+    bool IsTlsOffset() const
+    {
+        return GetField<ObjectTypeField>() == ObjectType::TLS_OFFSET;
+    }
+
+    uint64_t GetTlsOffset() const
+    {
+        ASSERT(GetObjectType() == ObjectType::TLS_OFFSET);
         return obj_;
     }
 

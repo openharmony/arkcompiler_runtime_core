@@ -238,17 +238,12 @@ void SetSuccessfulMatchLegacyProperties(EtsClass *type, const EtsObject *regexpE
     }
 
     EtsField *leftContextField = type->GetStaticFieldIDByName(LEFT_CONTEXT_FIELD_NAME);
-    PandaString inputCopy = inputStr->GetMutf8();
-    auto old = inputCopy[index];
-    inputCopy[index] = 0;
-    VMHandle<EtsString> prefix(coroutine, EtsString::CreateFromMUtf8(inputCopy.c_str(), index)->GetCoreType());
-    inputCopy[index] = old;
+    EtsString *prefix = EtsString::FastSubString(inputStr.GetPtr(), 0, index);
     type->SetStaticFieldObject(leftContextField, prefix->AsObject());
-    const char *suffixBegin =
-        std::next(inputCopy.c_str(), index + EtsString::FromEtsObject(matches->Get(0U))->GetLength());
 
     EtsField *rightContextField = type->GetStaticFieldIDByName(RIGHT_CONTEXT_FIELD_NAME);
-    VMHandle<EtsString> suffix(coroutine, EtsString::CreateFromMUtf8(suffixBegin)->GetCoreType());
+    auto suffixBegin = index + EtsString::FromEtsObject(matches->Get(0U))->GetLength();
+    EtsString *suffix = EtsString::FastSubString(inputStr.GetPtr(), suffixBegin, inputStr->GetLength() - suffixBegin);
     type->SetStaticFieldObject(rightContextField, suffix->AsObject());
 }
 

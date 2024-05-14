@@ -377,6 +377,7 @@ protected:
     static void VisitCallLaunchVirtual(GraphVisitor *v, Inst *inst);
     static void VisitCallResolvedLaunchStatic(GraphVisitor *v, Inst *inst);
     static void VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *inst);
+    static void VisitLoadImmediate(GraphVisitor *v, Inst *inst);
 
     void VisitDefault(Inst *inst) override;
 

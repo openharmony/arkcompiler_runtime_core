@@ -341,6 +341,11 @@ public:
         return longToStringCache_;
     }
 
+    static constexpr uint32_t GetDoubleToStringCacheOffset()
+    {
+        return MEMBER_OFFSET(PandaEtsVM, doubleToStringCache_);
+    }
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,

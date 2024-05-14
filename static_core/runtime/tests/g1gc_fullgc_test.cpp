@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,9 +184,12 @@ G1GCFullGCTest::ObjVec G1GCFullGCTest::MakeAllocations(size_t minSize, size_t ma
             }
         }
         for (size_t i = 0; i < MULTI; ++i) {
-            coretypes::String *stringObj = coretypes::String::CreateFromMUtf8(
-                reinterpret_cast<const uint8_t *>(&objTemplates[j][0]), objTemplates[j].length(), ctx, vm);
+            // create string of '\0's
+            coretypes::String *stringObj =
+                coretypes::String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>(&objTemplates[j][0]),
+                                                   objTemplates[j].length(), objTemplates[j].length(), true, ctx, vm);
             ASSERT(stringObj != nullptr);
+            ASSERT(stringObj->GetLength() == objTemplates[j].length());
             ASSERT(spaceChecker(ToUintPtr(stringObj)));
             *allocated += GetAlignedObjectSize(size);
             *requested += size;

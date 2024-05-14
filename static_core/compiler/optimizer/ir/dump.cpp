@@ -480,6 +480,12 @@ void LoadImmediateInst::DumpOpcode(std::ostream *out) const
     } else if (IsConstantPool()) {
         ArenaString type("constpool: 0x", adapter);
         (*out) << std::setw(INDENT_OPCODE) << opcode + open + type << std::hex << GetConstantPool() << close;
+    } else if (IsObject()) {
+        ArenaString type("object: 0x", adapter);
+        (*out) << std::setw(INDENT_OPCODE) << opcode + open + type << std::hex << GetObject() << close;
+    } else if (IsTlsOffset()) {
+        ArenaString type("TlsOffset: 0x", adapter);
+        (*out) << std::setw(INDENT_OPCODE) << opcode + open + type << std::hex << GetTlsOffset() << close;
     } else {
         UNREACHABLE();
     }

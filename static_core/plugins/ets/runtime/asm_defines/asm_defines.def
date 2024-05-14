@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,4 +15,6 @@
 // NOLINTBEGIN(readability-identifier-naming)
 DEFINE_VALUE(ETS_COROUTINE_PROMISE_CLASS_OFFSET, ark::ets::EtsCoroutine::GetTlsPromiseClassPointerOffset())
 DEFINE_VALUE(ETS_COROUTINE_UNDEFINED_OBJECT_OFFSET, ark::ets::EtsCoroutine::GetTlsUndefinedObjectOffset())
+
+DEFINE_VALUE(ETS_VM_DOUBLE_TO_STRING_CACHE_OFFSET, ark::ets::PandaEtsVM::GetDoubleToStringCacheOffset())
 // NOLINTEND(readability-identifier-naming)
