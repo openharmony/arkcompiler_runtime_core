@@ -432,7 +432,7 @@ export final class Date {
             throw new InvalidDate();
         }
 
-        let date = new Date();
+        let date = new Date(0);
 
         let timeZone: long = 0;
         const years = Date.parseIfContains(dateStr, 0, 4);
