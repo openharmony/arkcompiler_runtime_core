@@ -100,7 +100,11 @@ ohos_static_library("abc2program_frontend_static") {
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
   ]
-  external_deps = [ "bounds_checking_function:libsec_static" ]
+  if (is_arkui_x) {
+    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+  } else {
+    external_deps = [ "bounds_checking_function:libsec_static" ]
+  }
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
