@@ -364,7 +364,7 @@ bool ConstFoldingAdd(Inst *inst)
         inst->ReplaceUsers(newCnst);
         return true;
     }
-    return false;
+    return ConstFoldingBinaryMathWithNan(inst);
 }
 
 bool ConstFoldingSub(Inst *inst)
@@ -400,19 +400,19 @@ bool ConstFoldingSub(Inst *inst)
         inst->ReplaceUsers(newCnst);
         return true;
     }
-    return false;
+    return ConstFoldingBinaryMathWithNan(inst);
 }
 
 bool ConstFoldingMul(Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::Mul);
-    auto input0 = inst->GetInput(0);
-    auto input1 = inst->GetInput(1);
+    auto input0 = inst->GetInput(0).GetInst();
+    auto input1 = inst->GetInput(1).GetInst();
     auto graph = inst->GetBasicBlock()->GetGraph();
     ConstantInst *newCnst = nullptr;
-    if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
-        auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
-        auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
+    if (input0->IsConst() && input1->IsConst()) {
+        auto cnst0 = static_cast<ConstantInst *>(input0);
+        auto cnst1 = static_cast<ConstantInst *>(input1);
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
                 newCnst = ConstFoldingCreateIntConst(
@@ -430,16 +430,40 @@ bool ConstFoldingMul(Inst *inst)
         inst->ReplaceUsers(newCnst);
         return true;
     }
-    if (input0.GetInst()->IsConst()) {
-        newCnst = static_cast<ConstantInst *>(input0.GetInst());
-    } else if (input1.GetInst()->IsConst()) {
-        newCnst = static_cast<ConstantInst *>(input1.GetInst());
+    if (ConstFoldingBinaryMathWithNan(inst)) {
+        return true;
     }
-    if (newCnst != nullptr && newCnst->IsEqualConst(0, graph->IsBytecodeOptimizer())) {
-        inst->ReplaceUsers(newCnst);
+    // Const is always in input1
+    if (input0->IsConst()) {
+        std::swap(input0, input1);
+    }
+    if (input1->IsConst() && input1->CastToConstant()->IsEqualConst(0, graph->IsBytecodeOptimizer())) {
+        inst->ReplaceUsers(input1);
         return true;
     }
     return false;
+}
+
+bool ConstFoldingBinaryMathWithNan(Inst *inst)
+{
+    ASSERT(inst->GetInputsCount() == 2U);
+    auto input0 = inst->GetInput(0).GetInst();
+    auto input1 = inst->GetInput(1).GetInst();
+    ASSERT(!input0->IsConst() || !input1->IsConst());
+    if (!DataType::IsFloatType(inst->GetType())) {
+        return false;
+    }
+    if (input0->IsConst()) {
+        std::swap(input0, input1);
+    }
+    if (!input1->IsConst()) {
+        return false;
+    }
+    if (!input1->CastToConstant()->IsNaNConst()) {
+        return false;
+    }
+    inst->ReplaceUsers(input1);
+    return true;
 }
 
 ConstantInst *ConstFoldingDivInt2Int(Inst *inst, Graph *graph, ConstantInst *cnst0, ConstantInst *cnst1)
@@ -476,7 +500,7 @@ bool ConstFoldingDiv(Inst *inst)
     auto input1 = inst->GetDataFlowInput(1);
     auto graph = inst->GetBasicBlock()->GetGraph();
     if (!input0->IsConst() || !input1->IsConst()) {
-        return false;
+        return ConstFoldingBinaryMathWithNan(inst);
     }
     auto cnst0 = input0->CastToConstant();
     auto cnst1 = input1->CastToConstant();
@@ -546,7 +570,7 @@ bool ConstFoldingMin(Inst *inst)
         inst->ReplaceUsers(newCnst);
         return true;
     }
-    return false;
+    return ConstFoldingBinaryMathWithNan(inst);
 }
 
 ConstantInst *ConstFoldingMaxInt(Inst *inst, Graph *graph, ConstantInst *cnst0, ConstantInst *cnst1)
@@ -594,8 +618,9 @@ bool ConstFoldingMax(Inst *inst)
         inst->ReplaceUsers(newCnst);
         return true;
     }
-    return false;
+    return ConstFoldingBinaryMathWithNan(inst);
 }
+
 ConstantInst *ConstFoldingModIntConst(Graph *graph, Inst *inst, ConstantInst *cnst0, ConstantInst *cnst1)
 {
     if (DataType::IsTypeSigned(inst->GetType())) {
@@ -631,7 +656,7 @@ bool ConstFoldingMod(Inst *inst)
         return true;
     }
     if (!input0->IsConst() || !input1->IsConst()) {
-        return false;
+        return ConstFoldingBinaryMathWithNan(inst);
     }
     ConstantInst *newCnst = nullptr;
     auto cnst0 = input0->CastToConstant();
@@ -858,6 +883,37 @@ int64_t GetIntResult(ConstantInst *cnst0, ConstantInst *cnst1, DataType::Type in
     return GetResult(l, r, cmp);
 }
 
+bool ConstFoldingCmpFloatNan(Inst *inst)
+{
+    ASSERT(inst->GetOpcode() == Opcode::Cmp);
+    auto input0 = inst->GetInput(0).GetInst();
+    auto input1 = inst->GetInput(1).GetInst();
+    if (!input0->IsConst() && !input1->IsConst()) {
+        return false;
+    }
+
+    if (!DataType::IsFloatType(inst->CastToCmp()->GetOperandsType())) {
+        return false;
+    }
+
+    // One of the constant always will be in input1
+    if (input0->IsConst()) {
+        std::swap(input0, input1);
+    }
+
+    // For Float constant is applied only NaN cases
+    if (!input1->CastToConstant()->IsNaNConst()) {
+        return false;
+    }
+    // Result related with Fcmpg as wrote in spec
+    int64_t res {-1};
+    if (inst->CastToCmp()->IsFcmpg()) {
+        res = 1;
+    }
+    inst->ReplaceUsers(ConstFoldingCreateIntConst(inst, res));
+    return true;
+}
+
 bool ConstFoldingCmp(Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::Cmp);
@@ -865,6 +921,9 @@ bool ConstFoldingCmp(Inst *inst)
     auto input1 = inst->GetInput(1).GetInst();
     auto cmp = inst->CastToCmp();
     auto inputType = cmp->GetInputType(0);
+    if (ConstFoldingCmpFloatNan(inst)) {
+        return true;
+    }
     if (input0->IsConst() && input1->IsConst()) {
         auto cnst0 = static_cast<ConstantInst *>(input0);
         auto cnst1 = static_cast<ConstantInst *>(input1);
@@ -983,26 +1042,85 @@ bool IsUniqueRef(Inst *inst)
     return inst->IsAllocation() || inst->GetOpcode() == Opcode::NullPtr || inst->GetOpcode() == Opcode::LoadUndefined;
 }
 
+bool ConstFoldingCompareFloatNan(Inst *inst)
+{
+    ASSERT(DataType::IsFloatType(inst->CastToCompare()->GetOperandsType()));
+    auto input0 = inst->GetInput(0).GetInst();
+    auto input1 = inst->GetInput(1).GetInst();
+    if (!input0->IsConst() && !input1->IsConst()) {
+        return false;
+    }
+
+    // One of the constant always will be in input1
+    if (input0->IsConst()) {
+        std::swap(input0, input1);
+    }
+
+    // For Float constant is applied only NaN cases
+    if (!input1->CastToConstant()->IsNaNConst()) {
+        return false;
+    }
+
+    // If both operands is NaN constant - it is OK, all optimization will be applied anyway
+    bool resultConst {};
+    // We shouldn't reverse ConditionCode, because the results is not related to order of inputs
+    switch (inst->CastToCompare()->GetCc()) {
+        case ConditionCode::CC_NE:
+            // NaN != number is true
+            resultConst = true;
+            break;
+        case ConditionCode::CC_EQ:  // ==
+        case ConditionCode::CC_LT:  // <
+        case ConditionCode::CC_LE:  // <=
+        case ConditionCode::CC_GT:  // >
+        case ConditionCode::CC_GE:  // >=
+            // All these CC with NaN give false
+            resultConst = false;
+            break;
+        default:
+            UNREACHABLE();
+    }
+    inst->ReplaceUsers(ConstFoldingCompareCreateConst(inst, resultConst));
+    return true;
+}
+
+bool ConstFoldingCompareIntConstant(Inst *inst)
+{
+    ASSERT(!DataType::IsFloatType(inst->CastToCompare()->GetOperandsType()));
+    auto input0 = inst->GetInput(0).GetInst();
+    auto input1 = inst->GetInput(1).GetInst();
+    if (!input0->IsConst() || !input1->IsConst()) {
+        return false;
+    }
+
+    auto cnst0 = input0->CastToConstant();
+    auto cnst1 = input1->CastToConstant();
+    ConstantInst *newCnst = nullptr;
+    auto type = inst->GetInputType(0);
+    if (DataType::GetCommonType(type) == DataType::INT64) {
+        uint64_t cnstVal0 = ConvertIntToInt(cnst0->GetIntValue(), type);
+        uint64_t cnstVal1 = ConvertIntToInt(cnst1->GetIntValue(), type);
+        newCnst = ConstFoldingCompareCreateNewConst(inst, cnstVal0, cnstVal1);
+        inst->ReplaceUsers(newCnst);
+        return true;
+    }
+    return false;
+}
+
 bool ConstFoldingCompare(Inst *inst)
 {
     ASSERT(inst->GetOpcode() == Opcode::Compare);
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
-    if (input0->IsConst() && input1->IsConst() && !DataType::IsFloatType(input0->GetType())) {
-        auto cnst0 = input0->CastToConstant();
-        auto cnst1 = input1->CastToConstant();
 
-        ConstantInst *newCnst = nullptr;
-        auto type = inst->GetInputType(0);
-        if (DataType::GetCommonType(type) == DataType::INT64) {
-            uint64_t cnstVal0 = ConvertIntToInt(cnst0->GetIntValue(), type);
-            uint64_t cnstVal1 = ConvertIntToInt(cnst1->GetIntValue(), type);
-            newCnst = ConstFoldingCompareCreateNewConst(inst, cnstVal0, cnstVal1);
-        } else {
-            return false;
+    if (DataType::IsFloatType(inst->CastToCompare()->GetOperandsType())) {
+        if (ConstFoldingCompareFloatNan(inst)) {
+            return true;
         }
-        inst->ReplaceUsers(newCnst);
-        return true;
+    } else {
+        if (ConstFoldingCompareIntConstant(inst)) {
+            return true;
+        }
     }
     if (input0->GetOpcode() == Opcode::LoadImmediate && input1->GetOpcode() == Opcode::LoadImmediate) {
         auto class0 = input0->CastToLoadImmediate()->GetObject();

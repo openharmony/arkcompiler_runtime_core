@@ -3731,10 +3731,18 @@ public:
 
     inline bool IsEqualConst(double value, [[maybe_unused]] bool supportInt32 = false)
     {
+        // Special compare for NaN
+        if (GetType() == DataType::FLOAT64 && std::isnan(value) && std::isnan(bit_cast<double, uint64_t>(value_))) {
+            return true;
+        }
         return IsEqualConst(DataType::FLOAT64, bit_cast<uint64_t, double>(value));
     }
     inline bool IsEqualConst(float value, [[maybe_unused]] bool supportInt32 = false)
     {
+        // Special compare for NaN
+        if (GetType() == DataType::FLOAT32 && std::isnan(value) && std::isnan(bit_cast<float, uint32_t>(value_))) {
+            return true;
+        }
         return IsEqualConst(DataType::FLOAT32, bit_cast<uint32_t, float>(value));
     }
     inline bool IsEqualConst(DataType::Any value, [[maybe_unused]] bool supportInt32 = false)
@@ -3766,6 +3774,16 @@ public:
         ASSERT(IsConst());
         return (GetType() == DataType::INT32 || GetType() == DataType::INT64) &&
                (GetIntValue() == 0 || GetIntValue() == 1);
+    }
+
+    bool IsNaNConst() const
+    {
+        ASSERT(DataType::IsFloatType(GetType()));
+        if (GetType() == DataType::FLOAT32) {
+            return std::isnan(GetFloatValue());
+        }
+        // DataType::FLOAT64
+        return std::isnan(GetDoubleValue());
     }
 
     void SetImmTableSlot(ImmTableSlot immSlot)
