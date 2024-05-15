@@ -442,11 +442,17 @@ void ItemContainer::ReLayout()
 
 uint32_t ItemContainer::ComputeLayout()
 {
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
     uint32_t original_offset = 0;
     uint32_t num_classes = class_map_.size();
     uint32_t num_literalarrays = literalarray_map_.size();
     uint32_t class_idx_offset = sizeof(File::Header);
-    uint32_t cur_offset = class_idx_offset + (num_classes + num_literalarrays) * ID_SIZE;
+    uint32_t cur_offset = 0;
+    if (ContainsLiteralArrayInHeader(bc_version.value())) {
+        cur_offset = class_idx_offset + (num_classes + num_literalarrays) * ID_SIZE;
+    } else {
+        cur_offset = class_idx_offset + (num_classes * ID_SIZE);
+    }
     items_round_up_size_.clear();
     foreign_item_roundup_size_ = 0;
 
@@ -606,11 +612,22 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    if (!writer->Write<uint32_t>(literalarray_map_.size())) {
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
+
+    uint32_t num_literalarrays = INVALID_INDEX;
+    uint32_t literalarray_idx_offset = INVALID_OFFSET;
+    size_t index_section_off = sizeof(File::Header) + class_map_.size() * ID_SIZE;
+
+    if (ContainsLiteralArrayInHeader(bc_version.value())) {
+        num_literalarrays = literalarray_map_.size();
+        literalarray_idx_offset = sizeof(File::Header) + class_map_.size() * ID_SIZE;
+        index_section_off = literalarray_idx_offset + num_literalarrays * ID_SIZE;
+    }
+
+    if (!writer->Write<uint32_t>(num_literalarrays)) {
         return false;
     }
 
-    uint32_t literalarray_idx_offset = sizeof(File::Header) + class_map_.size() * ID_SIZE;
     if (!writer->Write<uint32_t>(literalarray_idx_offset)) {
         return false;
     }
@@ -619,7 +636,6 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    size_t index_section_off = literalarray_idx_offset + literalarray_map_.size() * ID_SIZE;
     return writer->Write<uint32_t>(index_section_off);
 }
 
@@ -665,40 +681,9 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
     return WriteHeaderIndexInfo(writer);
 }
 
-bool ItemContainer::Write(Writer *writer, bool deduplicateItems)
+bool ItemContainer::WriteItems(Writer *writer)
 {
-    if (deduplicateItems) {
-        DeduplicateItems();
-    }
-
-    ssize_t checksum_offset = -1;
-    if (!WriteHeader(writer, &checksum_offset)) {
-        return false;
-    }
-    ASSERT(checksum_offset != -1);
-
-    // Write class idx
-
-    for (auto &entry : class_map_) {
-        if (!writer->Write(entry.second->GetOffset())) {
-            return false;
-        }
-    }
-
-    // Write literalArray idx
-
-    for (auto &entry : literalarray_map_) {
-        if (!writer->Write(entry.second->GetOffset())) {
-            return false;
-        }
-    }
-
-    // Write index section
-
-    if (!index_section_item_.Write(writer)) {
-        return false;
-    }
-
+    ASSERT(writer != nullptr);
     for (auto &item : foreign_items_) {
         if (!writer->Align(item->Alignment())) {
             return false;
@@ -721,6 +706,49 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems)
         if (!item->Write(writer)) {
             return false;
         }
+    }
+    return true;
+}
+
+bool ItemContainer::Write(Writer *writer, bool deduplicateItems)
+{
+    if (deduplicateItems) {
+        DeduplicateItems();
+    }
+
+    ssize_t checksum_offset = -1;
+    if (!WriteHeader(writer, &checksum_offset)) {
+        return false;
+    }
+    ASSERT(checksum_offset != -1);
+
+    // Write class idx
+
+    for (auto &entry : class_map_) {
+        if (!writer->Write(entry.second->GetOffset())) {
+            return false;
+        }
+    }
+
+    // Write literalArray idx
+
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
+    if (ContainsLiteralArrayInHeader(bc_version.value())) {
+        for (auto &entry : literalarray_map_) {
+            if (!writer->Write(entry.second->GetOffset())) {
+                return false;
+            }
+        }
+    }
+
+    // Write index section
+
+    if (!index_section_item_.Write(writer)) {
+        return false;
+    }
+
+    if (!WriteItems(writer)) {
+        return false;
     }
 
     if (!writer->Align(line_number_program_index_item_.Alignment())) {
@@ -750,7 +778,12 @@ std::map<std::string, size_t> ItemContainer::GetStat()
     stat["class_idx_item"] = class_map_.size() * ID_SIZE;
     stat["line_number_program_idx_item"] = line_number_program_index_item_.GetNumItems() * ID_SIZE
                                            + line_number_item_roundup_size_;
-    stat["literalarray_idx"] = literalarray_map_.size() * ID_SIZE;
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
+    if (ContainsLiteralArrayInHeader(bc_version.value())) {
+        stat["literalarray_idx"] = literalarray_map_.size() * ID_SIZE;
+    } else {
+        stat["literalarray_idx"] = 0;
+    }
 
     stat["index_section_item"] = index_section_item_.GetSize();
     stat["foreign_item"] = GetForeignSize() + foreign_item_roundup_size_;

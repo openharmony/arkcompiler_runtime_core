@@ -558,6 +558,8 @@ private:
 
     bool WriteHeader(Writer *writer, ssize_t *checksum_offset);
 
+    bool WriteItems(Writer *writer);
+
     bool WriteHeaderIndexInfo(Writer *writer);
 
     void RebuildIndexSection();

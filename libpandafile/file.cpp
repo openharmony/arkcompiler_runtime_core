@@ -15,6 +15,7 @@
 
 #include "file_format_version.h"
 #include "file-inl.h"
+#include "file_items.h"
 #include "os/file.h"
 #include "os/mem.h"
 #include "os/filesystem.h"
@@ -583,10 +584,19 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
         return false;
     }
 
-    if (!CheckHeaderElementOffset(header->literalarray_idx_off, header->num_literalarrays, header->file_size)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file literalarray_idx_off " << header->literalarray_idx_off <<
-            " or num_literalarrays " << header->num_literalarrays;
-        return false;
+    if (ContainsLiteralArrayInHeader(header->version)) {
+        if (!CheckHeaderElementOffset(header->literalarray_idx_off, header->num_literalarrays, header->file_size)) {
+            LOG(ERROR, PANDAFILE) << "Invalid panda file literalarray_idx_off " << header->literalarray_idx_off <<
+                                     " or num_literalarrays " << header->num_literalarrays;
+            return false;
+        }
+    } else {
+        if (header->literalarray_idx_off != INVALID_INDEX || header->num_literalarrays != INVALID_OFFSET) {
+            LOG(ERROR, PANDAFILE) << "Invalid panda file literalarray_idx_off " << header->literalarray_idx_off <<
+                                     " or num_literalarrays " << header->num_literalarrays <<
+                                     ", The literalarray_idx_off and num_literalarrays should be reserved.";
+            return false;
+        }
     }
 
     if (!CheckHeaderElementOffset<File::IndexHeader>(header->index_section_off, header->num_indexes,
@@ -712,6 +722,12 @@ File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8_name) con
     }
 
     return File::EntityId();
+}
+
+
+bool ContainsLiteralArrayInHeader(const std::array<uint8_t, File::VERSION_SIZE> &version)
+{
+    return panda::panda_file::IsVersionLessOrEqual(version, LAST_CONTAINS_LITERAL_IN_HEADER_VERSION);
 }
 
 }  // namespace panda::panda_file

@@ -14,6 +14,7 @@
  */
 
 #include "disassembler.h"
+#include "libpandafile/util/collect_util.h"
 #include "mangling.h"
 #include "utils/logger.h"
 #include "utils/const_value.h"
@@ -360,30 +361,46 @@ bool Disassembler::IsModuleLiteralOffset(const panda_file::File::EntityId &id) c
 
 void Disassembler::GetLiteralArrays()
 {
-    const auto lit_arrays_id = file_->GetLiteralArraysId();
+    if (panda_file::ContainsLiteralArrayInHeader(file_->GetHeader()->version)) {
+        const auto lit_arrays_id = file_->GetLiteralArraysId();
+        LOG(DEBUG, DISASSEMBLER) << "\n[getting literal arrays]\nid: " << lit_arrays_id << " (0x" << std::hex
+                                 << lit_arrays_id << ")";
 
-    LOG(DEBUG, DISASSEMBLER) << "\n[getting literal arrays]\nid: " << lit_arrays_id << " (0x" << std::hex
-                             << lit_arrays_id << ")";
+        panda_file::LiteralDataAccessor lda(*file_, lit_arrays_id);
+        size_t num_litarrays = lda.GetLiteralNum();
+        for (size_t index = 0; index < num_litarrays; index++) {
+            auto id = lda.GetLiteralArrayId(index);
+            if (module_request_phase_literals_.count(id.GetOffset())) {
+                continue;
+            }
+            FillLiteralArrayTable(id, index);
+        }
+    } else {
+        panda::libpandafile::CollectUtil collect_util;
+        std::unordered_set<uint32_t> literal_array_ids;
+        collect_util.CollectLiteralArray(*file_, literal_array_ids);
+        size_t index = 0;
+        for (uint32_t literal_array_id : literal_array_ids) {
+            panda_file::File::EntityId id {literal_array_id};
+            FillLiteralArrayTable(id, index);
+            index++;
+        }
+    }
+}
 
-    panda_file::LiteralDataAccessor lda(*file_, lit_arrays_id);
-    size_t num_litarrays = lda.GetLiteralNum();
-    for (size_t index = 0; index < num_litarrays; index++) {
-        auto id = lda.GetLiteralArrayId(index);
-        if (module_request_phase_literals_.count(id.GetOffset())) {
-            continue;
-        }
-        if (IsModuleLiteralOffset(id)) {
-            std::stringstream ss;
-            ss << index << " 0x" << std::hex << id.GetOffset();
-            modulearray_table_.emplace(ss.str(), GetModuleLiteralArray(id));
-            continue;
-        }
+void Disassembler::FillLiteralArrayTable(panda_file::File::EntityId &id, size_t index)
+{
+    if (IsModuleLiteralOffset(id)) {
         std::stringstream ss;
         ss << index << " 0x" << std::hex << id.GetOffset();
-        panda::pandasm::LiteralArray lit_arr;
-        GetLiteralArray(&lit_arr, index);
-        prog_.literalarray_table.emplace(ss.str(), lit_arr);
+        modulearray_table_.emplace(ss.str(), GetModuleLiteralArray(id));
+        return;
     }
+    std::stringstream ss;
+    ss << index << " 0x" << std::hex << id.GetOffset();
+    panda::pandasm::LiteralArray lit_arr;
+    GetLiteralArrayByOffset(&lit_arr, id);
+    prog_.literalarray_table.emplace(ss.str(), lit_arr);
 }
 
 std::string Disassembler::ModuleTagToString(panda_file::ModuleTag &tag) const

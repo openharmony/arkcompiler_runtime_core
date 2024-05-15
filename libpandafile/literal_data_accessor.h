@@ -96,6 +96,10 @@ public:
 
     File::EntityId GetLiteralArrayId(size_t index) const
     {
+        if (literal_num_ == INVALID_INDEX) {
+            return File::EntityId(INVALID_INDEX);
+        }
+
         ASSERT(index < literal_num_);
         auto l_sp = literal_data_sp_.SubSpan(index * ID_SIZE);
         return File::EntityId(static_cast<uint32_t>(helpers::Read<sizeof(uint32_t)>(&l_sp)));

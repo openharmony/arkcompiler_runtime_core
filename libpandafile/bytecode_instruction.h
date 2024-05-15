@@ -401,6 +401,8 @@ public:
     {
         return Size(GetFormat(opcode));
     }
+
+    size_t GetLiteralIndex() const;
 };
 
 template <const BytecodeInstMode Mode>

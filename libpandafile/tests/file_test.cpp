@@ -388,4 +388,37 @@ HWTEST(File, CheckSecureMem, testing::ext::TestSize.Level0)
     bool res3 = CheckSecureMem(value3, static_cast<size_t>(243423423523));
     EXPECT_TRUE(res3);
 }
+
+HWTEST(File, CheckLiteralArray, testing::ext::TestSize.Level0)
+{
+    // Write panda file to disk
+    ItemContainer container;
+
+    auto writer = FileWriter(ABC_FILE);
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk
+    auto fp = fopen(ABC_FILE, "rb");
+    EXPECT_NE(fp, nullptr);
+
+    os::mem::ConstBytePtr ptr =
+        os::mem::MapFile(os::file::File(fileno(fp)), os::mem::MMAP_PROT_READ | os::mem::MMAP_PROT_WRITE,
+                         os::mem::MMAP_FLAG_PRIVATE, writer.GetOffset())
+            .ToConst();
+    EXPECT_NE(ptr.Get(), nullptr);
+    EXPECT_TRUE(CheckHeader(ptr, ABC_FILE));
+
+    auto header = reinterpret_cast<File::Header *>(reinterpret_cast<uintptr_t>(ptr.Get()));
+    auto num_literalarrays = header->num_literalarrays;
+    uint32_t i = 10;
+    header->num_literalarrays = i;
+    EXPECT_FALSE(CheckHeader(ptr, ABC_FILE));
+    header->num_literalarrays = num_literalarrays;
+    header->literalarray_idx_off = i;
+    EXPECT_FALSE(CheckHeader(ptr, ABC_FILE));
+    fclose(fp);
+
+    remove(ABC_FILE);
+}
+
 }  // namespace panda::panda_file::test

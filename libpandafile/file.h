@@ -548,6 +548,10 @@ std::unique_ptr<const File> OpenPandaFile(std::string_view location, std::string
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename = "");
 void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename);
 
+// Last version which contains redundance literal array in header
+constexpr std::array<uint8_t, File::VERSION_SIZE> LAST_CONTAINS_LITERAL_IN_HEADER_VERSION {12, 0, 6, 0};
+bool ContainsLiteralArrayInHeader(const std::array<uint8_t, File::VERSION_SIZE> &version);
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 extern const char *ARCHIVE_FILENAME;
 }  // namespace panda::panda_file

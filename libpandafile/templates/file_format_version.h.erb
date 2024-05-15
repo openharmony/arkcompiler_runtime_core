@@ -41,6 +41,9 @@ const std::set<std::array<uint8_t, File::VERSION_SIZE>> incompatibleVersion {
 
 std::string GetVersion(const std::array<uint8_t, File::VERSION_SIZE> &version);
 
+bool IsVersionLessOrEqual(const std::array<uint8_t, File::VERSION_SIZE> &currrent_version,
+                          const std::array<uint8_t, File::VERSION_SIZE> &target_version);
+
 inline void PrintBytecodeVersion()
 {
     std::stringstream ss;

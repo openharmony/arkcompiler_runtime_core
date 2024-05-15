@@ -16,8 +16,9 @@
 #include <locale>
 
 #include "verifier.h"
-#include "zlib.h"
 #include "class_data_accessor-inl.h"
+#include "libpandafile/util/collect_util.h"
+#include "zlib.h"
 
 namespace panda::verifier {
 
@@ -52,7 +53,9 @@ void Verifier::CollectIdInfos()
         return;
     }
     GetConstantPoolIds();
-    GetLiteralIds();
+    if (include_literal_array_ids) {
+        GetLiteralIds();
+    }
     CheckConstantPool(verifier::ActionType::COLLECTINFOS);
 }
 
@@ -171,9 +174,23 @@ void Verifier::GetLiteralIds()
     if (literal_ids_.size() != 0) {
         return;
     }
-    const auto literal_arrays = file_->GetLiteralArrays();
-    for (const auto literal_id : literal_arrays) {
-        literal_ids_.push_back(literal_id);
+
+    if (panda_file::ContainsLiteralArrayInHeader(file_->GetHeader()->version)) {
+        const auto literal_arrays = file_->GetLiteralArrays();
+        PushToLiteralIds(literal_arrays);
+    } else {
+        panda::libpandafile::CollectUtil collect_util;
+        std::unordered_set<uint32_t> literal_array_ids;
+        collect_util.CollectLiteralArray(*file_, literal_array_ids);
+        PushToLiteralIds(literal_array_ids);
+    }
+}
+
+template <typename T>
+void Verifier::PushToLiteralIds(T &ids)
+{
+    for (const auto id : ids) {
+        literal_ids_.push_back(id);
     }
 }
 

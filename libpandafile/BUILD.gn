@@ -70,6 +70,7 @@ libarkfile_sources = [
   "method_handle_data_accessor.cpp",
   "module_data_accessor.cpp",
   "pgo.cpp",
+  "util/collect_util.cpp",
 ]
 
 libarkfile_configs = [

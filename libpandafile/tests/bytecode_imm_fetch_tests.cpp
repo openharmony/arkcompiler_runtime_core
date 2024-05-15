@@ -181,4 +181,32 @@ TEST(BytecodeInstruction, OutputOperator)
     }
 }
 
+TEST(BytecodeInstruction, GetLiteralIndex)
+{
+    {
+        // legal ins, and have 0 literal id
+        const uint8_t bytecode[] = {0x05};
+        BytecodeInstruction inst(bytecode);
+        EXPECT_EQ(static_cast<int>(inst.GetLiteralIndex()), -1);
+    }
+    {
+        // legal ins, and have 1 literal id in loc 0
+        const uint8_t bytecode[] = {0x06, 0x00, 0x00, 0x00};
+        BytecodeInstruction inst(bytecode);
+        EXPECT_EQ(static_cast<int>(inst.GetLiteralIndex()), 0);
+    }
+    {
+        // legal ins, and have 1 literal id in loc 1
+        const uint8_t bytecode[] = {0x35, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        BytecodeInstruction inst(bytecode);
+        EXPECT_EQ(static_cast<int>(inst.GetLiteralIndex()), 1);
+    }
+    {
+        // illegal ins
+        const uint8_t bytecode[] = {0xff};
+        BytecodeInstruction inst(bytecode);
+        EXPECT_EQ(static_cast<int>(inst.GetLiteralIndex()), -1);
+    }
+}
+
 }  // namespace panda::test
