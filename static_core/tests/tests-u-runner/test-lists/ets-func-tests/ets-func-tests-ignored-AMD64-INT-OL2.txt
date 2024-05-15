@@ -1,0 +1,4 @@
+### Issue 17070
+escompat/escompat_Array_Test_escompat_Array.ets
+### Issue 17071
+escompat/escompat_Array_Test_escompat_Array_003.ets
