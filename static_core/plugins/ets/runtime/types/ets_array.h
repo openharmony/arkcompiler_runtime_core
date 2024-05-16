@@ -85,25 +85,18 @@ public:
         return reinterpret_cast<coretypes::Array *>(this);
     }
 
-    template <class T>
-    static T *Create(EtsClass *arrayClass, uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
-    {
-        return reinterpret_cast<T *>(coretypes::Array::Create(arrayClass->GetRuntimeClass(), length, spaceType));
-    }
-
-    template <class T>
-    static T *CreateForPrimitive(EtsClassRoot root, uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
-    {
-        EtsClass *arrayClass = PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(root);
-        return Create<T>(arrayClass, length, spaceType);
-    }
-
     NO_COPY_SEMANTIC(EtsArray);
     NO_MOVE_SEMANTIC(EtsArray);
 
 protected:
     // Use type alias to allow using into derived classes
     using ObjectHeader = ::ark::ObjectHeader;
+
+    template <class T>
+    static T *Create(EtsClass *arrayClass, uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
+    {
+        return reinterpret_cast<T *>(coretypes::Array::Create(arrayClass->GetRuntimeClass(), length, spaceType));
+    }
 
     template <class T>
     void SetImpl(uint32_t idx, T elem)
@@ -121,6 +114,8 @@ protected:
 template <typename Component>
 class EtsTypedObjectArray : public EtsArray {
 public:
+    using ValueType = Component *;
+
     static EtsTypedObjectArray *Create(EtsClass *objectClass, uint32_t length,
                                        ark::SpaceType spaceType = ark::SpaceType::SPACE_TYPE_OBJECT)
     {
@@ -219,8 +214,7 @@ public:
     static EtsPrimitiveArray *Create(uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        return EtsArray::CreateForPrimitive<EtsPrimitiveArray>(ETS_CLASS_ROOT, length, spaceType);
+        return EtsArray::Create<EtsPrimitiveArray>(GetComponentClass(), length, spaceType);
     }
     void Set(uint32_t index, ClassType element)
     {
@@ -229,6 +223,10 @@ public:
     ClassType Get(uint32_t index)
     {
         return GetImpl<ClassType>(index);
+    }
+    static EtsClass *GetComponentClass()
+    {
+        return PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(ETS_CLASS_ROOT);
     }
 
     EtsPrimitiveArray() = delete;

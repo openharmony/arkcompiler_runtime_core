@@ -553,6 +553,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     typeapiMethodClass_ = CacheClass(METHOD);
     typeapiParameterClass_ = CacheClass(PARAMETER);
     sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
+    jsvalueClass_ = CacheClass(JS_VALUE);
     CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
 
     auto coro = EtsCoroutine::GetCurrent();

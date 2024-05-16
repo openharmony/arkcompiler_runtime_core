@@ -200,8 +200,7 @@ Import Directives
 *****************
 
 .. meta:
-    frontend_status: Partly
-    todo: implement type binding - #14586
+    frontend_status: Done
 
 Import directives make entities exported from other compilation units (see
 also :ref:`Declaration Modules`) avaialble for use in the current compilation
@@ -912,8 +911,7 @@ Export Directives
 *****************
 
 .. meta:
-    frontend_status: Partly
-    todo: implement type binding - #14586
+    frontend_status: Done
 
 The *export directive* allows the following:
 

@@ -14,6 +14,7 @@
  */
 
 declare const exports: any;
+let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
 
 export type IntAlias = number;
 

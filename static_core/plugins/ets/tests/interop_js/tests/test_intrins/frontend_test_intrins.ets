@@ -147,7 +147,7 @@ function test_builtin_array_multidim(): boolean {
 function test_builtin_array_instanceof(): boolean {
     let v: int[] = [111, 222];
     let ctor = JSRuntime.getGlobal().Array;
-    return JSRuntime.instanceOf(Identity(v), ctor);
+    return JSRuntime.instanceOfDynamic(Identity(v), ctor);
 }
 function test_init_array_component(): boolean {
     // TODO(vpukhov): relies on jscast BadClass[]

@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/interop_js/intrinsics_api.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/class_linker-inl.h"
 
@@ -123,7 +124,7 @@ static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
 
-    if (!clsObj->GetClass()->GetRuntimeClass()->IsClassClass()) {
+    if (!clsObj->GetClass()->IsClassClass()) {
         ctx->Fatal("GetValueObject parameter is not a ClassClass instance");
     }
     auto const cls = reinterpret_cast<EtsClass *>(clsObj);
@@ -252,7 +253,7 @@ static JSValue *JSRuntimeCreateObject()
     return JSValue::CreateRefValue(coro, ctx, obj, napi_object);
 }
 
-uint8_t JSRuntimeInstanceOf(JSValue *object, JSValue *ctor)
+static uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -269,6 +270,44 @@ uint8_t JSRuntimeInstanceOf(JSValue *object, JSValue *ctor)
         return 0;
     }
     return static_cast<uint8_t>(res);
+}
+
+static uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass)
+{
+    ASSERT(etsClass != nullptr);
+
+    if (etsJsValue == nullptr) {
+        return 0;
+    }
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+
+    Class *cls = etsClass->GetRuntimeClass();
+    if (!cls->IsInitialized() && !IsStdClass(cls)) {
+        // 'js_value' haven't been created from the uninitialized class
+        return 0;
+    }
+
+    // Check if object has SharedReference
+    ets_proxy::SharedReference *sharedRef = [=] {
+        NapiScope jsHandleScope(env);
+        napi_value jsValue = etsJsValue->GetNapiValue(env);
+        return ctx->GetSharedRefStorage()->GetReference(env, jsValue);
+    }();
+
+    if (sharedRef != nullptr) {
+        EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
+        return static_cast<uint8_t>(etsClass->IsAssignableFrom(etsObject->GetClass()));
+    }
+
+    if (IsStdClass(cls)) {
+        // NOTE(v.cherkashin): Add support compat types, #13577
+        INTEROP_LOG(FATAL) << __func__ << " doesn't support compat types";
+    }
+
+    return 0;
 }
 
 static std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module)
@@ -308,32 +347,33 @@ static JSValue *JSRuntimeLoadModule(EtsString *module)
     PandaString moduleName = module->GetMutf8();
     auto [mod, func] = ResolveModuleName(moduleName);
 
-    NapiScope jsHandleScope(env);
-
-    napi_value requireFn;
-    NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), func.data(), &requireFn));
-
-    INTEROP_FATAL_IF(GetValueType(env, requireFn) != napi_function);
     napi_value modObj;
     {
-        napi_value jsName;
-        NAPI_CHECK_FATAL(napi_create_string_utf8(env, mod.data(), NAPI_AUTO_LENGTH, &jsName));
-        std::array<napi_value, 1> args = {jsName};
-        napi_value recv;
-        NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
-        auto status = (napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj));
+        ScopedNativeCodeThread etsNativeScope(coro);
+        NapiScope jsHandleScope(env);
 
-        if (status == napi_pending_exception) {
-            napi_value exp;
-            NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
-            NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
-            INTEROP_LOG(FATAL) << "Unable to load module due to exception";
-            UNREACHABLE();
+        napi_value requireFn;
+        NAPI_CHECK_FATAL(napi_get_named_property(env, GetGlobal(env), func.data(), &requireFn));
+
+        INTEROP_FATAL_IF(GetValueType(env, requireFn) != napi_function);
+        {
+            napi_value jsName;
+            NAPI_CHECK_FATAL(napi_create_string_utf8(env, mod.data(), NAPI_AUTO_LENGTH, &jsName));
+            std::array<napi_value, 1> args = {jsName};
+            napi_value recv;
+            NAPI_CHECK_FATAL(napi_get_undefined(env, &recv));
+            auto status = (napi_call_function(env, recv, requireFn, args.size(), args.data(), &modObj));
+            if (status == napi_pending_exception) {
+                napi_value exp;
+                NAPI_CHECK_FATAL(napi_get_and_clear_last_exception(env, &exp));
+                NAPI_CHECK_FATAL(napi_fatal_exception(env, exp));
+                INTEROP_LOG(FATAL) << "Unable to load module due to exception";
+                UNREACHABLE();
+            }
+            INTEROP_FATAL_IF(status != napi_ok);
         }
-
-        INTEROP_FATAL_IF(status != napi_ok);
+        INTEROP_FATAL_IF(IsUndefined(env, modObj));
     }
-    INTEROP_FATAL_IF(IsUndefined(env, modObj));
 
     return JSValue::CreateRefValue(coro, ctx, modObj, napi_object);
 }
@@ -722,6 +762,42 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     return EtsObject::FromCoreType(res);
 }
 
+EtsString *JSONStringify(JSValue *jsvalue)
+{
+    ASSERT(jsvalue != nullptr);
+
+    auto coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    auto env = ctx->GetJSEnv();
+    NapiScope jsHandleScope(env);
+
+    auto global = GetGlobal(env);
+
+    napi_value jsonInstance;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, global, "JSON", &jsonInstance));
+
+    napi_value stringify;
+    NAPI_CHECK_FATAL(napi_get_named_property(env, jsonInstance, "stringify", &stringify));
+
+    auto object = jsvalue->GetNapiValue(env);
+    std::array<napi_value, 1> args = {object};
+
+    napi_value result;
+    napi_status jsStatus;
+    {
+        ScopedNativeCodeThread nativeScope(coro);
+        jsStatus = napi_call_function(env, jsonInstance, stringify, args.size(), args.data(), &result);
+    }
+
+    if (UNLIKELY(jsStatus != napi_ok)) {
+        INTEROP_FATAL_IF(jsStatus != napi_pending_exception);
+        ctx->ForwardJSException(coro);
+        return nullptr;
+    }
+    auto res = JSConvertString::Unwrap(ctx, env, result);
+    return res.value_or(nullptr);
+}
+
 const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeFinalizationRegistryCallback,
     JSRuntimeNewJSValueDouble,
@@ -746,12 +822,14 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeGetNull,
     JSRuntimeGetGlobal,
     JSRuntimeCreateObject,
-    JSRuntimeInstanceOf,
+    JSRuntimeInstanceOfDynamic,
+    JSRuntimeInstanceOfStatic,
     JSRuntimeInitJSCallClass,
     JSRuntimeInitJSNewClass,
     JSRuntimeLoadModule,
     JSRuntimeStrictEqual,
     JSValueToString,
+    JSONStringify,
     CompilerGetJSNamedProperty,
     CompilerGetJSProperty,
     CompilerGetJSElement,

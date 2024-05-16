@@ -54,12 +54,14 @@ struct IntrinsicsAPI {
     JSValue *(*JSRuntimeGetNull)();
     JSValue *(*JSRuntimeGetGlobal)();
     JSValue *(*JSRuntimeCreateObject)();
-    uint8_t (*JSRuntimeInstanceOf)(JSValue *object, JSValue *ctor);
-    uint8_t (*JSRuntimeInitJSCallClass)(EtsString *cls_name);
-    uint8_t (*JSRuntimeInitJSNewClass)(EtsString *cls_name);
+    uint8_t (*JSRuntimeInstanceOfDynamic)(JSValue *object, JSValue *ctor);
+    uint8_t (*JSRuntimeInstanceOfStatic)(JSValue *object, EtsClass *cls);
+    uint8_t (*JSRuntimeInitJSCallClass)(EtsString *clsName);
+    uint8_t (*JSRuntimeInitJSNewClass)(EtsString *clsName);
     JSValue *(*JSRuntimeLoadModule)(EtsString *module);
     uint8_t (*JSRuntimeStrictEqual)(JSValue *lhs, JSValue *rhs);
     EtsString *(*JSValueToString)(JSValue *obj);
+    EtsString *(*JSONStringify)(JSValue *obj);
     void *(*CompilerGetJSNamedProperty)(void *val, char *propName);
     void *(*CompilerGetJSProperty)(void *val, void *prop);
     void *(*CompilerGetJSElement)(void *val, int32_t index);

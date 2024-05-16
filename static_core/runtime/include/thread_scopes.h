@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,50 @@
 #include "mtmanaged_thread.h"
 
 namespace ark {
+
+#ifndef NDEBUG
+class ScopedAssertManagedCode {
+public:
+    explicit ScopedAssertManagedCode()
+    {
+        ASSERT_MANAGED_CODE();
+    }
+
+    ~ScopedAssertManagedCode()
+    {
+        ASSERT_MANAGED_CODE();
+    }
+
+private:
+    NO_COPY_SEMANTIC(ScopedAssertManagedCode);
+    NO_MOVE_SEMANTIC(ScopedAssertManagedCode);
+};
+
+class ScopedAssertNativeCode {
+public:
+    explicit ScopedAssertNativeCode()
+    {
+        ASSERT_NATIVE_CODE();
+    }
+
+    ~ScopedAssertNativeCode()
+    {
+        ASSERT_NATIVE_CODE();
+    }
+
+private:
+    NO_COPY_SEMANTIC(ScopedAssertNativeCode);
+    NO_MOVE_SEMANTIC(ScopedAssertNativeCode);
+};
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define ASSERT_SCOPED_MANAGED_CODE() ::ark::ScopedAssertManagedCode MERGE_WORDS(managed_scope_, __LINE__)
+#define ASSERT_SCOPED_NATIVE_CODE() ::ark::ScopedAssertNativeCode MERGE_WORDS(native_scope_, __LINE__)
+#else  // NDEBUG
+#define ASSERT_SCOPED_MANAGED_CODE()
+#define ASSERT_SCOPED_NATIVE_CODE()
+#endif  // NDEBUG
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 class PANDA_PUBLIC_API ScopedNativeCodeThread {
 public:

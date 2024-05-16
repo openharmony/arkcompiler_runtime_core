@@ -367,3 +367,23 @@ function ArrayBuffer_TestJSResize(arr: ArrayBuffer): void {
 function ArrayBuffer_CreateEtsSample(): ArrayBuffer {
     return new ArrayBuffer(32);
 }
+
+function JSON_stringify_jsv(x: JSValue) {
+    return JSON.stringify(x)
+}
+
+function JSON_stringify_obj(x: JSValue) {
+    let y = x as Object
+    return JSON.stringify(y)
+}
+
+class TestClass {
+    constructor(x: JSValue) {
+        this.x = x
+    }
+    x: JSValue
+}
+
+function JSON_stringify_field(x: JSValue) {
+    return JSON.stringify(new TestClass(x))
+}

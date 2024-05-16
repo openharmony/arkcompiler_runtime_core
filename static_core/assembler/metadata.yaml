@@ -76,6 +76,12 @@ attributes:
   applicable_to:
     - function
 
+- name: varargs
+  type: bool
+  flags: [ACC_VARARGS]
+  applicable_to:
+    - function
+
 - name: static
   type: bool
   flags: [ACC_STATIC]

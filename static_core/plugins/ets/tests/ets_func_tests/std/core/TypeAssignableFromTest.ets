@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,8 +94,6 @@ function testInterfaceType(): int {
 function testArrayType(): int {
     let rat = Type.of(new double[1])
     let pat = Type.of(new Double[1])
-    let arrit = Type.of(new I[0])
-    let arrait = Type.of(new AI[1])
     let arrat = Type.of(new A[1])
     let arrbt = Type.of(new B[1])
     let arrct = Type.of(new C[1])
@@ -104,8 +102,7 @@ function testArrayType(): int {
             test(arrat.assignableFrom(arrbt), "A[] <- B[]") +
             test(arrat.assignableFrom(arrct), "A[] <- C[]") +
             test(!arrbt.assignableFrom(arrct), "B[] <\\- C[]") +
-            test(!arrct.assignableFrom(arrbt), "C[] <\\- B[]") +
-            test(arrit.assignableFrom(arrait), "I[] <- AI[]")
+            test(!arrct.assignableFrom(arrbt), "C[] <\\- B[]")
 }
 
 function testStringType(): int {
@@ -140,7 +137,7 @@ function testFunctionType(): int {
 function testNumericTypes(): int {
     let arr : Object[] = [new Char(), new Byte(), new Short(), new Int(), new Long(), new Float(), new Double()]
     let bt = Type.of(new Boolean())
-    let arrTypes = new Type[arr.length]
+    let arrTypes = new Array<Type>(arr.length)
     for (let i = 0; i < arr.length; i++) {
         arrTypes[i] = Type.of(arr[i])
     }

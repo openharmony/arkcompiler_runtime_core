@@ -68,6 +68,11 @@ public:
         return (accessFlags_ & ACC_ABSTRACT) != 0;
     }
 
+    bool IsVarArgs() const
+    {
+        return (accessFlags_ & ACC_VARARGS) != 0;
+    }
+
     bool IsNative() const
     {
         return (accessFlags_ & ACC_NATIVE) != 0;

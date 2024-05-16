@@ -145,6 +145,8 @@ export class JSON {
         return JSON.stringifyObj(d)
     }
 
+    public static native stringify(d: JSValue): String;
+
     private static native stringifyObj(d: Object): String
 
     //--------------------------

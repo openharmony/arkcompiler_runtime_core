@@ -103,6 +103,8 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
+    NotImplementedAdapter,
+    NotImplementedAdapter,
     // clang-format on
 };
 
@@ -232,9 +234,17 @@ JSValue *JSRuntimeCreateObjectIntrinsic()
     return S_INTRINSICS_API->JSRuntimeCreateObject();
 }
 
-uint8_t JSRuntimeInstanceOfIntrinsic(JSValue *object, JSValue *ctor)
+uint8_t JSRuntimeInstanceOfDynamicIntrinsic(JSValue *object, JSValue *ctor)
 {
-    return S_INTRINSICS_API->JSRuntimeInstanceOf(object, ctor);
+    return S_INTRINSICS_API->JSRuntimeInstanceOfDynamic(object, ctor);
+}
+
+uint8_t JSRuntimeInstanceOfStaticIntrinsic(JSValue *object, EtsObject *cls)
+{
+    // NOTE(v.cherkashin):
+    //  Delete cast and use 'EtsClass *cls' instead of 'EtsObject *cls' when issue #15273 was resolved
+    ASSERT(cls->GetClass()->IsClassClass());
+    return S_INTRINSICS_API->JSRuntimeInstanceOfStatic(object, reinterpret_cast<EtsClass *>(cls));
 }
 
 uint8_t JSRuntimeInitJSCallClassIntrinsic(EtsString *clsName)
@@ -260,6 +270,11 @@ uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 EtsString *JSValueToStringIntrinsic(JSValue *object)
 {
     return S_INTRINSICS_API->JSValueToString(object);
+}
+
+EtsString *JSONStringifyIntrinsic(JSValue *obj)
+{
+    return S_INTRINSICS_API->JSONStringify(obj);
 }
 
 // Compiler intrinsics for fast interop

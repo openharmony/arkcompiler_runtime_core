@@ -252,7 +252,7 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
         case panda_file::Type::TypeId::REFERENCE:
             return setupAccessors(helpers::TypeIdentity<EtsFieldAccessorREFERENCE>());
         default:
-            InteropCtx::Fatal(std::string("ConvertEtsVal: unsupported typeid ") +
+            InteropCtx::Fatal(std::string("DoMakeNapiProperty: unsupported typeid ") +
                               panda_file::Type::GetSignatureByTypeId(type));
     }
     UNREACHABLE();

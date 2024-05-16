@@ -1811,7 +1811,7 @@ export final class ClassType extends Type {
 
     // todo(kprokopenko): make varargs
     public make(args: NullishType[]): Object {
-        const argTypes = new Type[args.length]
+        const argTypes = new Array<Type>(args.length)
         for (let i = 0; i < args.length; i++) {
             argTypes[i] = Type.of(args[i])
         }

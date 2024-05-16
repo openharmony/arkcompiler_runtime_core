@@ -77,7 +77,7 @@ export final class JSRuntime {
     public static getValueString(value: JSValue): String {
         JSRuntime.checkIntrinsicMethod();
     }
-    
+
     // 2nd argument is ClassClass
     public static getValueObject(value: JSValue, t: Object): Object {
         JSRuntime.checkIntrinsicMethod();
@@ -188,10 +188,16 @@ export final class JSRuntime {
         JSRuntime.checkIntrinsicMethod();
     }
 
-    public static instanceOf(object: JSValue, ctor: JSValue): boolean {
+    public static instanceOfDynamic(object: JSValue, ctor: JSValue): boolean {
         JSRuntime.checkIntrinsicMethod();
     }
-    
+
+    // NOTE(v.cherkashin):
+    //  Replace 'cls: Object' by 'cls: Type' when issue #15273 was resolved
+    public static instanceOfStatic(object: JSValue, cls: Object): boolean {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
     public static strictEqual(lsh: JSValue, rhs: JSValue): boolean {
         JSRuntime.checkIntrinsicMethod();
     }

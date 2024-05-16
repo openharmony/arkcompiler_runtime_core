@@ -883,6 +883,9 @@ void Disassembler::GetMetaData(pandasm::Function *method, const panda_file::File
     SetEntityAttribute(
         method, [&methodAccessor]() { return methodAccessor.IsAbstract(); }, "noimpl");
 
+    SetEntityAttribute(
+        method, [&methodAccessor]() { return methodAccessor.IsVarArgs(); }, "varargs");
+
     SetEntityAttributeValue(
         method, [&methodAccessor]() { return methodAccessor.IsPublic(); }, "access.function", "public");
 

@@ -12,13 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { standaloneFunctionJs, ClassWithMethodJs, newInterfaceWithMethod, ClassWithGetterSetter, lambdaFunction,
-    genericFunction, ClassToExtend, functionArgTypeAny, functionArgTypeUnknown, functionArgTypeUndefined,
-    functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
-    functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
-    functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
-    genericTypeReturnValue, functionArgTypeOptionalPrimitive, functionArgTypePrimitive,
-    functionReturnTypePrimitive } from "pure_js"
+import * as js from "pure_js"
+import { ClassWithMethodJs, ClassWithGetterSetter } from "pure_js"
 
 import {
     optional_call,
@@ -41,7 +36,7 @@ function testOptionals() {
 }
 
 function Test_standalone_function_call(): boolean {
-    return standaloneFunctionJs() as int == 1;
+    return js.standaloneFunctionJs() as int == 1;
 }
 
 function Test_class_method_call(): boolean {
@@ -50,7 +45,7 @@ function Test_class_method_call(): boolean {
 }
 
 function Test_interface_method_call(): boolean {
-    let interface_method: () => int = newInterfaceWithMethod().methodInInterface as () => int;
+    let interface_method: () => int = js.newInterfaceWithMethod().methodInInterface as () => int;
     return interface_method() == 1;
 }
 
@@ -65,11 +60,11 @@ function Test_class_setter(): boolean {
 }
 
 function Test_lambda_function_call(): boolean {
-    return lambdaFunction() as int == 1;
+    return js.lambdaFunction() as int == 1;
 }
 
 function Test_generic_function_call(): boolean {
-    return genericFunction(1) as int == 1;
+    return js.genericFunction(1) as int == 1;
 }
 
 class ClassToExtend1 {
@@ -87,34 +82,34 @@ function Test_extend_class(): boolean {
 
 function Test_function_arg_type_any(): boolean {
     let arg: JSValue = 1;
-    return functionArgTypeAny(arg) as int == 1;
+    return js.functionArgTypeAny(arg) as int == 1;
 }
 
 function Test_function_arg_type_unknown(): boolean {
     let arg: JSValue = 1;
-    return functionArgTypeUnknown(arg) as int == 1;
+    return js.functionArgTypeUnknown(arg) as int == 1;
 }
 
 function Test_function_arg_type_undefined(): boolean {
     let arg: JSValue = 1;
-    return functionArgTypeUndefined(arg) as int == 1;
+    return js.functionArgTypeUndefined(arg) as int == 1;
 }
 
 function Test_function_arg_type_tuple(): boolean {
     let arg: [int, String] = [1, "one"];
-    return functionArgTypeTuple(arg) as int == 1;
+    return js.functionArgTypeTuple(arg) as int == 1;
 }
 
 function Test_function_return_type_any(): boolean {
-    return functionReturnTypeAny() as int == 1;
+    return js.functionReturnTypeAny() as int == 1;
 }
 
 function Test_function_return_type_unknown(): boolean {
-    return functionReturnTypeUnknown() as int == 1;
+    return js.functionReturnTypeUnknown() as int == 1;
 }
 
 function Test_function_return_type_undefined(): boolean {
-    return functionReturnTypeUndefined() as int == 1;
+    return js.functionReturnTypeUndefined() as int == 1;
 }
 
 function callable(): int {
@@ -129,35 +124,45 @@ function Test_function_arg_type_callable(): boolean {
 }
 
 function Test_default_value_int_define_for_parameter(): boolean {
-    return functionDefaultIntParameterFunction() as int == 1;
+    return js.functionDefaultIntParameterFunction() as int == 1;
 }
 
 function Test_default_value_define_for_parameter(): boolean {
-    return functionDefaultParameterFunction() as int == 1;
+    return js.functionDefaultParameterFunction() as int == 1;
 }
 
 function Test_generic_type_as_parameter(): boolean {
-    return genericTypeParameter(1) as String == "1";
+    return js.genericTypeParameter(1) as String == "1";
 }
 
 function Test_generic_type_as_return_value(): boolean {
-    return genericTypeReturnValue(1) as int == 1;
+    return js.genericTypeReturnValue(1) as int == 1;
 }
 
 function Test_function_arg_type_optional_primitive_explicit(): boolean {
-    return functionArgTypeOptionalPrimitive(1) as int == 1;
+    return js.functionArgTypeOptionalPrimitive(1) as int == 1;
 }
 
 function Test_function_arg_type_optional_primitive_default(): boolean {
-    return functionArgTypeOptionalPrimitive() as int == 1;
+    return js.functionArgTypeOptionalPrimitive() as int == 1;
 }
 
 function Test_function_arg_type_primitive(): boolean {
     let arg: int = 1;
-    return functionArgTypePrimitive(arg) as int == 1;
+    return js.functionArgTypePrimitive(arg) as int == 1;
 }
 
 function Test_function_return_type_primitive(): boolean {
-    let res: boolean = functionReturnTypePrimitive() as boolean;
+    let res: boolean = js.functionReturnTypePrimitive() as boolean;
     return typeof res === "boolean";
+}
+
+function Test_rest_params() {
+    // NOTE: casts due to bug in frontend
+    assert js.js_sum_rest_params(1, 2, 3) as Int == (1+2+3)
+    assert js.js_multiply_1arg_by_sum_rest_params(1, 2, 3, 4) as Int == (1) * (2+3+4)
+    assert js.js_multiply_sum2args_by_sum_rest_params(1, 2, 3, 4, 5) as Int == (1+2)*(3+4+5);
+    assert js.js_concat_strings_rest_params() as String == "";
+    assert js.js_concat_strings_rest_params("a", "b", "c") as String == "abc";
+    return true;
 }

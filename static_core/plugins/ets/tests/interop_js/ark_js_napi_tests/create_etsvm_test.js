@@ -17,7 +17,6 @@ function main() {
     globalThis.test = {}
 
     globalThis.test.etsVm = requireNapiPreview("ets_interop_js_napi", true)
-    print("etsVm.version()=" + globalThis.test.etsVm.version())
 
     const etsVmRes = globalThis.test.etsVm.createRuntime({
         "log-level": "info",
@@ -28,7 +27,8 @@ function main() {
         "compiler-enable-jit": "false",
         "run-gc-in-place": "true",
     })
-
+    print("etsVm.version()=" + globalThis.test.etsVm.version())
+    
     if (!etsVmRes) {
         throw new Error("Failed to create ETS runtime")
     } else {

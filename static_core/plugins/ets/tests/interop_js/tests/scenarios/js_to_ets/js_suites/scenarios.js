@@ -176,6 +176,30 @@ function single_required(z, x=123, y=123) {
   return x + y + z;
 }
 
+function js_sum_rest_params(...args) {
+  let sum = 0;
+  args.forEach(n => sum += n);
+  return sum;
+}
+
+function js_multiply_1arg_by_sum_rest_params(arg0, ...args) {
+  let sum = 0;
+  args.forEach(n => sum += n);
+  return sum * (arg0);
+}
+
+function js_multiply_sum2args_by_sum_rest_params(arg0, arg1, ...args) {
+  let sum = 0;
+  args.forEach(n => sum += n);
+  return sum * (arg0 + arg1);
+}
+
+function js_concat_strings_rest_params(...args) {
+  let str = "";
+  args.forEach(s => str += s);
+  return str;
+}
+
 exports.standaloneFunctionJs = standaloneFunctionJs;
 exports.ClassWithMethodJs = ClassWithMethodJs;
 exports.newInterfaceWithMethod = newInterfaceWithMethod;
@@ -202,3 +226,7 @@ exports.functionArgTypePrimitive = functionArgTypePrimitive;
 exports.functionReturnTypePrimitive = functionReturnTypePrimitive;
 exports.optional_call = optional_call;
 exports.single_required = single_required;
+exports.js_sum_rest_params = js_sum_rest_params;
+exports.js_multiply_1arg_by_sum_rest_params = js_multiply_1arg_by_sum_rest_params;
+exports.js_multiply_sum2args_by_sum_rest_params = js_multiply_sum2args_by_sum_rest_params;
+exports.js_concat_strings_rest_params = js_concat_strings_rest_params;

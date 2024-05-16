@@ -174,6 +174,61 @@ function function_return_type_primitive(): number {
     return 1;
 }
 
+function ets_sum_rest_params(...args: number[]): number {
+    let sum = 0;
+    for (let n of args) {
+        sum += n;
+    }
+    return sum;
+}
+
+function ets_multiply_1arg_by_sum_rest_params(arg0: number, ...args: number[]): number {
+    let sum = 0;
+    for (let n of args) {
+        sum += n;
+    }
+    return arg0 * sum;
+}
+
+function ets_multiply_sum2args_by_sum_rest_params(arg0: number, arg1: number, ...args: number[]): number {
+    let sum = 0;
+    for (let n of args) {
+        sum += n;
+    }
+    return sum * (arg0 + arg1);
+}
+
+class RestParamsTest {
+    x = 2;
+    foo() {
+        return 1;
+    }
+    sum_ints(...args: Int[]) {
+        let sum = 0;
+        for (let n of args) {
+            sum += n;
+        }
+        return sum;
+    }
+};
+
+function ets_call_foo_rest_params(...args: RestParamsTest[]): number {
+    let sum = 0;
+    for (let s of args) {
+        sum += s.foo();
+        sum += s.x;
+    }
+    return sum;
+}
+
+function ets_concat_strings_rest_params(...args: String[]): String {
+    let str = "";
+    for (let s of args) {
+        str += s;
+    }
+    return str;
+}
+
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
@@ -183,3 +238,58 @@ function GCJSRuntimeCleanup(): void {
         assert false : "Unexpected exception during GC";
     }
 }
+
+interface InterfaceWithPropsAndMethod {
+    numVal: number;
+    stringVal: string;
+
+    foo(x: int): string;
+}
+
+class ClassImplementingInterfaceWithPropsAndMethod implements InterfaceWithPropsAndMethod {
+    public numVal: number = 0;
+    public stringVal: string = '';
+
+    constructor(numVal: number, stringVal: string) {
+        this.numVal = numVal
+        this.stringVal = stringVal
+    }
+
+    public foo(x: int): string {
+        let result = this.stringVal + ' ' + this.numVal + ' ' + x;
+        return result;
+    }
+
+    public getNumVal(): number {
+        return this.numVal;
+    }
+}
+
+function function_arg_is_interface(arg: InterfaceWithPropsAndMethod): string {
+    let stringVal = arg.stringVal;
+    let numVal = arg.numVal;
+    arg.numVal = numVal * 2;
+    return arg.foo(123);
+}
+
+interface Unpackable<T> {
+    getValue(): T;
+}
+
+class Boxx<T> implements Unpackable<T> {
+    value_: T;
+
+    constructor(value: T) {
+        this.value_ = value;
+    }
+
+    public getValue(): T {
+        return this.value_;
+    }
+}
+
+function unpack_value<T>(arg: Unpackable<T>): T {
+    let result = arg.getValue();
+    return result;
+}
+

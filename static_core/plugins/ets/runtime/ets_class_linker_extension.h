@@ -193,6 +193,11 @@ public:
         return langCtx_;
     }
 
+    bool IsJSValueClass(Class *maybeJSValue) const
+    {
+        return maybeJSValue == jsvalueClass_;
+    }
+
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);
 
@@ -235,6 +240,7 @@ private:
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;
     Class *arrayAsListIntClass_ = nullptr;
+    Class *jsvalueClass_ = nullptr;
     // Cached type API classes
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;

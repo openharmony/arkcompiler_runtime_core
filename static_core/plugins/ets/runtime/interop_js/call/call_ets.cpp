@@ -45,6 +45,9 @@ public:
 private:
     template <bool IS_STATIC>
     ALWAYS_INLINE bool ConvertArgs(Span<Value> etsArgs);
+    ALWAYS_INLINE ObjectHeader **ConvertRestParams(Span<napi_value> restArgs);
+
+    ALWAYS_INLINE bool CheckNumArgs(size_t numArgs) const;
 
     template <bool IS_STATIC>
     ALWAYS_INLINE napi_value HandleImpl();
@@ -81,11 +84,12 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
     ObjectHeader **thisObjRoot = IS_STATIC ? nullptr : createRoot(thisObj_->GetCoreType());
 
     using ArgValueBox = std::variant<uint64_t, ObjectHeader **>;
-    auto numArgs = jsargv_.size();
+    auto const numArgs = protoReader_.GetMethod()->GetNumArgs() - !IS_STATIC;
+    auto const numNonRest = numArgs - protoReader_.GetMethod()->HasVarArgs();
     auto etsBoxedArgs = ctx_->GetTempArgs<ArgValueBox>(numArgs);
 
     // Convert and store in root if necessary
-    for (uint32_t argIdx = 0; argIdx < numArgs; ++argIdx, protoReader_.Advance()) {
+    for (uint32_t argIdx = 0; argIdx < numNonRest; ++argIdx, protoReader_.Advance()) {
         auto jsVal = jsargv_[argIdx];
         auto store = [&etsBoxedArgs, &argIdx, createRoot](auto val) {
             if constexpr (std::is_pointer_v<decltype(val)> || std::is_null_pointer_v<decltype(val)>) {
@@ -97,6 +101,11 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
         if (UNLIKELY(!ConvertArgToEts(ctx_, protoReader_, store, jsVal))) {
             return false;
         }
+    }
+
+    if (protoReader_.GetMethod()->HasVarArgs()) {
+        const auto restIdx = numArgs - 1;
+        etsBoxedArgs[restIdx] = ConvertRestParams(jsargv_.SubSpan(restIdx));
     }
 
     // Unbox values
@@ -117,6 +126,33 @@ ALWAYS_INLINE inline bool CallETSHandler::ConvertArgs(Span<Value> etsArgs)
     return true;
 }
 
+ObjectHeader **CallETSHandler::ConvertRestParams(Span<napi_value> restArgs)
+{
+    ASSERT(protoReader_.GetType().IsReference());
+    ASSERT(protoReader_.GetClass()->IsArrayClass());
+
+    ObjectHeader **restParamsSlot = PackRestParameters(coro_, ctx_, protoReader_, restArgs);
+    ASSERT(restParamsSlot != nullptr);
+
+    return restParamsSlot;
+}
+
+bool CallETSHandler::CheckNumArgs(size_t numArgs) const
+{
+    const auto method = protoReader_.GetMethod();
+    bool const hasRestParams = method->HasVarArgs();
+    ASSERT((hasRestParams && numArgs > 0) || !hasRestParams);
+
+    if ((hasRestParams && (numArgs - 1) > jsargv_.size()) || (!hasRestParams && numArgs != jsargv_.size())) {
+        std::string msg = "CallEtsFunction: wrong argc, ets_argc=" + std::to_string(numArgs) +
+                          " js_argc=" + std::to_string(jsargv_.size()) + " ets_method='" +
+                          std::string(method->GetFullName(true)) + "'";
+        InteropCtx::ThrowJSTypeError(ctx_->GetJSEnv(), msg);
+        return false;
+    }
+    return true;
+}
+
 template <bool IS_STATIC>
 napi_value CallETSHandler::HandleImpl()
 {
@@ -128,8 +164,7 @@ napi_value CallETSHandler::HandleImpl()
     ASSERT(IS_STATIC == (thisObj_ == nullptr));
 
     auto const numArgs = method->GetNumArgs() - (IS_STATIC ? 0 : 1);
-    if (UNLIKELY(numArgs != jsargv_.size())) {
-        InteropCtx::ThrowJSTypeError(ctx_->GetJSEnv(), std::string("CallEtsFunction: wrong argc"));
+    if (UNLIKELY(!CheckNumArgs(numArgs))) {
         return ForwardException(ctx_, coro_);
     }
 
