@@ -66,7 +66,7 @@ template <class LanguageConfig>
 class G1GC : public GenerationalGC<LanguageConfig> {
     using RefVector = PandaVector<RefInfo>;
     using ReferenceCheckPredicateT = typename GC::ReferenceCheckPredicateT;
-    using MemRangeRefsChecker = std::function<bool(const MemRange &, Region *)>;
+    using MemRangeRefsChecker = std::function<bool(Region *, const MemRange &)>;
     template <bool VECTOR>
     using MovedObjectsContainer = std::conditional_t<VECTOR, PandaVector<PandaVector<ObjectHeader *> *>,
                                                      PandaVector<PandaDeque<ObjectHeader *> *>>;
@@ -189,7 +189,7 @@ private:
     void IterateOverRefsInMemRange(const MemRange &memRange, Region *region, Handler &refsHandler);
 
     template <typename Visitor>
-    void CacheRefsFromDirtyCards(Visitor visitor);
+    void CacheRefsFromDirtyCards(GlobalRemSet &globalRemSet, Visitor visitor);
 
     void InitializeImpl() override;
 
@@ -243,7 +243,7 @@ private:
     static void CalcLiveBytesNotAtomicallyMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass);
 
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
-    MemRange MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
+    void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
 
     /**
      * Mark roots and add them to the stack
@@ -393,7 +393,7 @@ private:
     template <class Visitor>
     void UpdateRefsFromRemSets(const Visitor &visitor);
 
-    MemRange CacheRefsFromRemsets(const MemRangeRefsChecker &refsChecker);
+    void CacheRefsFromRemsets(const MemRangeRefsChecker &refsChecker);
 
     void ClearRefsFromRemsetsCache();
 
@@ -404,8 +404,6 @@ private:
     void RestoreYoungCards(const CollectionSet &collectionSet);
 
     void ClearYoungCards(const CollectionSet &collectionSet);
-
-    void ClearDirtyAndYoungCards(const MemRange &dirtyCardsRange);
 
     size_t GetMaxMixedRegionsCount();
 

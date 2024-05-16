@@ -196,9 +196,9 @@ void RemSet<LockConfigT>::RemoveRefRegion(Region *region)
 template <typename LockConfigT>
 size_t RemSet<LockConfigT>::GetIdxInBitmap(uintptr_t addr, uintptr_t bitmapBeginAddr)
 {
-    size_t memSize = DEFAULT_REGION_SIZE / Bitmap::GetNumBits();
+    static constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / Bitmap::GetNumBits();
     ASSERT(bitmapBeginAddr <= addr && addr < bitmapBeginAddr + DEFAULT_REGION_SIZE);
-    return (addr - bitmapBeginAddr) / memSize;
+    return (addr - bitmapBeginAddr) / MEM_SIZE;
 }
 
 template <typename LockConfigT>
@@ -223,6 +223,73 @@ void RemSet<LockConfigT>::Dump(std::ostream &out)
         out << " " << *reg;
     }
     out << std::dec;
+}
+
+template <typename LockConfigT>
+template <typename Visitor>
+void RemSet<LockConfigT>::VisitBitmaps(const Visitor &visitor) const
+{
+    for (auto &[bitmapBeginAddr, bitmap] : bitmaps_) {
+        visitor(bitmapBeginAddr, bitmap);
+    }
+}
+
+template <typename RegionContainer, typename RegionPred, typename MemVisitor>
+void GlobalRemSet::ProcessRemSets(const RegionContainer &cont, const RegionPred &regionPred, const MemVisitor &visitor)
+{
+    for (auto *region : cont) {
+        FillBitmap(*region->GetRemSet(), regionPred);
+    }
+    IterateOverBits(visitor);
+}
+
+template <typename RegionPred>
+void GlobalRemSet::FillBitmap(const RemSet<> &remSet, const RegionPred &regionPred)
+{
+    remSet.VisitBitmaps([this, &regionPred](uintptr_t beginAddr, const RemSet<>::Bitmap &bitmap) {
+        auto *region = AddrToRegion(ToVoidPtr(beginAddr));
+        if (regionPred(region)) {
+            bitmaps_[beginAddr].AddBits(bitmap);
+        }
+    });
+}
+
+template <typename MemVisitor>
+void GlobalRemSet::IterateOverBits(const MemVisitor &visitor) const
+{
+    for (auto &[bitmapBeginAddr, bitmap] : bitmaps_) {
+        auto *region = AddrToRegion(ToVoidPtr(bitmapBeginAddr));
+        MemRange bitmapRange(bitmapBeginAddr, bitmapBeginAddr + DEFAULT_REGION_SIZE);
+        bitmap.Iterate(bitmapRange, [region, visitor](const MemRange &range) { visitor(region, range); });
+    }
+}
+
+template <typename MemVisitor>
+bool GlobalRemSet::IterateOverUniqueRange(Region *region, MemRange range, const MemVisitor &visitor)
+{
+    auto addr = range.GetStartAddress();
+    auto bitmapBeginAddr = addr & ~DEFAULT_REGION_MASK;
+    auto bitmapIt = bitmaps_.find(bitmapBeginAddr);
+    if (bitmapIt == bitmaps_.cend()) {
+        return visitor(region, range);
+    }
+
+    auto &bitmap = bitmapIt->second;
+    auto endAddr = range.GetEndAddress() + 1U;
+    static constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
+    ASSERT(((endAddr - addr) % MEM_SIZE) == 0);
+    bool allRefsProcessed = true;
+    for (; addr != endAddr; addr += MEM_SIZE) {
+        auto isMarked = bitmap.Check(RemSet<>::GetIdxInBitmap(addr, bitmapBeginAddr));
+        if (isMarked) {
+            allRefsProcessed = false;
+            continue;
+        }
+        if (!visitor(region, MemRange(addr, addr + MEM_SIZE))) {
+            allRefsProcessed = false;
+        }
+    }
+    return allRefsProcessed;
 }
 
 }  // namespace ark::mem

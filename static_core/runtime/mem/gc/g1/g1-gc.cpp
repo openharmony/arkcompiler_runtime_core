@@ -39,21 +39,6 @@
 
 namespace ark::mem {
 
-#ifndef NDEBUG
-static bool IsCardTableClear(CardTable *cardTable)
-{
-    bool clear = true;
-    cardTable->VisitMarked(
-        [&clear](const MemRange &range) {
-            LOG(ERROR, GC) << "Card [" << ToVoidPtr(range.GetStartAddress()) << " - "
-                           << ToVoidPtr(range.GetEndAddress()) << "] is not clear";
-            clear = false;
-        },
-        CardTableProcessedFlag::VISIT_MARKED | CardTableProcessedFlag::VISIT_PROCESSED);
-    return clear;
-}
-#endif
-
 /* static */
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::CalcLiveBytesMarkPreprocess(const ObjectHeader *object, BaseClass *baseKlass)
@@ -1092,8 +1077,8 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
     uint64_t youngPauseTime;
     {
         time::Timer timer(&youngPauseTime, true);
-        MemRange dirtyCardsRange = MixedMarkAndCacheRefs(task, collectibleRegions);
-        ClearDirtyAndYoungCards(dirtyCardsRange);
+        MixedMarkAndCacheRefs(task, collectibleRegions);
+        ClearYoungCards(collectibleRegions);
         CollectAndMove<false>(collectibleRegions);
         ClearRefsFromRemsetsCache();
         this->GetObjectGenAllocator()->InvalidateSpaceData();
@@ -1105,7 +1090,7 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
 }
 
 template <class LanguageConfig>
-MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions)
+void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions)
 {
     GCScope<TRACE_TIMING_PHASE> scopedTrace(__FUNCTION__, this, GCPhase::GC_PHASE_MARK_YOUNG);
     bool useGcWorkers = this->GetSettings()->ParallelMarkingEnabled();
@@ -1126,13 +1111,13 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
     // since we reach this by graph from tenured roots,
     // because we will process all young regions at young GC we will find all required references
     RefCacheBuilder<LanguageConfig> builder(this, &uniqueRefsFromRemsets_, regionSizeBits_, &objectsStack);
-    auto refsChecker = [this, &builder](const MemRange &memRange, Region *region) {
+    auto refsChecker = [this, &builder](Region *region, const MemRange &memRange) {
         IterateOverRefsInMemRange(memRange, region, builder);
         return builder.AllCrossRegionRefsProcessed();
     };
 
     analytics_.ReportMarkingStart(ark::time::GetCurrentTimeInNanos());
-    MemRange dirtyCardsRange = CacheRefsFromRemsets(refsChecker);
+    CacheRefsFromRemsets(refsChecker);
 
     auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
     GCRootVisitor gcMarkCollectionSet = [&objectsStack, this, &refPred](const GCRoot &gcRoot) {
@@ -1180,7 +1165,6 @@ MemRange G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const C
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
     ProcessDirtyCards();
-    return dirtyCardsRange;
 }
 
 template <class LanguageConfig>
@@ -2031,102 +2015,60 @@ void G1GC<LanguageConfig>::UpdateRefsFromRemSets(const Visitor &visitor)
         visitor(object, ObjectAccessor::GetObject(object, offset), offset);
         return true;
     };
-    auto refsChecker = [this, &fieldVisitor](const MemRange &memRange, Region *region) {
+    auto refsChecker = [this, &fieldVisitor](Region *region, const MemRange &memRange) {
         IterateOverRefsInMemRange(memRange, region, fieldVisitor);
         return true;
     };
-    MemRange dirtyCards = CacheRefsFromRemsets(refsChecker);
-    ClearDirtyAndYoungCards(dirtyCards);
+    CacheRefsFromRemsets(refsChecker);
 }
 
 template <class LanguageConfig>
-MemRange G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &refsChecker)
+void G1GC<LanguageConfig>::CacheRefsFromRemsets(const MemRangeRefsChecker &refsChecker)
 {
     GCScope<TRACE_TIMING> cacheRefsFromRemsetScope(__FUNCTION__, this);
     // Collect only unique objects to not proceed them more than once.
     ASSERT(!uniqueCardsInitialized_);
-    CardTable *cardTable = this->GetCardTable();
-    uintptr_t minDirtyAddr = cardTable->GetMinAddress() + cardTable->GetCardsCount() * cardTable->GetCardSize();
-    uintptr_t maxDirtyAddr = cardTable->GetMinAddress();
 
     size_t remsetSize = 0;
-    ASSERT(IsCardTableClear(cardTable));
-    auto visitor = [cardTable, &minDirtyAddr, &maxDirtyAddr, &remsetSize, &refsChecker](Region *r,
-                                                                                        const MemRange &range) {
-        // The proper DEFAULT_REGION_SIZE value is 256_KB, that value allows card caching of already processed
-        // memory ranges, the following code will not work with a different DEFAULT_REGION size
-        constexpr uint64_t EXPECTED_DEFAULT_REGION_SIZE = 256_KB;
-        static_assert(DEFAULT_REGION_SIZE == EXPECTED_DEFAULT_REGION_SIZE, "Unsupported default region size");
-
-        // Use the card table to mark the ranges we already processed.
-        // Each card is uint8_t. Use it as a bitmap. Set bit means the corresponding memory
-        // range is processed.
-        CardTable::CardPtr card = cardTable->GetCardPtr(range.GetStartAddress());
-        uintptr_t cardAddr = cardTable->GetCardStartAddress(card);
-        constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
-        size_t bitIdx = (range.GetStartAddress() - cardAddr) / MEM_SIZE;
-        if ((card->GetCard() & (1U << bitIdx)) == 0) {
-            card->SetCard(card->GetCard() | (1U << bitIdx));
-            if (minDirtyAddr > cardAddr) {
-                minDirtyAddr = cardAddr;
-            }
-            if (maxDirtyAddr < cardAddr + CardTable::GetCardSize()) {
-                maxDirtyAddr = cardAddr + CardTable::GetCardSize();
-            }
-            remsetSize++;
-            return refsChecker(range, r);
-        }
-        // some cross region refs might be not processed
-        return false;
+    auto visitor = [&remsetSize, &refsChecker](Region *r, const MemRange &range) {
+        remsetSize++;
+        return refsChecker(r, range);
     };
-    for (auto region : collectionSet_) {
-        region->GetRemSet()->Iterate(RemsetRegionPredicate, visitor);
-    }
+
+    GlobalRemSet globalRemSet;
+    globalRemSet.ProcessRemSets(collectionSet_, RemsetRegionPredicate, visitor);
 
     analytics_.ReportRemsetSize(remsetSize, GetUniqueRemsetRefsCount());
 
     if (!this->IsFullGC()) {
         auto dirtyCardsCount = dirtyCards_.size();
         analytics_.ReportScanDirtyCardsStart(ark::time::GetCurrentTimeInNanos());
-        CacheRefsFromDirtyCards(visitor);
+        CacheRefsFromDirtyCards(globalRemSet, refsChecker);
         analytics_.ReportScanDirtyCardsEnd(ark::time::GetCurrentTimeInNanos(), dirtyCardsCount);
 #ifndef NDEBUG
         uniqueCardsInitialized_ = true;
 #endif  // NDEBUG
     }
-
-    if (minDirtyAddr > maxDirtyAddr) {
-        minDirtyAddr = maxDirtyAddr;
-    }
-    return MemRange(minDirtyAddr, maxDirtyAddr);
 }
 
 template <class LanguageConfig>
 template <typename Visitor>
-void G1GC<LanguageConfig>::CacheRefsFromDirtyCards(Visitor visitor)
+void G1GC<LanguageConfig>::CacheRefsFromDirtyCards(GlobalRemSet &globalRemSet, Visitor visitor)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     auto cardTable = this->GetCardTable();
-    constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
     for (auto it = dirtyCards_.cbegin(); it != dirtyCards_.cend();) {
         auto range = cardTable->GetMemoryRange(*it);
         auto addr = range.GetStartAddress();
         ASSERT_DO(IsHeapSpace(PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(ToVoidPtr(addr))),
                   std::cerr << "Invalid space type for the " << addr << std::endl);
-        auto endAddr = range.GetEndAddress();
         auto region = ark::mem::AddrToRegion(ToVoidPtr(addr));
         if (!RemsetRegionPredicate(region)) {
             it = dirtyCards_.erase(it);
             continue;
         }
 
-        auto allCrossRegionRefsProcessed = true;
-        while (addr < endAddr) {
-            if (!visitor(region, MemRange(addr, addr + MEM_SIZE))) {
-                allCrossRegionRefsProcessed = false;
-            }
-            addr += MEM_SIZE;
-        }
+        auto allCrossRegionRefsProcessed = globalRemSet.IterateOverUniqueRange(region, range, visitor);
         if (allCrossRegionRefsProcessed) {
             it = dirtyCards_.erase(it);
             continue;
@@ -2151,14 +2093,6 @@ void G1GC<LanguageConfig>::ClearYoungCards(const CollectionSet &collectionSet)
     for (Region *region : collectionSet.Young()) {
         cardTable->ClearCardRange(ToUintPtr(region), ToUintPtr(region) + DEFAULT_REGION_SIZE);
     }
-}
-
-template <class LanguageConfig>
-void G1GC<LanguageConfig>::ClearDirtyAndYoungCards(const MemRange &dirtyCardsRange)
-{
-    CardTable *cardTable = this->GetCardTable();
-    ClearYoungCards(collectionSet_);
-    cardTable->ClearCardRange(dirtyCardsRange.GetStartAddress(), dirtyCardsRange.GetEndAddress());
 }
 
 template <class LanguageConfig>
