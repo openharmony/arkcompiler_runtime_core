@@ -81,9 +81,11 @@ private:
     ForeignClassItem *CreateForeignClassItem(File::EntityId class_id);
     MethodHandleItem *CreateMethodHandleItem(File::EntityId mh_id);
     TypeItem *CreateParamTypeItem(ProtoDataAccessor *proto_acc, size_t param_num, size_t reference_num);
+    TypeItem *GetReturnTypeItem(Type type, size_t &reference_num);
     std::vector<MethodParamItem> CreateMethodParamItems(ProtoDataAccessor *proto_acc, MethodDataAccessor *method_acc,
                                                         size_t reference_num);
     DebugInfoItem *CreateDebugInfoItem(File::EntityId debug_info_id);
+    void EnumerateBlocks(MethodDataAccessor method_acc, MethodItem *method_item);
     void UpdateDebugInfoDependecies(File::EntityId debug_info_id);
     void UpdateDebugInfo(DebugInfoItem *debug_info_item, File::EntityId debug_info_id);
 

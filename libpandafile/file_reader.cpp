@@ -600,21 +600,8 @@ DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debug_info_id)
     return debug_info_item;
 }
 
-MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId method_id)
+TypeItem *FileReader::GetReturnTypeItem(Type ret_type, size_t &reference_num)
 {
-    auto it = items_done_.find(method_id);
-    if (it != items_done_.end()) {
-        return static_cast<MethodItem *>(it->second);
-    }
-
-    MethodDataAccessor method_acc(*file_, method_id);
-    auto data = file_->GetStringData(method_acc.GetNameId());
-    std::string method_name(utf::Mutf8AsCString(data.data));
-    auto *method_str_item = container_.GetOrCreateStringItem(method_name);
-
-    ProtoDataAccessor proto_acc(*file_, method_acc.GetProtoId());
-    Type ret_type = proto_acc.GetReturnType();
-    size_t reference_num = 0;
     TypeItem *ret_type_item = nullptr;
     if (ret_type.IsPrimitive()) {
         ret_type_item = container_.GetOrCreatePrimitiveTypeItem(ret_type);
@@ -627,18 +614,77 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId method_i
         }
         reference_num++;
     }
+    return ret_type_item;
+}
+
+void FileReader::EnumerateBlocks(MethodDataAccessor method_acc, MethodItem *method_item)
+{
+    // quick check
+    auto code_id = method_acc.GetCodeId();
+    if (code_id == std::nullopt) {
+        return;
+    }
+
+    CodeDataAccessor code_acc(*file_, code_id.value());
+    std::vector<uint8_t> instructions(code_acc.GetCodeSize());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    instructions.assign(code_acc.GetInstructions(), code_acc.GetInstructions() + code_acc.GetCodeSize());
+    auto *code_item =
+        container_.CreateItem<CodeItem>(code_acc.GetNumVregs(), code_acc.GetNumArgs(), std::move(instructions));
+
+    code_acc.EnumerateTryBlocks([&](CodeDataAccessor::TryBlock &try_block) {
+        std::vector<CodeItem::CatchBlock> catch_blocks;
+        try_block.EnumerateCatchBlocks([&](CodeDataAccessor::CatchBlock &catch_block) {
+            BaseClassItem *catch_type_item = nullptr;
+            auto type_idx = catch_block.GetTypeIdx();
+            if (type_idx != panda_file::INVALID_INDEX) {
+                File::EntityId catch_cls_id = file_->ResolveClassIndex(method_id, catch_block.GetTypeIdx());
+                catch_type_item = (file_->IsExternal(catch_cls_id)) ? CreateForeignClassItem(catch_cls_id) :
+                                                                      CreateClassItem(catch_cls_id);
+                method_item->AddIndexDependency(catch_type_item);
+            }
+            // Add new CatchBlock
+            catch_blocks.emplace_back(CodeItem::CatchBlock(method_item, catch_type_item, catch_block.GetHandlerPc(),
+                                                           catch_block.GetCodeSize()));
+            return true;
+        });
+        code_item->AddTryBlock(
+            CodeItem::TryBlock(try_block.GetStartPc(), try_block.GetLength(), std::move(catch_blocks)));
+        return true;
+    });
+
+    method_item->SetCode(code_item);
+}
+
+MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId method_id)
+{
+    // Check if we have done this method
+    auto it = items_done_.find(method_id);
+    if (it != items_done_.end()) {
+        return static_cast<MethodItem *>(it->second);
+    }
+
+    MethodDataAccessor method_acc(*file_, method_id);
+    auto data = file_->GetStringData(method_acc.GetNameId());
+    std::string method_name(utf::Mutf8AsCString(data.data));
+    auto method_str_item = container_.GetOrCreateStringItem(method_name);
+
+    ProtoDataAccessor proto_acc(*file_, method_acc.GetProtoId());
+    Type ret_type = proto_acc.GetReturnType();
+    size_t reference_num = 0;
+    TypeItem *ret_type_item = GetReturnTypeItem(ret_type, reference_num);
     ASSERT(ret_type_item != nullptr);
     auto param_items = CreateMethodParamItems(&proto_acc, &method_acc, reference_num);
-    // Double check if we done this method while computing params
+
+    // Double check if we have done this method while computing params
     auto it_check = items_done_.find(method_id);
     if (it_check != items_done_.end()) {
         return static_cast<MethodItem *>(it_check->second);
     }
-    auto *proto_item = container_.GetOrCreateProtoItem(ret_type_item, param_items);
 
-    auto *method_item =
+    auto proto_item = container_.GetOrCreateProtoItem(ret_type_item, param_items);
+    auto method_item =
         cls->AddMethod(method_str_item, proto_item, method_acc.GetAccessFlags(), std::move(param_items));
-
     if (method_item->HasRuntimeParamAnnotations()) {
         container_.CreateItem<ParamAnnotationsItem>(method_item, true);
     }
@@ -646,7 +692,6 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId method_i
     if (method_item->HasParamAnnotations()) {
         container_.CreateItem<ParamAnnotationsItem>(method_item, false);
     }
-
     items_done_.insert({method_id, static_cast<BaseItem *>(method_item)});
 
     method_acc.EnumerateAnnotations(
@@ -661,40 +706,7 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId method_i
     method_acc.EnumerateRuntimeTypeAnnotations(
         [&](File::EntityId ann_id) { method_item->AddRuntimeTypeAnnotation(CreateAnnotationItem(ann_id)); });
 
-    auto code_id = method_acc.GetCodeId();
-    if (code_id) {
-        CodeDataAccessor code_acc(*file_, code_id.value());
-        std::vector<uint8_t> instructions(code_acc.GetCodeSize());
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        instructions.assign(code_acc.GetInstructions(), code_acc.GetInstructions() + code_acc.GetCodeSize());
-        auto *code_item =
-            container_.CreateItem<CodeItem>(code_acc.GetNumVregs(), code_acc.GetNumArgs(), std::move(instructions));
-
-        code_acc.EnumerateTryBlocks([&](CodeDataAccessor::TryBlock &try_block) {
-            std::vector<CodeItem::CatchBlock> catch_blocks;
-            try_block.EnumerateCatchBlocks([&](CodeDataAccessor::CatchBlock &catch_block) {
-                BaseClassItem *catch_type_item = nullptr;
-                auto type_idx = catch_block.GetTypeIdx();
-                if (type_idx != panda_file::INVALID_INDEX) {
-                    File::EntityId catch_cls_id = file_->ResolveClassIndex(method_id, catch_block.GetTypeIdx());
-                    if (file_->IsExternal(catch_cls_id)) {
-                        catch_type_item = CreateForeignClassItem(catch_cls_id);
-                    } else {
-                        catch_type_item = CreateClassItem(catch_cls_id);
-                    }
-                    method_item->AddIndexDependency(catch_type_item);
-                }
-                catch_blocks.emplace_back(CodeItem::CatchBlock(method_item, catch_type_item, catch_block.GetHandlerPc(),
-                                                               catch_block.GetCodeSize()));
-                return true;
-            });
-            code_item->AddTryBlock(
-                CodeItem::TryBlock(try_block.GetStartPc(), try_block.GetLength(), std::move(catch_blocks)));
-            return true;
-        });
-
-        method_item->SetCode(code_item);
-    }
+    EnumerateBlocks(method_acc, method_item);
 
     auto debug_info_id = method_acc.GetDebugInfoId();
     if (debug_info_id) {
