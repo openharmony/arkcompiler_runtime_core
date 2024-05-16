@@ -897,6 +897,26 @@ ForeignClassItem *FileReader::CreateForeignClassItem(File::EntityId class_id)
     return class_item;
 }
 
+void FileReader::CreateSuperClassItem(ClassDataAccessor& class_acc,
+                                      ClassItem* class_item,
+                                      const std::string& class_name)
+{
+    auto super_class_id = class_acc.GetSuperClassId();
+    if (super_class_id.GetOffset() != 0) {
+        if (super_class_id.GetOffset() == class_id.GetOffset()) {
+            LOG(FATAL, PANDAFILE) << "Class " << class_name << " has cyclic inheritance";
+        }
+
+        if (file_->IsExternal(super_class_id)) {
+            auto *super_class_item = CreateForeignClassItem(super_class_id);
+            class_item->SetSuperClass(super_class_item);
+        } else {
+            auto *super_class_item = CreateClassItem(super_class_id);
+            class_item->SetSuperClass(super_class_item);
+        }
+    }
+}
+
 ClassItem *FileReader::CreateClassItem(File::EntityId class_id)
 {
     auto it = items_done_.find(class_id);
@@ -917,21 +937,7 @@ ClassItem *FileReader::CreateClassItem(File::EntityId class_id)
         class_item->SetSourceLang(source_lang_opt.value());
     }
 
-    auto super_class_id = class_acc.GetSuperClassId();
-
-    if (super_class_id.GetOffset() != 0) {
-        if (super_class_id.GetOffset() == class_id.GetOffset()) {
-            LOG(FATAL, PANDAFILE) << "Class " << class_name << " has cyclic inheritance";
-        }
-
-        if (file_->IsExternal(super_class_id)) {
-            auto *super_class_item = CreateForeignClassItem(super_class_id);
-            class_item->SetSuperClass(super_class_item);
-        } else {
-            auto *super_class_item = CreateClassItem(super_class_id);
-            class_item->SetSuperClass(super_class_item);
-        }
-    }
+    CreateSuperClassItem(class_acc, class_item, class_name);
 
     class_acc.EnumerateInterfaces([&](File::EntityId iface_id) {
         if (file_->IsExternal(iface_id)) {
@@ -1259,10 +1265,52 @@ void FileReader::UpdateDebugInfo(DebugInfoItem *debug_info_item, File::EntityId 
     lnp_item->EmitEnd();
 }
 
-void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverse_done)
+void AddIndexDependencyInstFlag(CodeItem *code_item, MethodItem *method_item,
+                                const std::unordered_map<File::EntityId, File::EntityId> &reverse_done)
 {
     using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
 
+    size_t offset = 0;
+    BytecodeInstruction inst(code_item->GetInstructions()->data());
+    while (offset < code_item->GetCodeSize()) {
+        if (inst.HasFlag(Flags::TYPE_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::Index idx = b_id.AsIndex();
+            File::EntityId method_id = reverse_done.find(method_item)->second;
+            File::EntityId old_id = file_->ResolveClassIndex(method_id, idx);
+            ASSERT(items_done_.find(old_id) != items_done_.end());
+            auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
+            method_item->AddIndexDependency(idx_item);
+        } else if (inst.HasFlag(Flags::METHOD_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::Index idx = b_id.AsIndex();
+            File::EntityId method_id = reverse_done.find(method_item)->second;
+            File::EntityId old_id = file_->ResolveMethodIndex(method_id, idx);
+            ASSERT(items_done_.find(old_id) != items_done_.end());
+            auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
+            method_item->AddIndexDependency(idx_item);
+        } else if (inst.HasFlag(Flags::FIELD_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::Index idx = b_id.AsIndex();
+            File::EntityId method_id = reverse_done.find(method_item)->second;
+            File::EntityId old_id = file_->ResolveFieldIndex(method_id, idx);
+            ASSERT(items_done_.find(old_id) != items_done_.end());
+            auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
+            method_item->AddIndexDependency(idx_item);
+        } else if (inst.HasFlag(Flags::STRING_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::EntityId old_id = b_id.AsFileId();
+            auto data = file_->GetStringData(old_id);
+            std::string item_str(utf::Mutf8AsCString(data.data));
+            container_.GetOrCreateStringItem(item_str);
+        }
+        offset += inst.GetSize();
+        inst = inst.GetNext();
+    }
+}
+
+void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverse_done)
+{
     auto *class_map = container_.GetClassMap();
 
     // First pass, add dependencies bytecode -> new items
@@ -1284,53 +1332,69 @@ void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, F
                 UpdateDebugInfoDependecies(reverse_done.find(debug_info_item)->second);
             }
 
-            size_t offset = 0;
-            BytecodeInstruction inst(code_item->GetInstructions()->data());
-            while (offset < code_item->GetCodeSize()) {
-                if (inst.HasFlag(Flags::TYPE_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveClassIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    method_item->AddIndexDependency(idx_item);
-                } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveMethodIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    method_item->AddIndexDependency(idx_item);
-                } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveFieldIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    method_item->AddIndexDependency(idx_item);
-                } else if (inst.HasFlag(Flags::STRING_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::EntityId old_id = b_id.AsFileId();
-                    auto data = file_->GetStringData(old_id);
-                    std::string item_str(utf::Mutf8AsCString(data.data));
-                    container_.GetOrCreateStringItem(item_str);
-                }
+            AddIndexDependencyInstFlag(inst, method_item, reverse_done);
 
-                offset += inst.GetSize();
-                inst = inst.GetNext();
-            }
             return true;
         });
     }
 }
 
-void FileReader::ComputeLayoutAndUpdateIndices()
+void UpdateIdInstFlag(CodeItem *code_item, MethodItem *method_item,
+                      const std::unordered_map<File::EntityId, File::EntityId> &reverse_done)
 {
     using Flags = panda::BytecodeInst<panda::BytecodeInstMode::FAST>::Flags;
 
+    size_t offset = 0;
+    BytecodeInstruction inst(code_item->GetInstructions()->data());
+    while (offset < code_item->GetCodeSize()) {
+        if (inst.HasFlag(Flags::TYPE_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::Index idx = b_id.AsIndex();
+            File::EntityId method_id = reverse_done.find(method_item)->second;
+            File::EntityId old_id = file_->ResolveClassIndex(method_id, idx);
+            ASSERT(items_done_.find(old_id) != items_done_.end());
+            auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
+            uint32_t index = idx_item->GetIndex(method_item);
+            inst.UpdateId(BytecodeId(index));
+        } else if (inst.HasFlag(Flags::METHOD_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::Index idx = b_id.AsIndex();
+            File::EntityId method_id = reverse_done.find(method_item)->second;
+            File::EntityId old_id = file_->ResolveMethodIndex(method_id, idx);
+            ASSERT(items_done_.find(old_id) != items_done_.end());
+            auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
+            uint32_t index = idx_item->GetIndex(method_item);
+            inst.UpdateId(BytecodeId(index));
+        } else if (inst.HasFlag(Flags::FIELD_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::Index idx = b_id.AsIndex();
+            File::EntityId method_id = reverse_done.find(method_item)->second;
+            File::EntityId old_id = file_->ResolveFieldIndex(method_id, idx);
+            ASSERT(items_done_.find(old_id) != items_done_.end());
+            auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
+            uint32_t index = idx_item->GetIndex(method_item);
+            inst.UpdateId(BytecodeId(index));
+        } else if (inst.HasFlag(Flags::STRING_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::EntityId old_id = b_id.AsFileId();
+            auto data = file_->GetStringData(old_id);
+            std::string item_str(utf::Mutf8AsCString(data.data));
+            auto *string_item = container_.GetOrCreateStringItem(item_str);
+            inst.UpdateId(BytecodeId(string_item->GetFileId().GetOffset()));
+        } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
+            BytecodeId b_id = inst.GetId();
+            File::EntityId old_id = b_id.AsFileId();
+            ASSERT(items_done_.find(old_id) != items_done_.end());
+            auto *array_item = items_done_.find(old_id)->second;
+            inst.UpdateId(BytecodeId(array_item->GetFileId().GetOffset()));
+        }
+        offset += inst.GetSize();
+        inst = inst.GetNext();
+    }
+}
+
+void FileReader::ComputeLayoutAndUpdateIndices()
+{
     std::map<BaseItem *, File::EntityId> reverse_done;
     for (const auto &it : items_done_) {
         reverse_done.insert({it.second, it.first});
@@ -1382,54 +1446,8 @@ void FileReader::ComputeLayoutAndUpdateIndices()
                 return true;
             }
 
-            size_t offset = 0;
-            BytecodeInstruction inst(code_item->GetInstructions()->data());
-            while (offset < code_item->GetCodeSize()) {
-                if (inst.HasFlag(Flags::TYPE_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveClassIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    uint32_t index = idx_item->GetIndex(method_item);
-                    inst.UpdateId(BytecodeId(index));
-                } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveMethodIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    uint32_t index = idx_item->GetIndex(method_item);
-                    inst.UpdateId(BytecodeId(index));
-                } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::Index idx = b_id.AsIndex();
-                    File::EntityId method_id = reverse_done.find(method_item)->second;
-                    File::EntityId old_id = file_->ResolveFieldIndex(method_id, idx);
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *idx_item = static_cast<IndexedItem *>(items_done_.find(old_id)->second);
-                    uint32_t index = idx_item->GetIndex(method_item);
-                    inst.UpdateId(BytecodeId(index));
-                } else if (inst.HasFlag(Flags::STRING_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::EntityId old_id = b_id.AsFileId();
-                    auto data = file_->GetStringData(old_id);
-                    std::string item_str(utf::Mutf8AsCString(data.data));
-                    auto *string_item = container_.GetOrCreateStringItem(item_str);
-                    inst.UpdateId(BytecodeId(string_item->GetFileId().GetOffset()));
-                } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
-                    BytecodeId b_id = inst.GetId();
-                    File::EntityId old_id = b_id.AsFileId();
-                    ASSERT(items_done_.find(old_id) != items_done_.end());
-                    auto *array_item = items_done_.find(old_id)->second;
-                    inst.UpdateId(BytecodeId(array_item->GetFileId().GetOffset()));
-                }
+            UpdateIdInstFlag(code_item, method_item, reverse_done);
 
-                offset += inst.GetSize();
-                inst = inst.GetNext();
-            }
             return true;
         });
     }

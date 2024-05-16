@@ -180,6 +180,47 @@ private:
     ColumnNumberTable cnt_;
 };
 
+void ExtractMethodParams(const File *pf, DebugInfoDataAccessor &dda, ProtoDataAccessor &pda, MethodDataAccessor &mda,
+                         ClassDataAccessor &cda, std::vector<DebugInfoExtractor::ParamInfo> &param_info)
+{
+    size_t idx = 0;
+    size_t idx_ref = (mda.HasValidProto() && pda.GetReturnType().IsReference()) ? 1 : 0;
+    bool first_param = true;
+    const char *class_name = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
+    dda.EnumerateParameters([&](File::EntityId &param_id) {
+        DebugInfoExtractor::ParamInfo info;
+        if (param_id.IsValid() && !mda.HasValidProto()) {
+            info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
+            // get signature of <any> type
+            info.signature = Type::GetSignatureByTypeId(Type(Type::TypeId::TAGGED));
+            param_info.emplace_back(info);
+            return;
+        }
+
+        if (!param_id.IsValid()) {
+            first_param = false;
+            param_info.emplace_back(info);
+            return;
+        }
+
+        info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
+        if (first_param && !mda.IsStatic()) {
+            info.signature = class_name;
+        } else {
+            Type param_type = pda.GetArgType(idx++);
+            if (param_type.IsPrimitive()) {
+                info.signature = Type::GetSignatureByTypeId(param_type);
+            } else {
+                auto ref_type = pda.GetReferenceType(idx_ref++);
+                info.signature = utf::Mutf8AsCString(pf->GetStringData(ref_type).data);
+            }
+        }
+
+        first_param = false;
+        param_info.emplace_back(info);
+    });
+}
+
 void DebugInfoExtractor::Extract(const File *pf)
 {
     const auto &panda_file = *pf;
@@ -205,38 +246,7 @@ void DebugInfoExtractor::Extract(const File *pf)
             ProtoDataAccessor pda(panda_file, mda.GetProtoId());
 
             std::vector<ParamInfo> param_info;
-
-            size_t idx = 0;
-            size_t idx_ref = (mda.HasValidProto() && pda.GetReturnType().IsReference()) ? 1 : 0;
-            bool first_param = true;
-            const char *class_name = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
-            dda.EnumerateParameters([&](File::EntityId &param_id) {
-                ParamInfo info;
-                if (param_id.IsValid() && !mda.HasValidProto()) {
-                    info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
-                    // get signature of <any> type
-                    info.signature = Type::GetSignatureByTypeId(Type(Type::TypeId::TAGGED));
-                    param_info.emplace_back(info);
-                    return;
-                }
-
-                if (param_id.IsValid()) {
-                    info.name = utf::Mutf8AsCString(pf->GetStringData(param_id).data);
-                    if (first_param && !mda.IsStatic()) {
-                        info.signature = class_name;
-                    } else {
-                        Type param_type = pda.GetArgType(idx++);
-                        if (param_type.IsPrimitive()) {
-                            info.signature = Type::GetSignatureByTypeId(param_type);
-                        } else {
-                            auto ref_type = pda.GetReferenceType(idx_ref++);
-                            info.signature = utf::Mutf8AsCString(pf->GetStringData(ref_type).data);
-                        }
-                    }
-                }
-                first_param = false;
-                param_info.emplace_back(info);
-            });
+            ExtractMethodParams(pf, dda, pda, mda, cda, param_info);
 
             const uint8_t *program = dda.GetLineNumberProgram();
 

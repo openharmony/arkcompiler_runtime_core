@@ -138,6 +138,54 @@ bool PrepareArguments(panda::PandArgParser *pa_parser, const RuntimeOptions &run
     return true;
 }
 
+int ExecutePandaFile(panda::PandArg<bool> &options, panda::PandArgParser &pa_parser, panda::PandArg<std::string> &file,
+                     panda::PandArg<std::string> &entrypoint, RuntimeOptions &runtime_options)
+{
+    if (!Runtime::Create(runtime_options)) {
+        std::cerr << "Error: cannot create runtime" << std::endl;
+        return -1;
+    }
+
+    int ret = 0;
+
+    if (options.GetValue()) {
+        std::cout << pa_parser.GetRegularArgs() << std::endl;
+    }
+
+    std::string file_name = file.GetValue();
+    std::string entry = entrypoint.GetValue();
+
+    auto &runtime = *Runtime::GetCurrent();
+    auto &verif_opts = runtime.GetVerificationOptions();
+    ASSERT(!verif_opts.IsOnlyVerify());
+
+    if (verif_opts.IsEnabled()) {
+        verifier::ThreadPool::GetCache()->FastAPI().ProcessFiles(runtime.GetClassLinker()->GetBootPandaFiles());
+    }
+
+    arg_list_t arguments = pa_parser.GetRemainder();
+    auto res = runtime.ExecutePandaFile(file_name, entry, arguments);
+    if (!res) {
+        std::cerr << "Cannot execute panda file '" << file_name << "' with entry '" << entry << "'" << std::endl;
+        ret = -1;
+    } else {
+        ret = res.Value();
+    }
+
+    if (runtime_options.IsPrintMemoryStatistics()) {
+        std::cout << runtime.GetMemoryStatistics();
+    }
+    if (runtime_options.IsPrintGcStatistics()) {
+        std::cout << runtime.GetFinalStatistics();
+    }
+    if (!Runtime::Destroy()) {
+        std::cerr << "Error: cannot destroy runtime" << std::endl;
+        return -1;
+    }
+    pa_parser.DisableTail();
+    return ret;
+}
+
 int Main(int argc, const char **argv)
 {
     BlockSignals();
@@ -174,8 +222,6 @@ int Main(int argc, const char **argv)
     runtime_options.SetVerificationMode(runtime_options.IsVerificationEnabled() ? VerificationMode::ON_THE_FLY
                                                                                 : VerificationMode::DISABLED);
 
-    arg_list_t arguments = pa_parser.GetRemainder();
-
     panda::compiler::CompilerLogger::SetComponents(panda::compiler::options.GetCompilerLog());
     if (compiler::options.IsCompilerEnableEvents()) {
         panda::compiler::EventWriter::Init(panda::compiler::options.GetCompilerEventsPath());
@@ -197,48 +243,7 @@ int Main(int argc, const char **argv)
 
     runtime_options.SetBootPandaFiles(boot_panda_files);
 
-    if (!Runtime::Create(runtime_options)) {
-        std::cerr << "Error: cannot create runtime" << std::endl;
-        return -1;
-    }
-
-    int ret = 0;
-
-    if (options.GetValue()) {
-        std::cout << pa_parser.GetRegularArgs() << std::endl;
-    }
-
-    std::string file_name = file.GetValue();
-    std::string entry = entrypoint.GetValue();
-
-    auto &runtime = *Runtime::GetCurrent();
-    auto &verif_opts = runtime.GetVerificationOptions();
-    ASSERT(!verif_opts.IsOnlyVerify());
-
-    if (verif_opts.IsEnabled()) {
-        verifier::ThreadPool::GetCache()->FastAPI().ProcessFiles(runtime.GetClassLinker()->GetBootPandaFiles());
-    }
-
-    auto res = runtime.ExecutePandaFile(file_name, entry, arguments);
-    if (!res) {
-        std::cerr << "Cannot execute panda file '" << file_name << "' with entry '" << entry << "'" << std::endl;
-        ret = -1;
-    } else {
-        ret = res.Value();
-    }
-
-    if (runtime_options.IsPrintMemoryStatistics()) {
-        std::cout << runtime.GetMemoryStatistics();
-    }
-    if (runtime_options.IsPrintGcStatistics()) {
-        std::cout << runtime.GetFinalStatistics();
-    }
-    if (!Runtime::Destroy()) {
-        std::cerr << "Error: cannot destroy runtime" << std::endl;
-        return -1;
-    }
-    pa_parser.DisableTail();
-    return ret;
+    return ExecutePandaFile(options, pa_parser, file, entrypoint, runtime_options);
 }
 }  // namespace panda
 
