@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -18,11 +18,11 @@ desc: Check interface with public access modifier out class.
 assert: Member or constructor with public modifier can be accessed everywhere.
 ---*/
 
-public class A {
-  public interface I { fee(): int }
+class A {
+  interface I { fee(): int }
 }
 
-public class B implements A.I {
+class B implements A.I {
   public override fee(): int {
     return 1;
   }

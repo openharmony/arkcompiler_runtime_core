@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,23 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for member in own_members %}
+
 /*---
 desc: class members
-assert: Members declared in the body of the class.
+assert: Members declared in the class body.
 ---*/
 
-
-final class B {
-  public x: int = 4;
-
-  public fee(): int {
-    return 5;
-  }
+class C {
+  {{member.decl}}
 }
 
 function main(): void {
-    let y: B = new B();
-    
-    assert y.fee() == 5;
-    assert y.x == 4;
+    let y: C = new C();
+    {{member.call}}
+    {{member.check}}
 }
+
+{% endfor %}
+

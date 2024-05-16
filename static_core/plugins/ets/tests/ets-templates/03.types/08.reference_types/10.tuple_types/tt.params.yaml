@@ -189,14 +189,15 @@ cases:
           assert v?.[0] === undefined
 
     - use: |-
+          let res: boolean = false
           let v: [string]|null = ["A"]
           try {
               v = null
               v![0] = "A"
           } catch (e: NullPointerError) {
-              // OK
+              res = true // OK
           }
-          assert false
+          assert res
 
     - decl: |-
           type TUPLE = [number, string]
