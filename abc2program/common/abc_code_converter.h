@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,4 +39,4 @@ private:
 
 }  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_COMMON_ABC_CODE_CONVERTER_H
+#endif  // ABC2PROGRAM_COMMON_ABC_CODE_CONVERTER_H

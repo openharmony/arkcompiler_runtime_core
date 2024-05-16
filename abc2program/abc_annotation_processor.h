@@ -35,8 +35,8 @@ private:
     std::unique_ptr<panda_file::AnnotationDataAccessor> annotation_data_accessor_;
     pandasm::Function &function_;
     std::string annotation_name_;
-}; // class AbcAnnotationProcessor
+};  // class AbcAnnotationProcessor
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC_ANNOTATION_PROCESSOR_H
+#endif  // ABC2PROGRAM_ABC_ANNOTATION_PROCESSOR_H

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ bool Abc2ProgramDriver::Dump(const std::string &output_file_path)
     std::ofstream ofs;
     ofs.open(output_file_path, std::ios::trunc | std::ios::out);
     PandasmProgramDumper dumper;
-    dumper.SetDumperSource(ProgramDumperSource::PANDA_ASSEMBLY);
+    dumper.SetDumperSource(PandasmDumperSource::PANDA_ASSEMBLY);
     dumper.SetAbcFilePath(input_file_path_);
     dumper.Dump(ofs, program_);
     ofs.close();
