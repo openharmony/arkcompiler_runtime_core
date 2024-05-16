@@ -32,6 +32,20 @@ public:
 private:
 };
 
+TEST_F(TaskTest, TaskPropertiesTest)
+{
+    for (auto taskType : ALL_TASK_TYPES) {
+        for (auto vmType : ALL_VM_TYPES) {
+            for (auto executionMode : ALL_TASK_EXECUTION_MODES) {
+                TaskProperties prop(taskType, vmType, executionMode);
+                ASSERT_EQ(prop.GetTaskType(), taskType);
+                ASSERT_EQ(prop.GetVMType(), vmType);
+                ASSERT_EQ(prop.GetTaskExecutionMode(), executionMode);
+            }
+        }
+    }
+}
+
 TEST_F(TaskTest, TaskSimpleTest)
 {
     std::string message = "task:";

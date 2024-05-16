@@ -90,6 +90,7 @@ public:
      */
     void AddTaskWithoutNewTaskCallbackExecution(Task &&task) override
     {
+        EventOnTaskAdding(&task);
         // Push task in one of internal queues based on its TaskExecutionMode
         PushTaskToInternalQueues(std::move(task));
         // Signal workers that should execute new task
@@ -256,6 +257,12 @@ private:
             return task;
         }
         return backgroundTaskQueue_.Pop();
+    }
+
+    void EventOnTaskAdding(Task *task)
+    {
+        ASSERT(task != nullptr);
+        task->EventOnTaskAdding();
     }
 
     /// subscriber_lock_ is used in case of calling new_tasks_callback_
