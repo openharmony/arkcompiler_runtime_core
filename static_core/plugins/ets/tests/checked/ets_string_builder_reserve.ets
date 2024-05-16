@@ -42,9 +42,9 @@
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve3"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){11,}\)/
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){11,}\)/
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve4"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
@@ -138,9 +138,9 @@
 //!
 //! METHOD        "ETSGLOBAL::step5_loop_reserve19"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_reserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
@@ -180,9 +180,9 @@
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
@@ -320,9 +320,9 @@
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve3"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){9,}\)/
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){9,}\)/
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve4"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
@@ -416,9 +416,9 @@
 //!
 //! METHOD        "ETSGLOBAL::step5_loop_reserve19"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_reserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
@@ -458,9 +458,9 @@
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
+//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"

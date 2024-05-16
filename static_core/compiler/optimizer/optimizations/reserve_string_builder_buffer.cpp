@@ -94,7 +94,7 @@ bool IsStringBuilderInstance(Inst *inst)
         return false;
     }
 
-    auto klass = GetObjectClass(inst->CastToNewObject());
+    auto klass = GetObjectClass(inst);
     if (klass == nullptr) {
         return false;
     }
@@ -385,7 +385,7 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantNotInlined(Inst
             UNREACHABLE();
     }
 
-    auto stringBuilderClass = GetObjectClass(instance->CastToNewObject());
+    auto stringBuilderClass = GetObjectClass(instance);
     ASSERT(stringBuilderClass != nullptr);
 
     // Create StoreObject instruction to store Object[] array

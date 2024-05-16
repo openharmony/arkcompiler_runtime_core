@@ -153,6 +153,7 @@ options:
     - scheduler
     - simplify-sb
     - reserve-sb-buffer
+    - savestate-opt
     - try-catch-resolving
     - vn-opt
     - bridges-ss
@@ -233,6 +234,12 @@ options:
   type: bool
   default: true
   description: Enable Deoptimize Elimination Pass
+  tags: [perf]
+
+- name: compiler-save-state-elimination
+  type: bool
+  default: true
+  description: Enable SaveState Elimination Pass
   tags: [perf]
 
 - name: compiler-safepoint-elimination-limit
@@ -816,6 +823,15 @@ events:
       type: uint32_t
 
 - name: deoptimize-elimination
+  fields:
+    - name: name
+      type: const char*
+    - name: inst_id
+      type: uint32_t
+    - name: pc
+      type: uint32_t
+
+- name: save-state-optimization
   fields:
     - name: name
       type: const char*

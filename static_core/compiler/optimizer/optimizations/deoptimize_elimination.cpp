@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,13 +25,10 @@ bool DeoptimizeElimination::RunImpl()
 {
     GetGraph()->RunPass<LoopAnalyzer>();
 
-    uint64_t instsNumber = VisitGraphAndCount();
+    VisitGraph();
 
     ReplaceDeoptimizeIfByUnconditionalDeoptimize();
 
-    if (!HaveCalls() && instsNumber <= g_options.GetCompilerSafepointEliminationLimit()) {
-        RemoveSafePoints();
-    }
     if (IsLoopDeleted() && GetGraph()->IsOsrMode()) {
         CleanupGraphSaveStateOSR(GetGraph());
     }
@@ -48,97 +45,6 @@ void DeoptimizeElimination::ReplaceDeoptimizeIfByUnconditionalDeoptimize()
             SetLoopDeleted();
         }
     }
-}
-
-void DeoptimizeElimination::RemoveSafePoints()
-{
-    auto block = GetGraph()->GetStartBlock();
-    ASSERT(block != nullptr && block->IsStartBlock());
-    for (auto sp : block->Insts()) {
-        if (sp->GetOpcode() == Opcode::SafePoint) {
-            sp->ClearFlag(inst_flags::NO_DCE);
-            SetApplied();
-            COMPILER_LOG(DEBUG, DEOPTIMIZE_ELIM) << "SafePoint " << sp->GetId() << " is deleted from start block";
-            block->GetGraph()->GetEventWriter().EventDeoptimizeElimination(GetOpcodeString(sp->GetOpcode()),
-                                                                           sp->GetId(), sp->GetPc());
-        }
-    }
-}
-
-bool DeoptimizeElimination::RequireRegMap(Inst *inst)
-{
-    for (auto &user : inst->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (userInst->RequireRegMap()) {
-            return true;
-        }
-        auto opcode = userInst->GetOpcode();
-        if (opcode == Opcode::CallStatic || opcode == Opcode::CallVirtual || opcode == Opcode::CallResolvedVirtual ||
-            opcode == Opcode::CallDynamic || opcode == Opcode::CallResolvedStatic) {
-            // Inlined method can contain Deoptimize or DeoptimizeIf
-            if (static_cast<CallInst *>(userInst)->IsInlined()) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-void DeoptimizeElimination::VisitDefault(Inst *inst)
-{
-    if (inst->GetType() != DataType::REFERENCE) {
-        return;
-    }
-    for (auto &user : inst->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (!userInst->IsSaveState()) {
-            return;
-        }
-        if (userInst->GetOpcode() == Opcode::SafePoint) {
-            if (g_options.IsCompilerSafePointsRequireRegMap()) {
-                return;
-            }
-            continue;
-        }
-        if (RequireRegMap(userInst)) {
-            return;
-        }
-    }
-
-    inst->RemoveUsers<true>();
-
-    SetApplied();
-    COMPILER_LOG(DEBUG, DEOPTIMIZE_ELIM) << "All users the instructions " << inst->GetId() << " are SaveStates";
-    inst->GetBasicBlock()->GetGraph()->GetEventWriter().EventDeoptimizeElimination(GetOpcodeString(inst->GetOpcode()),
-                                                                                   inst->GetId(), inst->GetPc());
-}
-
-void DeoptimizeElimination::VisitSaveState(GraphVisitor *v, Inst *inst)
-{
-    auto visitor = static_cast<DeoptimizeElimination *>(v);
-    if (visitor->TryToRemoveRedundantSaveState(inst)) {
-        return;
-    }
-
-    if (visitor->RequireRegMap(inst)) {
-        return;
-    }
-
-    auto ss = inst->CastToSaveState();
-    if (ss->RemoveNumericInputs()) {
-        visitor->SetApplied();
-        COMPILER_LOG(DEBUG, DEOPTIMIZE_ELIM) << "SaveState " << ss->GetId() << " numeric inputs were deleted";
-        ss->GetBasicBlock()->GetGraph()->GetEventWriter().EventDeoptimizeElimination(GetOpcodeString(ss->GetOpcode()),
-                                                                                     ss->GetId(), ss->GetPc());
-#ifndef NDEBUG
-        ss->SetInputsWereDeleted();
-#endif
-    }
-}
-
-void DeoptimizeElimination::VisitSaveStateDeoptimize(GraphVisitor *v, Inst *inst)
-{
-    static_cast<DeoptimizeElimination *>(v)->TryToRemoveRedundantSaveState(inst);
 }
 
 void DeoptimizeElimination::VisitDeoptimizeIf(GraphVisitor *v, Inst *inst)
@@ -168,21 +74,6 @@ void DeoptimizeElimination::VisitDeoptimizeIf(GraphVisitor *v, Inst *inst)
             }
         }
     }
-}
-
-bool DeoptimizeElimination::TryToRemoveRedundantSaveState(Inst *inst)
-{
-    if (inst->GetUsers().Empty()) {
-        auto block = inst->GetBasicBlock();
-        block->ReplaceInst(inst, block->GetGraph()->CreateInstNOP());
-        inst->RemoveInputs();
-        SetApplied();
-        COMPILER_LOG(DEBUG, DEOPTIMIZE_ELIM) << "SaveState " << inst->GetId() << " without users is deleted";
-        block->GetGraph()->GetEventWriter().EventDeoptimizeElimination(GetOpcodeString(inst->GetOpcode()),
-                                                                       inst->GetId(), inst->GetPc());
-        return true;
-    }
-    return false;
 }
 
 bool DeoptimizeElimination::CanRemoveGuard(Inst *guard)

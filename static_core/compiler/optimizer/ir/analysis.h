@@ -47,7 +47,8 @@ std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm);
 
 // If object input has known class, return pointer to the class, else returns nullptr
 RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t inputNum = 0);
-RuntimeInterface::ClassPtr GetObjectClass(NewObjectInst *inst);
+RuntimeInterface::ClassPtr GetObjectClass(Inst *inst);
+RuntimeInterface::ClassPtr GetClass(Inst *inst);
 
 inline bool IsInstInDifferentBlocks(Inst *i1, Inst *i2)
 {

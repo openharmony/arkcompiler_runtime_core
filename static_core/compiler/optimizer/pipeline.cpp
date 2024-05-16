@@ -52,6 +52,7 @@
 #include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/regalloc/reg_alloc.h"
 #include "optimizer/optimizations/reserve_string_builder_buffer.h"
+#include "optimizer/optimizations/savestate_optimization.h"
 #include "optimizer/optimizations/scheduler.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
@@ -220,12 +221,15 @@ bool Pipeline::RunOptimizations()
     if (graph->IsAotMode()) {
         graph->RunPass<Cse>();
     }
-    graph->RunPass<EscapeAnalysis>();
     graph->RunPass<LoopIdioms>();
     graph->RunPass<ChecksElimination>();
-    graph->RunPass<ReserveStringBuilderBuffer>();
+    if (graph->RunPass<DeoptimizeElimination>()) {
+        graph->RunPass<Peepholes>();
+    }
     graph->RunPass<LoopUnroll>(g_options.GetCompilerLoopUnrollInstLimit(), g_options.GetCompilerLoopUnrollFactor());
     OptimizationsAfterUnroll(graph);
+    graph->RunPass<EscapeAnalysis>();
+    graph->RunPass<ReserveStringBuilderBuffer>();
 
     /* to be removed once generic loop unrolling is implemented */
     ASSERT(graph->IsUnrollComplete());
@@ -237,10 +241,8 @@ bool Pipeline::RunOptimizations()
     if (graph->IsAotMode()) {
         graph->RunPass<Cse>();
     }
-    if (graph->RunPass<DeoptimizeElimination>()) {
-        graph->RunPass<Peepholes>();
-    }
-
+    graph->RunPass<SaveStateOptimization>();
+    graph->RunPass<Peepholes>();
 #ifndef NDEBUG
     graph->SetLowLevelInstructionsEnabled();
 #endif  // NDEBUG
