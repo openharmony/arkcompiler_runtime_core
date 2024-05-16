@@ -1590,3 +1590,93 @@ function main() {
     assert bugfix_concat_loop1(4, "ISO-8859-1") == "CCCC": "Wrong result at bugfix_concat_loop1"
     assert bugfix_concat_loop1(4, "UTF-16") == "힙힙힙힙": "Wrong result at bugfix_concat_loop1"
 }
+
+//! CHECKER       Invalid save states AOT (I9NI8P/16707)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*bugfix_concat_loop2_test[0-9]+' --compiler-inlining=true"
+
+//! CHECKER       Invalid save states JIT (I9NI8P/16707)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, entry: "ETSGLOBAL::bugfix_concat_loop2"
+
+const initial = "initial";
+const expected = "expected";
+const empty = "";
+
+function bugfix_concat_loop2_test0(): string {
+    let c = initial;
+    let b = expected;
+    for(let a = 0; a < 1; a++) {
+        b += empty;
+        c = b;
+    }
+    return c;
+}
+
+function bugfix_concat_loop2_test1(): string {
+    let c = initial;
+    let b = expected;
+    for(let a = 0; a < 1; a++) {
+        if (a == 1)
+            b += empty;
+        else
+            c = b;
+    }
+    return c;
+}
+
+function bugfix_concat_loop2_test2(): string {
+    let c = initial;
+    let b = expected;
+    for(let a = 0; a < 1; a++) {
+        if (a == 1)
+            b += empty;
+        c = b;
+    }
+    return c;
+}
+
+function bugfix_concat_loop2_test3(): string {
+    let c = initial;
+    let b = expected;
+    for(let a = 0; a < 1; a++) {
+        b += empty;
+        if (a == 0)
+            c = b;
+    }
+    return c;
+}
+
+function bugfix_concat_loop2_test4(): string {
+    let c = initial;
+    let b = expected;
+    for(let a = 0; a < 1; a++) {
+        b += empty;
+        if (a == 1) {}
+        else
+            c = b;
+    }
+    return c;
+}
+
+function bugfix_concat_loop2_test5(): string {
+    let c = initial;
+    let b = expected;
+    for(let a = 0; a < 1; a++) {
+        if (a == 1) {}
+        else
+            b += empty;
+        c = b;
+    }
+    return c;
+}
+
+function bugfix_concat_loop2() {
+    for(let i = 0; i < 5000; i++) {
+        assert bugfix_concat_loop2_test0() == expected;
+        assert bugfix_concat_loop2_test1() == expected;
+        assert bugfix_concat_loop2_test2() == expected;
+        assert bugfix_concat_loop2_test3() == expected;
+        assert bugfix_concat_loop2_test4() == expected;
+    }
+}
