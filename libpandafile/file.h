@@ -508,7 +508,7 @@ inline bool CheckSecureMem(uintptr_t mem)
         return true;
     }
 
-    LOG(ERROR, PANDAFILE) << "Secure memory check in memory start: " << std::hex << secureMemStart
+    LOG(DEBUG, PANDAFILE) << "Secure memory check in memory start: " << std::hex << secureMemStart
                    << " memory end: " << secureMemEnd;
     if (mem < secureMemStart || mem >= secureMemEnd) {
         LOG(ERROR, PANDAFILE) << "Secure memory check failed, mem out of secure memory, mem: " << std::hex << mem;

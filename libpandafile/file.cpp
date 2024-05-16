@@ -286,7 +286,7 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
         }
         auto ret = os::mem::TagAnonymousMemory(mem, size_to_mmap, tag.c_str());
         if (ret.has_value()) {
-            PLOG(ERROR, PANDAFILE) << "Can't tag mmap anonymous, errno: " << errno;
+            PLOG(DEBUG, PANDAFILE) << "Can't tag mmap anonymous, errno: " << errno;
         }
     }
 
