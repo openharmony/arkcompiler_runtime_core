@@ -30,6 +30,11 @@ srcs_compiler = [
   "compiler/optimizer/optimizations/interop_js/interop_intrinsic_optimization.cpp",
 ]
 
+if (is_ohos && is_standard_system) {
+  arkcompiler_deps =
+      [ "$ark_root/plugins/ets/runtime/interop_js:interop_intrinsic_kinds_h" ]
+}
+
 srcs_disassembler = [ "disassembler/disasm_ets_plugin.cpp" ]
 
 srcs_isa = [ "isa/isa.yaml" ]
