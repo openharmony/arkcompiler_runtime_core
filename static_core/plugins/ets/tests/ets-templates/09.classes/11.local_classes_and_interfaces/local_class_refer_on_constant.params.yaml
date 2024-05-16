@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of variable types
+--- # List of invalid type references
 variable_types:
   - byte
   - short

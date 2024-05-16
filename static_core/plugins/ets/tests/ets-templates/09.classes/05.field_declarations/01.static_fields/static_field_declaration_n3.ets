@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,19 +15,18 @@ limitations under the License.
 
 /*---
 desc: >-
-    A compile-time error occurs if he name of a field declared
-    in the body of a class declaration is already used for another
-    field or method in the same declaration.
-tags: [compile-only, negative]
+    Static fields are declared with the modifier static. A static field is not part of a class instance. There is one
+    copy of a static field irrespective of how many instances of the class (even if zero) are eventually created.
 ---*/
 
 class A {
     public static x: int = 42
-    public x(): number { // CTE: name is used
-        return 42.0
+    public x(): number {
+        return 41.0
     }
 }
 
 function main() {
     assert A.x == 42
+    assert A.x() == 41
 }
