@@ -154,19 +154,19 @@ spec/16.Support_for_GUI_Programming/struct-type/test-use-struct-as-name_2.ets
 
 ### Start enum
 ### Issue 12947
-spec/enum/enumCallToStringFromAsyncLambda.ets
+spec/11.Enumerations/enumCallToStringFromAsyncLambda.ets
 ### Issue 14655
-spec/enum/enum_trailing_comma_03.ets
-spec/enum/enum_trailing_comma_04.ets
+spec/11.Enumerations/enum_trailing_comma_03.ets
+spec/11.Enumerations/enum_trailing_comma_04.ets
 ### Issue 14654
-spec/enum/enum_const_expr_01_01.ets
-spec/enum/enum_const_expr_01_02.ets
-spec/enum/enum_const_expr_01_03.ets
-spec/enum/enum_const_expr_01_04.ets
-spec/enum/enum_const_expr_01_05.ets
-spec/enum/enum_const_expr_02_01.ets
+spec/11.Enumerations/enum_const_expr_01_01.ets
+spec/11.Enumerations/enum_const_expr_01_02.ets
+spec/11.Enumerations/enum_const_expr_01_03.ets
+spec/11.Enumerations/enum_const_expr_01_04.ets
+spec/11.Enumerations/enum_const_expr_01_05.ets
+spec/11.Enumerations/enum_const_expr_02_01.ets
 ### Issue 14633
-spec/enum/issue14633_1.ets
+spec/11.Enumerations/issue14633_1.ets
 ### Issue 14636
 ### End enum
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,12 +20,13 @@ name: 11.enumeration
 tags: []
 ---*/
 
-enum ConstExpr {
-    A,
-    B = (1 / ConstExpr.A)
+enum TrailingComma {
+    A = "A",
+    B = "B",
+    C = "C",
 }
 
 function main(): void {
-    assert ConstExpr.A.getValue() == 0
-    assert ConstExpr.B.getValue() == 1
+    let letters = TrailingComma.values()
+    assert letters.length == 3
 }

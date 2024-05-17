@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,12 +15,16 @@ limitations under the License.
 
 /*---
 desc: 11. Enumerations
-name: spec/enum/issue14633.ets
-tags: [negative, compile-only]
+name: spec/enum/issue14633_1.ets
+tags: []
 ---*/
 
 enum MyEnum {
     N1 = 80
 }
 
-const W = new Number(MyEnum.N1);
+const W = new Number(MyEnum.N1.getValue());
+
+function main(): void {
+    assert W == 80;
+}
