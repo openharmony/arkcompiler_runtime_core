@@ -180,8 +180,6 @@ spec/lambda/issue15579_4.ets
 ### Issue 14054
 spec/lambda/callAsyncMethodFromAsyncLambda1.ets
 spec/lambda/callMethodFromAsyncLambda1.ets
-### Issue 14209
-spec/lambda/callAsyncMethodFromAsyncLambda2.ets
 ### Issue 14131
 spec/lambda/callRegularLambdaWithAsyncOverload.ets
 ### Negative tests
@@ -345,7 +343,6 @@ spec/import_export/03.import_directives/05.default_import_binding/default_import
 std/core/std_core_string_String_fromCharCode_006.ets
 ### Issue 15304
 ### Not implemented
-std/core/std_core_string_String_split_RegExp_int.ets
 std/core/std_core_string_String_split_RegExp_number.ets
 ### Issue 14343
 spec/import_export/07.export_directives/03.re-export_directives/re_export_directive_03.ets
@@ -482,9 +479,6 @@ spec/tuples/tuple_as_generic_7.ets
 spec/tuples/tuple_as_param_default_0.ets
 ### Issue 15191
 spec/tuples/tuple_as_param_3.ets
-### Issue 15207
-spec/tuples/tuple_union_0.ets
-spec/tuples/tuple_union_1.ets
 ### Issue 15394
 spec/tuples/tuple_write_6.ets
 ### Issue 15493
@@ -496,12 +490,8 @@ spec/tuples/tuple_write_7.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface_overriding_02.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface_overriding_03.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface_overriding_04.ets
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_06.ets
 ### End of Interfaces overriding
 ### Overriding issues
-### Issue 15571
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_01.ets
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_02.ets
 ### Issue 15572
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
@@ -543,11 +533,6 @@ regression/12581_box_type_array_Long_array.ets
 std/core/std_core_string_String_codePointAt_number.ets
 ###
 
-### 15577
-spec/nullables/defined-type-nullable-union_2.ets
-spec/nullables/defined-type-nullable-union_3.ets
-###
-
 ## Tuples overloading issue(s)
 ### Issue (gitee) I909BB
 spec/tuples/tuple_as_param_default_1.ets
@@ -580,14 +565,6 @@ spec/10.interfaces/overriding/15523_0002_iterable_override.ets
 spec/10.interfaces/overriding/15523_0003_iterable_override.ets
 spec/10.interfaces/overriding/15523_0004_iterable_override.ets
 spec/10.interfaces/overriding/15523_0005_iterable_override.ets
-### Related to (reverted) builtin void type
-### StdLib is not testing corectly after the void revert
-std/core/TypeCreateClassTest.ets
-std/core/TypeCreateErasedBodyTest.ets
-std/core/TypeCreateInterfaceTest.ets
-std/core/TypeCreatePrimitiveNameTest.ets
-### End StdLib is not testing corectly after the void revert
-### End of Related to (reverted) builtin void type
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.ets
 
@@ -597,7 +574,6 @@ spec/13.Compilation_Units_Packages_and_Modules/import_export/issue15393/module2/
 
 ### Negative tests
 spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_04.ets
-spec/13.compilation_units_packages_and_modules/13.06.export_directives/13.06.03.re-export_directives/issue15371/issue15371_05.ets
 
 ### Issue 14609
 spec/07.expressions/nullish-coalescing_expressions/issue14609_02.ets

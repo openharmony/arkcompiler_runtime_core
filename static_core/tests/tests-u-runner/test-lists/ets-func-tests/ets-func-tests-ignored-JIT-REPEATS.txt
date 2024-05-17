@@ -1,11 +1,7 @@
-# #16231 #16362
-spec/03.types/References_Types/Bigint/bigint-arithmetic-mul-4-operands-1.ets
 # #16186
 spec/03.types/References_Types/Bigint/bigint-arithmetic-div-equal-zero.ets
 # #16083
 spec/03.types/References_Types/Bigint/bigint-arithmetic-div-2-operands-zero.ets
-# #16100
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-1-1.ets
 # #16217
 std/core/std_core_typedarrays__Int16Array.ets
 
