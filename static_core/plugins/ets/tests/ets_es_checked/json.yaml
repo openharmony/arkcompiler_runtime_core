@@ -14,7 +14,6 @@
 # excluded due to future milestone
 
 category: JSON
-excluded: true
 
 top_scope: |
   class Foo {
@@ -39,5 +38,5 @@ sub:
           "🤣"
         - |
           new Foo("🤣")
-        #- |
-        #  Array.of<number>(NaN, Infinity, -Infinity, 0, 0.0, -0.0)
+        - |
+         Array.of<number>(NaN, Infinity, -Infinity, 0, 0.0, -0.0)

@@ -68,7 +68,11 @@ export class JSON {
      * @returns String - JSON representation of float
      */
     public static stringify(d: float): String {
-        return StringBuilder.toString(d)
+        if (Float.isFinite(d)) {
+            return StringBuilder.toString(d)
+        } else {
+            return "null"
+        }
     }
 
     /**
@@ -79,7 +83,11 @@ export class JSON {
      * @returns String - JSON representation of double
      */
     public static stringify(d: double): String {
-        return StringBuilder.toString(d)
+        if (Double.isFinite(d)) {
+            return StringBuilder.toString(d)
+        } else {
+            return "null"
+        }
     }
 
     /**
@@ -141,8 +149,8 @@ export class JSON {
      *
      * @returns String - JSON representation of Object
      */
-    public static stringify(d: Object): String {
-        return JSON.stringifyObj(d)
+    public static stringify(obj: NullishType): String {
+        return new JSONWriter().write(obj)
     }
 
     public static native stringify(d: JSValue): String;
@@ -248,11 +256,11 @@ export class JSON {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
-            s.append(d[i])
+            s.append(JSON.stringify(d[i]))
             s.append(',')
         }
         if (d.length > 0) {
-            s.append(d[last_elem])
+            s.append(JSON.stringify(d[last_elem]))
         }
         s.append(']')
         return s.toString()
@@ -269,11 +277,11 @@ export class JSON {
         let s = new StringBuilder("[")
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
-            s.append(d[i])
+            s.append(JSON.stringify(d[i]))
             s.append(',')
         }
         if (d.length > 0) {
-            s.append(d[last_elem])
+            s.append(JSON.stringify(d[last_elem]))
         }
         s.append(']')
         return s.toString()
@@ -430,6 +438,200 @@ export class JSON {
 
 }
 
+class JSONWriter {
+    // NOTE(cheezzario) replace with Type.for<JSValue>() when it will be implemented
+    private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as JSValue[]) as ArrayType).getElementType()
+    private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
+
+    private readonly path = new Set<Object>()
+    private readonly buffer = new StringBuilder()
+
+    write(obj: NullishType): String {
+        this.writeObject(obj)
+
+        return this.buffer.toString()
+    }
+
+    private writeObject(obj: NullishType): void {
+        if (obj == null) {
+            this.buffer.append("null")
+        } else if (obj == undefined) {
+            this.buffer.append("undefined")
+        } else if (obj instanceof String) {
+            this.buffer.append(JSON.stringify(obj as String))
+        } else if (this.writeValueTypeWrapper(obj)) {
+            // nothing to do - write completed successfully
+        } else {
+            const objType = Type.of(obj)
+
+            if (objType.getName() == JSONWriter.STD_CORE_INTEROP_JSVALUE_TYPE.getName()) {
+                this.buffer.append(JSON.stringify(obj as JSValue))
+            } else if (objType instanceof ArrayType) {
+                this.writeArrayValue(Value.of(obj) as ArrayValue, objType as ArrayType)
+            } else if (objType.getName() == JSONWriter.ESCOMPAT_ARRAY_TYPE.getName()) {
+                this.writeEscompatArray(obj as Array<Object>)
+            } else if (objType instanceof ClassType) {
+                this.writeClassValue(obj, objType as ClassType)
+            } else if (objType instanceof LambdaType) {
+                this.buffer.append("undefined")
+            } else {
+                assert false : "unsupported object type: " + objType
+            }
+        }
+    }
+
+    private writeClassValue(obj: Object, objType: ClassType): void {
+        this.buffer.append("{")
+
+        const objValue = Value.of(obj) as ClassValue
+        const objFieldsCount = objValue.getFieldsNum()
+        if (objFieldsCount > 0) {
+            this.path.add(obj)
+
+            let fieldDumped = false
+            for (let fieldIdx = 0; fieldIdx < objFieldsCount; fieldIdx++) {
+                const objField = objType.getField(fieldIdx)
+                if (!this.isStringifiableFieldType(objField)) {
+                    continue
+                }
+
+                const objFieldValue = objValue.getField(fieldIdx)
+                if (objFieldValue.getData() !== undefined) {
+                    if (fieldDumped) {
+                        this.buffer.append(",")
+                    } else {
+                        fieldDumped = true
+                    }
+                    
+                    this.buffer.append('"')
+                    this.buffer.append(objField.getName())
+                    this.buffer.append('":')
+
+                    this.checkReferencesCycle(objFieldValue.getData())
+                    this.writeObject(objFieldValue.getData())
+                }
+            }
+
+            this.path.delete(obj)
+        }
+
+        this.buffer.append("}")
+    }
+
+    private isStringifiableFieldType(field: Field): boolean {
+        const fieldType = field.getType()
+
+        // NOTE(cheezzario) this assertion will be dropped after #17184 fix
+        assert !(fieldType instanceof InterfaceType && (fieldType as InterfaceType).getName().startsWith("std.core.Function")) 
+                : "lambda typed fields not supported yet"
+
+        if (field.isStatic() || fieldType instanceof LambdaType) {
+            return false
+        }
+
+        return true
+    }
+
+    private writeArrayValue(arrayValue: ArrayValue, arrayType: ArrayType): void {
+        this.buffer.append("[")
+
+        const arrayLength = arrayValue.getLength()
+        if (arrayLength > 0) {
+            const array: Object = arrayValue.getData()!
+
+            this.path.add(array)
+
+            const lastElementIndex = arrayLength - 1
+
+            for (let idx = 0; idx < lastElementIndex; idx++) {
+                this.writeArrayElementValue(arrayValue.getElement(idx))
+                this.buffer.append(",")
+            }
+
+            this.writeArrayElementValue(arrayValue.getElement(lastElementIndex))
+
+            this.path.delete(array)
+        }
+
+        this.buffer.append("]")
+    }
+
+    private writeArrayElementValue(elemValue: Value): void {
+        this.writeObjectsArrayElement(elemValue.getData())
+    }
+
+    private writeValueTypeWrapper(obj: Object): boolean {
+        if (obj instanceof Boolean) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else if (obj instanceof Byte) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else if (obj instanceof Char) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else if (obj instanceof Short) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else if (obj instanceof Int) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else if (obj instanceof Long) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else if (obj instanceof Float) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else if (obj instanceof Double) {
+            this.buffer.append(JSON.stringify(obj.unboxed()))
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private writeEscompatArray<T>(array: Array<T>): void {
+        this.buffer.append("[")
+
+        if (array.length > 0) {
+            this.path.add(array)
+
+            const lastElementIndex = array.length - 1
+
+            for (let idx = 0; idx < lastElementIndex; idx++) {
+                this.writeObjectsArrayElement(array[idx])
+                this.buffer.append(",")
+            }
+
+            this.writeObjectsArrayElement(array[lastElementIndex])
+
+            this.path.delete(array)
+        }
+
+        this.buffer.append("]")
+    }
+
+    private writeObjectsArrayElement(arrayElement: NullishType): void {
+        const arrayElementType = Type.of(arrayElement)
+        if (arrayElement == null || arrayElement == undefined || arrayElementType instanceof LambdaType) {
+            this.buffer.append("null")
+        } else {
+            this.checkReferencesCycle(arrayElement)
+            this.writeObject(arrayElement)
+        }
+    }
+
+    private checkReferencesCycle(obj: NullishType): void {
+        if (obj == null || obj == undefined) {
+            return
+        }
+
+        const cycleDetected = this.path.has(obj)
+        if (cycleDetected) {
+            throw new TypeError("cyclic object value")
+        }
+    }
+}
 
 class TypeColor {
     readonly static VISITED : int = 1

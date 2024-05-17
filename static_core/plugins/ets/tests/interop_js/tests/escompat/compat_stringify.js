@@ -52,8 +52,7 @@ function tmp() {}
     ASSERT_EQ(jsv, '{"x":"123","y":{"z":123}}');
     ASSERT_EQ(obj, '{"x":"123","y":{"z":123}}');
 
-    // NOTE(aleksisch): Escape char-s should be removed
-    ASSERT_EQ(jsv_as_field, '{"x":"{\\"x\\":\\"123\\",\\"y\\":{\\"z\\":123}}"}');
+    ASSERT_EQ(jsv_as_field, '{"x":{"x":"123","y":{"z":123}}}');
 
     try {
         let etsCodeFromJson = StringifyJSValue(new C());
