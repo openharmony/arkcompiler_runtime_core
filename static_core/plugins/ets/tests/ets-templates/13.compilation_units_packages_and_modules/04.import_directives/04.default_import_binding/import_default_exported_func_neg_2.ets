@@ -14,15 +14,15 @@
  */
 
 /*---
-desc: Import a default exported function with namespace import.
+desc: Import a default exported function with namespace import, which has an alias.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
+- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
 tags:
 - compile-only
 - negative
 ---*/
 
-import * as all from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
+import * as all from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
     all.TestFunc(42);

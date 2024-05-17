@@ -14,16 +14,16 @@
  */
 
 /*---
-desc: Import a default exported function with namespace import, which has an alias.
+desc: Import a default exported struct.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
-tags:
-- compile-only
-- negative
+- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct.ets
 ---*/
 
-import * as all from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
+import DefaultExportedStruct from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_struct"
 
 function main(): void {
-    all.TestFunc(42);
+    let test_class = new DefaultExportedStruct();
+
+    assert(test_class.hello("hello") == "hello_world");
+    assert((test_class.test_member + "_member") == "test_member");
 }

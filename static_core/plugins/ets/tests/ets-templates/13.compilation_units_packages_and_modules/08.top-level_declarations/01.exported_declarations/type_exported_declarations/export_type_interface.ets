@@ -14,15 +14,11 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Import class type.
-files:
-- ../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class.ets
+desc: Type export interface.
+tags:
+- compile-only
+- not-a-test
 ---*/
 
-import type {C} from "../../05.top-level_declarations/01.exported_declarations/type_exported_declarations/export_type_class"
-
-function main(): void {
-    let test_class = new C();
-
-    assert(test_class.test() == "Hello World");
-}
+interface I {}
+export type {I}

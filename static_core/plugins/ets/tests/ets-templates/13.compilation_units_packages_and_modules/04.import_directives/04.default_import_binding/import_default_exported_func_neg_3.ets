@@ -14,13 +14,16 @@
  */
 
 /*---
-desc: Import a default exported variable.
+desc: Import a default exported function using its name in a selective import.
 files:
-- ../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.ets
+- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function.ets
+tags:
+- compile-only
+- negative
 ---*/
 
-import DefaultExportedVar from "../../05.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
+import {TestFunc} from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_function"
 
 function main(): void {
-    assert(DefaultExportedVar == "default_variable");
+    TestFunc(42);
 }
