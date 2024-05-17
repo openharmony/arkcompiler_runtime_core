@@ -26,7 +26,7 @@ config("arkfile_public_config") {
     defines += [ "ENABLE_FULL_FILE_FIELDS" ]
   }
 
-  if (use_libfuzzer) {
+  if (use_libfuzzer || use_clang_coverage) {
     defines += [ "FATAL_AS_ERROR" ]
   }
 }
