@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: 05 Generics
+desc: 05.Generics
 name: issue15099_4.ets
 tags:
 
