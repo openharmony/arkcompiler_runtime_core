@@ -65,6 +65,15 @@ entrypoints:
   - const ark::ObjectHeader*
   - ark::Class*
 
+- name: CheckCastDeoptimize
+  entrypoint: CheckCastDeoptimizeEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - const ark::ObjectHeader*
+  - ark::Class*
+
 - name: CheckCastInterface
   entrypoint: CheckCastInterfaceEntrypoint
   bridge: none
@@ -76,6 +85,15 @@ entrypoints:
 
 - name: CheckStoreArrayReference
   entrypoint: CheckStoreArrayReferenceEntrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+  - void
+  - ark::coretypes::Array*
+  - ark::ObjectHeader*
+
+- name: CheckStoreArrayReferenceDeoptimize
+  entrypoint: CheckStoreArrayReferenceDeoptimizeEntrypoint
   bridge: entrypoint
   properties: []
   signature:

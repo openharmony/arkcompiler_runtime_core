@@ -282,6 +282,9 @@ static DeoptimizeType GetDeoptimizationType(Inst *inst)
             return DeoptimizeType::ZERO_CHECK;
         case Opcode::SubOverflowCheck:
             return DeoptimizeType::OVERFLOW;
+        case Opcode::CheckCast:
+        case Opcode::RefTypeCheck:
+            return DeoptimizeType::CHECK_CAST;
         default:
             ASSERT_DO(false, (std::cerr << "Unexpected inst to GetDeoptimizationType, inst:" << std::endl,
                               inst->Dump(&std::cerr)));
@@ -1279,8 +1282,13 @@ llvm::Value *LLVMIrConstructor::CreateIsInstanceInnerBlock(Inst *inst, llvm::Val
 void LLVMIrConstructor::CreateCheckCastEntrypointCall(Inst *inst)
 {
     auto object = GetInputValue(inst, 0);
-    auto classPtr = GetInputValue(inst, 1);
-    CreateEntrypointCall(RuntimeInterface::EntrypointId::CHECK_CAST, inst, {object, classPtr});
+    auto klass = GetInputValue(inst, 1);
+    if (inst->CanDeoptimize()) {
+        auto call = CreateEntrypointCall(RuntimeInterface::EntrypointId::CHECK_CAST_DEOPTIMIZE, inst, {object, klass});
+        call->addFnAttr(llvm::Attribute::get(call->getContext(), "may-deoptimize"));
+    } else {
+        CreateEntrypointCall(RuntimeInterface::EntrypointId::CHECK_CAST, inst, {object, klass});
+    }
 }
 
 void LLVMIrConstructor::CreateCheckCastObject(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
@@ -3039,7 +3047,6 @@ void LLVMIrConstructor::VisitRefTypeCheck(GraphVisitor *v, Inst *inst)
     auto outBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "out"), ctor->func_);
 
     auto runtime = ctor->GetGraph()->GetRuntime();
-    auto entrypoint = RuntimeInterface::EntrypointId::CHECK_STORE_ARRAY_REFERENCE;
     auto arch = ctor->GetGraph()->GetArch();
 
     auto cmp = ctor->builder_.CreateIsNotNull(ref);
@@ -3071,7 +3078,13 @@ void LLVMIrConstructor::VisitRefTypeCheck(GraphVisitor *v, Inst *inst)
     ctor->builder_.CreateCondBr(notObjectArray, slowPathBb, outBb);
 
     ctor->SetCurrentBasicBlock(slowPathBb);
-    ctor->CreateEntrypointCall(entrypoint, inst, {array, ref});
+    if (inst->CanDeoptimize()) {
+        auto entrypoint = RuntimeInterface::EntrypointId::CHECK_STORE_ARRAY_REFERENCE_DEOPTIMIZE;
+        auto call = ctor->CreateEntrypointCall(entrypoint, inst, {array, ref});
+        call->addFnAttr(llvm::Attribute::get(call->getContext(), "may-deoptimize"));
+    } else {
+        ctor->CreateEntrypointCall(RuntimeInterface::EntrypointId::CHECK_STORE_ARRAY_REFERENCE, inst, {array, ref});
+    }
     ctor->builder_.CreateBr(outBb);
 
     ctor->SetCurrentBasicBlock(outBb);
@@ -4504,13 +4517,13 @@ void LLVMIrConstructor::VisitCheckCast(GraphVisitor *v, Inst *inst)
         ctor->SetCurrentBasicBlock(contBb);
     }
 
-    if (klassType == ClassType::UNRESOLVED_CLASS) {
+    if (klassType == ClassType::UNRESOLVED_CLASS ||
+        (klassType == ClassType::INTERFACE_CLASS && inst->CanDeoptimize())) {
         ctor->CreateCheckCastEntrypointCall(inst);
     } else if (klassType == ClassType::INTERFACE_CLASS) {
-        constexpr auto ENTRYPOINT_ID = RuntimeInterface::EntrypointId::CHECK_CAST_INTERFACE;
-        auto interface = ctor->GetInputValue(inst, 1);
-        auto entrypointCall = ctor->CreateFastPathCall(inst, ENTRYPOINT_ID, {src, interface});
-        entrypointCall->addFnAttr(llvm::Attribute::get(entrypointCall->getContext(), "may-deoptimize"));
+        ASSERT(!inst->CanDeoptimize());
+        auto entrypoint = RuntimeInterface::EntrypointId::CHECK_CAST_INTERFACE;
+        ctor->CreateFastPathCall(inst, entrypoint, {src, ctor->GetInputValue(inst, 1)});
     } else {
         auto klassId = ctor->GetInputValue(inst, 1);
         auto klassObj = ctor->CreateLoadClassFromObject(src);

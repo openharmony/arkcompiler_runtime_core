@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,6 +200,15 @@ void DumpTypedOpcode(std::ostream *out, Opcode opcode, uint32_t typeId, ArenaAll
     ArenaString opc(GetOpcodeString(opcode), allocator->Adapter());
     ArenaString id(IdToString(typeId, allocator), allocator->Adapter());
     (*out) << std::setw(INDENT_OPCODE) << opc + space + id + space;
+}
+
+void DumpTypedOpcode(std::ostream *out, Opcode opcode, uint32_t typeId, const ArenaString &flags,
+                     ArenaAllocator *allocator)
+{
+    ArenaString space(" ", allocator->Adapter());
+    ArenaString opc(GetOpcodeString(opcode), allocator->Adapter());
+    ArenaString id(IdToString(typeId, allocator), allocator->Adapter());
+    (*out) << std::setw(INDENT_OPCODE) << opc + flags + space + id + space;
 }
 
 bool Inst::DumpInputs(std::ostream *out) const
@@ -765,7 +774,13 @@ void GlobalVarInst::DumpOpcode(std::ostream *out) const
 
 void CheckCastInst::DumpOpcode(std::ostream *out) const
 {
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
+    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    const auto &adapter = allocator->Adapter();
+    ArenaString flags("", adapter);
+    if (CanDeoptimize()) {
+        flags = " D";
+    }
+    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), flags, allocator);
 }
 
 void IsInstanceInst::DumpOpcode(std::ostream *out) const

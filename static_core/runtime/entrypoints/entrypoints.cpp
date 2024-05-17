@@ -414,6 +414,18 @@ extern "C" void CheckCastEntrypoint(const ObjectHeader *obj, Class *klass)
     }
 }
 
+extern "C" void CheckCastDeoptimizeEntrypoint(const ObjectHeader *obj, Class *klass)
+{
+    BEGIN_ENTRYPOINT();
+
+    ASSERT(obj != nullptr);
+    auto *objKlass = obj->ClassAddr<Class>();
+    ASSERT(objKlass != nullptr);
+    if (UNLIKELY(!klass->IsAssignableFrom(objKlass))) {
+        DeoptimizeEntrypoint(static_cast<uint64_t>(compiler::DeoptimizeType::CHECK_CAST));
+    }
+}
+
 extern "C" uint8_t IsInstanceEntrypoint(ObjectHeader *obj, Class *klass)
 {
     BEGIN_ENTRYPOINT();
@@ -820,6 +832,21 @@ extern "C" void CheckStoreArrayReferenceEntrypoint(coretypes::Array *array, Obje
         ark::ThrowArrayStoreException(arrayClass, storeObj->ClassAddr<Class>());
         HandlePendingException();
         UNREACHABLE();
+    }
+}
+
+extern "C" void CheckStoreArrayReferenceDeoptimizeEntrypoint(coretypes::Array *array, ObjectHeader *storeObj)
+{
+    BEGIN_ENTRYPOINT();
+    ASSERT(array != nullptr);
+    ASSERT(storeObj != nullptr);
+
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    auto *arrayClass = array->ClassAddr<Class>();
+    auto *elementClass = arrayClass->GetComponentType();
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    if (UNLIKELY(!storeObj->IsInstanceOf(elementClass))) {
+        DeoptimizeEntrypoint(static_cast<uint64_t>(compiler::DeoptimizeType::CHECK_CAST));
     }
 }
 

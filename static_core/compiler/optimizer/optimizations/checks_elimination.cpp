@@ -130,8 +130,10 @@ void ChecksElimination::VisitRefTypeCheck(GraphVisitor *v, Inst *inst)
         auto storeClass = (storeTypeInfo) ? storeTypeInfo.GetClass() : nullptr;
         if (visitor->GetGraph()->GetRuntime()->CheckStoreArray(arrayClass, storeClass)) {
             visitor->ReplaceUsersAndRemoveCheck(inst, storeInst);
+            return;
         }
     }
+    visitor->PushNewCheckForMoveOutOfLoop(inst);
 }
 
 bool ChecksElimination::TryToEliminateAnyTypeCheck(Inst *inst, Inst *instToReplace, AnyBaseType type,
@@ -387,16 +389,16 @@ void ChecksElimination::VisitCheckCast(GraphVisitor *v, Inst *inst)
         }
         return;
     }
-    if (inst->CastToCheckCast()->GetOmitNullCheck()) {
-        return;
+    if (!inst->CastToCheckCast()->GetOmitNullCheck()) {
+        auto block = inst->GetBasicBlock();
+        auto bri = block->GetGraph()->GetBoundsRangeInfo();
+        auto inputRange = bri->FindBoundsRange(block, inst->GetInput(0).GetInst());
+        if (inputRange.IsMore(BoundsRange(0))) {
+            visitor->SetApplied();
+            inst->CastToCheckCast()->SetOmitNullCheck(true);
+        }
     }
-    auto block = inst->GetBasicBlock();
-    auto bri = block->GetGraph()->GetBoundsRangeInfo();
-    auto inputRange = bri->FindBoundsRange(block, inst->GetInput(0).GetInst());
-    if (inputRange.IsMore(BoundsRange(0))) {
-        visitor->SetApplied();
-        inst->CastToCheckCast()->SetOmitNullCheck(true);
-    }
+    visitor->PushNewCheckForMoveOutOfLoop(inst);
 }
 
 void ChecksElimination::VisitIsInstance(GraphVisitor *v, Inst *inst)
@@ -1184,6 +1186,10 @@ void ChecksElimination::MoveCheckOutOfLoop()
         auto ss = FindOptimalSaveStateForHoist(inst, &insertAfter);
         if (ss == nullptr) {
             continue;
+        }
+        if (inst->GetOpcode() == Opcode::CheckCast) {
+            // input object can become null after hoisting
+            inst->CastToCheckCast()->SetOmitNullCheck(false);
         }
         ASSERT(insertAfter != nullptr);
         ASSERT(ss->GetBasicBlock() == insertAfter->GetBasicBlock());

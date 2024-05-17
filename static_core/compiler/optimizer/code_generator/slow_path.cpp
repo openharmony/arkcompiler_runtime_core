@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,7 +95,7 @@ bool SlowPathEntrypoint::GenerateCheckCast(Codegen *codegen)
 {
     auto src = codegen->ConvertRegister(GetInst()->GetSrcReg(0), DataType::REFERENCE);  // obj
     auto klass = codegen->ConvertRegister(GetInst()->GetSrcReg(1), DataType::REFERENCE);
-    codegen->CallRuntime(GetInst(), EntrypointId::CHECK_CAST, INVALID_REGISTER, RegMask::GetZeroMask(), src, klass);
+    codegen->CallRuntime(GetInst(), GetEntrypoint(), INVALID_REGISTER, RegMask::GetZeroMask(), src, klass);
     return true;
 }
 
@@ -136,6 +136,7 @@ bool SlowPathEntrypoint::GenerateByEntry(Codegen *codegen)
         case EntrypointId::IS_INSTANCE:
             return GenerateIsInstance(codegen);
         case EntrypointId::CHECK_CAST:
+        case EntrypointId::CHECK_CAST_DEOPTIMIZE:
             return GenerateCheckCast(codegen);
         case EntrypointId::CREATE_OBJECT_BY_CLASS:
             return GenerateCreateObject(codegen);
