@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,10 +41,10 @@ function main(): int {
     } catch (e) {
         assert false : "Unexpected exception during GC";
     }
-    assert wr.deref() == null : "Object referent must be collected after Full GC";
-    assert wrs.deref() == null : "String referent must be collected after Full GC";
+    assert wr.deref() === undefined : "Object referent must be collected after Full GC";
+    assert wrs.deref() === undefined : "String referent must be collected after Full GC";
     assert reachable_obj != null : "Local object must not be collected"
-    assert wr_with_reachable.deref() != null : "deref for weak reference with reachable object " + 
-    "must return non-null value";
+    assert wr_with_reachable.deref() != undefined : "deref for weak reference with reachable object " +
+    "must return non-undefined value";
     return 0;
 }

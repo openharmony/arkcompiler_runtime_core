@@ -158,7 +158,7 @@ export final class FinalizationRegistry<T> {
         let prev = 0;
         for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
             let object = this.getObject(i);
-            if (object != null && object.deref() == null) {
+            if (object != null && object.deref() == undefined) {
                 // Remove from trimplet first to prevent
                 // calling it again in separate thread
                 let arg: T | null = this.getCallbackArg(i);

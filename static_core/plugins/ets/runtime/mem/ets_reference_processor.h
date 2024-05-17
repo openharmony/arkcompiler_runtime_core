@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_PROCESSOR_H
 #define PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_PROCESSOR_H
 
+#include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 
 namespace ark::mem::ets {
@@ -26,6 +27,8 @@ public:
     NO_COPY_SEMANTIC(EtsReferenceProcessor);
     NO_MOVE_SEMANTIC(EtsReferenceProcessor);
     ~EtsReferenceProcessor() final = default;
+
+    void Initialize() override;
 
     bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                      const ReferenceCheckPredicateT &pred) const final;
@@ -57,7 +60,8 @@ public:
 private:
     mutable os::memory::Mutex weakRefLock_;
     PandaUnorderedSet<ObjectHeader *> weakReferences_ GUARDED_BY(weakRefLock_);
-    GC *gc_;
+    GC *gc_ {nullptr};
+    ark::ets::EtsObject *undefinedObject_ {nullptr};
 };
 
 }  // namespace ark::mem::ets

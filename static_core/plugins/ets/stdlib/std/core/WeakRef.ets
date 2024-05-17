@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@ package std.core;
  */
 export final class WeakRef<T extends Object> {
     // Reference to target object
-    private referent: T | null;
+    private referent: T | undefined;
 
     /**
      * Constructs weak reference object referring to a given target object
@@ -39,9 +39,9 @@ export final class WeakRef<T extends Object> {
     /**
      * Returns underlying parameter
      *
-     * @returns instance's target object, or null if the target object has been collected
+     * @returns instance's target object, or undefined if the target object has been collected
      */
-    public deref(): T | null {
+    public deref(): T | undefined {
         return this.referent;
     }
 }
