@@ -70,12 +70,12 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
     /**
      * Minimal value that this type can have as an shortegral
      */
-    public static MIN_VALUE: long = -32768;
+    public static MIN_VALUE: short = -32768;
 
     /**
      * Maximal value that this type can have as an shortegral
      */
-    public static MAX_VALUE: long = 32767;
+    public static MAX_VALUE: short = 32767;
 
     /**
      * Size of this type in bits

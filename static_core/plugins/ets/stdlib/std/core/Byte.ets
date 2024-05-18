@@ -70,12 +70,12 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     /**
      * Minimal value that this type can have as an integral
      */
-    public static MIN_VALUE: long = -128;
+    public static MIN_VALUE: byte = -128;
 
     /**
      * Maximal value that this type can have as an integral
      */
-    public static MAX_VALUE: long = 127;
+    public static MAX_VALUE: byte = 127;
 
     /**
      * Size of this type in bits
