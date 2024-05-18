@@ -21,7 +21,7 @@ namespace panda::abc2program {
 AbcFieldProcessor::AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container,
                                      pandasm::Record &record)
     : AbcFileEntityProcessor(entity_id, entity_container), record_(record),
-      type_converter_(AbcTypeConverter(*string_table_)),
+      type_converter_(entity_container),
       field_(pandasm::Field(LANG_ECMA))
 {
     field_data_accessor_ = std::make_unique<panda_file::FieldDataAccessor>(*file_, entity_id_);
@@ -43,7 +43,7 @@ void AbcFieldProcessor::FillFieldData()
 void AbcFieldProcessor::FillFieldName()
 {
     panda_file::File::EntityId field_name_id = field_data_accessor_->GetNameId();
-    field_.name = string_table_->GetStringById(field_name_id);
+    field_.name = GetStringById(field_name_id);
 }
 
 void AbcFieldProcessor::FillFieldType()

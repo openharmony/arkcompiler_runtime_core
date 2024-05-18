@@ -26,12 +26,16 @@ class AbcFileEntityProcessor {
 public:
     AbcFileEntityProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container);
 
+    std::string GetStringById(const panda_file::File::EntityId &entity_id) const
+    {
+        return entity_container_.GetStringById(entity_id);
+    }
+
 protected:
     virtual void FillProgramData() = 0;
     panda_file::File::EntityId entity_id_;
     Abc2ProgramEntityContainer &entity_container_;
     const panda_file::File *file_ = nullptr;
-    AbcStringTable *string_table_ = nullptr;
     pandasm::Program *program_ = nullptr;
 };  // class AbcFileEntityProcessor
 

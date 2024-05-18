@@ -24,8 +24,8 @@ AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entity
     : AbcFileEntityProcessor(entity_id, entity_container), function_(function)
 {
     annotation_data_accessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entity_id_);
-    auto typeDescriptorName = string_table_->GetStringById(annotation_data_accessor_->GetClassId());
-    annotation_name_ = pandasm::Type::FromDescriptor(typeDescriptorName).GetName();
+    auto type_descriptor_name = GetStringById(annotation_data_accessor_->GetClassId());
+    annotation_name_ = pandasm::Type::FromDescriptor(type_descriptor_name).GetName();
 }
 
 void AbcAnnotationProcessor::FillProgramData()
@@ -47,7 +47,7 @@ void AbcAnnotationProcessor::FillAnnotationElements(std::vector<pandasm::Annotat
 {
     for (uint32_t i = 0; i < annotation_data_accessor_->GetCount(); ++i) {
         auto annotation_data_accessor_elem = annotation_data_accessor_->GetElement(i);
-        auto annotation_elem_name = string_table_->GetStringById(annotation_data_accessor_elem.GetNameId());
+        auto annotation_elem_name = GetStringById(annotation_data_accessor_elem.GetNameId());
         auto value = annotation_data_accessor_elem.GetScalarValue().GetValue();
         auto value_type = pandasm::Value::GetCharAsType(annotation_data_accessor_->GetTag(i).GetItem());
         switch (value_type) {

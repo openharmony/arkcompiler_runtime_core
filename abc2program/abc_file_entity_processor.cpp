@@ -22,7 +22,6 @@ AbcFileEntityProcessor::AbcFileEntityProcessor(panda_file::File::EntityId entity
     : entity_id_(entity_id), entity_container_(entity_container)
 {
     file_ = &(entity_container_.GetAbcFile());
-    string_table_ = &(entity_container_.GetAbcStringTable());
     program_ = &(entity_container_.GetProgram());
 }
 

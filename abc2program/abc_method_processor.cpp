@@ -23,7 +23,7 @@ namespace panda::abc2program {
 AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id,
                                        Abc2ProgramEntityContainer &entity_container)
     : AbcFileEntityProcessor(entity_id, entity_container),
-      type_converter_(AbcTypeConverter(*string_table_)),
+      type_converter_(entity_container),
       function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_), LANG_ECMA)),
       debug_info_extractor_(entity_container.GetDebugInfoExtractor())
 {

@@ -22,7 +22,6 @@
 #include <assembly-program.h>
 #include <debug_info_extractor.h>
 #include "file.h"
-#include "abc_string_table.h"
 
 namespace panda::abc2program {
 
@@ -31,14 +30,15 @@ const panda::panda_file::SourceLang LANG_ECMA = panda::panda_file::SourceLang::E
 class Abc2ProgramEntityContainer {
 public:
     Abc2ProgramEntityContainer(const panda_file::File &file,
-                               AbcStringTable &string_table,
                                pandasm::Program &program,
-                               const panda_file::DebugInfoExtractor &debug_info_extractor)
-        : file_(file), string_table_(string_table), program_(program), debug_info_extractor_(debug_info_extractor) {}
+                               const panda_file::DebugInfoExtractor &debug_info_extractor,
+                               uint32_t class_id)
+        : file_(file), program_(program), debug_info_extractor_(debug_info_extractor),
+          current_class_id_(class_id) {}
     const panda_file::File &GetAbcFile() const;
-    AbcStringTable &GetAbcStringTable() const;
     pandasm::Program &GetProgram() const;
 
+    std::string GetStringById(const panda_file::File::EntityId &entity_id) const;
     std::string GetFullRecordNameById(const panda_file::File::EntityId &class_id);
     std::string GetFullMethodNameById(uint32_t method_id);
     std::string GetFullMethodNameById(const panda_file::File::EntityId &method_id);
@@ -57,13 +57,9 @@ public:
     std::string GetAbcFileAbsolutePath() const;
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
 
-    void SetCurrentClassId(uint32_t class_id);
-    void ClearLiteralArrayIdSet();
-
 private:
     std::string ConcatFullMethodNameById(const panda_file::File::EntityId &method_id);
     const panda_file::File &file_;
-    AbcStringTable &string_table_;
     pandasm::Program &program_;
     const panda_file::DebugInfoExtractor &debug_info_extractor_;
     std::unordered_map<uint32_t, std::string> record_full_name_map_;

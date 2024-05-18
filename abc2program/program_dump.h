@@ -18,7 +18,6 @@
 
 #include <iostream>
 #include <assembly-program.h>
-#include "common/abc_string_table.h"
 #include "dump_utils.h"
 
 namespace panda::abc2program {

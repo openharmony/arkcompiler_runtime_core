@@ -14,8 +14,9 @@
  */
 
 #include "abc2program_driver.h"
-#include "program_dump.h"
 #include "abc2program_options.h"
+#include "abc_class_processor.h"
+#include "program_dump.h"
 
 namespace panda::abc2program {
 
@@ -48,7 +49,20 @@ bool Abc2ProgramDriver::Compile(const std::string &input_file_path, pandasm::Pro
     if (!compiler_.OpenAbcFile(input_file_path)) {
         return false;
     }
-    return compiler_.FillProgramData(program);
+    auto &file = compiler_.GetAbcFile();
+    const auto classes = file.GetClasses();
+    for (size_t i = 0; i < classes.size(); i++) {
+        uint32_t class_idx = classes[i];
+        panda_file::File::EntityId record_id(class_idx);
+        if (file.IsExternal(record_id)) {
+            continue;
+        }
+        abc2program::Abc2ProgramEntityContainer entity_container(
+            file, program_, compiler_.GetDebugInfoExtractor(), class_idx);
+        abc2program::AbcClassProcessor class_processor(record_id, entity_container);
+        class_processor.FillProgramData();
+    }
+    return true;
 }
 
 bool Abc2ProgramDriver::Dump(const std::string &output_file_path)

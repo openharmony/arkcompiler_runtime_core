@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "abc_class_processor.h"
 #include <iostream>
-#include "abc_method_processor.h"
+#include "abc_class_processor.h"
 #include "abc_field_processor.h"
+#include "abc_literal_array_processor.h"
+#include "abc_method_processor.h"
 #include "mangling.h"
 
 namespace panda::abc2program {
@@ -29,8 +30,10 @@ AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2P
 
 void AbcClassProcessor::FillProgramData()
 {
+    program_->lang = LANG_ECMA;
     FillRecord();
     FillFunctions();
+    FillLiteralArrayTable();
 }
 
 void AbcClassProcessor::FillRecord()
@@ -75,7 +78,7 @@ void AbcClassProcessor::FillRecordSourceFile()
 {
     std::optional<panda_file::File::EntityId> source_file_id = class_data_accessor_->GetSourceFileId();
     if (source_file_id.has_value()) {
-        record_.source_file = string_table_->GetStringById(source_file_id.value());
+        record_.source_file = GetStringById(source_file_id.value());
     } else {
         record_.source_file = "";
     }
@@ -105,4 +108,50 @@ void AbcClassProcessor::FillFunctions()
     });
 }
 
+void AbcClassProcessor::FillLiteralArrayTable()
+{
+    literal_data_accessor_ = std::make_unique<panda_file::LiteralDataAccessor>(*file_, file_->GetLiteralArraysId());
+    FillModuleLiteralArrays();
+    FillUnnestedLiteralArrays();
+    FillNestedLiteralArrays();
+}
+
+void AbcClassProcessor::FillModuleLiteralArrays()
+{
+    for (uint32_t module_literal_array_id : entity_container_.GetMouleLiteralArrayIdSet()) {
+        FillModuleLiteralArrayById(module_literal_array_id);
+    }
+}
+
+void AbcClassProcessor::FillUnnestedLiteralArrays()
+{
+    for (uint32_t unnested_literal_array_id : entity_container_.GetUnnestedLiteralArrayIdSet()) {
+        FillLiteralArrayById(unnested_literal_array_id);
+    }
+}
+
+void AbcClassProcessor::FillNestedLiteralArrays()
+{
+    auto &unprocessed_literal_array_id_set = entity_container_.GetUnprocessedNestedLiteralArrayIdSet();
+    while (!unprocessed_literal_array_id_set.empty()) {
+        auto id = unprocessed_literal_array_id_set.begin();
+        entity_container_.AddProcessedNestedLiteralArrayId(*id);
+        FillLiteralArrayById(*id);
+        unprocessed_literal_array_id_set.erase(id);
+    }
+}
+
+void AbcClassProcessor::FillModuleLiteralArrayById(uint32_t module_literal_array_id)
+{
+    panda_file::File::EntityId entity_id(module_literal_array_id);
+    AbcModuleArrayProcessor module_array_processor(entity_id, entity_container_);
+    module_array_processor.FillProgramData();
+}
+
+void AbcClassProcessor::FillLiteralArrayById(uint32_t literal_array_id)
+{
+    panda_file::File::EntityId entity_id(literal_array_id);
+    AbcLiteralArrayProcessor literal_array_processor(entity_id, entity_container_, *literal_data_accessor_);
+    literal_array_processor.FillProgramData();
+}
 }  // namespace panda::abc2program

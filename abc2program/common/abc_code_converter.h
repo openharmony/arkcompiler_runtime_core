@@ -17,24 +17,23 @@
 #define ABC2PROGRAM_COMMON_ABC_CODE_CONVERTER_H
 
 #include <assembly-ins.h>
+#include "abc2program_entity_container.h"
 #include "bytecode_instruction-inl.h"
 #include "bytecode_instruction.h"
-#include "abc_string_table.h"
-#include "abc2program_entity_container.h"
 
 namespace panda::abc2program {
 
 class AbcCodeConverter {
 public:
-    explicit AbcCodeConverter(Abc2ProgramEntityContainer &entity_container);
+    explicit AbcCodeConverter(Abc2ProgramEntityContainer &entity_container)
+        : entity_container_(entity_container), file_(entity_container_.GetAbcFile()) {}
     pandasm::Ins BytecodeInstructionToPandasmInstruction(BytecodeInstruction bc_ins,
                                                          panda_file::File::EntityId method_id) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode opcode) const;
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
 private:
     Abc2ProgramEntityContainer &entity_container_;
-    const panda_file::File *file_ = nullptr;
-    AbcStringTable *string_table_ = nullptr;
+    const panda_file::File &file_;
 };  // class AbcCodeConverter
 
 }  // namespace panda::abc2program
