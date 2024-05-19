@@ -1261,10 +1261,6 @@ static void CheckTryCatch(const BasicBlock *block, std::ostream *out, bool *prin
         CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "catch";
     }
-    if (block->IsCatchEnd()) {
-        CheckPrintPropsFlag(out, printPropsFlag);
-        (*out) << "catch_end";
-    }
 }
 
 void BlockProps(const BasicBlock *block, std::ostream *out)

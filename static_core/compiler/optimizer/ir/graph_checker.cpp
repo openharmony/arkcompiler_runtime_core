@@ -266,11 +266,16 @@ void GraphChecker::CheckInputType(Inst *inst) const
                 (realInputType == DataType::ANY &&
                  (inputType == DataType::REFERENCE || inputType == DataType::POINTER)) ||
                 (IsZeroConstant(input) && (inputType == DataType::REFERENCE || inputType == DataType::POINTER)) ||
-                (inputType == DataType::ANY && input->IsConst() && realInputType == DataType::INT64),
-            std::cerr << "Input type don't equal to real input type\n"
-                      << "inst: " << *inst << std::endl
-                      << "input type: " << DataType::ToString(inputType) << std::endl
-                      << "input: " << *input << std::endl);
+                (inputType == DataType::ANY && input->IsConst() && realInputType == DataType::INT64) ||
+                (GetGraph()->IsThrowApplied() &&
+                 (input->GetBasicBlock()->IsEndWithThrow() ||
+                  ((input->GetOpcode() == Opcode::CatchPhi || input->GetOpcode() == Opcode::Phi) &&
+                   (inst->GetOpcode() == Opcode::Phi || inst->GetOpcode() == Opcode::CatchPhi)))),
+            (std::cerr << "Input type don't equal to real input type\n"
+                       << "inst: " << *inst << std::endl
+                       << "input type: " << DataType::ToString(inputType) << std::endl
+                       << "input: " << *input << std::endl,
+             GetGraph()->Dump(&std::cerr)));
     }
 }
 
@@ -319,16 +324,18 @@ void GraphChecker::CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block
 {
     for ([[maybe_unused]] auto &user : inst->GetUsers()) {
         auto userInst = user.GetInst();
-        ASSERT_DO_EXT(CheckInstHasInput(userInst, inst), std::cerr << "Instruction is not an input to its user\n"
-                                                                   << "input: " << *inst << std::endl
-                                                                   << "user:  " << *userInst << std::endl);
+        ASSERT_DO_EXT(CheckInstHasInput(userInst, inst), (std::cerr << "Instruction is not an input to its user\n"
+                                                                    << "input: " << *inst << std::endl
+                                                                    << "user:  " << *userInst << std::endl,
+                                                          GetGraph()->Dump(&std::cerr)));
         if (!userInst->IsPhi() && !userInst->IsCatchPhi()) {
             ASSERT_DO_EXT(inst->IsDominate(userInst) ||
-                              (GetGraph()->IsRegAllocApplied() &&
+                              ((GetGraph()->IsRegAllocApplied() || GetGraph()->IsThrowApplied()) &&
                                IsTryCatchDomination(inst->GetBasicBlock(), userInst->GetBasicBlock())),
-                          std::cerr << "Instruction doesn't dominate its user\n"
-                                    << "input: bb " << inst->GetBasicBlock()->GetId() << *inst << std::endl
-                                    << "user: bb " << userInst->GetBasicBlock()->GetId() << *userInst << std::endl);
+                          (std::cerr << "Instruction doesn't dominate its user\n"
+                                     << "input: bb " << inst->GetBasicBlock()->GetId() << *inst << std::endl
+                                     << "user: bb " << userInst->GetBasicBlock()->GetId() << *userInst << std::endl,
+                           GetGraph()->Dump(&std::cerr)));
         }
         if (DataType::Is32Bits(inst->GetType(), GetGraph()->GetArch())) {
             CheckUserOfInt32(block, inst, user);
@@ -555,11 +562,14 @@ void GraphChecker::CheckPhiInputs(Inst *phiInst)
         [[maybe_unused]] auto pred = phiInst->CastToPhi()->GetPhiInputBb(index);
         [[maybe_unused]] auto inputBb = phiInst->CastToPhi()->GetPhiInput(pred)->GetBasicBlock();
         ASSERT_DO_EXT(
-            inputBb->IsDominate(pred) || (GetGraph()->IsRegAccAllocApplied() && IsTryCatchDomination(inputBb, pred)),
+            inputBb->IsDominate(pred) || ((GetGraph()->IsRegAccAllocApplied() || GetGraph()->IsThrowApplied()) &&
+                                          IsTryCatchDomination(inputBb, pred)),
             (std::cerr
-             << "Block where phi-input is located should dominate predecessor block corresponding to this input\n"
-             << "Block " << inputBb->GetId() << " should dominate " << pred->GetId() << std::endl
-             << *phiInst));
+                 << "Block where phi-input is located should dominate predecessor block corresponding to this input\n"
+                 << "Block inputBb " << inputBb->GetId() << " should dominate pred " << pred->GetId() << std::endl
+                 << "phiInst " << *phiInst << " from BB " << phiInst->GetBasicBlock()->GetId() << std::endl,
+             std::cerr << "inputBb ", inputBb->Dump(&std::cerr), std::cerr << "pred ", pred->Dump(&std::cerr),
+             std::cerr << "phiBb ", phiInst->GetBasicBlock()->Dump(&std::cerr), GetGraph()->Dump(&std::cerr)));
     }
 }
 
@@ -803,10 +813,12 @@ void GraphChecker::CheckBlockEdges(const BasicBlock &block)
 {
     [[maybe_unused]] auto lastInstInBlock = block.GetLastInst();
     if (block.GetSuccsBlocks().size() > 1) {
-        ASSERT_EXT_PRINT(!block.IsEmpty() || block.IsTryEnd(),
-                         "Block with 2 successors have no instructions or should be try-end");
-        ASSERT_EXT_PRINT(block.IsTryBegin() || block.IsTryEnd() || lastInstInBlock->IsControlFlow(),
-                         "Last instruction must be control flow in block with 2 successors");
+        ASSERT_DO_EXT(!block.IsEmpty() || block.IsTryEnd(),
+                      (std::cerr << "Block with 2 successors have no instructions or should be try-end" << std::endl,
+                       GetGraph()->Dump(&std::cerr)));
+        ASSERT_DO_EXT(block.IsTryBegin() || block.IsTryEnd() || lastInstInBlock->IsControlFlow(),
+                      (std::cerr << "Last instruction must be control flow in block with 2 successors" << std::endl,
+                       GetGraph()->Dump(&std::cerr)));
     } else if (block.GetSuccsBlocks().size() == 1) {
         if (block.GetSuccsBlocks()[0]->IsEndBlock()) {
             if (block.IsEmpty()) {
@@ -872,7 +884,7 @@ void GraphChecker::CheckJump(const BasicBlock &block)
  */
 bool GraphChecker::IsTryCatchDomination(const BasicBlock *inputBlock, const BasicBlock *userBlock) const
 {
-    if (!GetGraph()->IsRegAllocApplied()) {
+    if (!GetGraph()->IsRegAllocApplied() && !GetGraph()->IsThrowApplied()) {
         return false;
     }
     if (inputBlock->IsTry()) {
@@ -1871,10 +1883,14 @@ void GraphChecker::VisitLoadUndefined([[maybe_unused]] GraphVisitor *v, [[maybe_
 void GraphChecker::VisitPhi([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     for ([[maybe_unused]] auto input : inst->GetInputs()) {
-        ASSERT_DO_EXT_VISITOR(CheckCommonTypes(inst, input.GetInst()),
-                              (std::cerr << "Types of phi result and phi input are not compatible\n"
-                                         << *inst << std::endl
-                                         << *input.GetInst()));
+        ASSERT_DO_EXT_VISITOR(
+            CheckCommonTypes(inst, input.GetInst()) ||
+                (static_cast<GraphChecker *>(v)->GetGraph()->IsThrowApplied() &&
+                 (input.GetInst()->GetBasicBlock()->IsEndWithThrow() ||
+                  input.GetInst()->GetOpcode() == Opcode::CatchPhi || input.GetInst()->GetOpcode() == Opcode::Phi)),
+            (std::cerr << "Types of phi result and phi input are not compatible\n"
+                       << *inst << std::endl
+                       << *input.GetInst()));
     }
 }
 
@@ -2196,8 +2212,9 @@ void GraphChecker::VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]]
                           std::cerr << "Throw instruction must be last instruction in the basic block: " << *inst
                                     << std::endl);
     for ([[maybe_unused]] auto succ : bb->GetSuccsBlocks()) {
-        ASSERT_DO_EXT_VISITOR(succ->IsEndBlock() || succ->IsTryEnd(),
-                              std::cerr << "Throw block must have end block or try-end block as successor\n");
+        ASSERT_DO_EXT_VISITOR(
+            succ->IsEndBlock() || succ->IsTryEnd() || succ->IsCatchBegin(),
+            std::cerr << "Throw block must have end block or try-end or catch-begin block as successor\n");
     }
 }
 

@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
+#include "file_items.h"
 #include "ir_builder.h"
 #include "compiler_logger.h"
+#include "macros.h"
+#include "optimizer/ir/basicblock.h"
+#include "optimizer/ir/runtime_interface.h"
 #include "pbc_iterator.h"
 #include "bytecode_instruction.h"
 #include "code_data_accessor-inl.h"
@@ -46,23 +50,8 @@ bool IrBuilder::RunImpl()
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
 
-    {
-        InstBuilder instBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
-        SetInstBuilder(&instBuilder);
-        instDefs_.resize(vregsCount + GetGraph()->GetEnvCount());
-        COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
-        for (auto bb : GetGraph()->GetBlocksRPO()) {
-            if (!BuildBasicBlock(bb, instructionsBuf)) {
-                return false;
-            }
-        }
-        GetGraph()->RunPass<DominatorsTree>();
-        GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
-        GetGraph()->RunPass<LoopAnalyzer>();
-        instBuilder.FixInstructions();
-    }
-    if (GetGraph()->GetRuntime()->IsMemoryBarrierRequired(GetMethod())) {
-        SetMemoryBarrierFlag();
+    if (!BuildIr(vregsCount)) {
+        return false;
     }
 
     if (g_options.IsCompilerPrintStats() || g_options.WasSetCompilerDumpStatsCsv()) {
@@ -78,6 +67,34 @@ bool IrBuilder::RunImpl()
 
     HotnessPropagation(GetGraph()).Run();
 
+    return true;
+}
+
+bool IrBuilder::BuildIr(size_t vregsCount)
+{
+    auto instructionsBuf = GetGraph()->GetRuntime()->GetMethodCode(GetMethod());
+    InstBuilder instBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
+    SetInstBuilder(&instBuilder);
+    instDefs_.resize(vregsCount + GetGraph()->GetEnvCount());
+    COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        if (!BuildBasicBlock(bb, instructionsBuf)) {
+            return false;
+        }
+    }
+    if (GetGraph()->IsBytecodeOptimizer() && !g_options.IsCompilerNonOptimizing() && !GetGraph()->IsDynamicMethod()) {
+        ConnectThrowBlocks();
+        if (GetGraph()->IsThrowApplied()) {
+            InvalidateBlocksOrderAnalyzes(GetGraph());
+        }
+    }
+    GetGraph()->RunPass<DominatorsTree>();
+    GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
+    GetGraph()->RunPass<LoopAnalyzer>();
+    instBuilder.FixInstructions();
+    if (GetGraph()->GetRuntime()->IsMemoryBarrierRequired(GetMethod())) {
+        SetMemoryBarrierFlag();
+    }
     return true;
 }
 
@@ -428,12 +445,6 @@ void IrBuilder::CreateTryCatchBoundariesBlocks()
     }
 }
 
-struct BlocksConnectorInfo {
-    bool fallthrough {};
-    bool deadInstructions {};
-    BytecodeInstruction prevInst {nullptr};
-};
-
 void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
 {
     BlocksConnectorInfo info;
@@ -442,7 +453,7 @@ void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
     for (auto inst : instructions) {
         auto pc = instructions.GetPc(inst);
         auto targetBlock = blocks_[pc];
-        TrackTryBoundaries(pc, inst);
+        TrackTryBoundaries(pc, inst, targetBlock != nullptr ? targetBlock : currBb, info);
         if (info.fallthrough) {
             ASSERT(targetBlock != nullptr);
             // May be the second edge between same blocks
@@ -479,7 +490,8 @@ void IrBuilder::ConnectBasicBlocks(const BytecodeInstructions &instructions)
     }
 }
 
-void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst)
+void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst, BasicBlock *targetBb,
+                                   BlocksConnectorInfo &info)
 {
     openedTryBlocks_.remove_if([pc](TryCodeBlock *tryBlock) { return tryBlock->boundaries.endPc == pc; });
 
@@ -491,6 +503,7 @@ void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst)
                 openedTryBlocks_.push_back(&tryBlock);
                 auto allocator = GetGraph()->GetLocalAllocator();
                 tryBlock.basicBlocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+                tryBlock.throwBlocks = allocator->New<ArenaSet<BasicBlock *>>(allocator->Adapter());
             } else {
                 // Empty try-block
                 ASSERT(tryBlock.boundaries.endPc == pc);
@@ -511,6 +524,13 @@ void IrBuilder::TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst)
     if (inst.CanThrow()) {
         for (auto &tryBlock : openedTryBlocks_) {
             tryBlock->containsThrowableInst = true;
+        }
+    }
+    if (GetGraph()->IsBytecodeOptimizer() && !g_options.IsCompilerNonOptimizing()) {
+        if (!info.deadInstructions && inst.IsThrow(BytecodeInstruction::Exceptions::X_THROW) &&
+            !openedTryBlocks_.empty()) {
+            auto &tryBlock = *openedTryBlocks_.rbegin();
+            tryBlock->throwBlocks->insert(targetBb);
         }
     }
 }
@@ -693,5 +713,184 @@ bool IrBuilderInliningAnalysis::RunImpl()
         }
     }
     return true;
+}
+
+uint32_t IrBuilder::FindCatchBlockInPandaFile(Class *cls, uint32_t pc) const
+{
+    if (cls == nullptr) {
+        return panda_file::INVALID_OFFSET;
+    }
+    auto pandaFile = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    auto *rta = GetGraph()->GetRuntime();
+    panda_file::MethodDataAccessor mda(*(pandaFile),
+                                       panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
+    panda_file::CodeDataAccessor cda(*(pandaFile), mda.GetCodeId().value());
+
+    auto method = GetMethod();
+
+    auto *descriptorStdCoreObject = reinterpret_cast<const uint8_t *>("Lstd/core/Object;");
+    ark::panda_file::File::EntityId stdCoreObjectId = pandaFile->GetClassId(descriptorStdCoreObject);
+    auto *stdCoreObject = rta->ResolveType(method, stdCoreObjectId.GetOffset());
+
+    uint32_t pcOffset = panda_file::INVALID_OFFSET;
+
+    cda.EnumerateTryBlocks(
+        [&pcOffset, cls, pc, rta, method, stdCoreObject](panda_file::CodeDataAccessor::TryBlock &tryBlock) {
+            if ((tryBlock.GetStartPc() > pc) || ((tryBlock.GetStartPc() + tryBlock.GetLength()) <= pc)) {
+                return pcOffset == panda_file::INVALID_OFFSET;
+            }
+            tryBlock.EnumerateCatchBlocks(
+                [&pcOffset, &cls, &rta, &method, &stdCoreObject](panda_file::CodeDataAccessor::CatchBlock &catchBlock) {
+                    auto typeIdx = catchBlock.GetTypeIdx();
+                    if (typeIdx == panda_file::INVALID_INDEX) {
+                        return true;
+                    }
+
+                    auto typeId = rta->ResolveTypeIndex(method, typeIdx);
+                    auto *handlerClass = rta->ResolveType(method, typeId);
+
+                    if (handlerClass == stdCoreObject) {
+                        pcOffset = catchBlock.GetHandlerPc();
+                        return false;
+                    }
+
+                    // bytecode_optimizer should have class linker to determine subclass
+                    // then the following condition could be replaced by cls->IsSubClassOf(handlerClass)
+                    if (cls == handlerClass) {
+                        pcOffset = catchBlock.GetHandlerPc();
+                        return false;
+                    }
+                    return true;
+                });
+            return false;
+        });
+    return pcOffset;
+}
+
+RuntimeInterface::ClassPtr IrBuilder::FindExceptionClass(BasicBlock *throwBlock, int32_t *throwPc)
+{
+    if (throwBlock->GetGraph() != GetGraph()) {
+        return nullptr;
+    }
+    if (throwBlock->GetSuccsBlocks().size() > 1 || throwBlock->GetSuccessor(0)->IsTryEnd()) {
+        return nullptr;
+    }
+    auto thr0w = throwBlock->GetLastInst();
+    if (thr0w->GetOpcode() != Opcode::Throw) {
+        return nullptr;
+    }
+    *throwPc = thr0w->GetPc();
+    auto throwInst = thr0w->CastToThrow();
+    auto newObj = throwInst->GetInput(0).GetInst();
+    RuntimeInterface::ClassPtr cls = nullptr;
+    if (newObj->GetOpcode() != Opcode::NewObject) {
+        return nullptr;
+    }
+    auto initClass = newObj->GetInput(0).GetInst();
+    if (initClass->GetOpcode() == Opcode::LoadAndInitClass) {
+        cls = initClass->CastToLoadAndInitClass()->GetClass();
+    } else {
+        ASSERT(initClass->GetOpcode() == Opcode::LoadImmediate);
+        cls = initClass->CastToLoadImmediate()->GetClass();
+    }
+    return cls;
+}
+
+BasicBlock *IrBuilder::FindCatchBegin(BasicBlock *bb)
+{
+    if (bb->IsCatchBegin()) {
+        return bb;
+    }
+    for (auto pred : bb->GetPredsBlocks()) {
+        if (pred->IsCatch() || pred->IsTryBegin()) {
+            return FindCatchBegin(pred);
+        }
+    }
+    UNREACHABLE();
+    return nullptr;
+}
+
+bool IrBuilder::FindAppropriateCatchBlock(const TryCodeBlock &tryBlock, BasicBlock *throwBlock, uint32_t catchPc)
+{
+    bool result = false;
+    if (catchPc == panda_file::INVALID_OFFSET) {
+        return result;
+    }
+    for (auto catchBlock : *tryBlock.catches) {
+        if (catchBlock.pc == catchPc) {
+            auto cBb = GetBlockForPc(catchPc);
+            ASSERT(cBb != nullptr);
+            cBb = FindCatchBegin(cBb);
+            ASSERT(cBb != nullptr && cBb->IsCatchBegin() && cBb->GetGuestPc() == catchPc);
+            auto endBlock = GetGraph()->GetEndBlock();
+            endBlock->RemovePred(throwBlock);
+            throwBlock->RemoveSucc(endBlock);
+            COMPILER_LOG(DEBUG, IR_BUILDER)
+                << "throwBlock " << throwBlock->GetId() << " is disconnected with endBlock " << endBlock->GetId();
+            throwBlock->AddSucc(cBb);
+            COMPILER_LOG(DEBUG, IR_BUILDER)
+                << "throwBlock " << throwBlock->GetId() << " is connected with catchBeginBlock " << cBb->GetId();
+            [[maybe_unused]] auto res = GetGraph()->AppendThrowBlock(throwBlock);
+            ASSERT(res);
+            GetGraph()->SetThrowApplied();
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
+
+void IrBuilder::ConnectThrowBlock(BasicBlock *throwBlock, const TryCodeBlock &tryBlock)
+{
+    if (throwBlock->GetGraph() != GetGraph()) {
+        return;
+    }
+    auto endBlock = GetGraph()->GetEndBlock();
+    if (throwBlock->GetSuccsBlocks().size() != 1 || throwBlock->GetSuccessor(0) != endBlock) {
+        return;
+    }
+    int32_t throwPc;
+    auto cls = FindExceptionClass(throwBlock, &throwPc);
+    if (cls != nullptr &&
+        FindAppropriateCatchBlock(tryBlock, throwBlock,
+                                  FindCatchBlockInPandaFile(static_cast<ark::Class *>(cls), throwPc))) {
+        return;
+    }
+    auto tryEnd = tryBlock.endBb;
+    ASSERT(tryEnd != nullptr);
+    if (tryEnd->GetGraph() != GetGraph()) {
+        return;
+    }
+    BasicBlock *catchBegin = nullptr;
+    if (tryEnd->IsCatch()) {
+        catchBegin = FindCatchBegin(tryEnd);
+    } else {
+        for (auto succ : tryEnd->GetSuccsBlocks()) {
+            if (succ->IsCatchBegin()) {
+                catchBegin = succ;
+                break;
+            }
+        }
+    }
+    if (catchBegin != nullptr) {
+        throwBlock->AddSucc(catchBegin);
+        COMPILER_LOG(DEBUG, IR_BUILDER) << "throwBlock " << throwBlock->GetId() << " is connected with catchBegin "
+                                        << catchBegin->GetId();
+        [[maybe_unused]] auto result = GetGraph()->AppendThrowBlock(throwBlock);
+        ASSERT(result);
+        GetGraph()->SetThrowApplied();
+    }
+}
+
+void IrBuilder::ConnectThrowBlocks()
+{
+    for (auto it : tryBlocks_) {
+        const auto &tryBlock = it.second;
+        if (tryBlock.containsThrowableInst) {
+            for (auto throwBlock : *tryBlock.throwBlocks) {
+                ConnectThrowBlock(throwBlock, tryBlock);
+            }
+        }
+    }
 }
 }  // namespace ark::compiler

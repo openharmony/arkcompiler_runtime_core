@@ -39,6 +39,7 @@ bool Cleanup::CanBeMerged(BasicBlock *bb)
  * It also removes empty basic blocks when it is possible and merges a linear basic block sequence to one bigger
  * basic block, thus simplifying control flow graph.
  */
+
 bool Cleanup::RunImpl()
 {
     GetGraph()->RunPass<DominatorsTree>();
@@ -92,6 +93,10 @@ bool Cleanup::RunImpl()
         while (CanBeMerged(bb)) {
             ASSERT(!bb->GetSuccessor(0)->HasPhi());
             COMPILER_LOG(DEBUG, CLEANUP) << "Merged block " << bb->GetSuccessor(0)->GetId() << " into " << bb->GetId();
+            if (GetGraph()->EraseThrowBlock(bb->GetSuccessor(0))) {
+                [[maybe_unused]] auto res = GetGraph()->AppendThrowBlock(bb);
+                ASSERT(res);
+            }
             bb->JoinSuccessorBlock();
             modified = true;
         }
@@ -231,7 +236,7 @@ bool Cleanup::ProcessBB(BasicBlock *bb, Marker deadMrk, ArenaSet<BasicBlock *> *
             last->SetMarker(deadMrk);
             dead_.push_back(last);
         } else {
-            ASSERT(last->GetOpcode() == Opcode::Try);
+            ASSERT(last->GetOpcode() == Opcode::Throw || last->GetOpcode() == Opcode::Try);
         }
         pred->RemoveSucc(succ);
         if (succ->GetPredsBlocks().size() == PREDS_BLOCK_NUM) {
@@ -251,8 +256,10 @@ bool Cleanup::ProcessBB(BasicBlock *bb, Marker deadMrk, ArenaSet<BasicBlock *> *
         // Fixing LoopAnalysis or DomTree is no necessary here, because there would be another edge
     }
     savedPreds_.clear();
-    bool badLoop = bb->GetLoop()->IsIrreducible();
-    GetGraph()->RemoveEmptyBlockWithPhis(bb, badLoop);
+    bool badLoop = bb->GetLoop()->IsIrreducible() || GetGraph()->IsThrowApplied();
+    if (!GetGraph()->IsThrowApplied()) {
+        GetGraph()->RemoveEmptyBlockWithPhis(bb, badLoop);
+    }
     if (badLoop) {
         GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
         GetGraph()->RunPass<LoopAnalyzer>();

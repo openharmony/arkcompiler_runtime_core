@@ -15,7 +15,9 @@
 
 #include "reg_alloc.h"
 #include "cleanup_empty_blocks.h"
+#include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/liveness_analyzer.h"
+#include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "reg_alloc_graph_coloring.h"
@@ -47,11 +49,54 @@ bool ShouldSkipAllocation(Graph *graph)
 #endif
 }
 
+void RemoveThrowEdges(Graph *graph)
+{
+    if (!graph->IsThrowApplied() || graph->GetThrowBlocks().empty()) {
+        return;
+    }
+    [[maybe_unused]] constexpr size_t IMM_2 = 2;
+    ASSERT(!graph->GetTryBeginBlocks().empty());
+    bool updated = false;
+    auto throwBlocks = graph->GetThrowBlocks();
+    for (auto throwBlock : throwBlocks) {
+        ASSERT(throwBlock->GetSuccsBlocks().size() <= IMM_2);
+        auto succ = throwBlock->GetSuccessor(0);
+        if (succ->IsEndBlock()) {
+            succ = throwBlock->GetSuccessor(1);
+        }
+        ASSERT(succ->IsCatchBegin());
+        graph->RemovePredecessorUpdateDF(succ, throwBlock);
+        throwBlock->RemoveSucc(succ);
+        [[maybe_unused]] auto res = graph->EraseThrowBlock(throwBlock);
+        COMPILER_LOG(DEBUG, IR_BUILDER) << throwBlock->GetId() << " is erased";
+        if (!res) {
+            COMPILER_LOG(DEBUG, IR_BUILDER) << graph->GetRuntime()->GetMethodFullName(graph->GetMethod())
+                                            << ": can't erase throwBlock " << throwBlock->GetId();
+        }
+        ASSERT(res);
+        if (throwBlock->GetSuccsBlocks().empty()) {
+            throwBlock->AddSucc(graph->GetEndBlock());
+        }
+        updated = true;
+    }
+    if (updated) {
+        ASSERT(graph->GetThrowBlocks().empty());
+        graph->InvalidateAnalysis<DominatorsTree>();
+        graph->InvalidateAnalysis<LoopAnalyzer>();
+        graph->RemoveUnreachableBlocks();
+        graph->RunPass<Cleanup>();
+    }
+    graph->UnsetThrowApplied();
+}
+
 bool RegAlloc(Graph *graph)
 {
     if (ShouldSkipAllocation(graph)) {
         return false;
     }
+
+    // Regalloc doesn't use RPO, so additional throw arcs aren't needed
+    RemoveThrowEdges(graph);
 
     bool raPassed = false;
 

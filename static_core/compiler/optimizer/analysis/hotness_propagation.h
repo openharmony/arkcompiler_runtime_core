@@ -204,6 +204,9 @@ private:
             }
             case 2U: {
                 [[maybe_unused]] auto pli = pred->GetLastInst();
+                if (pred->GetGraph()->IsThrowApplied() && pli->GetOpcode() == Opcode::Throw) {
+                    return 0;
+                }
                 ASSERT(pli != nullptr && (pli->GetOpcode() == Opcode::If || pli->GetOpcode() == Opcode::IfImm));
                 ASSERT(pred->GetTrueSuccessor() == succ || pred->GetFalseSuccessor() == succ);
                 return pred->GetGraph()->GetBranchCounter(pred, pred->GetTrueSuccessor() == succ);
@@ -231,7 +234,8 @@ private:
         // Otherwise, it is a transition-block (i.e. have only one successor), resolve its hotness firstly and return
         // it:
         if constexpr (!IS_END_BLOCK) {
-            ASSERT(pred->GetSuccsBlocks().size() == 1 || pred->IsTryBegin() || pred->IsTryEnd());
+            ASSERT(pred->GetSuccsBlocks().size() == 1 || pred->IsTryBegin() || pred->IsTryEnd() ||
+                   (pred->GetGraph()->IsThrowApplied() && pred->IsEndWithThrow()));
         }
         size_t sumPreds = 0;
         for (auto *newPred : pred->GetPredsBlocks()) {

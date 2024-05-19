@@ -29,6 +29,13 @@ class Method;
 }  // namespace ark
 
 namespace ark::compiler {
+
+struct BlocksConnectorInfo {
+    bool fallthrough {};
+    bool deadInstructions {};
+    BytecodeInstruction prevInst {nullptr};
+};
+
 /// Build IR from panda bytecode
 class IrBuilder : public Optimization {
     struct Boundaries {
@@ -49,6 +56,7 @@ class IrBuilder : public Optimization {
         ArenaVector<BasicBlock *> *basicBlocks {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
         uint32_t id {INVALID_ID};                          // NOLINT(misc-non-private-member-variables-in-classes)
         bool containsThrowableInst {false};                // NOLINT(misc-non-private-member-variables-in-classes)
+        ArenaSet<BasicBlock *> *throwBlocks {nullptr};     // NOLINT(misc-non-private-member-variables-in-classes)
 
         void Init(Graph *graph, uint32_t tryId)
         {
@@ -135,7 +143,8 @@ private:
     void ResolveTryCatchBlocks();
     void ConnectTryCatchBlocks();
     IrBuilder::TryCodeBlock *InsertTryBlockInfo(const Boundaries &tryBoundaries);
-    void TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst);
+    void TrackTryBoundaries(size_t pc, const BytecodeInstruction &inst, BasicBlock *targetBb,
+                            BlocksConnectorInfo &info);
     BasicBlock *GetBlockToJump(BytecodeInstruction *inst, size_t pc);
     BasicBlock *GetBlockForSaveStateDeoptimize(BasicBlock *block);
     void MarkTryCatchBlocks(Marker marker);
@@ -145,6 +154,14 @@ private:
     void ConnectTryCodeBlock(const TryCodeBlock &tryBlock, const ArenaMap<uint32_t, BasicBlock *> &catchBlocks);
     void ProcessThrowableInstructions(Inst *throwableInst);
     void RestoreTryEnd(const TryCodeBlock &tryBlock);
+    uint32_t FindCatchBlockInPandaFile(Class *cls, uint32_t pc) const;
+    void ConnectThrowBlock(BasicBlock *throwBlock, const TryCodeBlock &tryBlock);
+    void ConnectThrowBlocks();
+    bool BuildIr(size_t vregsCount);
+    RuntimeInterface::ClassPtr FindExceptionClass(BasicBlock *throwBlock, int32_t *throwPc);
+    bool FindAppropriateCatchBlock(const TryCodeBlock &tryBlock, BasicBlock *throwBlock, uint32_t catchPc);
+    BasicBlock *FindCatchBegin(BasicBlock *bb);
+
     void SetInstBuilder(InstBuilder *instBuilder)
     {
         instBuilder_ = instBuilder;
