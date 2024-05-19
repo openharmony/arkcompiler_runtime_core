@@ -288,6 +288,26 @@ export class Uint8ClampedArray implements Iterable<Number> {
     }
 
     /**
+     * Creates an Uint8ClampedArray from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, numbers[i] as int)
+        }
+    }
+
+    /**
+     * Creates an Uint8ClampedArray from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, numbers[i] as int)
+        }
+    }
+
+    /**
      * Iteratorable interface implementation
      * @returns iterator over all elements
      */
@@ -2703,6 +2723,26 @@ export class Uint8Array implements Iterable<Number> {
         this.byteLengthInt = other.byteLength as int
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
+    }
+
+    /**
+     * Creates an Uint8Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as int)
+        }
+    }
+
+    /**
+     * Creates an Uint8Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as int)
+        }
     }
 
     internal zeroIfInfinity(val: number): number {
@@ -5142,6 +5182,26 @@ export class Uint16Array implements Iterable<Number> {
         this.byteOffsetInt = 0
     }
 
+    /**
+     * Creates an Uint16Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as int)
+        }
+    }
+
+    /**
+     * Creates an Uint16Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as int)
+        }
+    }
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -7577,6 +7637,26 @@ export class Uint32Array implements Iterable<Number> {
         this.byteLengthInt = other.byteLength as int
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
+    }
+
+    /**
+     * Creates an Uint32Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as long)
+        }
+    }
+
+    /**
+     * Creates an Uint32Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(numbers[i]) as long)
+        }
     }
 
     internal zeroIfInfinity(val: number): number {
@@ -10041,6 +10121,26 @@ export class BigUint64Array implements Iterable<BigInt> {
         this.byteLengthInt = other.byteLength as int
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
+    }
+
+    /**
+     * Creates an BigUint64Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(new BigInt(numbers[i]).getULong()))
+        }
+    }
+
+    /**
+     * Creates an BigUint64Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafeClamp(i, this.zeroIfInfinity(new BigInt(numbers[i]).getULong()))
+        }
     }
 
     internal zeroIfInfinity(val: BigInt): BigInt {

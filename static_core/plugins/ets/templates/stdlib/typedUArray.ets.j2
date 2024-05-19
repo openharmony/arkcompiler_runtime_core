@@ -32,6 +32,8 @@ const IS_LITTLE_ENDIAN = RuntimeGetPlatformIsLittleEndian();
     {%- set numberBigIntToPrimitive = ('.' + element['etsType'] + 'Value()') if element['subsetType'] != 'BigInt' else '.getULong()' %}
     {%- set numberBigIntUndefToPrimitive = (numberBigIntToPrimitive) %}
     {%- set isNonCompat = '/* public */ internal' if element['subsetType'] != 'BigInt' else 'private' %}
+    {%- set valueOrBigIntGetULong = '%s' if element['subsetType'] != 'BigInt' else 'new BigInt(%s).getULong()' %}
+    {%- set asElementCompatOrBigInt = ('%s as ' + element['etsType']) if element['subsetType'] != 'BigInt' else '%s' %}
 
 class {{element['name']}}ArrayIteratorKeys implements IterableIterator<Number> {
     private length: int = 0
@@ -313,6 +315,35 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.lengthInt = other.length as int
         this.byteOffsetInt = 0
     }
+
+    /**
+     * Creates an {{element['name']}}Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            {%- if element.get('name') != 'Uint8Clamped' %}
+            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( 'this.zeroIfInfinity(' + (valueOrBigIntGetULong % 'numbers[i]') + ')' ) }})
+            {%- else %}
+            this.setUnsafeClamp(i, numbers[i] as {{element['etsType']}})
+            {%- endif %}
+        }
+    }
+
+    /**
+     * Creates an {{element['name']}}Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            {%- if element.get('name') != 'Uint8Clamped' %}
+            this.setUnsafeClamp(i, {{ asElementCompatOrBigInt % ( 'this.zeroIfInfinity(' + (valueOrBigIntGetULong % 'numbers[i]') + ')' ) }})
+            {%- else %}
+            this.setUnsafeClamp(i, numbers[i] as {{element['etsType']}})
+            {%- endif %}
+        }
+    }
+
 {%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
 
     internal zeroIfInfinity(val: {{element['subsetType']}}): {{element['subsetType']}} {

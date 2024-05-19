@@ -281,6 +281,26 @@ export final class Int8Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
+    /**
+     * Creates an Int8Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as byte)
+        }
+    }
+
+    /**
+     * Creates an Int8Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as byte)
+        }
+    }
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -2722,6 +2742,26 @@ export final class Int16Array implements Iterable<Number> {
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
+    }
+
+    /**
+     * Creates an Int16Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as short)
+        }
+    }
+
+    /**
+     * Creates an Int16Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as short)
+        }
     }
 
     internal zeroIfInfinity(val: number): number {
@@ -5171,6 +5211,26 @@ export final class Int32Array implements Iterable<Number> {
         this.byteOffset = 0
     }
 
+    /**
+     * Creates an Int32Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as int)
+        }
+    }
+
+    /**
+     * Creates an Int32Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i]) as int)
+        }
+    }
+
     internal zeroIfInfinity(val: number): number {
         if ((val == Infinity) || (val == -Infinity)) {
             return 0 as number
@@ -7591,6 +7651,26 @@ export final class BigInt64Array implements Iterable<BigInt> {
         this.byteOffset = 0
     }
 
+    /**
+     * Creates an BigInt64Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i] as long))
+        }
+    }
+
+    /**
+     * Creates an BigInt64Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, this.zeroIfInfinity(numbers[i] as long))
+        }
+    }
+
     internal zeroIfInfinity(val: BigInt): BigInt {
         if ((val.getLong() == Infinity) || (val.getLong() == -Infinity)) {
             return new BigInt(0)
@@ -9968,6 +10048,26 @@ export final class Float32Array implements Iterable<Number> {
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
+    }
+
+    /**
+     * Creates an Float32Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i] as float)
+        }
+    }
+
+    /**
+     * Creates an Float32Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i] as float)
+        }
     }
 
     /**
@@ -12395,6 +12495,26 @@ export final class Float64Array implements Iterable<Number> {
         this.byteLength = other.byteLength
         this.lengthInt = other.length as int
         this.byteOffset = 0
+    }
+
+    /**
+     * Creates an Float64Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i] as double)
+        }
+    }
+
+    /**
+     * Creates an Float64Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i] as double)
+        }
     }
 
     /**
