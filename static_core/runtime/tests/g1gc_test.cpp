@@ -62,6 +62,7 @@ public:
         options.SetRunGcInPlace(true);
         options.SetCompilerEnableJit(false);
         options.SetGcWorkersCount(0);
+        options.SetAdaptiveTlabSize(false);
         // NOLINTNEXTLINE(readability-magic-numbers)
         options.SetG1PromotionRegionAliveRate(100U);
         options.SetGcTriggerType("debug-never");

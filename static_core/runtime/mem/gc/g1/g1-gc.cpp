@@ -738,10 +738,16 @@ void G1GC<LanguageConfig>::TryRunMixedGC(ark::GCTask &task)
     if (!collectibleRegions.empty() && HaveEnoughSpaceToMove(collectibleRegions)) {
         // Ordinary collection flow
         RunMixedGC(task, collectibleRegions);
+    } else if (collectibleRegions.empty()) {
+        LOG_DEBUG_GC << "Failed to run gc: nothing to collect in movable space";
     } else {
-        LOG_DEBUG_GC << "Failed to run gc: "
-                     << (collectibleRegions.empty() ? "nothing to collect in movable space"
-                                                    : "not enough free regions to move");
+        // There are no space to move objects. Need to skip concurrent marking
+        // in this case, since it ignores young roots
+        // Atomic with release order reason: to see changes made by GC thread (which do concurrent
+        // marking and than set isMixedGcRequired_) in mutator thread which waits for the end of
+        // concurrent marking.
+        isMixedGcRequired_.store(true, std::memory_order_release);
+        LOG_DEBUG_GC << "Failed to run gc: not enough free regions to move";
     }
     ReenqueueDirtyCards();
 }

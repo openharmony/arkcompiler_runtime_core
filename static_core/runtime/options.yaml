@@ -505,7 +505,7 @@ options:
 
 - name: adaptive-tlab-size
   type: bool
-  default: false
+  default: true
   description: Enable/disable adaptive TLAB size according to runtime allocation statistics
 
 - name: init-tlab-size

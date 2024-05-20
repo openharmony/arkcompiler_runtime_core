@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -301,7 +301,7 @@ public:
         [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
 
         PandaVector<VMHandle<ObjectHeader>> objects;
-        constexpr size_t STRING_DATA_SIZE = 10000U;
+        constexpr size_t STRING_DATA_SIZE = 20000U;
         constexpr uint8_t START_VALUE_IN_STRING_DATA = 0x30;
         std::vector<uint8_t> stringData(STRING_DATA_SIZE, START_VALUE_IN_STRING_DATA);
         stringData.push_back(0x00);
