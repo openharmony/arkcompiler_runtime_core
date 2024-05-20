@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Data
+module TemplateData
     def self.get_lambda_data()
         [
             [2, ", i as number, #{$ctx.this}", ", i: number, self: #{$ctx.this_type}"],

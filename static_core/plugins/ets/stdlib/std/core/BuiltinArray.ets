@@ -357,7 +357,6 @@ export function some(self: boolean[], fn: (v: boolean, i: number, self: boolean[
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: boolean[], fn: (v: boolean, i: number, self: boolean[]) => boolean): boolean[] {
     return filter(self, (v: boolean, i: number): boolean => fn(v, i as number, self));
 }
@@ -390,7 +389,6 @@ export function findLastIndex(self: boolean[], fn: (element: boolean, i: number,
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number, self: boolean[]) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -414,7 +412,6 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number, 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean, i: number, self: boolean[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -433,7 +430,6 @@ export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, curr
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: number, self: boolean[]) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -457,7 +453,6 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: num
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number, self: boolean[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -471,7 +466,6 @@ export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: boolean[], fn: (a: boolean, i: number, self: boolean[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -585,7 +579,6 @@ export function findLastIndex(self: boolean[], fn: (element: boolean, i: number)
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -609,7 +602,6 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number) 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -628,7 +620,6 @@ export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, curr
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: number) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -652,7 +643,6 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: num
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -666,7 +656,6 @@ export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: boolean[], fn: (a: boolean, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -761,7 +750,6 @@ export function some(self: boolean[], fn: (v: boolean) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: boolean[], fn: (v: boolean) => boolean): boolean[] {
     return filter(self, (v: boolean, i: number): boolean => fn(v));
 }
@@ -794,7 +782,6 @@ export function findLastIndex(self: boolean[], fn: (element: boolean) => boolean
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: boolean[], fn: (a: boolean, b: boolean) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -818,7 +805,6 @@ export function reduce(self: boolean[], fn: (a: boolean, b: boolean) => boolean)
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -837,7 +823,6 @@ export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, curr
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -861,7 +846,6 @@ export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean) => boo
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -875,7 +859,6 @@ export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean) => U, ini
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: boolean[], fn: (a: boolean) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -1758,7 +1741,6 @@ export function some(self: byte[], fn: (v: byte, i: number, self: byte[]) => boo
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: byte[], fn: (v: byte, i: number, self: byte[]) => boolean): byte[] {
     return filter(self, (v: byte, i: number): boolean => fn(v, i as number, self));
 }
@@ -1791,7 +1773,6 @@ export function findLastIndex(self: byte[], fn: (element: byte, i: number, self:
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: byte[], fn: (a: byte, b: byte, i: number, self: byte[]) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -1815,7 +1796,6 @@ export function reduce(self: byte[], fn: (a: byte, b: byte, i: number, self: byt
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte, i: number, self: byte[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -1834,7 +1814,6 @@ export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number, self: byte[]) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -1858,7 +1837,6 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number, self
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number, self: byte[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -1872,7 +1850,6 @@ export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number, self
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: byte[], fn: (a: byte, i: number, self: byte[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -1986,7 +1963,6 @@ export function findLastIndex(self: byte[], fn: (element: byte, i: number) => bo
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: byte[], fn: (a: byte, b: byte, i: number) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -2010,7 +1986,6 @@ export function reduce(self: byte[], fn: (a: byte, b: byte, i: number) => byte):
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -2029,7 +2004,6 @@ export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -2053,7 +2027,6 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number) => b
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -2067,7 +2040,6 @@ export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number) => U
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: byte[], fn: (a: byte, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -2162,7 +2134,6 @@ export function some(self: byte[], fn: (v: byte) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: byte[], fn: (v: byte) => boolean): byte[] {
     return filter(self, (v: byte, i: number): boolean => fn(v));
 }
@@ -2195,7 +2166,6 @@ export function findLastIndex(self: byte[], fn: (element: byte) => boolean): num
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: byte[], fn: (a: byte, b: byte) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -2219,7 +2189,6 @@ export function reduce(self: byte[], fn: (a: byte, b: byte) => byte): byte {
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -2238,7 +2207,6 @@ export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: byte[], fn: (a: byte, b: byte) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -2262,7 +2230,6 @@ export function reduceRight(self: byte[], fn: (a: byte, b: byte) => byte): byte 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: byte[], fn: (a: U, b: byte) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -2276,7 +2243,6 @@ export function reduceRight<U>(self: byte[], fn: (a: U, b: byte) => U, initVal: 
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: byte[], fn: (a: byte) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -3159,7 +3125,6 @@ export function some(self: short[], fn: (v: short, i: number, self: short[]) => 
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: short[], fn: (v: short, i: number, self: short[]) => boolean): short[] {
     return filter(self, (v: short, i: number): boolean => fn(v, i as number, self));
 }
@@ -3192,7 +3157,6 @@ export function findLastIndex(self: short[], fn: (element: short, i: number, sel
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: short[], fn: (a: short, b: short, i: number, self: short[]) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -3216,7 +3180,6 @@ export function reduce(self: short[], fn: (a: short, b: short, i: number, self: 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short, i: number, self: short[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -3235,7 +3198,6 @@ export function reduce<U = short>(self: short[], fn: (previousValue: U, currentV
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: short[], fn: (a: short, b: short, i: number, self: short[]) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -3259,7 +3221,6 @@ export function reduceRight(self: short[], fn: (a: short, b: short, i: number, s
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number, self: short[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -3273,7 +3234,6 @@ export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number, se
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: short[], fn: (a: short, i: number, self: short[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -3387,7 +3347,6 @@ export function findLastIndex(self: short[], fn: (element: short, i: number) => 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: short[], fn: (a: short, b: short, i: number) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -3411,7 +3370,6 @@ export function reduce(self: short[], fn: (a: short, b: short, i: number) => sho
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -3430,7 +3388,6 @@ export function reduce<U = short>(self: short[], fn: (previousValue: U, currentV
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: short[], fn: (a: short, b: short, i: number) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -3454,7 +3411,6 @@ export function reduceRight(self: short[], fn: (a: short, b: short, i: number) =
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -3468,7 +3424,6 @@ export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number) =>
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: short[], fn: (a: short, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -3563,7 +3518,6 @@ export function some(self: short[], fn: (v: short) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: short[], fn: (v: short) => boolean): short[] {
     return filter(self, (v: short, i: number): boolean => fn(v));
 }
@@ -3596,7 +3550,6 @@ export function findLastIndex(self: short[], fn: (element: short) => boolean): n
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: short[], fn: (a: short, b: short) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -3620,7 +3573,6 @@ export function reduce(self: short[], fn: (a: short, b: short) => short): short 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -3639,7 +3591,6 @@ export function reduce<U = short>(self: short[], fn: (previousValue: U, currentV
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: short[], fn: (a: short, b: short) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -3663,7 +3614,6 @@ export function reduceRight(self: short[], fn: (a: short, b: short) => short): s
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: short[], fn: (a: U, b: short) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -3677,7 +3627,6 @@ export function reduceRight<U>(self: short[], fn: (a: U, b: short) => U, initVal
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: short[], fn: (a: short) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -4560,7 +4509,6 @@ export function some(self: int[], fn: (v: int, i: number, self: int[]) => boolea
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: int[], fn: (v: int, i: number, self: int[]) => boolean): int[] {
     return filter(self, (v: int, i: number): boolean => fn(v, i as number, self));
 }
@@ -4593,7 +4541,6 @@ export function findLastIndex(self: int[], fn: (element: int, i: number, self: i
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: int[], fn: (a: int, b: int, i: number, self: int[]) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -4617,7 +4564,6 @@ export function reduce(self: int[], fn: (a: int, b: int, i: number, self: int[])
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int, i: number, self: int[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -4636,7 +4582,6 @@ export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: int[], fn: (a: int, b: int, i: number, self: int[]) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -4660,7 +4605,6 @@ export function reduceRight(self: int[], fn: (a: int, b: int, i: number, self: i
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number, self: int[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -4674,7 +4618,6 @@ export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number, self: 
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: int[], fn: (a: int, i: number, self: int[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -4788,7 +4731,6 @@ export function findLastIndex(self: int[], fn: (element: int, i: number) => bool
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: int[], fn: (a: int, b: int, i: number) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -4812,7 +4754,6 @@ export function reduce(self: int[], fn: (a: int, b: int, i: number) => int): int
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -4831,7 +4772,6 @@ export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: int[], fn: (a: int, b: int, i: number) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -4855,7 +4795,6 @@ export function reduceRight(self: int[], fn: (a: int, b: int, i: number) => int)
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -4869,7 +4808,6 @@ export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number) => U, 
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: int[], fn: (a: int, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -4964,7 +4902,6 @@ export function some(self: int[], fn: (v: int) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: int[], fn: (v: int) => boolean): int[] {
     return filter(self, (v: int, i: number): boolean => fn(v));
 }
@@ -4997,7 +4934,6 @@ export function findLastIndex(self: int[], fn: (element: int) => boolean): numbe
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: int[], fn: (a: int, b: int) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -5021,7 +4957,6 @@ export function reduce(self: int[], fn: (a: int, b: int) => int): int {
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -5040,7 +4975,6 @@ export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: int[], fn: (a: int, b: int) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -5064,7 +4998,6 @@ export function reduceRight(self: int[], fn: (a: int, b: int) => int): int {
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: int[], fn: (a: U, b: int) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -5078,7 +5011,6 @@ export function reduceRight<U>(self: int[], fn: (a: U, b: int) => U, initVal: U)
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: int[], fn: (a: int) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -5961,7 +5893,6 @@ export function some(self: long[], fn: (v: long, i: number, self: long[]) => boo
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: long[], fn: (v: long, i: number, self: long[]) => boolean): long[] {
     return filter(self, (v: long, i: number): boolean => fn(v, i as number, self));
 }
@@ -5994,7 +5925,6 @@ export function findLastIndex(self: long[], fn: (element: long, i: number, self:
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: long[], fn: (a: long, b: long, i: number, self: long[]) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -6018,7 +5948,6 @@ export function reduce(self: long[], fn: (a: long, b: long, i: number, self: lon
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long, i: number, self: long[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -6037,7 +5966,6 @@ export function reduce<U = long>(self: long[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: long[], fn: (a: long, b: long, i: number, self: long[]) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -6061,7 +5989,6 @@ export function reduceRight(self: long[], fn: (a: long, b: long, i: number, self
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number, self: long[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6075,7 +6002,6 @@ export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number, self
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: long[], fn: (a: long, i: number, self: long[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -6189,7 +6115,6 @@ export function findLastIndex(self: long[], fn: (element: long, i: number) => bo
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: long[], fn: (a: long, b: long, i: number) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -6213,7 +6138,6 @@ export function reduce(self: long[], fn: (a: long, b: long, i: number) => long):
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -6232,7 +6156,6 @@ export function reduce<U = long>(self: long[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: long[], fn: (a: long, b: long, i: number) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -6256,7 +6179,6 @@ export function reduceRight(self: long[], fn: (a: long, b: long, i: number) => l
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6270,7 +6192,6 @@ export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number) => U
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: long[], fn: (a: long, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -6365,7 +6286,6 @@ export function some(self: long[], fn: (v: long) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: long[], fn: (v: long) => boolean): long[] {
     return filter(self, (v: long, i: number): boolean => fn(v));
 }
@@ -6398,7 +6318,6 @@ export function findLastIndex(self: long[], fn: (element: long) => boolean): num
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: long[], fn: (a: long, b: long) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -6422,7 +6341,6 @@ export function reduce(self: long[], fn: (a: long, b: long) => long): long {
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -6441,7 +6359,6 @@ export function reduce<U = long>(self: long[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: long[], fn: (a: long, b: long) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -6465,7 +6382,6 @@ export function reduceRight(self: long[], fn: (a: long, b: long) => long): long 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: long[], fn: (a: U, b: long) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -6479,7 +6395,6 @@ export function reduceRight<U>(self: long[], fn: (a: U, b: long) => U, initVal: 
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: long[], fn: (a: long) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -7362,7 +7277,6 @@ export function some(self: float[], fn: (v: float, i: number, self: float[]) => 
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: float[], fn: (v: float, i: number, self: float[]) => boolean): float[] {
     return filter(self, (v: float, i: number): boolean => fn(v, i as number, self));
 }
@@ -7395,7 +7309,6 @@ export function findLastIndex(self: float[], fn: (element: float, i: number, sel
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: float[], fn: (a: float, b: float, i: number, self: float[]) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -7419,7 +7332,6 @@ export function reduce(self: float[], fn: (a: float, b: float, i: number, self: 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float, i: number, self: float[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -7438,7 +7350,6 @@ export function reduce<U = float>(self: float[], fn: (previousValue: U, currentV
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: float[], fn: (a: float, b: float, i: number, self: float[]) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -7462,7 +7373,6 @@ export function reduceRight(self: float[], fn: (a: float, b: float, i: number, s
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number, self: float[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -7476,7 +7386,6 @@ export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number, se
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: float[], fn: (a: float, i: number, self: float[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -7590,7 +7499,6 @@ export function findLastIndex(self: float[], fn: (element: float, i: number) => 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: float[], fn: (a: float, b: float, i: number) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -7614,7 +7522,6 @@ export function reduce(self: float[], fn: (a: float, b: float, i: number) => flo
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -7633,7 +7540,6 @@ export function reduce<U = float>(self: float[], fn: (previousValue: U, currentV
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: float[], fn: (a: float, b: float, i: number) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -7657,7 +7563,6 @@ export function reduceRight(self: float[], fn: (a: float, b: float, i: number) =
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -7671,7 +7576,6 @@ export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number) =>
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: float[], fn: (a: float, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -7766,7 +7670,6 @@ export function some(self: float[], fn: (v: float) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: float[], fn: (v: float) => boolean): float[] {
     return filter(self, (v: float, i: number): boolean => fn(v));
 }
@@ -7799,7 +7702,6 @@ export function findLastIndex(self: float[], fn: (element: float) => boolean): n
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: float[], fn: (a: float, b: float) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -7823,7 +7725,6 @@ export function reduce(self: float[], fn: (a: float, b: float) => float): float 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -7842,7 +7743,6 @@ export function reduce<U = float>(self: float[], fn: (previousValue: U, currentV
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: float[], fn: (a: float, b: float) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -7866,7 +7766,6 @@ export function reduceRight(self: float[], fn: (a: float, b: float) => float): f
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: float[], fn: (a: U, b: float) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -7880,7 +7779,6 @@ export function reduceRight<U>(self: float[], fn: (a: U, b: float) => U, initVal
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: float[], fn: (a: float) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -8771,7 +8669,6 @@ export function some(self: double[], fn: (v: double, i: number, self: double[]) 
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: double[], fn: (v: double, i: number, self: double[]) => boolean): double[] {
     return filter(self, (v: double, i: number): boolean => fn(v, i as number, self));
 }
@@ -8804,7 +8701,6 @@ export function findLastIndex(self: double[], fn: (element: double, i: number, s
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: double[], fn: (a: double, b: double, i: number, self: double[]) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -8828,7 +8724,6 @@ export function reduce(self: double[], fn: (a: double, b: double, i: number, sel
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double, i: number, self: double[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -8847,7 +8742,6 @@ export function reduce<U = double>(self: double[], fn: (previousValue: U, curren
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: double[], fn: (a: double, b: double, i: number, self: double[]) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -8871,7 +8765,6 @@ export function reduceRight(self: double[], fn: (a: double, b: double, i: number
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number, self: double[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -8885,7 +8778,6 @@ export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number, 
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: double[], fn: (a: double, i: number, self: double[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -8999,7 +8891,6 @@ export function findLastIndex(self: double[], fn: (element: double, i: number) =
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: double[], fn: (a: double, b: double, i: number) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -9023,7 +8914,6 @@ export function reduce(self: double[], fn: (a: double, b: double, i: number) => 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -9042,7 +8932,6 @@ export function reduce<U = double>(self: double[], fn: (previousValue: U, curren
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: double[], fn: (a: double, b: double, i: number) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -9066,7 +8955,6 @@ export function reduceRight(self: double[], fn: (a: double, b: double, i: number
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -9080,7 +8968,6 @@ export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number) 
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: double[], fn: (a: double, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -9175,7 +9062,6 @@ export function some(self: double[], fn: (v: double) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: double[], fn: (v: double) => boolean): double[] {
     return filter(self, (v: double, i: number): boolean => fn(v));
 }
@@ -9208,7 +9094,6 @@ export function findLastIndex(self: double[], fn: (element: double) => boolean):
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: double[], fn: (a: double, b: double) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -9232,7 +9117,6 @@ export function reduce(self: double[], fn: (a: double, b: double) => double): do
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -9251,7 +9135,6 @@ export function reduce<U = double>(self: double[], fn: (previousValue: U, curren
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: double[], fn: (a: double, b: double) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -9275,7 +9158,6 @@ export function reduceRight(self: double[], fn: (a: double, b: double) => double
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: double[], fn: (a: U, b: double) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -9289,7 +9171,6 @@ export function reduceRight<U>(self: double[], fn: (a: U, b: double) => U, initV
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: double[], fn: (a: double) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -10180,7 +10061,6 @@ export function some(self: char[], fn: (v: char, i: number, self: char[]) => boo
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: char[], fn: (v: char, i: number, self: char[]) => boolean): char[] {
     return filter(self, (v: char, i: number): boolean => fn(v, i as number, self));
 }
@@ -10213,7 +10093,6 @@ export function findLastIndex(self: char[], fn: (element: char, i: number, self:
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: char[], fn: (a: char, b: char, i: number, self: char[]) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -10237,7 +10116,6 @@ export function reduce(self: char[], fn: (a: char, b: char, i: number, self: cha
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char, i: number, self: char[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -10256,7 +10134,6 @@ export function reduce<U = char>(self: char[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: char[], fn: (a: char, b: char, i: number, self: char[]) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -10280,7 +10157,6 @@ export function reduceRight(self: char[], fn: (a: char, b: char, i: number, self
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number, self: char[]) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -10294,7 +10170,6 @@ export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number, self
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: char[], fn: (a: char, i: number, self: char[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -10408,7 +10283,6 @@ export function findLastIndex(self: char[], fn: (element: char, i: number) => bo
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: char[], fn: (a: char, b: char, i: number) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -10432,7 +10306,6 @@ export function reduce(self: char[], fn: (a: char, b: char, i: number) => char):
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char, i: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -10451,7 +10324,6 @@ export function reduce<U = char>(self: char[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: char[], fn: (a: char, b: char, i: number) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -10475,7 +10347,6 @@ export function reduceRight(self: char[], fn: (a: char, b: char, i: number) => c
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -10489,7 +10360,6 @@ export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number) => U
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: char[], fn: (a: char, i: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -10584,7 +10454,6 @@ export function some(self: char[], fn: (v: char) => boolean): boolean {
  *
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function filter(self: char[], fn: (v: char) => boolean): char[] {
     return filter(self, (v: char, i: number): boolean => fn(v));
 }
@@ -10617,7 +10486,6 @@ export function findLastIndex(self: char[], fn: (element: char) => boolean): num
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce(self: char[], fn: (a: char, b: char) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -10641,7 +10509,6 @@ export function reduce(self: char[], fn: (a: char, b: char) => char): char {
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
@@ -10660,7 +10527,6 @@ export function reduce<U = char>(self: char[], fn: (previousValue: U, currentVal
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight(self: char[], fn: (a: char, b: char) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
@@ -10684,7 +10550,6 @@ export function reduceRight(self: char[], fn: (a: char, b: char) => char): char 
  *
  * @returns a result after applying fn over all elements of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function reduceRight<U>(self: char[], fn: (a: U, b: char) => U, initVal: U): U {
     let acc = initVal
     for (let i = self.length - 1; i >= 0; i--) {
@@ -10698,7 +10563,6 @@ export function reduceRight<U>(self: char[], fn: (a: U, b: char) => U, initVal: 
  *
  * @param fn to apply for each element of the Array
  */
-// NOTE(gogabr): should override from ReadonlyArray, but blocked by #15096
 export function forEach(self: char[], fn: (a: char) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
@@ -11292,38 +11156,51 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
 
 function builtin_insertion_sort<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
     for (let i = startIndex + 1; i < endIndex; i++) {
-        const tmp = arr[i]
-        if (comp(tmp, arr[startIndex]) as int < 0) {
-            for (let j = i; j > startIndex; j--) {
-                arr[j] = arr[j - 1]
-            }
-            arr[startIndex] = tmp
-        } else {
-            let pos = i
-            while (comp(tmp, arr[pos - 1]) as int < 0) {
-                arr[pos] = arr[pos - 1]
-                pos--
-            }
-            arr[pos] = tmp
+        const tmp = arr[i];
+        let j = i - 1;
+
+        while ((j >= startIndex) && (comp(tmp, arr[j]) as int < 0)) {
+            arr[j + 1] = arr[j];
+            j--;
         }
+        arr[j + 1] = tmp;
     }
+
 }
 
-function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: int, to: T[], toStart: int, comp: (lhs: T, rhs: T) => number): void {
-    let startIndex2 = midIndex
-    while (startIndex < midIndex && startIndex2 < endIndex) {
-        if (comp(arr[startIndex], arr[startIndex2]) as int <= 0) {
-            to[toStart++] = arr[startIndex++]
+function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
+    const len1 = midIndex - startIndex + 1;
+    const len2 = endIndex - midIndex;
+    let left = new T[len1];
+    let right = new T[len2];
+    for (let i = 0; i < len1; i++) {
+        left[i] = arr[startIndex + i];
+    }
+    for (let i = 0; i < len2; i++) {
+        right[i] = arr[midIndex + 1 + i];
+    }
+    let i = 0;
+    let j = 0;
+    let k = startIndex;
+    while (i < len1 && j < len2) {
+        if (comp(left[i], right[j]) as int <= 0) {
+            arr[k] = left[i];
+            i++;
         } else {
-            to[toStart++] = arr[startIndex2++]
+            arr[k] = right[j];
+            j++;
         }
+        k++;
     }
-
-    while (startIndex < midIndex) {
-        to[toStart++] = arr[startIndex++]
+    while (i < len1) {
+        arr[k] = left[i];
+        k++;
+        i++;
     }
-    while (startIndex2 < endIndex) {
-        to[toStart++] = arr[startIndex2++]
+    while (j < len2) {
+        arr[k] = right[j];
+        k++;
+        j++;
     }
 }
 
@@ -11331,40 +11208,25 @@ export function sort_stable<T>(arr: T[], startIndex: int, endIndex: int, comp: (
     if (endIndex <= startIndex) {
         return;
     }
+
     const INS_SORT_DELTA = 16
     for (let i = startIndex; i < endIndex; i += INS_SORT_DELTA ) {
         builtin_insertion_sort<T>(arr, i, min(i + INS_SORT_DELTA , endIndex), comp)
     }
-
-    let prevSize = INS_SORT_DELTA
-
-    const delta = endIndex - startIndex
-    const initialArr = arr
-    let buf = __alloc_array<T>(delta, arr)
-    let buf0 = 0
-    let arr0 = startIndex
-    while (prevSize < delta) {
-        for (let strt = 0; strt < delta; strt += 2 * prevSize) {
-            const mid = strt + prevSize
-            if (mid >= delta) {
-                break
-            }
-            const end = min(mid + prevSize, delta)
-            perform_merge(arr, strt + arr0, mid + arr0, end + arr0, buf, strt + buf0, comp)
-        }
-        const tmp = arr
-        arr = buf
-        buf = tmp
-        const buf0Tmp = buf0
-        buf0 = arr0
-        arr0 = buf0Tmp
-
-        prevSize *= 2
+    if ((endIndex - startIndex) < INS_SORT_DELTA) {
+        return;
     }
+    for (let size = INS_SORT_DELTA; size < endIndex; size = 2 * size) {
+        for (let left = startIndex; left < endIndex; left += 2 * size) {
 
-    if (!runtime.isSameReference(arr, initialArr)) {
-        for (let i = 0; i < delta; i++) {
-            initialArr[startIndex + i] = arr[i + arr0]
+            // Find ending point of left subarray and right subarray
+            const mid = min(left + size - 1, endIndex - 1);
+            const right = min((left + 2 * size - 1), (endIndex - 1));
+
+            // Merge sub array arr[left.....mid] and arr[mid+1....right]
+            if (mid < right) {
+                perform_merge(arr, left, mid, right, comp);
+            }
         }
     }
 }

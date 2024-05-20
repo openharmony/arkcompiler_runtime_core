@@ -14,7 +14,7 @@
 %
 % require_relative 'Array_code'
 
-% Data::get_lambda_data.each { |lambda_args_params|
+% TemplateData::get_lambda_data.each { |lambda_args_params|
 %   lambda_params_num, lambda_args, lambda_params = lambda_args_params
 /**
  * Creates a new `Array` object and populates
@@ -24,7 +24,7 @@
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-<%= access_public %> map<%= map_generic %>(<%= this_arg %>fn: (value: <%= el_type %><%= lambda_params %>) => <%= mapped_type %>): <%= array_of_type.(mapped_type) %> {
+<%= access_public %> <%= override %> map<%= map_generic %>(<%= this_arg %>fn: (value: <%= el_type %><%= lambda_params %>) => <%= mapped_type %>): <%= array_of_type.(mapped_type) %> {
     const len = <%= this_len_int %>;
     let res = <%= make_buffer.('len', mapped_type) %>;
     for (let i = 0; i < len; i++) {

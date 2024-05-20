@@ -667,7 +667,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns New `Array` instance, constructed from `this` and given `other` instances of `Array` class.
      */
-    // public concat(...items: (T | ConcatArray<T>)[]): Array<T> {
+    // public override concat(...items: (T | ConcatArray<T>)[]): Array<T> {
     //     throw new Error("not implemented")
     // }
 
@@ -1495,17 +1495,18 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Returns the last index at which a given element can be found in the array,
      * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
      *
-     * @param element element to locate in the array.
+     * @param searchElement element to locate in the array.
+     *
      * @param fromIndex zero-based index at which to start searching backwards.
      * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
      * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
      * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
-     * If `fromIndex` is undefined then `fromIndex = 0`
-     * If `fromIndex` is ommited then `fromIndex = length()-1`
+     * If `fromIndex` is undefined then `fromIndex = 0`.
+     * If `fromIndex` is ommited then `fromIndex = length()-1`.
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public lastIndexOf(element: T, fromIndex: int): int {
+     public lastIndexOf(searchElement: T, fromIndex: int): int {
         if (this.actualLength == 0) {
             return -1;
         }
@@ -1518,7 +1519,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         }
 
         while (k >= 0) {
-            if (__runtimeEquals(this.$_get_unsafe(k), element)) {
+            if (__runtimeEquals(this.$_get_unsafe(k), searchElement)) {
                 return k;
             }
             k--;
@@ -1531,12 +1532,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
      *
      * @param searchElement element to locate in the array.
+     *
      * @param fromIndex zero-based index at which to start searching backwards.
      * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
      * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
      * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
-     * If `fromIndex` is undefined then `fromIndex = 0`
-     * If `fromIndex` is ommited then `fromIndex = length()-1`
+     * If `fromIndex` is undefined then `fromIndex = 0`.
+     * If `fromIndex` is ommited then `fromIndex = length()-1`.
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
@@ -1549,12 +1551,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
      *
      * @param searchElement element to locate in the array.
+     *
      * @param fromIndex zero-based index at which to start searching backwards.
      * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
      * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
      * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
-     * If `fromIndex` is undefined then `fromIndex = 0`
-     * If `fromIndex` is ommited then `fromIndex = length()-1`
+     * If `fromIndex` is undefined then `fromIndex = 0`.
+     * If `fromIndex` is ommited then `fromIndex = length()-1`.
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
@@ -1629,7 +1632,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             if (i != 0) {
                 sb.append(",")
             }
-            let x: NullishType = this.$_get_unsafe(i)
+            let x = this.$_get_unsafe(i) as NullishType;
             if (!__runtimeIsSameReference(null, x) && !__runtimeIsSameReference(undefined, x)) {
                 sb.append(x!.toLocaleString())
             }

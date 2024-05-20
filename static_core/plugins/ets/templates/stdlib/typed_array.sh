@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eu -o pipefail
+set -xeo pipefail
 
 readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-readonly GENPATH="${SCRIPT_DIR}/../../stdlib/escompat"
+readonly GENPATH="${1:-"${SCRIPT_DIR}/../../stdlib"}/escompat"
+readonly ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../../../.."}
 
+source "${ROOT_DIR}/scripts/python/venv-utils.sh"
+activate_venv
 mkdir -p "${GENPATH}"
 
 echo "Generating $GENPATH/DataView.ets"
@@ -27,3 +30,5 @@ jinja2 "${SCRIPT_DIR}/typedArray.ets.j2" -o "$GENPATH/TypedArrays.ets"
 
 echo "Generating $GENPATH/TypedUArrays.ets"
 jinja2 "${SCRIPT_DIR}/typedUArray.ets.j2" -o "$GENPATH/TypedUArrays.ets"
+
+deactivate_venv

@@ -16,24 +16,35 @@ set -xeo pipefail
 
 readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 cd "$SCRIPT_DIR"
-readonly GENPATH="${SCRIPT_DIR}/../../stdlib/"
+readonly GENPATH="${SCRIPT_DIR}/../../stdlib"
+readonly ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../../../.."}
+readonly GEN_ESCOMPAT_PATH="${1:-${GENPATH}}/escompat"
+readonly GEN_STDCORE_PATH="${1:-${GENPATH}}/std/core"
 
 function format_file() {
     sed -e 's/\b \s\+\b/ /g' | sed -e 's/\s\+$//g' | sed -e 's+/\*\s*\*/\s*++g' | cat -s
 }
 
-readonly ARR="${GENPATH}/escompat/Array.ets"
+mkdir -p "${GEN_ESCOMPAT_PATH}"
+mkdir -p "${GEN_STDCORE_PATH}"
+
+source "${ROOT_DIR}/scripts/python/venv-utils.sh"
+activate_venv
+
+readonly ARR="${GEN_ESCOMPAT_PATH}/Array.ets"
 echo "Generating ${ARR}"
 erb Array_escompat.erb | format_file > "${ARR}"
 
-readonly BLT_ARR="${GENPATH}/std/core/BuiltinArray.ets"
+readonly BLT_ARR="${GEN_STDCORE_PATH}/BuiltinArray.ets"
 echo "Generating ${BLT_ARR}"
 erb Array_builtin.erb | format_file > "${BLT_ARR}"
 
-readonly BLT_ARR_SORT="${GENPATH}/std/core/BuiltinArraySort.ets"
+readonly BLT_ARR_SORT="${GEN_STDCORE_PATH}/BuiltinArraySort.ets"
 echo "Generating ${BLT_ARR_SORT}"
 jinja2 Array_builtin_sort.ets.j2 | format_file > "${BLT_ARR_SORT}"
 
-readonly BLT_ARR_ARG="${GENPATH}/std/core/BuiltinArrayAlgorithms.ets"
+readonly BLT_ARR_ARG="${GEN_STDCORE_PATH}/BuiltinArrayAlgorithms.ets"
 echo "Generating ${BLT_ARR_ARG}"
 jinja2 Array_builtin_algorithms.ets.j2 | format_file > "${BLT_ARR_ARG}"
+
+deactivate_venv
