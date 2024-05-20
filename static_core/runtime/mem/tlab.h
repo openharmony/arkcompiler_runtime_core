@@ -254,10 +254,25 @@ public:
         return AllocatorType::TLAB_ALLOCATOR;
     }
 
+    static constexpr float MIN_DESIRED_FILL_FRACTION = 0.5;
+
     size_t GetSize()
     {
         ASSERT(ToUintPtr(memoryEndAddr_) >= ToUintPtr(memoryStartAddr_));
         return ToUintPtr(memoryEndAddr_) - ToUintPtr(memoryStartAddr_);
+    }
+
+    float GetFillFraction()
+    {
+        size_t size = GetSize();
+        if (size == 0) {
+            // ZERO tlab case
+            // consider it is always full
+            return 1.0;
+        }
+        float fillFraction = static_cast<float>(GetOccupiedSize()) / static_cast<float>(size);
+        ASSERT(fillFraction <= 1.0);
+        return fillFraction;
     }
 
 private:

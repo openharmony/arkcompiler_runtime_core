@@ -615,12 +615,9 @@ TLAB *ObjectAllocatorGen<MT_MODE>::CreateNewTLAB(size_t tlabSize)
 template <MTModeT MT_MODE>
 size_t ObjectAllocatorGen<MT_MODE>::GetTLABMaxAllocSize()
 {
-    // Should be equal to the initial TLAB size since
-    // 1) Such max size prevents big objects from
-    //    allocation in growing TLABs
-    // 2) Threads change their TLAB sizes independently,
-    //    so tracking optimal object size over all
-    //    threads should be avoided
+    if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
+        return Runtime::GetOptions().GetMaxTlabSize();
+    }
     return Runtime::GetOptions().GetInitTlabSize();
 }
 
@@ -628,6 +625,9 @@ size_t ObjectAllocatorGen<MT_MODE>::GetTLABMaxAllocSize()
 template <MTModeT MT_MODE>
 size_t ObjectAllocatorGen<MT_MODE>::GetYoungAllocMaxSize()
 {
+    if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
+        return Runtime::GetOptions().GetMaxTlabSize();
+    }
     return Runtime::GetOptions().GetInitTlabSize();
 }
 

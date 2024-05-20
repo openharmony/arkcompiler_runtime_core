@@ -40,7 +40,7 @@ public:
         // Supposed that this method is called only in case of slow path
         ASSERT(occupiedSize <= maxSize);
         samples_.emplace_back(std::make_pair(occupiedSize, maxSize));
-        if (++slowAllocationCount_ > SLOW_ALLOCATION_THRESHOLD) {
+        if (slowAllocationCount_ > SLOW_ALLOCATION_THRESHOLD) {
             // There are too many slow paths taken by compiler
             // It is better to increase lastCountedSum_ immediately
             static constexpr float INCREASE_RATE = 2.0;
@@ -101,6 +101,16 @@ public:
         samples_.clear();
     }
 
+    void IncreaseSlowAllocationCount()
+    {
+        ++slowAllocationCount_;
+    }
+
+    size_t GetSlowAllocationCount() const
+    {
+        return slowAllocationCount_;
+    }
+
     float GetLastCountedSum() const
     {
         return lastCountedSum_;
@@ -108,28 +118,30 @@ public:
 
     size_t GetLastCountedSumInSizeT() const
     {
+        ASSERT(lowerSumBorder_ <= lastCountedSum_ && lastCountedSum_ <= upperSumBorder_);
         return static_cast<size_t>(lastCountedSum_);
     }
 
-private:
-    static constexpr size_t THRESHOLD_COUNT = 4;            // Threshold value showing that we have allocated
-                                                            // a lot of TLABs between GC pauses
     static constexpr size_t SLOW_ALLOCATION_THRESHOLD = 3;  // Value used for force increase of lastCountedSum_
-    static constexpr float REDUCTION_RATE = 0.75;           // Value used for size reduction
-    float maxGrowRatio_;                                    // Max change ratio when new average is estimated
-                                                            // (means that (newAverage / average) < maxGrowRatio_)
-    float lowerSumBorder_;                                  // Min value that sum may take
-    float upperSumBorder_;                                  // Max value that sum may take
-    float lastCountedSum_;                                  // Last estimated sum
-    float weight_;                                          // From 0 to 1
-                                                            // Used for better average estimation
-                                                            // Recently observed samples should have greater weight
-    float desiredFillFraction_;                             // From 0 to 1
-                                                            // If (occupiedSize / maxSize) < desiredFillFraction_ then
-                                                            // lastCountedSum_ should grow
-    size_t slowAllocationCount_ = 0;                        // Used for force increase of lastCountedSum_
-                                                            // if slowAllocationCount_ > SLOW_ALLOCATION_THRESHOLD
-    PandaVector<std::pair<size_t, size_t>> samples_;        // Saved samples. Used for estimation of a new sum
+
+private:
+    static constexpr size_t THRESHOLD_COUNT = 4;      // Threshold value showing that we have allocated
+                                                      // a lot of TLABs between GC pauses
+    static constexpr float REDUCTION_RATE = 0.75;     // Value used for size reduction
+    float maxGrowRatio_;                              // Max change ratio when new average is estimated
+                                                      // (means that (newAverage / average) < maxGrowRatio_)
+    float lowerSumBorder_;                            // Min value that sum may take
+    float upperSumBorder_;                            // Max value that sum may take
+    float lastCountedSum_;                            // Last estimated sum
+    float weight_;                                    // From 0 to 1
+                                                      // Used for better average estimation
+                                                      // Recently observed samples should have greater weight
+    float desiredFillFraction_;                       // From 0 to 1
+                                                      // If (occupiedSize / maxSize) < desiredFillFraction_ then
+                                                      // lastCountedSum_ should grow
+    size_t slowAllocationCount_ = 0;                  // Used for force increase of lastCountedSum_
+                                                      // if slowAllocationCount_ > SLOW_ALLOCATION_THRESHOLD
+    PandaVector<std::pair<size_t, size_t>> samples_;  // Saved samples. Used for estimation of a new sum
 };
 
 }  // namespace ark

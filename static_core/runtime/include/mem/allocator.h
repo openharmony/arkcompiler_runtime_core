@@ -881,6 +881,10 @@ public:
 
     TLAB *CreateNewTLAB(size_t tlabSize) final;
 
+    /**
+     * @brief This method should be used carefully, since in case of adaptive TLAB
+     * it only shows max possible size (grow limit) of a TLAB
+     */
     size_t GetTLABMaxAllocSize() final;
 
     bool IsTLABSupported() final

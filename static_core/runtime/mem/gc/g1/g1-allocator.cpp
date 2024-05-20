@@ -112,12 +112,9 @@ size_t ObjectAllocatorG1<MT_MODE>::GetTLABMaxAllocSize()
         // For single-threaded VMs we can allocate objects of size up to region size in TLABs.
         return GetYoungAllocMaxSize();
     } else {
-        // Should be equal to the initial TLAB size since
-        // 1) Such max size prevents big objects from
-        //    allocation in growing TLABs
-        // 2) Threads change their TLAB sizes independently,
-        //    so tracking optimal object size over all
-        //    threads should be avoided
+        if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
+            return Runtime::GetOptions().GetMaxTlabSize();
+        }
         return Runtime::GetOptions().GetInitTlabSize();
     }
 }

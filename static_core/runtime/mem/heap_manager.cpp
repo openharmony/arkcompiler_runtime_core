@@ -173,11 +173,18 @@ void *HeapManager::AllocateMemoryForObject(size_t size, Alignment align, Managed
     if (UseTLABForAllocations() && size <= GetTLABMaxAllocSize() && !pinned) {
         ASSERT(thread != nullptr);
         ASSERT(GetGC()->IsTLABsSupported());
+        if (isAdaptiveTlabSize_) {
+            thread->GetWeightedTlabAverage()->IncreaseSlowAllocationCount();
+        }
         // Try to allocate an object via TLAB
         TLAB *currentTlab = thread->GetTLAB();
         ASSERT(currentTlab != nullptr);  // A thread's TLAB must be initialized at least via some ZERO tlab values.
         mem = currentTlab->Alloc(size);
-        if (mem == nullptr) {
+        bool shouldAllocNewTlab = !isAdaptiveTlabSize_ ||
+                                  currentTlab->GetFillFraction() >= TLAB::MIN_DESIRED_FILL_FRACTION ||
+                                  thread->GetWeightedTlabAverage()->GetSlowAllocationCount() >=
+                                      WeightedAdaptiveTlabAverage::SLOW_ALLOCATION_THRESHOLD;
+        if (mem == nullptr && shouldAllocNewTlab) {
             // We couldn't allocate an object via current TLAB,
             // Therefore, create a new one and allocate in it.
             if (CreateNewTLAB(thread)) {
