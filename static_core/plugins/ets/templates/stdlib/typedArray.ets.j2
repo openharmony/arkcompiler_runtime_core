@@ -303,6 +303,37 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         this.lengthInt = other.length as int
         this.byteOffset = 0
     }
+
+    /**
+     * Creates an {{N}}Array from number[]
+     */
+    public constructor(numbers: number[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            {%- if (N != 'Float32') and (N != 'Float64') %}
+            this.setUnsafe(i, {{ ('this.zeroIfInfinity(numbers[i])' + ' as ' + T)
+                if elementCompat != 'BigInt' else 'this.zeroIfInfinity(numbers[i] as long)' }})
+            {%- else %}
+            this.setUnsafe(i, numbers[i]{{fromElementCompat}})
+            {%- endif %}
+        }
+    }
+
+    /**
+     * Creates an {{N}}Array from int[]
+     */
+    public constructor(numbers: int[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            {%- if (N != 'Float32') and (N != 'Float64') %}
+            this.setUnsafe(i, {{ ('this.zeroIfInfinity(numbers[i])' + ' as ' + T)
+                            if elementCompat != 'BigInt' else 'this.zeroIfInfinity(numbers[i] as long)' }})
+            {%- else %}
+            this.setUnsafe(i, numbers[i]{{fromElementCompat}})
+            {%- endif %}
+        }
+    }
+
     {%- if (N != 'Float32') and (N != 'Float64') %}
 
     internal zeroIfInfinity(val: {{elementCompat}}): {{elementCompat}} {
