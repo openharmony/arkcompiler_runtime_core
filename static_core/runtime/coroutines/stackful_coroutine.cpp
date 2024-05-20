@@ -133,6 +133,7 @@ void StackfulCoroutineContext::RequestSuspend(bool getsBlocked)
 
 void StackfulCoroutineContext::RequestResume()
 {
+    UpdateId(os::thread::GetCurrentThreadId(), GetCoroutine());
     SetStatus(Coroutine::Status::RUNNING);
 }
 

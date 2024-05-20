@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,12 @@ public:
      * and returns true on successful operation
      */
     virtual bool RetrieveStackInfo(void *&stackAddr, size_t &stackSize, size_t &guardSize) = 0;
+
+protected:
+    static void UpdateId(os::thread::ThreadId id, Coroutine *co)
+    {
+        co->UpdateId(id);
+    }
 
 private:
     Coroutine *co_ = nullptr;

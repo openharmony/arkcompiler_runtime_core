@@ -63,7 +63,9 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 
     auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
     Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
-    if (Coroutine::GetCurrent() != mainCoro) {
+    Coroutine *current = Coroutine::GetCurrent();
+    if (current != mainCoro && mainCoro->GetId() == current->GetId()) {
+        // Call ExecuteOnThisContext is possible only in the same thread.
         mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
             &subscribeOnAnotherPromise, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
     } else {
