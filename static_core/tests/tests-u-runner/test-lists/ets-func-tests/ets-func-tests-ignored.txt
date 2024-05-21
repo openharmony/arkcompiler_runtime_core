@@ -264,63 +264,27 @@ spec/nullables/nullable-lambda-default-param_5.ets
 spec/05.Generics/issue14751.ets
 ### Issue 14752
 spec/05.Generics/issue14752.ets
-<<<<<<< HEAD
 ### Issue 14498
 spec/05.Generics/generic_03.ets
-=======
->>>>>>> Title: Refactoring folder's structure for functional specificaton tests
 ### Issue 14510
 spec/05.Generics/generic_02.ets
 ### Issue 14542
 ### Negative tests
 spec/05.Generics/wrongUsingInT.ets
-<<<<<<< HEAD
 ### Issue 14656
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_05.ets
-=======
->>>>>>> Title: Refactoring folder's structure for functional specificaton tests
 ### Issue 14941
 spec/05.Generics/issue14700_ArrayBackedConstructorWithobject.ets
 ### Issue 15089
 spec/05.Generics/issue15089_05.ets
 spec/05.Generics/issue15089_06.ets
 spec/05.Generics/issue15089_08.ets
-<<<<<<< HEAD
 ### Issue 15623
 spec/05.Generics/issue15380_0.ets
 ### Issue 15380
 spec/05.Generics/issue15380_1.ets
 spec/05.Generics/issue15380_2.ets
 spec/05.Generics/issue15380_3.ets
-=======
-spec/05.generic/issue14751.ets
-### Issue 14752
-spec/05.generic/issue14752.ets
-### Issue 14498
-spec/05.generic/generic_03.ets
-### Issue 14510
-spec/05.generic/generic_02.ets
-### Issue 14542
-### Negative tests
-spec/05.generic/wrongUsingInT.ets
-### Issue 14656
-spec/05.generic/genericTypeArgumentWithDefaultParameterValue_05.ets
-### Issue 14941
-spec/05.generic/issue14700_ArrayBackedConstructorWithobject.ets
-### Issue 15089
-spec/05.generic/issue15089_05.ets
-spec/05.generic/issue15089_06.ets
-spec/05.generic/issue15089_08.ets
-### Issue 15623
-spec/05.generic/issue15380_0.ets
-### Issue 15380
-spec/05.generic/issue15380_1.ets
-spec/05.generic/issue15380_2.ets
-spec/05.generic/issue15380_3.ets
-=======
-### Issue 15380
-spec/05.Generics/issue15380_2.ets
->>>>>>> Title: Refactoring folder's structure for functional specificaton tests
 ### End of Generic
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)
@@ -529,7 +493,6 @@ spec/types/double_to_string_1.ets
 spec/types/double_to_string_2.ets
 ### Issue 15281 end
 ### Issue 13952
-<<<<<<< HEAD
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload1.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload2.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload3.ets
@@ -539,7 +502,6 @@ spec/10.Interfaces/Interface_Methods_Declarations/method_overload4.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload5.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload6.ets
 spec/10.Interfaces/Interface_Methods_Declarations/method_overload7.ets
-=======
 spec/10.Interfaces/method_overload1.ets
 spec/10.Interfaces/method_overload2.ets
 spec/10.Interfaces/method_overload3.ets
@@ -549,7 +511,6 @@ spec/10.Interfaces/method_overload4.ets
 spec/10.Interfaces/method_overload5.ets
 spec/10.Interfaces/method_overload6.ets
 spec/10.Interfaces/method_overload7.ets
->>>>>>> Issue : ahttps://gitee.com/openharmony/arkcompiler_runtime_core/issues/I9E4MJ
 ### BigInt64Array
 std/core/std_core_typedarrays__BigInt64Array.ets
 ### BigInt64Array end
