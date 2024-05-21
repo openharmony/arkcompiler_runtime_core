@@ -660,3 +660,8 @@ spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_ty
 ### Issue 14903 end
 ### Issue 1823 (QA Ticket for checking error in test)
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_0.ets
+### Issue 17725 begin
+spec/05.Generics/function_as_type_generic_0010.ets
+spec/05.Generics/function_as_type_generic_0020.ets
+spec/05.Generics/function_as_type_generic_0030.ets
+### Issue 17725
