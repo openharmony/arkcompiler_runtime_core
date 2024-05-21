@@ -13,18 +13,15 @@
  * limitations under the License.
  */
 
-#include "os/thread.h"
-#include "os/mem.h"
-
-#include "utils/span.h"
-#include "utils/logger.h"
-
-#include <chrono>
-#include <cstdio>
-
 #include <array>
+#include <chrono>
 #include <cstdint>
-#include "os/failure_retry.h"
+#include <cstdio>
+#include "libpandabase/os/failure_retry.h"
+#include "libpandabase/os/thread.h"
+#include "libpandabase/os/mem.h"
+#include "libpandabase/utils/logger.h"
+#include "libpandabase/utils/span.h"
 #ifdef PANDA_TARGET_UNIX
 #include <fcntl.h>
 #include <pthread.h>
@@ -36,7 +33,6 @@
 #include <unistd.h>
 
 namespace ark::os::thread {
-
 ThreadId GetCurrentThreadId()
 {
 #if defined(HAVE_GETTID)
@@ -55,6 +51,54 @@ ThreadId GetCurrentThreadId()
 int GetPid()
 {
     return getpid();
+}
+
+int GetPPid()
+{
+    return getppid();
+}
+
+int GetUid()
+{
+    return getuid();
+}
+
+int GetEuid()
+{
+    return geteuid();
+}
+
+uint32_t GetGid()
+{
+    return getgid();
+}
+
+uint32_t GetEgid()
+{
+    return getegid();
+}
+
+std::vector<uint32_t> GetGroups()
+{
+    int groupCount = getgroups(0, nullptr);
+    if (groupCount == -1) {
+        return {};
+    }
+
+    std::vector<gid_t> groups(groupCount);
+    groupCount = getgroups(groupCount, groups.data());
+    if (groupCount == -1) {
+        return {};
+    }
+
+    groups.resize(groupCount);
+
+    gid_t egid = getegid();
+    if (std::find(groups.begin(), groups.end(), egid) == groups.end()) {
+        groups.push_back(egid);
+    }
+
+    return groups;
 }
 
 int SetPriority(int threadId, int prio)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef PANDA_FILESYSTEM_H
 #define PANDA_FILESYSTEM_H
 
-#include "macros.h"
+#include "libpandabase/macros.h"
 #include <string>
 
 #if defined(PANDA_TARGET_WINDOWS)
@@ -44,6 +44,12 @@ PANDA_PUBLIC_API bool IsDirExists(const std::string &dirpath);
 PANDA_PUBLIC_API std::string RemoveExtension(const std::string &filepath);
 
 PANDA_PUBLIC_API std::string NormalizePath(const std::string &filepath);
+
+// Get the current working directory of the running process
+PANDA_PUBLIC_API std::string GetCurrentWorkingDirectory();
+
+// Change current working directory of the running process
+PANDA_PUBLIC_API void ChangeCurrentWorkingDirectory(const std::string &path);
 
 }  // namespace ark::os
 

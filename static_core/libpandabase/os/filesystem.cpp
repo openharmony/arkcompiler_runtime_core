@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "os/filesystem.h"
-#include "os/file.h"
-#include "utils/logger.h"
+#include <string>
+#include "libpandabase/os/filesystem.h"
+#include "libpandabase/os/file.h"
+#include "libpandabase/utils/logger.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #if defined(PANDA_TARGET_WINDOWS)
@@ -139,6 +140,32 @@ std::string NormalizePath(const std::string &path)
     }
 
     return ss.str();
+}
+
+std::string GetCurrentWorkingDirectory()
+{
+#ifdef PANDA_TARGET_UNIX
+    std::array<char, PATH_MAX> cwd {};
+    if (getcwd(cwd.data(), sizeof(char) * cwd.size()) == nullptr) {
+        LOG(WARNING, COMMON) << "Failed to get current working directory";
+        return {};
+    }
+    return std::string {cwd.data()};
+#else
+    UNREACHABLE();
+#endif
+}
+
+void ChangeCurrentWorkingDirectory([[maybe_unused]] const std::string &path)
+{
+#ifdef PANDA_TARGET_UNIX
+    auto status = chdir(path.c_str());
+    if (status != 0) {
+        LOG(WARNING, COMMON) << "Failed to change current working directory\n";
+    }
+#else
+    UNREACHABLE();
+#endif
 }
 
 }  // namespace ark::os

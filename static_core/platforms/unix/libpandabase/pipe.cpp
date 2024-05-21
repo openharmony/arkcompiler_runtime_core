@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "pipe.h"
-
-#include "os/failure_retry.h"
+#include "libpandabase/os/pipe.h"
+#include "libpandabase/os/failure_retry.h"
 
 #include <vector>
 #include <array>
@@ -25,7 +24,7 @@
 #include <fcntl.h>
 #include <poll.h>
 
-namespace ark::os::unix {
+namespace ark::os {
 
 std::pair<UniqueFd, UniqueFd> CreatePipe()
 {
@@ -119,4 +118,4 @@ std::optional<Error> Dup2(const UniqueFd &source, const UniqueFd &target)
     return {};
 }
 
-}  // namespace ark::os::unix
+}  // namespace ark::os

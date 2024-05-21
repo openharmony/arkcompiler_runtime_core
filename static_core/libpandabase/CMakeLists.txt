@@ -66,10 +66,12 @@ set(UNIX_SOURCES_COMMON
     ${PANDA_ROOT}/platforms/unix/libpandabase/property.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/file.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/filesystem.cpp
+    ${PANDA_ROOT}/platforms/unix/libpandabase/kill.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/library_loader_resolve_symbol.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/mem.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/mem_hooks.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/sighook.cpp
+    ${PANDA_ROOT}/platforms/unix/libpandabase/system_environment.cpp
     ${PANDA_ROOT}/platforms/unix/libpandabase/trace.cpp
     ${ARKBASE_LTO_UNIX_SOURCES}
 )
@@ -99,6 +101,7 @@ set(WINDOWS_SOURCES
     ${PANDA_ROOT}/libpandabase/utils/type_converter.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/cpu_affinity.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/error.cpp
+    ${PANDA_ROOT}/platforms/windows/libpandabase/kill.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/library_loader.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/file.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/mem.cpp
@@ -106,6 +109,7 @@ set(WINDOWS_SOURCES
     ${PANDA_ROOT}/platforms/windows/libpandabase/thread.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/filesystem.cpp
     ${PANDA_ROOT}/platforms/windows/libpandabase/trace.cpp
+    ${PANDA_ROOT}/platforms/windows/libpandabase/system_environment.cpp
     ${PANDA_ROOT}/libpandabase/os/dfx_option.cpp
     ${PANDA_ROOT}/libpandabase/os/filesystem.cpp
     ${PANDA_ROOT}/libpandabase/os/mutex.cpp

@@ -28,7 +28,7 @@ function divide(a: number, b: number): number {
     return a / b
 }
 
-function process(a: number, b: number): number {
+function processNumbers(a: number, b: number): number {
     try {
         let res = divide(a, b)
         return res
@@ -39,6 +39,6 @@ function process(a: number, b: number): number {
 }
 
 function main() {
-    assert process(4, 2) == 2
-    assert process(4, 0) == -1
+    assert processNumbers(4, 2) == 2
+    assert processNumbers(4, 0) == -1
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "os/thread.h"
+#include "libpandabase/os/thread.h"
 #include "utils/logger.h"
 
 #include <errhandlingapi.h>
@@ -32,6 +32,42 @@ ThreadId GetCurrentThreadId()
 int GetPid()
 {
     return _getpid();
+}
+
+int GetPPid()
+{
+    // Unsupported on windows platform
+    UNREACHABLE();
+}
+
+int GetUid()
+{
+    // Unsupported on windows platform
+    UNREACHABLE();
+}
+
+int GetEuid()
+{
+    // Unsupported on windows platform
+    UNREACHABLE();
+}
+
+uint32_t GetGid()
+{
+    // Unsupported on windows platform
+    UNREACHABLE();
+}
+
+uint32_t GetEgid()
+{
+    // Unsupported on windows platform
+    UNREACHABLE();
+}
+
+std::vector<uint32_t> GetGroups()
+{
+    // Unsupported on windows platform
+    UNREACHABLE();
 }
 
 int SetPriority(DWORD threadId, int prio)
