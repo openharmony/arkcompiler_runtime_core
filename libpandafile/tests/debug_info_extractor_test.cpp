@@ -385,6 +385,7 @@ HWTEST_F(ExtractorTest, DebugInfoTestColumnNumber, testing::ext::TestSize.Level0
     DebugInfoExtractor extractor(pf);
 
     auto methods = extractor.GetMethodIdList();
+    std::sort(methods.begin(), methods.end());
     constexpr uint32_t column_start = 5;
     uint32_t i = column_start;
     for (auto const &method_id : methods) {

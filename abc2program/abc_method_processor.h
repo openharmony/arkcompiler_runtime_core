@@ -46,7 +46,7 @@ class AbcMethodProcessor : public AbcFileEntityProcessor {
     AbcTypeConverter type_converter_;
     pandasm::Function function_;
     std::unique_ptr<panda_file::MethodDataAccessor> method_data_accessor_;
-    panda_file::DebugInfoExtractor &debug_info_extractor_;
+    const panda_file::DebugInfoExtractor &debug_info_extractor_;
 };
 
 } // namespace panda::abc2program

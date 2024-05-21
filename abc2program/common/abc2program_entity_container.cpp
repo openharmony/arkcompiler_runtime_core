@@ -36,7 +36,7 @@ pandasm::Program &Abc2ProgramEntityContainer::GetProgram() const
     return program_;
 }
 
-panda_file::DebugInfoExtractor &Abc2ProgramEntityContainer::GetDebugInfoExtractor() const
+const panda_file::DebugInfoExtractor &Abc2ProgramEntityContainer::GetDebugInfoExtractor() const
 {
     return debug_info_extractor_;
 }

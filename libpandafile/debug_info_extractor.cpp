@@ -253,19 +253,20 @@ void DebugInfoExtractor::Extract(const File *pf)
             if (UNLIKELY(source_code == nullptr)) {
                 source_code = "";
             }
-            methods_.push_back({source_file, source_code, method_id, handler.GetLineNumberTable(),
-                                handler.GetLocalVariableTable(), std::move(param_info),
-                                handler.GetColumnNumberTable()});
+            ASSERT(methods_.find(method_id.GetOffset()) == methods_.end());
+            methods_.emplace(method_id.GetOffset(),
+                             MethodDebugInfo {source_file, source_code, method_id, handler.GetLineNumberTable(),
+                                              handler.GetLocalVariableTable(), std::move(param_info),
+                                              handler.GetColumnNumberTable()});
         });
     }
 }
 
 const LineNumberTable &DebugInfoExtractor::GetLineNumberTable(File::EntityId method_id) const
 {
-    for (const auto &method : methods_) {
-        if (method.method_id == method_id) {
-            return method.line_number_table;
-        }
+    auto it = methods_.find(method_id.GetOffset());
+    if (it != methods_.end()) {
+        return it->second.line_number_table;
     }
 
     static const LineNumberTable EMPTY_LINE_TABLE {};  // NOLINT(fuchsia-statically-constructed-objects)
@@ -274,10 +275,9 @@ const LineNumberTable &DebugInfoExtractor::GetLineNumberTable(File::EntityId met
 
 const ColumnNumberTable &DebugInfoExtractor::GetColumnNumberTable(File::EntityId method_id) const
 {
-    for (const auto &method : methods_) {
-        if (method.method_id == method_id) {
-            return method.column_number_table;
-        }
+    auto it = methods_.find(method_id.GetOffset());
+    if (it != methods_.end()) {
+        return it->second.column_number_table;
     }
 
     static const ColumnNumberTable EMPTY_COLUMN_TABLE {};  // NOLINT(fuchsia-statically-constructed-objects)
@@ -286,10 +286,9 @@ const ColumnNumberTable &DebugInfoExtractor::GetColumnNumberTable(File::EntityId
 
 const LocalVariableTable &DebugInfoExtractor::GetLocalVariableTable(File::EntityId method_id) const
 {
-    for (const auto &method : methods_) {
-        if (method.method_id == method_id) {
-            return method.local_variable_table;
-        }
+    auto it = methods_.find(method_id.GetOffset());
+    if (it != methods_.end()) {
+        return it->second.local_variable_table;
     }
 
     static const LocalVariableTable EMPTY_VARIABLE_TABLE {};  // NOLINT(fuchsia-statically-constructed-objects)
@@ -298,10 +297,9 @@ const LocalVariableTable &DebugInfoExtractor::GetLocalVariableTable(File::Entity
 
 const std::vector<DebugInfoExtractor::ParamInfo> &DebugInfoExtractor::GetParameterInfo(File::EntityId method_id) const
 {
-    for (const auto &method : methods_) {
-        if (method.method_id == method_id) {
-            return method.param_info;
-        }
+    auto it = methods_.find(method_id.GetOffset());
+    if (it != methods_.end()) {
+        return it->second.param_info;
     }
 
     static const std::vector<ParamInfo> EMPTY_PARAM_INFO {};  // NOLINT(fuchsia-statically-constructed-objects)
@@ -310,20 +308,18 @@ const std::vector<DebugInfoExtractor::ParamInfo> &DebugInfoExtractor::GetParamet
 
 const char *DebugInfoExtractor::GetSourceFile(File::EntityId method_id) const
 {
-    for (const auto &method : methods_) {
-        if (method.method_id == method_id) {
-            return method.source_file.c_str();
-        }
+    auto it = methods_.find(method_id.GetOffset());
+    if (it != methods_.end()) {
+        return it->second.source_file.c_str();
     }
     return "";
 }
 
 const char *DebugInfoExtractor::GetSourceCode(File::EntityId method_id) const
 {
-    for (const auto &method : methods_) {
-        if (method.method_id == method_id) {
-            return method.source_code.c_str();
-        }
+    auto it = methods_.find(method_id.GetOffset());
+    if (it != methods_.end()) {
+        return it->second.source_code.c_str();
     }
     return "";
 }
@@ -333,7 +329,7 @@ std::vector<File::EntityId> DebugInfoExtractor::GetMethodIdList() const
     std::vector<File::EntityId> list;
 
     for (const auto &method : methods_) {
-        list.push_back(method.method_id);
+        list.push_back(method.second.method_id);
     }
     return list;
 }
