@@ -3070,7 +3070,6 @@ public:
             SET_STATUS_FOR_MSG(AccumulatorAlwaysNull, OK);
             // Don't set types for "others of the same origin" when origin is null: n = null, a = n, b = n, a =
             // (NewType)x
-            SetAcc(cachedType);
             MoveToNextInst<FORMAT>();
             return true;
         }
