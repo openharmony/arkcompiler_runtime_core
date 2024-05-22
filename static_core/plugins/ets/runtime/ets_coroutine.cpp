@@ -125,8 +125,7 @@ EtsObject *EtsCoroutine::GetReturnValueAsObject(panda_file::Type returnType, Val
 {
     switch (returnType.GetId()) {
         case panda_file::Type::TypeId::VOID:
-            LOG(FATAL, COROUTINES) << "Return type 'void' is not supported yet in 'launch' instruction";
-            break;
+            return EtsObject::FromCoreType(undefinedObj_);
         case panda_file::Type::TypeId::U1:
             return EtsBoxPrimitive<EtsBoolean>::Create(this, returnValue.GetAs<EtsBoolean>());
         case panda_file::Type::TypeId::I8:
