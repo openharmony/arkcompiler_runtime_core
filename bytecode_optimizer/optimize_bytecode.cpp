@@ -210,15 +210,12 @@ static bool SkipFunction(const pandasm::Function &function, const std::string &f
     return false;
 }
 
-static void SetCompilerOptions(bool is_dynamic)
+static void SetCompilerOptions()
 {
     compiler::options.SetCompilerUseSafepoint(false);
     compiler::options.SetCompilerSupportInitObjectInst(true);
     if (!compiler::options.WasSetCompilerMaxBytecodeSize()) {
         compiler::options.SetCompilerMaxBytecodeSize(MAX_BYTECODE_SIZE);
-    }
-    if (is_dynamic && !compiler::options.IsCompilerOptTryCatchFunc()) {
-        panda::bytecodeopt::options.SetSkipMethodsWithEh(true);
     }
 }
 
@@ -427,7 +424,7 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};
     ArenaAllocator local_allocator {SpaceType::SPACE_TYPE_COMPILER, nullptr, true};
 
-    SetCompilerOptions(is_dynamic);
+    SetCompilerOptions();
 
     auto ir_interface = BytecodeOptIrInterface(maps, prog);
 

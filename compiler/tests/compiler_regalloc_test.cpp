@@ -1052,7 +1052,7 @@ HWTEST_F(RegallocTest, regalloc_test_020, TestSize.Level1)
 HWTEST_F(RegallocTest, regalloc_test_021, TestSize.Level1)
 {
     std::string pfile_name = GRAPH_TEST_ABC_DIR "regallocTest.abc";
-    const char *test_method_name = "func4";
+    const char *test_method_name = "#*#func4";
     bool status = false;
     auto pfile = panda_file::OpenPandaFile(pfile_name);
     for (uint32_t id : pfile->GetClasses()) {

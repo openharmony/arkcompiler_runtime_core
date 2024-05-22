@@ -193,12 +193,6 @@ options:
   description: Enable Branch Elimination Pass
   tags: [perf]
 
-- name: compiler-opt-try-catch-func
-  type: bool
-  default: true
-  description: Enable optimizations for functions with try-catch blocks
-  tags: [perf]
-
 - name: compiler-checks-elimination
   type: bool
   default: true
