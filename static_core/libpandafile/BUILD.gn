@@ -32,19 +32,6 @@ config("arkfile_public_config") {
     "$target_gen_dir",
     "$target_gen_dir/include",
   ]
-
-  if (!ark_standalone_build) {
-    include_dirs += [
-      "//third_party/zlib",
-      "//third_party/zlib/contrib/minizip",
-    ]
-  } else {
-    include_dirs += [
-      "$ark_third_party_root/zlib",
-      "$ark_third_party_root/zlib/contrib/minizip",
-    ]
-  }
-  configs = [ sdk_libc_secshared_config ]
 }
 
 libarkfile_sources = [
@@ -69,7 +56,6 @@ libarkfile_sources = [
 ]
 
 libarkfile_configs = [
-  sdk_libc_secshared_config,
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
   ":arkfile_public_config",
@@ -92,7 +78,13 @@ source_set("libarkfile_static") {
     ":source_lang_enum_h",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libziparchive:libarktsziparchive",
-    sdk_libc_secshared_dep,
+  ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  public_external_deps = [
+    "zlib:libz",
+    "zlib:shared_libz",
   ]
 }
 
@@ -122,7 +114,13 @@ source_set("libarkfile_frontend_set_static") {
     ":libarkfile_type_gen_h",
     ":source_lang_enum_h",
     "$ark_root/libziparchive:libarktsziparchive_frontend_static",
-    sdk_libc_secshared_dep,
+  ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
+  public_external_deps = [
+    "zlib:libz",
+    "zlib:shared_libz",
   ]
 }
 

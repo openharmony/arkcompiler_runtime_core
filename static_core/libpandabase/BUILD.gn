@@ -26,7 +26,6 @@ ohos_static_library("libarktsbase_package") {
 }
 
 config("arkbase_public_config") {
-  configs = [ sdk_libc_secshared_config ]
   include_dirs = [
     "$ark_root_gen_dir/libpandabase",
     "$ark_root/libpandabase",
@@ -210,7 +209,6 @@ if (is_mob) {
 }
 
 libarkbase_configs = [
-  sdk_libc_secshared_config,
   ":arkbase_public_config",
   "$ark_root:ark_config",
 ]
@@ -224,7 +222,6 @@ libarkbase_deps = [
   ":logger_impl_gen_h",
   ":plugins_regmasks_gen",
   ":source_language_gen",
-  sdk_libc_secshared_dep,
 ]
 
 source_set("libarkbase_static") {
@@ -238,6 +235,8 @@ source_set("libarkbase_static") {
   public_configs = libarkbase_configs
 
   deps = libarkbase_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
 }
 
 ohos_shared_library("libarktsbase") {
@@ -255,6 +254,8 @@ source_set("libarkbase_frontend_set_static") {
   public_configs = libarkbase_configs
 
   deps = libarkbase_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
 }
 
 ohos_source_set("libarktsbase_frontend_static") {

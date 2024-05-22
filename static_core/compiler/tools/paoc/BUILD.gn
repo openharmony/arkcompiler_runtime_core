@@ -47,7 +47,6 @@ ohos_executable("ark_aot") {
     "$ark_root/compiler:arkcompiler_public_config",
     "$ark_root/compiler/aot/aot_builder:aotbuilder_public_config",
     "$ark_root/compiler/optimizer/code_generator:arkencoder_config",
-    sdk_libc_secshared_config,
   ]
 
   deps = [

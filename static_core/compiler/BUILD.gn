@@ -171,7 +171,6 @@ if (!is_win && !is_mac && !is_mingw) {
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
 libarkcompiler_configs = [
-  sdk_libc_secshared_config,
   ":arkcompiler_public_config",
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
@@ -244,8 +243,10 @@ ohos_shared_library("libarktscompiler") {
     "$ark_root/runtime:arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
     "$ark_root/runtime:plugins_entrypoints_gen_h",
     "$ark_root/runtime/asm_defines:asm_defines_generator",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
   if (enable_irtoc) {
     deps += [
       ":irtoc_builder_cpp",
@@ -334,8 +335,10 @@ ohos_source_set("libarktscompiler_frontend_static") {
     "$ark_root/runtime:arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
     "$ark_root/runtime:plugins_entrypoints_gen_h",
     "$ark_root/runtime/asm_defines:asm_defines_generator",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
   if (enable_irtoc) {
     deps += [
       ":irtoc_builder_cpp",
