@@ -14,6 +14,7 @@
  */
 
 #include "pgo.h"
+#include "os/filesystem.h"
 #include "utils/logger.h"
 
 namespace panda::panda_file::pgo {
@@ -56,8 +57,14 @@ void ProfileOptimizer::MarkProfileItem(std::unique_ptr<BaseItem> &item, bool set
 
 bool ProfileOptimizer::ParseProfileData()
 {
+    std::string path = os::GetAbsolutePath(profile_file_path_);
+    if (path == "") {
+        LOG(ERROR, PANDAFILE) << "failed to resolve profile file path: " << profile_file_path_;
+        return false;
+    }
+    
     std::ifstream file;
-    file.open(profile_file_path_, std::ios::in);
+    file.open(path, std::ios::in);
     if (!file.is_open()) {
         LOG(ERROR, PANDAFILE) << "failed to open pgo files: " << profile_file_path_;
         return false;
