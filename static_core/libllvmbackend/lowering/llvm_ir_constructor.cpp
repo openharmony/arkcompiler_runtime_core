@@ -1953,15 +1953,17 @@ llvm::Value *LLVMIrConstructor::CreateLaunchArgsArray(CallInst *callInst, uint32
     auto callArgsCount = callInst->GetInputsCount() - 1U - argStart;
 
     auto ltype = builder_.getInt64Ty();
-    auto dtype = DataType::INT64;
+    auto dtype = DataType::INT32;
 
     auto callArgs = CreateAllocaForArgs(ltype, callArgsCount);
 
     // Store actual call arguments
     for (size_t i = 0; i < callArgsCount; i++) {
         auto arg = GetInputValue(callInst, argStart + i);
-        if (dtype != callInst->GetInputType(argStart + i)) {
-            arg = CoerceValue(arg, callInst->GetInputType(argStart + i), dtype);
+        auto type = callInst->GetInputType(argStart + i);
+        auto typeSize = DataType::GetTypeSize(type, GetGraph()->GetArch());
+        if (typeSize < DataType::GetTypeSize(dtype, GetGraph()->GetArch())) {
+            arg = CoerceValue(arg, type, dtype);
         }
         auto gep = builder_.CreateConstInBoundsGEP1_32(ltype, callArgs, i);
         builder_.CreateStore(arg, gep);
