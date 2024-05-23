@@ -30,7 +30,7 @@ function bar(): Base {
 function foo(da: Base[]): int {
     try {
         da[0] = bar()
-    } catch (e: ArrayStoreException) {
+    } catch (e: ArrayStoreError) {
         return 0
     }
     return 1

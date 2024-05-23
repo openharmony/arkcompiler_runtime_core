@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,16 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
+{% for case in boolean_comparison_neg %}
+
 /*---
-desc: check division by zero for byte operand
+desc: Comparing boolean with non-boolean types {{case.left}} {{case.op}} {{case.right}}
+tags: [compile-only, negative]
 ---*/
 
 function main(): void {
-    try {
-        const a: byte = 1
-	    const b: byte = 0
-	    const result: byte = a / b
-	    assert(false)
-    } catch (e: ArithmeticError) {
-    }
+  let x: {{case.ltype}} = {{case.left}}
+  let y: {{case.rtype}} = {{case.right}}
+  x {{case.op}} y /* CTE */
 }
+
+{% endfor %}

@@ -51,7 +51,7 @@ static void StdCoreCopyTo(coretypes::Array *src, coretypes::Array *dst, int32_t 
 
     if (errmsg != nullptr) {
         auto *coroutine = EtsCoroutine::GetCurrent();
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION, errmsg);
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR, errmsg);
     }
 }
 

@@ -58,7 +58,7 @@ cases:
           try {
               v = new number[foo(1)][foo(2)][foo(3)][foo(-4)][foo(5)]
               return 1
-          } catch (e: NegativeArraySizeException) {
+          } catch (e: NegativeArraySizeError) {
               // expected
               return (res == "123-45" && v == null ? 0 : 1)
           }
@@ -76,7 +76,7 @@ cases:
           try {
               v = new number[foo(-1)][foo(-2)][foo(-3)][foo(4)][foo(-5)]
               return 1
-          } catch (e: NegativeArraySizeException) {
+          } catch (e: NegativeArraySizeError) {
               // expected
               return (res == "-1-2-34-5" && v == null ? 0 : 1)
           }
@@ -97,7 +97,7 @@ cases:
           try {
               v = new number[foo(-1)][foo(-2)][foo(3)][foo(4)][foo(-5)]
               return 1
-          } catch (e: NegativeArraySizeException) {
+          } catch (e: NegativeArraySizeError) {
               return 1
           } catch (e) {
               // expected

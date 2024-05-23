@@ -144,14 +144,14 @@ function main(): void {
         let failedCase = str4[-1];
         assert false
     } catch(err) {
-        assert err instanceof StringIndexOutOfBoundsException: "It should be instance of StringIndexOutOfBoundsException"
+        assert err instanceof StringIndexOutOfBoundsError: "It should be instance of StringIndexOutOfBoundsError"
     }
 
     try {
         let failedCase = str4[str4.length];
         assert false
     } catch(err) {
-        assert err instanceof StringIndexOutOfBoundsException: "It should be instance of StringIndexOutOfBoundsException"
+        assert err instanceof StringIndexOutOfBoundsError: "It should be instance of StringIndexOutOfBoundsError"
     }
 
     let str5: String = "函数式编程";

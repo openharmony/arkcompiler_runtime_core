@@ -64,8 +64,7 @@ ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString
 
     auto message = PandaString(ReferenceTypeString(coro, source)) + " cannot be cast to " + target->GetMutf8();
 
-    return ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_EXCEPTION.data(),
-                                  message.data())
+    return ets::SetupEtsException(coro, panda_file_items::class_descriptors::CLASS_CAST_ERROR.data(), message.data())
         ->GetCoreType();
 }
 

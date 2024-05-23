@@ -26,9 +26,9 @@ desc: >-
     - Otherwise, the right-hand operand is evaluated. If this evaluation completes abruptly,
     then the assignment expression completes abruptly for the same reason and no assignment occurs.
     - Otherwise, if the value of the index subexpression is less than zero, or greater than or
-    equal to the length of the array, then no assignment occurs and an ArrayIndexOutOfBoundsException
+    equal to the length of the array, then no assignment occurs and an ArrayIndexOutOfBoundsError
     is thrown.
-params: ArrayIndexOutOfBoundsException
+params: ArrayIndexOutOfBoundsError
 ---*/
 
 let result: string = ""
@@ -44,7 +44,7 @@ function idx(i: int): int {
     if (i != 1) {
         return i
     }
-    return -i  // get ArrayIndexOutOfBoundsException
+    return -i  // get ArrayIndexOutOfBoundsError
 }
 
 function val(): int {
@@ -58,7 +58,7 @@ function main(): int {
     let s: string = ""
     try {
       s = s + ref("A")[idx(2)] = ref("B")[idx(1)] = ref("C")[idx(0)] = val()
-    } catch (e: ArrayIndexOutOfBoundsException) {
+    } catch (e: ArrayIndexOutOfBoundsError) {
         if (result == "A2B1C0V" && s == "") {
             return 0
         }

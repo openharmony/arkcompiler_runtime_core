@@ -19,6 +19,6 @@ export class PromiseWrapper {
     });
 };
 
-async function AsyncIdentity(param: int): Promise<int> {
+export async function AsyncIdentity(param: int): Promise<int> {
     return param;
 }

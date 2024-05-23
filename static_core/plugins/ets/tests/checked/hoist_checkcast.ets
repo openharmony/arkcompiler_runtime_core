@@ -49,8 +49,8 @@ function test(arr: A[], value: A | B) : int {
             iters++;
             set(arr, i, value);
         }
-    } catch (e: ClassCastException) {
-        assert e.toString().match('ETSGLOBAL.set at .*:42\nETSGLOBAL.test at .*50') != null
+    } catch (e: ClassCastError) {
+        assert e.toString().match('ClassCastError: B cannot be cast to A') != null
         return -iters;
     }
     return iters;
@@ -103,9 +103,9 @@ function test2(arr: Object[], value: A | B) : int {
             iters++;
             arr[i] = value
         }
-    } catch (e: ArrayStoreException) {
+    } catch (e: ArrayStoreError) {
         // NOTE: line number is invalid in interpreter, see #17098
-        assert e.toString().match('ETSGLOBAL.test2 at .*') != null
+        assert e.toString().match('ArrayStoreError: B cannot be stored in an array of type [LA;') != null
         return -iters;
     }
     return iters;

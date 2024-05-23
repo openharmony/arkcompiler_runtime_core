@@ -27,7 +27,7 @@ let result: string = ""
 class A {
     public fld: string
     public constructor() {
-        this.fld = new Int(1/0).toString()  // get ArithmeticException
+        this.fld = new Int(1/0).toString()  // get ArithmeticError
     }
 }
 
@@ -47,7 +47,7 @@ function main(): int {
     let s: string = ""
     try {
         s = (getObj().fld) = getVal()
-    } catch (e: ArithmeticException) {
+    } catch (e: ArithmeticError) {
         if (result == "1" && s == "") {
             return 0
         }

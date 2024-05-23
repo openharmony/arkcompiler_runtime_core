@@ -23,13 +23,15 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_error_options.h"
 
 namespace ark::ets {
 
-static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *classDescriptor)
+static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *classDescriptor, bool *isError)
 {
     ASSERT(coroutine != nullptr);
     ASSERT(classDescriptor != nullptr);
+    ASSERT(isError != nullptr);
 
     EtsClassLinker *classLinker = coroutine->GetPandaVM()->GetClassLinker();
     EtsClass *cls = classLinker->GetClass(classDescriptor, true);
@@ -42,7 +44,21 @@ static EtsClass *GetExceptionClass(EtsCoroutine *coroutine, const char *classDes
         LOG(ERROR, CLASS_LINKER) << "Class " << classDescriptor << " cannot be initialized";
         return nullptr;
     }
-    return cls;
+
+    EtsClass *errorBaseCls = classLinker->GetClass(panda_file_items::class_descriptors::ERROR.data(), true);
+    EtsClass *exceptionBaseCls = classLinker->GetClass(panda_file_items::class_descriptors::EXCEPTION.data(), true);
+
+    if (errorBaseCls->IsAssignableFrom(cls)) {
+        *isError = true;
+        return cls;
+    }
+    if (exceptionBaseCls->IsAssignableFrom(cls)) {
+        *isError = false;
+        return cls;
+    }
+
+    UNREACHABLE();
+    return nullptr;
 }
 
 EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
@@ -50,8 +66,11 @@ EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescripto
     [[maybe_unused]] EtsHandleScope scope(coroutine);
     EtsHandle<EtsObject> cause(coroutine, EtsObject::FromCoreType(coroutine->GetException()));
     coroutine->ClearException();
+    EtsHandle<EtsErrorOptions> errOptionHandle(coroutine, EtsErrorOptions::Create(coroutine));
+    errOptionHandle->SetCause(cause.GetPtr());
 
-    EtsClass *cls = GetExceptionClass(coroutine, classDescriptor);
+    bool isError = false;
+    EtsClass *cls = GetExceptionClass(coroutine, classDescriptor, &isError);
     if (cls == nullptr) {
         return nullptr;
     }
@@ -71,7 +90,8 @@ EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescripto
     Method::Proto proto(Method::Proto::ShortyVector {panda_file::Type(panda_file::Type::TypeId::VOID),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
-                        Method::Proto::RefTypeVector {panda_file_items::class_descriptors::STRING,
+                        Method::Proto::RefTypeVector {isError ? panda_file_items::class_descriptors::OBJECT
+                                                              : panda_file_items::class_descriptors::STRING,
                                                       panda_file_items::class_descriptors::OBJECT});
     EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
     if (ctor == nullptr) {
@@ -84,8 +104,8 @@ EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescripto
     // clang-format off
     std::array args {
         Value(excHandle.GetPtr()->GetCoreType()),
-        Value(msgHandle.GetPtr()->GetCoreType()),
-        Value(cause.GetPtr()->GetCoreType())
+        Value(isError ? msgHandle.GetPtr()->AsObject()->GetCoreType() : msgHandle.GetPtr()->GetCoreType()),
+        Value(isError ? errOptionHandle.GetPtr()->AsObject()->GetCoreType() : cause.GetPtr()->GetCoreType())
     };
     // clang-format on
 
@@ -96,6 +116,7 @@ EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescripto
     return nullptr;
 }
 
+// NOTE: Is used to throw all language exceptional objects (currently Errors and Exceptions)
 void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg)
 {
     ASSERT(coroutine != nullptr);

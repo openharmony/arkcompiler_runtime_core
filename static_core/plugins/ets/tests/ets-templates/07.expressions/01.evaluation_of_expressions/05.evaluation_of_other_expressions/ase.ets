@@ -30,7 +30,7 @@ function main(): int {
     try {
       v[0] = w;
       return {{t.fail}};
-    } catch (e: ArrayStoreException) {
+    } catch (e: ArrayStoreError) {
       return 1 - {{t.fail}};
     } catch (e) {
       return 1;

@@ -22,7 +22,7 @@ function main(): void {
   try {
     let ii = i!;
     assert 0;
-  } catch(npe: NullPointerException) {
+  } catch(npe: NullPointerError) {
     assert 1;
   } catch(e) {
     assert 0;

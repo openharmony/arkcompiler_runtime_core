@@ -24,7 +24,7 @@ function main(): void {
   try {
     let b: Int = a!;
     res = 0;
-  } catch (e: NullPointerException) {
+  } catch (e: NullPointerError) {
     res = 1;
   }
 

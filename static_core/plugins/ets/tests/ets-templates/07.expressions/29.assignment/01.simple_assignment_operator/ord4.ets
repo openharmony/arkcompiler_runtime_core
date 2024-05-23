@@ -26,7 +26,7 @@ tags: [no-warmup]
 let result: string = ""
 
 class A {
-    public static fld: string = new Int(1/0).toString()  // get ArithmeticException
+    public static fld: string = new Int(1/0).toString()  // get ArithmeticError
 }
 
 function getVal(): string {
@@ -38,7 +38,7 @@ function main(): int {
     let s: string = ""
     try {
         s = ((A.fld)) = getVal()
-    } catch (e: ArithmeticException) {
+    } catch (e: ArithmeticError) {
         if (result == "1" && s == "") {
             return 0
         }

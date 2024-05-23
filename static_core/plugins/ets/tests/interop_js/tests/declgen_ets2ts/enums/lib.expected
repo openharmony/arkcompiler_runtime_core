@@ -18,20 +18,22 @@ let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
-export {_$init$_};
-exports._$init$_ = _$init$_;
 _$init$_();
 
-export enum Letter {
+enum Letter {
     A = 0,
     B = 1,
     C = 2,
 }
+export {Letter};
+exports.Letter = Letter;
 
-export enum Color {
+enum Color {
     Red = 0,
     Green = -100,
     Blue = -99,
     White = 0,
 }
+export {Color};
+exports.Color = Color;
 

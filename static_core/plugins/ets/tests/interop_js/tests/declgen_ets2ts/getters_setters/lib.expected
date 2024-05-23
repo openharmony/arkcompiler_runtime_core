@@ -18,8 +18,6 @@ let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
-export {_$init$_};
-exports._$init$_ = _$init$_;
 _$init$_();
 
 class C {

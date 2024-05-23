@@ -47,7 +47,7 @@ function createDefault(): int {
 function createWithNegativeInitialCapacity(): int {
     try {
         new Array<Number>(-1);
-    } catch(nse: NegativeArraySizeException) {
+    } catch(nse: NegativeArraySizeError) {
         return success;
     }
     return fail;

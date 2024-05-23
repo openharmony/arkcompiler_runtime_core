@@ -23,7 +23,7 @@ function main(): int {
   let b: Int|null = 4;
   try {
       let x: Int|null = b + a;
-  } catch (e: NullPointerException) {
+  } catch (e: NullPointerError) {
       return 0;
   }
   return 1;

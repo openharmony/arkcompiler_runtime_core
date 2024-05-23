@@ -20,7 +20,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_extension.cpp
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
-    ${ETS_EXT_SOURCES}/ets_errors.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
     ${ETS_EXT_SOURCES}/ets_napi_env.cpp
     ${ETS_EXT_SOURCES}/ets_native_library.cpp

@@ -32,7 +32,7 @@ function main(): int {
     try {
       {{t.expr}};
       return {{t.fail}};
-    } catch (e: ClassCastException) {
+    } catch (e: ClassCastError) {
       return 1 - {{t.fail}};
     } catch (e) {
       return 1;

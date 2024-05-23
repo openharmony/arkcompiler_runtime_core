@@ -18,8 +18,6 @@ let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
-export {_$init$_};
-exports._$init$_ = _$init$_;
 _$init$_();
 
 function Identity<T>(x: T): T { return {} as any; };
@@ -42,13 +40,17 @@ class GenericClass<T extends Object> {
 export {GenericClass};
 exports.GenericClass = GenericClass;
 
-export interface IGeneric0<T> {
+interface IGeneric0<T> {
     I0Method(a: T): T;
 }
+export {IGeneric0};
 
-export interface IGeneric1<T> {
+
+interface IGeneric1<T> {
     I1Method(a: T): T;
 }
+export {IGeneric1};
+
 
 class BaseGeneric<T, U> {
     public c: T = {} as any;

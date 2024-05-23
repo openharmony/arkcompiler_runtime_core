@@ -167,15 +167,15 @@ export function copyOf(src: boolean[]): boolean[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: boolean[], dst: boolean[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: boolean[], dst: boolean[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -333,15 +333,15 @@ export function copyOf(src: byte[]): byte[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: byte[], dst: byte[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: byte[], dst: byte[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -499,15 +499,15 @@ export function copyOf(src: short[]): short[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: short[], dst: short[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: short[], dst: short[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -665,15 +665,15 @@ export function copyOf(src: int[]): int[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: int[], dst: int[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: int[], dst: int[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -831,15 +831,15 @@ export function copyOf(src: long[]): long[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: long[], dst: long[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: long[], dst: long[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -997,15 +997,15 @@ export function copyOf(src: float[]): float[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: float[], dst: float[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: float[], dst: float[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -1163,15 +1163,15 @@ export function copyOf(src: double[]): double[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: double[], dst: double[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: double[], dst: double[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -1329,15 +1329,15 @@ export function copyOf(src: char[]): char[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: char[], dst: char[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: char[], dst: char[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;
@@ -1382,15 +1382,15 @@ export function copyOf(src: NullishType[]): NullishType[] {
  * copyTo(src, dst, 0, 0, src.length)
  * ```
  */
-export function copyTo(src: NullishType[], dst: NullishType[], dstStart: int, srcStart: int, srcEnd: int): void throws {
+export function copyTo(src: NullishType[], dst: NullishType[], dstStart: int, srcStart: int, srcEnd: int): void {
     if (!checkRange(src.length, srcStart, srcEnd)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: src bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: src bounds verification failed")
     }
     if (!checkRange(dst.length, dstStart, dst.length)) {
-        throw new ArrayIndexOutOfBoundsException("copyTo: dst bounds verification failed")
+        throw new ArrayIndexOutOfBoundsError("copyTo: dst bounds verification failed")
     }
     if (!((srcEnd - srcStart) <= (dst.length - dstStart))) {
-        throw new ArrayIndexOutOfBoundsException("Destination array must have enough space")
+        throw new ArrayIndexOutOfBoundsError("Destination array must have enough space")
     }
 
     let j: int = dstStart;

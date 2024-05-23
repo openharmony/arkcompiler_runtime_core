@@ -144,7 +144,7 @@ cases:
           try {
               for (let v of s!) res += v
               assert false;
-          } catch (e: NullPointerException) {
+          } catch (e: NullPointerError) {
               assert true;
           } catch (e) {
               assert false;
@@ -155,7 +155,7 @@ cases:
           try {
               for (let v of s!) res += v
               assert false;
-          } catch (e: NullPointerException) {
+          } catch (e: NullPointerError) {
               assert true;
           } catch (e) {
               assert false;
@@ -181,7 +181,7 @@ cases:
           try {
               for (let v of s!) res += v
               assert false;
-          } catch (e: NullPointerException) {
+          } catch (e: NullPointerError) {
               assert true;
           } catch (e) {
               assert false;
@@ -192,7 +192,7 @@ cases:
           try {
               for (let v of s!) res += v
               assert false;
-          } catch (e: NullPointerException) {
+          } catch (e: NullPointerError) {
               assert true;
           } catch (e) {
               assert false;

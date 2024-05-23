@@ -25,7 +25,7 @@ function main(): void {
   try {
     let b: Int = a as Int;
     res = 0;
-  } catch (e: ClassCastException) {
+  } catch (e: ClassCastError) {
     res = 1;
   }
 

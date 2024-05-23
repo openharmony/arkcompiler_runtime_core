@@ -14,7 +14,7 @@
  */
 
 /*---
-desc: NullPointerException is thrown by an array access expression
+desc: NullPointerError is thrown by an array access expression
   if the array reference expression has the null value.
 ---*/
 
@@ -28,7 +28,7 @@ function main(): int {
     let v: String = "X" + (a = 2) + (byt = foo(42)[0]) + (b = 2);
     if (a != 2 || b != 2) return 1;
     return 0;
-  } catch (e: NullPointerException) {
+  } catch (e: NullPointerError) {
     return 1;
   } catch {
     return 1;

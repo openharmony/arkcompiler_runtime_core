@@ -186,49 +186,49 @@ class Consumer {
 
     public static consumeBool(boolc: boolean): void throws {
         if (boolc == Consumer.boola && boolc == Consumer. boolb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
     public static consumeChar(charc: char): void throws {
         if (charc == Consumer.chara && charc == Consumer.charb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
     public static consumeByte(bytec: byte): void throws {
         if (bytec == Consumer.bytea && bytec == Consumer.byteb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
     public static consumeShort(shortc: short): void throws {
         if (shortc == Consumer.shorta && shortc == Consumer.shortb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
     public static consumeInt(intc: int): void throws {
         if (intc == Consumer.inta && intc == Consumer.intb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
     public static consumeLong(longc: long): void throws {
         if (longc == Consumer.longa && longc == Consumer.longb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
     public static consumeFloat(floatc: float): void throws {
         if (floatc == Consumer.floata && floatc == Consumer.floatb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
     public static consumeDouble(doublec: double): void throws {
         if (doublec == Consumer.doublea && doublec == Consumer.doubleb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 
@@ -242,7 +242,7 @@ class Consumer {
 
     public static consumeString(strc: string): void throws {
         if (strc === Consumer.stra && strc === Consumer.strb) {
-            throw new NullPointerException();
+            throw new NullPointerError();
         }
     }
 

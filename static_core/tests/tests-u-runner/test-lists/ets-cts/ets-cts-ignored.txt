@@ -873,12 +873,6 @@
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index3_n_1.ets
 # end of es2panda fails
 
-# es2panda fails: panda:14381 ArrayIndexOutOfBoundsException is thrown instead of ArrayIndexOutOfBoundsError
-07.expressions/12.indexing_expression/01.array_indexing_expression/abrupt10.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/abrupt11.ets
-07.expressions/12.indexing_expression/01.array_indexing_expression/abrupt12.ets
-# end of es2panda fails
-
 # es2panda fails: panda:14382 Char type should not be permitted in index expression
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_8.ets
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_9.ets
@@ -1358,38 +1352,6 @@
 07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_61.ets
 07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_62.ets
 07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_63.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_0.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_1.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_2.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_3.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_4.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_5.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_6.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_7.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_8.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_9.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_10.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_11.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_12.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_13.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_14.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_15.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_16.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_17.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_18.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_19.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_20.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_21.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_22.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_23.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_24.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_25.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_26.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_27.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_28.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_29.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_30.ets
-07.expressions/24.relational_expressions/03.boolean_comparison_operators/boolean_comparison_31.ets
 # end of 16369
 
 # Not implemented yet: 13836
@@ -2126,3 +2088,5 @@
 # 16623: cannot call static method from abstract class
 09.classes/06.method_declarations/01.static_methods/static_method_in_abstract_class_1.ets
 # end of es2panda failure
+# es2panda: 15945: The test failed because of a different error. The check for this case is not implemented yet
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_5.ets

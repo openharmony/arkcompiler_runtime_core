@@ -33,7 +33,7 @@ function main(): int {
     let long_max = x - 1 + x
     try {
         let res = crash(long_max);
-    } catch (e: ArithmeticException) {
+    } catch (e: ArithmeticError) {
         return 0;
     } catch (e) {
         return 2;

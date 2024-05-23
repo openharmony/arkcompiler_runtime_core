@@ -32,7 +32,7 @@ let x: int[] = [10, 20, 30]
 function ref(p: string): int[] {
     result = result + p
     if (p == "C") {
-        p = p + (1 / 0)  // get ArithmeticException
+        p = p + (1 / 0)  // get ArithmeticError
     }
     return x;
 }
@@ -53,7 +53,7 @@ function main(): int {
     let s: string = ""
     try {
       s = s + ref("A")[idx(2)] = ref("B")[idx(1)] = ref("C")[idx(0)] = val()
-    } catch (e: ArithmeticException) {
+    } catch (e: ArithmeticError) {
         if (result == "A2B1C" && s == "") {
             return 0
         }

@@ -22,7 +22,8 @@ desc: Boolean comparison {{case.left}} {{case.op}} {{case.right}}
 function main(): void {
   let x: {{case.type}} = {{case.left}}
   let y: {{case.type}} = {{case.right}}
-  assert ( x {{case.op}} y) == {{case.result}};
+  assert ( {{case.left}} {{case.op}} {{case.right}} ) == {{case.result}}
+  assert ( x {{case.op}} y) == {{case.result}}
 }
 
 {% endfor %}

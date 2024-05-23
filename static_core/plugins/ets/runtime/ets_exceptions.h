@@ -26,13 +26,16 @@ class EtsObject;
 
 PANDA_PUBLIC_API EtsObject *SetupEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
 
+// NOTE: Is used to throw all language exceptional objects (currently Errors and Exceptions)
 PANDA_PUBLIC_API void ThrowEtsException(EtsCoroutine *coroutine, const char *classDescriptor, const char *msg);
 
+// NOTE: Is used to throw all language exceptional objects (currently Errors and Exceptions)
 inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDescriptor, const char *msg)
 {
     ThrowEtsException(coroutine, classDescriptor.data(), msg);
 }
 
+// NOTE: Is used to throw all language exceptional objects (currently Errors and Exceptions)
 inline void ThrowEtsException(EtsCoroutine *coroutine, std::string_view classDescriptor, std::string_view msg)
 {
     ThrowEtsException(coroutine, classDescriptor.data(), msg.data());

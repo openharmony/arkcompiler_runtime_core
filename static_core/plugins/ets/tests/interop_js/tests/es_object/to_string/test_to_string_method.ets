@@ -109,7 +109,7 @@ function concat_nan_to_string(): String {
 function explicit_optional_to_string(): String {
     try {
         return Optional(true) + "A";
-    } catch (e: NullPointerException) {
+    } catch (e: NullPointerError) {
         return "NPE";
     }
 }

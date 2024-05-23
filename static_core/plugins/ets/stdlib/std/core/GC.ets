@@ -162,7 +162,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NullPointerException if object is null
+     * @throws NullPointerError if object is null
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      */
@@ -179,9 +179,9 @@ export final class GC {
      *
      * @param obj pinned object for unpinning
      *
-     * @throws NullPointerException if object is null
+     * @throws NullPointerError if object is null
      */
-    public static native unpinObject(obj: Object | null): void throws;
+    public static native unpinObject(obj: Object | null): void;
 
     /**
      * Allocate array of boolean and pin (GC will not move pinned array)
@@ -190,7 +190,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -207,7 +207,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -224,7 +224,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -241,7 +241,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -258,7 +258,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -275,7 +275,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -292,7 +292,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -309,7 +309,7 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NegativeArraySizeException if length is negative
+     * @throws NegativeArraySizeError if length is negative
      *
      * @throws UnsupportedOperationException if used GC does not support pinning
      *
@@ -324,11 +324,11 @@ export final class GC {
      *
      * @param obj object for which space type is requested
      *
-     * @throws NullPointerException if object is null
+     * @throws NullPointerError if object is null
      *
      * @returns type of space which contains object-argument
      */
-    public static native getObjectSpaceType(obj: Object | null): int throws;
+    public static native getObjectSpaceType(obj: Object | null): int;
 
     /**
      * Returns object address
@@ -340,14 +340,14 @@ export final class GC {
     public static native getObjectAddress(obj: Object | null): long;
 
     /**
-     * @throws NegativeArraySizeException if size is negative
+     * @throws NegativeArraySizeError if size is negative
      *
      * @param size: long - number of bytes to be registered by GC as native
      */
     public static native registerNativeAllocation(size: long): void;
 
     /**
-     * @throws NegativeArraySizeException if size is negative
+     * @throws NegativeArraySizeError if size is negative
      *
      * @param size: long - number of bytes to be freed by GC
      */

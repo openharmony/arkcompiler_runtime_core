@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,7 +96,7 @@ public:
 
     const uint8_t *GetNullPointerExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NULL_POINTER_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NULL_POINTER_ERROR.data());
     }
 
     const uint8_t *GetStackOverflowErrorClassDescriptor() const override
@@ -106,12 +106,12 @@ public:
 
     const uint8_t *GetArrayIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARRAY_INDEX_OUT_OF_BOUNDS_ERROR.data());
     }
 
     const uint8_t *GetIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::INDEX_OUT_OF_BOUNDS_ERROR.data());
     }
 
     const uint8_t *GetIllegalStateExceptionClassDescriptor() const override
@@ -120,12 +120,12 @@ public:
     }
     const uint8_t *GetNegativeArraySizeExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::NEGATIVE_ARRAY_SIZE_ERROR.data());
     }
 
     const uint8_t *GetStringIndexOutOfBoundsExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::STRING_INDEX_OUT_OF_BOUNDS_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::STRING_INDEX_OUT_OF_BOUNDS_ERROR.data());
     }
 
     const uint8_t *GetRangeErrorExceptionClassDescriptor() const
@@ -135,12 +135,12 @@ public:
 
     const uint8_t *GetArithmeticExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARITHMETIC_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARITHMETIC_ERROR.data());
     }
 
     const uint8_t *GetClassCastExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_CAST_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::CLASS_CAST_ERROR.data());
     }
 
     const uint8_t *GetAbstractMethodErrorClassDescriptor() const override
@@ -150,7 +150,7 @@ public:
 
     const uint8_t *GetArrayStoreExceptionClassDescriptor() const override
     {
-        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARRAY_STORE_EXCEPTION.data());
+        return utf::CStringAsMutf8(panda_file_items::class_descriptors::ARRAY_STORE_ERROR.data());
     }
 
     const uint8_t *GetRuntimeExceptionClassDescriptor() const override
