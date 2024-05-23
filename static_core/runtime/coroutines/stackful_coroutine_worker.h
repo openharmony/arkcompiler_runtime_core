@@ -188,7 +188,7 @@ private:
     PandaDeque<Coroutine *> runnables_ GUARDED_BY(runnablesLock_);
     // blocked coros-related members: Coroutine AWAITS CoroutineEvent
     mutable os::memory::Mutex waitersLock_;
-    PandaMap<CoroutineEvent *, Coroutine *> waiters_ GUARDED_BY(waitersLock_);
+    PandaMultiMap<CoroutineEvent *, Coroutine *> waiters_ GUARDED_BY(waitersLock_);
     // terminated coros (waiting for deletion)
     PandaQueue<Coroutine *> finalizationQueue_;
 
