@@ -28,11 +28,6 @@
 
 namespace ark::compiler {
 
-constexpr size_t ARG_IDX_0 = 0;
-constexpr size_t ARG_IDX_1 = 1;
-constexpr size_t ARG_IDX_2 = 2;
-constexpr size_t ARG_IDX_3 = 3;
-
 SimplifyStringBuilder::SimplifyStringBuilder(Graph *graph)
     : Optimization(graph),
       instructionsStack_ {graph->GetLocalAllocator()->Adapter()},
@@ -212,18 +207,27 @@ InstIter SimplifyStringBuilder::SkipToStringBuilderDefaultConstructor(InstIter b
                         [](auto inst) { return IsMethodStringBuilderDefaultConstructor(inst); });
 }
 
-IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(Inst *lhs, Inst *rhs, DataType::Type type,
-                                                            SaveStateInst *saveState)
+IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
+    const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics, size_t appendCount, DataType::Type type,
+    SaveStateInst *saveState)
 {
     auto concatIntrinsic =
-        GetGraph()->CreateInstIntrinsic(GetGraph()->GetRuntime()->GetStringBuilderConcatStringsIntrinsicId());
+        GetGraph()->CreateInstIntrinsic(GetGraph()->GetRuntime()->GetStringConcatStringsIntrinsicId(appendCount));
     ASSERT(concatIntrinsic->RequireState());
 
     concatIntrinsic->SetType(type);
+    // Allocate input types (+1 input for save state)
+    concatIntrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), appendCount + 1);
+
+    for (size_t index = 0; index < appendCount; ++index) {
+        auto arg = appendIntrinsics[index]->GetInput(1).GetInst();
+        concatIntrinsic->AppendInput(arg);
+        concatIntrinsic->AddInputType(arg->GetType());
+    }
+
     auto saveStateClone = CopySaveState(GetGraph(), saveState);
-    concatIntrinsic->SetInputs(
-        GetGraph()->GetAllocator(),
-        {{lhs, lhs->GetType()}, {rhs, rhs->GetType()}, {saveStateClone, saveStateClone->GetType()}});
+    concatIntrinsic->AppendInput(saveStateClone);
+    concatIntrinsic->AddInputType(saveStateClone->GetType());
 
     return concatIntrinsic;
 }
@@ -300,89 +304,59 @@ void SimplifyStringBuilder::FixBrokenSaveStates(Inst *source, Inst *target)
 
 void SimplifyStringBuilder::Check(const ConcatenationMatch &match)
 {
+    // NOLINTBEGIN(readability-magic-numbers)
     [[maybe_unused]] auto &appendIntrinsics = match.appendIntrinsics;
     ASSERT(match.appendCount > 1);
-    ASSERT(appendIntrinsics[ARG_IDX_0] != nullptr);
-    ASSERT(appendIntrinsics[ARG_IDX_0]->GetInputsCount() > 1);
-    ASSERT(appendIntrinsics[ARG_IDX_1] != nullptr);
-    ASSERT(appendIntrinsics[ARG_IDX_1]->GetInputsCount() > 1);
+    ASSERT(appendIntrinsics[0U] != nullptr);
+    ASSERT(appendIntrinsics[0U]->GetInputsCount() > 1);
+    ASSERT(appendIntrinsics[1U] != nullptr);
+    ASSERT(appendIntrinsics[1U]->GetInputsCount() > 1);
 
     switch (match.appendCount) {
         case ARGS_NUM_2:
             break;
         case ARGS_NUM_3: {
-            ASSERT(appendIntrinsics[ARG_IDX_2] != nullptr);
-            ASSERT(appendIntrinsics[ARG_IDX_2]->GetInputsCount() > 1);
+            ASSERT(appendIntrinsics[2U] != nullptr);
+            ASSERT(appendIntrinsics[2U]->GetInputsCount() > 1);
             break;
         }
         case ARGS_NUM_4: {
-            ASSERT(appendIntrinsics[ARG_IDX_2] != nullptr);
-            ASSERT(appendIntrinsics[ARG_IDX_2]->GetInputsCount() > 1);
-            ASSERT(appendIntrinsics[ARG_IDX_3] != nullptr);
-            ASSERT(appendIntrinsics[ARG_IDX_3]->GetInputsCount() > 1);
+            ASSERT(appendIntrinsics[2U] != nullptr);
+            ASSERT(appendIntrinsics[2U]->GetInputsCount() > 1);
+            ASSERT(appendIntrinsics[3U] != nullptr);
+            ASSERT(appendIntrinsics[3U]->GetInputsCount() > 1);
             break;
         }
         default:
             UNREACHABLE();
     }
+    // NOLINTEND(readability-magic-numbers)
 }
 
-void SimplifyStringBuilder::InsertIntrinsicAndFixSaveStates(IntrinsicInst *concatIntrinsic, Inst *lhs, Inst *rhs,
-                                                            Inst *before)
+void SimplifyStringBuilder::InsertIntrinsicAndFixSaveStates(
+    IntrinsicInst *concatIntrinsic, const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics, size_t appendCount,
+    Inst *before)
 {
     InsertBeforeWithSaveState(concatIntrinsic, before);
-    FixBrokenSaveStates(lhs, concatIntrinsic);
-    FixBrokenSaveStates(rhs, concatIntrinsic);
+    for (size_t index = 0; index < appendCount; ++index) {
+        auto arg = appendIntrinsics[index]->GetDataFlowInput(1);
+        FixBrokenSaveStates(arg, concatIntrinsic);
+    }
 }
 
 void SimplifyStringBuilder::ReplaceWithIntrinsic(const ConcatenationMatch &match)
 {
     auto &appendIntrinsics = match.appendIntrinsics;
-    auto arg0 = appendIntrinsics[ARG_IDX_0]->GetInput(1).GetInst();
-    auto arg1 = appendIntrinsics[ARG_IDX_1]->GetInput(1).GetInst();
     auto toStringCall = match.toStringCall;
-    auto concat01 = CreateConcatIntrinsic(arg0, arg1, toStringCall->GetType(), toStringCall->GetSaveState());
-    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Replace StringBuilder append-intrinsics (id="
-                                     << appendIntrinsics[ARG_IDX_0]->GetId()
-                                     << " and id=" << appendIntrinsics[ARG_IDX_1]->GetId()
-                                     << ") with concat intrinsic (id=" << concat01->GetId() << ")";
-    switch (match.appendCount) {
-        case ARGS_NUM_2: {
-            InsertIntrinsicAndFixSaveStates(concat01, arg0, arg1, toStringCall);
-            toStringCall->ReplaceUsers(concat01);
-            break;
-        }
-        case ARGS_NUM_3: {
-            auto arg2 = appendIntrinsics[ARG_IDX_2]->GetInput(1).GetInst();
-            auto concat012 =
-                CreateConcatIntrinsic(concat01, arg2, toStringCall->GetType(), toStringCall->GetSaveState());
-            COMPILER_LOG(DEBUG, SIMPLIFY_SB)
-                << "Replace StringBuilder append-intrinsic (id=" << appendIntrinsics[ARG_IDX_2]->GetId()
-                << ") with concat intrinsic (id=" << concat012->GetId() << ")";
-            InsertIntrinsicAndFixSaveStates(concat01, arg0, arg1, toStringCall);
-            InsertIntrinsicAndFixSaveStates(concat012, concat01, arg2, toStringCall);
-            toStringCall->ReplaceUsers(concat012);
-            break;
-        }
-        case ARGS_NUM_4: {
-            auto arg2 = appendIntrinsics[ARG_IDX_2]->GetInput(1).GetInst();
-            auto arg3 = appendIntrinsics[ARG_IDX_3]->GetInput(1).GetInst();
-            auto concat23 = CreateConcatIntrinsic(arg2, arg3, toStringCall->GetType(), toStringCall->GetSaveState());
-            auto concat0123 =
-                CreateConcatIntrinsic(concat01, concat23, toStringCall->GetType(), toStringCall->GetSaveState());
-            COMPILER_LOG(DEBUG, SIMPLIFY_SB)
-                << "Replace StringBuilder append-intrinsics (id=" << appendIntrinsics[ARG_IDX_2]->GetId()
-                << " and id=" << appendIntrinsics[ARG_IDX_3]->GetId()
-                << ") with concat intrinsic (id=" << concat23->GetId() << ")";
-            InsertIntrinsicAndFixSaveStates(concat01, arg0, arg1, toStringCall);
-            InsertIntrinsicAndFixSaveStates(concat23, arg2, arg3, toStringCall);
-            InsertIntrinsicAndFixSaveStates(concat0123, concat01, concat23, toStringCall);
-            toStringCall->ReplaceUsers(concat0123);
-            break;
-        }
-        default:
-            UNREACHABLE();
-    }
+
+    auto concatIntrinsic = CreateConcatIntrinsic(appendIntrinsics, match.appendCount, toStringCall->GetType(),
+                                                 toStringCall->GetSaveState());
+    InsertIntrinsicAndFixSaveStates(concatIntrinsic, appendIntrinsics, match.appendCount, toStringCall);
+    toStringCall->ReplaceUsers(concatIntrinsic);
+
+    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Replace StringBuilder (id=" << match.ctorCall->GetId()
+                                     << ") append-intrinsics with concat intrinsic (id=" << concatIntrinsic->GetId()
+                                     << ")";
 }
 
 void SimplifyStringBuilder::Cleanup(const ConcatenationMatch &match)
@@ -733,6 +707,8 @@ void SimplifyStringBuilder::RemoveStringBuilderInstance(Inst *instance)
         if (userInst->IsCheck()) {
             auto checkUserInst = SkipSingleUserCheckInstruction(userInst);
             checkUserInst->GetBasicBlock()->RemoveInst(checkUserInst);
+            COMPILER_LOG(DEBUG, SIMPLIFY_SB)
+                << "Remove StringBuilder user instruction (id=" << checkUserInst->GetId() << ")";
         }
 
         userInst->GetBasicBlock()->RemoveInst(userInst);
@@ -766,6 +742,9 @@ void SimplifyStringBuilder::ReconnectStringBuilderCascade(Inst *instance, Inst *
 
     NormalizeStringBuilderAppendInstructionUsers(inputInstance, saveState);
     for (auto inputAppendInstruction : FindStringBuilderAppendInstructions(inputInstance)) {
+        COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Retarget append instrisic (id=" << inputAppendInstruction->GetId()
+                                         << ") to instance (id=" << instance->GetId() << ")";
+
         inputAppendInstruction->SetInput(0, instance);
         inputAppendInstruction->SetSaveState(saveState);
 

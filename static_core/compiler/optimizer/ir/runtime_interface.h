@@ -1233,7 +1233,7 @@ public:
         UNREACHABLE();
     }
 
-    virtual IntrinsicId GetStringBuilderConcatStringsIntrinsicId() const
+    virtual IntrinsicId GetStringConcatStringsIntrinsicId([[maybe_unused]] size_t numArgs) const
     {
         UNREACHABLE();
     }

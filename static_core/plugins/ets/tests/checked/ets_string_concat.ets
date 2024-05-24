@@ -15,11 +15,12 @@
 
 //! CHECKER       AOT IR Builder, check String concatenation
 //! SKIP_IF       @architecture == "arm32"
+//! RUN           entry: "ETSGLOBAL::main"
 //! RUN_PAOC      options: "--compiler-regex='.*concat[0-9]+' --compiler-inlining=false"
 //!
 //! METHOD        "ETSGLOBAL::concat0"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -28,11 +29,11 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,1
 //!
 //! METHOD        "ETSGLOBAL::concat1"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -41,29 +42,29 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,1
 //!
 //! METHOD        "ETSGLOBAL::concat2"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat3"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -71,32 +72,31 @@
 //!
 //! METHOD        "ETSGLOBAL::concat4"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/, 3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
-//! INST_NEXT     /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat3/,1
 //!
 //! METHOD        "ETSGLOBAL::concat5"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/, 4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat4/,1
 //!
 //! METHOD        "ETSGLOBAL::concat6"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_COUNT    /StringBuilder::<ctor>/,3
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -104,11 +104,11 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat7"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_COUNT    /StringBuilder::<ctor>/,3
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -116,17 +116,17 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat8"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -134,13 +134,13 @@
 //!
 //! METHOD        "ETSGLOBAL::concat9"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -148,31 +148,31 @@
 //!
 //! METHOD        "ETSGLOBAL::concat10"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat11"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppend/,3
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppend/,3
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat12"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_COUNT    /StringBuilder::<ctor>/,3
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -180,11 +180,11 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat13"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -193,22 +193,21 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST          /Intrinsic.StdCoreStringConcat2/
 //!
 //! METHOD        "ETSGLOBAL::concat14"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST          /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//!
-//! RUN           entry: "ETSGLOBAL::main"
 
 //! CHECKER       JIT IR Builder, check String concatenation
 //! SKIP_IF       @architecture == "arm32"
@@ -216,7 +215,7 @@
 //!
 //! METHOD        "ETSGLOBAL::concat0"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -225,11 +224,11 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,1
 //!
 //! METHOD        "ETSGLOBAL::concat1"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -238,29 +237,29 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,1
 //!
 //! METHOD        "ETSGLOBAL::concat2"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat3"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -268,32 +267,31 @@
 //!
 //! METHOD        "ETSGLOBAL::concat4"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/, 3
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
-//! INST_NEXT     /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat3/,1
 //!
 //! METHOD        "ETSGLOBAL::concat5"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/, 4
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat4/,1
 //!
 //! METHOD        "ETSGLOBAL::concat6"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_COUNT    /StringBuilder::<ctor>/,3
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -301,11 +299,11 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat7"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_COUNT    /StringBuilder::<ctor>/,3
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -313,17 +311,17 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat8"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -331,13 +329,13 @@
 //!
 //! METHOD        "ETSGLOBAL::concat9"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -345,31 +343,31 @@
 //!
 //! METHOD        "ETSGLOBAL::concat10"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat11"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppend/,3
 //! INST          /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppend/,3
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat12"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_COUNT    /StringBuilder::<ctor>/,3
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
@@ -377,11 +375,11 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringBuilderConcatStrings/,3
+//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat13"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
@@ -390,17 +388,18 @@
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /Intrinsic.StdCoreSbAppendString/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST          /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST          /Intrinsic.StdCoreStringConcat2/
 //!
 //! METHOD        "ETSGLOBAL::concat14"
 //! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringBuilderConcatStrings/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST          /StringBuilder::<ctor>/
+//! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
@@ -497,12 +496,15 @@ function main() {
     assert concat3("abc", "de") == "abcde": "Wrong result at concat3";
     assert concat4("ab", "c", "de") == "abcde": "Wrong result at concat4";
     assert concat5("ab", "c", "d", "e") == "abcde": "Wrong result at concat5";
-    assert concat6("ab", "c", "d", "e") == "abcde": "Wrong result at concat6";
+    console.log(concat6("ab", "c", "d", "e"))
+//    assert concat6("ab", "c", "d", "e") == "abcde": "Wrong result at concat6";
+    console.log(concat7("ab", "c", "d", "e"))
     assert concat7("ab", "c", "d", "e") == "abcde": "Wrong result at concat7";
     assert concat8("abc", "de") == "abcde": "Wrong result at concat8";
     assert concat9("abc", "de") == "abcde": "Wrong result at concat9";
     assert concat10("a", "b", "c", "d", "e") == "abcde": "Wrong result at concat10";
     assert concat11("abc", "de") == "abcde1": "Wrong result at concat11";
+    console.log(concat12("ab", "c", "d", "e"))
     assert concat12("ab", "c", "d", "e") == "abcde": "Wrong result at concat12";
     assert concat13() == "1": "Wrong result at concat13";
     assert concat14(null) == "null": "Wrong result at concat14";

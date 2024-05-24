@@ -74,12 +74,15 @@ private:
     };
 
     InstIter SkipToStringBuilderDefaultConstructor(InstIter begin, InstIter end);
-    IntrinsicInst *CreateConcatIntrinsic(Inst *lhs, Inst *rhs, DataType::Type type, SaveStateInst *saveState);
+    IntrinsicInst *CreateConcatIntrinsic(const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics,
+                                         size_t appendCount, DataType::Type type, SaveStateInst *saveState);
     bool IsIntrinsicStringBuilderAppendString(Inst *inst) const;
     bool MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match);
     void FixBrokenSaveStates(Inst *source, Inst *target);
     void Check(const ConcatenationMatch &match);
-    void InsertIntrinsicAndFixSaveStates(IntrinsicInst *concatIntrinsic, Inst *lhs, Inst *rhs, Inst *before);
+    void InsertIntrinsicAndFixSaveStates(IntrinsicInst *concatIntrinsic,
+                                         const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics,
+                                         size_t appendCount, Inst *before);
     void ReplaceWithIntrinsic(const ConcatenationMatch &match);
     void RemoveStringBuilderInstance(Inst *instance);
     void Cleanup(const ConcatenationMatch &match);
