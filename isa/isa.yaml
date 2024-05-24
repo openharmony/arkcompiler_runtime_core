@@ -107,10 +107,10 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 12.0.2.0
+version: 12.0.3.0
 
 # 0 is default value, alaways reflects to the newest version
-api_version_map: [[0, 12.0.2.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.2.0]]
+api_version_map: [[0, 12.0.3.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.3.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.
@@ -261,11 +261,11 @@ verification:
 
 isa_information:
     - description: The last encoding number of various ISA. It should be maintained as long as ISA changes.
-      last_opcode_idx: 0xdb
+      last_opcode_idx: 0xdc
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x12
+      last_callruntime_prefixed_opcode_idx: 0x14
 
 prefixes:
   - name: throw
@@ -429,6 +429,11 @@ groups:
       - sig: definefieldbyname imm:u8, string_id, v:in:top
         acc: in:top
         opcode_idx: [0xdb]
+        format: [op_imm_8_id_16_v_8]
+        properties: [string_id, ic_slot, two_slot, eight_bit_ic]
+      - sig: definepropertybyname imm:u8, string_id, v:in:top
+        acc: in:top
+        opcode_idx: [0xdc]
         format: [op_imm_8_id_16_v_8]
         properties: [string_id, ic_slot, two_slot, eight_bit_ic]
 
@@ -879,6 +884,18 @@ groups:
         opcode_idx: [0x12]
         format: [pref_op_imm1_16_imm2_16]
         prefix: callruntime
+      - sig: callruntime.istrue imm:u8
+        acc: inout:top
+        opcode_idx: [0x13]
+        format: [pref_op_imm_8]
+        prefix: callruntime
+        properties: [ic_slot, eight_bit_ic]
+      - sig: callruntime.isfalse imm:u8
+        acc: inout:top
+        opcode_idx: [0x14]
+        format: [pref_op_imm_8]
+        prefix: callruntime
+        properties: [ic_slot, eight_bit_ic]
 
   - title: throw instructions
     description: throw instructions

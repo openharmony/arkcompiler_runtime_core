@@ -467,13 +467,17 @@ LatticeElement *ConstantPropagation::FoldingConstant(ConstantElement *lattice, R
 {
     switch (id) {
         case RuntimeInterface::IntrinsicId::ISFALSE:
-        case RuntimeInterface::IntrinsicId::ISTRUE: {
+        case RuntimeInterface::IntrinsicId::ISTRUE:
+        case RuntimeInterface::IntrinsicId::CALLRUNTIME_ISFALSE_PREF_IMM8:
+        case RuntimeInterface::IntrinsicId::CALLRUNTIME_ISTRUE_PREF_IMM8: {
             if (lattice->GetType() != ConstantValue::CONSTANT_BOOL) {
                 return BottomElement::GetInstance();
             }
             auto cst = lattice->GetValue<bool>();
+            bool is_true_ins = (id == RuntimeInterface::IntrinsicId::ISTRUE) ||
+                (id == RuntimeInterface::IntrinsicId::CALLRUNTIME_ISTRUE_PREF_IMM8);
             return GetGraph()->GetLocalAllocator()->New<ConstantElement>(
-                id == RuntimeInterface::IntrinsicId::ISTRUE ? cst : !cst);
+                is_true_ins ? cst : !cst);
         }
         default:
             return BottomElement::GetInstance();
