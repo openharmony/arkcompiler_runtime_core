@@ -93,9 +93,11 @@ protected:
     using ObjectHeader = ::ark::ObjectHeader;
 
     template <class T>
-    static T *Create(EtsClass *arrayClass, uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
+    static T *Create(EtsClass *arrayClass, uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT,
+                     bool pinned = false)
     {
-        return reinterpret_cast<T *>(coretypes::Array::Create(arrayClass->GetRuntimeClass(), length, spaceType));
+        return reinterpret_cast<T *>(
+            coretypes::Array::Create(arrayClass->GetRuntimeClass(), length, spaceType, pinned));
     }
 
     template <class T>
@@ -211,10 +213,11 @@ class EtsPrimitiveArray : public EtsArray {
 public:
     using ValueType = ClassType;
 
-    static EtsPrimitiveArray *Create(uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT)
+    static EtsPrimitiveArray *Create(uint32_t length, SpaceType spaceType = SpaceType::SPACE_TYPE_OBJECT,
+                                     bool pinned = false)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
-        return EtsArray::Create<EtsPrimitiveArray>(GetComponentClass(), length, spaceType);
+        return EtsArray::Create<EtsPrimitiveArray>(GetComponentClass(), length, spaceType, pinned);
     }
     void Set(uint32_t index, ClassType element)
     {
