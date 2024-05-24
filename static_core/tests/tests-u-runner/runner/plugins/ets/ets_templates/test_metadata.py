@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 
+import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
@@ -25,6 +26,8 @@ import yaml
 
 METADATA_PATTERN = re.compile(r"(?<=\/\*---)(.*?)(?=---\*\/)", flags=re.DOTALL)
 PACKAGE_PATTERN = re.compile(r"\n\s*package[\t\f\v  ]+(?P<package_name>\w+(\.\w+)*)\b")
+SPEC_CHAPTER_PATTERN = re.compile(r"^\d{1,2}\.{0,1}\d{0,3}\.{0,1}\d{0,3}\.{0,1}\d{0,3}\.{0,1}\d{0,3}$")
+_LOGGER = logging.getLogger("runner.plugins.ets.ets_templates.test_metadata")
 
 
 class Tags:
@@ -72,6 +75,15 @@ class TestMetadata:
     package: Optional[str] = None
     ark_options: List[str] = field(default_factory=list)
     timeout: Optional[int] = None
+    spec: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.spec is None:
+            return
+        self.spec = str(self.spec)
+        if not re.match(SPEC_CHAPTER_PATTERN, self.spec):
+            _LOGGER.error(f"Incorrect format of specification chapter number : {self.spec}")
+
 
 
 def get_metadata(path: Path) -> TestMetadata:
