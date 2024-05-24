@@ -26,11 +26,11 @@ This chapter introduces the following three mutually-related notions:
 
 Each entity in an |LANG| program---a variable, a constant, a class,
 a type, a function, a method, etc.---is introduced via a *declaration*.
-An entity declaration defines a *name* of this entity. The name is used to
-refer to the entity further in the program text. Such declaration binds entity
-name with the *scope* (see :ref:`Scopes`). The scope affects the accessibility
-of a new entity, and how it can be referred by its qualified or simple
-(unqualified) name.
+An entity declaration defines a *name* of the entity. The name is used to
+refer to the entity further in the program text. The declaration binds the
+entity name with the *scope* (see :ref:`Scopes`). The scope affects the
+accessibility of a new entity, and how it can be referred to by its qualified
+or simple (unqualified) name.
 
 .. index::
    variable
@@ -53,8 +53,8 @@ Names
 .. meta:
     frontend_status: Done
 
-A name is a sequence of one or more identifiers which allows to refer to any
-declared entity. Names can have two syntactical forms:
+A name is a sequence of one or more identifiers. A name allows referring to
+any declared entity. Names can have two syntactical forms:
 
     - *Simple name* that consists of a single identifier;
     - *Qualified name* that consists of a sequence of identifiers with the
@@ -183,6 +183,23 @@ If a declaration is indistinguishable by name, then a compile-time error occurs:
 
 |
 
+.. _Accessible:
+
+Accessible
+**********
+
+.. meta:
+    frontend_status: Done
+
+Entity is considered accessible if it belongs to the current scope (see
+:ref:`Scopes`) and means that
+
+ - function or method can be called;
+ - variable can be read or changed;
+ - type can be used in declarations or extends/implements clauses.
+
+|
+
 .. _Scopes:
 
 Scopes
@@ -192,19 +209,23 @@ Scopes
     frontend_status: Done
 
 Different entity declarations introduce new names in different *scopes*. Scope
-(see :ref:`Scopes`) is the region of program text where an entity is declared
-and regions where it is accessible. The following entities can be referred to
-by their qualified names only:
+(see :ref:`Scopes`) is the region of program text where an entity is declared,
+and other regions where it can be used. The following entities always referred
+to by their qualified names only:
 
--  Class and interface members, both static and instance ones,
+-  Class and interface members (both static and instance ones),
 -  Entities imported via qualified import.
 
-Other entities are referred by their simple (unqualified) names.
+Other entities are referred to by their simple (unqualified) names.
 
-Names of different entities can be used for different purposes, like
+Names of different entities can be used for different purposes as follows:
 
-- A type name is used to declare variables or constants;
-- A function name is used to call that function;
+- Type name is used to declare variables, constants, parameters, class fields,
+  or interface properties;
+- Function or method name is used to call the function or method;
+- Variable name can be used to read or change the value of the variable;
+- Compilation unit name introduced as a result of import All with Qualified
+  Access to deal with exported entities.
 
 .. index::
    scope
@@ -220,9 +241,9 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _package-access:
 
--  A name declared on the package level (*package level scope*) is accessible
-   throughout the entire package. The name can be accessed in other packages or
-   modules if exported.
+-  Name declared on the package level (*package level scope*) is accessible
+   (see :ref:`Accessible`) throughout the entire package. The name can be
+   accessed (see :ref:`Accessible`) in other packages or modules if exported.
 
 .. index::
    name
@@ -235,8 +256,9 @@ The scope of an entity depends on the context the entity is declared in:
 .. _module-access:
 
 -  *Module level scope* is applicable for separate modules only. A name
-   declared on the module level is accessible throughout the entire module.
-   The name can be accessed in other compilation units if exported.
+   declared on the module level is accessible (see :ref:`Accessible`)
+   throughout the entire module. If exported, a name can be accessed in other
+   compilation units.
 
 .. index::
    module level scope
@@ -247,20 +269,21 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _class-access:
   
--  A name declared inside a class (*class level scope*) is accessible in the
-   class and sometimes, depending on the access modifier, outside the class, or
-   by means of a derived class.
+-  A name declared inside a class (*class level scope*) is accessible (see
+   :ref:`Accessible`) in the class and sometimes, depending on the access
+   modifier (see :ref:`Access Modifiers`), outside the class, or by means of a
+   derived class.
 
    Access to names inside the class is qualified with one of the following:
 
-   -  Keyword ``this`` or ``super``;
+   -  Keywords ``this`` or ``super``;
    -  Class instance expression for the names of instance entities; or
    -  Name of the class for static entities.
 
    Outside access is qualified with one of the following:
 
-   -  Expression the value stores;
-   -  Reference to the class instance for the names of instance entities; or
+   -  The expression the value stores;
+   -  A reference to the class instance for the names of instance entities; or
    -  Name of the class for static entities.
 
 .. index::
@@ -275,7 +298,7 @@ The scope of an entity depends on the context the entity is declared in:
 .. _interface-access:
 
 -  A name declared inside an interface (*interface level scope*) is accessible
-   inside and outside that interface (default public).
+   (see :ref:`Accessible`) inside and outside that interface (default public).
 
 .. index::
    name
@@ -572,9 +595,9 @@ Variable Declarations
 .. meta:
     frontend_status: Done
 
-A *variable declaration* introduces a new named storage location that will be
-assigned with an initial value as part of declartion or via some initialization
-before the first usage:
+A *variable declaration* introduces a new named storage location. The named
+storage location is assigned an initial value as part of the declartion, or
+via initialization before the first usage:
 
 .. code-block:: abnf
 
@@ -600,8 +623,8 @@ variable is determined as follows:
 
 -  *T* is the type specified in a type annotation (if any) of the declaration.
 
-   - If '``?``' is used after the name of the variable, then the actual type *T*
-     of the variable is ``type | undefined``.
+   - If '``?``' is used after the name of the variable, then it is semantically 
+     equivalent to the variable type ``type | undefined``.
    - If the declaration also has an initializer, then the initializer expression
      type must be compatible with *T* (see :ref:`Type Compatibility with Initializer`).
 
@@ -632,7 +655,6 @@ variable is determined as follows:
 Every variable in a program must have an initial value before it can be used.
 The initial value can be identified as follows:
 
--  The initial value is explicitly specified by an *initializer*.
 -  Each method or function parameter is initialized to the corresponding
    argument value provided by the caller of the method or function.
 -  Each constructor parameter is initialized to the corresponding
@@ -643,8 +665,20 @@ The initial value can be identified as follows:
 
 -  An exception parameter is initialized to the thrown object (see
    :ref:`Throw Statements`) that represents exception or error.
--  Each class, instance, local variable, or array element is initialized with
-   a *default value* (see :ref:`Default Values for Types`) when it is created.
+
+- If a variable has an *initializer* explicitly specified then its execution
+  will produce an initial value for this variable.
+
+- Otherwise the following cases are possible
+
+   + Each class or interface static variable is initialized as a result of
+     execution of the class or interface initializer (see
+     :ref:`Class Initializer`).
+   + Each class variable is initialized with either a *default value* (see
+     :ref:`Default Values for Types`) or as a result of class constructor (see
+     :ref:`Constructor Declaration`) execution.
+   + Each local variable or array element is initialized with a *default value*
+     (see :ref:`Default Values for Types`) when it is created.
 
 Otherwise, the variable is not initialized, and a :index:`compile-time error`
 occurs.
@@ -838,89 +872,6 @@ then a compile-time error occurs (see :ref:`Object Literal`):
 
 |
 
-.. _Smart Types:
-
-Smart Types
-===========
-
-.. meta:
-    frontend_status: Partly
-    todo: implement a dataflow check for loops and try-catch blocks
-
-As every data entity - variable (see :ref:`Variable and Constant Declarations`),
-class variable (see :ref:`Field Declarations`), or local variable (see
-:ref:`Parameter List` and :ref:`Local Declarations`) of some function or method
-has its static type, the type which was expliclty specified or inferred at the
-point of its declaration. This type defines the set of operations which can
-be applied to such entity. Namely what methods can be called and which other
-entities can be accessed having this entity as a reciever of the operation.
-
-.. code-block:: typescript
-   :linenos:
-
-    let a = new Object
-    a.toString() // entity 'a' has method toString()
-
-There could be cases when the type of an entity (mostly local variables) is a
-class or interface type (see :ref:`Classes` and :ref:`Interfaces`) or union
-type (see :ref:`Union Types`) and in the particular context of the program the
-compiler can narrow (smart cast) the static type to a more precise type (smart
-type) and allow operations which are specific to such narrowed type.
-
-.. code-block:: typescript
-   :linenos:
-
-    let a: number | string = 666
-    a++ /* Here we know for sure that type of 'a' is number and number-specific
-           operations are type-safe */
-
-    class Base {}
-    class Derived extends Base { method () {} }
-    let b: base = new Derived
-    b.method () /* Here we know for sure that type of 'b' is Derived and Derived-specific
-           operations are type-safe */
-
-Other examples are explicit calls to instanceof (see
-:ref:`InstanceOf Expression`) or checks against null (see
-:ref:`Equality with null or undefined`) as part of if statements (see
-:ref:`if Statements`) or conditional expression (see
-:ref:`Conditional Expressions`)
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (b: Base, d: Derived|null) {
-        if (b instanceof Derived) {
-            b.method()
-        }
-        if (d != null) {
-            d.method()
-        }
-    }
-
-So, for such cases the smart compiler can deduce smart type of an entity and
-will not require unnecesary ``as`` conversions (see :ref:`Cast Expressions`).
-
-There are tricky cases related to overloading (see
-:ref:`Function and Method Overloading`) when a smart type may lead to the call
-of the function or method (see :ref:`Function or Method Selection`) which suits
-the smart type of an argument rather than the static one.
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (p: Base) {}
-    function foo (p: Derived) {}
-
-    let b: Base = new Derived
-    foo (b) // potential ambiguity in case of smart type, foo(p:Base) is to be called
-    foo (b as Derived) // no ambiguity,  foo(p:Derived) is to be called
-
-Particular cases supported by the compiler are determined by the compiler
-implementation.
-
-|
-
 .. _Function Declarations:
 
 Function Declarations
@@ -930,7 +881,7 @@ Function Declarations
     frontend_status: Done
 
 *Function declarations* specify names, signatures, and bodies when
-introducing *named functions*. A function body is a block (see :ref:`Block`).
+introducing *named functions*. A function body is a block (see :ref:`Block`):
 
 .. code-block:: abnf
 
@@ -1198,9 +1149,9 @@ For example, the following two functions can be used in the same way:
     function foo1 (p?: number) {}
     function foo2 (p: Number | undefined = undefined) {}
 
-    foo1() // 'p' has 'undefined' value
+    foo1()  // 'p' has 'undefined' value
     foo1(5) // 'p' has an integer value
-    foo2() // 'p' has 'undefined' value
+    foo2()  // 'p' has 'undefined' value
     foo2(5) // 'p' has an integer value
 
 |
@@ -1298,9 +1249,9 @@ Shadowing by Parameter
     frontend_status: Done
 
 If the name of a parameter is identical to the name of a top-level
-variable accessible within the body of a function or a method with that
-parameter, then the name of the parameter shadows the name of the
-top-level variable within the body of that function or method:
+variable accessible (see :ref:`Accessible`) within the body of a function or a
+method with that parameter, then the name of the parameter shadows the name of
+the top-level variable within the body of that function or method:
 
 .. code-block:: typescript
    :linenos:
@@ -1334,6 +1285,24 @@ top-level variable within the body of that function or method:
 
 Return Type
 ===========
+
+.. meta:
+    frontend_status: Done
+
+Function or method return type defines the static type of the result of the
+function or method execution (see :ref:`Function Call Expression` and
+:ref:`Method Call Expression`). During execution function or method can
+produce a value of type compatible (see :ref:`Type Compatibility`) to the
+return type.
+
+If the function or method return type is not ``void``, and the function or 
+method body has an execution path without a return statement (see
+:ref:`Return Statements`), then a :index:`compile-time error` occurs.
+
+.. _Return Type Inference:
+
+Return Type Inference
+=====================
 
 .. meta:
     frontend_status: Done
@@ -1403,10 +1372,6 @@ The type inference is presented in the example below:
 
 If a particular type inference case is not recognized by the compiler, then
 a corresponding :index:`compile-time error` occurs.
-
-If the function return type is not ``void``, and the function or method body
-has an execution path without a return statement (see :ref:`Return Statements`),
-then a :index:`compile-time error` occurs.
 
 |
 

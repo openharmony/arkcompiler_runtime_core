@@ -16,7 +16,7 @@ Error Handling
 ##############
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 |LANG| is designed to provide first-class support in responding to, and
 recovering from different erroneous conditions in a program.
@@ -88,7 +88,7 @@ Errors
 ******
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 ``Error`` is the base class of all errors. Defining a new error class is
 normally not required because essential error classes for various cases (e.g.,

@@ -19,7 +19,7 @@ Contexts and Conversions
     frontend_status: Done
 
 Every expression written in the |LANG| programming language has a type that
-is inferred at compile time. 
+is inferred (see :ref:`Type Inference`) at compile time. 
 
 In most contexts, an expression must be *compatible* with a type expected in
 that context. This type is called the *target type*. 
@@ -389,19 +389,19 @@ These conversions never cause runtime errors.
 
 Numeric casting conversion of an operand of type ``double`` to target type
 ``float`` is performed in compliance with the IEEE 754 rounding rules.
-
-A double ``NaN`` is converted to a float ``NaN``.
-
-A double infinity is converted to the same-signed floating-point infinity.
 This conversion can lose precision or range, resulting in the following:
 
 -  Float zero from a nonzero double; and
 -  Float infinity from a finite double.
 
+A double ``NaN`` is converted to a float ``NaN``.
+
+A double infinity is converted to the same-signed floating-point infinity.
+
 A numeric casting conversion of a floating-point type operand to types
 ``short``, ``byte``, or ``char`` is performed in the following two steps:
 
-- First, the casting conversion to ``int`` is done;
+- The casting conversion to ``int`` is performed first;
 - Then, the ``int`` operand is casted to the target type.
 
 A numeric casting conversion of a floating-point type operand to
@@ -417,9 +417,18 @@ target types ``long`` or ``int`` is performed by the following rules:
 - Otherwise, the result is the value that rounds toward zero by using IEEE 754
   *round-toward-zero* mode.
 
+
+A numeric casting conversion from an integer type (or char)
+to smaller integer type (or char) *I* 
+discards all bits except the *N* lowest ones, 
+where *N* is the number of bites used to represent type *I*.
+This conversion can loose information about the magnitude of the numeric
+value, also the sign of the resulting value can differ from the sign of 
+the original value.
+
+
 .. index::
    IEEE 754
-
 
 |
 
@@ -486,7 +495,7 @@ of the types of the union, or to a type that is derived from such one type.
 For union type ``U = T``:sub:`1` ``| ... | T``:sub:`N`, the *casting conversion
 from union* converts an expression of type ``U`` to some type ``TT`` (*target type*).
 
-.. 
+..
    line 472 initially was *U* = *T*:sub:`1` | ... | *T*:sub:`N`
 
 A compile-time error occurs if the target type ``TT`` is not one of ``T``:sub:`i`,

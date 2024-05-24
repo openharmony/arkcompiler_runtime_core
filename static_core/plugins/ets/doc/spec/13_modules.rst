@@ -21,8 +21,8 @@ Compilation Units, Packages, and Modules
 Programs are structured as sequences of elements ready for compilation, i.e.,
 compilation units. Each compilation unit creates its own scope (see
 :ref:`Scopes`). The compilation unit’s variables, functions, classes,
-interfaces, or other declarations are only accessible within such scope if
-not explicitly exported.
+interfaces, or other declarations are only accessible (see :ref:`Accessible`)
+within such scope if not explicitly exported.
 
 A variable, function, class, interface, or other declarations exported from a
 different compilation unit must be imported first.
@@ -96,8 +96,8 @@ Every module implicitly imports (see :ref:`Implicit Import`) all exported
 entities from essential kernel packages of the standard library (see
 :ref:`Standard Library`).
 
-All entities from these packages are accessible as simple names, like the
-*console* variable:
+All entities from these packages are accessible (see :ref:`Accessible`) as
+simple names, like the *console* variable:
 
 .. code-block:: typescript
    :linenos:
@@ -229,13 +229,12 @@ An import declaration has the following two parts:
 .. code-block:: abnf
 
     importDirective:
-        'import' fileBinding|selectiveBindigns|defaultBinding|typeBinding
+        'import' allBinding|selectiveBindigns|defaultBinding|typeBinding
         'from' importPath
         ;
 
-    fileBinding:
+    allBinding:
         '*' importAlias
-        | qualifiedName '.' '*'
         ;
 
     selectiveBindigns:
@@ -243,7 +242,7 @@ An import declaration has the following two parts:
         ;
 
     defaultBinding:
-        Identifier
+        Identifier | ( '{' 'default' 'as' Identifier '}' )
         ;
 
     typeBinding:
@@ -305,7 +304,8 @@ by the *import path*.
 +---------------------------------+--+-------------------------------+
 
 This form of import is recommended because it simplifies the reading and
-understanding of the source code.
+understanding of the source code, when all exported entites are prefixed with
+the name of the imported compilation unit.
 
 .. index::
    import binding
@@ -347,8 +347,8 @@ functions (see :ref:`Function and Method Overloading`).
 The import binding ``ident as A`` binds an exported entity (entities) with the
 name *A* to the declaration scope of the current module.
 
-The bound entity is not accessible as ``ident`` because this binding does not
-bind ``ident``.
+The bound entity is not accessible (see :ref:`Accessible`) as ``ident`` because
+this binding does not bind ``ident``.
 
 .. index::
    import binding
@@ -530,7 +530,7 @@ Default Import Binding
 
 Default import binding allows importing a declaration exported from some
 module as default export. Knowing the actual name of the declaration is not
-required as the new name is given at importing.
+required as the new name is given at importing. 
 A :index:`compile-time error` occurs if another form of import is used to
 import an entity initially exported as default.
 
@@ -538,10 +538,15 @@ import an entity initially exported as default.
    :linenos:
 
     import DefaultExportedItemBindedName from ".../someFile"
+    import {default as DefaultExportedItemNewName} from  ".../someFile"
     function foo () {
-      let v = new DefaultExportedItemBindedName()
+      let v1 = new DefaultExportedItemBindedName()
+      // instance of class 'SomeClass' be created here
+      let v2 = new DefaultExportedItemNewName()
       // instance of class 'SomeClass' be created here
     }
+
+
 
     // SomeFile
     export default class SomeClass {}
@@ -562,8 +567,7 @@ Type Binding
 ============
 
 .. meta:
-    frontend_status: None
-    todo: implement type binding - #14586
+    frontend_status: Done
 
 Type import binding allows importing only the type declarations exported from
 some module or package. These declarations can be exported normally, or by
@@ -794,10 +798,10 @@ Compilation Unit Initialization
 .. meta:
     frontend_status: None
 
-A compilation unit is a separate module or a package that is initialized (see
-:ref:`Separate Module Initializer` and :ref:`Package Initializer`) once
-before the first use of an entity (function, variable, or type) exported
-from the compilation unit.
+A compilation unit is a separate module (see :ref:`Separate Module Initializer`)
+or a package (see :ref:`Package Initializer`) that is initialized once before
+the first use of an entity (function, variable, or type) exported from the
+compilation unit.
 If a compilation unit has any import directive (see :ref:`Import Directives`)
 but the imported entities are not actually used, then the imported compilation
 unit (separate or package) is initialized before the entry point (see
@@ -867,9 +871,9 @@ Exported Declarations
     frontend_status: Done
 
 Top-level declarations can use export modifiers that make the declarations
-accessible in other compilation units by using import (see :ref:`Import Directives`).
-The declarations not marked as exported can be used only inside the compilation
-unit they are declared in.
+accessible (see :ref:`Accessible`) in other compilation units by using import
+(see :ref:`Import Directives`). The declarations not marked as exported can be
+used only inside the compilation unit they are declared in.
 
 .. code-block:: typescript
    :linenos:
@@ -917,13 +921,15 @@ The *export directive* allows the following:
 
 -  Specifying a selective list of exported declarations with optional
    renaming; or
--  Re-exporting declarations from other compilation units.
+-  Specifying a name of one declarartion; or
+-  Re-exporting declarations from other compilation units; or
+-  Export type.
 
 
 .. code-block:: abnf
 
     exportDirective:
-        selectiveExportDirective | reExportDirective | exportTypeDirective
+        selectiveExportDirective | singleExportDirective | reExportDirective | exportTypeDirective
         ;
 
 .. index::
@@ -962,7 +968,8 @@ An export list directive uses the same syntax as an import directive with
     export { d1, d2 as d3}
 
 The above directive exports 'd1' by its name, and 'd2' as 'd3'. The name 'd2'
-is not accessible in the modules that import this module.
+is not accessible (see :ref:`Accessible`) in the modules that import this
+module.
 
 .. index::
    selective export directive
@@ -976,14 +983,42 @@ is not accessible in the modules that import this module.
 
 |
 
+.. _Single Export Directive:
+
+Single Export Directive
+=======================
+
+.. meta:
+    frontend_status: None
+
+Single export directive allows to specifiy the declaration which will be
+exported from the current compilation unit using its name.
+
+.. code-block:: abnf
+
+    singleExportDirective:
+        'export' Identifier
+        ;
+
+
+.. code-block:: typescript
+   :linenos:
+
+    export v
+    let v = 1
+
+The above directive exports variable 'v' by its name.
+
+
+|
+
 .. _Export Type Directive:
 
 Export Type Directive
 =====================
 
 .. meta:
-    frontend_status: Partly
-    todo: implement type binding - #14586
+    frontend_status: Done
 
 In addition to export that is attached to some declaration, a programmer can
 use the *export type* directive in order to do the following:
@@ -1194,7 +1229,9 @@ below:
    :linenos:
 
     function main() {
-      // Option 1: a return type is inferred, must be void or int
+      // Option 1: a return type is inferred from the body of main().
+      // It will be 'int' if the body has 'return' with the integer expression
+      // and 'void' if no return at all in the body
     }
 
     function main(): void {
