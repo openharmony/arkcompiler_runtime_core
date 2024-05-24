@@ -35,7 +35,6 @@ ohos_source_set("arkplatform_static") {
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 
-  configs = [ "$js_root:ark_jsruntime_public_config" ]
   external_deps = [
     "ets_runtime:libark_jsruntime",
     "hilog:libhilog",

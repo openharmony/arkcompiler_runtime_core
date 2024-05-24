@@ -39,7 +39,6 @@ ohos_static_library("aotbuilder") {
     "$ark_root:ark_config",
     "$ark_root/compiler:arkcompiler_public_config",
     ":aotbuilder_public_config",
-    sdk_libc_secshared_config,
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/runtime:arkruntime_public_config",
     "$ark_root/libpandafile:arkfile_public_config",

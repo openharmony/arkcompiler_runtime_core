@@ -35,7 +35,6 @@ ohos_shared_library("libarkaotmanager") {
   configs = [
     ":aot_manager_config",
     "$ark_root:ark_config",
-    sdk_libc_secshared_config,
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
     "$ark_root/runtime:arkruntime_public_config",
@@ -57,8 +56,9 @@ ohos_shared_library("libarkaotmanager") {
     "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
     "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_h",
     "$ark_root/runtime:plugins_entrypoints_gen_h",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   output_extension = "so"
   part_name = ark_part_name

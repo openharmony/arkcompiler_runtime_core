@@ -32,7 +32,6 @@ source_set("libdprof_static") {
   public_configs = [
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
-    sdk_libc_secshared_config,
     ":libdprof_config",
   ]
 

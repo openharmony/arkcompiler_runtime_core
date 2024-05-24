@@ -30,7 +30,6 @@ ohos_static_library("asm_defines") {
     "$ark_root:ark_config",
     "$ark_root/runtime:arkruntime_public_config",
     "$ark_root/libpandabase:arkbase_public_config",
-    sdk_libc_secshared_config,
     "$ark_root/libpandafile:arkfile_public_config",
   ]
   cflags_cc = [
@@ -45,8 +44,10 @@ ohos_static_library("asm_defines") {
     "$ark_root/libpandabase:coherency_line_size_h",
     "$ark_root/libpandafile:libarktsfile",
     "$ark_root/runtime:arkruntime_header_deps",
-    sdk_libc_secshared_dep,
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }

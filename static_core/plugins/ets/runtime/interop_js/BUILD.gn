@@ -14,15 +14,6 @@
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//build/ohos.gni")
 
-declare_args() {
-  if (is_ohos && is_standard_system) {
-    ark_napi_headers_path = "//third_party/node/src"
-  } else {
-    ark_napi_headers_path = ""
-  }
-}
-assert(ark_napi_headers_path != "", "ark_napi_headers_path is not set")
-
 if (is_ohos && is_standard_system) {
   ohos_prebuilt_etc("etsstdlib_install") {
     deps = [ "$ark_root/plugins/ets:etsstdlib" ]
@@ -51,8 +42,6 @@ ohos_source_set("ets_interop_js_napi_static") {
     "$ark_root:ark_config",
     "$ark_root/runtime:arkruntime_public_config",
   ]
-
-  include_dirs = [ "$ark_napi_headers_path" ]
 
   sources = [
     "call/call_ets.cpp",
@@ -93,7 +82,6 @@ ohos_source_set("ets_interop_js_napi_static") {
     "$ark_root/runtime:libarkruntime",
   ]
   if (is_ohos && is_standard_system) {
-    include_dirs += [ "$hilog_root/include" ]
     defines = [ "PANDA_USE_OHOS_LOG" ]
     deps += [ ":etsstdlib_install" ]
     external_deps = [

@@ -51,7 +51,6 @@ libarkbytecodeopt_sources = [
 libarkbytecodeopt_sources += plugin_libarkbytecodeopt_sources
 
 libarkbytecodeopt_configs = [
-  sdk_libc_secshared_config,
   "$ark_root:ark_config",
   ":bytecodeopt_public_config",
   "$ark_root/compiler:arkcompiler_public_config",

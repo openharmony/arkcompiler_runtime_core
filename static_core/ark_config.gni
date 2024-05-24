@@ -73,25 +73,19 @@ vixl_with_panda = true
 
 sdk_libc_secshared_dep = ""
 sdk_libc_secshared_ext_dep = ""
-sdk_libc_secshared_config = ""
 
 if (ark_standalone_build) {
-  sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secshared"
+  sdk_libc_secshared_dep = "securec:libc_secshared"
   sdk_libc_secshared_ext_dep = "securec:libc_secshared"
-  sdk_libc_secshared_config =
-      "$ark_third_party_root/securec:libsec_public_config"
 
   if (is_mingw || is_mac || is_linux) {
-    sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secstatic"
+    sdk_libc_secshared_dep = "securec:libc_secstatic"
     sdk_libc_secshared_ext_dep = "securec:libc_secstatic"
   }
 } else {
   # For OpenHarmony build, always link with the static lib:
-  sdk_libc_secshared_dep =
-      "$ark_third_party_root/bounds_checking_function:libsec_static"
+  sdk_libc_secshared_dep = "bounds_checking_function:libsec_static"
   sdk_libc_secshared_ext_dep = "bounds_checking_function:libsec_static"
-  sdk_libc_secshared_config =
-      "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 }
 
 is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
@@ -342,7 +336,7 @@ template("es2panda_gen") {
         get_label_info("$ark_es2panda_root/aot:es2panda(${host_toolchain})",
                        "root_out_dir")
     script = es2panda_root_out + "/arkcompiler/ets_frontend/es2panda"
-    deps = [ "$ark_es2panda_root/aot:es2panda(${host_toolchain})" ]
+    external_deps = [ "ets_frontend:es2panda(${host_toolchain})" ]
 
     inputs = invoker.inputs
     outputs = invoker.outputs
