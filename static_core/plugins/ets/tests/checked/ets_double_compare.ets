@@ -45,6 +45,36 @@
 //! INST          "Fcmp"
 //! PASS_AFTER    "Lowering"
 //! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_more__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_less__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_more_eq__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_less_eq__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_eq__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_ne__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
 
 //! CHECKER       Compare double AOT
 //! SKIP_IF       @architecture == "arm32"
@@ -79,6 +109,36 @@
 //! INST          "Fcmp"
 //! PASS_AFTER    "Lowering"
 //! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_more__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_less__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_more_eq__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_less_eq__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_eq__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
+//! METHOD        "ETSGLOBAL::Compare_const_ne__noinline__"
+//! PASS_BEFORE   "Peephole"
+//! INST          "Fcmp"
+//! PASS_AFTER    "Lowering"
+//! INST_NOT      "Fcmp"
 //! RUN           entry: "ETSGLOBAL::main"
 
 function Compare_more__noinline__(str1 : String, str2 : String): boolean {
@@ -103,6 +163,42 @@ function Compare_eq__noinline__(str1 : String, str2 : String): boolean {
 
 function Compare_ne__noinline__(str1 : String, str2 : String): boolean {
     return str1.length != str2.length
+}
+
+function Compare_const_more__noinline__(str : String) : boolean {
+    if (str.length < 4.0) {
+        return str.length < 2147483647.0;
+    }
+    return false;
+}
+
+function Compare_const_less__noinline__(str : String) : boolean {
+    if (str.length > 4.0) {
+        return str.length > -2147483648.0;
+    }
+    return false;
+}
+
+function Compare_const_more_eq__noinline__(str : String) : boolean {
+    if (str.length <= 4.0) {
+        return str.length <= 2147483648.0;
+    }
+    return false;
+}
+
+function Compare_const_less_eq__noinline__(str : String) : boolean {
+    if (str.length >= 4.0) {
+        return str.length >= -2147483649.0;
+    }
+    return false;
+}
+
+function Compare_const_eq__noinline__(str : String) : boolean {
+    return str.length == 4.0;
+}
+
+function Compare_const_ne__noinline__(str : String) : boolean {
+    return str.length != 4.0;
 }
 
 function main(): int {
@@ -164,6 +260,66 @@ function main(): int {
     }
     if (Compare_ne__noinline__("abcd", "abcd")) {
         return 18
+    }
+
+    if (!Compare_const_more__noinline__("abc")) {
+        return 19
+    }
+    if (Compare_const_more__noinline__("abcd")) {
+        return 20
+    }
+    if (Compare_const_more__noinline__("abcde")) {
+        return 21
+    }
+
+    if (Compare_const_less__noinline__("abc")) {
+        return 22
+    }
+    if (Compare_const_less__noinline__("abcd")) {
+        return 23
+    }
+    if (!Compare_const_less__noinline__("abcde")) {
+        return 24
+    }
+
+    if (!Compare_const_more_eq__noinline__("abc")) {
+        return 25
+    }
+    if (!Compare_const_more_eq__noinline__("abcd")) {
+        return 26
+    }
+    if (Compare_const_more_eq__noinline__("abcde")) {
+        return 27
+    }
+
+    if (Compare_const_less_eq__noinline__("abc")) {
+        return 28
+    }
+    if (!Compare_const_less_eq__noinline__("abcd")) {
+        return 29
+    }
+    if (!Compare_const_less_eq__noinline__("abcde")) {
+        return 30
+    }
+
+    if (Compare_const_eq__noinline__("abc")) {
+        return 31
+    }
+    if (!Compare_const_eq__noinline__("abcd")) {
+        return 32
+    }
+    if (Compare_const_eq__noinline__("abcde")) {
+        return 33
+    }
+
+    if (!Compare_const_ne__noinline__("abc")) {
+        return 34
+    }
+    if (Compare_const_ne__noinline__("abcd")) {
+        return 35
+    }
+    if (!Compare_const_ne__noinline__("abcde")) {
+        return 36
     }
     return 0
 }

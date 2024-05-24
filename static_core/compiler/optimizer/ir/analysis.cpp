@@ -284,6 +284,19 @@ bool CheckFcmpInputs(Inst *input0, Inst *input1)
     return true;
 }
 
+bool CheckFcmpWithConstInput(Inst *input0, Inst *input1)
+{
+    if (input0->IsConst() && input1->GetOpcode() == Opcode::Cast &&
+        input1->CastToCast()->GetOperandsType() == DataType::INT32) {
+        return true;
+    }
+    if (input1->IsConst() && input0->GetOpcode() == Opcode::Cast &&
+        input0->CastToCast()->GetOperandsType() == DataType::INT32) {
+        return true;
+    }
+    return false;
+}
+
 // Get power of 2
 // if n not power of 2 return -1;
 int64_t GetPowerOfTwo(uint64_t n)

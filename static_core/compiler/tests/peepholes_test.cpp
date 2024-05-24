@@ -3912,6 +3912,71 @@ TEST_F(PeepholesTest, CompareTest4)
     }
 }
 
+TEST_F(PeepholesTest, CompareTestCmpWithZero1)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 10U).s32();
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(3U, Opcode::Cast).f64().SrcType(DataType::INT32).Inputs(1U);
+            INST(4U, Opcode::Cast).f64().SrcType(DataType::INT32).Inputs(2U);
+            INST(5U, Opcode::Cmp).s32().Inputs(3U, 4U);
+            INST(6U, Opcode::Compare).b().CC(CC_LT).Inputs(5U, 0U);
+            INST(7U, Opcode::Return).b().Inputs(6U);
+        }
+    }
+    GetGraph()->RunPass<Peepholes>();
+    GetGraph()->RunPass<Cleanup>();
+    GraphChecker(GetGraph()).Check();
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 10U).s32();
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(6U, Opcode::Compare).b().CC(CC_LT).Inputs(1U, 2U);
+            INST(7U, Opcode::Return).b().Inputs(6U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(PeepholesTest, CompareTestCmpWithZero2)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 10.0F);
+        PARAMETER(2U, 1U).s32();
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(3U, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(2U);
+            INST(4U, Opcode::Cmp).s32().Inputs(3U, 1U);
+            INST(5U, Opcode::Compare).b().CC(CC_LT).Inputs(4U, 0U);
+            INST(6U, Opcode::Return).b().Inputs(5U);
+        }
+    }
+    GetGraph()->RunPass<Peepholes>();
+    GetGraph()->RunPass<Cleanup>();
+    GraphChecker(GetGraph()).Check();
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(2U, 1U).s32();
+        CONSTANT(7U, 10U);
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(5U, Opcode::Compare).b().CC(CC_LT).Inputs(2U, 7U);
+            INST(6U, Opcode::Return).b().Inputs(5U);
+        }
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
 TEST_F(PeepholesTest, CompareTestCmpMultipleUsers)
 {
     GRAPH(GetGraph())
