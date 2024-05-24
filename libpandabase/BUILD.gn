@@ -195,10 +195,14 @@ ohos_static_library("libarkbase_static") {
 
   deps = libarkbase_deps
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  if (!ark_standalone_build) {
+    public_external_deps = [ sdk_libc_secshared_dep ]
+  } else {
+    external_deps = [ sdk_libc_secshared_dep ]
+  }
 
   if (enable_hilog) {
-    public_external_deps = [ "hilog:libhilog" ]
+    public_external_deps += [ "hilog:libhilog" ]
   }
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
