@@ -10,7 +10,7 @@
     "sourceMap": true,
     "outDir": "build",
     "strict": true,
-    "types": ["node"]
   },
-  "include": ["src/*"]
+
+  "include": ["src/", "utils/"]
 }
