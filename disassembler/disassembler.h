@@ -113,7 +113,7 @@ private:
 
     void GetMetaData(pandasm::Record *record, const panda_file::File::EntityId &record_id) const;
     void GetMetaData(pandasm::Function *method, const panda_file::File::EntityId &method_id) const;
-    void GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id);
+    void GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id, bool is_scope_names_record);
 
     void GetLanguageSpecificMetadata();
 

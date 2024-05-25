@@ -31,9 +31,15 @@ public:
 
 static const Function *CheckFunction(std::unique_ptr<const AbcFile> &abc_file, std::string_view func_name)
 {
-    ASSERT(abc_file != nullptr);
+    if (abc_file == nullptr) {
+        EXPECT_NE(abc_file, nullptr);
+        return nullptr;
+    }
     auto func0 = abc_file->GetFunctionByName(func_name);
-    ASSERT(func0 != nullptr);
+    if (func0 == nullptr) {
+        EXPECT_NE(func0, nullptr);
+        return nullptr;
+    }
     EXPECT_EQ(func0->GetFunctionName(), func_name);
     return func0;
 }
@@ -41,12 +47,15 @@ static const Function *CheckFunction(std::unique_ptr<const AbcFile> &abc_file, s
 static bool ContainDefinedFunction(std::unique_ptr<const AbcFile> &abc_file,
                                    const Function *par_func, std::string_view func_name)
 {
-    ASSERT(abc_file != nullptr);
+    if (abc_file == nullptr) {
+        EXPECT_NE(abc_file, nullptr);
+        return false;
+    }
     size_t df_cnt0 = par_func->GetDefinedFunctionCount();
     for (size_t i = 0; i < df_cnt0; ++i) {
         auto df = par_func->GetDefinedFunctionByIndex(i);
         if (df->GetFunctionName() == func_name) {
-            ASSERT(df->GetParentFunction() == par_func);
+            EXPECT_EQ(df->GetParentFunction(), par_func);
             return true;
         }
     }
@@ -56,16 +65,18 @@ static bool ContainDefinedFunction(std::unique_ptr<const AbcFile> &abc_file,
 static bool ContainMemberFunction(std::unique_ptr<const AbcFile> &abc_file,
                                   const Class *class0, std::string_view func_name)
 {
-    ASSERT(abc_file != nullptr);
+    if (abc_file == nullptr) {
+        EXPECT_NE(abc_file, nullptr);
+        return false;
+    }
     size_t mf_func_count = class0->GetMemberFunctionCount();
     for (size_t i = 0; i < mf_func_count; ++i) {
         auto mf = class0->GetMemberFunctionByIndex(i);
         if (mf->GetFunctionName() == func_name) {
-            ASSERT(class0->GetMemberFunctionByName(func_name) == mf);
+            EXPECT_EQ(class0->GetMemberFunctionByName(func_name), mf);
             return true;
         }
     }
-
     auto par_class = class0->GetParentClass();
     if (par_class != nullptr) {
         return ContainMemberFunction(abc_file, par_class, func_name);
@@ -75,16 +86,26 @@ static bool ContainMemberFunction(std::unique_ptr<const AbcFile> &abc_file,
 
 static const Class *CheckClass(std::unique_ptr<const AbcFile> &abc_file, std::string_view class_name)
 {
-    ASSERT(abc_file != nullptr);
+    if (abc_file == nullptr) {
+        EXPECT_NE(abc_file, nullptr);
+        return nullptr;
+    }
     auto *class0 = abc_file->GetClassByName(class_name);
-    ASSERT(class0 != nullptr);
+    if (class0 == nullptr) {
+        EXPECT_NE(class0, nullptr);
+        return nullptr;
+    }
     EXPECT_EQ(class0->GetClassName(), class_name);
     [[maybe_unused]] size_t mf_func_count = class0->GetMemberFunctionCount();
     ASSERT(mf_func_count >= 1);
     [[maybe_unused]] auto mf_func0 = class0->GetMemberFunctionByIndex(0);
-    ASSERT(abc_file->GetFunctionByName(class_name) == mf_func0);
-    ASSERT(class0->GetMemberFunctionByName(class_name) == mf_func0);
-    ASSERT(mf_func0->GetClass() == class0);
+    if (mf_func0 == nullptr) {
+        EXPECT_NE(mf_func0, nullptr);
+        return nullptr;
+    }
+    EXPECT_EQ(abc_file->GetFunctionByName(class_name), mf_func0);
+    EXPECT_EQ(class0->GetMemberFunctionByName(class_name), mf_func0);
+    EXPECT_EQ(mf_func0->GetClass(), class0);
     CheckFunction(abc_file, class_name);
     return class0;
 }
@@ -106,90 +127,89 @@ size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
     ASSERT_TRUE(f0->GetParentFunction() == nullptr);
     size_t dc_cnt0 = f0->GetDefinedClassCount();
     EXPECT_EQ(dc_cnt0, 2U);
-    EXPECT_EQ(f0->GetDefinedClassByIndex(0)->GetClassName(), "Bar");
-    EXPECT_EQ(f0->GetDefinedClassByIndex(1)->GetClassName(), "ExampleClass1");
+    EXPECT_EQ(f0->GetDefinedClassByIndex(0)->GetClassName(), "#~@1=#Bar");
+    EXPECT_EQ(f0->GetDefinedClassByIndex(1)->GetClassName(), "#~@4=#ExampleClass1");
     size_t df_cnt0 = f0->GetDefinedFunctionCount();
     EXPECT_EQ(df_cnt0, 12U);
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "func1"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "func2"));
-    ASSERT_FALSE(ContainDefinedFunction(abc_file, f0, "func3"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "func6"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "getName"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "setName"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "func9"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "func10"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "func17"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#*#func1"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#*#func2"));
+    ASSERT_FALSE(ContainDefinedFunction(abc_file, f0, "func1"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#~@1>#func6"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#~@1>#getName"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#~@1>#setName"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#~@1>#func9"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#*#func10"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f0, "#~@4>#func17"));
     // func2
-    auto f1 = CheckFunction(abc_file, "func2");
+    auto f1 = CheckFunction(abc_file, "#*#func2");
+    ASSERT_NE(f1, nullptr);
     EXPECT_EQ(f1->GetArgCount(), 5U);
     size_t df_cnt1 = f1->GetDefinedFunctionCount();
     EXPECT_EQ(df_cnt1, 2U);
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f1, "func4"));
+    ASSERT_TRUE(ContainDefinedFunction(abc_file, f1, "#*@0*#func4"));
     // func10
-    auto f2 = CheckFunction(abc_file, "func10");
+    auto f2 = CheckFunction(abc_file, "#*#func10");
     EXPECT_EQ(f2->GetArgCount(), 3U);
     size_t dc_cnt2 = f2->GetDefinedClassCount();
     EXPECT_EQ(dc_cnt2, 2U);
     EXPECT_EQ(f2->GetDefinedClassByIndex(0)->GetClassName(),
-                            "#11247673030038003130#Bar");
-    EXPECT_EQ(f2->GetDefinedClassByIndex(1)->GetClassName(), "Bar2");
+                            "#*@2~@1=#Bar");
+    EXPECT_EQ(f2->GetDefinedClassByIndex(1)->GetClassName(), "#*@2~@3=#Bar2");
     size_t df_cnt2 = f2->GetDefinedFunctionCount();
     EXPECT_EQ(df_cnt2, 7U);
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f2, "baseFoo1"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f2, "func12"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f2, "a"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f2, "symbol"));
-    ASSERT_TRUE(ContainDefinedFunction(abc_file, f2, "func15"));
-
+    EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@1>#baseFoo1"));
+    EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@3>#func12"));
+    EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@3>#a"));
+    EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@3>#symbol"));
+    EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@3>#func15"));
     // check each defined class
     // #1#Bar
-    auto class0 = CheckClass(abc_file, "Bar");
+    auto class0 = CheckClass(abc_file, "#~@1=#Bar");
     ASSERT_TRUE(class0->GetParentClass() == nullptr);
     ASSERT_TRUE(class0->GetDefiningFunction() == f0);
     size_t mf_count0 = class0->GetMemberFunctionCount();
     EXPECT_EQ(mf_count0, 5U);
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class0, "func6"));
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class0, "getName"));
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class0, "setName"));
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class0, "func9"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class0, "#~@1>#func6"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class0, "#~@1>#getName"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class0, "#~@1>#setName"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class0, "#~@1>#func9"));
     // #3#Bar2
-    auto class1 = CheckClass(abc_file, "Bar2");
+    auto class1 = CheckClass(abc_file, "#*@2~@3=#Bar2");
     ASSERT_TRUE(class1->GetParentClass() != nullptr);
-    ASSERT_TRUE(class1->GetDefiningFunction() == abc_file->GetFunctionByName("func10"));
+    ASSERT_TRUE(class1->GetDefiningFunction() == abc_file->GetFunctionByName("#*#func10"));
     size_t mf_count1 = class1->GetMemberFunctionCount();
     EXPECT_EQ(mf_count1, 5U);
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class1, "baseFoo1"));
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class1, "func12"));
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class1, "func15"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class1, "#*@2~@1>#baseFoo1"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class1, "#*@2~@3>#func12"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class1, "#*@2~@3>#func15"));
     // #8#ExampleClass2
-    auto class2 = CheckClass(abc_file, "ExampleClass2");
-    ASSERT_TRUE(class2->GetParentClass() ==
-                            abc_file->GetClassByName("#2505994642537462424#ExampleClass1"));
-    ASSERT_FALSE(ContainMemberFunction(abc_file, class2, "func17"));
-    ASSERT_TRUE(ContainMemberFunction(abc_file, class2, "func19"));
+    auto class2 = CheckClass(abc_file, "#*@5*@7~@6=#ExampleClass2");
+    EXPECT_EQ(class2->GetParentClassName(), "#*@5~@4=#ExampleClass1");
+    EXPECT_FALSE(ContainMemberFunction(abc_file, class2, "#~@4=#func17"));
+    EXPECT_TRUE(ContainMemberFunction(abc_file, class2, "#*@5~@4>#func19"));
     // #9#ExtendService
-    auto class3 = CheckClass(abc_file, "ExtendService");
+    auto class3 = CheckClass(abc_file, "#*@9~@8=#ExtendService");
     ASSERT_TRUE(class3->GetParentClass() == nullptr);
     EXPECT_EQ(class3->GetParentClassName(), "BaseService");
     EXPECT_EQ(class3->GetParClassExternalModuleName(), "../base/service");
-    ASSERT_TRUE(class3->GetParClassGlobalVarName().empty());
+    EXPECT_TRUE(class3->GetParClassGlobalVarName().empty());
     // #10#ExtendPhoneService
-    auto class4 = CheckClass(abc_file, "ExtendPhoneService");
+    auto class4 = CheckClass(abc_file, "#*@9~@a=#ExtendPhoneService");
     ASSERT_TRUE(class4->GetParentClass() == nullptr);
     EXPECT_EQ(class4->GetParentClassName(), "PhoneService");
     EXPECT_EQ(class4->GetParClassExternalModuleName(), "../mod1");
-    ASSERT_TRUE(class4->GetParClassGlobalVarName().empty());
+    EXPECT_TRUE(class4->GetParClassGlobalVarName().empty());
     // #11#ExtendDataSource
-    auto class5 = CheckClass(abc_file, "ExtendDataSource");
+    auto class5 = CheckClass(abc_file, "#*@9~@b=#ExtendDataSource");
     ASSERT_TRUE(class5->GetParentClass() == nullptr);
     EXPECT_EQ(class5->GetParentClassName(), "BasicDataSource");
-    ASSERT_TRUE(class5->GetParClassExternalModuleName().empty());
+    EXPECT_TRUE(class5->GetParClassExternalModuleName().empty());
     EXPECT_EQ(class5->GetParClassGlobalVarName(), "globalvar");
     // #12#ExtendDataItem
-    auto class6 = CheckClass(abc_file, "ExtendDataItem");
+    auto class6 = CheckClass(abc_file, "#*@9~@c=#ExtendDataItem");
     ASSERT_TRUE(class6->GetParentClass() == nullptr);
     EXPECT_EQ(class6->GetParentClassName(), "DataItem");
-    ASSERT_TRUE(class6->GetParClassExternalModuleName().empty());
+    EXPECT_TRUE(class6->GetParClassExternalModuleName().empty());
     EXPECT_EQ(class6->GetParClassGlobalVarName(), "globalvar2.Data");
 }
 
@@ -197,33 +217,41 @@ HWTEST(DefectScanAuxTest, DebugInfoTest, testing::ext::TestSize.Level0)
 {
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "debug_info_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
-    ASSERT(abc_file != nullptr);
+    ASSERT_NE(abc_file, nullptr);
 
     // check debug info, whether the line number obtained from call inst is correct
-    auto f0 = abc_file->GetFunctionByName("foo");
+    auto f0 = abc_file->GetFunctionByName("#*#foo");
+    ASSERT_NE(f0, nullptr);
     EXPECT_EQ(f0->GetCalleeInfoCount(), 3U);
     auto ci0_0 = f0->GetCalleeInfoByIndex(0);
+    ASSERT_NE(ci0_0, nullptr);
     // callarg0
     EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_0->GetCallInst()), 34);
     auto ci0_1 = f0->GetCalleeInfoByIndex(1);
+    ASSERT_NE(ci0_1, nullptr);
     // callspread
     EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_1->GetCallInst()), 38);
     auto ci0_2 = f0->GetCalleeInfoByIndex(2);
+    ASSERT_NE(ci0_2, nullptr);
     // callirange
     EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_2->GetCallInst()), 40);
     // ctor of Data
-    auto f1 = abc_file->GetFunctionByName("Data");
+    auto f1 = abc_file->GetFunctionByName("#*@2~@1=#Data");
+    ASSERT_NE(f1, nullptr);
     EXPECT_EQ(f1->GetCalleeInfoCount(), 1U);
     auto ci1_0 = f1->GetCalleeInfoByIndex(0);
     // supercall
     EXPECT_EQ(abc_file->GetLineNumberByInst(f1, ci1_0->GetCallInst()), 60);
     // bar
-    auto f2 = abc_file->GetFunctionByName("bar");
+    auto f2 = abc_file->GetFunctionByName("#*#bar");
+    ASSERT_NE(f2, nullptr);
     EXPECT_EQ(f2->GetCalleeInfoCount(), 2U);
     auto ci2_0 = f2->GetCalleeInfoByIndex(0);
+    ASSERT_NE(ci2_0, nullptr);
     // callithisrange
     EXPECT_EQ(abc_file->GetLineNumberByInst(f2, ci2_0->GetCallInst()), 70);
     auto ci2_1 = f2->GetCalleeInfoByIndex(1);
+    ASSERT_NE(ci2_1, nullptr);
     // callithisrange
     EXPECT_EQ(abc_file->GetLineNumberByInst(f2, ci2_1->GetCallInst()), 75);
 }
@@ -232,7 +260,7 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest, testing::ext::TestSize.Level0)
 {
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "callee_info_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
-    ASSERT(abc_file != nullptr);
+    ASSERT_NE(abc_file, nullptr);
     size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
     EXPECT_EQ(def_func_cnt, 19U);
     size_t def_class_cnt = abc_file->GetDefinedClassCount();
@@ -240,16 +268,19 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest, testing::ext::TestSize.Level0)
 
     // check callee info of each func
     // foo
-    auto f0 = abc_file->GetFunctionByName("foo");
+    auto f0 = abc_file->GetFunctionByName("#*#foo");
+    ASSERT_NE(abc_file, nullptr);
     size_t ci_cnt0 = f0->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt0, 6U);
     auto ci0_0 = f0->GetCalleeInfoByIndex(0);
+    ASSERT_NE(abc_file, nullptr);
     ASSERT_TRUE(f0->GetCalleeInfoByCallInst(ci0_0->GetCallInst()) == ci0_0);
     ASSERT_TRUE(ci0_0->IsCalleeDefinite());
     EXPECT_EQ(ci0_0->GetCalleeArgCount(), 1);
     ASSERT_TRUE(ci0_0->GetCaller() == f0);
-    ASSERT_TRUE(ci0_0->GetCallee() == abc_file->GetFunctionByName("func2"));
+    ASSERT_TRUE(ci0_0->GetCallee() == abc_file->GetFunctionByName("#*@0*#func2"));
     auto ci0_1 = f0->GetCalleeInfoByIndex(1);
+    ASSERT_NE(ci0_1, nullptr);
     EXPECT_EQ(f0->GetCalleeInfoByCallInst(ci0_1->GetCallInst()), ci0_1);
     ASSERT_FALSE(ci0_1->IsCalleeDefinite());
     EXPECT_EQ(ci0_1->GetCalleeArgCount(), 1);
@@ -257,102 +288,124 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(ci0_1->GetFunctionName(), "log");
     EXPECT_EQ(ci0_1->GetGlobalVarName(), "console");
     auto ci0_2 = f0->GetCalleeInfoByIndex(2);
+    ASSERT_NE(ci0_2, nullptr);
     ASSERT_FALSE(ci0_2->IsCalleeDefinite());
     EXPECT_EQ(ci0_2->GetCalleeArgCount(), 1);
     ASSERT_TRUE(ci0_2->GetCallee() == nullptr);
     EXPECT_EQ(ci0_2->GetFunctionName(), "logd");
     EXPECT_EQ(ci0_2->GetGlobalVarName(), "globalvar.hilog");
     auto ci0_3 = f0->GetCalleeInfoByIndex(3);
+    ASSERT_NE(ci0_3, nullptr);
     ASSERT_TRUE(ci0_3->IsCalleeDefinite());
-    ASSERT_TRUE(ci0_3->GetCallee() == abc_file->GetFunctionByName("func2"));
+    ASSERT_TRUE(ci0_3->GetCallee() == abc_file->GetFunctionByName("#*@0*#func2"));
     auto ci0_4 = f0->GetCalleeInfoByIndex(4);
+    ASSERT_NE(ci0_4, nullptr);
     ASSERT_TRUE(ci0_4->IsCalleeDefinite());
     EXPECT_EQ(ci0_4->GetCalleeArgCount(), 2);
-    ASSERT_TRUE(ci0_4->GetCallee() == abc_file->GetFunctionByName("func1"));
+    ASSERT_TRUE(ci0_4->GetCallee() == abc_file->GetFunctionByName("#*#func1"));
     auto ci0_5 = f0->GetCalleeInfoByIndex(5);
+    ASSERT_NE(ci0_5, nullptr);
     ASSERT_FALSE(ci0_5->IsCalleeDefinite());
     EXPECT_EQ(ci0_5->GetFunctionName(), "bar");
     // foo1
-    auto f1 = abc_file->GetFunctionByName("foo1");
+    auto f1 = abc_file->GetFunctionByName("#*#foo1");
+    ASSERT_NE(f1, nullptr);
     size_t ci_cnt1 = f1->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt1, 3U);
     auto ci1_0 = f1->GetCalleeInfoByIndex(0);
+    ASSERT_NE(ci1_0, nullptr);
     ASSERT_TRUE(ci1_0->IsCalleeDefinite());
-    ASSERT_TRUE(ci1_0->GetCallee() == abc_file->GetFunctionByName("fn"));
+    ASSERT_TRUE(ci1_0->GetCallee() == abc_file->GetFunctionByName("#*@1*#fn"));
     auto ci1_1 = f1->GetCalleeInfoByIndex(1);
+    ASSERT_NE(ci1_1, nullptr);
     ASSERT_TRUE(ci1_1->IsCalleeDefinite());
-    ASSERT_TRUE(ci1_1->GetCallee() == abc_file->GetFunctionByName("fn"));
+    ASSERT_TRUE(ci1_1->GetCallee() == abc_file->GetFunctionByName("#*@1*#fn"));
     auto ci1_2 = f1->GetCalleeInfoByIndex(2);
+    ASSERT_NE(ci1_2, nullptr);
     ASSERT_FALSE(ci1_2->IsCalleeDefinite());
     EXPECT_EQ(ci1_2->GetFunctionName(), "bind");
     // #2#ColorPoint
-    auto f2 = abc_file->GetFunctionByName("ColorPoint");
+    auto f2 = abc_file->GetFunctionByName("#*@4~@3=#ColorPoint");
+    ASSERT_NE(f2, nullptr);
     size_t ci_cnt2 = f2->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt2, 1U);
     auto ci2_0 = f2->GetCalleeInfoByIndex(0);
+    ASSERT_NE(ci2_0, nullptr);
     ASSERT_TRUE(ci2_0->IsCalleeDefinite());
-    ASSERT_TRUE(ci2_0->GetClass() == abc_file->GetClassByName("Point"));
-    ASSERT_TRUE(ci2_0->GetCallee() == abc_file->GetFunctionByName("Point"));
+    ASSERT_TRUE(ci2_0->GetClass() == abc_file->GetClassByName("#~@2=#Point"));
+    ASSERT_TRUE(ci2_0->GetCallee() == abc_file->GetFunctionByName("#~@2=#Point"));
     // func6
-    auto f3 = abc_file->GetFunctionByName("func6");
+    auto f3 = abc_file->GetFunctionByName("#*#func6");
+    ASSERT_NE(f3, nullptr);
     size_t ci_cnt3 = f3->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt3, 1U);
     auto ci3_0 = f3->GetCalleeInfoByIndex(0);
-    ASSERT_FALSE(ci3_0->IsCalleeDefinite());
+    EXPECT_FALSE(ci3_0->IsCalleeDefinite());
     EXPECT_EQ(ci3_0->GetFunctionName(), "bar");
     EXPECT_EQ(ci3_0->GetExternalModuleName(), "./mod2");
     // func7
-    auto f4 = abc_file->GetFunctionByName("func7");
+    auto f4 = abc_file->GetFunctionByName("#*@5*#func7");
+    ASSERT_NE(f4, nullptr);
     size_t ci_cnt4 = f4->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt4, 2U);
     auto ci4_0 = f4->GetCalleeInfoByIndex(0);
+    ASSERT_NE(ci4_0, nullptr);
     ASSERT_FALSE(ci4_0->IsCalleeDefinite());
     EXPECT_EQ(ci4_0->GetCalleeArgCount(), 2);
     EXPECT_EQ(ci4_0->GetFunctionName(), "sum");
     EXPECT_EQ(ci4_0->GetExternalModuleName(), "../../mod1");
     auto ci4_1 = f4->GetCalleeInfoByIndex(1);
-    ASSERT_FALSE(ci4_1->IsCalleeDefinite());
+    ASSERT_NE(ci4_1, nullptr);
+    EXPECT_FALSE(ci4_1->IsCalleeDefinite());
     EXPECT_EQ(ci4_1->GetCalleeArgCount(), 2);
     EXPECT_EQ(ci4_1->GetFunctionName(), "sub");
     EXPECT_EQ(ci4_1->GetExternalModuleName(), "../../mod1");
     // callMemberFunc1
-    auto f5 = abc_file->GetFunctionByName("callMemberFunc1");
+    auto f5 = abc_file->GetFunctionByName("#*@6*#callMemberFunc1");
+    ASSERT_NE(f5, nullptr);
     size_t ci_cnt5 = f5->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt5, 2U);
     auto ci5_0 = f5->GetCalleeInfoByIndex(0);
-    ASSERT_TRUE(ci5_0->IsCalleeDefinite());
-    ASSERT_TRUE(ci5_0->GetClass() != nullptr);
-    EXPECT_EQ(ci5_0->GetClass(), abc_file->GetClassByName("Point"));
-    ASSERT_TRUE(ci5_0->GetCallee() != nullptr);
-    EXPECT_EQ(ci5_0->GetCallee(), abc_file->GetFunctionByName("getCoordinateX"));
+    ASSERT_NE(ci5_0, nullptr);
+    EXPECT_TRUE(ci5_0->IsCalleeDefinite());
+    EXPECT_TRUE(ci5_0->GetClass() != nullptr);
+    EXPECT_EQ(ci5_0->GetClass(), abc_file->GetClassByName("#~@2=#Point"));
+    EXPECT_TRUE(ci5_0->GetCallee() != nullptr);
+    EXPECT_EQ(ci5_0->GetCallee(), abc_file->GetFunctionByName("#~@2>#getCoordinateX"));
     auto ci5_1 = f5->GetCalleeInfoByIndex(1);
-    ASSERT_TRUE(ci5_1->IsCalleeDefinite());
-    ASSERT_TRUE(ci5_1->GetClass() != nullptr);
-    EXPECT_EQ(ci5_1->GetClass(), abc_file->GetClassByName("Point"));
-    ASSERT_TRUE(ci5_1->GetCallee() != nullptr);
-    EXPECT_EQ(ci5_1->GetCallee(), abc_file->GetFunctionByName("setCoordinateX"));
+    ASSERT_NE(ci5_1, nullptr);
+    EXPECT_TRUE(ci5_1->IsCalleeDefinite());
+    EXPECT_TRUE(ci5_1->GetClass() != nullptr);
+    EXPECT_EQ(ci5_1->GetClass(), abc_file->GetClassByName("#~@2=#Point"));
+    EXPECT_TRUE(ci5_1->GetCallee() != nullptr);
+    EXPECT_EQ(ci5_1->GetCallee(), abc_file->GetFunctionByName("#~@2>#setCoordinateX"));
     // callMemberFunc2
-    auto f6 = abc_file->GetFunctionByName("callMemberFunc2");
+    auto f6 = abc_file->GetFunctionByName("#*@6*@7*#callMemberFunc2");
+    ASSERT_NE(f6, nullptr);
     size_t ci_cnt6 = f6->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt6, 2U);
     auto ci6_0 = f6->GetCalleeInfoByIndex(0);
-    ASSERT_TRUE(ci6_0->IsCalleeDefinite());
-    ASSERT_TRUE(ci6_0->GetClass() != nullptr);
-    EXPECT_EQ(ci6_0->GetClass(), abc_file->GetClassByName("Point"));
-    ASSERT_TRUE(ci6_0->GetCallee() != nullptr);
-    EXPECT_EQ(ci6_0->GetCallee(), abc_file->GetFunctionByName("plus"));
+    ASSERT_NE(ci6_0, nullptr);
+    EXPECT_TRUE(ci6_0->IsCalleeDefinite());
+    EXPECT_TRUE(ci6_0->GetClass() != nullptr);
+    EXPECT_EQ(ci6_0->GetClass(), abc_file->GetClassByName("#~@2=#Point"));
+    EXPECT_TRUE(ci6_0->GetCallee() != nullptr);
+    EXPECT_EQ(ci6_0->GetCallee(), abc_file->GetFunctionByName("#~@2>#plus"));
     auto ci6_1 = f6->GetCalleeInfoByIndex(1);
-    ASSERT_FALSE(ci6_1->IsCalleeDefinite());
+    ASSERT_NE(ci6_1, nullptr);
+    EXPECT_FALSE(ci6_1->IsCalleeDefinite());
     EXPECT_EQ(ci6_1->GetFunctionName(), "sub");
     EXPECT_EQ(ci6_1->GetExternalModuleName(), "");
     EXPECT_EQ(ci6_1->GetGlobalVarName(), "");
     // callExClassMemberFunc1
-    auto f7 = abc_file->GetFunctionByName("callExClassMemberFunc1");
+    auto f7 = abc_file->GetFunctionByName("#*@8*#callExClassMemberFunc1");
+    ASSERT_NE(f7, nullptr);
     size_t ci_cnt7 = f7->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt7, 1U);
     auto ci7_0 = f7->GetCalleeInfoByIndex(0);
-    ASSERT_FALSE(ci7_0->IsCalleeDefinite());
-    ASSERT_TRUE(ci7_0->GetClass() == nullptr);
+    ASSERT_NE(ci7_0, nullptr);
+    EXPECT_FALSE(ci7_0->IsCalleeDefinite());
+    EXPECT_TRUE(ci7_0->GetClass() == nullptr);
     EXPECT_EQ(ci7_0->GetFunctionName(), "makePhoneCall");
     EXPECT_EQ(ci7_0->GetExternalModuleName(), "../../mod1");
     EXPECT_EQ(ci7_0->GetGlobalVarName(), "");
@@ -362,9 +415,9 @@ HWTEST(DefectScanAuxTest, GraphTest, testing::ext::TestSize.Level0)
 {
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "graph_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
-    ASSERT(abc_file != nullptr);
-    auto f0 = CheckFunction(abc_file, "foo");
-
+    ASSERT_NE(abc_file, nullptr);
+    auto f0 = CheckFunction(abc_file, "#*#foo");
+    ASSERT_NE(f0, nullptr);
     // check api of graph
     auto &graph = f0->GetGraph();
     auto bb_list = graph.GetBasicBlockList();
@@ -479,6 +532,15 @@ HWTEST(DefectScanAuxTest, GraphTest, testing::ext::TestSize.Level0)
 
 HWTEST(DefectScanAuxTest, ModuleInfoTest, testing::ext::TestSize.Level0)
 {
+    const std::string USER_INPUT = "#~@1=#UserInput";
+    const std::string UI_INPUT = "UInput";
+    const std::string GET_TEXT = "#~@1>#getText";
+    const std::string INNER_USER_INPUT = "#~@0=#InnerUserInput";
+    const std::string GET_TEXT_BASE = "#~@0>#getTextBase";
+    const std::string FUNC1 = "#*#func1";
+    const std::string FUNC2 = "#*#func2";
+    const std::string FUNC3 = "#*#func3";
+
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "module_info_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
     ASSERT(abc_file != nullptr);
@@ -488,47 +550,47 @@ HWTEST(DefectScanAuxTest, ModuleInfoTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(def_class_cnt, 2U);
 
     // check exported class
-    std::string inter_name0 = abc_file->GetLocalNameByExportName("UInput");
+    std::string inter_name0 = abc_file->GetLocalNameByExportName(UI_INPUT);
     EXPECT_EQ(inter_name0, "UserInput");
-    auto ex_class = abc_file->GetExportClassByExportName("UInput");
-    EXPECT_EQ(ex_class->GetClassName(), "UserInput");
-    CheckClass(abc_file, "UserInput");
+    auto ex_class = abc_file->GetExportClassByExportName(UI_INPUT);
+    EXPECT_EQ(ex_class->GetClassName(), USER_INPUT);
+    CheckClass(abc_file, USER_INPUT);
     size_t mf_func_count0 = ex_class->GetMemberFunctionCount();
     EXPECT_EQ(mf_func_count0, 2U);
     auto mf_func0_1 = ex_class->GetMemberFunctionByIndex(1);
-    EXPECT_EQ(mf_func0_1->GetFunctionName(), "getText");
+    EXPECT_EQ(mf_func0_1->GetFunctionName(), GET_TEXT);
     ASSERT_TRUE(mf_func0_1->GetClass() == ex_class);
-    CheckFunction(abc_file, "getText");
+    CheckFunction(abc_file, GET_TEXT);
     auto par_class = ex_class->GetParentClass();
     ASSERT_TRUE(par_class != nullptr);
-    EXPECT_EQ(par_class->GetClassName(), "InnerUserInput");
-    CheckClass(abc_file, "InnerUserInput");
+    EXPECT_EQ(par_class->GetClassName(), INNER_USER_INPUT);
+    CheckClass(abc_file, INNER_USER_INPUT);
     size_t mf_func_count1 = par_class->GetMemberFunctionCount();
     EXPECT_EQ(mf_func_count1, 2U);
     auto mf_func1_1 = par_class->GetMemberFunctionByIndex(1);
-    EXPECT_EQ(mf_func1_1->GetFunctionName(), "getTextBase");
+    EXPECT_EQ(mf_func1_1->GetFunctionName(), GET_TEXT_BASE);
     ASSERT_TRUE(mf_func1_1->GetClass() == par_class);
-    CheckFunction(abc_file, "getTextBase");
+    CheckFunction(abc_file, GET_TEXT_BASE);
 
     // check exported func
     // func3
     std::string inter_name1 = abc_file->GetLocalNameByExportName("exFunc3");
     EXPECT_EQ(inter_name1, "func3");
     auto ex_func1 = abc_file->GetExportFunctionByExportName("exFunc3");
-    EXPECT_EQ(ex_func1->GetFunctionName(), "func3");
-    CheckFunction(abc_file, "func3");
+    EXPECT_EQ(ex_func1->GetFunctionName(), FUNC3);
+    CheckFunction(abc_file, FUNC3);
     // func1
     std::string inter_name2 = abc_file->GetLocalNameByExportName("default");
     EXPECT_EQ(inter_name2, "func1");
     auto ex_func2 = abc_file->GetExportFunctionByExportName("default");
-    EXPECT_EQ(ex_func2->GetFunctionName(), "func1");
-    CheckFunction(abc_file, inter_name2);
+    EXPECT_EQ(ex_func2->GetFunctionName(), FUNC1);
+    CheckFunction(abc_file, FUNC1);
     // func2
     std::string inter_name3 = abc_file->GetLocalNameByExportName("func2");
     EXPECT_EQ(inter_name3, "func2");
     auto ex_func3 = abc_file->GetExportFunctionByExportName("func2");
-    EXPECT_EQ(ex_func3->GetFunctionName(), "func2");
-    CheckFunction(abc_file, inter_name3);
+    EXPECT_EQ(ex_func3->GetFunctionName(), FUNC2);
+    CheckFunction(abc_file, FUNC2);
 
     // GetModuleNameByLocalName
     std::string mod_name0 = abc_file->GetModuleNameByLocalName("var1");

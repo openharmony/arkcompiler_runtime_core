@@ -27,10 +27,10 @@ using namespace testing::ext;
 namespace panda::abc2program {
 const std::string HELLO_WORLD_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorld.abc";
 constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 77;
-constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".HelloWorld";
-constexpr std::string_view FUNC_NAME_FOO = ".foo";
-constexpr std::string_view FUNC_NAME_GOO = ".goo";
-constexpr std::string_view FUNC_NAME_HOO = ".hoo";
+constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".#~@0=#HelloWorld";
+constexpr std::string_view FUNC_NAME_FOO = ".#*#foo";
+constexpr std::string_view FUNC_NAME_GOO = ".#*#goo";
+constexpr std::string_view FUNC_NAME_HOO = ".#*#hoo";
 constexpr std::string_view FUNC_NAME_MAIN = ".func_main_0";
 constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 7;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
@@ -180,15 +180,15 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_record_table, T
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_fields, TestSize.Level1)
 {
     for (const auto &it : prog_->record_table) {
-        if (it.first == "_ESModuleRecord") {
+        if (it.first == "_ESModuleRecord" || it.first == "_ESScopeNamesRecord") {
             const pandasm::Record &record = it.second;
             const std::vector<pandasm::Field> &field_list = record.field_list;
-            EXPECT_TRUE(field_list.size() == 1);
+            EXPECT_EQ(field_list.size(), 1);
             const pandasm::Field &field = field_list[0];
-            EXPECT_TRUE(field.type.GetPandasmName() == "u32");
-            EXPECT_TRUE(field.name.find("HelloWorld.js") != std::string::npos);
+            EXPECT_EQ(field.type.GetPandasmName(), "u32");
+            EXPECT_NE(field.name.find("HelloWorld.js"), std::string::npos);
         } else {
-            EXPECT_TRUE(it.second.field_list.size() == 0);
+            EXPECT_EQ(it.second.field_list.size(), 0);
         }
     }
 }

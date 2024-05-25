@@ -21,6 +21,9 @@ namespace ark {
     static constexpr size_t INSTRUCTION_FORMAT_WIDTH = 20;
     static constexpr size_t INSTRUCTION_VALUE_WIDTH = 2;
     static constexpr size_t INSTRUCTION_OFFSET_WIDTH = 4;
+    static constexpr std::string_view SCOPE_NAME_RECORD = "_ESScopeNamesRecord";
+    static constexpr std::string_view TYPE_SUMMARY_FIELD_NAME = "typeSummaryOffset";
+    static constexpr std::string_view SCOPE_NAMES = "scopeNames";
 }  // namespace ark
 
 #endif  // CONST_VALUE_H

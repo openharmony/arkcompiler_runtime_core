@@ -19,9 +19,10 @@
 
 namespace panda::abc2program {
 
-std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"", ".HelloWorld", ".Lit",
-                                                                                    ".foo", ".goo", ".hoo",
-                                                                                    ".instance_initializer",
+std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"", ".#~@0=#HelloWorld",
+                                                                                    ".#~@1=#Lit", ".#*#hoo",
+                                                                                    ".#*#foo", ".#*#goo",
+                                                                                    ".#~@0>#instance_initializer",
                                                                                     "HelloWorld", "varA", "error",
                                                                                     "inner catch",
                                                                                     "masg", "max", "min", "msg",
@@ -30,11 +31,12 @@ std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_
                                                                                     "string", "toString", "x"};
 std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {"_ESModuleRecord",
                                                                                     "_ESSlotNumberAnnotation",
+                                                                                    "_ESScopeNamesRecord",
                                                                                     "_GLOBAL"};
-std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord_2247",
-                                                                                          "_GLOBAL_2327",
-                                                                                          "_GLOBAL_2336",
-                                                                                          "_GLOBAL_2345"};
+std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord_2412",
+                                                                                          "_GLOBAL_2492",
+                                                                                          "_GLOBAL_2501",
+                                                                                          "_GLOBAL_2510"};
 
 std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 8, 21};
 

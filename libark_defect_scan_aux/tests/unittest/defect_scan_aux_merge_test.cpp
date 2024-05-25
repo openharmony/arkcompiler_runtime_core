@@ -29,7 +29,7 @@ public:
     void TearDown() {};
 };
 
-HWTEST(DefectScanAuxMergeTest, AcrossAbcTest, testing::ext::TestSize.Level0)
+HWTEST(DefectScanAuxMergeTest, AcrossAbcTest_0, testing::ext::TestSize.Level0)
 {
     std::string name = DEFECT_SCAN_AUX_TEST_MERGE_ABC_DIR "across_abc_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(name);
@@ -50,12 +50,13 @@ HWTEST(DefectScanAuxMergeTest, AcrossAbcTest, testing::ext::TestSize.Level0)
     auto all_func_size = abc_file->GetDefinedFunctionCount();
     EXPECT_EQ(all_func_size, 18U);
 
-    auto class_userinput = abc_file->GetClassByName("Luser_input;UserInput");
-    ASSERT(class_userinput != nullptr);
+    auto class_userinput = abc_file->GetClassByName("Luser_input;#~@0=#UserInput");
+    ASSERT_NE(class_userinput, nullptr);
     auto class_userinput_member_func_size = class_userinput->GetMemberFunctionCount();
     EXPECT_EQ(class_userinput_member_func_size, 3U);
-    [[maybe_unused]] auto func_setText = class_userinput->GetMemberFunctionByName("Luser_input;setText");
-    ASSERT(func_setText->GetClass() == class_userinput);
+    [[maybe_unused]] auto func_setText = class_userinput->GetMemberFunctionByName("Luser_input;#~@0>#setText");
+    ASSERT_NE(func_setText, nullptr);
+    EXPECT_EQ(func_setText->GetClass(), class_userinput);
 
     auto userinput_func_main_0 = abc_file->GetFunctionByName("Luser_input;func_main_0");
     auto &graph = userinput_func_main_0->GetGraph();
@@ -65,24 +66,34 @@ HWTEST(DefectScanAuxMergeTest, AcrossAbcTest, testing::ext::TestSize.Level0)
     std::string inter_name0 = abc_file->GetLocalNameByExportName("DBInterface", "Ldatabase;");
     EXPECT_EQ(inter_name0, "DatabaseInterface");
     auto ex_class = abc_file->GetExportClassByExportName("DBInterface", "Ldatabase;");
-    EXPECT_EQ(ex_class->GetClassName(), "Ldatabase;DatabaseInterface");
+    EXPECT_EQ(ex_class->GetClassName(), "Ldatabase;#~@1=#DatabaseInterface");
 
     std::string inter_name1 = abc_file->GetLocalNameByExportName("getblankInstanceInterface", "Ldatabase;");
     EXPECT_EQ(inter_name1, "getblankInstance1");
     auto ex_func1 = abc_file->GetExportFunctionByExportName("getblankInstanceInterface", "Ldatabase;");
-    EXPECT_EQ(ex_func1->GetFunctionName(), "Ldatabase;getblankInstance1");
+    EXPECT_EQ(ex_func1->GetFunctionName(), "Ldatabase;#*#getblankInstance1");
 
     auto ex_func2 = abc_file->GetExportFunctionByExportName("default", "Ldatabase;");
-    EXPECT_EQ(ex_func2->GetFunctionName(), "Ldatabase;getblankInstance2");
+    EXPECT_EQ(ex_func2->GetFunctionName(), "Ldatabase;#*#getblankInstance2");
+}
 
-    auto child_class = abc_file->GetClassByName("Ldatabase;DatabaseInterface");
-    EXPECT_EQ(child_class->GetParentClassName(), "Ldatabase;Database");
-    ASSERT_TRUE(child_class->GetMemberFunctionByName("Ldatabase;getText") == child_class->GetMemberFunctionByIndex(1));
+HWTEST(DefectScanAuxMergeTest, AcrossAbcTest_1, testing::ext::TestSize.Level0)
+{
+    std::string name = DEFECT_SCAN_AUX_TEST_MERGE_ABC_DIR "across_abc_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(name);
+    ASSERT(abc_file != nullptr);
 
+    auto child_class = abc_file->GetClassByName("Ldatabase;#~@1=#DatabaseInterface");
+    ASSERT_NE(child_class, nullptr);
+    EXPECT_EQ(child_class->GetParentClassName(), "Ldatabase;#~@0=#Database");
+    EXPECT_EQ(child_class->GetMemberFunctionByName("Ldatabase;#~@1>#getText"),
+              child_class->GetMemberFunctionByIndex(1));
     auto database_func_main_0 = abc_file->GetFunctionByName("Ldatabase;func_main_0");
+    ASSERT_NE(database_func_main_0, nullptr);
     auto callee_info = database_func_main_0->GetCalleeInfoByIndex(0);
-    ASSERT_TRUE(callee_info->IsCalleeDefinite());
-    EXPECT_EQ(callee_info->GetClass(), abc_file->GetClassByName("Ldatabase;Database"));
-    EXPECT_EQ(callee_info->GetCallee(), abc_file->GetFunctionByName("Ldatabase;addData"));
+    ASSERT_NE(callee_info, nullptr);
+    EXPECT_TRUE(callee_info->IsCalleeDefinite());
+    EXPECT_EQ(callee_info->GetClass(), abc_file->GetClassByName("Ldatabase;#~@0=#Database"));
+    EXPECT_EQ(callee_info->GetCallee(), abc_file->GetFunctionByName("Ldatabase;#~@0>#addData"));
 }
 }  // namespace panda::defect_scan_aux::test
