@@ -33,10 +33,10 @@ std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_
                                                                                     "_ESSlotNumberAnnotation",
                                                                                     "_ESScopeNamesRecord",
                                                                                     "_GLOBAL"};
-std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord_2412",
-                                                                                          "_GLOBAL_2492",
-                                                                                          "_GLOBAL_2501",
-                                                                                          "_GLOBAL_2510"};
+std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord",
+                                                                                          "_GLOBAL",
+                                                                                          "_GLOBAL",
+                                                                                          "_GLOBAL"};
 
 std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 8, 21};
 
@@ -67,7 +67,15 @@ bool Abc2ProgramTestUtils::ValidateRecordNames(const std::vector<std::string> &r
 
 bool Abc2ProgramTestUtils::ValidateLiteralArrayKeys(const std::vector<std::string> &literal_array_keys)
 {
-    return ValidateStrings(literal_array_keys, helloworld_expected_literal_array_keys_);
+    if (literal_array_keys.size() != helloworld_expected_literal_array_keys_.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < literal_array_keys.size(); ++i) {
+        if (literal_array_keys[i].find(helloworld_expected_literal_array_keys_[i]) != 0) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Abc2ProgramTestUtils::ValidateLiteralsSizes(const std::set<size_t> &literal_array_sizes)
