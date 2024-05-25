@@ -51,6 +51,11 @@ private:
     bool IsPhiAccReady(compiler::Inst *phi) const;
     void SetNeedLda(compiler::Inst *inst, bool need);
 
+    void InitializeSourceRegisters();
+    void MarkAccForPhiInstructions();
+    void MarkAccForInstructions(compiler::BasicBlock *block);
+    void UpdateInstructionsAfterMark(compiler::BasicBlock *block);
+
     compiler::Marker acc_marker_ {0};
 };
 
