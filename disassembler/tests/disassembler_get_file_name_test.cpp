@@ -32,11 +32,11 @@ class DisassemblerGetFileNameTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
-        if (std::filesystem::exists(FILE_NAME)) {
-            std::filesystem::remove(FILE_NAME);
-        }
-        std::filesystem::path src_file_name{ SOURCE_FILE_PATH };
         std::filesystem::path file_name{ FILE_NAME };
+        std::filesystem::path src_file_name{ SOURCE_FILE_PATH };
+        if (std::filesystem::exists(file_name)) {
+            std::filesystem::remove(file_name);
+        }
         std::filesystem::copy(src_file_name, file_name);
     };
 

@@ -107,10 +107,10 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 12.0.3.0
+version: 12.0.4.0
 
 # 0 is default value, alaways reflects to the newest version
-api_version_map: [[0, 12.0.3.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.3.0]]
+api_version_map: [[0, 12.0.4.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.4.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.

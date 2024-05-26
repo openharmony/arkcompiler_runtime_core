@@ -48,10 +48,27 @@ const std::vector<const Function *> &Class::GetMemberFunctionList() const
     return member_func_list_;
 }
 
+static std::string GetFuncNameWithoutPrefix(const std::string &func_name)
+{
+    auto name = std::string(func_name);
+    auto pos1 = name.find_first_of("#");
+    auto pos2 = name.find_last_of("#");
+    if (pos1 == pos2) {
+        ASSERT(pos1 == std::string::npos);
+        return name;
+    }
+    ASSERT(pos1 != std::string::npos);
+    ASSERT(pos2 != std::string::npos);
+    auto record_name = name.substr(0, pos1);
+    auto fun_name = name.substr(pos2 + 1);
+    return record_name + fun_name;
+}
+
 const Function *Class::GetMemberFunctionByName(std::string_view func_name) const
 {
+    auto func_name_without_prefix = GetFuncNameWithoutPrefix(std::string(func_name));
     for (auto func : member_func_list_) {
-        if (func->GetFunctionName() == func_name) {
+        if (GetFuncNameWithoutPrefix(func->GetFunctionName()) == func_name_without_prefix) {
             return func;
         }
     }

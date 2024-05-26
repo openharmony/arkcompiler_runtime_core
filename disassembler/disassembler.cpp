@@ -489,7 +489,7 @@ void Disassembler::GetFields(pandasm::Record *record, const panda_file::File::En
         uint32_t field_type = field_accessor.GetType();
         field.type = FieldTypeToPandasmType(field_type);
 
-        GetMetaData(&field, field_accessor.GetFieldId());
+        GetMetaData(&field, field_accessor.GetFieldId(), record->name == ark::SCOPE_NAME_RECORD);
 
         record->field_list.push_back(std::move(field));
     });
@@ -887,7 +887,9 @@ void Disassembler::GetMetaData(pandasm::Record *record, const panda_file::File::
     }
 }
 
-void Disassembler::GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id)
+void Disassembler::GetMetaData(pandasm::Field *field,
+                               const panda_file::File::EntityId &field_id,
+                               bool is_scope_names_record)
 {
     LOG(DEBUG, DISASSEMBLER) << "[getting metadata]\nfield id: " << field_id << " (0x" << std::hex << field_id << ")";
 
@@ -909,8 +911,8 @@ void Disassembler::GetMetaData(pandasm::Field *field, const panda_file::File::En
 
     if (field->type.GetId() == panda_file::Type::TypeId::U32) {
         const auto offset = field_accessor.GetValue<uint32_t>().value();
-        static const std::string TYPE_SUMMARY_FIELD_NAME = "typeSummaryOffset";
-        if (field->name != TYPE_SUMMARY_FIELD_NAME) {
+        bool is_scope_name_field = is_scope_names_record || field->name == ark::SCOPE_NAMES;
+        if (field->name != ark::TYPE_SUMMARY_FIELD_NAME && !is_scope_name_field) {
             LOG(DEBUG, DISASSEMBLER) << "Module literalarray " << field->name << " at offset 0x" << std::hex << offset
                                      << " is excluded";
             module_literals_.insert(offset);

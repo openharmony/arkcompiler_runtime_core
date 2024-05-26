@@ -51,7 +51,7 @@ public:
 */
 HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_001, TestSize.Level1)
 {
-    static const std::string METHOD_NAME = "module-requests-annotation-import.funcD";
+    static const std::string METHOD_NAME = "module-requests-annotation-import.#*#funcD";
     static const std::string ANNOTATION_NAME = "L_ESConcurrentModuleRequestsAnnotation";
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(MODULE_REQUEST_FILE_NAME, false, false);
@@ -69,7 +69,7 @@ HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_001, TestSize.
 */
 HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_002, TestSize.Level1)
 {
-    static const std::string METHOD_NAME = "funcA";
+    static const std::string METHOD_NAME = "#*#funcA";
     static const std::string ANNOTATION_NAME = "L_ESSlotNumberAnnotation";
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(SLOT_NUMBER_FILE_NAME, false, false);

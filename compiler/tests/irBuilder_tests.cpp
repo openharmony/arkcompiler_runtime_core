@@ -102,9 +102,12 @@ public:
                                                        false, nullptr, true, true);
                     graph->RunPass<panda::compiler::IrBuilder>();
 
-                    auto methodName = std::string(utf::Mutf8AsCString(pfile->GetStringData(mda.GetNameId()).data));
-
-                    cb(graph, methodName);
+                    auto method_name = std::string(utf::Mutf8AsCString(pfile->GetStringData(mda.GetNameId()).data));
+                    auto pos = method_name.find_last_of("#");
+                    if (pos != std::string::npos) {
+                        method_name = method_name.substr(pos + 1);
+                    }
+                    cb(graph, method_name);
                 }
             });
         }
