@@ -226,13 +226,10 @@ TEST_F(BitTableTest, CustomAccessor)
     }
 }
 
-TEST_F(BitTableTest, Ranges)
+void InitRangesTest(std::array<std::array<uint32_t, 2>, 10> &values, BitTable<TestAccessor> &table)
 {
     ArenaVector<uint8_t> data(GetAllocator()->Adapter());
     data.reserve(1_KB);
-
-    std::array<std::array<uint32_t, 2>, 10> values = {
-        {{0U, 10U}, {1U, 11U}, {2U, 12U}, {3U, 13U}, {4U, 14U}, {5U, 15U}, {6U, 16U}, {7U, 17U}, {8U, 18U}, {9U, 19U}}};
 
     BitTableBuilder<TestAccessor> builder(GetAllocator());
     for (auto &v : values) {
@@ -248,6 +245,14 @@ TEST_F(BitTableTest, Ranges)
 
     ASSERT_EQ(table.GetRowsCount(), 10);
     ASSERT_EQ(table.GetColumnsCount(), 2);
+}
+
+TEST_F(BitTableTest, RangesTest1)
+{
+    std::array<std::array<uint32_t, 2>, 10> values = {
+        {{0U, 10U}, {1U, 11U}, {2U, 12U}, {3U, 13U}, {4U, 14U}, {5U, 15U}, {6U, 16U}, {7U, 17U}, {8U, 18U}, {9U, 19U}}};
+    BitTable<TestAccessor> table;
+    InitRangesTest(values, table);
 
     {
         auto range = table.GetRange(0, 6);
@@ -281,6 +286,15 @@ TEST_F(BitTableTest, Ranges)
         }
         ASSERT_EQ(i, 10);
     }
+}
+
+TEST_F(BitTableTest, RangesTest2)
+{
+    std::array<std::array<uint32_t, 2>, 10> values = {
+        {{0U, 10U}, {1U, 11U}, {2U, 12U}, {3U, 13U}, {4U, 14U}, {5U, 15U}, {6U, 16U}, {7U, 17U}, {8U, 18U}, {9U, 19U}}};
+    BitTable<TestAccessor> table;
+
+    InitRangesTest(values, table);
 
     {
         auto range = table.GetRangeReversed(4, 10);
@@ -312,6 +326,15 @@ TEST_F(BitTableTest, Ranges)
         }
         ASSERT_EQ(i, 0);
     }
+}
+
+TEST_F(BitTableTest, RangesTest3)
+{
+    std::array<std::array<uint32_t, 2>, 10> values = {
+        {{0U, 10U}, {1U, 11U}, {2U, 12U}, {3U, 13U}, {4U, 14U}, {5U, 15U}, {6U, 16U}, {7U, 17U}, {8U, 18U}, {9U, 19U}}};
+    BitTable<TestAccessor> table;
+
+    InitRangesTest(values, table);
 
     {
         auto range = table.GetRange(0, 0);

@@ -110,7 +110,7 @@ HWTEST_F(BitVectorTest, Comparison, testing::ext::TestSize.Level0)
 }
 
 template <typename T>
-void TestIteration(T &vector, size_t bits)
+void TestIteration1(T &vector, size_t bits)
 {
     uint32_t index = 0;
 
@@ -160,7 +160,11 @@ void TestIteration(T &vector, size_t bits)
         ASSERT_EQ(i, index);
         index += 2;
     }
+}
 
+template <typename T>
+void TestIteration2(T &vector, size_t bits)
+{
     auto it = vector.begin();
     ASSERT_EQ(*it, false);
     ++it;
@@ -209,21 +213,26 @@ HWTEST_F(BitVectorTest, Iteration, testing::ext::TestSize.Level0)
 
     BitVector<> vec1;
     vec1.resize(bits_num);
-    TestIteration(vec1, bits_num);
+    TestIteration1(vec1, bits_num);
+    TestIteration2(vec1, bits_num);
 
     BitVector<ArenaAllocator> vec2(GetAllocator());
     vec2.resize(bits_num);
-    TestIteration(vec2, bits_num);
+    TestIteration1(vec2, bits_num);
+    TestIteration2(vec2, bits_num);
 
     BitVector<ArenaAllocator> vec3(bits_num, GetAllocator());
-    TestIteration(vec3, bits_num);
+    TestIteration1(vec3, bits_num);
+    TestIteration2(vec2, bits_num);
 
     BitVectorSpan vec4(Span<uint32_t>(data.data(), data.size()));
-    TestIteration(vec4, bits_num);
+    TestIteration1(vec4, bits_num);
+    TestIteration2(vec4, bits_num);
 
     data.fill(0);
     BitVectorSpan vec5(data.data(), bits_num);
-    TestIteration(vec5, bits_num);
+    TestIteration1(vec5, bits_num);
+    TestIteration2(vec5, bits_num);
 }
 
 template <typename T>
