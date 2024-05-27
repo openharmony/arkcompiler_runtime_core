@@ -785,6 +785,38 @@ The following example shows how ambient functions can be declared and exported:
     export declare function goo()
     export { foo }
 
+Optional usage of the ``export`` keyword has a meaning that the particular
+declaration is used by some other exported declarations but is not exported on
+its own and thus, cannot be used by modules that import this declaration
+module.
+
+.. code-block:: typescript
+   :linenos:
+
+   // module with implementation
+   class A {} // It is not exported
+   export class B {
+     public a: A = new A // the field is exported but its type is not
+   }
+   export function process_field (p: A) {}
+
+   // declaration module should look like
+   declare class A {}
+   export declare class B {
+     public a: A // the field is exported but its type is not
+   }
+   export function process_field (p: A)
+
+   // Module which uses B and process_field
+   import {* as m} from "path_to_declaration_module"
+
+   let b = new m.B  // B instance is created
+   m.process_field (b.a) // exported field is passed to function as an argument
+
+   let a = new m.A // compile-time error as A is not exported
+
+
+
 The exact manner declaration modules are stored in the file system, and how
 they differ from separate modules is determined by a particular implementation.
 
@@ -1038,8 +1070,9 @@ If a class or an interface is exported in this manner, then its usage is
 limited similarly to the limitations described for *import type* directives
 (see :ref:`Type Binding`).
 
-A compile-time error occurs if a class or interface is declared exported,
-but then *export type* is applied to the same class or interface name.
+A :index:`compile-time error` occurs if a class or interface is declared
+exported, but then *export type* is applied to the same class or interface
+name.
 
 The following example is an illustration of how this can be used:
 

@@ -56,8 +56,8 @@ An ambient enumeration type declaration
 can be prefixed by ``const`` keyword for |TS| compatibility.
 It does not have any influence to the declared type.
 
-A compile-time error occurs if the modifier ``declare`` is used in a context
-that is already ambient:
+A :index:`compile-time error` occurs if the modifier ``declare`` is used in a
+context that is already ambient:
 
 .. code-block:: typescript
    :linenos:
@@ -126,7 +126,7 @@ Ambient Function Declarations
           typeParameters? signature ';'
         ;        
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  Explicit return type is not specified for an ambient function declaration;
 -  Not all overload signatures are marked as ambient in top-level ambient
@@ -186,7 +186,7 @@ Ambient Class Declarations
     ambientClassDeclaration:
         'class' identifier typeParameters?
         classExtendsClause? implementsClause?
-        ambientClassBodyDeclaration*
+        '{' ambientClassBodyDeclaration* '}'
         ;
 
     ambientClassBodyDeclaration:
@@ -204,7 +204,6 @@ Ambient Class Declarations
     ambientAccessModifier:
         'public' | 'protected'
         ;
-        
     
 
 Ambient field declarations have no initializers:
@@ -316,7 +315,7 @@ Ambient Iterable
 ================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
        
 Ambient iterable declarations defines that a class instance is iterable.
 This feature is provided for compatibility with |TS|
@@ -358,8 +357,23 @@ Ambient Interface Declarations
 
     ambientInterfaceDeclaration:
         'interface' identifier typeParameters?
-        interfaceExtendsClause? '{' interfaceMember* '}'
+        interfaceExtendsClause? 
+        '{' ambientInterfaceMember* '}'
         ;
+
+    ambientInterfaceMember
+        : interfaceProperty
+        | interfaceMethodDeclaration
+        | ambientIndexerDeclaration
+        | ambientCallSignatureDeclaration
+        | ambientIterableDeclaration
+        ;
+
+An ambient interface can contain additional members
+the same as an ambient class, see
+:ref:`Ambient Indexer`,
+:ref:`Ambient Call Signature` and
+:ref:`Ambient Iterable`.
 
 |
 

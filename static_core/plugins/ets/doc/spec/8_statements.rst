@@ -203,8 +203,8 @@ certain conditions:
 
 If an expression represents a condition and is successfully evaluated as
 ``true``, then *statement1* is executed. Otherwise, *statement2* is executed
-(if provided). A compile-time error occurs if the expression type is not
-``boolean``.
+(if provided). A :index:`compile-time error` occurs if the expression type is
+not ``boolean``.
 
 Any ``else`` corresponds to the first ``if`` of an ``if`` statement:
 
@@ -379,7 +379,7 @@ of *iterable* class or interface (see :ref:`Iterable Types`):
         ;
 
 
-A compile-time error occurs if the type of an expression is not
+A :index:`compile-time error` occurs if the type of an expression is not
 ``array``, ``string``, or iterable type.
 
 The execution of a ``for-of`` loop starts with the evaluation of ``expression``.
@@ -468,15 +468,15 @@ or ``switchStatement``:
         ;
 
 A ``break`` statement with the label *identifier* transfers control out of the
-enclosing statement with the same label *identifier*. A compile-time error
-occurs if such a statement is not found within the body of the surrounding
-function or method.
+enclosing statement with the same label *identifier*. A
+:index:`compile-time error` occurs if such a statement is not found within the
+body of the surrounding function or method.
 
 A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement.
 
-A compile-time error occurs if the ``breakStatement`` is not found within
-``loopStatment`` or ``switchStatement``.
+A :index:`compile-time error` occurs if the ``breakStatement`` is not found
+within ``loopStatment`` or ``switchStatement``.
 
 .. index::
    break statement
@@ -517,11 +517,11 @@ exit conditions depend on the kind of the loop.
 
 A ``continue`` statement with the label *identifier* transfers control out
 of the enclosing loop statement with the same label *identifier*.
-A compile-time error occurs if such a statement is not found within the body
-of the surrounding function or method.
+A :index:`compile-time error` occurs if such a statement is not found within
+the body of the surrounding function or method.
 
-A compile-time error occurs if no ``continueStatement`` is found within
-``loopStatment``.
+A :index:`compile-time error` occurs if no ``continueStatement`` is found
+within ``loopStatment``.
 
 .. index::
    continue statement
@@ -568,7 +568,7 @@ situations:
 - Inside a constructor body; or
 - Inside a function or a method body with return type ``void``.
 
-A compile-time error occurs if a ``return`` statement is found in:
+A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
 -  Top-level statements (see :ref:`Top-Level Statements`);
 -  Class initializers (see :ref:`Class Initializer`) and constructors (see
@@ -676,7 +676,7 @@ or ``enum``.
    Int
    Long
 
-A compile-time error occurs if not **all** of the following is true:
+A :index:`compile-time error` occurs if not **all** of the following is true:
 
 -  Every case expression type associated with a ``switch`` statement is
    compatible (see :ref:`Type Compatibility`) with the type of the ``switch``
@@ -717,7 +717,8 @@ A compile-time error occurs if not **all** of the following is true:
 
 The execution of a ``switch`` statement starts from the evaluation of the
 ``switch`` expression. If the evaluation result is of type ``Char``, ``Byte``,
-``Short``, or ``Int``, then the unboxing conversion follows.
+``Short``, ``Int``, or ``Long``, then the unboxing conversion (see
+:ref:`Unboxing Conversions`) follows.
 
 Otherwise, the value of the ``switch`` expression is compared repeatedly to the
 value of each case expression.
@@ -757,7 +758,7 @@ A ``throw`` statement causes *exception* or *error* to be thrown (see
 :ref:`Error Handling`). It immediately transfers control, and can exit multiple
 statements, constructors, functions, and method calls until a ``try`` statement
 (see :ref:`Try Statements`) is found that catches the thrown value. If no
-``try`` statement is found, then ``UncatchedExceptionError`` is thrown.
+``try`` statement is found, then ``UncaughtExceptionError`` is thrown.
 
 .. code-block:: abnf
 
@@ -766,7 +767,7 @@ statements, constructors, functions, and method calls until a ``try`` statement
         ;
 
 The expression type must be assignable (see :ref:`Assignment`) to type
-``Exception`` or ``Error``. Otherwise, a compile-time error occurs.
+``Exception`` or ``Error``. Otherwise, a :index:`compile-time error` occurs.
 
 This implies that the thrown object is never ``null``.
 
@@ -838,7 +839,7 @@ The |LANG| programming language supports *multiple typed catch clauses* as
 an experimental feature (see :ref:`Try Statements`).
 
 A ``try`` statement must contain either a ``finally`` clause, or at least one
-``catch`` clause. Otherwise, a compile-time error occurs.
+``catch`` clause. Otherwise, a :index:`compile-time error` occurs.
 
 If the ``try`` block completes normally, then no action is taken, and no
 ``catch`` clause block is executed.
@@ -1020,7 +1021,7 @@ can be performed while leaving the ``try-catch``:
    method, or constructor, then the execution depends on whether the surrounding
    scope is a *throwing function* (see :ref:`Throwing Functions`). If so, then
    the exception propagates to the caller context. Otherwise,
-   ``UncatchedExceptionError`` is thrown.
+   ``UncaughtExceptionError`` is thrown.
 
 .. index::
    try statement

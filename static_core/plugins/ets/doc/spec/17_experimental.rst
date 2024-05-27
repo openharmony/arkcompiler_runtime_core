@@ -333,8 +333,9 @@ If the type of any ``dimensionExpression`` is number or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
 
-- Runtime error, if the situation is identified during program execution; and
-- Compile-time error, if the situation is detected during compilation.
+- a runtime error, if the situation is identified during program execution; and
+- a :index:`compile-time error`, if the situation is detected during
+  compilation.
 
 
 .. code-block:: typescript
@@ -370,7 +371,7 @@ default value:
       let y = new A[2] // OK, as all 3 elements of array will be filled with
       // new A() objects
 
-A compile-time error occurs if ``typeReference`` is a type parameter:
+A :index:`compile-time error` occurs if ``typeReference`` is a type parameter:
 
 .. code-block:: typescript
    :linenos:
@@ -518,7 +519,8 @@ The functions can be overridden and provide a dynamic dispatch for the indexing
 expression evaluation (see :ref:`Indexing Expressions`). They can be used in
 generic classes and interfaces for better flexibility.
 
-A compile-time error occurs if these functions are marked as ``async``.
+A :index:`compile-time error` occurs if these functions are marked as
+``async``.
 
 .. code-block-meta:
    expect-cte:
@@ -620,7 +622,7 @@ The function ``$_iterator`` is an ordinary function with a compiler-known
 signature. The function can be used like any other function. It can be
 abstract or defined in an interface to be implemented later.
 
-A compile-time error occurs if this function is marked as ``async``.
+A :index:`compile-time error` occurs if this function is marked as ``async``.
 
 **Note**: To support the code compatible with |TS|, the name of the function
 ``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the class
@@ -1260,7 +1262,7 @@ Native Functions
     frontend_status: Done
 
 A ``native`` function implemented in a platform-dependent code is typically
-written in another programming language (e.g., *C*). A compile-time error
+written in another programming language (e.g., *C*). A :index:`compile-time error`
 occurs if a ``native`` function has a body.
 
 .. index::
@@ -1742,7 +1744,7 @@ The formal syntax of the *trailing lambda* is presented below:
 
 
 Currently, no parameter can be specified for the trailing lambda. Otherwise,
-a compile-time error occurs.
+a :index:`compile-time error` occurs.
 
 **Note**: If a call is followed by a block, and the function or method
 being called has no last function type parameter, then such block is
@@ -2293,16 +2295,15 @@ Create and Launch a Coroutine
 .. meta:
     frontend_status: Done
 
-The following expression is used to create and launch a coroutine:
+The following expression is used to create and launch a coroutine based on
+function or method call or lambda expression:
 
 .. code-block:: typescript
    :linenos:
 
-      launchExpression: 'launch' expression;
+      launchExpression:
+        'launch' functionCallExpression|methodCallExpression|lambdaExpression;
 
-A :index:`compile-time error` occurs if that expression is not a *function call
-expression* (see :ref:`Function Call Expression`) or is not a method call one
-(see :ref:`Method Call Expression`).
 
 .. code-block:: typescript
    :linenos:
@@ -2409,6 +2410,28 @@ If the coroutine result must be ignored, then the expression statement
       let promise = launch foo()
       await promise
 
+The ``await`` cannot return ``Promise<T>`` or union type 
+that contains ``Promise<T>``.
+If the actual type argument of *T* in ``Promise<T>`` contains ``Promise``, 
+the compiler eliminates all such usages.
+
+The following example shows return types of ``await`` expressions:
+
+.. code-block:: typescript
+   :linenos:
+
+       // if p has type Promise<Promise<string>>, 
+       // await p returns string
+       let x : string = await p;
+       
+       // if p2 has type Promise<Promise<string> | number>,
+       // await p2 returns string | number
+       let y : string | number = await p2;
+
+       // if p3 has type Promise<string>|Promise<number>,
+       // await p2 returns string | number
+       let z : string | number = await p3;
+
 .. index::
    coroutine
    expression statement
@@ -2507,6 +2530,12 @@ standard library (see :ref:`Standard Library`).
 
 |
 
+Async Functions and Methods
+***************************
+
+.. meta:
+    frontend_status: Done
+
 .. _Async Functions:
 
 ``Async`` Functions
@@ -2517,6 +2546,8 @@ standard library (see :ref:`Standard Library`).
 
 The function ``async`` is an implicit coroutine that can be called as a
 regular function.
+
+The ``async`` function cannot be ``abstract`` or ``native``.
 
 The return type of an ``async`` function must be ``Promise<T>`` (see
 :ref:`Promise<T> Class`).
@@ -2529,11 +2560,47 @@ is ``Promise<void>``.
 of the function body if there is no explicit return statement in a function
 with the return type ``Promise<void>``.
 
-**Note**: Using this annotation is not recommended because this type of
-functions is only supported for the sake of backward |TS| compatibility.
+**Note**: Using type ``Promise<void>`` is not recommended, it 
+is supported for the sake of backward |TS| compatibility only.
 
 .. index::
    function async
+   coroutine
+   return type
+   function body
+   backward compatibility
+   annotation
+
+|
+
+.. _Async Methods Experimental:
+
+``Async`` Methods
+=================
+
+.. meta:
+    frontend_status: Done
+
+``Async`` methods are the implicit coroutines which can be called as a regular method. 
+
+The ``async`` method can't be ``abstract`` or ``native``.
+
+The return type of an ``async`` method must be ``Promise<T>`` (see
+:ref:`Promise<T> Class`).
+Returning values of types ``Promise<T>`` and *T* from the ``async`` method
+is allowed.
+
+Using return statement without an expression is allowed if the return type
+is ``Promise<void>``.
+*No-argument* return statement can be added implicitly as the last statement
+of the methods body if there is no explicit return statement in a method
+with the return type ``Promise<void>``.
+
+**Note**: Using this annotation is not recommended because this type of
+methods is only supported for the sake of backward |TS| compatibility.
+
+.. index::
+   async method
    coroutine
    return type
    function body
@@ -2764,7 +2831,7 @@ The cast expression *D as T* (see :ref:`Cast Expressions`), where *D* is of
 type ``DynamicObject``, is handled as an attempt to cast the underlying object
 to a static type *T*.
 
-A compile-time error occurs if *T* is not a class or interface type.
+A :index:`compile-time error` occurs if *T* is not a class or interface type.
 
 The result of a cast expression is an instance of type *T*.
 
@@ -3064,7 +3131,7 @@ A :index:`compile-time error` occurs if a function, method, or constructor
 type parameters have a variance modifier specified.
 
 *Variance* is used to describe the subtyping (see :ref:`Subtyping`) operation
-on parameterized types (see :ref:`Generic Declarations`). The
+on parameterized types (see :ref:`Generics`). The
 variance of the corresponding type parameter *F* defines the subtyping between
 *T<A>* and *T<B>* (in the case of declaration-site variance with two different
 types *A* <: *B*) as follows:

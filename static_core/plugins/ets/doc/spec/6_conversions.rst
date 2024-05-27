@@ -52,8 +52,8 @@ Otherwise, the expression is *non-standalone*:
 
 
 The type of some expressions cannot be inferred from the expression itself
-(see :ref:`Object Literal` as an example). A compile-time error occurs if
-such an expression is used as a *standalone expression*.
+(see :ref:`Object Literal` as an example). A :index:`compile-time error` occurs
+if such an expression is used as a *standalone expression*.
 
 There are two ways to facilitate the compatibility of a *non-standalone
 expression* with its surrounding context:
@@ -80,7 +80,8 @@ expression* with its surrounding context:
    standalone expression
    non-standalone expression
 
-A compile-time error occurs if neither produces an appropriate expression type.
+A :index:`compile-time error` occurs if neither produces an appropriate
+expression type.
 
 The rules that determine whether a *target type* allows an implicit
 *conversion* vary for different kinds of contexts and types of expressions.
@@ -177,7 +178,7 @@ The examples are presented below:
 
 In all these cases, the expression type either must be equal to the *target
 type* or can be converted to the *target type* by using one of the conversions
-discussed below. Otherwise, a compile-time error occurs.
+discussed below. Otherwise, a :index:`compile-time error` occurs.
 
 Assignment-like contexts allow using of one of the following:
 
@@ -201,9 +202,12 @@ Assignment-like contexts allow using of one of the following:
 
 - :ref:`Enumeration to Int Conversions`;
 
-- :ref:`Enumeration to String Conversions`.
+- :ref:`Enumeration to String Conversions`;
 
-If there is no applicable conversion, then a compile-time error occurs.
+- :ref:`Type Parameter Conversions`.
+
+If there is no applicable conversion, then a :index:`compile-time error`
+occurs.
 
 |
 
@@ -246,7 +250,7 @@ String Operator Contexts
    type ``string`` with the value of the corresponding enumeration constant
    if values of enumeration are of type ``string``.
 
-If there is no applicable conversion, then a compile-time error occurs.
+If there is no applicable conversion, then a :index:`compile-time error` occurs.
 
 The target type in this context is always ``string``:
 
@@ -364,7 +368,8 @@ an explicitly specified *target type* by using one of the following:
 - :ref:`Narrowing Reference Casting Conversions`;
 - :ref:`Casting Conversions from Union`.
 
-If there is no applicable conversion, then a compile-time error occurs.
+If there is no applicable conversion, then a :index:`compile-time error`
+occurs.
 
 .. _Numeric Casting Conversions:
 
@@ -498,8 +503,8 @@ from union* converts an expression of type ``U`` to some type ``TT`` (*target ty
 ..
    line 472 initially was *U* = *T*:sub:`1` | ... | *T*:sub:`N`
 
-A compile-time error occurs if the target type ``TT`` is not one of ``T``:sub:`i`,
-and not derived from one of ``T``:sub:`i`.
+A :index:`compile-time error` occurs if the target type ``TT`` is not one of
+``T``:sub:`i`, and not derived from one of ``T``:sub:`i`.
 
 .. code-block-meta:
 
@@ -533,7 +538,8 @@ Another form of *conversion from union* is implicit conversion from union type
 to the target type. The conversion is only possible if each type in a union is
 compatible (see :ref:`Type Compatibility`) with the target type. If so, the
 conversion never causes a runtime error. If at least one type of a union is not
-compatible with the target type, then conversion causes a compile-time error:
+compatible with the target type, then conversion causes a
+:index:`compile-time error`:
 
 .. code-block-meta:
    expect-cte
@@ -894,7 +900,7 @@ error.
     }
 
 The only exception is the cast to type *never* that is forbidden. This cast is
-a compile-time error as it can cause type-safety violations:
+a :index:`compile-time error` as it can cause type-safety violations:
 
 .. code-block:: typescript
    :linenos:
@@ -1053,8 +1059,8 @@ See :ref:`Type Compatibility` for details.
 
 A *throwing function* type variable can have a *non-throwing function* value.
 
-A compile-time error occurs if a *throwing function* value is assigned to a
-*non-throwing function* type variable.
+A :index:`compile-time error` occurs if a *throwing function* value is assigned
+to a *non-throwing function* type variable.
 
 .. index::
    throwing function
@@ -1125,6 +1131,41 @@ This conversion never causes runtime errors.
     enum StringEnum {a = "a", b = "b", c = "c"}
     let se: StringEnum = StringEnum.a
     let s: string = se // n will get the value of "a"
+
+|
+
+.. _Type Parameter Conversions:
+
+Type Parameter Conversions
+==========================
+
+.. meta:
+    frontend_status: Done
+
+A value of ``type parameter`` type can be converted only to the same
+``type parameter`` type.
+
+This conversion never causes runtime errors.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {}
+    class Derived extends Base {}
+
+    class A <T1 extends Base, T2 extends Derived, T3 extends Base> {
+        foo (p1: T1, p2: T2, p3: T3) {
+            let t1: T1 = p1
+            let t2: T2 = p2
+            let t3: T3 = p3
+
+            t1 = t2 // compile-time error
+            t2 = t1 // compile-time error
+			t1 = t3 // compile-time error
+			t3 = t1 // compile-time error
+        }
+    }
+
 
 |
 

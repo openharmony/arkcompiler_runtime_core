@@ -32,10 +32,10 @@
    /12_errors
    /13_modules
    /14_ambients
-   /15_annotations
+   /15_semantics
    /16_gui
    /17_experimental
-   /18_semantics
+   /18_annotations
    /19_stdlib
    /20_implementation
    /21_TS_compatibility

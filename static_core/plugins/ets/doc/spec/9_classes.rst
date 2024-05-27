@@ -103,7 +103,7 @@ reference type.
 The class name is specified by an *identifier* inside a class declaration.
 
 If ``typeParameters`` are defined in a class declaration, then that class
-is a *generic class* (see :ref:`Generic Declarations`).
+is a *generic class* (see :ref:`Generics`).
 
 .. index::
    class declaration
@@ -276,7 +276,7 @@ the ``extends`` ``Object`` clause.
 .. code-block:: abnf
 
     classExtendsClause:
-        'extends' typeReference | unionType
+        'extends' typeReference
         ;
 
 A :index:`compile-time error` occurs if:
@@ -290,7 +290,7 @@ A :index:`compile-time error` occurs if:
 -  The ``extends`` graph has a cycle.
 
 -  ``typeReference`` refers directly to, or is an alias of primitive,
-   enumeration, union, interface, or function types.
+   array, string, enumeration, union, interface, or function types.
 
 -  Any type argument of ``typeReference`` is a wildcard type argument.
 
@@ -447,7 +447,7 @@ A :index:`compile-time error` occurs if a class is at the same time a
 subtype (see :ref:`Subtyping`) of:
 
 -  Two interface types that represent different instantiations of the same
-   generic interface (see :ref:`Generic Declarations`); or
+   generic interface (see :ref:`Generics`); or
 -  Instantiation of a generic interface, and a raw type that names the
    a generic interface.
 
@@ -564,7 +564,7 @@ a field is not necessary:
 
 If a property is defined in the form that requires a setter, then the
 implementation of the property in the form of a readonly field triggers
-a compile-time error:
+a :index:`compile-time error`:
 
 .. code-block-meta:
    expect-cte
@@ -588,6 +588,39 @@ a compile-time error:
     }
 
     write_into_read_only (new StyleClassTwo)
+
+
+If a property is defined in the readonly form, then the implementation of the
+property can keep readonly form or extend it to the writable one as well:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface Style {
+      get color(): string
+      readonly readable: number
+    }
+
+    class StyleClassThree implements Style {
+      get color(): string { return "Black" }
+      set color(s: string) {} // OK!
+      readable: number = 0  // OK!
+    }
+
+    function how_to_write (s: Style) {
+      s.color = "Black" // compile-time error
+      s.readable = 666 // compile-time error
+      if (s instanceof StyleClassThree) {
+        let s1 = s as StyleClassThree
+        s1.color = "Black" // OK!
+        s1.readable = 666 // OK!
+      }
+    }
+
+    how_to_write (new StyleClassThree)
+
+
+
 
 .. index::
    class
@@ -1210,6 +1243,7 @@ Method Declarations
         | 'final'
         | 'override'
         | 'native'
+        | 'async'
         ;
 
 *Overloading signature* of a method allows calling a method in different ways.
@@ -1314,8 +1348,8 @@ Non-abstract methods can be referred to as *concrete methods*.
 A :index:`compile-time error` occurs if:
 
 -  An abstract method is declared private.
--  The method declaration contains another modifier (``static``, ``final``, or
-   ``native``) along with the modifier ``abstract``.
+-  The method declaration contains another modifier (``static``, ``final``,
+   ``native`` or ``async``) along with the modifier ``abstract``.
 -  The declaration of an abstract method *m* does not appear directly within an
    abstract class *A*.
 -  Any non-abstract subclass of *A* (see :ref:`Abstract Classes`) does not
@@ -1353,9 +1387,20 @@ Final Methods
     frontend_status: Done
 
 Final methods are described in the chapter Experimental Features (see
-:ref:`Native Methods Experimental`).
+:ref:`Final Methods Experimental`).
 
 |
+
+.. _Async Methods:
+
+Async Methods
+=============
+
+.. meta:
+    frontend_status: Done
+
+Async methods are described in the chapter Experimental Features (see
+:ref:`Async Methods Experimental`)
 
 .. _Override Methods:
 
@@ -1644,8 +1689,8 @@ fields:
 
 A class can define a getter, a setter, or both with the same name.
 If both a getter and a setter with a particular name are defined,
-then both must have the same accessor modifiers. Otherwise, a compile-time
-error occurs.
+then both must have the same accessor modifiers. Otherwise, a
+:index:`compile-time error` occurs.
 
 Accessors can be implemented by using a private field to store its value
 (as in the example above).
@@ -1697,7 +1742,8 @@ initial values before the first use.
         : 'static' block
         ;
 
-A compile-time error occurs if a class initializer contains the following:
+A :index:`compile-time error` occurs if a class initializer contains the
+following:
 
 -  A ``return <expression>`` statement (see :ref:`Return Statements`).
 -  A ``throw`` statement (see :ref:`Throw Statements`) without a surrounding
@@ -1774,8 +1820,8 @@ inaccessible prevents class instantiation from using this constructor.
 If the only constructor is declared inaccessible, then no class instance
 can be created.
 
-A compile-time error occurs if two constructors in a class are declared, and
-have identical signatures.
+A :index:`compile-time error` occurs if two constructors in a class are
+declared, and have identical signatures.
 
 See :ref:`Throwing Functions` for the ``throws``, and :ref:`Rethrowing Functions`
 for the ``rethrows`` mark.
@@ -1934,7 +1980,7 @@ The high-level sequence of a *primary constructor* body includes the following:
 
     - Executes instance own field initializers in a valid order determined by
       the compiler. If the compiler detects a circular reference, then a
-      compile-time error occurs.
+      :index:`compile-time error` occurs.
 
 4. Arbitrary code that guarantees all remaining instance fields (if any) are
    initialized but does not:
@@ -2007,7 +2053,7 @@ The example below shows *primary* and *secondary* constuctors:
     }
 
 
-A compile-time error occurs if a constructor calls itself, directly or
+A :index:`compile-time error` occurs if a constructor calls itself, directly or
 indirectly, through a series of one or more explicit constructor calls
 using ``this``.
 
@@ -2019,10 +2065,10 @@ can use a return statement without an expression.
 A constructor body must not use fields of a created object before the fields
 are initialized: ``this`` can be passed as an argument only after each object
 field receives an initial value. The checks are performed by the compiler.
-If the compiler finds a violation, then a compile-time error occurs.
+If the compiler finds a violation, then a :index:`compile-time error` occurs.
 
 A constructor body can have no more than one call to the current class or
-direct superclass constructor. A compile-time error occurs otherwise.
+direct superclass constructor. A :index:`compile-time error` occurs otherwise.
 
 .. index::
    compile-time error
@@ -2060,7 +2106,7 @@ There are two kinds of *explicit constructor call* statements:
    type arguments.
 
 
-A compile-time error occurs if the constructor body of an explicit
+A :index:`compile-time error` occurs if the constructor body of an explicit
 constructor call statement:
 
 -  Refers to any non-static field or instance method; or
@@ -2195,7 +2241,7 @@ least one constructor. The form of a default constructor is as follows:
    with no arguments except the primordial class ``Object``. The default
    constructor body for the primordial class ``Object`` is empty.
 
-A compile-time error occurs if a default constructor is implicit, but
+A :index:`compile-time error` occurs if a default constructor is implicit, but
 the superclass:
 
 -  Has no accessible (see :ref:`Accessible`) constructor without parameters;
@@ -2351,7 +2397,7 @@ interfaces have access to entities visible within this scope, and capture the
 entities they use from this scope. Function/method parameters and local
 variables can be used and thus captured.
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  A local class or interface declaration has access modifier ``public``,
    ``protected``, or ``private``.

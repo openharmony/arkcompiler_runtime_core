@@ -129,8 +129,8 @@ provided below:
     }
 
 
-A compile-time error occurs if a generic class is directly or indirectly
-a subclass of ``Error``.
+A :index:`compile-time error` occurs if a generic class is directly or
+indirectly a subclass of ``Error``.
 
 In most cases, errors are raised by the |LANG| runtime system, or by the
 standard library (see :ref:`Standard Library`) code.
