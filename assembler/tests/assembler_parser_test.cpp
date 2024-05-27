@@ -572,8 +572,8 @@ HWTEST_F(ParserTest, parser_test_022, TestSize.Level1)
     EXPECT_EQ(item.Value().function_table.at(sig_main).return_type.GetId(), panda::panda_file::Type::TypeId::I32);
     EXPECT_EQ(item.Value().function_table.at(sig_m123).return_type.GetId(), panda::panda_file::Type::TypeId::F64);
 
-   auto func_m123_table = item.Value().function_table.at(sig_m123).label_table.at("la1").file_location;
-   auto func_main_table = item.Value().function_table.at(sig_main).label_table.at("label").file_location;
+    auto func_m123_table = item.Value().function_table.at(sig_m123).label_table.at("la1").file_location;
+    auto func_main_table = item.Value().function_table.at(sig_main).label_table.at("label").file_location;
 
     EXPECT_EQ(func_main_table->line_number, 5U);
     EXPECT_EQ(func_main_table->is_defined, true);
@@ -1406,7 +1406,6 @@ HWTEST_F(ParserTest, parser_test_040, TestSize.Level1)
         auto item = p.Parse(v);
         EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_BAD_NUMBER_OPERANDS);
     }
-
 }
 
 /**
@@ -2168,24 +2167,19 @@ HWTEST_F(ParserTest, parser_test_058, TestSize.Level1)
         lit_value1);
 
     // unsigned long intro literals
-    EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals_[0].tag_,
-              panda::panda_file::LiteralTag::TAGVALUE);
-    EXPECT_EQ(std::get<uint8_t>(item.Value().literalarray_table.at("array_unsigned_long").literals_[0].value_),
-              static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U64));
-    EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals_[1].tag_,
-              panda::panda_file::LiteralTag::INTEGER);
-    EXPECT_EQ(std::get<uint32_t>(item.Value().literalarray_table.at("array_unsigned_long").literals_[1].value_), 3);
+    auto literals = item.Value().literalarray_table.at("array_unsigned_long").literals_;
+    EXPECT_EQ(literals[0].tag_, panda::panda_file::LiteralTag::TAGVALUE);
+    EXPECT_EQ(std::get<uint8_t>(literals[0].value_), static_cast<uint8_t>(panda::panda_file::LiteralTag::ARRAY_U64));
+    EXPECT_EQ(literals[1].tag_, panda::panda_file::LiteralTag::INTEGER);
+    EXPECT_EQ(std::get<uint32_t>(literals[1].value_), 3);
 
     // unsigned long array elements
-    EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals_[2].tag_,
-              panda::panda_file::LiteralTag::ARRAY_U64);
-    EXPECT_EQ(static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_unsigned_long").literals_[2].value_)), 10000);
-    EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals_[3].tag_,
-              panda::panda_file::LiteralTag::ARRAY_U64);
-    EXPECT_EQ(static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_unsigned_long").literals_[3].value_)), 20000);
-    EXPECT_EQ(item.Value().literalarray_table.at("array_unsigned_long").literals_[4].tag_,
-              panda::panda_file::LiteralTag::ARRAY_U64);
-    EXPECT_EQ(static_cast<int64_t>(std::get<uint64_t>(item.Value().literalarray_table.at("array_unsigned_long").literals_[4].value_)), 30000);
+    EXPECT_EQ(literals[2].tag_, panda::panda_file::LiteralTag::ARRAY_U64);
+    EXPECT_EQ(static_cast<int64_t>(std::get<uint64_t>(literals[2].value_)), 10000);
+    EXPECT_EQ(literals[3].tag_, panda::panda_file::LiteralTag::ARRAY_U64);
+    EXPECT_EQ(static_cast<int64_t>(std::get<uint64_t>(literals[3].value_)), 20000);
+    EXPECT_EQ(literals[4].tag_, panda::panda_file::LiteralTag::ARRAY_U64);
+    EXPECT_EQ(static_cast<int64_t>(std::get<uint64_t>(literals[4].value_)), 30000);
 
     // long intro literals
     EXPECT_EQ(item.Value().literalarray_table.at("array_long").literals_[0].tag_,

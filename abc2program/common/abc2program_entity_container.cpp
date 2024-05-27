@@ -184,9 +184,9 @@ std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetUnprocessedNestedLi
     return unprocessed_nested_literal_array_id_set_;
 }
 
-void Abc2ProgramEntityContainer::AddModuleLiteralArrayId(uint32_t literal_array_id)
+void Abc2ProgramEntityContainer::AddModuleLiteralArrayId(uint32_t module_literal_array_id)
 {
-    module_literal_array_id_set_.insert(literal_array_id);
+    module_literal_array_id_set_.insert(module_literal_array_id);
 }
 
 void Abc2ProgramEntityContainer::AddUnnestedLiteralArrayId(const panda_file::File::EntityId &literal_array_id)

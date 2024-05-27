@@ -53,7 +53,7 @@ private:
     void SkipToNextEntryIfNeeded(uint32_t &idx,
                                  uint32_t &offset_start,
                                  uint32_t &offset_end,
-                                 uint32_t ins_offset,
+                                 uint32_t inst_idx,
                                  const T &table);
     void FillInsDebug();
     uint32_t GetInstIdxByInstPc(uint32_t inst_pc) const;

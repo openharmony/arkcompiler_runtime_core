@@ -904,7 +904,7 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_013, TestSize.Level1)
 {
     Parser par;
     auto source = R"(
-        .array array { 
+        .array array {
             u1 1
             u8 2
             i8 -30
@@ -1012,7 +1012,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_015, TestSize.Level1)
     program.Value().record_table.at("R").field_list[0].metadata->SetValue(insn_order_anno);
     auto pf4 = AsmEmitter::Emit(program.Value());
     EXPECT_NE(pf4, nullptr);
-
 }
 
 /**

@@ -57,7 +57,6 @@ void MoveConstants::MoveFromStartBlock(Inst *inst)
     auto user_inst = SingleBlockNoPhiDominatingUser(inst);
     if (user_inst != nullptr) {
         target_bb = user_inst->GetBasicBlock();
-
         if (IsBlockSuitable(target_bb)) {
             graph->GetStartBlock()->EraseInst(inst);
             target_bb->InsertBefore(inst, user_inst);
