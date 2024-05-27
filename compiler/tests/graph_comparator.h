@@ -57,7 +57,7 @@ public:
             return false;
         }
         auto inst_cmp = [this](auto inst1, auto inst2) {
-            assert(inst2 != nullptr);
+            ASSERT(inst2 != nullptr);
             bool t = Compare(inst1, inst2);
             if (!t) {
                 std::cerr << "Different instructions:\n";
