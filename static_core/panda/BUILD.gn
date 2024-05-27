@@ -35,6 +35,8 @@ ohos_executable("arkts_bin") {
     "$ark_root/runtime:libarkruntime",
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   output_name = "ark"
   install_enable = true
   part_name = ark_part_name

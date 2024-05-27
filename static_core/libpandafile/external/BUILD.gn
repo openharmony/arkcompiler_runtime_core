@@ -36,6 +36,8 @@ ohos_shared_library("libarkfileExt") {
     "$ark_root/libpandafile:libarktsfile",
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   output_extension = "so"
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
@@ -62,6 +64,8 @@ ohos_shared_library("libarksupport") {
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:libarktsfile",
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   output_extension = "so"
   part_name = ark_part_name

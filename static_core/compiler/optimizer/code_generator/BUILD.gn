@@ -35,7 +35,7 @@ if (enable_codegen) {
     ]
     deps = []
     defines = []
-    external_deps = []
+    external_deps = [ sdk_libc_secshared_dep ]
 
     if (target_cpu == "x86") {
       sources += [
@@ -128,6 +128,8 @@ if (enable_codegen) {
     deps = []
     defines = []
 
+    external_deps = [ sdk_libc_secshared_dep ]
+
     if (target_cpu == "x86") {
       sources += [
         "target/x86/callconv.cpp",
@@ -139,7 +141,7 @@ if (enable_codegen) {
     } else if (target_cpu == "amd64" || target_cpu == "x64" ||
                target_cpu == "x86_64") {
       if (!is_mingw) {
-        external_deps = [ "vixl:libvixl" ]
+        external_deps += [ "vixl:libvixl" ]
 
         sources += [
           "target/amd64/callconv.cpp",
@@ -165,7 +167,7 @@ if (enable_codegen) {
       defines = [ "USE_VIXL_ARM32" ]
       include_dirs =
           [ "$ark_root/compiler/optimizer/code_generator/target/aarch32" ]
-      external_deps = [ "vixl:libvixl" ]
+      external_deps += [ "vixl:libvixl" ]
     } else if (target_cpu == "arm64") {
       sources += [
         "target/aarch64/callconv.cpp",
@@ -175,7 +177,7 @@ if (enable_codegen) {
       defines = [ "USE_VIXL_ARM64" ]
       include_dirs =
           [ "$ark_root/compiler/optimizer/code_generator/target/aarch64" ]
-      external_deps = [ "vixl:libvixl" ]
+      external_deps += [ "vixl:libvixl" ]
     }
 
     if (is_mac) {

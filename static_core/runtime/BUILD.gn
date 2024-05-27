@@ -493,6 +493,8 @@ source_set("arkruntime_interpreter_impl_static") {
     "$ark_root/libpandafile:libarktsfile",
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   deps += plugin_arkruntime_stdlib_plugin_deps
 }
 
