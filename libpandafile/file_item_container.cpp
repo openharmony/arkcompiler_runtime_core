@@ -278,25 +278,10 @@ void ItemContainer::DeduplicateDebugInfo(MethodItem *method, ItemDeduper *debug_
     }
 }
 
-static void DeduplicateCode(MethodItem *method, ItemDeduper *code_deduper)
-{
-    auto *code_item = method->GetCode();
-    if (code_item == nullptr) {
-        return;
-    }
-
-    auto *deduplicated = code_deduper->Deduplicate(code_item);
-    if (deduplicated != code_item) {
-        method->SetCode(deduplicated);
-        deduplicated->AddMethod(method);  // we need it for Profile-Guided optimization
-    }
-}
-
 void ItemContainer::DeduplicateCodeAndDebugInfo()
 {
     ItemDeduper line_number_program_deduper;
     ItemDeduper debug_deduper;
-    ItemDeduper code_deduper;
 
     for (auto &p : class_map_) {
         auto *item = p.second;
@@ -307,10 +292,9 @@ void ItemContainer::DeduplicateCodeAndDebugInfo()
         auto *class_item = static_cast<ClassItem *>(item);
 
         class_item->VisitMethods(
-            [this, &debug_deduper, &line_number_program_deduper, &code_deduper](BaseItem *param_item) {
+            [this, &debug_deduper, &line_number_program_deduper](BaseItem *param_item) {
                 auto *method_item = static_cast<MethodItem *>(param_item);
                 DeduplicateDebugInfo(method_item, &debug_deduper, &line_number_program_deduper);
-                DeduplicateCode(method_item, &code_deduper);
                 return true;
             });
     }
