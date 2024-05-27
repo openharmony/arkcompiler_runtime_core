@@ -135,6 +135,11 @@ extern "C" void StdSystemSetCoroutineSchedulingPolicy(int32_t policy)
     cm->SetSchedulingPolicy(newPolicy);
 }
 
+extern "C" int32_t StdSystemGetCoroutineId()
+{
+    return EtsCoroutine::GetCurrent()->GetCoroutineId();
+}
+
 extern "C" void StdSystemAtomicFlagSet(EtsAtomicFlag *instance, EtsBoolean v)
 {
     instance->SetValue(v);

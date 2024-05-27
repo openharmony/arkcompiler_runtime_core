@@ -85,6 +85,7 @@ private:
     Coroutine *LaunchImpl(CompletionEvent *completionEvent, Method *entrypoint, PandaVector<Value> &&arguments,
                           bool startSuspended = true);
     void ScheduleImpl();
+    void UnblockWaitersImpl(CoroutineEvent *blocker) REQUIRES(coroSwitchLock_);
 
     /* runnables queue management */
     void PushToRunnableQueue(Coroutine *co);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ function check(test: String): void {
 export function main(): int {
     reset();
     let byteP: Promise<Object> = launch byteFunc();
-    byteP.then<Object>((value: Object): Object => {
+    let pThen = byteP.then<Object>((value: Object): Object => {
         if ((value as Byte) == -3) {
             passed = true;
         } else {
@@ -70,11 +70,12 @@ export function main(): int {
         return value
     });
     await byteP;
+    await pThen as Promise<Object>;
     check("byteFunc");
 
     reset();
     let charP: Promise<Object> = launch charFunc();
-    charP.then<Object>((value: Object): Object => {
+    pThen = charP.then<Object>((value: Object): Object => {
         if ((value as Char) == c'x') {
             passed = true;
         } else {
@@ -83,11 +84,12 @@ export function main(): int {
         return value
     });
     await charP;
+    await pThen as Promise<Object>;
     check("charFunc");
 
     reset();
     let shortP: Promise<Object> = launch shortFunc();
-    shortP.then<Object>((value: Object): Object => {
+    pThen = shortP.then<Object>((value: Object): Object => {
         if ((value as Short) == 32767) {
             passed = true;
         } else {
@@ -96,11 +98,12 @@ export function main(): int {
         return value
     });
     await shortP;
+    await pThen as Promise<Object>;
     check("shortFunc");
 
     reset();
     let intP: Promise<Object> = launch intFunc();
-    intP.then<Object>((value: Object): Object => {
+    pThen = intP.then<Object>((value: Object): Object => {
         if ((value as Int) == 5) {
             passed = true;
         } else {
@@ -109,11 +112,12 @@ export function main(): int {
         return value
     });
     await intP;
+    await pThen as Promise<Object>;
     check("intFunc");
 
     reset();
     let longP: Promise<Object> = launch longFunc();
-    longP.then<Object>((value: Object): Object => {
+    pThen = longP.then<Object>((value: Object): Object => {
         if ((value as Long) == 777) {
             passed = true;
         } else {
@@ -123,11 +127,12 @@ export function main(): int {
         return value
     });
     await longP;
+    await pThen as Promise<Object>;
     check("longFunc");
 
     reset();
     let floatP: Promise<Object> = launch floatFunc();
-    floatP.then<Object>((value: Object): Object => {
+    pThen = floatP.then<Object>((value: Object): Object => {
         if ((value as Float) == FLOAT_PI) {
             passed = true;
         } else {
@@ -137,11 +142,12 @@ export function main(): int {
         return value
     });
     await floatP;
+    await pThen as Promise<Object>;
     check("floatFunc");
 
     reset();
     let doubleP: Promise<Object> = launch doubleFunc();
-    doubleP.then<Object>((value: Object): Object => {
+    pThen = doubleP.then<Object>((value: Object): Object => {
         if ((value as Double) == 2.71) {
             passed = true;
         } else {
@@ -150,6 +156,7 @@ export function main(): int {
         return value
     });
     await doubleP;
+    await pThen as Promise<Object>;
     check("doubleFunc");
     return 0;
 }

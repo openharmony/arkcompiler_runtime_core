@@ -189,7 +189,6 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
     Runtime::GetCurrent()->GetNotificationManager()->ThreadEndEvent(co);
 
     if (co->HasManagedEntrypoint()) {
-        UnblockWaiters(co->GetCompletionEvent());
         CheckProgramCompletion();
         GetCurrentWorker()->RequestFinalization(co);
     } else if (co->HasNativeEntrypoint()) {

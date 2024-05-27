@@ -102,6 +102,7 @@ void StackfulCoroutineContext::CleanUp()
 void StackfulCoroutineContext::ThreadProcImpl()
 {
     auto *co = GetCoroutine();
+    auto *coroutineManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
     co->NativeCodeBegin();
     SetStatus(Coroutine::Status::RUNNING);
     if (co->HasManagedEntrypoint()) {
@@ -109,13 +110,13 @@ void StackfulCoroutineContext::ThreadProcImpl()
         PandaVector<Value> args = std::move(co->GetManagedEntrypointArguments());
         Value result = co->GetManagedEntrypoint()->Invoke(co, args.data());
         co->RequestCompletion(result);
+        coroutineManager->UnblockWaiters(co->GetCompletionEvent());
+        co->ProcessPresentAndAnnouncedCallbacks();
     } else if (co->HasNativeEntrypoint()) {
         co->GetNativeEntrypoint()(co->GetNativeEntrypointParam());
     }
     SetStatus(Coroutine::Status::TERMINATING);
-
-    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
-    threadManager->TerminateCoroutine(co);
+    coroutineManager->TerminateCoroutine(co);
 }
 
 bool StackfulCoroutineContext::SwitchTo(StackfulCoroutineContext *target)

@@ -23,4 +23,6 @@ export final class CoroutineExtras {
     public static native getWorkerId(): int;
     // sets default coroutine affinity
     public static native setSchedulingPolicy(policy: int): void;
+    // returns coroutine id
+    public static native getCoroutineId(): int;
 }

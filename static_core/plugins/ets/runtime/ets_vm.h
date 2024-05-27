@@ -264,7 +264,7 @@ public:
         uint8_t data[SIZE];  // NOLINT(modernize-avoid-c-arrays)
     };
 
-    JobQueue *GetJobQueue()
+    JobQueue *GetJobQueue() const
     {
         return jobQueue_.get();
     }
@@ -273,6 +273,7 @@ public:
     {
         ASSERT(jobQueue_ == nullptr);
         jobQueue_.reset(jobQueue);
+        Coroutine::GetCurrent()->SetCallbackQueue(jobQueue);
     }
 
     std::mt19937 &GetRandomEngine()

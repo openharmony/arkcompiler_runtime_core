@@ -15,6 +15,7 @@
 
 #include <node_api.h>
 #include "runtime/handle_scope-inl.h"
+#include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_utils.h"
@@ -26,6 +27,7 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_callback.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "intrinsics.h"
@@ -34,19 +36,16 @@ namespace ark::ets::interop::js {
 static napi_value ThenCallback(napi_env env, napi_callback_info info)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    PandaEtsVM *vm = coro->GetPandaVM();
     INTEROP_CODE_SCOPE_JS(coro, env);
 
-    mem::Reference *callbackRef = nullptr;
+    EtsCallback *callback = nullptr;
     [[maybe_unused]] napi_status status =
-        napi_get_cb_info(env, info, nullptr, nullptr, nullptr, reinterpret_cast<void **>(&callbackRef));
+        napi_get_cb_info(env, info, nullptr, nullptr, nullptr, reinterpret_cast<void **>(&callback));
     ASSERT(status == napi_ok);
 
-    [[maybe_unused]] HandleScope<ObjectHeader *> handleScope(ManagedThread::GetCurrent());
-    VMHandle<EtsObject> callback(coro, vm->GetGlobalObjectStorage()->Get(callbackRef));
-    vm->GetGlobalObjectStorage()->Remove(callbackRef);
+    callback->Run();
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(callback);
 
-    LambdaUtils::InvokeVoid(coro, callback.GetPtr());
     if (coro->HasPendingException()) {
         napi_throw_error(env, nullptr, "EtsVM internal error");
     }
@@ -55,41 +54,49 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
     return undefined;
 }
 
-void JsJobQueue::AddJob(EtsObject *callback)
+void JsJobQueue::Post(PandaUniquePtr<Callback> callback)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    PandaEtsVM *vm = coro->GetPandaVM();
-    napi_env env = InteropCtx::Current(coro)->GetJSEnv();
-    napi_deferred deferred;
-    napi_value undefined;
-    napi_value jsPromise;
-    napi_value thenFn;
+    auto *callbackPtr = callback.release();
+    auto postProc = [callbackPtr] {
+        EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+        napi_env env = InteropCtx::Current(coro)->GetJSEnv();
+        napi_deferred deferred;
+        napi_value undefined;
+        napi_value jsPromise;
+        napi_value thenFn;
 
-    napi_get_undefined(env, &undefined);
-    napi_status status = napi_create_promise(env, &deferred, &jsPromise);
-    if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot allocate a Promise instance");
+        napi_get_undefined(env, &undefined);
+        napi_status status = napi_create_promise(env, &deferred, &jsPromise);
+        if (status != napi_ok) {
+            InteropCtx::Fatal("Cannot allocate a Promise instance");
+        }
+        status = napi_get_named_property(env, jsPromise, "then", &thenFn);
+        ASSERT(status == napi_ok);
+        (void)status;
+
+        napi_value thenCallback;
+        status = napi_create_function(env, nullptr, 0, ThenCallback, callbackPtr, &thenCallback);
+        if (status != napi_ok) {
+            InteropCtx::Fatal("Cannot create a function");
+        }
+
+        napi_value thenPromise;
+        status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenPromise);
+        ASSERT(status == napi_ok);
+        (void)status;
+
+        napi_resolve_deferred(env, deferred, undefined);
+    };
+
+    auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
+    Coroutine *mainCoro = Coroutine::CastFromThread(mainT);
+    if (Coroutine::GetCurrent() != mainCoro) {
+        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
+        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(
+            &postProc, EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>());
+    } else {
+        postProc();
     }
-    status = napi_get_named_property(env, jsPromise, "then", &thenFn);
-    ASSERT(status == napi_ok);
-    (void)status;
-
-    mem::Reference *callbackRef =
-        vm->GetGlobalObjectStorage()->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    ASSERT(callbackRef != nullptr);
-
-    napi_value thenCallback;
-    status = napi_create_function(env, nullptr, 0, ThenCallback, callbackRef, &thenCallback);
-    if (status != napi_ok) {
-        InteropCtx::Fatal("Cannot create a function");
-    }
-
-    napi_value thenPromise;
-    status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenPromise);
-    ASSERT(status == napi_ok);
-    (void)status;
-
-    napi_resolve_deferred(env, deferred, undefined);
 }
 
 static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callback_info info)

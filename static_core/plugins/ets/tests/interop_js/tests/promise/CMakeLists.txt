@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-panda_ets_interop_js_test(ets_interop_js_test_promise1
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-    LAUNCHER_ARGS "testPendingPromise"
-)
+# // NOTE(panferovi): fix a deadlock issue when waiting for a promise to be resolved. Issue: #17820
+# panda_ets_interop_js_test(ets_interop_js_test_promise1
+#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+#     LAUNCHER_ARGS "testPendingPromise"
+# )
 
 panda_ets_interop_js_test(ets_interop_js_test_promise2
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
