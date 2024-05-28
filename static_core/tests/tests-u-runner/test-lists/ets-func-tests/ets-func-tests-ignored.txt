@@ -478,7 +478,7 @@ spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interf
 ### Overriding issues
 ### Issue 15572
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_05.ets
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_optional_param_01_06.ets
+
 ### Issue 15201
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.ets
@@ -576,14 +576,6 @@ spec/07.expressions/nullish-coalescing_expressions/issue14609_02.ets
 spec/07.expressions/nullish-coalescing_expressions/issue14609_01.ets
 ### Issue 1654 end
 
-### Issue 1643
-spec/13.Compilation_Units_Packages_and_Modules/import_export/issue14991_01.ets
-### Issue 1643 end
-
-### Issue 15762
-spec/03.types/nullables/issue15013_03.ets
-### Issue 15762 end
-
 ### Issue 16535
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0000.ets
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0001.ets
@@ -622,9 +614,6 @@ spec/10.Interfaces/method_overiding_0005.ets
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/override_static_instance_0011.ets
 # Issue 16623
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/override_static_instance_0002.ets
-### STDLIB test Failures begin
-std/core/std_core_string_String_localeCompare_string_005.ets
-### STDLIB test Failures end
 ### Issue 16465 begin
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import_Directives/issue15173/src/issue_15173_02.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import_Directives/issue15173/src/issue_15173_03.ets
