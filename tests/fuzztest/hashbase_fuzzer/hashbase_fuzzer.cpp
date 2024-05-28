@@ -22,8 +22,10 @@ namespace OHOS {
     void HashBaseFuzzTest(const uint8_t* data, size_t size)
     {
         const uint32_t seed = 0xCC9E2D51U;
+        std::string str(data, data + size);
+        uint8_t* string_data = reinterpret_cast<uint8_t*>(const_cast<char*>(str.c_str()));
         panda::HashBase<panda::MurmurHash32<seed>>::GetHash32(data, size);
-        panda::HashBase<panda::MurmurHash32<seed>>::GetHash32String(data);
+        panda::HashBase<panda::MurmurHash32<seed>>::GetHash32String(string_data);
     }
 }
 

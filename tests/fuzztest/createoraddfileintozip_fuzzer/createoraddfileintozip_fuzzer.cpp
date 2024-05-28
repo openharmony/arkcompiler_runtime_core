@@ -20,23 +20,24 @@
 namespace OHOS {
     void CreateOrAddFileIntoZipFuzzTest(const uint8_t* data, size_t size)
     {
+        std::string str(data, data + size);
         {
             // zipOpen test
             const char* zipname = nullptr;
-            const char* filename = reinterpret_cast<char*>(const_cast<uint8_t*>(data));
+            const char* filename = str.c_str();
             panda::CreateOrAddFileIntoZip(zipname, filename, data, size, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
             (void)remove(zipname);
         }
         {
             // zipOpenNewFileInZip test
-            const char* zipname = reinterpret_cast<char*>(const_cast<uint8_t*>(data));
+            const char* zipname = str.c_str();
             const char* filename = nullptr;
             panda::CreateOrAddFileIntoZip(zipname, filename, data, size, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
             (void)remove(zipname);
         }
         {
             // zipWriteInFileInZip test
-            const char* zipname = reinterpret_cast<char*>(const_cast<uint8_t*>(data));
+            const char* zipname = str.c_str();
             const char* filename = panda::panda_file::ARCHIVE_FILENAME;
             panda::CreateOrAddFileIntoZip(zipname, filename, data, 0, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
             (void)remove(zipname);

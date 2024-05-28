@@ -22,13 +22,16 @@ namespace OHOS {
     {
         using namespace panda::utf;
 
-        CStringAsMutf8(reinterpret_cast<const char*>(data));
+        std::string str(data, data + size);
+        const uint8_t* string_data = CStringAsMutf8(const_cast<char*>(str.c_str()));
 
         Mutf8AsCString(data);
         IsAvailableNextUtf16Code(static_cast<uint16_t>(size));
 
-        Mutf8Less mutf8Less;
-        mutf8Less(data, data);
+        if (IsValidModifiedUTF8(string_data)) {
+            Mutf8Less mutf8Less;
+            mutf8Less(string_data, string_data);
+        }
 
         SplitUtf16Pair(static_cast<uint32_t>(size));
     }

@@ -20,8 +20,8 @@
 namespace OHOS {
     void PandargsFuzzTest(const uint8_t* data, size_t size)
     {
-        std::string dataString(reinterpret_cast<char*>(const_cast<uint8_t*>(data)));
-        panda::arg_list_t arg = {dataString};
+        std::string str(data, data + size);
+        panda::arg_list_t arg = {str};
         panda::PandArg<panda::arg_list_t> pandarg_arg("list", arg, "Sample arg_list_t argument", "a");
 
         panda::PandArg<uint64_t> pandarg("uint64", static_cast<uint64_t>(size), "Sample uint64 argument");
@@ -29,7 +29,7 @@ namespace OHOS {
         pandarg.SetValue(1);
         pandarg.ResetDefaultValue();
 
-        panda::PandArg<std::string> pandarg_string("string", dataString, "Sample string argument");
+        panda::PandArg<std::string> pandarg_string("string", str, "Sample string argument");
         panda::PandArg<bool> pandarg_bool("bool", false, "Sample boolean argument");
     }
 }

@@ -20,7 +20,7 @@
 namespace OHOS {
     void JsonParserFuzzTest(const uint8_t* data, [[maybe_unused]] size_t size)
     {
-        std::string str(reinterpret_cast<const char*>(data));
+        std::string str(data, data + size);
         panda::JsonObject obj(str);
 
         auto strBool = R"(
