@@ -143,6 +143,7 @@ set(SOURCES
     mem/gc/g1/update_remset_thread.cpp
     mem/gc/g1/update_remset_task_queue.cpp
     mem/gc/g1/g1_pause_tracker.cpp
+    mem/gc/g1/hot_cards.cpp
     relayout_profiler.cpp
     loadable_agent.cpp
     default_debugger_agent.cpp

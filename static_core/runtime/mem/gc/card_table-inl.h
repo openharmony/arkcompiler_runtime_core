@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,13 @@ inline void CardTable::Card::SetCard(uint8_t newVal)
     // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
     // on other reads or writes
     value_.store(newVal, std::memory_order_relaxed);
+}
+
+inline CardTable::Card::Status CardTable::Card::GetStatus() const
+{
+    // Atomic with relaxed order reason: data race with value_ with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    return value_.load(std::memory_order_relaxed) & STATUS_MASK;
 }
 
 inline void CardTable::FillRanges(PandaVector<MemRange> *ranges, const Card *startCard, const Card *endCard)
@@ -75,8 +82,6 @@ void CardTable::VisitMarked(CardVisitor cardVisitor, uint32_t processedFlag)
     bool visitMarked = processedFlag & CardTableProcessedFlag::VISIT_MARKED;
     bool visitProcessed = processedFlag & CardTableProcessedFlag::VISIT_PROCESSED;
     bool setProcessed = processedFlag & CardTableProcessedFlag::SET_PROCESSED;
-    static_assert(sizeof(std::atomic_size_t) % sizeof(Card) == 0);
-    constexpr size_t CHUNK_CARD_NUM = sizeof(std::atomic_size_t) / sizeof(Card);
     auto *card = cards_;
     auto *cardEnd = cards_ + (cardsCount_ / CHUNK_CARD_NUM) * CHUNK_CARD_NUM;
     while (card < cardEnd) {
@@ -93,7 +98,8 @@ void CardTable::VisitMarked(CardVisitor cardVisitor, uint32_t processedFlag)
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto *chunkEnd = card + CHUNK_CARD_NUM;
         while (card < chunkEnd) {
-            if (!(visitMarked && card->IsMarked()) && !(visitProcessed && card->IsProcessed())) {
+            auto cardStatus = card->GetStatus();
+            if (!(visitMarked && Card::IsMarked(cardStatus)) && !(visitProcessed && Card::IsProcessed(cardStatus))) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                 ++card;
                 continue;
@@ -109,7 +115,8 @@ void CardTable::VisitMarked(CardVisitor cardVisitor, uint32_t processedFlag)
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (; card < cards_ + cardsCount_; ++card) {
-        if ((visitMarked && card->IsMarked()) || (visitProcessed && card->IsProcessed())) {
+        auto cardStatus = card->GetStatus();
+        if ((visitMarked && Card::IsMarked(cardStatus)) || (visitProcessed && Card::IsProcessed(cardStatus))) {
             if (setProcessed) {
                 card->SetProcessed();
             }

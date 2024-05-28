@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,7 @@ GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lan
     parallelRefUpdatingEnabled_ = options.IsGcParallelRefUpdatingEnabled() && (options.GetGcWorkersCount() != 0);
     g1EnableConcurrentUpdateRemset_ = options.IsG1EnableConcurrentUpdateRemset();
     g1MinConcurrentCardsToProcess_ = options.GetG1MinConcurrentCardsToProcess();
+    g1HotCardsProcessingFrequency_ = options.GetG1HotCardsProcessingFrequency();
     g1EnablePauseTimeGoal_ = options.IsG1PauseTimeGoal();
     g1MaxGcPauseMs_ = options.GetG1PauseTimeGoalMaxGcPause();
     g1GcPauseIntervalMs_ = options.WasSetG1PauseTimeGoalGcPauseInterval() ? options.GetG1PauseTimeGoalGcPauseInterval()
@@ -260,6 +261,11 @@ bool GCSettings::G1EnableConcurrentUpdateRemset() const
 size_t GCSettings::G1MinConcurrentCardsToProcess() const
 {
     return g1MinConcurrentCardsToProcess_;
+}
+
+size_t GCSettings::G1HotCardsProcessingFrequency() const
+{
+    return g1HotCardsProcessingFrequency_;
 }
 
 bool GCSettings::G1EnablePauseTimeGoal() const

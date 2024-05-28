@@ -15,6 +15,7 @@
 
 #include "runtime/mem/gc/g1/update_remset_worker.h"
 
+#include "mem/gc/card_table.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/mem/gc/g1/card_handler.h"
@@ -28,10 +29,12 @@ template <class LanguageConfig>
 UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorker(G1GC<LanguageConfig> *gc,
                                                        GCG1BarrierSet::ThreadLocalCardQueues *queue,
                                                        os::memory::Mutex *queueLock, size_t regionSize,
-                                                       bool updateConcurrent, size_t minConcurrentCardsToProcess)
+                                                       bool updateConcurrent, size_t minConcurrentCardsToProcess,
+                                                       size_t hotCardsProcessingFrequency)
     : gc_(gc),
       regionSizeBits_(ark::helpers::math::GetIntLog2(regionSize)),
       minConcurrentCardsToProcess_(minConcurrentCardsToProcess),
+      hotCardsProcessingFrequency_(hotCardsProcessingFrequency),
       queue_(queue),
       queueLock_(queueLock),
       updateConcurrent_(updateConcurrent)
@@ -125,6 +128,12 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffers(PandaUnorder
 }
 
 template <class LanguageConfig>
+void UpdateRemsetWorker<LanguageConfig>::FillFromHotCards(PandaUnorderedSet<CardTable::CardPtr> *cards)
+{
+    hotCards_.DrainMarkedCards(cards);
+}
+
+template <class LanguageConfig>
 void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(GCG1BarrierSet::G1PostBarrierRingBufferType *postWrb,
                                                                    PandaUnorderedSet<CardTable::CardPtr> *cards)
 {
@@ -153,13 +162,69 @@ void UpdateRemsetWorker<LanguageConfig>::FillFromPostBarrierBuffer(GCG1BarrierSe
 }
 
 template <class LanguageConfig>
+bool UpdateRemsetWorker<LanguageConfig>::NeedProcessHotCards()
+{
+    static size_t processingCnt = 0;
+    if (processingCnt++ == hotCardsProcessingFrequency_) {
+        processingCnt = 0;
+        return true;
+    }
+    return false;
+}
+
+template <class LanguageConfig>
 size_t UpdateRemsetWorker<LanguageConfig>::ProcessAllCards()
+{
+    size_t processedCardsCnt = ProcessCommonCards();
+    if (NeedProcessHotCards()) {
+        processedCardsCnt += ProcessHotCards();
+    }
+    return processedCardsCnt;
+}
+
+template <class LanguageConfig>
+size_t UpdateRemsetWorker<LanguageConfig>::ProcessHotCards()
+{
+    CardHandler<LanguageConfig> cardHandler(gc_->GetCardTable(), regionSizeBits_, deferCards_);
+    auto processedCardsCnt = hotCards_.HandleCards(cardHandler);
+    return processedCardsCnt;
+}
+
+template <class LanguageConfig>
+void UpdateRemsetWorker<LanguageConfig>::UpdateCardStatus(CardTable::CardPtr card)
+{
+    auto cardValue = card->GetCard();
+    auto cardStatus = CardTable::Card::GetStatus(cardValue);
+
+    ASSERT_PRINT(!CardTable::Card::IsProcessed(cardStatus) && !CardTable::Card::IsYoung(cardStatus),
+                 "UpdateCardStatus card: " << card << " cardValue: " << (int)cardValue);
+
+    if (!CardTable::Card::IsMarked(cardStatus)) {
+        return;
+    }
+
+    if (CardTable::Card::IsHot(cardValue)) {
+        HotCards::SetMaxHotValue(card, cardValue);
+        return;
+    }
+
+    if (CardTable::Card::IsMaxHotValue(cardValue)) {
+        HotCards::SetHot(card, cardValue);
+        hotCards_.PushCard(card);
+        return;
+    }
+
+    HotCards::IncrementHotValue(card, cardValue & HotCards::RESET_MARK_MASK);
+}
+
+template <class LanguageConfig>
+size_t UpdateRemsetWorker<LanguageConfig>::ProcessCommonCards()
 {
     FillFromQueue(&cards_);
     FillFromThreads(&cards_);
     FillFromPostBarrierBuffers(&cards_);
 
-    std::for_each(cards_.begin(), cards_.end(), [](auto *card) { card->Clear(); });
+    std::for_each(cards_.begin(), cards_.end(), [this](auto *card) { UpdateCardStatus(card); });
 
     // clear cards before we process it, because parallel mutator thread can make a write and we would miss it
     arch::StoreLoadBarrier();
@@ -169,14 +234,18 @@ size_t UpdateRemsetWorker<LanguageConfig>::ProcessAllCards()
     size_t cardsSize = 0;
     CardHandler<LanguageConfig> cardHandler(gc_->GetCardTable(), regionSizeBits_, deferCards_);
     for (auto it = cards_.begin(); it != cards_.end();) {
-        if (!cardHandler.Handle(*it)) {
-            break;
+        auto cardPtr = *it;
+        if (!cardPtr->IsHot()) {
+            if (!cardHandler.Handle(cardPtr)) {
+                break;
+            }
+            ++cardsSize;
         }
-        cardsSize++;
-
         it = cards_.erase(it);
     }
     LOG_IF(!cards_.empty(), DEBUG, GC) << "Processed " << cardsSize << " cards";
+
+    hotCards_.DecrementHotValue();
     return cardsSize;
 }
 
@@ -189,6 +258,7 @@ void UpdateRemsetWorker<LanguageConfig>::DrainAllCards(PandaUnorderedSet<CardTab
     FillFromQueue(cards);
     FillFromThreads(cards);
     FillFromPostBarrierBuffers(cards);
+    FillFromHotCards(cards);
 }
 
 template <class LanguageConfig>
@@ -196,7 +266,9 @@ void UpdateRemsetWorker<LanguageConfig>::GCProcessCards()
 {
     ASSERT(IsFlag(UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD));
     os::memory::LockHolder holder(updateRemsetLock_);
-    ProcessAllCards();
+    ProcessCommonCards();
+    ProcessHotCards();
+    hotCards_.ClearHotCards();
 }
 
 template <class LanguageConfig>

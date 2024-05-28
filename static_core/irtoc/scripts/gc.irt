@@ -163,6 +163,8 @@ scoped_macro(:push_dirty_card_to_buffer) do |cards, min_addr, mem|
     card := Add(cards, card_offset).ptr
     card_value := LoadI(card).Imm(Constants::CARD_VALUE_OFFSET).u8
 
+    # it is expected that young card cannot be enqueued
+    # so we can avoid card_value & CARD_STATUS_MASK operation
     is_card_young := Compare(card_value, Constants::CARD_YOUNG_VALUE).EQ.b
     IfImm(is_card_young).Imm(0).NE.b {
         Goto(:Done)
@@ -171,12 +173,18 @@ scoped_macro(:push_dirty_card_to_buffer) do |cards, min_addr, mem|
     # StoreLoad barrier is required to guarantee order of previous reference store and card load
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     card_value := LoadI(card).Imm(Constants::CARD_VALUE_OFFSET).u8
+    card_status := AndI(card_value).Imm(Constants::CARD_STATUS_MASK).u8
 
-    is_card_clear := Compare(card_value, Constants::CARD_CLEAR_VALUE).EQ.b
+    is_card_clear := Compare(card_status, Constants::CARD_CLEAR_VALUE).EQ.b
     IfImm(is_card_clear).Imm(0).EQ.Unlikely.b {
         Goto(:Done)
     }
-    StoreI(card, Constants::CARD_MARKED_VALUE).Imm(Constants::CARD_VALUE_OFFSET).u8
+    Intrinsic(:ATOMIC_BYTE_OR, card, Constants::CARD_MARKED_VALUE).void
+
+    hot_bit := AndI(card_value).Imm(Constants::CARD_HOT_FLAG).u8
+    If(hot_bit, Constants::CARD_HOT_FLAG).EQ.b {
+        Goto(:Done)
+    }
 
     buffer := LoadI(%tr).Imm(Constants::MANAGED_THREAD_G1_POST_BARRIER_BUFFER_OFFSET).ptr
     buffer_data := AddI(buffer).Imm(Constants::G1_LOCK_BUFFER_DATA_OFFSET).ptr

@@ -405,6 +405,8 @@ private:
 
     void ClearYoungCards(const CollectionSet &collectionSet);
 
+    void ClearTenuredCards(const CollectionSet &collectionSet);
+
     size_t GetMaxMixedRegionsCount();
 
     void PrepareYoungRegionsForFullGC(const CollectionSet &collectionSet);

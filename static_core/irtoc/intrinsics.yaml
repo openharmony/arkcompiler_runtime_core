@@ -269,4 +269,17 @@ intrinsics:
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
   description: Expand the the lower 4 u8 into 4 u16
 
-
+- name: AtomicByteOr
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  builtin: true
+  codegen_arch: [arm64, arm32, amd64]
+  codegen_func: "CreateIrtocIntrinsic"
+  llvm_codegen_func: EmitAtomicByteOr
+  signature:
+      ret: void
+      args: [ u64, u8 ]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Atomic bit set on byte in memory, without return

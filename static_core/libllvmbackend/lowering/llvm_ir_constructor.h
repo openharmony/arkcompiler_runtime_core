@@ -73,6 +73,7 @@ private:
     bool EmitWriteTlabStatsSafe(Inst *inst);
     bool EmitExpandU8U16(Inst *inst);
     bool EmitReverseHalfWords(Inst *inst);
+    bool EmitAtomicByteOr(Inst *inst);
 
 public:
     llvm::Value *GetMappedValue(Inst *inst, DataType::Type type);

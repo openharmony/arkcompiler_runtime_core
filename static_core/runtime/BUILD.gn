@@ -168,6 +168,7 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/gc/g1/g1-helpers.cpp",
     "mem/gc/g1/g1_analytics.cpp",
     "mem/gc/g1/g1_pause_tracker.cpp",
+    "mem/gc/g1/hot_cards.cpp",
     "mem/gc/g1/ref_updater.cpp",
     "mem/gc/g1/update_remset_task_queue.cpp",
     "mem/gc/g1/update_remset_thread.cpp",

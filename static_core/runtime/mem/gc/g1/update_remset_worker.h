@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "libpandabase/os/mutex.h"
 #include "runtime/mem/gc/card_table.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
+#include "runtime/mem/gc/g1/hot_cards.h"
 
 namespace ark::mem {
 // Forward declarations for UpdateRemsetWorker:
@@ -31,7 +32,7 @@ class UpdateRemsetWorker {
 public:
     UpdateRemsetWorker(G1GC<LanguageConfig> *gc, GCG1BarrierSet::ThreadLocalCardQueues *queue,
                        os::memory::Mutex *queueLock, size_t regionSize, bool updateConcurrent,
-                       size_t minConcurrentCardsToProcess);
+                       size_t minConcurrentCardsToProcess, size_t hotCardsProcessingFrequency);
     NO_COPY_SEMANTIC(UpdateRemsetWorker);
     NO_MOVE_SEMANTIC(UpdateRemsetWorker);
 
@@ -114,6 +115,12 @@ protected:
     /// @brief Try to process all unprocessed cards in one thread
     size_t ProcessAllCards() REQUIRES(updateRemsetLock_);
 
+    /// @brief Try to process hot cards in one thread
+    size_t ProcessHotCards() REQUIRES(updateRemsetLock_);
+
+    /// @brief Try to process cards from barriers in one thread
+    size_t ProcessCommonCards() REQUIRES(updateRemsetLock_);
+
     /**
      * @brief Notify UpdateRemsetWorker to continue process cards
      * @see SuspendWorkerForGCPause
@@ -176,6 +183,7 @@ private:
     void FillFromDefered(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(updateRemsetLock_);
     void FillFromQueue(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(updateRemsetLock_);
     void FillFromThreads(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(updateRemsetLock_);
+    void FillFromHotCards(PandaUnorderedSet<CardTable::CardPtr> *cards) REQUIRES(updateRemsetLock_);
 
     void FillFromPostBarrierBuffers(PandaUnorderedSet<CardTable::CardPtr> *cards);
     void FillFromPostBarrierBuffer(GCG1BarrierSet::G1PostBarrierRingBufferType *postWrb,
@@ -185,13 +193,19 @@ private:
 
     void DoInvalidateRegions(RegionVector *regions) REQUIRES(updateRemsetLock_);
 
+    void UpdateCardStatus(CardTable::CardPtr card);
+
+    bool NeedProcessHotCards();
+
     G1GC<LanguageConfig> *gc_ {nullptr};
     size_t regionSizeBits_;
     size_t minConcurrentCardsToProcess_;
+    size_t hotCardsProcessingFrequency_;
     GCG1BarrierSet::ThreadLocalCardQueues *queue_ GUARDED_BY(queueLock_) {nullptr};
     os::memory::Mutex *queueLock_ {nullptr};
     bool updateConcurrent_;  // used to process references in gc-thread between zygote phases
 
+    HotCards hotCards_;
     PandaUnorderedSet<CardTable::CardPtr> cards_;
     PandaVector<GCG1BarrierSet::ThreadLocalCardQueues *> postBarrierBuffers_ GUARDED_BY(postBarrierBuffersLock_);
     os::memory::Mutex postBarrierBuffersLock_;

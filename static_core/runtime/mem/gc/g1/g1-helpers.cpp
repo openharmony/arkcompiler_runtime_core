@@ -17,6 +17,7 @@
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/gc/g1/g1-helpers.h"
+#include "runtime/mem/gc/card_table-inl.h"
 
 namespace ark::mem {
 
@@ -68,9 +69,14 @@ extern "C" void PostWrbUpdateCardFuncEntrypoint(const void *from, const void *to
     }
     // StoreLoad barrier is required to guarantee order of previous reference store and card load
     arch::StoreLoadBarrier();
-    if (card->IsClear()) {
+
+    auto cardValue = card->GetCard();
+    auto status = CardTable::Card::GetStatus(cardValue);
+    if (!CardTable::Card::IsMarked(status)) {
         card->Mark();
-        barriers->Enqueue(card);
+        if (!CardTable::Card::IsHot(cardValue)) {
+            barriers->Enqueue(card);
+        }
     }
 }
 
