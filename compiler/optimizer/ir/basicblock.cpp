@@ -40,7 +40,7 @@ bool BasicBlock::IsEndBlock() const
 }
 bool BasicBlock::IsPseudoControlFlowBlock() const
 {
-    return IsStartBlock() || IsEndBlock() || IsTryBegin() || IsTryEnd();
+    return IsStartBlock() || IsEndBlock() || IsTryBegin() || IsTryEnd() || IsCatchBegin();
 }
 
 bool BasicBlock::IsLoopHeader() const

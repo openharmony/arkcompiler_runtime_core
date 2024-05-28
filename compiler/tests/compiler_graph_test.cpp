@@ -248,8 +248,8 @@ HWTEST_F(CompilerGraphTest,  graph_test_007, TestSize.Level1)
             EXPECT_NE(graph, nullptr);
             graph->DumpThrowableInsts(&out);
             std::string str = "Throwable Inst   "
-                            "22.void Intrinsic.trystglobalbyname v21, v23"
-                            "                                                         bc: 0x0000001f\n"
+                            "17.void Intrinsic.trystglobalbyname v16, v18"
+                            "                                                         bc: 0x0000001a\n"
                             "Catch handlers: BB 9\n";
             EXPECT_EQ(out.str(), str);
         });

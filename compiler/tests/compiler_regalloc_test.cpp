@@ -877,7 +877,7 @@ HWTEST_F(RegallocTest, regalloc_test_017, TestSize.Level1)
                     param->SetReg(reg++);
                     param->AppendRange({0, 10});
                     param->StartFrom(0);
-                    EXPECT_EQ(param->GetRanges().size(), 1);
+                    EXPECT_EQ(param->GetRanges().size(), 2);
                     EXPECT_EQ(param->GetReg(), reg - 1);
                     EXPECT_NE(param->SplitAt(1, graph->GetAllocator()), nullptr);
                     param->SetLocation(Location::MakeConstant(0));
@@ -1052,7 +1052,7 @@ HWTEST_F(RegallocTest, regalloc_test_020, TestSize.Level1)
 HWTEST_F(RegallocTest, regalloc_test_021, TestSize.Level1)
 {
     std::string pfile_name = GRAPH_TEST_ABC_DIR "regallocTest.abc";
-    const char *test_method_name = "func4";
+    const char *test_method_name = "#*#func4";
     bool status = false;
     auto pfile = panda_file::OpenPandaFile(pfile_name);
     for (uint32_t id : pfile->GetClasses()) {

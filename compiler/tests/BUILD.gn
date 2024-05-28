@@ -38,7 +38,6 @@ test_js_path = "//arkcompiler/runtime_core/compiler/tests/js/"
 # graph interface unit tests
 graph_test_js_files = [
   "cleanUpTest",
-  "nestedTryCatch",
   "regallocTest",
   "regallocTryTest",
   "simpleTryCatch",
@@ -61,7 +60,10 @@ foreach(file, graph_test_js_files) {
   }
 }
 
-graph_test_js_files_un_opt = [ "branchElimination" ]
+graph_test_js_files_un_opt = [
+  "branchElimination",
+  "nestedTryCatch",
+]
 
 foreach(file, graph_test_js_files_un_opt) {
   es2abc_gen_abc("gen_${file}_abc") {
@@ -86,6 +88,7 @@ host_unittest_action("GraphInterfaceTest") {
     "compiler_graph_test.cpp",
     "compiler_inst_test.cpp",
     "compiler_optimizations_test.cpp",
+    "compiler_regalloc_test.cpp",
     "dominators_tree_new_test.cpp",
     "dump_test.cpp",
     "graph_checker_test.cpp",

@@ -105,7 +105,7 @@ HWTEST_F(DumpTest, dump_test_002, TestSize.Level1)
         EXPECT_EQ(data.str(), test_data);
         data.clear();
         data.str("");
-        test_data = "prop: end, bc: 0x0000002d\n";
+        test_data = "prop: end, bc: 0x00000026\n";
         BlockProps(graph->GetEndBlock(), &data);
         EXPECT_EQ(data.str(), test_data);
         Loop loop(graph->GetAllocator(), graph->GetEndBlock(), 1);
@@ -117,17 +117,17 @@ HWTEST_F(DumpTest, dump_test_002, TestSize.Level1)
         loop3.SetAsRoot();
         data.clear();
         data.str("");
-        test_data = "prop: end, head, loop 1, bc: 0x0000002d\n";
+        test_data = "prop: end, head, loop 1, bc: 0x00000026\n";
         BlockProps(graph->GetEndBlock(), &data);
         EXPECT_EQ(data.str(), test_data);
         data.clear();
         data.str("");
-        test_data = "prop: loop 0, try_begin (id 0), bc: 0x0000001a\n"
-                    "prop: loop (irreducible) 2, try (id 0), bc: 0x0000001a\n"
-                    "prop: try_end (id 0), bc: 0x00000023\n"
-                    "prop: catch_begin, catch, bc: 0x00000025\n"
-                    "prop: catch_begin, catch, bc: 0x00000025\n"
-                    "prop: catch, bc: 0x00000025\n";
+        test_data = "prop: loop 0, try_begin (id 0), bc: 0x00000015\n"
+                    "prop: loop (irreducible) 2, try (id 0), bc: 0x00000015\n"
+                    "prop: try_end (id 0), bc: 0x0000001e\n"
+                    "prop: catch_begin, catch, bc: 0x00000020\n"
+                    "prop: catch_begin, catch, bc: 0x00000020\n"
+                    "prop: catch, bc: 0x00000020\n";
         for (auto block : graph->GetBlocksRPO()) {
             if (block->IsTry()) {
                 block->SetLoop(&loop1);
@@ -151,7 +151,7 @@ HWTEST_F(DumpTest, dump_test_002, TestSize.Level1)
         }
         auto value1 = PcToString(graph->GetEndBlock()->GetGuestPc(), graph->GetLocalAllocator());
         std::string str = value1.data();
-        EXPECT_EQ(str, "bc: 0x0000002d");
+        EXPECT_EQ(str, "bc: 0x00000026");
         EXPECT_EQ(data.str(), test_data);
     });
     EXPECT_TRUE(status);
@@ -612,7 +612,8 @@ HWTEST_F(DumpTest, dump_test_014, TestSize.Level1)
 
         EXPECT_NE(graph, nullptr);
         std::stringstream data;
-        std::string test_data = "       Intrinsic.definefunc       Intrinsic.stglobalvar        Intrinsic.definefunc"
+        std::string test_data = "       Intrinsic.definefunc"
+                                "       Intrinsic.stglobalvar        Intrinsic.definefunc"
                                 "       Intrinsic.stglobalvar Intrinsic.trystglobalbyname Intrinsic.tryldglobalbyname"
                                 "       Intrinsic.ldundefined   Intrinsic.returnundefined ";
         for (auto bb : graph->GetBlocksRPO()) {
@@ -751,59 +752,59 @@ HWTEST_F(DumpTest, dump_test_018, TestSize.Level1)
         std::string test_data = "Method: L_GLOBAL;::func_main_0\n\n"
                                 "BB 7\n"
                                 "prop: start, bc: 0x00000000\n"
-                                "   10.any  Parameter                  "
+                                "    5.any  Parameter                  "
                                 "arg 0                                                           \n ->  [u64]\n"
-                                "   11.any  Parameter                  "
+                                "    6.any  Parameter                  "
                                 "arg 1                                                           \n ->  [u64]\n"
-                                "   12.any  Parameter                  "
+                                "    7.any  Parameter                  "
                                 "arg 2                                                           \n ->  [u64]\n"
-                                "   21.i32  Constant                   0x1 -> "
-                                "(v22)                                                    \n"
+                                "   16.i32  Constant                   0x1 -> "
+                                "(v17)                                                    \n"
                                 "succs: [bb 0]\n\n"
                                 "BB 0  preds: [bb 7]\n"
                                 "prop: bc: 0x00000000\n"
-                                "   13.any  Intrinsic.definefunc        ss14 -> (v15)"
+                                "    8.any  Intrinsic.definefunc        ss9 -> (v10)"
+                                "                                                    \n"
+                                "   10.void Intrinsic.stglobalvar       v8, ss11"
+                                "                                                        \n"
+                                "   12.any  Intrinsic.definefunc        ss13 -> (v14)"
                                 "                                                   \n"
-                                "   15.void Intrinsic.stglobalvar       v13, ss16"
-                                "                                                       \n"
-                                "   17.any  Intrinsic.definefunc        ss18 -> (v19)"
-                                "                                                   \n"
-                                "   19.void Intrinsic.stglobalvar       v17, ss20"
+                                "   14.void Intrinsic.stglobalvar       v12, ss15"
                                 "                                                       \n"
                                 "succs: [bb 2]\n\n"
                                 "BB 2  preds: [bb 0]\n"
-                                "prop: try_begin (id 0), bc: 0x0000001a\n"
+                                "prop: try_begin (id 0), bc: 0x00000015\n"
                                 "    0.     Try                                   "
                                 "                                                     \n"
                                 "succs: [bb 4, bb 9]\n\n"
                                 "BB 4  preds: [bb 2]\n"
-                                "prop: try (id 0), bc: 0x0000001a\n"
-                                "   22.void Intrinsic.trystglobalbyname v21, ss23"
+                                "prop: try (id 0), bc: 0x00000015\n"
+                                "   17.void Intrinsic.trystglobalbyname v16, ss18"
                                 "                                                       \n"
                                 "succs: [bb 3]\n\n"
                                 "BB 3  preds: [bb 4]\n"
-                                "prop: try_end (id 0), bc: 0x00000023\n"
+                                "prop: try_end (id 0), bc: 0x0000001e\n"
                                 "succs: [bb 5, bb 9]\n\n"
                                 "BB 9  preds: [bb 2, bb 3]\n"
-                                "prop: catch_begin, catch, bc: 0x00000025\n"
+                                "prop: catch_begin, catch, bc: 0x00000020\n"
                                 "succs: [bb 6]\n\n"
                                 "BB 6  preds: [bb 9]\n"
-                                "prop: catch, bc: 0x00000025\n"
-                                "   24.any  Intrinsic.tryldglobalbyname ss25                        "
+                                "prop: catch, bc: 0x00000020\n"
+                                "   19.any  Intrinsic.tryldglobalbyname ss20                        "
                                 "                                    \n"
                                 "succs: [bb 1]\n\n"
                                 "BB 5  preds: [bb 3]\n"
-                                "prop: bc: 0x00000023\n"
+                                "prop: bc: 0x0000001e\n"
                                 "succs: [bb 1]\n\n"
                                 "BB 1  preds: [bb 5, bb 6]\n"
-                                "prop: bc: 0x0000002b\n"
-                                "   33.any  Intrinsic.ldundefined       ss34"
+                                "prop: bc: 0x00000024\n"
+                                "   25.any  Intrinsic.ldundefined       ss26"
                                 "                                                            \n"
-                                "   35.void Intrinsic.returnundefined   ss36"
+                                "   27.void Intrinsic.returnundefined   ss28"
                                 "                                                            \n"
                                 "succs: [bb 8]\n\n"
                                 "BB 8  preds: [bb 1]\n"
-                                "prop: end, bc: 0x0000002d\n\n";
+                                "prop: end, bc: 0x00000026\n\n";
         graph->Dump(&out);
         EXPECT_TRUE(graph->HasEndBlock());
         EXPECT_EQ(out.str(), test_data);
@@ -831,59 +832,59 @@ HWTEST_F(DumpTest, dump_test_019, TestSize.Level1)
         std::stringstream out;
         std::string test_data = "BB 7\n"
                                 "prop: start, bc: 0x00000000\n"
-                                "   10.any  Parameter                  arg 0"
+                                "    5.any  Parameter                  arg 0"
                                 "                                                           \n ->  [u64]\n"
-                                "   11.any  Parameter                  arg 1"
+                                "    6.any  Parameter                  arg 1"
                                 "                                                           \n ->  [u64]\n"
-                                "   12.any  Parameter                  arg 2"
+                                "    7.any  Parameter                  arg 2"
                                 "                                                           \n ->  [u64]\n"
-                                "   21.i32  Constant                   0x1 -> (v22)"
+                                "   16.i32  Constant                   0x1 -> (v17)"
                                 "                                                    \n"
                                 "succs: [bb 0]\n"
                                 "BB 0  preds: [bb 7]\n"
                                 "prop: bc: 0x00000000\n"
-                                "   13.any  Intrinsic.definefunc        ss14 -> (v15)"
+                                "    8.any  Intrinsic.definefunc        ss9 -> (v10)"
+                                "                                                    \n"
+                                "   10.void Intrinsic.stglobalvar       v8, ss11"
+                                "                                                        \n"
+                                "   12.any  Intrinsic.definefunc        ss13 -> (v14)"
                                 "                                                   \n"
-                                "   15.void Intrinsic.stglobalvar       v13, ss16"
-                                "                                                       \n"
-                                "   17.any  Intrinsic.definefunc        ss18 -> (v19)"
-                                "                                                   \n"
-                                "   19.void Intrinsic.stglobalvar       v17, ss20"
+                                "   14.void Intrinsic.stglobalvar       v12, ss15"
                                 "                                                       \n"
                                 "succs: [bb 2]\n"
                                 "BB 2  preds: [bb 0]\n"
-                                "prop: try_begin (id 0), bc: 0x0000001a\n"
+                                "prop: try_begin (id 0), bc: 0x00000015\n"
                                 "    0.     Try                                                       "
                                 "                                 \n"
                                 "succs: [bb 4, bb 9]\n"
                                 "BB 4  preds: [bb 2]\n"
-                                "prop: try (id 0), bc: 0x0000001a\n"
-                                "   22.void Intrinsic.trystglobalbyname v21, ss23"
+                                "prop: try (id 0), bc: 0x00000015\n"
+                                "   17.void Intrinsic.trystglobalbyname v16, ss18"
                                 "                                                       \n"
                                 "succs: [bb 3]\n"
                                 "BB 3  preds: [bb 4]\n"
-                                "prop: try_end (id 0), bc: 0x00000023\n"
+                                "prop: try_end (id 0), bc: 0x0000001e\n"
                                 "succs: [bb 5, bb 9]\n"
                                 "BB 9  preds: [bb 2, bb 3]\n"
-                                "prop: catch_begin, catch, bc: 0x00000025\n"
+                                "prop: catch_begin, catch, bc: 0x00000020\n"
                                 "succs: [bb 6]\n"
                                 "BB 6  preds: [bb 9]\n"
-                                "prop: catch, bc: 0x00000025\n"
-                                "   24.any  Intrinsic.tryldglobalbyname ss25"
+                                "prop: catch, bc: 0x00000020\n"
+                                "   19.any  Intrinsic.tryldglobalbyname ss20"
                                 "                                                            \n"
                                 "succs: [bb 1]\n"
                                 "BB 5  preds: [bb 3]\n"
-                                "prop: bc: 0x00000023\n"
+                                "prop: bc: 0x0000001e\n"
                                 "succs: [bb 1]\n"
                                 "BB 1  preds: [bb 5, bb 6]\n"
-                                "prop: bc: 0x0000002b\n"
-                                "   33.any  Intrinsic.ldundefined       ss34"
+                                "prop: bc: 0x00000024\n"
+                                "   25.any  Intrinsic.ldundefined       ss26"
                                 "                                                            \n"
-                                "   35.void Intrinsic.returnundefined   ss36"
+                                "   27.void Intrinsic.returnundefined   ss28"
                                 "                                                            \n"
                                 "succs: [bb 8]\n"
                                 "BB 8  preds: [bb 1]\n"
-                                "prop: end, bc: 0x0000002d\n";
+                                "prop: end, bc: 0x00000026\n";
         for (auto bb : graph->GetBlocksRPO()) {
             bb->Dump(&out);
         }

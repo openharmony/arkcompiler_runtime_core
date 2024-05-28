@@ -46,7 +46,7 @@ bool MoveConstants::RunImpl()
 
 bool IsBlockSuitable(const BasicBlock *bb)
 {
-    return (!bb->IsLoopValid() || bb->GetLoop()->IsRoot()) && !bb->IsTryBegin();
+    return (!bb->IsLoopValid() || bb->GetLoop()->IsRoot()) && !bb->IsTryBegin() && !bb->IsCatchBegin();
 }
 
 void MoveConstants::MoveFromStartBlock(Inst *inst)
