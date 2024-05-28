@@ -31,6 +31,13 @@ ohos_source_set("libarkziparchive_static") {
 
   deps = [ "$ark_root/libpandabase:libarkbase_static" ]
 
+  if (is_arkui_x) {
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/zlib:libz",
+    ]
+  }
+
   external_deps = [ sdk_libc_secshared_dep ]
 
   if (ark_standalone_build || is_arkui_x) {
@@ -72,6 +79,13 @@ ohos_source_set("libarkziparchive_frontend_set_static") {
   ]
 
   deps = [ "$ark_root/libpandabase:libarkbase_frontend_static" ]
+
+  if (is_arkui_x) {
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/zlib:libz",
+    ]
+  }
 
   external_deps = [
     "zlib:libz",
