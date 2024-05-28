@@ -36,6 +36,7 @@ source_set("libdprof_static") {
   ]
 
   deps = [ "$ark_root/libpandabase:libarktsbase" ]
+  external_deps = [ sdk_libc_secshared_dep ]
 }
 
 ohos_static_library("libdprof") {

@@ -40,6 +40,8 @@ ohos_executable("verifier_bin") {
     "$ark_root/runtime:libarkruntime",
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   output_name = "verifier"
   install_enable = true
   part_name = ark_part_name

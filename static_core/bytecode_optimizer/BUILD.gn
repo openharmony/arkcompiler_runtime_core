@@ -86,6 +86,8 @@ ohos_shared_library("libarktsbytecodeopt") {
 
   deps += plugin_bytecodeopt_deps
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   output_extension = "so"
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
@@ -114,6 +116,9 @@ ohos_static_library("libarktsbytecodeopt_frontend_static") {
   ]
 
   deps += plugin_bytecodeopt_deps
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }
