@@ -107,9 +107,9 @@ spec/rest-params/RestParamsTest_PassLambdas_1.ets
 ### Issue 14564 end
 ### End Of Feature: Rest Params
 ### undefined functionality is not implemented
-spec/conditional-expression/nullish_expr/loop/undefined-expression-loop-while.ets
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/nullish_expr/loop/undefined-expression-loop-while.ets
 ### issue 14299 (incorrect behavior for tests with boxed type like new Short(0))
-spec/conditional-expression/numeric/expr/numeric-double-object-zero-expression.ets
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-double-object-zero-expression.ets
 ### Trailing lambda issues
 ### Valid cases but not supported features
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_01.ets
