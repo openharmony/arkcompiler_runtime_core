@@ -79,18 +79,28 @@ public:
         if (LIKELY(newTasksCallback_ != nullptr)) {
             newTasksCallback_(properties, 1UL);
         }
+        AddTaskWithoutNewTaskCallbackExecution(std::move(task));
+        return Size();
+    }
+
+    /**
+     * @brief The method adds a task to the queue without execution the new task callback. This method should only be
+     * used with tasks that have already triggered this callback.
+     * @param task: instance of Task
+     */
+    void AddTaskWithoutNewTaskCallbackExecution(Task &&task) override
+    {
         // Push task in one of internal queues based on its TaskExecutionMode
         PushTaskToInternalQueues(std::move(task));
         // Signal workers that should execute new task
         if (signalWorkersCallback_ != nullptr) {
             signalWorkersCallback_();
         }
-        return Size();
     }
 
     /**
-     * @brief Pops task from task queue. Operation is thread-safe. The method will wait new task if queue is empty and
-     * method WaitForQueueEmptyAndFinish has not been executed. Otherwise it will return std::nullopt.
+     * @brief Pops task from task queue. Operation is thread-safe. The method will wait a new task if queue is empty
+     * and method WaitForQueueEmptyAndFinish has not been executed. Otherwise it will return std::nullopt.
      * This method should be used only in TaskScheduler
      */
     [[nodiscard]] std::optional<Task> PopTask() override
@@ -100,7 +110,7 @@ public:
 
     /**
      * @brief Pops task from task queue with specified execution mode. Operation is thread-safe. The method will wait
-     * new task if queue with specified execution mode is empty and method WaitForQueueEmptyAndFinish has not been
+     * a new task if queue with specified execution mode is empty and method WaitForQueueEmptyAndFinish has not been
      * executed. Otherwise it will return std::nullopt.
      * This method should be used only in TaskScheduler!
      * @param mode - execution mode of task that we want to pop.

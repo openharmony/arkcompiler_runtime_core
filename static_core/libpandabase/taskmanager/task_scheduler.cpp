@@ -129,28 +129,42 @@ void TaskScheduler::StealTaskFromOtherWorker(WorkerThread *taskReceiver)
 bool TaskScheduler::FillWithTasks(WorkerThread *worker)
 {
     ASSERT(start_);
-    os::memory::LockHolder lockHolder(taskSchedulerStateLock_);
-    // If queue if empty we should go and wait until new task comes
-    if (AreQueuesEmpty()) {
+    std::queue<Task> readyTasks;
+    {
+        os::memory::LockHolder lockHolder(taskSchedulerStateLock_);
         // We increment counter of waiters to signal them in future
-        // Atomic with acq_rel order reason: sync for counter
-        waitWorkersCount_.fetch_add(1, std::memory_order_acq_rel);
-        while (AreQueuesEmpty()) {
-            if (finish_) {
-                LOG(DEBUG, TASK_MANAGER) << worker->GetWorkerName() << ": finish execution";
+        if (AreQueuesEmpty() && !waitList_.HaveReadyValue()) {
+            if (!WaitUntilNewTasks()) {
                 return true;
             }
-            queuesWaitCondVar_.TimedWait(&taskSchedulerStateLock_, TASK_WAIT_TIMEOUT);
         }
-        // Atomic with acq_rel order reason: sync for counter
-        waitWorkersCount_.fetch_sub(1, std::memory_order_acq_rel);
+        if (!waitList_.HaveReadyValue()) {
+            // Use selector to choose next queue to pop task
+            auto selectedQueue = selector_.SelectQueue();
+            ASSERT(selectedQueue != INVALID_TASKQUEUE_ID);
+            // Getting task from selected queue
+            PutTasksInWorker(worker, selectedQueue);
+            return false;
+        }
+        // Wait list have task that should be added in queues. So worker firstly should add this task in local queue
+        // under lock-holder. Next in should add them in TaskQueues
+        PutWaitTaskInLocalQueue(readyTasks);
     }
-    // Use selector to choose next queue to pop task
-    auto selectedQueue = selector_.SelectQueue();
-    ASSERT(selectedQueue != INVALID_TASKQUEUE_ID);
-    // Getting task from selected queue
-    PutTasksInWorker(worker, selectedQueue);
+    // Worker puts tasks to TaskQueues without lock-holder to avoid unnecessary waiting of other workers
+    PutTaskInTaskQueues(readyTasks);
     return false;
+}
+
+bool TaskScheduler::WaitUntilNewTasks()
+{
+    // Atomic with acq_rel order reason: sync for counter
+    waitWorkersCount_.fetch_add(1, std::memory_order_acq_rel);
+    while (AreQueuesEmpty() && !waitList_.HaveReadyValue() && !finish_) {
+        queuesWaitCondVar_.TimedWait(&taskSchedulerStateLock_, TASK_WAIT_TIMEOUT);
+    }
+    // Atomic with acq_rel order reason: sync for counter
+    waitWorkersCount_.fetch_sub(1, std::memory_order_acq_rel);
+    return !finish_;
 }
 
 size_t TaskScheduler::PutTasksInWorker(WorkerThread *worker, TaskQueueId selectedQueue)
@@ -376,6 +390,52 @@ internal::SchedulableTaskQueueInterface *TaskScheduler::GetQueue(TaskQueueId id)
     }
     std::tie(std::ignore, queue) = *taskQueuesIterator;
     return queue;
+}
+
+WaiterId TaskScheduler::AddTaskToWaitListWithTimeout(Task &&task, uint64_t time)
+{
+    os::memory::LockHolder lockHolder(taskSchedulerStateLock_);
+    this->IncrementCounterOfAddedTasks(task.GetTaskProperties(), 1U);
+    return waitList_.AddValueToWait(std::move(task), time);
+}
+
+WaiterId TaskScheduler::AddTaskToWaitList(Task &&task)
+{
+    // Use adding with max time as possible, wait list will understand that it should set max possible time
+    return AddTaskToWaitListWithTimeout(std::move(task), std::numeric_limits<uint64_t>().max());
+}
+
+void TaskScheduler::PutWaitTaskInLocalQueue(LocalTaskQueue &queue)
+{
+    for (auto task = waitList_.GetReadyValue(); task.has_value(); task = waitList_.GetReadyValue()) {
+        queue.push(std::move(task.value()));
+    }
+}
+
+void TaskScheduler::PutTaskInTaskQueues(LocalTaskQueue &queue)
+{
+    while (!queue.empty()) {
+        Task task = std::move(queue.front());
+        queue.pop();
+        auto prop = task.GetTaskProperties();
+        auto *taskQueue = GetQueue({prop.GetTaskType(), prop.GetVMType()});
+        taskQueue->AddTaskWithoutNewTaskCallbackExecution(std::move(task));
+    }
+}
+
+void TaskScheduler::SignalWaitList(WaiterId waiterId)
+{
+    std::optional<Task> task;
+    {
+        os::memory::LockHolder lockHolder(taskSchedulerStateLock_);
+        task = waitList_.GetValueById(waiterId);
+    }
+    if (!task.has_value()) {
+        return;
+    }
+    auto prop = task->GetTaskProperties();
+    auto *queue = GetQueue({prop.GetTaskType(), prop.GetVMType()});
+    queue->AddTaskWithoutNewTaskCallbackExecution(std::move(task.value()));
 }
 
 TaskScheduler::~TaskScheduler()

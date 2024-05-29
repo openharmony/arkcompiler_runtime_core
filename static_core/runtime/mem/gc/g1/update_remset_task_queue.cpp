@@ -30,6 +30,35 @@ UpdateRemsetTaskQueue<LanguageConfig>::UpdateRemsetTaskQueue(G1GC<LanguageConfig
     : UpdateRemsetWorker<LanguageConfig>(gc, queue, queueLock, regionSize, updateConcurrent,
                                          minConcurrentCardsToProcess, hotCardsProcessingFrequency)
 {
+    taskRunner_ = [this]() {
+        os::memory::LockHolder lh(this->updateRemsetLock_);
+        taskRunnerWaiterId_ = taskmanager::INVALID_WAITER_ID;
+        ASSERT(this->hasTaskInTaskmanager_);
+
+        auto iterationFlag = this->GetFlag();
+        if (iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_STOP_WORKER) {
+            this->hasTaskInTaskmanager_ = false;
+            return;
+        }
+
+        if (iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_PAUSED_BY_GC_THREAD ||
+            iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_INVALIDATE_REGIONS) {
+            this->AddToWaitList();
+            return;
+        }
+
+        ASSERT(!this->pausedByGcThread_);
+        auto processedCards = this->ProcessAllCards();
+        if (processedCards < this->GetMinConcurrentCardsToProcess()) {
+            // need to add to wait list with timeout
+            this->AddToWaitListWithTimeout();
+            return;
+        }
+
+        // After cards processing add new cards processing task to task manager
+        this->hasTaskInTaskmanager_ = false;
+        this->StartProcessCards();
+    };
 }
 
 template <class LanguageConfig>
@@ -42,21 +71,8 @@ void UpdateRemsetTaskQueue<LanguageConfig>::StartProcessCards()
     if (hasTaskInTaskmanager_) {
         return;
     }
-    auto updateRemsetRunner = [this]() {
-        os::memory::LockHolder lh(this->updateRemsetLock_);
-        ASSERT(this->hasTaskInTaskmanager_);
-        // GC notified us to pause cards processing, or we are destroing runtime and notifiy STOP_WORKER
-        if (!this->IsFlag(UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_PROCESS_CARD)) {
-            this->hasTaskInTaskmanager_ = false;
-            return;
-        }
-        ASSERT(!this->pausedByGcThread_);
-        this->ProcessAllCards();
-        // After cards processing add new cards processing task to task manager
-        this->hasTaskInTaskmanager_ = false;
-        this->StartProcessCards();
-    };
-    auto processCardsTask = taskmanager::Task::Create(UPDATE_REMSET_TASK_PROPERTIES, updateRemsetRunner);
+    ASSERT(taskRunner_);
+    auto processCardsTask = taskmanager::Task::Create(UPDATE_REMSET_TASK_PROPERTIES, taskRunner_);
     hasTaskInTaskmanager_ = true;
     this->GetGC()->GetWorkersTaskQueue()->AddTask(std::move(processCardsTask));
 }
@@ -64,7 +80,11 @@ void UpdateRemsetTaskQueue<LanguageConfig>::StartProcessCards()
 template <class LanguageConfig>
 void UpdateRemsetTaskQueue<LanguageConfig>::ContinueProcessCards()
 {
-    StartProcessCards();
+    if (taskRunnerWaiterId_ != taskmanager::INVALID_WAITER_ID) {
+        taskmanager::TaskScheduler::GetTaskScheduler()->SignalWaitList(taskRunnerWaiterId_);
+    } else {
+        StartProcessCards();
+    }
 }
 
 template <class LanguageConfig>
@@ -81,6 +101,25 @@ void UpdateRemsetTaskQueue<LanguageConfig>::DestroyWorkerImpl()
     taskmanager::TaskScheduler::GetTaskScheduler()->WaitForFinishAllTasksWithProperties(UPDATE_REMSET_TASK_PROPERTIES);
     [[maybe_unused]] os::memory::LockHolder lh(this->updateRemsetLock_);
     ASSERT(!hasTaskInTaskmanager_);
+}
+
+template <class LanguageConfig>
+void UpdateRemsetTaskQueue<LanguageConfig>::AddToWaitList()
+{
+    ASSERT(taskRunner_);
+    auto processCardsTask = taskmanager::Task::Create(UPDATE_REMSET_TASK_PROPERTIES, taskRunner_);
+    taskRunnerWaiterId_ =
+        taskmanager::TaskScheduler::GetTaskScheduler()->AddTaskToWaitList(std::move(processCardsTask));
+}
+
+template <class LanguageConfig>
+void UpdateRemsetTaskQueue<LanguageConfig>::AddToWaitListWithTimeout()
+{
+    ASSERT(taskRunner_);
+    auto processCardsTask = taskmanager::Task::Create(UPDATE_REMSET_TASK_PROPERTIES, taskRunner_);
+    static constexpr uint64_t TIMEOUT_MS = 1U;
+    taskRunnerWaiterId_ = taskmanager::TaskScheduler::GetTaskScheduler()->AddTaskToWaitListWithTimeout(
+        std::move(processCardsTask), TIMEOUT_MS);
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(UpdateRemsetTaskQueue);

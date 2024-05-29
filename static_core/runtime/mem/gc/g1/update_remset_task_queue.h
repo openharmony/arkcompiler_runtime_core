@@ -19,6 +19,7 @@
 #include "runtime/mem/gc/g1/update_remset_worker.h"
 
 #include "libpandabase/taskmanager/task.h"
+#include "libpandabase/taskmanager/utils/wait_list.h"
 
 namespace ark::mem {
 
@@ -39,14 +40,27 @@ private:
 
     void ContinueProcessCards() REQUIRES(this->updateRemsetLock_) final;
 
-    /// @brief Add a new process cards task in task manager if such task does not exist, do nothing otherwise
+    /**
+     * @brief Add a new process cards task in task manager if such task does not exist. Else if taskRunnerWaiterId_ is
+     * valid, signal wait list to execute task.
+     */
     void StartProcessCards() REQUIRES(this->updateRemsetLock_);
+
+    /// @brief Add a new process cards task in task manager wait list with timeout.
+    void AddToWaitListWithTimeout() REQUIRES(this->updateRemsetLock_);
+
+    /// @brief Add a new process cards task in task manager wait list. @returns id of waiter in wait list
+    void AddToWaitList() REQUIRES(this->updateRemsetLock_);
 
     /* TaskManager specific variables */
     static constexpr taskmanager::TaskProperties UPDATE_REMSET_TASK_PROPERTIES = {
         taskmanager::TaskType::GC, taskmanager::VMType::STATIC_VM, taskmanager::TaskExecutionMode::FOREGROUND};
 
     bool hasTaskInTaskmanager_ GUARDED_BY(this->updateRemsetLock_) {false};
+
+    std::function<void()> taskRunner_ {nullptr};
+
+    taskmanager::WaiterId taskRunnerWaiterId_ GUARDED_BY(this->updateRemsetLock_) {taskmanager::INVALID_WAITER_ID};
 };
 
 }  // namespace ark::mem

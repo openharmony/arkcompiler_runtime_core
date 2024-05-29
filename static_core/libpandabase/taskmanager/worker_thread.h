@@ -64,45 +64,24 @@ public:
      * @brief register all workers in local queue
      * @param workers - ref to vector with all workers
      */
-    void RegisterAllWorkersInLocalQueue(const std::vector<WorkerThread *> &workers)
-    {
-        for (auto *worker : workers) {
-            if (worker == this) {
-                continue;
-            }
-            perWorkerPopId_[worker] = localQueue_.RegisterConsumer();
-        }
-    }
+    void RegisterAllWorkersInLocalQueue(const std::vector<WorkerThread *> &workers);
 
-    std::string GetWorkerName() const
-    {
-        return name_;
-    }
+    std::string GetWorkerName() const;
 
     /**
      * @brief method returns id of worker to pop tasks.
      * @param worker: pointer on WorkerThread which id you want to get. It should be added with
      * RegisterAllWorkersInLocalQueue(...) method
      */
-    size_t GetLocalWorkerQueuePopId(WorkerThread *worker)
-    {
-        return perWorkerPopId_[worker];
-    }
+    size_t GetLocalWorkerQueuePopId(WorkerThread *worker) const;
 
     /// @brief method returns id of TaskScheduler.
-    size_t GetLocalWorkerQueueSchedulerPopId()
-    {
-        return schedulerPopId_;
-    }
+    size_t GetLocalWorkerQueueSchedulerPopId() const;
 
     /// @brief method starts WorkerLoop. All workers should be registered before Start executing
     void Start();
 
-    void SetStolenTask(Task &&stolenTask)
-    {
-        ASSERT(stolenTask_.IsInvalid());
-        stolenTask_ = std::move(stolenTask);
-    }
+    void SetStolenTask(Task &&stolenTask);
 
     /**
      * @brief Fills with tasks other WorkerThread.
@@ -138,12 +117,11 @@ public:
         return count;
     }
 
-    void TryDeleteRetiredPtrs()
-    {
-        localQueue_.TryDeleteRetiredPtrs();
-    }
+    void TryDeleteRetiredPtrs();
 
 private:
+    void ExecuteTask(Task *task);
+
     /// @brief Main workers algorithm
     void WorkerLoop();
 
