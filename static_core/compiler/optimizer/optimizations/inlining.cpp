@@ -1000,6 +1000,7 @@ void Inlining::ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *cal
             }
         }
     } else {
+        ASSERT(!needBarriers);
         // Otherwise we remove call instruction
         auto saveState = callInst->GetSaveState();
         // Remove SaveState if it has only Call instruction in the users
