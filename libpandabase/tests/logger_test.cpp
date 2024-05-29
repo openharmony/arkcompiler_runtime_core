@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "os/file.h"
 #include "os/thread.h"
 #include "utils/logger.h"
 #include "utils/string_helpers.h"
@@ -31,7 +32,9 @@ class LoggerTest : public testing::Test {
 public:
     static void SetUpTestSuite()
     {
+#ifndef HOST_UT
         system("mount -o rw,remount /");
+#endif
     }
 };
 
@@ -247,6 +250,9 @@ HWTEST_F(LoggerTest, FileLogging, testing::ext::TestSize.Level0)
 {
     uint32_t tid = os::thread::GetCurrentThreadId();
     std::string log_filename = helpers::string::Format("/tmp/gtest_panda_logger_file_%06x", tid);
+
+    auto file = os::file::Open(log_filename, os::file::Mode::READWRITECREATE);
+    ASSERT_TRUE(file.IsValid());
 
     Logger::InitializeFileLogging(log_filename, Logger::Level::INFO,
                                   panda::Logger::ComponentMask().set(Logger::Component::COMMON));

@@ -14,6 +14,7 @@
  */
 
 #include "logger.h"
+#include "os/filesystem.h"
 #include "os/thread.h"
 #include "string_helpers.h"
 #include "generated/base_options.h"
@@ -203,7 +204,15 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, con
         return;
     }
 
-    std::ofstream stream(log_file);
+    auto path = os::GetAbsolutePath(log_file);
+    if (path == "") {
+        logger = new StderrLogger(level, component_mask);
+        std::string msg = helpers::string::Format("Fallback to stderr logging: resolve file path error");
+        logger->LogLineInternal(Level::ERROR, Component::COMMON, msg);
+        return;
+    }
+
+    std::ofstream stream(path);
     if (stream) {
         if (is_fast_logging) {
             logger = new FastFileLogger(std::move(stream), level, component_mask);

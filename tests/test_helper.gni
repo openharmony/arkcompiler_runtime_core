@@ -30,6 +30,8 @@ template("host_unittest_action") {
   action("${_target_name_}Action") {
     testonly = true
 
+    defines = [ "HOST_UT" ]
+
     _host_test_target_ = ":${_target_name_}(${host_toolchain})"
     _root_out_dir_ = get_label_info(_host_test_target_, "root_out_dir")
 
