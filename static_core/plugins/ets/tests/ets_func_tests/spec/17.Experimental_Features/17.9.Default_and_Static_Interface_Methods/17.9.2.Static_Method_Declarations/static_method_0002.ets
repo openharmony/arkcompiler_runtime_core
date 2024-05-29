@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*---
+ desc: 17.9.1 Experimental Features
+ tags: []
+ ---*/
+
+
+interface I1  {
+    static foo1(): int {return 11;}
+    static bar1(): int {return 12;}
+}
+
+interface I2  {
+    static foo2(): int {return 21;}
+    static bar2(): int {return 22;}
+}
+
+
+class C implements I1, I2 {
+}
+
+function main() : int {
+    assert C.foo1() == 11;
+    assert C.bar1() == 12;
+    assert C.foo2() == 21;
+    assert C.bar2() == 22;
+    return 0;
+}
