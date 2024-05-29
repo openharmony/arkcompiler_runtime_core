@@ -753,6 +753,16 @@ void EncodeVisitor::VisitDeoptimizeIf(GraphVisitor *visitor, Inst *inst)
     enc->GetEncoder()->EncodeJump(slowPath->GetLabel(), src, Condition::NE);
 }
 
+template <typename T>
+void EncodeJump(Encoder *encoder, LabelHolder::LabelId label, Reg src0, T src1, Condition cc)
+{
+    if (IsTestCc(cc)) {
+        encoder->EncodeJumpTest(label, src0, src1, cc);
+    } else {
+        encoder->EncodeJump(label, src0, src1, cc);
+    }
+}
+
 void EncodeVisitor::VisitDeoptimizeCompare(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
@@ -762,7 +772,7 @@ void EncodeVisitor::VisitDeoptimizeCompare(GraphVisitor *visitor, Inst *inst)
     auto src1 = enc->GetCodegen()->ConvertRegister(deopt->GetSrcReg(1), deopt->GetOperandsType());
     auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(
         inst, inst->CastToDeoptimizeCompare()->GetDeoptimizeType());
-    enc->GetEncoder()->EncodeJump(slowPath->GetLabel(), src0, src1, enc->GetCodegen()->ConvertCc(deopt->GetCc()));
+    EncodeJump(enc->GetEncoder(), slowPath->GetLabel(), src0, src1, enc->GetCodegen()->ConvertCc(deopt->GetCc()));
 }
 
 void EncodeVisitor::VisitDeoptimizeCompareImm(GraphVisitor *visitor, Inst *inst)
@@ -773,8 +783,10 @@ void EncodeVisitor::VisitDeoptimizeCompareImm(GraphVisitor *visitor, Inst *inst)
     ASSERT(deopt->GetOperandsType() != DataType::NO_TYPE);
     auto cc = deopt->GetCc();
     auto src0 = enc->GetCodegen()->ConvertRegister(deopt->GetSrcReg(0), deopt->GetOperandsType());
-    auto slowPath = enc->GetCodegen()->CreateSlowPath<SlowPathDeoptimize>(
-        inst, inst->CastToDeoptimizeCompareImm()->GetDeoptimizeType());
+    auto slowPathLabel =
+        enc->GetCodegen()
+            ->CreateSlowPath<SlowPathDeoptimize>(inst, inst->CastToDeoptimizeCompareImm()->GetDeoptimizeType())
+            ->GetLabel();
 
     if (deopt->GetImm() == 0) {
         Arch arch = enc->GetCodegen()->GetArch();
@@ -784,24 +796,24 @@ void EncodeVisitor::VisitDeoptimizeCompareImm(GraphVisitor *visitor, Inst *inst)
             auto signBit = GetTypeSize(type, arch) - 1;
             if (cc == ConditionCode::CC_LT) {
                 // x < 0
-                encoder->EncodeBitTestAndBranch(slowPath->GetLabel(), src0, signBit, true);
+                encoder->EncodeBitTestAndBranch(slowPathLabel, src0, signBit, true);
                 return;
             }
             if (cc == ConditionCode::CC_GE) {
                 // x >= 0
-                encoder->EncodeBitTestAndBranch(slowPath->GetLabel(), src0, signBit, false);
+                encoder->EncodeBitTestAndBranch(slowPathLabel, src0, signBit, false);
                 return;
             }
         }
         if (enc->GetCodegen()->GetTarget().SupportZeroReg()) {
             auto zreg = enc->GetRegfile()->GetZeroReg();
-            encoder->EncodeJump(slowPath->GetLabel(), src0, zreg, enc->GetCodegen()->ConvertCc(cc));
+            EncodeJump(encoder, slowPathLabel, src0, zreg, enc->GetCodegen()->ConvertCc(cc));
         } else {
-            encoder->EncodeJump(slowPath->GetLabel(), src0, Imm(0), enc->GetCodegen()->ConvertCc(cc));
+            EncodeJump(encoder, slowPathLabel, src0, Imm(0), enc->GetCodegen()->ConvertCc(cc));
         }
         return;
     }
-    encoder->EncodeJump(slowPath->GetLabel(), src0, Imm(deopt->GetImm()), enc->GetCodegen()->ConvertCc(cc));
+    EncodeJump(encoder, slowPathLabel, src0, Imm(deopt->GetImm()), enc->GetCodegen()->ConvertCc(cc));
 }
 
 void EncodeVisitor::VisitLoadString(GraphVisitor *visitor, Inst *inst)

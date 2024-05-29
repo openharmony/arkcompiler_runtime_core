@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define COMPILER_OPTIMIZER_OPTIMIZATIONS_TRY_CATCH_RESOLVING_H
 
 #include "optimizer/ir/graph.h"
-#include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
 
 namespace ark::compiler {
@@ -30,6 +29,7 @@ public:
     {
         tryBlocks_.clear();
         throwInsts_.clear();
+        throwInsts0_.clear();
         catchBlocks_.clear();
         phiInsts_.clear();
         cphi2phi_.clear();
@@ -45,6 +45,7 @@ public:
     void InvalidateAnalyses() override;
 
 private:
+    void DeoptimizeIfs();
     void CollectCandidates();
     BasicBlock *FindCatchBeginBlock(BasicBlock *bb);
     void VisitTryInst(TryInst *tryInst);
@@ -59,6 +60,7 @@ private:
     Marker marker_ {UNDEF_MARKER};
     ArenaVector<BasicBlock *> tryBlocks_;
     ArenaVector<Inst *> throwInsts_;
+    ArenaVector<Inst *> throwInsts0_;
     ArenaMap<uint32_t, BasicBlock *> catchBlocks_;
     ArenaMap<uint32_t, PhiInst *> phiInsts_;
     ArenaMap<CatchPhiInst *, PhiInst *> cphi2phi_;

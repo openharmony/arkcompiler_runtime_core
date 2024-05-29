@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,11 @@ public:
     const char *GetPassName() const override
     {
         return "RedundantLoopElimination";
+    }
+
+    bool IsEnable() const override
+    {
+        return g_options.IsCompilerRedundantLoopElimination();
     }
 
     bool IsApplied() const
