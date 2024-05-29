@@ -255,19 +255,21 @@ static auto g_getPossibleBreakpointsHandler = [](ScriptId scriptId, size_t start
                 JsonProperties(JsonProperty<JsonObject::ArrayT> {"locations", JsonElementsAreArray(locations)}));
 };
 
+static void DefaultFrameEnumerator(const InspectorServer::FrameInfoHandler &handler)
+{
+    std::optional<RemoteObject> objThis;
+    auto scope_chain = std::vector {Scope(Scope::Type::LOCAL, RemoteObject::Number(72))};
+    handler(FrameId(0), std::to_string(0), g_sourceFile, 0, scope_chain, objThis);
+}
+
 TEST_F(ServerTest, OnCallDebuggerGetPossibleBreakpoints)
 {
     auto scriptId = 0;
     size_t start = 5;
     size_t end = 5;
 
-    auto func = [&](auto &handler) {
-        auto scope_chain = std::vector {Scope(Scope::Type::LOCAL, RemoteObject::Number(72))};
-        handler(FrameId(0), std::to_string(0), g_sourceFile, 0, scope_chain);
-    };
-
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
-    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, func);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, DefaultFrameEnumerator);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getPossibleBreakpoints", testing::_))
         .WillOnce(std::bind(g_getPossibleBreakpointsHandler, scriptId, start, end,  // NOLINT(modernize-avoid-bind)
@@ -311,17 +313,12 @@ TEST_F(ServerTest, OnCallDebuggerGetScriptSource)
 {
     auto scriptId = 0;
 
-    auto func = [&](auto &handler) {
-        auto scope_chain = std::vector {Scope(Scope::Type::LOCAL, RemoteObject::Number(72))};
-        handler(FrameId(0), std::to_string(0), g_sourceFile, 0, scope_chain);
-    };
-
     EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.paused", testing::_))
         .WillOnce([&](testing::Unused, testing::Unused, auto s) { ToObject(std::move(s)); });
     EXPECT_CALL(server, CallMock(g_sessionId, "Debugger.scriptParsed", testing::_)).Times(1);
 
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
-    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, func);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, DefaultFrameEnumerator);
 
     EXPECT_CALL(server, OnCallMock("Debugger.getScriptSource", testing::_))
         .WillOnce([&](testing::Unused, auto handler) {
@@ -405,13 +402,8 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpoint)
     auto scriptId = 0;
     size_t start = 5;
 
-    auto func = [&](auto &handler) {
-        auto scope_chain = std::vector {Scope(Scope::Type::LOCAL, RemoteObject::Number(72))};
-        handler(FrameId(0), std::to_string(0), g_sourceFile, 0, scope_chain);
-    };
-
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
-    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, func);
+    inspectorServer.CallDebuggerPaused(g_mthread, {}, {}, DefaultFrameEnumerator);
 
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;

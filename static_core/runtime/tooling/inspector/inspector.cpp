@@ -362,22 +362,22 @@ void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &o
     inspectorServer_.CallDebuggerPaused(
         thread, hitBreakpoints, exceptionRemoteObject, [this, thread, &objectRepository](auto &handler) {
             FrameId frameId = 0;
-            HandleError(
-                debugger_.EnumerateFrames(thread, [this, &objectRepository, &handler, &frameId](const PtFrame &frame) {
-                    std::string_view sourceFile;
-                    std::string_view methodName;
-                    size_t lineNumber;
-                    debugInfoCache_.GetSourceLocation(frame, sourceFile, methodName, lineNumber);
+            HandleError(debugger_.EnumerateFrames(thread, [this, &objectRepository, &handler,
+                                                           &frameId](const PtFrame &frame) {
+                std::string_view sourceFile;
+                std::string_view methodName;
+                size_t lineNumber;
+                debugInfoCache_.GetSourceLocation(frame, sourceFile, methodName, lineNumber);
 
-                    auto scopeChain =
-                        std::vector {Scope(Scope::Type::LOCAL,
-                                           objectRepository.CreateFrameObject(frame, debugInfoCache_.GetLocals(frame))),
-                                     Scope(Scope::Type::GLOBAL, objectRepository.CreateGlobalObject())};
+                std::optional<RemoteObject> objThis;
+                auto frameObject = objectRepository.CreateFrameObject(frame, debugInfoCache_.GetLocals(frame), objThis);
+                auto scopeChain = std::vector {Scope(Scope::Type::LOCAL, std::move(frameObject)),
+                                               Scope(Scope::Type::GLOBAL, objectRepository.CreateGlobalObject())};
 
-                    handler(frameId++, methodName, sourceFile, lineNumber, scopeChain);
+                handler(frameId++, methodName, sourceFile, lineNumber, scopeChain, objThis);
 
-                    return true;
-                }));
+                return true;
+            }));
         });
 }
 
