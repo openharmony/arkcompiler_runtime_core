@@ -717,6 +717,7 @@ LiteralTagToStringMap PandasmProgramDumper::literal_tag_to_string_map_ = {
     {panda_file::LiteralTag::GETTER, "getter"},
     {panda_file::LiteralTag::SETTER, "setter"},
     {panda_file::LiteralTag::GENERATORMETHOD, "generator_method"},
+    {panda_file::LiteralTag::ASYNCGENERATORMETHOD, "async_generator_method"},
     {panda_file::LiteralTag::ACCESSOR, "accessor"},
     {panda_file::LiteralTag::METHODAFFILIATE, "method_affiliate"},
     {panda_file::LiteralTag::NULLVALUE, "null_value"},
@@ -927,6 +928,7 @@ void PandasmProgramDumper::SerializeLiteralsAtIndex(const pandasm::LiteralArray 
         case panda_file::LiteralTag::GETTER:
         case panda_file::LiteralTag::SETTER:
         case panda_file::LiteralTag::GENERATORMETHOD:
+        case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
             os << (std::get<std::string>(val));
             break;
         case panda_file::LiteralTag::NULLVALUE:
