@@ -138,6 +138,8 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     }
 
     DeleteCoroutineInstance(co);
+
+    os::memory::LockHolder lk(cvAwaitAllMutex_);
     cvAwaitAll_.Signal();
     return true;
     // NOTE(konstanting): issue debug notifications to runtime
@@ -365,10 +367,10 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
         }
     }
     // then start awaiting for other coroutines to complete
-    os::memory::LockHolder lk(cvMutex_);
+    os::memory::LockHolder lk(cvAwaitAllMutex_);
     ctx->EnterAwaitLoop();
     while (coroutineCount_ > 1) {  // main coro runs till VM shutdown
-        cvAwaitAll_.Wait(&cvMutex_);
+        cvAwaitAll_.Wait(&cvAwaitAllMutex_);
         LOG(DEBUG, COROUTINES) << "ThreadedCoroutineManager::MainCoroutineCompleted(): await_all(): still "
                                << coroutineCount_ << " coroutines exist...";
     }

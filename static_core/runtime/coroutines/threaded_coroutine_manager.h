@@ -114,7 +114,7 @@ private:
     PandaMap<CoroutineEvent *, Coroutine *> waiters_;
 
     os::memory::ConditionVariable cvAwaitAll_;
-    os::memory::Mutex cvMutex_;
+    os::memory::Mutex cvAwaitAllMutex_;
 
     uint32_t workersCount_ = 1;
     // main is running from the very beginning
