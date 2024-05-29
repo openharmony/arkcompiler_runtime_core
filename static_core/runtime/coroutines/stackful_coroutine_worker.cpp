@@ -79,11 +79,12 @@ void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
 {
     os::memory::LockHolder lock(waitersLock_);
     auto w = waiters_.find(blocker);
-    if (w != waiters_.end()) {
+    while (w != waiters_.end()) {
         auto *coro = w->second;
         waiters_.erase(w);
         coro->RequestUnblock();
         PushToRunnableQueue(coro);
+        w = waiters_.find(blocker);
     }
 }
 

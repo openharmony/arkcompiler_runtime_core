@@ -111,7 +111,7 @@ private:
     // ready coros
     PandaDeque<Coroutine *> runnablesQueue_;
     // blocked coros: Coroutine AWAITS CoroutineEvent
-    PandaMap<CoroutineEvent *, Coroutine *> waiters_;
+    PandaMultiMap<CoroutineEvent *, Coroutine *> waiters_;
 
     os::memory::ConditionVariable cvAwaitAll_;
     os::memory::Mutex cvAwaitAllMutex_;

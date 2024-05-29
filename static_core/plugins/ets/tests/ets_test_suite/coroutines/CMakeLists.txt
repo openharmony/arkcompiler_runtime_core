@@ -258,6 +258,14 @@ if (NOT PANDA_TARGET_ARM32)
                             WORKERS "ONE"
                             MODE "INT" "JIT" "AOT"
     )
+
+    add_ets_coroutines_test(FILE concurrent_await.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "THREADED" "STACKFUL"
+                        OPTION_SETS_THREADED "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT"
+    )
 endif()
 # # Issue 12886
 add_ets_coroutines_test(FILE launch_return.ets
