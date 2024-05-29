@@ -935,13 +935,6 @@
 07.expressions/12.indexing_expression/01.array_indexing_expression/array_index_n_9.ets
 # end of es2panda fails
 
-# es2panda fails: Record is not implemented yet
-07.expressions/12.indexing_expression/02.record_indexing_expression/indx3a.ets
-07.expressions/12.indexing_expression/02.record_indexing_expression/indx3b.ets
-07.expressions/12.indexing_expression/02.record_indexing_expression/indx3c.ets
-07.expressions/12.indexing_expression/02.record_indexing_expression/indx3d.ets
-# end of es2panda fails
-
 # es2panda fails: equality not yet implemented
 07.expressions/25.equality_expressions/eq_12.ets
 07.expressions/25.equality_expressions/eq_13.ets

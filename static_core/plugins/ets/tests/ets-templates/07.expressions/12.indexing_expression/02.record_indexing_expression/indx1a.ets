@@ -17,7 +17,6 @@
 desc: >-
     The type of the object reference expression must be a nullish type based on
     an array type, or on the Record type; a compile-time error occurs otherwise.
-tags: [compile-only, negative]
 ---*/
 
 function test(b: boolean) {
@@ -32,5 +31,5 @@ function refNotNullish(): Record<string, number> {
 }
 
 function main() {
-    test(refNotNullish()?.["magic"] == 42) // CTE expected
+    test(refNotNullish()?.["magic"] == 42)
 }
