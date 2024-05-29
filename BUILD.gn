@@ -22,10 +22,7 @@ group("arkcompiler_params") {
 }
 
 group("ark_device_packages") {
-  deps = [
-    "$ark_root/verifier:ark_verifier",
-    "$ark_root/verifier:libarkverifier",
-  ]
+  deps = [ "$ark_root/verifier:libarkverifier" ]
 }
 
 group("ark_packages") {
