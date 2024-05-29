@@ -97,6 +97,11 @@ public:
         return promiseClass_;
     }
 
+    Class *GetPromiseRefClass()
+    {
+        return promiseRefClass_;
+    }
+
     Class *GetBigIntClass()
     {
         return bigintClass_;
@@ -237,6 +242,7 @@ private:
     Class *bigintClass_ = nullptr;
     Class *promiseClass_ = nullptr;
     Method *subscribeOnAnotherPromiseMethod_ = nullptr;
+    Class *promiseRefClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;
     Class *arrayAsListIntClass_ = nullptr;

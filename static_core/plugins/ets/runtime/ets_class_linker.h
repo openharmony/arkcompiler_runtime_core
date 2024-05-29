@@ -52,6 +52,7 @@ public:
     Method *GetMethod(const panda_file::File &pf, panda_file::File::EntityId id);
     Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
     EtsClass *GetPromiseClass();
+    EtsClass *GetPromiseRefClass();
     EtsClass *GetArrayBufferClass();
     EtsClass *GetStringBuilderClass();
     EtsClass *GetSharedMemoryClass();

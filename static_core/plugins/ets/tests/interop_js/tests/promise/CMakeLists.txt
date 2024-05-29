@@ -89,17 +89,17 @@ panda_ets_interop_js_test(ets_interop_js_test_promise10
     LAUNCHER_ARGS "await"
 )
 
-# panda_ets_interop_js_test(ets_interop_js_test_promise11
-#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/await_js_promise.js
-#     LAUNCHER_ARGS "pending"
-# )
+panda_ets_interop_js_test(ets_interop_js_test_promise11
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/await_js_promise.js
+    LAUNCHER_ARGS "pending"
+)
 
-# panda_ets_interop_js_test(ets_interop_js_test_promise12
-#     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-#     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/await_js_promise.js
-#     LAUNCHER_ARGS "resolved"
-# )
+panda_ets_interop_js_test(ets_interop_js_test_promise12
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/await_js_promise.js
+    LAUNCHER_ARGS "resolved"
+)
 
 panda_ets_interop_js_test(ets_interop_js_test_await_promise
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/promise/promise_tests.ets
@@ -265,4 +265,14 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_race_rejected
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
     LAUNCHER_ARGS "testPromiseRaceRejected"
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_to_js_and_back
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_to_js_and_back_test.js
+)
+
+panda_ets_interop_js_test(ets_interop_js_test_to_ets_and_back
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_to_ets_and_back_test.js
 )

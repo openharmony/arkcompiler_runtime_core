@@ -110,13 +110,14 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     EtsHandleScope hScope(coro);
     EtsHandle<EtsPromise> promiseHandle(coro, EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
     vm->GetGlobalObjectStorage()->Remove(promiseRef);
-    ASSERT(promiseHandle.GetPtr()->GetEventPtr() != nullptr);
-    promiseHandle.GetPtr()->GetEventPtr()->SetHappened();
+    CoroutineEvent *event = promiseHandle->GetEventPtr();
+    ASSERT(event != nullptr);
+    event->SetHappened();
 
     auto jsval = JSValue::Create(coro, ctx, value);
     ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
 
-    vm->GetCoroutineManager()->UnblockWaiters(promiseHandle.GetPtr()->GetEventPtr());
+    vm->GetCoroutineManager()->UnblockWaiters(event);
     vm->GetCoroutineManager()->Schedule();
 
     napi_value undefined;
@@ -124,14 +125,17 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     return undefined;
 }
 
-void JsJobQueue::CreatePromiseLink(JSValue *jsPromise, EtsPromise *etsPromise)
+void JsJobQueue::CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise)
 {
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     PandaEtsVM *vm = coro->GetPandaVM();
-    napi_env env = InteropCtx::Current(coro)->GetJSEnv();
+    InteropCtx *ctx = InteropCtx::Current(coro);
+    napi_env env = ctx->GetJSEnv();
+    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    napi_value jsPromise = storage->GetReference(jsObject)->GetJsObject(env);
 
     napi_value thenFn;
-    napi_status status = napi_get_named_property(env, jsPromise->GetNapiValue(env), "then", &thenFn);
+    napi_status status = napi_get_named_property(env, jsPromise, "then", &thenFn);
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot call then() from a JS promise");
     }
@@ -146,7 +150,7 @@ void JsJobQueue::CreatePromiseLink(JSValue *jsPromise, EtsPromise *etsPromise)
     }
 
     napi_value thenResult;
-    status = napi_call_function(env, jsPromise->GetNapiValue(env), thenFn, 1, &thenCallback, &thenResult);
+    status = napi_call_function(env, jsPromise, thenFn, 1, &thenCallback, &thenResult);
     if (status != napi_ok) {
         InteropCtx::Fatal("Cannot call then() from a JS Promise");
     }
@@ -154,7 +158,7 @@ void JsJobQueue::CreatePromiseLink(JSValue *jsPromise, EtsPromise *etsPromise)
 
 void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
 {
-    auto addLinkProc = [&]() { CreatePromiseLink(JSValue::FromEtsObject(source), EtsPromise::FromEtsObject(target)); };
+    auto addLinkProc = [&]() { CreatePromiseLink(source, EtsPromise::FromEtsObject(target)); };
 
     auto *mainT = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
     Coroutine *mainCoro = Coroutine::CastFromThread(mainT);

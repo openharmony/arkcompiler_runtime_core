@@ -362,6 +362,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     private value: T | null = null;
     private thenQueue: Object[]|null = null;
     private catchQueue: Object[]|null = null;
+    private interopObject: Object|null = null;
     private linkedPromise: Object | null = null;
     private eventPtr: long;
     private thenQueueSize: int = 0;

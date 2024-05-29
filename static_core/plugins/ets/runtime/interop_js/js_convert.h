@@ -341,14 +341,28 @@ JSCONVERT_DEFINE_TYPE(Promise, EtsPromise *);
 
 JSCONVERT_WRAP(Promise)
 {
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto ctx = InteropCtx::Current(coro);
+    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    // SharedReferenceStorage uses object's MarkWord to store interop hash.
+    // Also runtime may lock a Promise object (this operation also requires MarkWord modification).
+    // Interop hash and locks cannot co-exist. That is why a separate object (EtsPromiseRef) is used for
+    // mapping between js and ets Promise objects.
+    // When a ets Promise object goes to JS we should get the corresponding EtsPromiseRef object.
+    // So the ets Promise object should know about EtsPromiseRef which is stored in 'interopObject' field.
+    EtsObject *interopObj = etsVal->GetInteropObject(coro);
+    if (interopObj != nullptr && storage->HasReference(interopObj)) {
+        return storage->GetReference(interopObj)->GetJsObject(env);
+    }
+
+    [[maybe_unused]] EtsHandleScope s(coro);
+    EtsHandle<EtsPromise> hpromise(coro, etsVal);
     napi_deferred deferred;
     napi_value jsPromise;
     NAPI_CHECK_FATAL(napi_create_promise(env, &deferred, &jsPromise));
-    auto *coro = EtsCoroutine::GetCurrent();
-    if (etsVal->GetState() != EtsPromise::STATE_PENDING) {
-        EtsObject *value = etsVal->GetValue(coro);
+    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
+        EtsObject *value = hpromise->GetValue(coro);
         napi_value completionValue;
-        auto ctx = InteropCtx::Current(coro);
         if (value == nullptr) {
             completionValue = GetNull(env);
         } else {
@@ -363,23 +377,38 @@ JSCONVERT_WRAP(Promise)
     } else {
         coro->GetPandaVM()->AddPromiseListener(etsVal, MakePandaUnique<PendingPromiseListener>(deferred));
     }
+    EtsPromiseRef *ref = EtsPromiseRef::Create(coro);
+    ref->SetTarget(coro, hpromise->AsObject());
+    hpromise->SetInteropObject(coro, ref);
+    [[maybe_unused]] auto *sharedRef = storage->CreateETSObjectRef(ctx, ref, jsPromise);
+    ASSERT(sharedRef != nullptr);
     return jsPromise;
 }
 
 JSCONVERT_UNWRAP(Promise)
 {
+#ifndef NDEBUG
     bool isPromise = false;
     NAPI_CHECK_FATAL(napi_is_promise(env, jsVal, &isPromise));
-    if (!isPromise) {
-        InteropCtx::Fatal("Passed object is not a promise!");
-        UNREACHABLE();
+    ASSERT(isPromise);
+#endif
+    auto coro = EtsCoroutine::GetCurrent();
+    ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
+    ets_proxy::SharedReference *sharedRef = storage->GetReference(env, jsVal);
+    if (sharedRef != nullptr) {
+        auto *ref = reinterpret_cast<EtsPromiseRef *>(sharedRef->GetEtsObject(ctx));
+        ASSERT(ref->GetTarget(coro) != nullptr);
+        return EtsPromise::FromEtsObject(ref->GetTarget(coro));
     }
-    auto currentCoro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] EtsHandleScope s(currentCoro);
-    auto *promise = EtsPromise::Create(currentCoro);
-    EtsHandle<EtsPromise> hpromise(currentCoro, promise);
-    auto *jsval = JSValue::Create(currentCoro, ctx, jsVal);
-    hpromise->SetLinkedPromise(currentCoro, jsval->AsObject());
+
+    [[maybe_unused]] EtsHandleScope s(coro);
+    auto *promise = EtsPromise::Create(coro);
+    EtsHandle<EtsPromise> hpromise(coro, promise);
+    EtsHandle<EtsPromiseRef> href(coro, EtsPromiseRef::Create(coro));
+    href->SetTarget(coro, hpromise->AsObject());
+    hpromise->SetInteropObject(coro, href.GetPtr());
+    storage->CreateJSObjectRef(ctx, href.GetPtr(), jsVal);
+    hpromise->SetLinkedPromise(coro, href->AsObject());
     return hpromise.GetPtr();
 }
 

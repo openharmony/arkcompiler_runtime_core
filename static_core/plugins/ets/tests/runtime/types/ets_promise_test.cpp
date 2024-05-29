@@ -19,6 +19,7 @@
 
 #include "types/ets_class.h"
 #include "types/ets_promise.h"
+#include "types/ets_promise_ref.h"
 #include "tests/runtime/types/ets_test_mirror_classes.h"
 
 namespace ark::ets::test {
@@ -54,11 +55,27 @@ public:
     NO_COPY_SEMANTIC(EtsPromiseTest);
     NO_MOVE_SEMANTIC(EtsPromiseTest);
 
-    static std::vector<MirrorFieldInfo> GetMembers()
+    static void CompareMemberOffsets(EtsClass *klass, const std::vector<MirrorFieldInfo> &members)
+    {
+        ASSERT_NE(nullptr, klass);
+        ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
+
+        // Check both EtsPromise and ark::Class<Promise> has the same number of fields
+        // and at the same offsets
+        for (const MirrorFieldInfo &memb : members) {
+            EtsField *field = klass->GetFieldIDByName(memb.Name());
+            ASSERT_NE(nullptr, field);
+            ASSERT_EQ(memb.Offset(), field->GetOffset())
+                << "Offsets of the field '" << memb.Name() << "' are different";
+        }
+    }
+
+    static std::vector<MirrorFieldInfo> GetPromiseMembers()
     {
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsPromise, value_, "value"),
                                              MIRROR_FIELD_INFO(EtsPromise, thenQueue_, "thenQueue"),
                                              MIRROR_FIELD_INFO(EtsPromise, catchQueue_, "catchQueue"),
+                                             MIRROR_FIELD_INFO(EtsPromise, interopObject_, "interopObject"),
                                              MIRROR_FIELD_INFO(EtsPromise, linkedPromise_, "linkedPromise"),
                                              MIRROR_FIELD_INFO(EtsPromise, event_, "eventPtr"),
                                              MIRROR_FIELD_INFO(EtsPromise, thenQueueSize_, "thenQueueSize"),
@@ -66,23 +83,24 @@ public:
                                              MIRROR_FIELD_INFO(EtsPromise, state_, "state")};
     }
 
+    static std::vector<MirrorFieldInfo> GetPromiseRefMembers()
+    {
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsPromiseRef, target_, "target")};
+    }
+
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
-TEST_F(EtsPromiseTest, MemoryLayout)
+TEST_F(EtsPromiseTest, PromiseMemoryLayout)
 {
     EtsClass *promiseClass = vm_->GetClassLinker()->GetPromiseClass();
-    ASSERT_NE(nullptr, promiseClass);
-    std::vector<MirrorFieldInfo> members = GetMembers();
-    ASSERT_EQ(members.size(), promiseClass->GetInstanceFieldsNumber());
+    CompareMemberOffsets(promiseClass, GetPromiseMembers());
+}
 
-    // Check both EtsPromise and ark::Class<Promise> has the same number of fields
-    // and at the same offsets
-    for (const MirrorFieldInfo &memb : members) {
-        EtsField *field = promiseClass->GetFieldIDByName(memb.Name());
-        ASSERT_NE(nullptr, field);
-        ASSERT_EQ(memb.Offset(), field->GetOffset()) << "Offsets of the field '" << memb.Name() << "' are different";
-    }
+TEST_F(EtsPromiseTest, PromiseRefMemoryLayout)
+{
+    EtsClass *promiseRefClass = vm_->GetClassLinker()->GetPromiseRefClass();
+    CompareMemberOffsets(promiseRefClass, GetPromiseRefMembers());
 }
 }  // namespace ark::ets::test
