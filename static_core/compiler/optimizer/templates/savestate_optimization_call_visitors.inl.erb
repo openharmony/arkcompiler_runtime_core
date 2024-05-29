@@ -18,10 +18,10 @@
 % IR::instructions.select{|i| i.is_call? && i.opcode != 'Intrinsic'}.map do |inst|
     static void Visit<%= inst.opcode %>(GraphVisitor* v, [[maybe_unused]] Inst* inst) {
 %   if inst.base != 'CallInst'
-        static_cast<DeoptimizeElimination *>(v)->SetHaveCalls();
+        static_cast<SaveStateOptimization *>(v)->SetHaveCalls();
 %   else
         if (!inst->CastTo<%= inst.opcode %>()->IsInlined()) {
-            static_cast<DeoptimizeElimination *>(v)->SetHaveCalls();
+            static_cast<SaveStateOptimization *>(v)->SetHaveCalls();
         }
 %   end
     }

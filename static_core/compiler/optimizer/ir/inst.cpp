@@ -681,9 +681,25 @@ bool Inst::IsReferenceOrAny() const
     return GetType() == DataType::REFERENCE;
 }
 
+bool IsMovableObjectRec(Inst *inst, Marker visitedMrk)
+{
+    if (inst->SetMarker(visitedMrk)) {
+        return false;
+    }
+    if (inst->IsPhi()) {
+        for (size_t i = 0U; i < inst->GetInputsCount(); ++i) {
+            if (IsMovableObjectRec(inst->GetDataFlowInput(i), visitedMrk)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return inst->IsMovableObject();
+}
+
 // Returns true if instruction result can be moved by GC
 // Returns false for checks because their result is equal to input
-bool Inst::IsMovableObject() const
+bool Inst::IsMovableObject()
 {
     if (IsCheck() || !IsReferenceOrAny()) {
         return false;
@@ -708,7 +724,10 @@ bool Inst::IsMovableObject() const
             // Classes in non moveble space.
             return this->CastToLoadObject()->GetObjectType() != ObjectType::MEM_DYN_CLASS &&
                    this->CastToLoadObject()->GetObjectType() != ObjectType::MEM_DYN_HCLASS;
-
+        case Opcode::Phi: {
+            MarkerHolder marker {GetBasicBlock()->GetGraph()};
+            return IsMovableObjectRec(this, marker.GetMarker());
+        }
         default:
             return true;
     }

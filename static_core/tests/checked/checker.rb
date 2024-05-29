@@ -65,8 +65,11 @@ end
 
 def raise_error(msg)
   log.error "Test failed: #{$checker_name}"
-  if !@current_method.nil?
-    log.error "Method \"#{@current_method}\""
+  if !$current_method.nil?
+    log.error "Method: \"#{$current_method}\""
+  end
+  if !$current_pass.nil?
+    log.error $current_pass
   end
   log.error msg
   log.error "Command to reproduce: #{$curr_cmd}"
@@ -587,13 +590,14 @@ class Checker
     @ir_files = Dir["#{@cwd}/ir_dump/*#{method.gsub(/::|[<>]/, '_')}*.ir"]
     @ir_files.sort!
     raise_error "IR dumps not found for method: #{method.gsub(/::|[<>]/, '_')}" if @ir_files.empty?
-    @current_method = method
+    $current_method = method
     @current_file_index = 0
   end
 
   def PASS_AFTER(pass)
     return if @options.release
 
+    $current_pass = "Pass after: #{pass}"
     @current_file_index = @ir_files.index { |x| File.basename(x).include? pass }
     raise_error "IR file not found for pass: #{pass}. Possible cause: you forgot to select METHOD first" unless @current_file_index
     @ir_scope = SearchScope.from_file(@ir_files[@current_file_index], 'IR')
@@ -602,6 +606,7 @@ class Checker
   def PASS_AFTER_NEXT(pass)
     return if @options.release
 
+    $current_pass = "Pass after next: #{pass}"
     index = @ir_files[(@current_file_index + 1)..-1].index { |x| File.basename(x).include? pass }
     raise_error "IR file not found for pass: #{pass}. Possible cause: you forgot to select METHOD first" unless index
     @current_file_index += 1 + index
@@ -611,6 +616,7 @@ class Checker
   def PASS_BEFORE(pass)
     return if @options.release
 
+    $current_pass = "Pass before: #{pass}"
     @current_file_index  = @ir_files.index { |x| File.basename(x).include? pass }
     raise_error "IR file not found for pass: #{pass}. Possible cause: you forgot to select METHOD first" unless @current_file_index
     @ir_scope = SearchScope.from_file(@ir_files[@current_file_index - 1], 'IR')

@@ -83,25 +83,37 @@ RuntimeInterface::ClassPtr GetClassPtrForObject(Inst *inst, size_t inputNum)
     if (objInst->GetOpcode() != Opcode::NewObject) {
         return nullptr;
     }
-    return GetObjectClass(objInst->CastToNewObject());
+    return GetObjectClass(objInst);
 }
 
-RuntimeInterface::ClassPtr GetObjectClass(NewObjectInst *inst)
+RuntimeInterface::ClassPtr GetClass(Inst *inst)
+{
+    if (inst->IsClassInst()) {
+        return static_cast<ClassInst *>(inst)->GetClass();
+    }
+    if (inst->GetOpcode() == Opcode::LoadImmediate) {
+        return inst->CastToLoadImmediate()->GetClass();
+    }
+    if (inst->GetOpcode() == Opcode::LoadRuntimeClass) {
+        return inst->CastToLoadRuntimeClass()->GetClass();
+    }
+    if (inst->IsPhi()) {
+        auto graph = inst->GetBasicBlock()->GetGraph();
+        graph->RunPass<ObjectTypePropagation>();
+        auto typeInfo = inst->GetObjectTypeInfo();
+        if (typeInfo.IsValid() && typeInfo.IsExact()) {
+            return typeInfo.GetClass();
+        }
+        return nullptr;
+    }
+    UNREACHABLE();
+    return nullptr;
+}
+
+RuntimeInterface::ClassPtr GetObjectClass(Inst *inst)
 {
     ASSERT(inst->GetInputsCount() > 0);
-
-    RuntimeInterface::ClassPtr klass = nullptr;
-    auto inputInst = inst->GetDataFlowInput(0);
-    if (inputInst->IsClassInst()) {
-        klass = static_cast<ClassInst *>(inputInst)->GetClass();
-    } else if (inputInst->GetOpcode() == Opcode::LoadImmediate) {
-        klass = inputInst->CastToLoadImmediate()->GetClass();
-    } else if (inputInst->GetOpcode() == Opcode::LoadRuntimeClass) {
-        klass = inputInst->CastToLoadRuntimeClass()->GetClass();
-    } else {
-        UNREACHABLE();
-    }
-    return klass;
+    return GetClass(inst->GetDataFlowInput(0));
 }
 
 template bool HasOsrEntryBetween(Inst *dominate, Inst *current);

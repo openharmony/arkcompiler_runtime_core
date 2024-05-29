@@ -15,7 +15,7 @@
 
 #include "tests/unit_test.h"
 #include "optimizer/ir/graph_cloner.h"
-#include "optimizer/optimizations/deoptimize_elimination.h"
+#include "optimizer/optimizations/savestate_optimization.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "plugins/ets/compiler/optimizer/optimizations/interop_js/interop_intrinsic_optimization.h"
 
@@ -137,8 +137,8 @@ TEST_F(InteropIntrnsicsOptTest, SingleBlock)
     Graph *expected = SingleBlockBuildExpectedGraph();
 
     ASSERT_TRUE(GetGraph()->RunPass<InteropIntrinsicOptimization>());
-    // DeoptimizeElimination removes SaveState user of ConvertLocalToJSValue
-    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+    // SaveStateOptimization removes SaveState user of ConvertLocalToJSValue
+    ASSERT_TRUE(GetGraph()->RunPass<SaveStateOptimization>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
@@ -269,8 +269,8 @@ PARAM_TEST(InteropIntrnsicsOptTest, ChainOfBlocks,
             }
         }
         ASSERT_TRUE(GetGraph()->RunPass<InteropIntrinsicOptimization>());
-        // DeoptimizeElimination removes SaveState user of ConvertLocalToJSValue
-        ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+        // SaveStateOptimization removes SaveState user of ConvertLocalToJSValue
+        ASSERT_TRUE(GetGraph()->RunPass<SaveStateOptimization>());
         ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
         GraphChecker(GetGraph()).Check();
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -371,7 +371,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, TriangleOfBlocks,
             }
         }
         ASSERT_TRUE(GetGraph()->RunPass<InteropIntrinsicOptimization>());
-        ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+        ASSERT_TRUE(GetGraph()->RunPass<SaveStateOptimization>());
         ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
         GraphChecker(GetGraph()).Check();
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -530,7 +530,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<InteropIntrinsicOptimization>());
-    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+    ASSERT_TRUE(GetGraph()->RunPass<SaveStateOptimization>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
     // Remove unused constants for some parameter values
     graph->RunPass<Cleanup>();

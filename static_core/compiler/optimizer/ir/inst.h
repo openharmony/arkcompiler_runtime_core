@@ -1324,7 +1324,7 @@ public:
     bool IsZeroRegInst() const;
 
     bool IsReferenceOrAny() const;
-    bool IsMovableObject() const;
+    bool IsMovableObject();
 
     /// Return instruction clone
     virtual Inst *Clone(const Graph *targetGraph) const;

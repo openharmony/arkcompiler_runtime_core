@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,25 +91,11 @@ public:
         return isLoopDeleted_;
     }
 
-    bool HaveCalls()
-    {
-        return haveCalls_;
-    }
-
-#include <deoptimize_elimination_call_visitors.inl>
-    static void VisitSaveState(GraphVisitor *v, Inst *inst);
-    static void VisitSaveStateDeoptimize(GraphVisitor *v, Inst *inst);
     static void VisitDeoptimizeIf(GraphVisitor *v, Inst *inst);
-    void VisitDefault(Inst *inst) override;
 
 #include "optimizer/ir/visitor.inc"
 
 private:
-    void SetHaveCalls()
-    {
-        haveCalls_ = true;
-    }
-
     void PushNewDeoptimizeIf(Inst *inst)
     {
         deoptimizeMustThrow_.push_back(inst);
@@ -129,15 +115,12 @@ private:
         return BlockType::INVALID;
     }
 
-    bool TryToRemoveRedundantSaveState(Inst *inst);
     bool CanRemoveGuard(Inst *guard);
     bool CanRemoveGuardRec(BasicBlock *block, Inst *guard, const Marker &mrk, const Marker &removeMrk);
     void RemoveGuard(Inst *guard);
     void RemoveDeoptimizeIf(Inst *inst);
-    bool RequireRegMap(Inst *inst);
 
 private:
-    bool haveCalls_ {false};
     bool isApplied_ {false};
     bool isLoopDeleted_ {false};
     ArenaUnorderedMap<BasicBlock *, BlockType> blocksType_;

@@ -109,7 +109,7 @@ panda_gen(DATA ${CMAKE_CURRENT_LIST_DIR}/optimizer/ir/instructions.yaml
             inst_checker_gen.h.erb
             IR-instructions.md.erb
             codegen_arm64_gen.inc.erb
-            deoptimize_elimination_call_visitors.inl.erb
+            savestate_optimization_call_visitors.inl.erb
         SOURCE ${COMPILER_TEMPLATES_DIR}
         DESTINATION ${GENERATED_DIR}
         API ${COMPILER_TEMPLATES_DIR}/instructions.rb
@@ -206,6 +206,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/phi_type_resolving.cpp
         optimizer/optimizations/redundant_loop_elimination.cpp
         optimizer/optimizations/reserve_string_builder_buffer.cpp
+        optimizer/optimizations/savestate_optimization.cpp
         optimizer/optimizations/scheduler.cpp
         optimizer/optimizations/simplify_string_builder.cpp
         optimizer/optimizations/string_builder_utils.cpp
@@ -353,6 +354,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/reg_alloc_interference_graph_test.cpp
     tests/reg_alloc_resolver_test.cpp
     tests/rpo_test.cpp
+    tests/savestate_optimization_tests.cpp
     tests/scheduler_test.cpp
     tests/split_resolver_test.cpp
     tests/try_catch_resolving_test.cpp

@@ -141,6 +141,7 @@ libarkcompiler_sources = [
   "optimizer/optimizations/regalloc/spill_fills_resolver.cpp",
   "optimizer/optimizations/regalloc/split_resolver.cpp",
   "optimizer/optimizations/reserve_string_builder_buffer.cpp",
+  "optimizer/optimizations/savestate_optimization.cpp",
   "optimizer/optimizations/scheduler.cpp",
   "optimizer/optimizations/simplify_string_builder.cpp",
   "optimizer/optimizations/string_builder_utils.cpp",
@@ -221,9 +222,9 @@ ohos_shared_library("libarktscompiler") {
     ":libarkcompiler_opcodes_h_IR-instructions_md",
     ":libarkcompiler_opcodes_h_arch_info_gen_h",
     ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
-    ":libarkcompiler_opcodes_h_deoptimize_elimination_call_visitors_inl",
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
+    ":libarkcompiler_opcodes_h_savestate_optimization_call_visitors_inl",
     ":pipeline_includes_h",
     ":plugin_create_pipeline_inl",
     ":source_languages_h",
@@ -313,9 +314,9 @@ ohos_source_set("libarktscompiler_frontend_static") {
     ":libarkcompiler_opcodes_h_IR-instructions_md",
     ":libarkcompiler_opcodes_h_arch_info_gen_h",
     ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
-    ":libarkcompiler_opcodes_h_deoptimize_elimination_call_visitors_inl",
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
+    ":libarkcompiler_opcodes_h_savestate_optimization_call_visitors_inl",
     ":pipeline_includes_h",
     ":plugin_create_pipeline_inl",
     ":source_languages_h",
@@ -410,7 +411,7 @@ ark_gen("libarkcompiler_opcodes_h") {
     "inst_checker_gen.h.erb",
     "IR-instructions.md.erb",
     "codegen_arm64_gen.inc.erb",
-    "deoptimize_elimination_call_visitors.inl.erb",
+    "savestate_optimization_call_visitors.inl.erb",
   ]
   sources = "optimizer/templates"
   destination = "$target_gen_dir/generated"
