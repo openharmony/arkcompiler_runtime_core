@@ -54,7 +54,7 @@ public:
     bool IsIntrinsicStringBuilderAppendString(IntrinsicId id) const override;
     bool IsIntrinsicStringBuilderAppend(IntrinsicId id) const override;
     IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId(compiler::DataType::Type type) const override;
-    IntrinsicId GetStringBuilderConcatStringsIntrinsicId() const override;
+    IntrinsicId GetStringConcatStringsIntrinsicId(size_t numArgs) const override;
     IntrinsicId GetStringIsCompressedIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
 

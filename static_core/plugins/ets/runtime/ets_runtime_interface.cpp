@@ -288,9 +288,20 @@ EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::ConvertTypeToStringBuilder
     return IntrinsicId::INVALID;
 }
 
-EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderConcatStringsIntrinsicId() const
+EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringConcatStringsIntrinsicId(size_t numArgs) const
 {
-    return IntrinsicId::INTRINSIC_STD_CORE_STRING_BUILDER_CONCAT_STRINGS;
+    // NOLINTBEGIN(readability-magic-numbers)
+    switch (numArgs) {
+        case 2U:
+            return IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT2;
+        case 3U:
+            return IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT3;
+        case 4U:
+            return IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT4;
+        default:
+            UNREACHABLE();
+    }
+    // NOLINTEND(readability-magic-numbers)
 }
 
 EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringIsCompressedIntrinsicId() const

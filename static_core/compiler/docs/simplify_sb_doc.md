@@ -356,7 +356,7 @@ succs: [bb 0]
 
 BB 0  preds: [bb 1]
 prop:
-   18.ref  Intrinsic.StdCoreStringBuilderConcatStrings v0, v1, ss -> (v17)
+   18.ref  Intrinsic.StdCoreStringConcat2 v0, v1, ss -> (v17)
    17.ref  Return                     v18
 succs: [bb 2]
 
