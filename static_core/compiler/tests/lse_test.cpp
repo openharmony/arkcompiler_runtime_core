@@ -812,8 +812,9 @@ TEST_F(LSETest, NestedLoopElimination)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
-/// Replace only MUST_ALIASed accesses
-TEST_F(LSETest, LoopWithMayAliases)
+// Replace MUST_ALIASed accesses
+// Move out of loop NO_ALIASed accesses
+TEST_F(LSETest, LoopWithMayAliasesAndNoAlias)
 {
     GRAPH(GetGraph())
     {
@@ -827,6 +828,7 @@ TEST_F(LSETest, LoopWithMayAliases)
             INST(45U, Opcode::Compare).b().CC(CC_GE).Inputs(1U, 9U);
             INST(46U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(45U);
         }
+        // v6 = v[0]
         // For (v12 = 0, v12 < lenarr(v0[0]), v12++)
         //     v13 += v0[0][0] + v0[1][0]
         BASIC_BLOCK(4U, 3U, 4U)
@@ -835,7 +837,7 @@ TEST_F(LSETest, LoopWithMayAliases)
             INST(13U, Opcode::Phi).s32().Inputs({{2U, 1U}, {4U, 42U}});
             INST(24U, Opcode::LoadArray).ref().Inputs(0U, 1U);  // Eliminated due to v6
             INST(29U, Opcode::LoadArray).s32().Inputs(24U, 1U);
-            INST(35U, Opcode::LoadArray).ref().Inputs(0U, 30U);
+            INST(35U, Opcode::LoadArray).ref().Inputs(0U, 30U);  // Move out of loop
             INST(40U, Opcode::LoadArray).s32().Inputs(35U, 1U);
             INST(41U, Opcode::Add).s32().Inputs(40U, 29U);
             INST(42U, Opcode::Add).s32().Inputs(41U, 13U);
@@ -860,16 +862,18 @@ TEST_F(LSETest, LoopWithMayAliases)
             INST(6U, Opcode::LoadArray).ref().Inputs(0U, 1U);
             INST(9U, Opcode::LenArray).s32().Inputs(6U);
             INST(45U, Opcode::Compare).b().CC(CC_GE).Inputs(1U, 9U);
+            INST(35U, Opcode::LoadArray).ref().Inputs(0U, 30U);
             INST(46U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(45U);
         }
+        // v6 = v0[0]
+        // v35 = v0[1]
         // For (v12 = 0, v12 < lenarr(v0[0]), v12++)
-        //     v13 += v0[0][0] + v0[1][0]
+        //     v13 += v6[0] + v35[0]
         BASIC_BLOCK(4U, 3U, 4U)
         {
             INST(12U, Opcode::Phi).s32().Inputs({{2U, 1U}, {4U, 43U}});
             INST(13U, Opcode::Phi).s32().Inputs({{2U, 1U}, {4U, 42U}});
             INST(29U, Opcode::LoadArray).s32().Inputs(6U, 1U);
-            INST(35U, Opcode::LoadArray).ref().Inputs(0U, 30U);
             INST(40U, Opcode::LoadArray).s32().Inputs(35U, 1U);
             INST(41U, Opcode::Add).s32().Inputs(40U, 29U);
             INST(42U, Opcode::Add).s32().Inputs(41U, 13U);
