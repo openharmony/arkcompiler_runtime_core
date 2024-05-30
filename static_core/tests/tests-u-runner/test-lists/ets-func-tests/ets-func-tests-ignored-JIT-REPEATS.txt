@@ -2,8 +2,6 @@
 spec/03.types/References_Types/Bigint/bigint-arithmetic-div-equal-zero.ets
 # #16083
 spec/03.types/References_Types/Bigint/bigint-arithmetic-div-2-operands-zero.ets
-# #16217
-std/core/std_core_typedarrays__Int16Array.ets
 
 # Timeouts. Will be fixed when generics accept primitives as type arguments
 std/core/SortInternalTestShort.ets
