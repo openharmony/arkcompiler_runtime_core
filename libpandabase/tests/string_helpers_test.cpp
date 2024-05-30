@@ -39,7 +39,7 @@ TEST(StringHelpers, Format)
     EXPECT_EQ(Format("%10003s", "abc"), ss.str());
 }
 
-TEST(StringHelpers, ParseInt)
+TEST(StringHelpers, ParseIntFormat)
 {
     errno = 0;
     int i = 0;
@@ -65,7 +65,12 @@ TEST(StringHelpers, ParseInt)
     short s = 0;
     ASSERT_TRUE(ParseInt("1234", &s));
     ASSERT_EQ(1234, s);
+}
 
+TEST(StringHelpers, ParseIntRange)
+{
+    errno = 0;
+    int i = 0;
     // check range
     ASSERT_TRUE(ParseInt("12", &i, 0, 15));
     ASSERT_EQ(12, i);

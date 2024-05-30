@@ -46,6 +46,9 @@ constexpr uint8_t ISA_VERSION_FIRST_NUMBER = panda::panda_file::version[0];
 constexpr uint8_t ISA_VERSION_SECOND_NUMBER = panda::panda_file::version[1];
 constexpr uint8_t ISA_VERSION_THIRD_NUMBER = panda::panda_file::version[2]; // 2: the third number of ISA version
 constexpr uint8_t ISA_VERSION_FOURTH_NUMBER = panda::panda_file::version[3]; // 3: the fourth number of ISA version
+constexpr size_t ELEM_WIDTH = 4;
+constexpr size_t ELEM_PER16 = 16 / ELEM_WIDTH;
+constexpr uint8_t API_VERSION = 11;
 
 HWTEST(ItemContainer, DeduplicationTest, testing::ext::TestSize.Level0)
 {
@@ -226,6 +229,119 @@ static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> &data)
     return File::OpenFromMemory(std::move(ptr));
 }
 
+void TestPandaFile(MemoryWriter& mem_writer, std::unique_ptr<const File>& panda_file,
+                   ClassItem* class_item, ClassItem* empty_class_item, StringItem* source_file,
+                   ClassDataAccessor class_data_accessor)
+{
+    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(ISA_VERSION_FIRST_NUMBER,
+        ISA_VERSION_SECOND_NUMBER, ISA_VERSION_THIRD_NUMBER, ISA_VERSION_FOURTH_NUMBER));
+    EXPECT_EQ(panda_file->GetHeader()->file_size, mem_writer.GetData().size());
+    EXPECT_EQ(panda_file->GetHeader()->foreign_off, 0U);
+    EXPECT_EQ(panda_file->GetHeader()->foreign_size, 0U);
+    EXPECT_EQ(panda_file->GetHeader()->num_classes, 3U);
+    EXPECT_EQ(panda_file->GetHeader()->class_idx_off, sizeof(File::Header));
+
+    const uint32_t *class_index =
+        reinterpret_cast<const uint32_t *>(panda_file->GetBase() + panda_file->GetHeader()->class_idx_off);
+    EXPECT_EQ(class_index[0], class_item->GetOffset());
+    EXPECT_EQ(class_index[1], empty_class_item->GetOffset());
+
+    EXPECT_EQ(class_data_accessor.GetSuperClassId().GetOffset(), empty_class_item->GetOffset());
+    EXPECT_EQ(class_data_accessor.GetAccessFlags(), ACC_PUBLIC);
+    EXPECT_EQ(class_data_accessor.GetFieldsNumber(), 1U);
+    EXPECT_EQ(class_data_accessor.GetMethodsNumber(), 1U);
+    EXPECT_EQ(class_data_accessor.GetIfacesNumber(), 1U);
+    EXPECT_TRUE(class_data_accessor.GetSourceFileId().has_value());
+    EXPECT_EQ(class_data_accessor.GetSourceFileId().value().GetOffset(), source_file->GetOffset());
+    EXPECT_EQ(class_data_accessor.GetSize(), class_item->GetSize());
+}
+
+void TestClassDataAccessor(std::unique_ptr<const File>& panda_file, ClassItem* class_item, ClassItem* iface_item,
+                           AnnotationItem* runtime_annotation_item, ClassDataAccessor class_data_accessor)
+{
+    class_data_accessor.EnumerateInterfaces([&](File::EntityId id) {
+        EXPECT_EQ(id.GetOffset(), iface_item->GetOffset());
+
+        ClassDataAccessor iface_class_data_accessor(*panda_file, id);
+        EXPECT_EQ(iface_class_data_accessor.GetSuperClassId().GetOffset(), 0U);
+        EXPECT_EQ(iface_class_data_accessor.GetAccessFlags(), ACC_PUBLIC);
+        EXPECT_EQ(iface_class_data_accessor.GetFieldsNumber(), 0U);
+        EXPECT_EQ(iface_class_data_accessor.GetMethodsNumber(), 0U);
+        EXPECT_EQ(iface_class_data_accessor.GetIfacesNumber(), 0U);
+        EXPECT_FALSE(iface_class_data_accessor.GetSourceFileId().has_value());
+        EXPECT_EQ(iface_class_data_accessor.GetSize(), iface_item->GetSize());
+    });
+
+    class_data_accessor.EnumerateRuntimeAnnotations([&](File::EntityId id) {
+        EXPECT_EQ(id.GetOffset(), runtime_annotation_item->GetOffset());
+
+        AnnotationDataAccessor data_accessor(*panda_file, id);
+        EXPECT_EQ(data_accessor.GetAnnotationId().GetOffset(), runtime_annotation_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetCount(), 0U);
+    });
+}
+
+void TestAnnotationsAndFields(ClassDataAccessor class_data_accessor, AnnotationItem* annotation_item,
+                              std::unique_ptr<const File>& panda_file, ClassItem* class_item,
+                              FieldItem* field_item, StringItem* field_name)
+{
+    class_data_accessor.EnumerateAnnotations([&](File::EntityId id) {
+        EXPECT_EQ(id.GetOffset(), annotation_item->GetOffset());
+
+        AnnotationDataAccessor data_accessor(*panda_file, id);
+        EXPECT_EQ(data_accessor.GetAnnotationId().GetOffset(), annotation_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetCount(), 0U);
+    });
+
+    class_data_accessor.EnumerateFields([&](FieldDataAccessor &data_accessor) {
+        EXPECT_EQ(data_accessor.GetFieldId().GetOffset(), field_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetNameId().GetOffset(), field_name->GetOffset());
+        EXPECT_EQ(data_accessor.GetType(), Type(Type::TypeId::I32).GetFieldEncoding());
+        EXPECT_EQ(data_accessor.GetAccessFlags(), ACC_PUBLIC);
+        EXPECT_FALSE(data_accessor.GetValue<int32_t>().has_value());
+        EXPECT_EQ(data_accessor.GetSize(), field_item->GetSize());
+
+        data_accessor.EnumerateRuntimeAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
+        data_accessor.EnumerateAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
+    });
+}
+
+void TestMethods(ClassDataAccessor class_data_accessor, MethodItem* method_item, ClassItem* class_item,
+                 StringItem* method_name, ProtoItem* proto_item)
+{
+    class_data_accessor.EnumerateMethods([&](MethodDataAccessor &data_accessor) {
+        EXPECT_FALSE(data_accessor.IsExternal());
+        EXPECT_EQ(data_accessor.GetMethodId().GetOffset(), method_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetNameId().GetOffset(), method_name->GetOffset());
+        EXPECT_EQ(data_accessor.GetProtoId().GetOffset(), proto_item->GetOffset());
+        EXPECT_EQ(data_accessor.GetAccessFlags(), ACC_PUBLIC | ACC_STATIC);
+        EXPECT_FALSE(data_accessor.GetCodeId().has_value());
+        EXPECT_EQ(data_accessor.GetSize(), method_item->GetSize());
+        EXPECT_FALSE(data_accessor.GetRuntimeParamAnnotationId().has_value());
+        EXPECT_FALSE(data_accessor.GetParamAnnotationId().has_value());
+        EXPECT_FALSE(data_accessor.GetDebugInfoId().has_value());
+
+        data_accessor.EnumerateRuntimeAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
+        data_accessor.EnumerateAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
+    });
+}
+
+void TestEmptyClassDataAccessor(std::unique_ptr<const File> &panda_file, ClassItem *empty_class_item)
+{
+    ClassDataAccessor empty_class_data_accessor(*panda_file, File::EntityId(empty_class_item->GetOffset()));
+    EXPECT_EQ(empty_class_data_accessor.GetSuperClassId().GetOffset(), 0U);
+    EXPECT_EQ(empty_class_data_accessor.GetAccessFlags(), 0U);
+    EXPECT_EQ(empty_class_data_accessor.GetFieldsNumber(), 0U);
+    EXPECT_EQ(empty_class_data_accessor.GetMethodsNumber(), 0U);
+    EXPECT_EQ(empty_class_data_accessor.GetIfacesNumber(), 0U);
+    EXPECT_FALSE(empty_class_data_accessor.GetSourceFileId().has_value());
+    EXPECT_EQ(empty_class_data_accessor.GetSize(), empty_class_item->GetSize());
+}
+
 HWTEST(ItemContainer, TestClasses, testing::ext::TestSize.Level0)
 {
     // Write panda file to memory
@@ -296,106 +412,24 @@ HWTEST(ItemContainer, TestClasses, testing::ext::TestSize.Level0)
 
     ASSERT_NE(panda_file, nullptr);
 
-    EXPECT_THAT(panda_file->GetHeader()->version, ::testing::ElementsAre(ISA_VERSION_FIRST_NUMBER,
-        ISA_VERSION_SECOND_NUMBER, ISA_VERSION_THIRD_NUMBER, ISA_VERSION_FOURTH_NUMBER));
-    EXPECT_EQ(panda_file->GetHeader()->file_size, mem_writer.GetData().size());
-    EXPECT_EQ(panda_file->GetHeader()->foreign_off, 0U);
-    EXPECT_EQ(panda_file->GetHeader()->foreign_size, 0U);
-    EXPECT_EQ(panda_file->GetHeader()->num_classes, 3U);
-    EXPECT_EQ(panda_file->GetHeader()->class_idx_off, sizeof(File::Header));
-
-    const uint32_t *class_index =
-        reinterpret_cast<const uint32_t *>(panda_file->GetBase() + panda_file->GetHeader()->class_idx_off);
-    EXPECT_EQ(class_index[0], class_item->GetOffset());
-    EXPECT_EQ(class_index[1], empty_class_item->GetOffset());
-
     std::vector<uint8_t> class_name {'B', 'a', 'r', '\0'};
     auto class_id = panda_file->GetClassId(class_name.data());
     EXPECT_EQ(class_id.GetOffset(), class_item->GetOffset());
 
     ClassDataAccessor class_data_accessor(*panda_file, class_id);
-    EXPECT_EQ(class_data_accessor.GetSuperClassId().GetOffset(), empty_class_item->GetOffset());
-    EXPECT_EQ(class_data_accessor.GetAccessFlags(), ACC_PUBLIC);
-    EXPECT_EQ(class_data_accessor.GetFieldsNumber(), 1U);
-    EXPECT_EQ(class_data_accessor.GetMethodsNumber(), 1U);
-    EXPECT_EQ(class_data_accessor.GetIfacesNumber(), 1U);
-    EXPECT_TRUE(class_data_accessor.GetSourceFileId().has_value());
-    EXPECT_EQ(class_data_accessor.GetSourceFileId().value().GetOffset(), source_file->GetOffset());
-    EXPECT_EQ(class_data_accessor.GetSize(), class_item->GetSize());
 
-    class_data_accessor.EnumerateInterfaces([&](File::EntityId id) {
-        EXPECT_EQ(id.GetOffset(), iface_item->GetOffset());
-
-        ClassDataAccessor iface_class_data_accessor(*panda_file, id);
-        EXPECT_EQ(iface_class_data_accessor.GetSuperClassId().GetOffset(), 0U);
-        EXPECT_EQ(iface_class_data_accessor.GetAccessFlags(), ACC_PUBLIC);
-        EXPECT_EQ(iface_class_data_accessor.GetFieldsNumber(), 0U);
-        EXPECT_EQ(iface_class_data_accessor.GetMethodsNumber(), 0U);
-        EXPECT_EQ(iface_class_data_accessor.GetIfacesNumber(), 0U);
-        EXPECT_FALSE(iface_class_data_accessor.GetSourceFileId().has_value());
-        EXPECT_EQ(iface_class_data_accessor.GetSize(), iface_item->GetSize());
-    });
-
-    class_data_accessor.EnumerateRuntimeAnnotations([&](File::EntityId id) {
-        EXPECT_EQ(id.GetOffset(), runtime_annotation_item->GetOffset());
-
-        AnnotationDataAccessor data_accessor(*panda_file, id);
-        EXPECT_EQ(data_accessor.GetAnnotationId().GetOffset(), runtime_annotation_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetCount(), 0U);
-    });
+    TestPandaFile(mem_writer, panda_file, class_item, empty_class_item, source_file, class_data_accessor);
+    TestClassDataAccessor(panda_file, class_item, iface_item, runtime_annotation_item, class_data_accessor);
 
     // Annotation is the same as the runtime one, so we deduplicate it
     EXPECT_FALSE(annotation_item->NeedsEmit());
     annotation_item = runtime_annotation_item;
 
-    class_data_accessor.EnumerateAnnotations([&](File::EntityId id) {
-        EXPECT_EQ(id.GetOffset(), annotation_item->GetOffset());
+    TestAnnotationsAndFields(class_data_accessor, annotation_item, panda_file, class_item, field_item, field_name);
 
-        AnnotationDataAccessor data_accessor(*panda_file, id);
-        EXPECT_EQ(data_accessor.GetAnnotationId().GetOffset(), annotation_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetCount(), 0U);
-    });
+    TestMethods(class_data_accessor, method_item, class_item, method_name, proto_item);
 
-    class_data_accessor.EnumerateFields([&](FieldDataAccessor &data_accessor) {
-        EXPECT_EQ(data_accessor.GetFieldId().GetOffset(), field_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetNameId().GetOffset(), field_name->GetOffset());
-        EXPECT_EQ(data_accessor.GetType(), Type(Type::TypeId::I32).GetFieldEncoding());
-        EXPECT_EQ(data_accessor.GetAccessFlags(), ACC_PUBLIC);
-        EXPECT_FALSE(data_accessor.GetValue<int32_t>().has_value());
-        EXPECT_EQ(data_accessor.GetSize(), field_item->GetSize());
-
-        data_accessor.EnumerateRuntimeAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
-        data_accessor.EnumerateAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
-    });
-
-    class_data_accessor.EnumerateMethods([&](MethodDataAccessor &data_accessor) {
-        EXPECT_FALSE(data_accessor.IsExternal());
-        EXPECT_EQ(data_accessor.GetMethodId().GetOffset(), method_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetNameId().GetOffset(), method_name->GetOffset());
-        EXPECT_EQ(data_accessor.GetProtoId().GetOffset(), proto_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetAccessFlags(), ACC_PUBLIC | ACC_STATIC);
-        EXPECT_FALSE(data_accessor.GetCodeId().has_value());
-        EXPECT_EQ(data_accessor.GetSize(), method_item->GetSize());
-        EXPECT_FALSE(data_accessor.GetRuntimeParamAnnotationId().has_value());
-        EXPECT_FALSE(data_accessor.GetParamAnnotationId().has_value());
-        EXPECT_FALSE(data_accessor.GetDebugInfoId().has_value());
-
-        data_accessor.EnumerateRuntimeAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
-        data_accessor.EnumerateAnnotations([](File::EntityId) { EXPECT_TRUE(false); });
-    });
-
-    ClassDataAccessor empty_class_data_accessor(*panda_file, File::EntityId(empty_class_item->GetOffset()));
-    EXPECT_EQ(empty_class_data_accessor.GetSuperClassId().GetOffset(), 0U);
-    EXPECT_EQ(empty_class_data_accessor.GetAccessFlags(), 0U);
-    EXPECT_EQ(empty_class_data_accessor.GetFieldsNumber(), 0U);
-    EXPECT_EQ(empty_class_data_accessor.GetMethodsNumber(), 0U);
-    EXPECT_EQ(empty_class_data_accessor.GetIfacesNumber(), 0U);
-    EXPECT_FALSE(empty_class_data_accessor.GetSourceFileId().has_value());
-    EXPECT_EQ(empty_class_data_accessor.GetSize(), empty_class_item->GetSize());
+    TestEmptyClassDataAccessor(panda_file, empty_class_item);
 }
 
 HWTEST(ItemContainer, TestMethods, testing::ext::TestSize.Level0)
@@ -439,7 +473,6 @@ HWTEST(ItemContainer, TestMethods, testing::ext::TestSize.Level0)
         EXPECT_EQ(data_accessor.GetClassId().GetOffset(), class_item->GetOffset());
         EXPECT_EQ(data_accessor.GetNameId().GetOffset(), method_name->GetOffset());
         EXPECT_EQ(data_accessor.GetProtoId().GetOffset(), proto_item->GetOffset());
-        EXPECT_EQ(data_accessor.GetProtoIdx(), INVALID_INDEX_16);
         EXPECT_EQ(data_accessor.GetAccessFlags(), ACC_PUBLIC | ACC_STATIC);
         EXPECT_EQ(data_accessor.GetSize(), method_item->GetSize());
 
@@ -474,52 +507,9 @@ HWTEST(ItemContainer, TestMethods, testing::ext::TestSize.Level0)
     });
 }
 
-void TestProtos(size_t n)
+void TestProtoDataAccessor(MemoryWriter& mem_writer, ClassItem* class_item, MethodItem* method_item,
+                           ProtoItem* proto_item, std::vector<Type::TypeId> types, std::vector<ClassItem *> ref_types)
 {
-    constexpr size_t ELEM_WIDTH = 4;
-    constexpr size_t ELEM_PER16 = 16 / ELEM_WIDTH;
-    constexpr uint8_t API_VERSION = 11;
-
-    // Write panda file to memory
-    ItemContainer::SetApi(API_VERSION);
-    ItemContainer container;
-
-    ClassItem *class_item = container.GetOrCreateClassItem("A");
-    class_item->SetAccessFlags(ACC_PUBLIC);
-
-    StringItem *method_name = container.GetOrCreateStringItem("foo");
-
-    std::vector<Type::TypeId> types {Type::TypeId::VOID, Type::TypeId::I32};
-    std::vector<ClassItem *> ref_types;
-
-    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
-    std::vector<MethodParamItem> params;
-
-    params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
-
-    for (size_t i = 0; i < ELEM_PER16 * 2 - 2; i++) {
-        params.emplace_back(container.GetOrCreateClassItem("B"));
-        types.push_back(Type::TypeId::REFERENCE);
-        ref_types.push_back(container.GetOrCreateClassItem("B"));
-        params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F64));
-        types.push_back(Type::TypeId::F64);
-    }
-
-    for (size_t i = 0; i < n; i++) {
-        params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F32));
-        types.push_back(Type::TypeId::F32);
-    }
-
-    ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
-
-    MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
-
-    MemoryWriter mem_writer;
-
-    ASSERT_TRUE(container.Write(&mem_writer));
-
-    // Read panda file from memory
-
     auto data = mem_writer.GetData();
     auto panda_file = GetPandaFile(data);
 
@@ -564,6 +554,51 @@ void TestProtos(size_t n)
         EXPECT_EQ(proto_data_accessor.GetSize(), size);
         EXPECT_EQ(proto_data_accessor.GetSize(), proto_item->GetSize());
     });
+}
+
+void TestProtos(size_t n)
+{
+    // Write panda file to memory
+    ItemContainer::SetApi(API_VERSION);
+    ItemContainer container;
+
+    ClassItem *class_item = container.GetOrCreateClassItem("A");
+    class_item->SetAccessFlags(ACC_PUBLIC);
+
+    StringItem *method_name = container.GetOrCreateStringItem("foo");
+
+    std::vector<Type::TypeId> types {Type::TypeId::VOID, Type::TypeId::I32};
+    std::vector<ClassItem *> ref_types;
+
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params;
+
+    params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
+
+    for (size_t i = 0; i < ELEM_PER16 * 2 - 2; i++) {
+        params.emplace_back(container.GetOrCreateClassItem("B"));
+        types.push_back(Type::TypeId::REFERENCE);
+        ref_types.push_back(container.GetOrCreateClassItem("B"));
+        params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F64));
+        types.push_back(Type::TypeId::F64);
+    }
+
+    for (size_t i = 0; i < n; i++) {
+        params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F32));
+        types.push_back(Type::TypeId::F32);
+    }
+
+    ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
+
+    MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
+
+    MemoryWriter mem_writer;
+
+    ASSERT_TRUE(container.Write(&mem_writer));
+
+    // Read panda file from memory
+
+    TestProtoDataAccessor(mem_writer, class_item, method_item, proto_item, types, ref_types);
 }
 
 HWTEST(ItemContainer, TestProtos, testing::ext::TestSize.Level0)
@@ -817,10 +852,8 @@ HWTEST(ItemContainer, ContainerChecksum, testing::ext::TestSize.Level0)
     EXPECT_EQ(file->GetHeader()->checksum, checksum);
 }
 
-HWTEST(ItemContainer, TestProfileGuidedRelayout, testing::ext::TestSize.Level0)
+void CreateItems(ItemContainer& container)
 {
-    ItemContainer container;
-
     // Add classes
     ClassItem *empty_class_item = container.GetOrCreateClassItem("LTest;");
     ClassItem *class_item_a = container.GetOrCreateClassItem("LAA;");
@@ -875,14 +908,12 @@ HWTEST(ItemContainer, TestProfileGuidedRelayout, testing::ext::TestSize.Level0)
     // Add source file
     StringItem *source_file = container.GetOrCreateStringItem("source_file");
     class_item_a->SetSourceFile(source_file);
+}
 
-    constexpr std::string_view PRIMITIVE_TYPE_ITEM = "primitive_type_item";
-    constexpr std::string_view PROTO_ITEM = "proto_item";
-    constexpr std::string_view END_ITEM = "end_item";
-
-    // Items before PGO
-    const auto &items = container.GetItems();
-    auto item = items.begin();
+void CheckItemBeforePGO1(std::list<std::unique_ptr<BaseItem>>::const_iterator& item,
+                         std::string_view PRIMITIVE_TYPE_ITEM,
+                         std::string_view PROTO_ITEM, std::string_view END_ITEM)
+{
     EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
     EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
     item++;
@@ -906,6 +937,12 @@ HWTEST(ItemContainer, TestProfileGuidedRelayout, testing::ext::TestSize.Level0)
     item++;
     EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
     item++;
+}
+
+void CheckItemBeforePGO2(std::list<std::unique_ptr<BaseItem>>::const_iterator& item,
+                         std::string_view PRIMITIVE_TYPE_ITEM,
+                         std::string_view PROTO_ITEM, std::string_view END_ITEM)
+{
     EXPECT_EQ((*item)->GetName(), STRING_ITEM);
     EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
     item++;
@@ -934,6 +971,87 @@ HWTEST(ItemContainer, TestProfileGuidedRelayout, testing::ext::TestSize.Level0)
     item++;
     EXPECT_EQ((*item)->GetName(), END_ITEM);
     item++;
+}
+
+void CheckItemAfterPGO1(std::list<std::unique_ptr<BaseItem>>::const_iterator& item,
+                        std::string_view PRIMITIVE_TYPE_ITEM,
+                        std::string_view PROTO_ITEM, std::string_view END_ITEM)
+{
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
+    item++;
+    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
+    item++;
+}
+
+void CheckItemAfterPGO2(std::list<std::unique_ptr<BaseItem>>::const_iterator& item,
+                        std::string_view PRIMITIVE_TYPE_ITEM,
+                        std::string_view PROTO_ITEM, std::string_view END_ITEM)
+{
+    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
+    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
+    item++;
+    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), END_ITEM);
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "BB::foo2");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "Test::foo3");
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[1], "Test::foo4");
+    item++;
+    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
+    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "AA::foo1");
+    item++;
+}
+
+HWTEST(ItemContainer, TestProfileGuidedRelayout, testing::ext::TestSize.Level0)
+{
+    ItemContainer container;
+
+    // Add
+    CreateItems(container);
+
+    constexpr std::string_view PRIMITIVE_TYPE_ITEM = "primitive_type_item";
+    constexpr std::string_view PROTO_ITEM = "proto_item";
+    constexpr std::string_view END_ITEM = "end_item";
+
+    // Items before PGO
+    const auto &items = container.GetItems();
+    auto item = items.begin();
+    CheckItemBeforePGO1(item, PRIMITIVE_TYPE_ITEM, PROTO_ITEM, END_ITEM);
+    CheckItemBeforePGO2(item, PRIMITIVE_TYPE_ITEM, PROTO_ITEM, END_ITEM);
     EXPECT_EQ(item, items.end());
 
     // Prepare profile data
@@ -953,105 +1071,13 @@ HWTEST(ItemContainer, TestProfileGuidedRelayout, testing::ext::TestSize.Level0)
 
     // Items after PGO
     item = items.begin();
-    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "test_field");
-    item++;
-    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo1");
-    item++;
-    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo2");
-    item++;
-    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo3");
-    item++;
-    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "foo4");
-    item++;
-    EXPECT_EQ((*item)->GetName(), STRING_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "source_file");
-    item++;
-    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "BB");
-    item++;
-    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "Test");
-    item++;
-    EXPECT_EQ((*item)->GetName(), CLASS_ITEM);
-    EXPECT_EQ(panda::panda_file::pgo::ProfileOptimizer::GetNameInfo(*item), "AA");
-    item++;
-    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
-    item++;
-    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
-    item++;
-    EXPECT_EQ((*item)->GetName(), PRIMITIVE_TYPE_ITEM);
-    item++;
-    EXPECT_EQ((*item)->GetName(), PROTO_ITEM);
-    item++;
-    EXPECT_EQ((*item)->GetName(), END_ITEM);
-    item++;
-    EXPECT_EQ((*item)->GetName(), END_ITEM);
-    item++;
-    EXPECT_EQ((*item)->GetName(), END_ITEM);
-    item++;
-    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
-    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "BB::foo2");
-    item++;
-    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
-    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "Test::foo3");
-    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[1], "Test::foo4");
-    item++;
-    EXPECT_EQ((*item)->GetName(), CODE_ITEM);
-    EXPECT_EQ(static_cast<CodeItem *>((*item).get())->GetMethodNames()[0], "AA::foo1");
-    item++;
+    CheckItemAfterPGO1(item, PRIMITIVE_TYPE_ITEM, PROTO_ITEM, END_ITEM);
+    CheckItemAfterPGO2(item, PRIMITIVE_TYPE_ITEM, PROTO_ITEM, END_ITEM);
     EXPECT_EQ(item, items.end());
 }
 
-HWTEST(ItemContainer, GettersTest, testing::ext::TestSize.Level0)
+void PerformTests(ItemContainer& container)
 {
-    ItemContainer container;
-
-    ClassItem *empty_class_item = container.GetOrCreateClassItem("Foo");
-
-    ClassItem *class_item = container.GetOrCreateClassItem("Bar");
-    class_item->SetAccessFlags(ACC_PUBLIC);
-    class_item->SetSuperClass(empty_class_item);
-
-    // Add methods
-
-    StringItem *method_name1 = container.GetOrCreateStringItem("foo1");
-
-    PrimitiveTypeItem *ret_type1 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
-    std::vector<MethodParamItem> params1;
-    params1.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
-    ProtoItem *proto_item1 = container.GetOrCreateProtoItem(ret_type1, params1);
-
-    class_item->AddMethod(method_name1, proto_item1, ACC_PUBLIC | ACC_STATIC, params1);
-
-    StringItem *method_name2 = container.GetOrCreateStringItem("foo2");
-
-    PrimitiveTypeItem *ret_type2 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
-    std::vector<MethodParamItem> params2;
-    params2.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F32));
-    ProtoItem *proto_item2 = container.GetOrCreateProtoItem(ret_type2, params2);
-
-    class_item->AddMethod(method_name2, proto_item2, ACC_PUBLIC | ACC_STATIC, params2);
-
-    // Add field
-
-    StringItem *field_name = container.GetOrCreateStringItem("field");
-    PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
-
-    class_item->AddField(field_name, field_type, ACC_PUBLIC);
-
-    // Add source file
-
-    StringItem *source_file = container.GetOrCreateStringItem("source_file");
-
-    class_item->SetSourceFile(source_file);
-
-    // Read items from container
-
     ASSERT_TRUE(container.GetItems().size() == 14);
 
     std::map<std::string, panda_file::BaseClassItem *> *class_map = container.GetClassMap();
@@ -1103,6 +1129,54 @@ HWTEST(ItemContainer, GettersTest, testing::ext::TestSize.Level0)
 
     panda_file::BaseItem::VisitorCallBack cb_field = TestField;
     rclass_item->VisitFields(cb_field);
+}
+
+HWTEST(ItemContainer, GettersTest, testing::ext::TestSize.Level0)
+{
+    ItemContainer container;
+
+    ClassItem *empty_class_item = container.GetOrCreateClassItem("Foo");
+
+    ClassItem *class_item = container.GetOrCreateClassItem("Bar");
+    class_item->SetAccessFlags(ACC_PUBLIC);
+    class_item->SetSuperClass(empty_class_item);
+
+    // Add methods
+
+    StringItem *method_name1 = container.GetOrCreateStringItem("foo1");
+
+    PrimitiveTypeItem *ret_type1 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params1;
+    params1.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
+    ProtoItem *proto_item1 = container.GetOrCreateProtoItem(ret_type1, params1);
+
+    class_item->AddMethod(method_name1, proto_item1, ACC_PUBLIC | ACC_STATIC, params1);
+
+    StringItem *method_name2 = container.GetOrCreateStringItem("foo2");
+
+    PrimitiveTypeItem *ret_type2 = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+    std::vector<MethodParamItem> params2;
+    params2.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::F32));
+    ProtoItem *proto_item2 = container.GetOrCreateProtoItem(ret_type2, params2);
+
+    class_item->AddMethod(method_name2, proto_item2, ACC_PUBLIC | ACC_STATIC, params2);
+
+    // Add field
+
+    StringItem *field_name = container.GetOrCreateStringItem("field");
+    PrimitiveTypeItem *field_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32);
+
+    class_item->AddField(field_name, field_type, ACC_PUBLIC);
+
+    // Add source file
+
+    StringItem *source_file = container.GetOrCreateStringItem("source_file");
+
+    class_item->SetSourceFile(source_file);
+
+    // Read items from container
+
+    PerformTests(container);
 }
 
 HWTEST(ItemContainer, IndexedItemGlobalIndexTest, testing::ext::TestSize.Level0)

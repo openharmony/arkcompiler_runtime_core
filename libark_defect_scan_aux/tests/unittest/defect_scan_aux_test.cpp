@@ -110,15 +110,20 @@ static const Class *CheckClass(std::unique_ptr<const AbcFile> &abc_file, std::st
     return class0;
 }
 
-HWTEST(DefectScanAuxTest, DefineInfoTest, testing::ext::TestSize.Level0)
+void CheckAbcFile(std::unique_ptr<const AbcFile> &abc_file, size_t test_def_func_cnt, size_t test_def_class_cnt)
+{
+    ASSERT_NE(abc_file, nullptr);
+    size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
+    EXPECT_EQ(def_func_cnt, test_def_func_cnt);
+    size_t def_class_cnt = abc_file->GetDefinedClassCount();
+    EXPECT_EQ(def_class_cnt, test_def_class_cnt);
+}
+
+HWTEST(DefectScanAuxTest, DefineInfoFuncTest, testing::ext::TestSize.Level0)
 {
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "define_info_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
-    ASSERT(abc_file != nullptr);
-size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
-    EXPECT_EQ(def_func_cnt, 30U);
-    size_t def_class_cnt = abc_file->GetDefinedClassCount();
-    EXPECT_EQ(def_class_cnt, 10U);
+    CheckAbcFile(abc_file, 30U, 10U);
 
     // check each defined func
     // func_main_0
@@ -152,8 +157,7 @@ size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
     EXPECT_EQ(f2->GetArgCount(), 3U);
     size_t dc_cnt2 = f2->GetDefinedClassCount();
     EXPECT_EQ(dc_cnt2, 2U);
-    EXPECT_EQ(f2->GetDefinedClassByIndex(0)->GetClassName(),
-                            "#*@2~@1=#Bar");
+    EXPECT_EQ(f2->GetDefinedClassByIndex(0)->GetClassName(), "#*@2~@1=#Bar");
     EXPECT_EQ(f2->GetDefinedClassByIndex(1)->GetClassName(), "#*@2~@3=#Bar2");
     size_t df_cnt2 = f2->GetDefinedFunctionCount();
     EXPECT_EQ(df_cnt2, 7U);
@@ -162,8 +166,17 @@ size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
     EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@3>#a"));
     EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@3>#symbol"));
     EXPECT_TRUE(ContainDefinedFunction(abc_file, f2, "#*@2~@3>#func15"));
+}
+
+HWTEST(DefectScanAuxTest, DefineInfoClassTest, testing::ext::TestSize.Level0)
+{
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "define_info_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    CheckAbcFile(abc_file, 30U, 10U);
+
     // check each defined class
     // #1#Bar
+    auto f0 = CheckFunction(abc_file, "func_main_0");
     auto class0 = CheckClass(abc_file, "#~@1=#Bar");
     ASSERT_TRUE(class0->GetParentClass() == nullptr);
     ASSERT_TRUE(class0->GetDefiningFunction() == f0);
@@ -256,15 +269,11 @@ HWTEST(DefectScanAuxTest, DebugInfoTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(abc_file->GetLineNumberByInst(f2, ci2_1->GetCallInst()), 75);
 }
 
-HWTEST(DefectScanAuxTest, CalleeInfoTest, testing::ext::TestSize.Level0)
+HWTEST(DefectScanAuxTest, CalleeInfoTest1, testing::ext::TestSize.Level0)
 {
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "callee_info_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
-    ASSERT_NE(abc_file, nullptr);
-    size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
-    EXPECT_EQ(def_func_cnt, 19U);
-    size_t def_class_cnt = abc_file->GetDefinedClassCount();
-    EXPECT_EQ(def_class_cnt, 2U);
+    CheckAbcFile(abc_file, 19U, 2U);
 
     // check callee info of each func
     // foo
@@ -307,6 +316,15 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest, testing::ext::TestSize.Level0)
     ASSERT_NE(ci0_5, nullptr);
     ASSERT_FALSE(ci0_5->IsCalleeDefinite());
     EXPECT_EQ(ci0_5->GetFunctionName(), "bar");
+}
+
+HWTEST(DefectScanAuxTest, CalleeInfoTest2, testing::ext::TestSize.Level0)
+{
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "callee_info_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    CheckAbcFile(abc_file, 19U, 2U);
+
+    // check callee info of each func
     // foo1
     auto f1 = abc_file->GetFunctionByName("#*#foo1");
     ASSERT_NE(f1, nullptr);
@@ -343,6 +361,15 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest, testing::ext::TestSize.Level0)
     EXPECT_FALSE(ci3_0->IsCalleeDefinite());
     EXPECT_EQ(ci3_0->GetFunctionName(), "bar");
     EXPECT_EQ(ci3_0->GetExternalModuleName(), "./mod2");
+}
+
+HWTEST(DefectScanAuxTest, CalleeInfoTest3, testing::ext::TestSize.Level0)
+{
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "callee_info_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    CheckAbcFile(abc_file, 19U, 2U);
+
+    // check callee info of each func
     // func7
     auto f4 = abc_file->GetFunctionByName("#*@5*#func7");
     ASSERT_NE(f4, nullptr);
@@ -379,6 +406,15 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(ci5_1->GetClass(), abc_file->GetClassByName("#~@2=#Point"));
     EXPECT_TRUE(ci5_1->GetCallee() != nullptr);
     EXPECT_EQ(ci5_1->GetCallee(), abc_file->GetFunctionByName("#~@2>#setCoordinateX"));
+}
+
+HWTEST(DefectScanAuxTest, CalleeInfoTest4, testing::ext::TestSize.Level0)
+{
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "callee_info_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    CheckAbcFile(abc_file, 19U, 2U);
+
+    // check callee info of each func
     // callMemberFunc2
     auto f6 = abc_file->GetFunctionByName("#*@6*@7*#callMemberFunc2");
     ASSERT_NE(f6, nullptr);
@@ -453,8 +489,17 @@ HWTEST(DefectScanAuxTest, GraphTest, testing::ext::TestSize.Level0)
                                 inst_cnt_table[InstType::WIDE_GETMODULENAMESPACE_PREF_IMM16],
                             0U);
     EXPECT_EQ(inst_cnt_table[InstType::OPCODE_PARAMETER], 5U);
+}
 
+HWTEST(DefectScanAuxTest, BasicBlockTest, testing::ext::TestSize.Level0)
+{
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "graph_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    ASSERT_NE(abc_file, nullptr);
+    auto f0 = CheckFunction(abc_file, "#*#foo");
+    ASSERT_NE(f0, nullptr);
     // check api of basic block
+    auto &graph = f0->GetGraph();
     auto bb0 = graph.GetStartBasicBlock();
     EXPECT_EQ(bb0.GetPredBlocks().size(), 0U);
     EXPECT_EQ(bb0.GetSuccBlocks().size(), 1U);
@@ -477,8 +522,16 @@ HWTEST(DefectScanAuxTest, GraphTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(bb3.GetPredBlocks().size(), 2U);
     EXPECT_EQ(bb4.GetPredBlocks().size(), 1U);
     EXPECT_EQ(bb4.GetPredBlocks()[0], bb1);
+}
 
-    // check api of inst
+HWTEST(DefectScanAuxTest, InstTest1, testing::ext::TestSize.Level0)
+{
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "graph_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    ASSERT_NE(abc_file, nullptr);
+    auto f0 = CheckFunction(abc_file, "#*#foo");
+    ASSERT_NE(f0, nullptr);
+    // Test 1 : check api of inst
     size_t ci_cnt = f0->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt, 6U);
     auto ci0 = f0->GetCalleeInfoByIndex(ci_cnt - 1);
@@ -499,7 +552,17 @@ HWTEST(DefectScanAuxTest, GraphTest, testing::ext::TestSize.Level0)
                             call_inst0_in3_type == InstType::LDOBJBYNAME_IMM16_ID16);
     EXPECT_EQ(call_inst0_ins[3].GetUserInsts().size(), 1U);
     EXPECT_EQ(call_inst0_ins[3].GetUserInsts()[0], call_inst0);
+}
 
+HWTEST(DefectScanAuxTest, InstTest2, testing::ext::TestSize.Level0)
+{
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "graph_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    ASSERT_NE(abc_file, nullptr);
+    auto f0 = CheckFunction(abc_file, "#*#foo");
+    ASSERT_NE(f0, nullptr);
+    // Test 2 : check api of inst
+    size_t ci_cnt = f0->GetCalleeInfoCount();
     auto ci1 = f0->GetCalleeInfoByIndex(ci_cnt - 2);
     auto call_inst1 = ci1->GetCallInst();
     auto call_inst1_ins = call_inst1.GetInputInsts();
@@ -530,7 +593,7 @@ HWTEST(DefectScanAuxTest, GraphTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(add2_inst_ins[1].GetType(), InstType::OPCODE_PARAMETER);
 }
 
-HWTEST(DefectScanAuxTest, ModuleInfoTest, testing::ext::TestSize.Level0)
+HWTEST(DefectScanAuxTest, ModuleInfoClassTest, testing::ext::TestSize.Level0)
 {
     const std::string USER_INPUT = "#~@1=#UserInput";
     const std::string UI_INPUT = "UInput";
@@ -543,11 +606,7 @@ HWTEST(DefectScanAuxTest, ModuleInfoTest, testing::ext::TestSize.Level0)
 
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "module_info_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
-    ASSERT(abc_file != nullptr);
-    size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
-    EXPECT_EQ(def_func_cnt, 8U);
-    size_t def_class_cnt = abc_file->GetDefinedClassCount();
-    EXPECT_EQ(def_class_cnt, 2U);
+    CheckAbcFile(abc_file, 8U, 2U);
 
     // check exported class
     std::string inter_name0 = abc_file->GetLocalNameByExportName(UI_INPUT);
@@ -571,6 +630,22 @@ HWTEST(DefectScanAuxTest, ModuleInfoTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(mf_func1_1->GetFunctionName(), GET_TEXT_BASE);
     ASSERT_TRUE(mf_func1_1->GetClass() == par_class);
     CheckFunction(abc_file, GET_TEXT_BASE);
+}
+
+HWTEST(DefectScanAuxTest, ModuleInfoTest, testing::ext::TestSize.Level0)
+{
+    const std::string USER_INPUT = "#~@1=#UserInput";
+    const std::string UI_INPUT = "UInput";
+    const std::string GET_TEXT = "#~@1>#getText";
+    const std::string INNER_USER_INPUT = "#~@0=#InnerUserInput";
+    const std::string GET_TEXT_BASE = "#~@0>#getTextBase";
+    const std::string FUNC1 = "#*#func1";
+    const std::string FUNC2 = "#*#func2";
+    const std::string FUNC3 = "#*#func3";
+
+    std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "module_info_test.abc";
+    auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    CheckAbcFile(abc_file, 8U, 2U);
 
     // check exported func
     // func3

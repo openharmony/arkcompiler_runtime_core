@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 
 namespace panda::utf::test {
 
-HWTEST(Utf, ConvertMUtf8ToUtf16, testing::ext::TestSize.Level0)
+HWTEST(Utf, ConvertMUtf8ToUtf16_1, testing::ext::TestSize.Level0)
 {
     // 2-byte mutf-8 U+0000
     {
@@ -60,8 +60,11 @@ HWTEST(Utf, ConvertMUtf8ToUtf16, testing::ext::TestSize.Level0)
         ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
         EXPECT_EQ(out, res);
     }
+}
 
-    // double 3-byte mutf-8: 11101101 1010xxxx 10xxxxxx 11101101 1011xxxx 10xxxxxx
+// double 3-byte mutf-8: 11101101 1010xxxx 10xxxxxx 11101101 1011xxxx 10xxxxxx
+HWTEST(Utf, ConvertMUtf8ToUtf16_2, testing::ext::TestSize.Level0)
+{
     {
         const std::vector<uint8_t> in {0xed, 0xa0, 0x81, 0xed, 0xb0, 0xb7, 0x00};
         const std::vector<uint16_t> res {0xd801, 0xdc37};
@@ -131,7 +134,7 @@ HWTEST(Utf, Utf16ToMUtf8Size, testing::ext::TestSize.Level0)
     }
 }
 
-HWTEST(Utf, ConvertRegionUtf16ToMUtf8, testing::ext::TestSize.Level0)
+HWTEST(Utf, ConvertRegionUtf16ToMUtf8_1, testing::ext::TestSize.Level0)
 {
     // 2-byte mutf-8 U+0000
     {
@@ -176,7 +179,10 @@ HWTEST(Utf, ConvertRegionUtf16ToMUtf8, testing::ext::TestSize.Level0)
         out[out.size() - 1] = '\0';
         EXPECT_EQ(out, res);
     }
+}
 
+HWTEST(Utf, ConvertRegionUtf16ToMUtf8_2, testing::ext::TestSize.Level0)
+{
     // 3-byte mutf-8: 1110xxxx 10xxxxxx 10xxxxxx
     // utf-16 data in 0xd800-0xdfff
     {
@@ -213,9 +219,9 @@ HWTEST(Utf, ConvertRegionUtf16ToMUtf8, testing::ext::TestSize.Level0)
     }
 }
 
-HWTEST(Utf, CompareMUtf8ToMUtf8, testing::ext::TestSize.Level0)
+// 1-byte utf-8: 0xxxxxxx
+HWTEST(Utf, CompareMUtf8ToMUtf8_1, testing::ext::TestSize.Level0)
 {
-    // 1-byte utf-8: 0xxxxxxx
     {
         const std::vector<uint8_t> v1 {0x00};
         const std::vector<uint8_t> v2 {0x7f, 0x00};
@@ -245,8 +251,11 @@ HWTEST(Utf, CompareMUtf8ToMUtf8, testing::ext::TestSize.Level0)
         const std::vector<uint8_t> v2 {0x01, 0x73, 0x00};
         EXPECT_TRUE(CompareMUtf8ToMUtf8(v1.data(), v2.data()) < 0);
     }
+}
 
-    // 2-byte utf-8: 110xxxxx 10xxxxxx
+// 2-byte utf-8: 110xxxxx 10xxxxxx
+HWTEST(Utf, CompareMUtf8ToMUtf8_2, testing::ext::TestSize.Level0)
+{
     {
         const std::vector<uint8_t> v1 {0xdf, 0xbf, 0x03, 0x00};
         const std::vector<uint8_t> v2 {0xdf, 0xbf, 0x03, 0x00};
@@ -264,8 +273,11 @@ HWTEST(Utf, CompareMUtf8ToMUtf8, testing::ext::TestSize.Level0)
         const std::vector<uint8_t> v2 {0xdf, 0xb0, 0x03, 0x00};
         EXPECT_TRUE(CompareMUtf8ToMUtf8(v1.data(), v2.data()) < 0);
     }
+}
 
-    // 3-byte utf-8: 1110xxxx 10xxxxxx 10xxxxxx
+// 3-byte utf-8: 1110xxxx 10xxxxxx 10xxxxxx
+HWTEST(Utf, CompareMUtf8ToMUtf8_3, testing::ext::TestSize.Level0)
+{
     {
         const std::vector<uint8_t> v1 {0xef, 0xbf, 0x03, 0x04, 0x00};
         const std::vector<uint8_t> v2 {0xef, 0xbf, 0x03, 0x04, 0x00};
@@ -283,8 +295,11 @@ HWTEST(Utf, CompareMUtf8ToMUtf8, testing::ext::TestSize.Level0)
         const std::vector<uint8_t> v2 {0xef, 0xbf, 0x05, 0x04, 0x00};
         EXPECT_TRUE(CompareMUtf8ToMUtf8(v1.data(), v2.data()) < 0);
     }
+}
 
-    // 4-byte utf-8: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+// 4-byte utf-8: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+HWTEST(Utf, CompareMUtf8ToMUtf8_4, testing::ext::TestSize.Level0)
+{
     {
         const std::vector<uint8_t> v1 {0xf7, 0xbf, 0xbf, 0x04, 0x05, 0x00};
         const std::vector<uint8_t> v2 {0xf7, 0xbf, 0xbf, 0x04, 0x05, 0x00};
@@ -304,9 +319,9 @@ HWTEST(Utf, CompareMUtf8ToMUtf8, testing::ext::TestSize.Level0)
     }
 }
 
-HWTEST(Utf, CompareUtf8ToUtf8, testing::ext::TestSize.Level0)
+// 1-byte utf-8: 0xxxxxxx
+HWTEST(Utf, CompareUtf8ToUtf8_1, testing::ext::TestSize.Level0)
 {
-    // 1-byte utf-8: 0xxxxxxx
     {
         const std::vector<uint8_t> v1 {0x00};
         const std::vector<uint8_t> v2 {0x7f, 0x00};
@@ -336,8 +351,11 @@ HWTEST(Utf, CompareUtf8ToUtf8, testing::ext::TestSize.Level0)
         const std::vector<uint8_t> v2 {0x01, 0x73, 0x00};
         EXPECT_TRUE(CompareUtf8ToUtf8(v1.data(), v1.size(), v2.data(), v2.size()) < 0);
     }
+}
 
-    // 2-byte utf-8: 110xxxxx 10xxxxxx
+// 2-byte utf-8: 110xxxxx 10xxxxxx
+HWTEST(Utf, CompareUtf8ToUtf8_2, testing::ext::TestSize.Level0)
+{
     {
         const std::vector<uint8_t> v1 {0xdf, 0xbf, 0x03, 0x00};
         const std::vector<uint8_t> v2 {0xdf, 0xbf, 0x03, 0x00};
@@ -355,8 +373,11 @@ HWTEST(Utf, CompareUtf8ToUtf8, testing::ext::TestSize.Level0)
         const std::vector<uint8_t> v2 {0xdf, 0xb0, 0x03, 0x00};
         EXPECT_TRUE(CompareUtf8ToUtf8(v1.data(), v1.size(), v2.data(), v2.size()) < 0);
     }
+}
 
-    // 3-byte utf-8: 1110xxxx 10xxxxxx 10xxxxxx
+// 3-byte utf-8: 1110xxxx 10xxxxxx 10xxxxxx
+HWTEST(Utf, CompareUtf8ToUtf8_3, testing::ext::TestSize.Level0)
+{
     {
         const std::vector<uint8_t> v1 {0xef, 0xbf, 0x03, 0x04, 0x00};
         const std::vector<uint8_t> v2 {0xef, 0xbf, 0x03, 0x04, 0x00};
@@ -374,8 +395,11 @@ HWTEST(Utf, CompareUtf8ToUtf8, testing::ext::TestSize.Level0)
         const std::vector<uint8_t> v2 {0xef, 0xbf, 0x05, 0x04, 0x00};
         EXPECT_TRUE(CompareUtf8ToUtf8(v1.data(), v1.size(), v2.data(), v2.size()) < 0);
     }
+}
 
-    // 4-byte utf-8: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+// 4-byte utf-8: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+HWTEST(Utf, CompareUtf8ToUtf8_4, testing::ext::TestSize.Level0)
+{
     {
         const std::vector<uint8_t> v1 {0xf7, 0xbf, 0xbf, 0x04, 0x05, 0x00};
         const std::vector<uint8_t> v2 {0xf7, 0xbf, 0xbf, 0x04, 0x05, 0x00};

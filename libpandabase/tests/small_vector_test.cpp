@@ -92,7 +92,7 @@ TEST_F(SmallVectorTest, Growing)
 }
 
 template <typename Vector>
-void TestVectorIteration(Vector &vector)
+void TestVectorFind(Vector &vector)
 {
     std::array values = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
     ASSERT_EQ(vector.size(), 0);
@@ -126,7 +126,18 @@ void TestVectorIteration(Vector &vector)
         const auto const_vector = vector;
         ASSERT_TRUE(std::equal(const_vector.begin(), const_vector.end(), values.begin()));
     }
+}
 
+template <typename Vector>
+void TestVectorResize(Vector &vector)
+{
+    std::array values = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    ASSERT_EQ(vector.size(), 0);
+
+    std::copy(values.begin(), values.begin() + 4, std::back_inserter(vector));
+    ASSERT_TRUE(vector.IsStatic());
+    ASSERT_EQ(vector.size(), 4);
+    ASSERT_TRUE(std::equal(vector.begin(), vector.end(), values.begin()));
     std::copy(values.begin() + 4, values.end(), std::back_inserter(vector));
     ASSERT_EQ(vector.size(), 10);
     ASSERT_FALSE(vector.IsStatic());
@@ -163,11 +174,13 @@ TEST_F(SmallVectorTest, Iteration)
 {
     {
         SmallVector<int, 4> vector;
-        TestVectorIteration(vector);
+        TestVectorFind(vector);
+        TestVectorResize(vector);
     }
     {
         SmallVector<int, 4, ArenaAllocator, true> vector(GetAllocator());
-        TestVectorIteration(vector);
+        TestVectorFind(vector);
+        TestVectorResize(vector);
     }
 }
 
@@ -318,7 +331,7 @@ TEST_F(SmallVectorTest, ResizeDynamicWithValue)
     ASSERT_FALSE(vector.IsStatic());
 }
 
-TEST_F(SmallVectorTest, Constructing)
+TEST_F(SmallVectorTest, ConstructingAssign)
 {
     std::array values = {0, 1, 2, 3, 4, 5, 6, 7};
 
@@ -337,6 +350,7 @@ TEST_F(SmallVectorTest, Constructing)
         vector1.push_back(values[2]);
         ASSERT_FALSE(vector1.IsStatic());
     }
+
     // Assign from dynamic vector to static
     {
         SmallVector<int, 2> vector1;
@@ -350,6 +364,11 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_FALSE(vector1.IsStatic());
         ASSERT_TRUE(std::equal(vector1.begin(), vector1.end(), vector2.begin()));
     }
+}
+
+TEST_F(SmallVectorTest, ConstructingMove)
+{
+    std::array values = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // Move assign from static vector to dynamic
     {
@@ -366,6 +385,7 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_TRUE(vector1.IsStatic());
         ASSERT_TRUE(std::equal(vector1.begin(), vector1.end(), values.begin()));
     }
+
     // Move assign from dynamic vector to static
     {
         SmallVector<int, 2> vector1;
@@ -381,6 +401,11 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_FALSE(vector1.IsStatic());
         ASSERT_TRUE(std::equal(vector1.begin(), vector1.end(), values.begin()));
     }
+}
+
+TEST_F(SmallVectorTest, ConstructingCopy)
+{
+    std::array values = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // Copy constructor from dynamic
     {
@@ -393,6 +418,7 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_EQ(vector2.size(), values.size());
         ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), vector1.begin()));
     }
+
     // Copy constructor from static
     {
         SmallVector<int, 2> vector1;
@@ -403,6 +429,11 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_EQ(vector2.size(), 2);
         ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), vector1.begin()));
     }
+}
+
+TEST_F(SmallVectorTest, ConstructingMoveDynamic)
+{
+    std::array values = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // Move constructor from dynamic
     {
@@ -415,6 +446,7 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_EQ(vector2.size(), values.size());
         ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), values.begin()));
     }
+
     // Move constructor from static
     {
         SmallVector<int, 2> vector1;

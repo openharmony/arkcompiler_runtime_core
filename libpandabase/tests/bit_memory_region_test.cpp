@@ -82,7 +82,7 @@ TEST(BitMemoryRegion, TestBitsAccess)
     }
 }
 
-TEST(BitMemoryRegion, Dumping)
+TEST(BitMemoryRegion, DumpingTest1)
 {
     std::array<uint64_t, 4> data {};
     std::stringstream ss;
@@ -123,6 +123,16 @@ TEST(BitMemoryRegion, Dumping)
         ss << region;
         ASSERT_EQ(ss.str(), "0x5000000000000000001");
     }
+}
+
+TEST(BitMemoryRegion, DumpingTest2)
+{
+    std::array<uint64_t, 4> data {};
+    std::stringstream ss;
+    auto clear = [&data, &ss]() {
+        data.fill(0);
+        ss.str(std::string());
+    };
 
     {
         clear();
