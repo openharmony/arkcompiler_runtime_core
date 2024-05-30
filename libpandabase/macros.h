@@ -244,8 +244,8 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define TSAN_ANNOTATE_IGNORE_WRITES_END() \
     AnnotateIgnoreWritesEnd(__FILE__, __LINE__)
-extern "C" void AnnotateHappensBefore(const char* f, int l, void* addr);
-extern "C" void AnnotateHappensAfter(const char* f, int l, void* addr);
+extern "C" void AnnotateHappensBefore(const char* f, int l, const volatile void* addr);
+extern "C" void AnnotateHappensAfter(const char* f, int l, const volatile void* addr);
 extern "C" void AnnotateIgnoreWritesBegin(const char* f, int l);
 extern "C" void AnnotateIgnoreWritesEnd(const char* f, int l);
 #  else
