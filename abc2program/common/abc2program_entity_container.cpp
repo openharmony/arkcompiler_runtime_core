@@ -120,9 +120,9 @@ void Abc2ProgramEntityContainer::AddModuleLiteralArrayId(uint32_t module_literal
 }
 
 
-void Abc2ProgramEntityContainer::AddModuleRequestPhaseId(uint32_t module_literal_array_id)
+void Abc2ProgramEntityContainer::AddModuleRequestPhaseId(uint32_t module_request_phase_id)
 {
-    module_request_phase_id_set_.insert(module_literal_array_id);
+    module_request_phase_id_set_.insert(module_request_phase_id);
 }
 
 void Abc2ProgramEntityContainer::AddUnnestedLiteralArrayId(uint32_t literal_array_id)

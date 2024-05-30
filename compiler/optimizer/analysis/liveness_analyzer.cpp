@@ -565,6 +565,7 @@ void LivenessAnalyzer::BlockReg(Register reg, LifeNumber block_from)
     auto interval = intervals.at(reg);
     if (interval == nullptr) {
         interval = GetGraph()->GetAllocator()->New<LifeIntervals>(GetGraph()->GetAllocator());
+        CHECK_NOT_NULL(interval);
         interval->SetPhysicalReg(reg, is_fp ? DataType::FLOAT64 : DataType::UINT64);
         intervals.at(reg) = interval;
     }

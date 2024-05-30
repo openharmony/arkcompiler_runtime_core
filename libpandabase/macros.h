@@ -145,6 +145,21 @@
         __builtin_unreachable();                                     \
     } while (0)
 
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK(expr) \
+    do { \
+        if (UNLIKELY(!(expr))) { \
+            std::cerr << "CHECK FAILED: " << #expr; \
+            std::cerr << "          IN: " << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << std::endl; \
+            panda::PrintStack(std::cerr); \
+            std::abort(); \
+        } \
+    } while (0)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECK_NOT_NULL(ptr) CHECK((ptr) != nullptr)
+
 #if !defined(NDEBUG)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
