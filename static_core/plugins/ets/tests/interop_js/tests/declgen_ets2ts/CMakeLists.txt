@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -226,5 +226,6 @@ add_subdirectory(getters_setters)
 add_subdirectory(imports)
 add_subdirectory(methods)
 add_subdirectory(unions)
+add_subdirectory(properties)
 # NOTE(aakmaev): need proper comparing. Issue #17097
 # add_subdirectory(global_vars)
