@@ -138,6 +138,9 @@ private:
         }
 #endif
         paoc_->runtimeOptions_->SetArkAot(true);
+        if (!paoc_->runtimeOptions_->WasSetTaskmanagerWorkersCount()) {
+            paoc_->runtimeOptions_->SetTaskmanagerWorkersCount(1);
+        }
         if (!ark::Runtime::Create(*paoc_->runtimeOptions_)) {
             std::cerr << "Failed to create runtime!\n";
             return -1;
