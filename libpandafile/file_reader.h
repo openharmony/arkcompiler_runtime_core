@@ -88,6 +88,11 @@ private:
     void EnumerateBlocks(MethodDataAccessor method_acc, MethodItem *method_item);
     void UpdateDebugInfoDependecies(File::EntityId debug_info_id);
     void UpdateDebugInfo(DebugInfoItem *debug_info_item, File::EntityId debug_info_id);
+    void CreateSuperClassItem(ClassDataAccessor& class_acc, ClassItem* class_item, const std::string& class_name);
+    void AddIndexDependencyInstFlag(CodeItem *code_item, MethodItem *method_item,
+                                    const std::unordered_map<File::EntityId, File::EntityId> &reverse_done);
+    void UpdateIdInstFlag(CodeItem *code_item, MethodItem *method_item,
+                          const std::unordered_map<File::EntityId, File::EntityId> &reverse_done);
 
     template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
     void SetIntegerFieldValue(FieldDataAccessor *field_acc, FieldItem *field_item)
