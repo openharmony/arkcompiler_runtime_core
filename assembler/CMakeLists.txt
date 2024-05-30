@@ -22,6 +22,7 @@ file(MAKE_DIRECTORY "${PANDASM_BIN_TESTS}")
 panda_isa_gen(
     TEMPLATES
         "isa.h.erb"
+        "function_collect_string.cpp.erb"
         "ins_emit.h.erb"
         "ins_to_string.cpp.erb"
         "ins_create_api.h.erb"
