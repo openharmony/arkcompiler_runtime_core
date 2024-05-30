@@ -590,6 +590,7 @@ void EscapeAnalysis::Initialize()
         phis_.emplace_back(GetLocalAllocator()->Adapter());
     }
 
+    PropagateLoadObjectsUpwards();
     if (!GetGraph()->IsAnalysisValid<LoopAnalyzer>()) {
         GetGraph()->RunPass<LoopAnalyzer>();
     }
@@ -598,11 +599,142 @@ void EscapeAnalysis::Initialize()
     }
 }
 
+/*
+ * Propagate upwards the LoadObjects that are users of a ref Phi
+ *
+ * Requirements:
+ * - the phi has NewObject instructions as it's inputs
+ * - all the phi users are LoadObject instructions
+
+ considering the above we can remove the original phi after propagating
+ all the load instructions upwards and adding corresponding phi instructions
+ for them in the original phi's basic block
+
+ for each user in users(phi) do
+   create new phi of type(user)
+   for each input in inputs(phi) do
+     create load instuction of type(user)
+     insert load before bb(input).last
+     set load input to input(phi, bb(input))
+     add load to new phi inputs
+   end
+   add users(user) to the new phi instruction
+   remove user
+ end
+ remove phi
+
+ BB 1            BB 2
+ 1.NewObject     2.NewObject
+      |               |
+      ----Phi(1, 2)----
+               |
+      t1.LoadObject(Phi, f1)
+      t2.LoadObject(Phi, f2)
+
+
+ BB 1                     BB 2
+ 1.NewObject              2.NewObject
+ 10.t1.LoadObject(1, f1)  20.t1.LoadObject(2, f1)
+ 11.t2.LoadObject(1, f2)  21.t2.LoadObject(2, f2)
+      |                            |
+      ----------t1.Phi(10,20)-------
+                t2.Phi(11,21)
+*/
+
+static bool PhiHasLoadObjToPropagate(Inst *phi)
+{
+    if (!DataType::IsReference(phi->GetType())) {
+        return false;
+    }
+
+    ObjectTypeInfo typeinfo = {};
+    for (auto input : phi->GetInputs()) {
+        auto inst = input.GetInst();
+        if (inst->GetOpcode() != Opcode::NewObject) {
+            return false;
+        }
+        if (!typeinfo) {
+            typeinfo = inst->GetObjectTypeInfo();
+            continue;
+        }
+        if (inst->GetObjectTypeInfo() != typeinfo) {
+            return false;
+        }
+    }
+
+    if (!typeinfo) {
+        return false;
+    }
+
+    for (auto &user : phi->GetUsers()) {
+        if (user.GetInst()->GetOpcode() != Opcode::LoadObject) {
+            return false;
+        }
+    }
+    return true;
+}
+
+#ifndef NDEBUG
+bool EscapeAnalysis::EnsureLoadsRemoval()
+{
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : bb->Insts()) {
+            if (inst->GetOpcode() == Opcode::LoadObject && inst->IsMarked(removableLoads_)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+#endif
+
+void EscapeAnalysis::CreateTemporaryLoads(Inst *phi)
+{
+    for (auto &user : phi->GetUsers()) {
+        auto ld = user.GetInst();
+        auto type = ld->GetType();
+        auto newPhi = GetGraph()->CreateInstPhi(type, phi->GetPc());
+        for (size_t i = 0; i < phi->GetInputsCount(); ++i) {
+            auto ldClone = ld->Clone(GetGraph());
+            ldClone->SetInput(0, phi->GetInput(i).GetInst());
+            auto insertAt = phi->CastToPhi()->GetPhiInputBb(i)->GetLastInst();
+            insertAt = insertAt->IsControlFlow() ? insertAt->GetPrev() : insertAt;
+            insertAt->InsertAfter(ldClone);
+            newPhi->AppendInput(ldClone);
+            newPhi->SetPhiInputBbNum(i, phi->CastToPhi()->GetPhiInputBbNum(i));
+        }
+        ld->ReplaceUsers(newPhi);
+        phi->InsertAfter(newPhi);
+        phi->RemoveUser(&user);
+        ld->GetBasicBlock()->RemoveInst(ld);
+#ifndef NDEBUG
+        ld->SetMarker(removableLoads_);
+#endif
+    }
+}
+
+void EscapeAnalysis::PropagateLoadObjectsUpwards()
+{
+    for (auto bb : GetGraph()->GetBlocksRPO()) {
+        for (auto phi : bb->PhiInstsSafe()) {
+            if (!PhiHasLoadObjToPropagate(phi)) {
+                continue;
+            }
+            CreateTemporaryLoads(phi);
+            phi->GetBasicBlock()->RemoveInst(phi);
+        }
+    }
+}
+
 bool EscapeAnalysis::RunImpl()
 {
     if (!GetGraph()->HasEndBlock()) {
         return false;
     }
+#ifndef NDEBUG
+    MarkerHolder mh {GetGraph()};
+    removableLoads_ = mh.GetMarker();
+#endif
     Initialize();
 
     if (!liveIns_.Run()) {
@@ -620,6 +752,9 @@ bool EscapeAnalysis::RunImpl()
 
     ScalarReplacement sr {GetGraph(), aliases_, phis_, materializationInfo_, saveStateInfo_};
     sr.Apply(virtualizableAllocations_);
+#ifndef NDEBUG
+    ASSERT(EnsureLoadsRemoval());
+#endif
     return true;
 }
 

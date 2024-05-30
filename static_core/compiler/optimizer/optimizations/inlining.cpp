@@ -27,6 +27,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
+#include "optimizer/analysis/object_type_propagation.h"
 #include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
@@ -195,6 +196,7 @@ void Inlining::InvalidateAnalyses()
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
+    GetGraph()->InvalidateAnalysis<ObjectTypePropagation>();
     InvalidateBlocksOrderAnalyzes(GetGraph());
 }
 

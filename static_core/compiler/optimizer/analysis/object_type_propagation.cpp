@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,15 +21,17 @@ namespace ark::compiler {
 bool ObjectTypePropagation::RunImpl()
 {
     VisitGraph();
+    InstVector visitedPhis(GetGraph()->GetLocalAllocator()->Adapter());
+    visitedPhis_ = &visitedPhis;
     visited_ = GetGraph()->NewMarker();
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto phi : bb->PhiInsts()) {
             auto typeInfo = GetPhiTypeInfo(phi);
-            for (auto visitedPhi : visitedPhis_) {
+            for (auto visitedPhi : visitedPhis) {
                 ASSERT(visitedPhi->GetObjectTypeInfo() == ObjectTypeInfo::UNKNOWN);
                 visitedPhi->SetObjectTypeInfo(typeInfo);
             }
-            visitedPhis_.clear();
+            visitedPhis.clear();
         }
     }
     GetGraph()->EraseMarker(visited_);
@@ -186,7 +188,7 @@ ObjectTypeInfo ObjectTypePropagation::GetPhiTypeInfo(Inst *inst)
         typeInfo = {typeInfo.GetClass(), typeInfo.IsExact() && inputInfo.IsExact()};
     }
     if (needUpdate) {
-        visitedPhis_.push_back(inst);
+        visitedPhis_->push_back(inst);
     } else {
         inst->SetObjectTypeInfo(typeInfo);
     }

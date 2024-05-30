@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,7 @@ namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ObjectTypePropagation final : public Analysis, public GraphVisitor {
 public:
-    explicit ObjectTypePropagation(Graph *graph) : Analysis(graph), visitedPhis_(graph->GetLocalAllocator()->Adapter())
-    {
-    }
+    explicit ObjectTypePropagation(Graph *graph) : Analysis(graph) {}
     NO_MOVE_SEMANTIC(ObjectTypePropagation);
     NO_COPY_SEMANTIC(ObjectTypePropagation);
     ~ObjectTypePropagation() override = default;
@@ -62,7 +60,7 @@ private:
     ObjectTypeInfo GetPhiTypeInfo(Inst *inst);
 
 private:
-    InstVector visitedPhis_;
+    InstVector *visitedPhis_ {nullptr};
     Marker visited_ {UNDEF_MARKER};
 };
 }  // namespace ark::compiler
