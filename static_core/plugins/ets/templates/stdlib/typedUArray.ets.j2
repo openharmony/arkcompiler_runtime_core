@@ -75,6 +75,31 @@ class {{element['name']}}ArrayIterator implements IterableIterator<{{element['su
     }
 }
 
+{% set subsetTypeValuesEntries = '[' + 'Number' + ', ' + element['subsetTypeValues'] + ']' -%}
+
+class {{element['name']}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEntries}}> {
+    private parent: {{element['name']}}Array
+    private idx: int = 0
+
+    constructor(parent: {{element['name']}}Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<{{subsetTypeValuesEntries}}> {
+        return this;
+    }
+
+    override next(): IteratorResult<{{subsetTypeValuesEntries}}> {
+        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+            return new IteratorResult<{{subsetTypeValuesEntries}}>()
+        }
+        return new IteratorResult<{{subsetTypeValuesEntries}}>(
+            false,
+            [new Number(this.idx), new {{element['subsetTypeValues']}}(this.parent.getUnsafe(this.idx++))]{{ '' if element['subsetType'] != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
+        )
+    }
+}
+
 /**
  * JS {{element['name']}}Array API-compatible class
  */
@@ -655,17 +680,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         return this.copyWithin(target, 0, this.lengthInt)
     }
 
-    /**
-     * Returns an iterator for all entries
-     */
-    // NOTE (ivan-tyulyandin): blocked by tuples implentation
-    // public entries(): Iterator<[Int, Object]> {
-    //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.lengthInt];
-    //     for (let i: int = 0; i < this.lengthInt; i++) {
-    //         ret[i] = new Entry<Int, Object>(i, this.at(i));
-    //     }
-    //     return new MapIterator<Int, Object>(ret);
-    // }
+    public entries(): IterableIterator<{{subsetTypeValuesEntries}}> {
+        return new {{element['name']}}ArrayIteratorEntries(this)
+    }
 
     /**
      * Fills the {{element['name']}}Array with specified value

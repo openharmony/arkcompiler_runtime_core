@@ -73,6 +73,31 @@ class {{N}}ArrayIterator implements IterableIterator<{{subsetTypeValues}}> {
     }
 }
 
+{% set subsetTypeValuesEntries = '[' + 'Number' + ', ' + subsetTypeValues + ']' -%}
+
+class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEntries}}> {
+    private parent: {{N}}Array
+    private idx: int = 0
+
+    constructor(parent: {{N}}Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<{{subsetTypeValuesEntries}}> {
+        return this;
+    }
+
+    override next(): IteratorResult<{{subsetTypeValuesEntries}}> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<{{subsetTypeValuesEntries}}>()
+        }
+        return new IteratorResult<{{subsetTypeValuesEntries}}>(
+            false, [new Number(this.idx), new {{subsetTypeValues}}(this.parent[this.idx++])]{{ '' if elementCompat != 'BigInt' else ' as ' + subsetTypeValuesEntries }}
+        )
+    }
+}
+
+
 /**
  * JS {{N}}Array API-compatible class
  */
@@ -671,8 +696,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): IterableIterator<Entry<Int, {{TBoxed}}>> {
-        throw new Error("not implemented")
+    public entries(): IterableIterator<{{subsetTypeValuesEntries}}> {
+        return new {{N}}ArrayIteratorEntries(this)
     }
 
     /**

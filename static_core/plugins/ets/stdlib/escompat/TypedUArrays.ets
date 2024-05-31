@@ -61,6 +61,29 @@ class Uint8ClampedArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Uint8ClampedArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Uint8ClampedArray
+    private idx: int = 0
+
+    constructor(parent: Uint8ClampedArray) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false,
+            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+        )
+    }
+}
+
 /**
  * JS Uint8ClampedArray API-compatible class
  */
@@ -550,17 +573,9 @@ export class Uint8ClampedArray implements Iterable<Number> {
         return this.copyWithin(target, 0, this.lengthInt)
     }
 
-    /**
-     * Returns an iterator for all entries
-     */
-    // NOTE (ivan-tyulyandin): blocked by tuples implentation
-    // public entries(): Iterator<[Int, Object]> {
-    //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.lengthInt];
-    //     for (let i: int = 0; i < this.lengthInt; i++) {
-    //         ret[i] = new Entry<Int, Object>(i, this.at(i));
-    //     }
-    //     return new MapIterator<Int, Object>(ret);
-    // }
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Uint8ClampedArrayIteratorEntries(this)
+    }
 
     /**
      * Fills the Uint8ClampedArray with specified value
@@ -2499,6 +2514,29 @@ class Uint8ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Uint8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Uint8Array
+    private idx: int = 0
+
+    constructor(parent: Uint8Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false,
+            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+        )
+    }
+}
+
 /**
  * JS Uint8Array API-compatible class
  */
@@ -3004,17 +3042,9 @@ export class Uint8Array implements Iterable<Number> {
         return this.copyWithin(target, 0, this.lengthInt)
     }
 
-    /**
-     * Returns an iterator for all entries
-     */
-    // NOTE (ivan-tyulyandin): blocked by tuples implentation
-    // public entries(): Iterator<[Int, Object]> {
-    //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.lengthInt];
-    //     for (let i: int = 0; i < this.lengthInt; i++) {
-    //         ret[i] = new Entry<Int, Object>(i, this.at(i));
-    //     }
-    //     return new MapIterator<Int, Object>(ret);
-    // }
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Uint8ArrayIteratorEntries(this)
+    }
 
     /**
      * Fills the Uint8Array with specified value
@@ -4949,6 +4979,29 @@ class Uint16ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Uint16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Uint16Array
+    private idx: int = 0
+
+    constructor(parent: Uint16Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false,
+            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+        )
+    }
+}
+
 /**
  * JS Uint16Array API-compatible class
  */
@@ -5461,17 +5514,9 @@ export class Uint16Array implements Iterable<Number> {
         return this.copyWithin(target, 0, this.lengthInt)
     }
 
-    /**
-     * Returns an iterator for all entries
-     */
-    // NOTE (ivan-tyulyandin): blocked by tuples implentation
-    // public entries(): Iterator<[Int, Object]> {
-    //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.lengthInt];
-    //     for (let i: int = 0; i < this.lengthInt; i++) {
-    //         ret[i] = new Entry<Int, Object>(i, this.at(i));
-    //     }
-    //     return new MapIterator<Int, Object>(ret);
-    // }
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Uint16ArrayIteratorEntries(this)
+    }
 
     /**
      * Fills the Uint16Array with specified value
@@ -7406,6 +7451,29 @@ class Uint32ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Uint32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Uint32Array
+    private idx: int = 0
+
+    constructor(parent: Uint32Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false,
+            [new Number(this.idx), new Number(this.parent.getUnsafe(this.idx++))]
+        )
+    }
+}
+
 /**
  * JS Uint32Array API-compatible class
  */
@@ -7945,17 +8013,9 @@ export class Uint32Array implements Iterable<Number> {
         return this.copyWithin(target, 0, this.lengthInt)
     }
 
-    /**
-     * Returns an iterator for all entries
-     */
-    // NOTE (ivan-tyulyandin): blocked by tuples implentation
-    // public entries(): Iterator<[Int, Object]> {
-    //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.lengthInt];
-    //     for (let i: int = 0; i < this.lengthInt; i++) {
-    //         ret[i] = new Entry<Int, Object>(i, this.at(i));
-    //     }
-    //     return new MapIterator<Int, Object>(ret);
-    // }
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Uint32ArrayIteratorEntries(this)
+    }
 
     /**
      * Fills the Uint32Array with specified value
@@ -9890,6 +9950,29 @@ class BigUint64ArrayIterator implements IterableIterator<BigInt> {
     }
 }
 
+class BigUint64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]> {
+    private parent: BigUint64Array
+    private idx: int = 0
+
+    constructor(parent: BigUint64Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, BigInt]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, BigInt]> {
+        if (this.idx < 0 || this.idx >= this.parent.lengthInt) {
+            return new IteratorResult<[Number, BigInt]>()
+        }
+        return new IteratorResult<[Number, BigInt]>(
+            false,
+            [new Number(this.idx), new BigInt(this.parent.getUnsafe(this.idx++))] as [Number, BigInt]
+        )
+    }
+}
+
 /**
  * JS BigUint64Array API-compatible class
  */
@@ -10429,17 +10512,9 @@ export class BigUint64Array implements Iterable<BigInt> {
         return this.copyWithin(target, 0, this.lengthInt)
     }
 
-    /**
-     * Returns an iterator for all entries
-     */
-    // NOTE (ivan-tyulyandin): blocked by tuples implentation
-    // public entries(): Iterator<[Int, Object]> {
-    //     let ret: Entry<Int, Object> = new Entry<Int, Object>[this.lengthInt];
-    //     for (let i: int = 0; i < this.lengthInt; i++) {
-    //         ret[i] = new Entry<Int, Object>(i, this.at(i));
-    //     }
-    //     return new MapIterator<Int, Object>(ret);
-    // }
+    public entries(): IterableIterator<[Number, BigInt]> {
+        return new BigUint64ArrayIteratorEntries(this)
+    }
 
     /**
      * Fills the BigUint64Array with specified value

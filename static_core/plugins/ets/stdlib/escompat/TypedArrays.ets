@@ -57,6 +57,29 @@ class Int8ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Int8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Int8Array
+    private idx: int = 0
+
+    constructor(parent: Int8Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false, [new Number(this.idx), new Number(this.parent[this.idx++])]
+        )
+    }
+}
+
+
 /**
  * JS Int8Array API-compatible class
  */
@@ -579,8 +602,8 @@ export final class Int8Array implements Iterable<Number> {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): IterableIterator<Entry<Int, Byte>> {
-        throw new Error("not implemented")
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Int8ArrayIteratorEntries(this)
     }
 
     /**
@@ -2513,6 +2536,29 @@ class Int16ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Int16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Int16Array
+    private idx: int = 0
+
+    constructor(parent: Int16Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false, [new Number(this.idx), new Number(this.parent[this.idx++])]
+        )
+    }
+}
+
+
 /**
  * JS Int16Array API-compatible class
  */
@@ -3042,8 +3088,8 @@ export final class Int16Array implements Iterable<Number> {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): IterableIterator<Entry<Int, Short>> {
-        throw new Error("not implemented")
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Int16ArrayIteratorEntries(this)
     }
 
     /**
@@ -4980,6 +5026,29 @@ class Int32ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Int32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Int32Array
+    private idx: int = 0
+
+    constructor(parent: Int32Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false, [new Number(this.idx), new Number(this.parent[this.idx++])]
+        )
+    }
+}
+
+
 /**
  * JS Int32Array API-compatible class
  */
@@ -5482,8 +5551,8 @@ export final class Int32Array implements Iterable<Number> {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): IterableIterator<Entry<Int, Int>> {
-        throw new Error("not implemented")
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Int32ArrayIteratorEntries(this)
     }
 
     /**
@@ -7420,6 +7489,29 @@ class BigInt64ArrayIterator implements IterableIterator<BigInt> {
     }
 }
 
+class BigInt64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]> {
+    private parent: BigInt64Array
+    private idx: int = 0
+
+    constructor(parent: BigInt64Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, BigInt]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, BigInt]> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<[Number, BigInt]>()
+        }
+        return new IteratorResult<[Number, BigInt]>(
+            false, [new Number(this.idx), new BigInt(this.parent[this.idx++])] as [Number, BigInt]
+        )
+    }
+}
+
+
 /**
  * JS BigInt64Array API-compatible class
  */
@@ -7949,8 +8041,8 @@ export final class BigInt64Array implements Iterable<BigInt> {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): IterableIterator<Entry<Int, Long>> {
-        throw new Error("not implemented")
+    public entries(): IterableIterator<[Number, BigInt]> {
+        return new BigInt64ArrayIteratorEntries(this)
     }
 
     /**
@@ -9819,6 +9911,29 @@ class Float32ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Float32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Float32Array
+    private idx: int = 0
+
+    constructor(parent: Float32Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false, [new Number(this.idx), new Number(this.parent[this.idx++])]
+        )
+    }
+}
+
+
 /**
  * JS Float32Array API-compatible class
  */
@@ -10331,8 +10446,8 @@ export final class Float32Array implements Iterable<Number> {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): IterableIterator<Entry<Int, Float>> {
-        throw new Error("not implemented")
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Float32ArrayIteratorEntries(this)
     }
 
     /**
@@ -12266,6 +12381,29 @@ class Float64ArrayIterator implements IterableIterator<Number> {
     }
 }
 
+class Float64ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
+    private parent: Float64Array
+    private idx: int = 0
+
+    constructor(parent: Float64Array) {
+        this.parent = parent
+    }
+
+    public override iterator(): IterableIterator<[Number, Number]> {
+        return this;
+    }
+
+    override next(): IteratorResult<[Number, Number]> {
+        if (this.idx < 0 || this.idx >= this.parent.length as int) {
+            return new IteratorResult<[Number, Number]>()
+        }
+        return new IteratorResult<[Number, Number]>(
+            false, [new Number(this.idx), new Number(this.parent[this.idx++])]
+        )
+    }
+}
+
+
 /**
  * JS Float64Array API-compatible class
  */
@@ -12752,8 +12890,8 @@ export final class Float64Array implements Iterable<Number> {
     /**
      * Returns an iterator for all entries
      */
-    /* public */ internal entries(): IterableIterator<Entry<Int, Double>> {
-        throw new Error("not implemented")
+    public entries(): IterableIterator<[Number, Number]> {
+        return new Float64ArrayIteratorEntries(this)
     }
 
     /**

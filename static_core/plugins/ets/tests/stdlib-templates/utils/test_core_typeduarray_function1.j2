@@ -1666,3 +1666,34 @@ function testEmptyTypedUArrayReverse(): number {
 
   return success;
 }
+
+function checkEntries(actual: [Number, Number], expected: [Number, Number], name: string): int {
+    let result = (actual[0] == expected[0]) && (actual[1] == expected[1])
+    if (result) {
+        console.println("PASSED: " + name)
+        return success
+    }
+    console.println("FAILED: " + name + ", expected: [" + expected.toString() + "], actual: [" + actual.toString() + "]")
+    return fail
+}
+
+function assertEq(expr: boolean, expected: boolean, name: string): int {
+    if (expr == expected) {
+        console.println("PASSED: " + name)
+        return success
+    }
+    console.println("FAILED: " + name + ", expected: " + (expected ? "true": "false") + ", actual: " + (expr ? "true": "false"))
+    return fail
+}
+
+function testTypedUArrayEntries(): int {
+    let failures = 0
+    const firstResult = [0, 1] as [Number, Number]
+    const secondResult = [1, 2] as [Number, Number]
+    const numbers = [1 as number, 2 as number]
+    let entries = (new {{.item.objectType}}(numbers)).entries()
+    failures += checkEntries(entries.next().value!, firstResult, "{{.item.objectType}}.entries() - next() #1")
+    failures += checkEntries(entries.next().value!, secondResult, "{{.item.objectType}}.entries() - next() #2")
+    failures += assertEq(entries.next().done, true, "{{.item.objectType}}.entries() - next() #3 (done)")
+    return failures
+}
