@@ -354,7 +354,7 @@ spec/indexable/idx-s03-0000.ets
 
 ### object-literals
 ### Issue 14658
-spec/object-literals/issue14687.ets
+spec/07.expressions/Object_Literal/issue14687.ets
 ### end Issue 14658
 ### End of object-literals
 
@@ -398,11 +398,11 @@ spec/16.Support_for_GUI_Programming/annotations/annotation_@Watch_2.ets
 ### Issue 15096
 algorithms/SampleAppTest.ets
 ### for of is not implemented
-spec/for_of/for_of_08.ets
-spec/for_of/for_of_09.ets
-spec/for_of/for_of_10.ets
-spec/for_of/for_of_11.ets
-spec/for_of/for-of-s01-array-08.ets
+spec/17.Experimental_Features/Iterable_Types/for_of_08.ets
+spec/17.Experimental_Features/Iterable_Types/for_of_09.ets
+spec/17.Experimental_Features/Iterable_Types/for_of_10.ets
+spec/17.Experimental_Features/Iterable_Types/for_of_11.ets
+spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.ets
 ### end for of
 
 ### Issue 15726
@@ -544,8 +544,9 @@ spec/09.classes/constructor-inheritance/issue14720_6.ets
 ### Issue 14720 end
 
 ## Issue 15553
-spec/functions/Issue-14273_0.ets
-spec/functions/Issue-14273_3.ets
+spec/09.classes/9.6.Method_Declarations/Issue-14273_0.ets
+spec/09.classes/9.6.Method_Declarations/Issue-14273_3.ets
+
 
 ### Issue 15763
 spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.ets
@@ -622,3 +623,5 @@ spec/13.Compilation_Units_Packages_and_Modules/13.6.Export_Directives/13.6.3.Re-
 ### Issue 16465 end
 ### Issue 17149
 spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.2.Static_Method_Declarations/static_method_0003.ets
+### Issue 16242 (STDLIB)
+std/core/std_core_string_String_localeCompare_string_005.ets

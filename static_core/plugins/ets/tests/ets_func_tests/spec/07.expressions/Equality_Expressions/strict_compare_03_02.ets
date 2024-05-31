@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@ tags: []
 ---*/
 
 class A {
-  test(): boolean {
-    if(this === this) {
+  test(obj: Object): boolean {
+    if(this === obj) {
       return true
     }
     return false
@@ -29,6 +29,8 @@ class A {
 }
 
 function main(): void {
-  let a: A = new A()
-  assert a.test()
+  let a1: A = new A()
+  let a2: A = new A()
+  // compare different objects
+  assert !a1.test(a2)
 }
