@@ -61,7 +61,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # NOTE(kurnevichstanislav): fix SIGSEGV in sampler tests with TaskManager (#14278)
-set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --ets.workers-type=threadpool)
+set(RUNTIME_ARGUMENTS ${RUNTIME_ARGUMENTS} --workers-type=threadpool)
 
 foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
     foreach(i_arg ${INTERPRETER_ARGUMENTS_LIST})
