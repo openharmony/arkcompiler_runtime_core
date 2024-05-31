@@ -1167,7 +1167,6 @@ bool TestStrz(Encoder64Test *test)
             // Store must change ret_data value
             bool ret = (ret_data[0] == tmp && std::signbit(ret_data[0]) == std::signbit(tmp)) ||
                        (std::isnan(ret_data[0]) && std::isnan(tmp)) || (std::isinf(ret_data[0]) && std::isinf(tmp));
-
             if (!ret) {
                 if constexpr (std::is_same<float, T>::value) {
                     std::cerr << std::hex << "Strz test fail " << bit_cast<uint32_t>(tmp)
@@ -1370,7 +1369,6 @@ bool TestSqrt(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-
         if (!test->CallCode<T>(nan, nan)) {
             return false;
         }
@@ -1480,7 +1478,6 @@ bool TestAddImm(Encoder64Test *test)
         // Second type-dependency
         T tmp1 = random_gen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp1 + param2)) {
@@ -1593,7 +1590,6 @@ bool TestSubImm(Encoder64Test *test)
         // Second type-dependency
         T tmp1 = random_gen<T>();
         // Deduced conflicting types for parameter
-
         // Main check - compare parameter and
         // return value
         if (!test->CallCode<T>(tmp1, tmp1 - param2)) {
