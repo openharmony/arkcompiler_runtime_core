@@ -227,6 +227,8 @@ export abstract class Type extends Object {
                 // NOTE(shumilov-petr): unknown type, need error
                 assert(false)
         }
+
+        return null;
     }
 
     /**
@@ -2132,6 +2134,8 @@ export final class ArrayType extends Type {
                 // NOTE(shumilov-petr): need throw exception
                 assert(false)
         }
+
+        throw new Error("Invalid object")
     }
 
     internal static getInstance(td: TypeDesc): ArrayType {

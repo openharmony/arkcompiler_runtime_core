@@ -26,7 +26,7 @@ function(panda_ets_interop_js_checked_test)
 
     set(TARGET_TEST_PACKAGE ${TARGET}_test_package)
     # NOTE (kkonsw): temporary disabling all other checks
-    set(ETS_VERIFICATOR_ERRORS "ForLoopCorrectlyInitializedForAll")
+    set(ETS_VERIFICATOR_ERRORS "NodeHasParentForAll,EveryChildHasValidParentForAll,VariableHasScopeForAll,NodeHasTypeForAll,IdentifierHasVariableForAll,ReferenceTypeAnnotationIsNullForAll,ArithmeticOperationValidForAll,SequenceExpressionHasLastTypeForAll,ForLoopCorrectlyInitializedForAll,VariableHasEnclosingScopeForAll,ModifierAccessValidForAll,ImportExportAccessValid")
     panda_ets_package(${TARGET_TEST_PACKAGE}
         ETS_SOURCES ${ARG_FILE}
         ETS_CONFIG ${ETS_CONFIG}

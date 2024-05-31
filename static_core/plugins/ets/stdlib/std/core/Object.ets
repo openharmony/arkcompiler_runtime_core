@@ -167,6 +167,8 @@ export class Object {
             throw new Error("Not implemented")
         }
         assert(false)
+
+        throw new Error("Invalid object");
     }
 
     /**
@@ -238,6 +240,8 @@ export class Object {
             throw new Error("Not implemented")
         }
         assert(false)
+
+        throw new Error("Invalid object")
     }
 
     /**
@@ -308,6 +312,8 @@ export class Object {
             throw new Error("Not implemented")
         }
         assert(false)
+
+        throw new Error("Invalid object")
     }
 
     /**
@@ -357,6 +363,8 @@ export class Object {
             throw new Error("Not implemented")
         }
         assert(false)
+
+        throw new Error("Invalid object")
     }
 
     /**

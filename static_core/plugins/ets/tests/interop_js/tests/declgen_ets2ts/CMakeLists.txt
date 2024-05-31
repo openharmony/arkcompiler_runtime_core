@@ -105,7 +105,7 @@ function(create_declgen_ets2ts_test TARGET)
     file(WRITE ${ARKTSCONFIG} ${ARKTSCONFIG_CONTENT})
 
     # NOTE (kkonsw): temporary disabling all other checks
-    set(ETS_VERIFICATOR_ERRORS "ForLoopCorrectlyInitializedForAll")
+    set(ETS_VERIFICATOR_ERRORS "NodeHasParentForAll,EveryChildHasValidParentForAll,VariableHasScopeForAll,NodeHasTypeForAll,IdentifierHasVariableForAll,ReferenceTypeAnnotationIsNullForAll,ArithmeticOperationValidForAll,SequenceExpressionHasLastTypeForAll,ForLoopCorrectlyInitializedForAll,VariableHasEnclosingScopeForAll,ModifierAccessValidForAll,ImportExportAccessValid")
 
     # Compile source .ets files into .abc and declaration .ts files
     set(ABC_FILES "")

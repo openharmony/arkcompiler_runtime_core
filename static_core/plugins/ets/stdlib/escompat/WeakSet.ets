@@ -32,9 +32,8 @@ export final class WeakSet<K> {
      * The add() method appends a new object to the end of a WeakSet
      * object.
      */
-    add(v: K): WeakSet<K> {
+    add(v: K): WeakSet<K>{
         throw new Error("Not implemented");
-        return this;
     }
 
     /**
@@ -43,7 +42,6 @@ export final class WeakSet<K> {
      */
     has(v: K): boolean {
         throw new Error("Not implemented");
-        return false;
     }
 
     /**
@@ -52,6 +50,5 @@ export final class WeakSet<K> {
      */
     delete(v: K): boolean {
         throw new Error("Not implemented");
-        return false;
     }
 }

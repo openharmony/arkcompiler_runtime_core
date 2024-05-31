@@ -287,6 +287,8 @@ function add<K extends Comparable<Object>, V>(node: Node<K, V> | null, k: K, v: 
             }
         }
     }
+
+    throw new Error("Invalid node");
 }
 
 

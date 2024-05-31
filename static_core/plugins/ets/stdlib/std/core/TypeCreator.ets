@@ -472,6 +472,7 @@ export final class ClassTypeCreator extends TypeCreator {
      */
     public addFinal(): ClassTypeCreator {
         this.attrs.add(Attributes.FINAL, true)
+        return this;
     }
 }
 
@@ -662,6 +663,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      */
     public addThrowing(): LambdaTypeCreator {
         this.attrs.add(Attributes.THROWING, true)
+        return this;
     }
 
     /**
@@ -670,6 +672,7 @@ export final class LambdaTypeCreator extends TypeCreator {
      */
     public addAsync(): LambdaTypeCreator {
         this.attrs.add(Attributes.ASYNC, true)
+        return this;
     }
 
     internal override collectTypes(collector: CollectTypesCB): void {
