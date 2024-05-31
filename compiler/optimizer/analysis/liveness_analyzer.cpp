@@ -667,7 +667,6 @@ LifeNumber LifeIntervals::GetFirstIntersectionWith(const LifeIntervals *other, L
             }
             auto range_begin = std::max<LifeNumber>(search_from, range.GetBegin());
             auto other_range_begin = std::max<LifeNumber>(search_from, other_range.GetBegin());
-
             if (range_begin <= other_range_begin) {
                 if (other_range_begin < range.GetEnd()) {
                     // [range]

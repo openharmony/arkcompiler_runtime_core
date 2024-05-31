@@ -453,7 +453,6 @@ void Disassembler::GetRecords()
 
         const panda_file::File::EntityId record_id {class_id};
         auto language = GetRecordLanguage(record_id);
-
         if (language != file_language_) {
             if (file_language_ == panda_file::SourceLang::PANDA_ASSEMBLY) {
                 file_language_ = language;
@@ -547,7 +546,7 @@ void Disassembler::AddAnnotationElement(pandasm::Function &method, const std::st
     if (annotation_name.empty() || key.empty()) {
         return;
     }
-    
+
     std::vector<pandasm::AnnotationData> method_annotation = method.metadata->GetAnnotations();
     const auto ann_iter = std::find_if(method_annotation.begin(), method_annotation.end(),
                                        [&](pandasm::AnnotationData &ann) -> bool {
@@ -632,7 +631,6 @@ void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::
     panda_file::CodeDataAccessor code_accessor(*file_, code_id);
 
     auto params_num = code_accessor.GetNumArgs();
-
     if (params_num > MAX_ARG_NUM) {
         LOG(ERROR, DISASSEMBLER) << "> error encountered at " << code_id << " (0x" << std::hex << code_id
                                  << "). number of function's arguments (" << std::dec << params_num
@@ -673,7 +671,6 @@ LabelTable Disassembler::GetExceptions(pandasm::Function *method, panda_file::Fi
         size_t catch_idx = 0;
         try_block.EnumerateCatchBlocks([&](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
             auto class_idx = catch_block.GetTypeIdx();
-
             if (class_idx == panda_file::INVALID_INDEX) {
                 catch_block_pa.exception_record = "";
             } else {
@@ -1492,7 +1489,6 @@ void Disassembler::Serialize(const pandasm::Record &record, std::ostream &os, bo
 
     const auto record_iter = prog_ann_.record_annotations.find(record.name);
     const bool record_in_table = record_iter != prog_ann_.record_annotations.end();
-
     if (record_in_table) {
         Serialize(*record.metadata, record_iter->second.ann_list, os);
     } else {
@@ -1834,7 +1830,6 @@ std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::Fil
     std::stringstream name;
     const auto offset = file_->ResolveOffsetByIndex(method_id, bc_ins.GetId(idx).AsIndex());
     std::string str_data = StringDataToString(file_->GetStringData(offset));
-    
     if (bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::METHOD_ID)) {
         name << GetMethodSignature(offset);
     } else if (bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::STRING_ID)) {
@@ -1870,7 +1865,6 @@ static void translateImmToLabel(pandasm::Ins *pa_ins, LabelTable *label_table, c
     const auto bc_ins_dest = bc_ins.JumpTo(jmp_offset);
     if (bc_ins_last.GetAddress() > bc_ins_dest.GetAddress()) {
         size_t idx = getBytecodeInstructionNumber(BytecodeInstruction(ins_arr), bc_ins_dest);
-
         if (idx != std::numeric_limits<size_t>::max()) {
             if (label_table->find(idx) == label_table->end()) {
                 std::stringstream ss {};
@@ -1933,7 +1927,6 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
 
             const bool is_present = prog_.function_table.find(arg_method_signature) != prog_.function_table.cend();
             const bool is_external = file_->IsExternal(arg_method_id);
-
             if (is_external && !is_present) {
                 unknown_external_methods.push_back(arg_method_id);
             }

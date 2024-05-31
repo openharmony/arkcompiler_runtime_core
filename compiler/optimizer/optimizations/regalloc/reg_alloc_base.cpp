@@ -87,7 +87,6 @@ bool RegAllocBase::Prepare()
     // Apply pre-allocated registers on construction
     GetGraph()->InitUsedRegs<DataType::INT64>(&GetRegMask().GetVector());
     GetGraph()->InitUsedRegs<DataType::FLOAT64>(&GetVRegMask().GetVector());
-
     GetGraph()->RunPass<DominatorsTree>();
 
     // Because linear numbers should stay unchanged from Liveness
@@ -167,7 +166,6 @@ void RegAllocBase::SetType(LifeIntervals *interval)
 void RegAllocBase::SetPreassignedRegisters(LifeIntervals *interval)
 {
     auto inst = interval->GetInst();
-
     if (inst->GetDstReg() != INVALID_REG) {
         interval->SetPreassignedReg(inst->GetDstReg());
         return;

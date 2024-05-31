@@ -88,7 +88,6 @@ void RegAllocResolver::ResolveInputs(Inst *inst)
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
         auto location = inst->GetLocation(i);
         auto input_interval = liveness_->GetInstLifeIntervals(inst->GetDataFlowInput(i));
-
         if (CanReadFromAccumulator(inst, i) || input_interval->NoDest() || location.IsInvalid()) {
             continue;
         }

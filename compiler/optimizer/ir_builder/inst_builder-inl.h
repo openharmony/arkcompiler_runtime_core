@@ -65,7 +65,6 @@ void InstBuilder::BuildCastToAnyNumber(const BytecodeInstruction *bc_inst)
 {
     auto input = GetDefinitionAcc();
     auto type = input->GetType();
-
     if (input->IsConst() && !DataType::IsFloatType(type)) {
         auto const_insn = input->CastToConstant();
         if (const_insn->GetType() == DataType::INT64) {

@@ -83,8 +83,8 @@ constexpr std::array<int, static_cast<size_t>(Opcode::NUM_OPCODES)> DEF_IDX_TABL
 
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) use_idxs,
 // clang-format off
-constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>, static_cast<size_t>(Opcode::NUM_OPCODES)> USE_IDXS_TABLE = {
-    PANDA_INSTRUCTION_LIST(OPLIST)};
+constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>,
+                     static_cast<size_t>(Opcode::NUM_OPCODES)> USE_IDXS_TABLE = {PANDA_INSTRUCTION_LIST(OPLIST)};
 // clang-format on
 #undef OPLIST
 

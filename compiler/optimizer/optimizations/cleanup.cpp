@@ -109,7 +109,6 @@ bool Cleanup::RunOnce(ArenaSet<BasicBlock *> *empty_blocks, ArenaSet<BasicBlock 
         }
 
         auto succ = bb->GetSuccessor(0);
-
         // Strange infinite loop with only one empty block, or loop pre-header - lets bail out
         if (succ == bb || succ->GetLoop()->GetPreHeader() == bb) {
             continue;
