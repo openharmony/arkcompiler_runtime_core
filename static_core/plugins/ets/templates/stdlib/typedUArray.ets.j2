@@ -934,9 +934,36 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         }
     }
 
+    {% for argType in ['number'] -%}
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new {{N}}Array
+     */
+    public static of(...items: {{argType}}[]): {{element['name']}}Array {
+    {%- if element.get('name') != 'BigUint64' %}
+        let res = new {{element['name']}}Array(items.length)
+        for (let i: int = 0; i < items.length; i++) {
+        {%- if element.get('name') != 'Uint8Clamped' %}
+            res.setUnsafeClamp(i, res.zeroIfInfinity(items[i]) as {{element['etsType']}})
+        {%- else %}
+            res.setUnsafeClamp(i, items[i] as {{element['etsType']}})
+        {%- endif %}
+        }
+        return res
+    {%- else %}
+        throw new Error("{{N}}Array.of: not implemented")
+    {%- endif %}
+    }
+    {%- endfor %}
+
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @returns new {{element['name']}}Array
      */
     public static from(arr: ArrayLike<{{element['subsetType']}}>): {{element['name']}}Array {
@@ -949,8 +976,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new {{element['name']}}Array
      */
     public static from(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
@@ -1006,8 +1036,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new {{element['name']}}Array
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {

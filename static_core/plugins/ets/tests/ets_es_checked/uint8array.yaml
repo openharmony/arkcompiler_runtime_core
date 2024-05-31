@@ -139,5 +139,16 @@ sub:
           - paramOf(*default_search)
           - paramOf(*default_inds_undef)
         mandatory: 1
+      - self: null
+        sub:
+          - expr: Uint8Array.of(pars).length
+            rest:
+              - combinationRest 1, 2, 3, 'NaN'
+          - expr: Uint8Array.of(pars)
+            rest:
+              - combinationRest 1, 2, 3, 'NaN'
+          - expr: Uint8Array.of(pars)
+            rest:
+              - combinationRest "NaN", "10.0", "Infinity"
 
 
