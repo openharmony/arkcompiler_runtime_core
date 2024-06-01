@@ -70,7 +70,7 @@ private:
     uint32_t curr_try_end_inst_pc_ = 0;
     uint32_t curr_catch_begin_pc_ = 0;
     uint32_t curr_catch_end_pc_ = 0;
-    panda_file::DebugInfoExtractor &debug_info_extractor_;
+    const panda_file::DebugInfoExtractor &debug_info_extractor_;
 }; // AbcCodeProcessor
 
 } // namespace panda::abc2program

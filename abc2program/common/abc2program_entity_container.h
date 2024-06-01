@@ -33,7 +33,7 @@ public:
     Abc2ProgramEntityContainer(const panda_file::File &file,
                                AbcStringTable &string_table,
                                pandasm::Program &program,
-                               panda_file::DebugInfoExtractor &debug_info_extractor)
+                               const panda_file::DebugInfoExtractor &debug_info_extractor)
         : file_(file), string_table_(string_table), program_(program), debug_info_extractor_(debug_info_extractor) {}
     const panda_file::File &GetAbcFile() const;
     AbcStringTable &GetAbcStringTable() const;
@@ -64,7 +64,7 @@ public:
     std::string GetLiteralArrayIdName(uint32_t literal_array_id);
     std::string GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id);
     std::string GetAbcFileAbsolutePath() const;
-    panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
+    const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
 
     void SetCurrentClassId(uint32_t class_id);
     void ClearLiteralArrayIdSet();
@@ -74,7 +74,7 @@ private:
     const panda_file::File &file_;
     AbcStringTable &string_table_;
     pandasm::Program &program_;
-    panda_file::DebugInfoExtractor &debug_info_extractor_;
+    const panda_file::DebugInfoExtractor &debug_info_extractor_;
     std::unordered_map<uint32_t, const pandasm::Record*> record_map_;
     std::unordered_map<uint32_t, const pandasm::Function*> function_map_;
     std::unordered_map<uint32_t, const pandasm::Field*> field_map_;

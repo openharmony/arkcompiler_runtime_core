@@ -21,7 +21,7 @@
 
 #include <string>
 #include <vector>
-#include <list>
+#include <unordered_map>
 
 namespace panda::panda_file {
 
@@ -90,7 +90,7 @@ private:
         ColumnNumberTable column_number_table;
     };
 
-    std::list<MethodDebugInfo> methods_;
+    std::unordered_map<uint32_t, MethodDebugInfo> methods_;
 };
 
 }  // namespace panda::panda_file
