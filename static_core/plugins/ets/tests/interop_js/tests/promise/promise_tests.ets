@@ -73,13 +73,11 @@ function testPendingPromise(): int {
         globalTest!.success()
     });
     globalTest!.check();
-    p.then<Object | null>((): Object | null => {
+    p.then<void>((): void => {
         globalTest!.fail();
-        return null;
     });
-    p.catch<Object | null>((error: Object | null): Object | null => {
+    p.catch<void>((error: NullishType): void => {
         globalTest!.fail();
-        return null;
     });
     // Check callback are not called inside 'then' and 'catch'
     globalTest!.check();
@@ -100,7 +98,7 @@ function testResolvedPromise(): int {
         }
         return null;
     });
-    p.catch<Object | null>((err: Object | null): Object | null => {
+    p.catch<Object | null>((err: NullishType): Object | null => {
         globalTest!.fail();
         return null;
     });
@@ -118,7 +116,7 @@ function testRejectedPromise(): int {
             globalTest!.fail();
             return null;
         });
-        p.catch<Object | null>((err: Object | null): Object => {
+        p.catch<Object | null>((err: NullishType): Object => {
             if (err == error) {
                 globalTest!.success();
             } else {
@@ -196,30 +194,27 @@ function testPromiseChain(): int {
     let p = new Promise<Object>((resolve: (value: Object) => void): void => {
         resolve(new Object());
     });
-    // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object | null> = p.then<Object | null>((): Object | null => {
+    // NOTE(audovichenko): Remove p1 and p2 variables #17359
+    let p1: PromiseLike<void> = p.then<void>((): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
             globalTest!.fail();
         }
-        return null;
     });
-    let p2: Promise<Object | null> = p1.then<Object | null>((): Object | null => {
+    let p2: PromiseLike<void> = p1.then<void>((): void => {
         if (fixture.state == 1) {
             fixture.state = 2;
         } else {
             globalTest!.fail();
         }
-        return null;
     });
-    p2.then<Object | null>((): Object | null => {
+    p2.then<void>((): void => {
         if (fixture.state == 2) {
             globalTest!.success();
         } else {
             globalTest!.fail();
         }
-        return null;
     });
     return 0;
 }
@@ -227,21 +222,19 @@ function testPromiseChain(): int {
 function testPromiseCatchFinallyChain(): int {
     globalTest = new Test();
     let fixture = new PromiseChainFixture();
-    let p = Promise.reject<Object>(new Object());
-    // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object | null> = p.then<Object | null>((): Object | null => {
+    let p: Promise<Object> = Promise.reject<Object>(new Object());
+    // NOTE(audovichenko): Remove p1 and p2 variables #17359
+    let p1: Promise<void> = p.then<void>((v: Object): void => {
         globalTest!.fail();
-        return null;
-    });
-    let p2: Promise<Object | null> = p1.catch<Object | null>((value): Object | null => {
+    }) as Promise<void>; // NOTE(audovichenko): Remove cast to Promise. The return type should be Promise. #15523
+    let p2: Promise<void> = p1.catch<void>((value: NullishType): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
             globalTest!.fail();
         }
-        return null;
     });
-    p2.finally(() => {
+    p2.finally((): void => {
         if (fixture.state == 1) {
             globalTest!.success();
         } else {
@@ -255,19 +248,17 @@ function testResolvePromiseThenFinally(): int {
     globalTest = new Test();
     let fixture = new PromiseChainFixture();
     let p = Promise.resolve<Object>(new Object());
-    // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object | null> = p.then<Object | null>((value: Object): Object | null => {
+    // NOTE(audovichenko): Remove p1 and p2 variables #17359
+    let p1: Promise<void> = p.then<void, void>((value: Object): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
             globalTest!.fail();
         }
-        return null;
-    }, (error: Object | null): Object | null => {
+    }, (error: NullishType): void => {
         globalTest!.fail();
-        return null;
-    });
-    p1.finally(() => {
+    }) as Promise<void>; // NOTE(audovichenko): Remove cast to Promise. The return type should be Promise. #15523
+    p1.finally((): void => {
         if (fixture.state == 1) {
             globalTest!.success();
         } else {
@@ -281,19 +272,17 @@ function testRejectPromiseThenFinally(): int {
     globalTest = new Test();
     let fixture = new PromiseChainFixture();
     let p = Promise.reject<Object>(new Object());
-    // TODO(audovichenko): Remove p1 and p2 variables
-    let p1: Promise<Object | null> = p.then<Object | null>((value: Object): Object | null => {
+    // NOTE(audovichenko): Remove p1 and p2 variables #17359
+    let p1: Promise<void> = p.then<void, void>((value: Object): void => {
         globalTest!.fail();
-        return null;
-    }, (error: Object | null): Object | null => {
+    }, (error: NullishType): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
             globalTest!.fail();
         }
-        return null;
-    });
-    p1.finally(() => {
+    }) as Promise<void>; // NOTE(audovichenko): Remove cast to Promise. The return type should be Promise. #15523
+    p1.finally((): void => {
         if (fixture.state == 1) {
             globalTest!.success();
         } else {
@@ -385,7 +374,7 @@ async function testAwaitJsPromise(pendingP: Promise<Object>): Promise<Object> {
 
     globalTest!.msg("testAwaitJsPromise: done", Test.INFO);
     /**
-     * TODO(konstanting, #I67QXC): add a test where we would return here a PENDING promise.
+     * NOTE(konstanting, #I67QXC): add a test where we would return here a PENDING promise.
      * Currently this leads to a crash, because:
      *     - testAwaitJsPromise$asyncImpl resolves its linked promise (P1) with makeResolvedPromise's result (P2)
      *     - since we returned P1 to JS as PENDING (due to await presence), it has listeners
@@ -442,10 +431,10 @@ async function testAsyncVoid(): Promise<void> { return undefined }
 async function testAsyncVoidEmpty(): Promise<void> {}
 async function testAsyncVoidNothing() {}
 
-function testPromiseAllEmpty(): Promise<Object | null> {
+function testPromiseAllEmpty(): void {
     globalTest = new Test();
     let promises: Promise<Object>[] = [];
-    return Promise.all(promises).then<Object | null>((v: Object): Object|null => {
+    Promise.all(promises).then<void>((v: Object): void => {
         let values: Object[] = v as Object[];
         if (values == null || values.length != 0) {
             globalTest!.fail();
@@ -455,16 +444,16 @@ function testPromiseAllEmpty(): Promise<Object | null> {
     });
 }
 
-function testPromiseAllResolved(): Promise<Object|null> {
+function testPromiseAllResolved(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.resolve<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
-    return Promise.all([
+
+    Promise.all<Object>([
         p1, p2, p3
-    ]).then<Object | null>((v: Object): Object|null => {
-        let values: Object[] = v as Object[];
-        if (values == null || values.length != 3) {
+    ]).then<void>((values: Object[]): void => {
+        if (values.length != 3) {
             globalTest!.fail();
         }
         if (values[0] != "abc") {
@@ -477,40 +466,37 @@ function testPromiseAllResolved(): Promise<Object|null> {
             globalTest!.fail();
         }
         globalTest!.success();
-        return null;
     });
 }
 
-function testPromiseAllRejected(): Promise<Object|null> {
+function testPromiseAllRejected(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
-    return Promise.all([
+    Promise.all([
         p1, p2, p3
-    ]).then<Object|null>((v: Object): Object|null => {
+    ]).then<void, void>((v: Object): void => {
         globalTest!.fail();
-        return null;
-    }, (err: Object|null): Object|null => {
+    }, (err: NullishType): void => {
         if (err != "def") {
             globalTest!.fail();
         } else {
             globalTest!.success();
         }
-        return null;
     });
 }
 
-function testPromiseAllSettled(): Promise<Object|null> {
+function testPromiseAllRawValues(): void {
     globalTest = new Test();
-    let p1: Promise<Object> = Promise.resolve<Object>("abc");
-    let p2: Promise<Object> = Promise.reject<Object>("def");
-    let p3: Promise<Object> = Promise.resolve<Object>("xyz");
-    return Promise.allSettled([
+    let p1: Object = "abc";
+    let p2: Object = "def";
+    let p3: Object = "xyz";
+
+    Promise.all<Object>([
         p1, p2, p3
-    ]).then<Object|null>((v: Object): Object|null => {
-        let values = v as Object[];
-        if (values == null || values.length != 3) {
+    ]).then<void>((values: Object[]): void => {
+        if (values.length != 3) {
             globalTest!.fail();
         }
         if (values[0] != "abc") {
@@ -523,19 +509,92 @@ function testPromiseAllSettled(): Promise<Object|null> {
             globalTest!.fail();
         }
         globalTest!.success();
-        return null;
-    }, (err: Object|null): Object|null => {
-        globalTest!.fail();
-        return null;
     });
 }
 
-function testPromiseAnyEmpty(): Promise<Object|null> {
+function testPromiseAllIterable(): void {
+    globalTest = new Test();
+    let array = new Array<Object|PromiseLike<Object>>();
+    array.push(Promise.resolve<Object>("abc"));
+    array.push("def");
+    array.push(Promise.resolve<Object>("xyz"));
+
+    Promise.all<Object>(array).then<void>((values: Object[]): void => {
+        if (values.length != 3) {
+            globalTest!.fail();
+        }
+        if (values[0] != "abc") {
+            globalTest!.fail();
+        }
+        if (values[1] != "def") {
+            globalTest!.fail();
+        }
+        if (values[2] != "xyz") {
+            globalTest!.fail();
+        }
+        globalTest!.success();
+    });
+}
+
+function testPromiseAllSettledEmpty(): void {
     globalTest = new Test();
     let promises: Promise<Object>[] = [];
-    return Promise.any(promises).then<Object|null>((v: Object): Object|null => {
+    Promise.allSettled<Object>(promises).then<void, void>((values: PromiseSettledResult<Object>[]): void => {
+        if (values.length != 0) {
+            globalTest!.fail();
+        }
+        globalTest!.success();
+    }, (err: NullishType): void => {
         globalTest!.fail();
-    }, (err: Object|null): Object|null => {
+    });
+}
+
+function testPromiseAllSettled(): void {
+    globalTest = new Test();
+    let p1: Promise<Object> = Promise.resolve<Object>("abc");
+    let p2: Promise<Object> = Promise.reject<Object>("def");
+    let p3: Promise<Object> = Promise.resolve<Object>("xyz");
+    Promise.allSettled([
+        p1, p2, p3
+    ]).then<void, void>((values: Object): void => {
+        // NOTE(audovichenko): values must have type PromiseSettledResult<Object>[] #17073
+        let result = values as PromiseSettledResult<Object>[];
+        if (result.length != 3) {
+            globalTest!.fail();
+        }
+        if (!(result[0] instanceof PromiseFulfilledResult)) {
+            globalTest!.fail();
+        }
+        let res0 = result[0] as PromiseFulfilledResult<Object>;
+        if (res0.status != "fulfilled" || res0.value != "abc") {
+            globalTest!.fail();
+        }
+        if (!(result[1] instanceof PromiseRejectedResult)) {
+            globalTest!.fail();
+        }
+        let res1 = result[1] as PromiseRejectedResult;
+        if (res1.status != "rejected" || res1.reason != "def") {
+            globalTest!.fail();
+        }
+        if (!(result[2] instanceof PromiseFulfilledResult)) {
+            globalTest!.fail();
+        }
+        let res2 = result[2] as PromiseFulfilledResult<Object>;
+        if (res2.status != "fulfilled" || res2.value != "xyz") {
+            globalTest!.fail();
+        }
+        globalTest!.success();
+    }, (err: NullishType): void => {
+        globalTest!.fail();
+    });
+}
+
+function testPromiseAnyEmpty(): void {
+    globalTest = new Test();
+    let promises: Promise<Object>[] = [];
+    Promise.any(promises).then<void, void>((v: Object): void => {
+        globalTest!.fail();
+    }, (err: NullishType): void => {
         if (err != null && err instanceof AggregateError) {
             globalTest!.success();
         } else {
@@ -544,75 +603,92 @@ function testPromiseAnyEmpty(): Promise<Object|null> {
     });
 }
 
-function testPromiseAnyResolved(): Promise<Object|null> {
+function testPromiseAnyResolved(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
-    return Promise.any([
+    Promise.any([
         p1, p2, p3
-    ]).then<Object|null>((value: Object): Object|null => {
+    ]).then<void>((value: Object): void => {
         if (value != "xyz") {
             globalTest!.fail();
         }
         globalTest!.success();
-        return null;
     });
 }
 
-function testPromiseAnyRejected(): Promise<Object|null> {
+function testPromiseAnyRejected(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
     let p3: Promise<Object> = Promise.reject<Object>("xyz");
-    return Promise.any([
+    Promise.any([
         p1, p2, p3
-    ]).then<Object|null>((v: Object): Object|null => {
+    ]).then<void, void>((v: Object): void => {
         globalTest!.fail();
-        return null;
-    }, (err: Object|null): Object|null => {
+    }, (err: NullishType): void => {
         if (err == null || !(err instanceof AggregateError)) {
             globalTest!.fail();
         } else {
             globalTest!.success();
         }
-        return null;
     });
 }
 
-function testPromiseRaceResolved(): Promise<Object|null> {
+function testPromiseAnyRawValues(): void {
+    globalTest = new Test();
+    Promise.any([
+        "abc", "def", "xyz"
+    ]).then<void>((value: Object): void => {
+        if (value != "abc") {
+            globalTest!.fail();
+        }
+        globalTest!.success();
+    });
+}
+
+function testPromiseAnyIterable(): void {
+    globalTest = new Test();
+    let array = new Array<Object|PromiseLike<Object>>();
+    array.push(Promise.reject<Object>("def"));
+    array.push(Promise.resolve<Object>("xyz"));
+    Promise.any<Object>(array).then<void>((value: Object): void => {
+        if (value != "xyz") {
+            globalTest!.fail();
+        }
+        globalTest!.success();
+    });
+}
+
+function testPromiseRaceResolved(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.resolve<Object>("abc");
     let p2: Promise<Object> = Promise.reject<Object>("def");
-    return Promise.race([
+    Promise.race([
         p1, p2
-    ]).then<Object|null>((value: Object): Object|null => {
+    ]).then<void, void>((value: Object): void => {
         if (value != "abc") {
             globalTest!.fail();
         }
         globalTest!.success();
-        return null;
-    }, (value: Object|null): Object|null => {
+    }, (error: NullishType): void => {
         globalTest!.fail();
-        return null;
     });
 }
 
-function testPromiseRaceRejected(): Promise<Object|null> {
+function testPromiseRaceRejected(): void {
     globalTest = new Test();
     let p1: Promise<Object> = Promise.reject<Object>("abc");
     let p2: Promise<Object> = Promise.resolve<Object>("def");
-    return Promise.race([
+    Promise.race([
         p1, p2
-    ]).then<Object|null>((value: Object): Object|null => {
+    ]).then<void, void>((value: Object): void => {
         globalTest!.fail();
-        return null;
-    }, (value: Object|null): Object|null => {
-        console.println("UDAV: here " + value);
-        if (value != "abc") {
+    }, (error: NullishType): void => {
+        if (error != "abc") {
             globalTest!.fail();
         }
         globalTest!.success();
-        return null;
     });
 }

@@ -15,45 +15,69 @@
 
 package std.core;
 
+export interface PromiseLike<T> {
+    then<U>(onFulfilled: () => U|PromiseLike<U> throws): PromiseLike<U>;
+    then<U>(onFulfilled: (value: T) => U|PromiseLike<U> throws): PromiseLike<U>;
+    // NOTE(audovichenko): Mark parameters by '?' instead of add '|undefined'. Issue #17204
+    then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined,
+            onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): PromiseLike<U|E>;
+}
+
+export class PromiseFulfilledResult<T> {
+    status: string;
+    value: T;
+}
+
+export class PromiseRejectedResult {
+    status: string;
+    reason: NullishType;
+}
+
+export type PromiseSettledResult<T> = PromiseFulfilledResult<T>|PromiseRejectedResult
+
 /**
  * Class represents a result of an asynchronous operation in the future.
  */
-export final class Promise<out T> {
+export final class Promise<out T> implements PromiseLike<T> {
     private constructor() {
     }
 
-    constructor(callback: (resolve: (value: T) => void) => void throws) {
+    constructor(callback: (resolve: (value: T|PromiseLike<T>) => void) => void throws) {
         try {
-            callback((value: T): void => {
-                this.resolveImpl(value);
+            callback((value: T|PromiseLike<T>): void => {
+                this.doResolve<T>(value);
             });
         } catch (error) {
-            this.rejectImpl(error as NullableType);
+            this.rejectImpl(error);
         }
     }
 
-    constructor(callback: (resolve: (value: T) => void throws, reject: (error: Object|null) => void) => void throws) {
+    // NOTE(audovichenko): add constructor #17147
+    // constructor(callback: (resolve: (value: T|PromiseLike<T>) => void throws,
+    //        reject: () => void) => void throws)
+
+    constructor(callback: (resolve: (value: T|PromiseLike<T>) => void throws,
+            reject: (error: NullishType) => void) => void throws) {
         try {
-            callback((value: T): void => {
-                this.resolveImpl(value);
-            }, (error: Object|null): void => {
-                this.rejectImpl(error as NullableType)
+            callback((value: T|PromiseLike<T>): void => {
+                this.doResolve<T>(value);
+            }, (error: NullishType): void => {
+                this.rejectImpl(error);
             });
-    } catch (error) {
-            this.rejectImpl(error as NullableType);
+        } catch (error) {
+            this.rejectImpl(error);
         }
     }
 
-    then<U>(onFulfilled: () => U throws): Promise<U> {
+    // NOTE(audovichenko): Change return type to Promise<U>. Issue #15523
+    then<U>(onFulfilled: () => U|PromiseLike<U> throws): PromiseLike<U> {
         let promise = new Promise<U>();
-        // TODO(audovichenko): remove thisPromise variable
-        let thisPromise = this;
         let fn: () => void = (): void => {
             try {
-                if (thisPromise.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(onFulfilled());
+                if (this.state == Promise.STATE_RESOLVED) {
+                    promise.doResolve<U>(onFulfilled());
                 } else {
-                    promise.rejectImpl(thisPromise.value as NullableType);
+                    promise.rejectImpl(this.value);
                 }
             } catch (error) {
                 promise.rejectImpl(error);
@@ -67,16 +91,15 @@ export final class Promise<out T> {
         return promise;
     }
 
-    then<U>(onFulfilled: (value: T) => U throws): Promise<U> {
+    // NOTE(audovichenko): Change return type to Promise<U>. Issue #15523
+    then<U>(onFulfilled: (value: T) => U|PromiseLike<U> throws): PromiseLike<U> {
         let promise = new Promise<U>();
-        // TODO(audovichenko): remove thisPromise variable
-        let thisPromise = this;
         let fn: () => void = (): void => {
             try {
-                if (thisPromise.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(onFulfilled(thisPromise.value!));
+                if (this.state == Promise.STATE_RESOLVED) {
+                    promise.doResolve<U>(onFulfilled(this.value!));
                 } else {
-                    promise.rejectImpl(thisPromise.value! as Object);
+                    promise.rejectImpl(this.value! as Object);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -90,16 +113,25 @@ export final class Promise<out T> {
         return promise;
     }
 
-    then<U>(onFulfilled: (value: T) => U throws, onRejected: (error: Object|null) => U throws): Promise<U> {
-        let promise = new Promise<U>();
-        // TODO(audovichenko): remove thisPromise variable
-        let thisPromise = this;
+    // NOTE(audovichenko): Change return type to Promise<U>. Issue #15523
+    // NOTE(audovichenko): Mark parameters by '?' instead of add '|undefined'. Issue #17204
+    then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined,
+            onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): PromiseLike<U|E> {
+        let promise = new Promise<U|E>();
         let fn: () => void = (): void => {
             try {
-                if (thisPromise.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(onFulfilled(thisPromise.value!));
+                if (this.state == Promise.STATE_RESOLVED) {
+                    if (onFulfilled) {
+                        promise.doResolve<U>(onFulfilled(this.value!));
+                    } else {
+                        promise.resolveImpl(this.value!);
+                    }
                 } else {
-                    promise.rejectImpl(onRejected(thisPromise.value! as Object) as NullableType);
+                    if (onRejected) {
+                        promise.rejectImpl(onRejected(this.value! as Object));
+                    } else {
+                        promise.rejectImpl(this.value!);
+                    }
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -114,14 +146,16 @@ export final class Promise<out T> {
         return promise;
     }
 
-    catch<U>(onRejected: (error: Object|null) => U throws): Promise<U> {
-        let promise = new Promise<U>();
-        // TODO(audovichenko): remove thisPromise variable
-        let thisPromise = this;
+    catch<U = never>(onRejected?: (error: NullishType) => U|PromiseLike<U> throws): Promise<T|U> {
+        let promise = new Promise<T|U>();
         let fn: () => void = (): void => {
             try {
-                let res: U = onRejected(thisPromise.value as NullableType);
-                promise.resolveImpl(res);
+                if (onRejected) {
+                    let res: U|PromiseLike<U> = onRejected(this.value);
+                    promise.doResolve<U>(res);
+                } else {
+                    promise.rejectImpl(this.value!);
+                }
             } catch (e) {
                 promise.rejectImpl(e);
             }
@@ -134,17 +168,21 @@ export final class Promise<out T> {
         return promise;
     }
 
-    finally(onFinally: () => void throws): Promise<T> {
+    finally(onFinally?: () => void throws): Promise<T> {
         let promise = new Promise<T>();
-        // TODO(audovichenko): remove thisPromise variable
-        let thisPromise = this;
         let fn: () => void = (): void => {
             try {
-                onFinally();
-                if (thisPromise.state == Promise.STATE_RESOLVED) {
-                    promise.resolveImpl(thisPromise.value!);
+                if (onFinally) {
+                    try {
+                        onFinally();
+                    } catch(error) {
+                        promise.rejectImpl(error);
+                    }
+                }
+                if (this.state == Promise.STATE_RESOLVED) {
+                    promise.resolveImpl(this.value!);
                 } else {
-                    promise.rejectImpl(thisPromise.value! as Object);
+                    promise.rejectImpl(this.value! as Object);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
@@ -165,105 +203,165 @@ export final class Promise<out T> {
         return p;
     }
 
-    static resolve<U>(value: U): Promise<U> {
+    static resolve<U>(value: U|PromiseLike<U>): Promise<U> {
         let p = new Promise<U>();
-        p.resolveImpl(value);
+        p.doResolve(value);
         return p;
     }
 
-    static reject<U>(value: U): Promise<U> {
+    static reject(): Promise<void> {
+        let p = new Promise<void>();
+        p.rejectImpl(null);
+        return p;
+    }
+
+    static reject<U = never>(value: U): Promise<U> {
         let p = new Promise<U>();
-        p.rejectImpl(value as NullableType);
+        p.rejectImpl(value);
         return p;
     }
 
-    // NOTE(audovichenko) Replace Promise<Object> by Promise<out Object> when it gets available
-    static all(promises: Promise<Object>[]): Promise<Object> {
-        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+    static all<U>(promises: (U|PromiseLike<U>)[]): Promise<U[]> {
+        return new Promise<U[]>((resolve: (value: U[]) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
-            new PromiseConcurrency(resolve, reject).all(promises);
+            new AllPromiseConcurrency<U>(resolve, reject).all(promises);
         });
-        return p;
     }
 
-    static allSettled(promises: Promise<Object>[]): Promise<Object> {
-        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+    static all<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U[]> {
+        return Promise.all<U>(Promise.toArray(promises));
+    }
+
+    static allSettled<U>(promises: (U|PromiseLike<U>)[]): Promise<PromiseSettledResult<U>[]> {
+        return new Promise<PromiseSettledResult<U>[]>((resolve: (value: PromiseSettledResult<U>[]) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
-            new PromiseConcurrency(resolve, reject).allSettled(promises);
+            new AllSettledPromiseConcurrency<U>(resolve, reject).allSettled(promises);
         });
-        return p;
     }
 
-    static any(promises: Promise<Object>[]): Promise<Object> {
-        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+    static allSettled<U>(promises: Iterable<U|PromiseLike<U>>): Promise<PromiseSettledResult<U>[]> {
+        return Promise.allSettled<U>(Promise.toArray(promises));
+    }
+
+    static any<U>(promises: (U|PromiseLike<U>)[]): Promise<U> {
+        return new Promise<U>((resolve: (value: U) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
-            new PromiseConcurrency(resolve, reject).any(promises);
+            new AnyPromiseConcurrency<U>(resolve, reject).any(promises);
         });
-        return p;
     }
 
-    static race(promises: Promise<Object>[]): Promise<Object> {
-        let p = new Promise<Object>((resolve: (value: Object) => void, reject: (error: Object|null) => void): void => {
+    static any<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
+        return Promise.any<U>(Promise.toArray(promises));
+    }
+
+    static race<U>(promises: (U|PromiseLike<U>)[]): Promise<U> {
+        return new Promise<U>((resolve: (value: U) => void, reject: (error: NullishType) => void): void => {
             // This temp object is needed because es2panda cannot change captured primitives
-            new PromiseConcurrency(resolve, reject).race(promises);
+            new RacePromiseConcurrency<U>(resolve, reject).race(promises);
         });
-        return p;
     }
 
-    private static ensureCapacity(queue: Object[] | null, size: int): Object[] | null {
-        if (size == 0) {
-            return new Object[2];
+    static race<U>(promises: Iterable<U|PromiseLike<U>>): Promise<U> {
+        return Promise.race<U>(Promise.toArray(promises));
+    }
+
+    private static toArray<U>(values: Iterable<U>): U[] {
+        let it = values.iterator();
+        let v = it.next();
+        if (v.done) {
+            return new U[0];
         }
-        if (size == queue!.length) {
-            let newQueue = new Object[size * 2];
-            for (let i = 0; i < size; ++i) {
-                newQueue[i] = queue?.[i]!;
+        let array: U[] = new U[1];
+        array[0] = v.value!;
+        let len = 1;
+        while (true) {
+            v = it.next();
+            if (v.done) {
+                return Promise.trim(array, len);
             }
-            return newQueue;
+            array = Promise.ensureCapacity(array, len + 1);
+            array[len] = v.value!;
+            ++len;
         }
-        return queue;
+    }
+
+    private static trim<U>(array: U[], length: int): U[] {
+        if (array.length == length) {
+            return array;
+        }
+        let result = new U[length];
+        for (let i = 0; i < length; ++i) {
+            result[i] = array[i];
+        }
+        return result;
+    }
+
+    private static ensureCapacity<U>(queue: U[], size: int): U[] {
+        if (size <= queue.length) {
+            return queue;
+        }
+        let newQueue = new U[size * 2];
+        for (let i = 0; i < queue.length; ++i) {
+            newQueue[i] = queue[i];
+        }
+        return newQueue;
     }
 
     private pushToThenQueue(job: Object): void {
         // length property of thenQueue Objet array represents its capacity, thenQueueSize represents its current size
-        this.thenQueue = this.ensureCapacity(this.thenQueue, this.thenQueueSize);
+        if (this.thenQueue == null) {
+            this.thenQueue = Promise.EMPTY_QUEUE;
+        }
+        this.thenQueue = this.ensureCapacity(this.thenQueue!, this.thenQueueSize + 1);
         this.thenQueue![this.thenQueueSize] = job;
         ++this.thenQueueSize;
     }
 
     private pushToCatchQueue(job: Object): void {
         // length property of catchQueue Objet array represents its capacity, catchQueueSize represents its current size
-        this.catchQueue = this.ensureCapacity(this.catchQueue, this.catchQueueSize);
+        if (this.catchQueue == null) {
+            this.catchQueue = Promise.EMPTY_QUEUE;
+        }
+        this.catchQueue = this.ensureCapacity(this.catchQueue!, this.catchQueueSize + 1);
         this.catchQueue![this.catchQueueSize] = job;
         ++this.catchQueueSize;
     }
 
-    private subscribeOnAnotherPromise(internalPromise: Promise<T>): void {
+    private subscribeOnAnotherPromise<U>(internalPromise: PromiseLike<U>): void {
         let thisPromise = this;
-        internalPromise.then<undefined>((value: T): undefined => {
+        internalPromise.then<void, void>((value: U): void => {
             thisPromise.resolveImpl(value);
-        }, (error: NullableType): undefined => {
+        }, (error: NullishType): void => {
             thisPromise.rejectImpl(error);
         });
     }
 
+    private doResolve<U>(value: U|PromiseLike<U>): void {
+        if (value instanceof PromiseLike) {
+            this.subscribeOnAnotherPromise<U>(value as PromiseLike<U>);
+        } else {
+            this.resolveImpl(value);
+        }
+    }
+
     public native awaitResolution(): T;
 
-    private native resolveImpl(value: T): void;
-    private native rejectImpl(error: NullableType): void;
+    private native resolveImpl<U>(value: U): void;
+    private native rejectImpl(error: NullishType): void;
     private static native addToJobQueue(job: Object): void;
 
     private static STATE_PENDING = 0;
     private static STATE_RESOLVED = 1;
     private static STATE_REJECTED = 2;
+    private static EMPTY_QUEUE = new Object[0];
 
     // Order of fields should be the following
     // 1. Reference fields
     // 2. Primitive fields in mostly size decreasing order
     // filling alignment holes
     private value: T | null = null;
-    private thenQueue: Object[] | null = null;;
-    private catchQueue: Object[] | null = null;
+    private thenQueue: Object[]|null = null;
+    private catchQueue: Object[]|null = null;
     private linkedPromise: Object | null = null;
     private eventPtr: long;
     private thenQueueSize: int = 0;
@@ -271,110 +369,188 @@ export final class Promise<out T> {
     private state: int = Promise.STATE_PENDING;
 }
 
-class PromiseConcurrency {
-    constructor(resolve: (value: Object) => void, reject: (error: Object|null) => void) {
+class PromiseConcurrencyBase<T> {
+    toPromiseLike(value: T|PromiseLike<T>): PromiseLike<T> {
+        if (value instanceof PromiseLike) {
+            let p = value as PromiseLike<T>;
+            return p;
+        } else {
+            let p = Promise.resolve<T>(value as T);
+            return p;
+        }
+    }
+}
+
+class AllPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
+    constructor(resolve: (value: T[]) => void, reject: (error: NullishType) => void) {
         this.resolve = resolve;
         this.reject = reject;
     }
 
-    all(promises: Promise<Object>[]): void {
-        let values = new Object[promises.length];
+    all(promises: (T|PromiseLike<T>)[]): void {
+        this.values = new T[promises.length];
         if (promises.length == 0) {
-            this.resolve(values);
+            this.resolve(this.values!);
             return;
         }
         for (let i = 0; i < promises.length; ++i) {
             let idx = i;
-            let promise = promises[idx];
-            promise.then<Object|null>((value: Object): Object|null => {
-                values[idx] = value;
-                ++this.resolvedCnt;
-                if (this.resolvedCnt == values.length) {
-                    this.resolve(values as Object);
-                }
-                return null;
-            }, (error: Object|null): Object|null => {
+            this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+                this.resolveImpl(value, idx);
+            }, (error: NullishType): void => {
                 this.reject(error);
-                return null;
             });
         }
     }
 
-    allSettled(promises: Promise<Object>[]): void {
-        let values: (Object|null)[] = new Object[promises.length];
-        if (promises.length == 0) {
-            this.resolve(values);
-            return;
-        }
-        for (let i = 0; i < promises.length; ++i) {
-            let idx = i;
-            let promise = promises[idx];
-            promise.then<Object|null>((value: Object): Object|null => {
-                values[idx] = value;
-                ++this.resolvedCnt;
-                if (this.resolvedCnt == values.length) {
-                    this.resolve(values as Object);
-                }
-                return null;
-            }, (error: Object|null): Object|null => {
-                values[idx] = error;
-                ++this.resolvedCnt;
-                if (this.resolvedCnt == values.length) {
-                    this.resolve(values as Object);
-                }
-                return null;
-            });
-        }
-    }
-
-    any(promises: Promise<Object>[]): void {
-        let errors = new Error[promises.length];
-        if (promises.length == 0) {
-            this.reject(new AggregateError(errors, "All promises are rejected"));
-            return;
-        }
-        for (let i = 0; i < promises.length; ++i) {
-            let idx = i;
-            let promise = promises[idx];
-            promise.then<Object|null>((value: Object): Object|null => {
-                ++this.resolvedCnt;
-                if (this.resolvedCnt == 1) {
-                    this.resolve(value);
-                }
-                return null;
-            }, (error: Object|null): Object|null => {
-                ++this.rejectedCnt;
-                if (error == null || error instanceof Error) {
-                    errors[idx] = error as Error;
-                } else {
-                    errors[idx] = new Error(error!.toString());
-                }
-                if (this.rejectedCnt == errors.length) {
-                    this.reject(new AggregateError(errors, "All promises are rejected"));
-                }
-                return null;
-            });
-        }
-    }
-
-    race(promises: Promise<Object>[]): void {
-        for (let i = 0; i < promises.length; ++i) {
-            let idx = i;
-            let promise = promises[idx];
-            promise.then<Object|null>((value: Object): Object|null => {
-                this.resolve(value)
-                return null;
-            }, (error: Object|null): Object|null => {
-                this.reject(error);
-                return null;
-            });
+    private resolveImpl(value: T, idx: int): void {
+        this.values![idx] = value;
+        ++this.resolvedCnt;
+        if (this.resolvedCnt == this.values!.length) {
+            this.resolve(this.values!);
         }
     }
 
     private resolvedCnt = 0;
     private rejectedCnt = 0;
-    private resolve: (value: Object) => void;
-    private reject: (error: Object|null) => void;
+    private values: T[]|null = null;
+    private resolve: (value: T[]) => void;
+    private reject: (error: NullishType) => void;
+}
+
+class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
+    constructor(resolve: (value: PromiseSettledResult<T>[]) => void, reject: (error: NullishType) => void) {
+        this.resolve = resolve;
+        this.reject = reject;
+    }
+
+    allSettled(promises: (T|PromiseLike<T>)[]): void {
+        this.values = new PromiseSettledResult<T>[promises.length];
+        if (promises.length == 0) {
+            this.resolve(this.values!);
+            return;
+        }
+        for (let i = 0; i < promises.length; ++i) {
+            let idx = i;
+            this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+                this.resolveImpl(value as T, idx);
+            }, (error: NullishType): void => {
+                this.rejectImpl(error, idx);
+            });
+        }
+    }
+
+    private resolveImpl(value: T, idx: int): void {
+        let res = new PromiseFulfilledResult<T>();
+        res.status = "fulfilled";
+        res.value = value;
+        this.values![idx] = res;
+        ++this.resolvedCnt;
+        if (this.resolvedCnt == this.values!.length) {
+            this.resolve(this.values!);
+        }
+    }
+
+    private rejectImpl(error: NullishType, idx: int): void {
+        let res = new PromiseRejectedResult();
+        res.status = "rejected";
+        res.reason = error;
+        this.values![idx] = res;
+        ++this.resolvedCnt;
+        if (this.resolvedCnt == this.values!.length) {
+            this.resolve(this.values!);
+        }
+    }
+
+    private resolvedCnt = 0;
+    private rejectedCnt = 0;
+    private values: PromiseSettledResult<T>[]|null = null;
+    private resolve: (value: PromiseSettledResult<T>[]) => void;
+    private reject: (error: NullishType) => void;
+}
+
+class AnyPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
+    constructor(resolve: (value: T) => void, reject: (error: NullishType) => void) {
+        this.resolve = resolve;
+        this.reject = reject;
+    }
+
+    any(promises: (T|PromiseLike<T>)[]): void {
+        this.errors = new Error[promises.length];
+        if (promises.length == 0) {
+            this.reject(new AggregateError(this.errors!, "All promises are rejected"));
+            return;
+        }
+        for (let i = 0; i < promises.length; ++i) {
+            let idx = i;
+            this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+                this.resolveImpl(value as T);
+            }, (error: NullishType): void => {
+                this.rejectImpl(error, idx);
+            });
+        }
+    }
+
+    private resolveImpl(value: T) {
+        ++this.resolvedCnt;
+        if (this.resolvedCnt == 1) {
+            this.resolve(value);
+        }
+    }
+
+    private rejectImpl(error: NullishType, idx: int) {
+        ++this.rejectedCnt;
+        if (error == null || error instanceof Error) {
+            this.errors![idx] = error as Error;
+        } else {
+            this.errors![idx] = new Error(error!.toString());
+        }
+        if (this.rejectedCnt == this.errors!.length) {
+            this.reject(new AggregateError(this.errors!, "All promises are rejected"));
+        }
+    }
+
+    private resolvedCnt = 0;
+    private rejectedCnt = 0;
+    private errors: Error[]|null = null;
+    private resolve: (value: T) => void;
+    private reject: (error: NullishType) => void;
+}
+
+class RacePromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
+    constructor(resolve: (value: T) => void, reject: (error: NullishType) => void) {
+        this.resolve = resolve;
+        this.reject = reject;
+    }
+
+    race(promises: (T|PromiseLike<T>)[]): void {
+        for (let i = 0; i < promises.length; ++i) {
+            let idx = i;
+            this.toPromiseLike(promises[idx]).then<void, void>((value: T): void => {
+                this.resolveImpl(value as T);
+            }, (error: NullishType): void => {
+                this.rejectImpl(error);
+            });
+        }
+    }
+
+    private resolveImpl(value: T) {
+        if (!this.settled) {
+            this.resolve(value)
+            this.settled = true;
+        }
+    }
+
+    private rejectImpl(error: NullishType) {
+        if (!this.settled) {
+            this.reject(error);
+            this.settled = true;
+        }
+    }
+
+    private settled = false;
+    private resolve: (value: T) => void;
+    private reject: (error: NullishType) => void;
 }
 
 export type NullablePromise<out T> = Promise<T> | null;

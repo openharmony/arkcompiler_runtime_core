@@ -87,7 +87,7 @@ function(do_panda_ets_package TARGET)
                 COMMENT "${TARGET}: Convert ets files to ${OUTPUT_ABC}"
                 COMMAND mkdir -p ${BUILD_DIR}/src
                 COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} --output=${OUTPUT_ABC} ${ARG_ETS_SOURCES}
-                DEPENDS etsstdlib ${es2panda_target} ${ARG_ETS_SOURCES}
+                DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ARG_ETS_SOURCES}
             )
         else()
             # Compile several .ets files and link them to OUTPUT_ABC
@@ -103,7 +103,7 @@ function(do_panda_ets_package TARGET)
                     COMMENT "${TARGET}: Convert ets files to ${CUR_OUTPUT_ABC}"
                     COMMAND mkdir -p ${BUILD_DIR}/src
                     COMMAND ${es2panda_bin} ${ES2PANDA_ARGUMENTS} ${ETS_MODULE_KEY} --output=${CUR_OUTPUT_ABC} ${ETS_SOURCE}
-                    DEPENDS etsstdlib ${es2panda_target} ${ETS_SOURCE}
+                    DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${es2panda_target} ${ETS_SOURCE}
                 )
                 if (ETS_MODULE_KEY STREQUAL "")
                     set(ETS_MODULE_KEY "--ets-module")
@@ -124,7 +124,7 @@ function(do_panda_ets_package TARGET)
                 TARGET ${TARGET}
                 COMMENT "${TARGET}: Verify abc file ${OUTPUT_ABC}"
                 COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:verifier> ${VERIFIER_ARGUMENTS} ${OUTPUT_ABC}
-                DEPENDS verifier etsstdlib ${OUTPUT_ABC}
+                DEPENDS verifier ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${OUTPUT_ABC}
             )
         endif()
     else()
@@ -132,7 +132,7 @@ function(do_panda_ets_package TARGET)
                 OUTPUT ${OUTPUT_ABC}
                 COMMENT "${TARGET}: Copy abc file to ${OUTPUT_ABC}"
                 COMMAND cp -rf ${ARG_ABC_FILE} ${OUTPUT_ABC}
-                DEPENDS etsstdlib ${ARG_ABC_FILE}
+                DEPENDS ${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc ${ARG_ABC_FILE}
             )
     endif()
 
