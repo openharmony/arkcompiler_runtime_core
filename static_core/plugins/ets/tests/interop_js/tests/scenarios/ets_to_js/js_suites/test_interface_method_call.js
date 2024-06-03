@@ -21,3 +21,5 @@ const newInterfaceWithMethodEts = etsMod.getFunction('newInterfaceWithMethodEts'
 {
   ASSERT_EQ(newInterfaceWithMethodEts().methodInInterface(), 1);
 }
+
+GCJSRuntimeCleanup();

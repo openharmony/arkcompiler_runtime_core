@@ -30,9 +30,19 @@ TEST_F(EtsInteropScenariosEtsToJs, test_class_method_call)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_method_call.js"));
 }
 
+TEST_F(EtsInteropScenariosEtsToJs, test_class_method_call_union)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_method_call_union.js"));
+}
+
 TEST_F(EtsInteropScenariosEtsToJs, test_interface_method_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_interface_method_call.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_interface_method_call_union)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_interface_method_call_union.js"));
 }
 
 // NOTE #15888 enable this after interop is implemented for eTS getter use in JS
@@ -41,10 +51,20 @@ TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_class_getter)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_getter.js"));
 }
 
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_class_getter_union)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_getter_union.js"));
+}
+
 // NOTE #15889 enable this after interop is implemented for eTS setter use in JS
 TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_class_setter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_setter.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_class_setter_union)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_setter_union.js"));
 }
 
 TEST_F(EtsInteropScenariosEtsToJs, test_lambda_function_call)
@@ -55,6 +75,26 @@ TEST_F(EtsInteropScenariosEtsToJs, test_lambda_function_call)
 TEST_F(EtsInteropScenariosEtsToJs, test_generic_function_call)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_generic_function_call.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_generic_function_with_union_call)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_generic_function_with_union_call.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_rest_params_call)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_rest_params_call.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_spread_params_call)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_spread_params_call.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_rest_params_union_call)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_rest_params_union_call.js"));
 }
 
 TEST_F(EtsInteropScenariosEtsToJs, test_extend_class)
@@ -168,6 +208,22 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_primitive)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_primitive.js"));
 }
 
+TEST_F(EtsInteropScenariosEtsToJs, negative_test_function_arg_type_primitive)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/negative_test_function_arg_type_primitive.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_primitive_union)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_primitive_union.js"));
+}
+
+// NOTE #16812 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_negative_test_function_arg_type_primitive_union)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/negative_test_function_arg_type_primitive_union.js"));
+}
+
 TEST_F(EtsInteropScenariosEtsToJs, test_function_return_type_primitive)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_return_type_primitive.js"));
@@ -230,6 +286,48 @@ TEST_F(EtsInteropScenariosEtsToJs, DISABLED_negative_test_interface_arg_not_call
 TEST_F(EtsInteropScenariosEtsToJs, DISABLED_negative_test_interface_arg_wrong_prop_type)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/interface_arg/negative_wrong_prop_type.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_async_function_literal)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_literal.js"));
+}
+
+// NOTE #17602 enable this bug is fixed
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_async_function_any)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_any.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_async_function_extra_set)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_extra_set.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_async_function_subset_by_ref)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_subset_by_ref.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_async_function_subset_by_value)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_subset_by_value.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_async_function_user_class)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_user_class.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_async_function_user_interface_ret)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_user_interface_ret.js"));
+}
+
+// NOTE #17603 enable this bug is fixed
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_async_function_user_interface_param)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_user_interface_param.js"));
 }
 
 }  // namespace ark::ets::interop::js::testing

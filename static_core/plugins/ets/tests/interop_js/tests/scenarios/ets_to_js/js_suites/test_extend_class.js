@@ -24,3 +24,5 @@ class ChildClass extends ClassToExtendEts { }
   let obj = new ChildClass();
   ASSERT_EQ(obj.value(), 1);
 }
+
+GCJSRuntimeCleanup();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,15 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypeCallableEts = etsMod.getFunction('function_arg_type_callable_ets');
+const newInterfaceWithMethodEts = etsMod.getFunction('newInterfaceWithMethodEts');
+const async_function_user_interface = etsMod.getFunction('async_function_user_interface');
 
-{
-  let functionToCall = () => 1;
-  let ret = functionArgTypeCallableEts(functionToCall);
+async function test() {
+  let obj = newInterfaceWithMethodEts();
+  let ret = await async_function_user_interface(obj);
   ASSERT_EQ(ret, 1);
 }
+
+test();
 
 GCJSRuntimeCleanup();

@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 import * as js from "pure_js"
-import { ClassWithMethodJs, ClassWithGetterSetter } from "pure_js"
+import {
+    ClassWithMethodJs, ClassWithGetterSetter, InterfaceWithUnionImpl, UnionTestClassJs,
+    ClassWithStaticMethod
+} from "pure_js"
 
 import {
     optional_call,
@@ -159,10 +162,89 @@ function Test_function_return_type_primitive(): boolean {
 
 function Test_rest_params() {
     // NOTE: casts due to bug in frontend
-    assert js.js_sum_rest_params(1, 2, 3) as Int == (1+2+3)
-    assert js.js_multiply_1arg_by_sum_rest_params(1, 2, 3, 4) as Int == (1) * (2+3+4)
-    assert js.js_multiply_sum2args_by_sum_rest_params(1, 2, 3, 4, 5) as Int == (1+2)*(3+4+5);
+    assert js.js_sum_rest_params(1, 2, 3) as Int == (1 + 2 + 3)
+    assert js.js_multiply_1arg_by_sum_rest_params(1, 2, 3, 4) as Int == (1) * (2 + 3 + 4)
+    assert js.js_multiply_sum2args_by_sum_rest_params(1, 2, 3, 4, 5) as Int == (1 + 2) * (3 + 4 + 5);
     assert js.js_concat_strings_rest_params() as String == "";
     assert js.js_concat_strings_rest_params("a", "b", "c") as String == "abc";
+    return true;
+}
+
+function Test_function_arg_type_union(): boolean {
+    let i: (number | string) = 1;
+    let s: (number | string) = "1";
+    if (js.functionArgTypeUnion(i) as int != 0) {
+        return false;
+    }
+    if (js.functionArgTypeUnion(s) as int != 1) {
+        return false;
+    }
+    return true;
+}
+
+function Test_function_return_type_union(): boolean {
+    let res: (number | string) = js.functionReturnTypeUnion(0) as (number | string);
+    if (typeof res != "number" || res as number != 1) {
+        return false;
+    }
+    res = js.functionReturnTypeUnion(1) as (number | string);
+    if (typeof res != "string" || res as string != "1") {
+        return false;
+    }
+    return true;
+}
+
+function Test_class_method_arg_type_union(): boolean {
+    let i: (number | string) = 1;
+    let s: (number | string) = "1";
+    let obj = new UnionTestClassJs();
+    if (obj.methodArgTypeUnion(i) as int != 0) {
+        return false;
+    }
+    if (obj.methodArgTypeUnion(s) as int != 1) {
+        return false;
+    }
+    return true;
+}
+
+function Test_class_method_return_type_union(): boolean {
+    let obj = new UnionTestClassJs();
+    let res: (number | string) = obj.methodReturnTypeUnion(0) as (number | string);
+    if (typeof res != "number" || res as number != 1) {
+        return false;
+    }
+    res = obj.methodReturnTypeUnion(1) as (number | string);
+    if (typeof res != "string" || res as string != "1") {
+        return false;
+    }
+    return true;
+}
+
+function Test_interface_method_call_return_type_union(): boolean {
+    let obj = js.newInterfaceWithUnion();
+    let res: (number | string) = obj.methodInInterface(0) as (number | string);
+    if (typeof res != "number" || res as number != 1) {
+        return false;
+    }
+    res = obj.methodInInterface(1) as (number | string);
+    if (typeof res != "string" || res as string != "1") {
+        return false;
+    }
+    return true;
+}
+
+function Test_static_method_call(): boolean {
+    return js.ClassWithStaticMethod.staticMethod(1) as int == 1;
+}
+
+function Test_static_method_call_return_type_union(): boolean {
+    let res: (number | string) = js.ClassWithStaticMethod.staticMethodReturnTypeUnion(0) as (number | string);
+    if (typeof res != "number" || res as number != 1) {
+        return false;
+    }
+    res = js.ClassWithStaticMethod.staticMethodReturnTypeUnion(1) as (number | string);
+    if (typeof res != "string" || res as string != "1") {
+        return false;
+    }
     return true;
 }

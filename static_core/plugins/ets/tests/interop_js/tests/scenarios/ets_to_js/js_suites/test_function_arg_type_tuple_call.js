@@ -22,3 +22,5 @@ const functionArgTypeTupleEts = etsMod.getFunction('function_arg_type_tuple_ets'
   let ret = functionArgTypeTupleEts([1, 'one']);
   ASSERT_EQ(ret, 1);
 }
+
+GCJSRuntimeCleanup();

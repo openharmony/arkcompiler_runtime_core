@@ -31,3 +31,5 @@ const defaultUndefinedFunctionEts = etsMod.getFunction('default_undefined_parame
   ret = defaultUndefinedFunctionEts(INT_VALUE);
   ASSERT_EQ(ret, INT_VALUE);
 }
+
+GCJSRuntimeCleanup();

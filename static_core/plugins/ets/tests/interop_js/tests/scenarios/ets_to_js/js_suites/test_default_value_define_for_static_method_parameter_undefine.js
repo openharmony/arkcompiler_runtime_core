@@ -15,6 +15,7 @@
 const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const ClassWithDefaultParameterMethods = etsMod.getClass('ClassWithDefaultParameterMethods');
 
 
@@ -30,3 +31,5 @@ const ClassWithDefaultParameterMethods = etsMod.getClass('ClassWithDefaultParame
   ret = ClassWithDefaultParameterMethods.undefined_parameter_static_method(INT_VALUE);
   ASSERT_EQ(ret, INT_VALUE);
 }
+
+GCJSRuntimeCleanup();

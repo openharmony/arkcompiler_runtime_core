@@ -15,6 +15,7 @@
 const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const overloadedFunction = etsMod.getFunction('overloaded_function');
 
 {
@@ -24,3 +25,5 @@ const overloadedFunction = etsMod.getFunction('overloaded_function');
   ASSERT_THROWS(TypeError, () => overloadedFunction(INT_VALUE));
   ASSERT_THROWS(TypeError, () => overloadedFunction(STRING_VALUE));
 }
+
+GCJSRuntimeCleanup();

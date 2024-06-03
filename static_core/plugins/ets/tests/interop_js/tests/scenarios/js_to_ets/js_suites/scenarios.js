@@ -167,12 +167,11 @@ function functionReturnTypePrimitive() {
   return true;
 }
 
-
-function optional_call(x=123, y=130, z=1) {
+function optional_call(x = 123, y = 130, z = 1) {
   return x + y + z;
 }
 
-function single_required(z, x=123, y=123) {
+function single_required(z, x = 123, y = 123) {
   return x + y + z;
 }
 
@@ -198,6 +197,52 @@ function js_concat_strings_rest_params(...args) {
   let str = "";
   args.forEach(s => str += s);
   return str;
+}
+
+class InterfaceWithUnionImpl {
+  methodInInterface(arg) {
+    return functionReturnTypeUnion(arg);
+  }
+}
+
+function newInterfaceWithUnion() {
+  return new InterfaceWithUnionImpl();
+}
+
+function functionArgTypeUnion(arg) {
+  switch (typeof arg) {
+    case 'number':
+      return 0;
+    case 'string':
+      return 1;
+    default:
+      return -1;
+  }
+}
+
+function functionReturnTypeUnion(arg) {
+  if (arg == 0) {
+    return INT_VALUE;
+  }
+  return STRING_VALUE;
+}
+
+class UnionTestClassJs {
+  methodArgTypeUnion(arg) {
+    return functionArgTypeUnion(arg);
+  }
+  methodReturnTypeUnion(arg) {
+    return functionReturnTypeUnion(arg);
+  }
+}
+
+class ClassWithStaticMethod {
+  static staticMethod(arg) {
+    return arg;
+  }
+  static staticMethodReturnTypeUnion(arg) {
+    return functionReturnTypeUnion(arg);
+  }
 }
 
 exports.standaloneFunctionJs = standaloneFunctionJs;
@@ -230,3 +275,9 @@ exports.js_sum_rest_params = js_sum_rest_params;
 exports.js_multiply_1arg_by_sum_rest_params = js_multiply_1arg_by_sum_rest_params;
 exports.js_multiply_sum2args_by_sum_rest_params = js_multiply_sum2args_by_sum_rest_params;
 exports.js_concat_strings_rest_params = js_concat_strings_rest_params;
+exports.InterfaceWithUnionImpl = InterfaceWithUnionImpl
+exports.newInterfaceWithUnion = newInterfaceWithUnion
+exports.functionArgTypeUnion = functionArgTypeUnion;
+exports.functionReturnTypeUnion = functionReturnTypeUnion;
+exports.UnionTestClassJs = UnionTestClassJs;
+exports.ClassWithStaticMethod = ClassWithStaticMethod;

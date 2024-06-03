@@ -26,3 +26,5 @@ const ClassWithGetterSetterEts = etsMod.getClass('ClassWithGetterSetterEts');
   obj.value = EXPECTED_VALUE;
   ASSERT_EQ(obj.value, EXPECTED_VALUE);
 }
+
+GCJSRuntimeCleanup();

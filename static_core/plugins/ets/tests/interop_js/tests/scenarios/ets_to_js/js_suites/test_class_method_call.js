@@ -22,3 +22,5 @@ const ClassWithMethodEts = etsMod.getClass('ClassWithMethodEts');
   let obj = new ClassWithMethodEts();
   ASSERT_EQ(obj.methodInClass(), 1);
 }
+
+GCJSRuntimeCleanup();

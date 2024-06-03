@@ -22,3 +22,5 @@ const standaloneFunctionEts = etsMod.getFunction('standalone_function_ets');
   let ret = standaloneFunctionEts();
   ASSERT_EQ(ret, 1);
 }
+
+GCJSRuntimeCleanup();

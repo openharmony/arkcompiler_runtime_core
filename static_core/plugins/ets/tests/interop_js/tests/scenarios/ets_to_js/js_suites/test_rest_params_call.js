@@ -15,6 +15,7 @@
 const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
+const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 
 let ets_sum_rest_params = etsMod.getFunction("ets_sum_rest_params");
 let ets_multiply_1arg_by_sum_rest_params = etsMod.getFunction("ets_multiply_1arg_by_sum_rest_params");
@@ -24,11 +25,13 @@ let ets_method_rest_params = etsMod.getFunction("ets_call_foo_rest_params");
 let F = etsMod.getClass("RestParamsTest");
 {
     ASSERT_EQ(ets_sum_rest_params(1, 2, 3), (1 + 2 + 3));
-    ASSERT_EQ(ets_multiply_1arg_by_sum_rest_params(1, 2, 3, 4), (1)*(2+3+4));
-    ASSERT_EQ(ets_multiply_sum2args_by_sum_rest_params(1, 2, 3, 4, 5), (1+2)*(3+4+5));
+    ASSERT_EQ(ets_multiply_1arg_by_sum_rest_params(1, 2, 3, 4), (1) * (2 + 3 + 4));
+    ASSERT_EQ(ets_multiply_sum2args_by_sum_rest_params(1, 2, 3, 4, 5), (1 + 2) * (3 + 4 + 5));
     ASSERT_EQ(ets_concat_strings_rest_params(), "");
     ASSERT_EQ(ets_concat_strings_rest_params('a', 'b', 'c', 'd'), "abcd");
     ASSERT_EQ(ets_method_rest_params(new F(), new F(), new F()), 9);
     let foo = new F();
     ASSERT_EQ(foo.sum_ints(1, 2, 3), (1 + 2 + 3));
 }
+
+GCJSRuntimeCleanup();

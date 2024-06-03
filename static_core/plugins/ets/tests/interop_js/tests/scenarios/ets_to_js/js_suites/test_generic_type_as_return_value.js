@@ -35,3 +35,5 @@ const genericTypeReturnValueEts = etsMod.getFunction('generic_type_return_value_
   ASSERT_EQ(ret, TRUE_VALUE);
 
 }
+
+GCJSRuntimeCleanup();
