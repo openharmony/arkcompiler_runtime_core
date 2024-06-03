@@ -36,9 +36,10 @@ std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_
 std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord",
                                                                                           "_GLOBAL",
                                                                                           "_GLOBAL",
+                                                                                          "_GLOBAL",
                                                                                           "_GLOBAL"};
 
-std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 8, 21};
+std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 6, 8, 21};
 
 template <typename T>
 bool Abc2ProgramTestUtils::ValidateStrings(const T &strings, const T &expected_strings)

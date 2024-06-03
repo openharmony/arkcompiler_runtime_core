@@ -32,9 +32,10 @@ constexpr std::string_view FUNC_NAME_FOO = ".#*#foo";
 constexpr std::string_view FUNC_NAME_GOO = ".#*#goo";
 constexpr std::string_view FUNC_NAME_HOO = ".#*#hoo";
 constexpr std::string_view FUNC_NAME_MAIN = ".func_main_0";
-constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 7;
+constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 13;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
-constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 4;
+constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 5;
+constexpr uint8_t TOTAL_NUM_OF_ASYNC_METHOD_LITERALS = 6;
 constexpr uint8_t TOTAL_NUM_OF_MODULE_LITERALS = 21;
 constexpr uint8_t NUM_OF_MODULE_REQUESTS = 4;
 constexpr uint8_t NUM_OF_REGULAR_IMPORTS = 1;
@@ -150,6 +151,44 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_literalarray_ta
     }
     EXPECT_TRUE(Abc2ProgramTestUtils::ValidateLiteralsSizes(literals_sizes));
     EXPECT_TRUE(Abc2ProgramTestUtils::ValidateLiteralArrayKeys(literal_array_keys));
+}
+
+/**
+ * @tc.name: abc2program_async_method_literals
+ * @tc.desc: get and check literals of async generator method.
+ * @tc.type: FUNC
+ * @tc.require: issueI9SLHH
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_async_method_literals, TestSize.Level1)
+{
+    auto &literal_array_table = prog_->literalarray_table;
+    EXPECT_EQ(literal_array_table.size(), SIZE_OF_LITERAL_ARRAY_TABLE);
+    panda::pandasm::LiteralArray async_literals;
+    for (auto &item : literal_array_table) {
+        for (auto &literal : item.second.literals_) {
+            if (literal.tag_ == panda_file::LiteralTag::ASYNCGENERATORMETHOD) {
+                async_literals = item.second;
+                break;
+            }
+        }
+        if (async_literals.literals_.size() != 0) {
+            break;
+        }
+    }
+    EXPECT_EQ(async_literals.literals_.size(), TOTAL_NUM_OF_ASYNC_METHOD_LITERALS);
+    auto it = async_literals.literals_.begin();
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::STRING);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::ASYNCGENERATORMETHOD);
+    EXPECT_EQ(std::get<std::string>(it->value_), ".#*@2*#method");
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::METHODAFFILIATE);
 }
 
 /**
@@ -508,8 +547,13 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_imm_of_FLDAI, TestSize.Leve
 {
     const pandasm::Function &hoo = *hoo_function_;
     EXPECT_EQ(hoo.ins.size(), INS_SIZE_OF_FUNCTION_HOO);
-    constexpr uint32_t INDEX_OF_FUNC_FLDAI = 3;
-    auto &ins_fldai = hoo.ins[INDEX_OF_FUNC_FLDAI];
+    pandasm::Ins ins_fldai;
+    for (auto &ins : hoo.ins) {
+        if (ins.opcode == pandasm::Opcode::FLDAI) {
+            ins_fldai = ins;
+            break;
+        }
+    }
     EXPECT_TRUE(ins_fldai.opcode == pandasm::Opcode::FLDAI);
     // check imm of FLDAI
     EXPECT_EQ(ins_fldai.imms.size(), IMMS_SIZE_OF_OPCODE_FLDAI);

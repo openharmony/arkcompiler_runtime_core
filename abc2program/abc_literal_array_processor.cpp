@@ -132,6 +132,7 @@ void AbcLiteralArrayProcessor::FillLiteralData(pandasm::LiteralArray *lit_array,
         case panda_file::LiteralTag::GETTER:
         case panda_file::LiteralTag::SETTER:
         case panda_file::LiteralTag::GENERATORMETHOD:
+        case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
             value_lit.value_ = entity_container_.GetFullMethodNameById(std::get<uint32_t>(value));
             break;
         case panda_file::LiteralTag::LITERALARRAY:

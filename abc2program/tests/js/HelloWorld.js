@@ -64,6 +64,7 @@ function goo() {
 
 function hoo () {
   varA = 1.23;
+  var obj = {async * method() {}};
 }
 
 foo();
