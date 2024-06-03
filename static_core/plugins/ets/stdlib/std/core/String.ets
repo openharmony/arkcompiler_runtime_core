@@ -1959,7 +1959,7 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
      */
     public native isCompressed(): boolean;
 
-    public override iterator(): IterableIterator<String> {
+    public override $_iterator(): IterableIterator<String> {
         return new StringIterator(this)
     }
 }

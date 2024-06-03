@@ -21,7 +21,7 @@
 
 class MyClass {
     public constructor(element: Iterable<Int>) {
-        let it = element.iterator();
+        let it = element.$_iterator();
         while(true) {
             const v = it.next();
             if (v.done) {

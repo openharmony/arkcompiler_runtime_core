@@ -99,7 +99,7 @@ final class SetIterator<R> implements IterableIterator<R> {
         return res
     }
 
-    override iterator(): IterableIterator<R> {
+    override $_iterator(): IterableIterator<R> {
         return this
     }
 }
@@ -305,7 +305,7 @@ export final class Set<K> implements ReadonlySet<K> {
         })
     }
 
-    override iterator(): IterableIterator<K> {
+    override $_iterator(): IterableIterator<K> {
         return this.values();
     }
 

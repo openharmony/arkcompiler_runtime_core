@@ -28,7 +28,7 @@ class ArrayValuesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx
         return new IteratorResult<<%= ctx.el_type %>>(<%= ctx.get_unsafe.('this.parent', 'this.idx++') %>)
     }
 
-    override iterator(): IterableIterator<<%= ctx.el_type %>> {
+    override $_iterator(): IterableIterator<<%= ctx.el_type %>> {
         return this;
     }
 }
@@ -50,7 +50,7 @@ class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ct
         return new IteratorResult<[number, <%= ctx.el_type %>]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, <%= ctx.el_type %>]> {
+    override $_iterator(): IterableIterator<[number, <%= ctx.el_type %>]> {
         return this;
     }
 }

@@ -36,7 +36,7 @@ export interface ArrayLike<T> extends Iterable<T> {
 
     get length(): number
 
-    iterator(): IterableIterator<T> {
+    $_iterator(): IterableIterator<T> {
         return new ArrayLikeIterator<T>(this)
     }
 }

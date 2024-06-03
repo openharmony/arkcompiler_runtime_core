@@ -109,7 +109,7 @@ function values(): int {
 
 function iterator(): int {
     let arr = new Array<Number>;
-    let iterator = arr.iterator();
+    let iterator = arr.$_iterator();
     let i: int = 0;
     while (true) {
         const v = iterator.next();
@@ -124,7 +124,7 @@ function iterator(): int {
     for (let i: int = 0; i < d.length; ++i) {
         arr.push(d[i]);
     }
-    iterator = arr.iterator();
+    iterator = arr.$_iterator();
     i = 0;
     while (true) {
         const v = iterator.next();

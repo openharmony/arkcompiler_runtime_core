@@ -44,7 +44,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
         return new IteratorResult<number>(this.idx++ as number)
     }
 
-    override iterator(): IterableIterator<number> {
+    override $_iterator(): IterableIterator<number> {
         return this
     }
 }

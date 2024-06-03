@@ -14,7 +14,7 @@
  */
 
 function check(str: String): int {
-    let it = str.iterator()
+    let it = str.$_iterator()
     let fin = ""
     while (true) {
         let res = it.next()
