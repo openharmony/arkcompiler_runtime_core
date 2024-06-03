@@ -49,7 +49,6 @@ static void OnPromiseCompletion(EtsCoroutine *coro, EtsHandle<EtsPromise> &promi
     if (exception.GetPtr() != promise.GetPtr()) {
         coro->SetException(exception.GetPtr());
     }
-    coro->GetPandaVM()->FirePromiseStateChanged(promise);
 }
 
 void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *internalPromise)

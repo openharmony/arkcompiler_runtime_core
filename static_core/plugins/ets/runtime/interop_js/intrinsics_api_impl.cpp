@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/include/class_linker-inl.h"
+#include "runtime/coroutines/stackful_coroutine.h"
 
 namespace ark::ets::interop::js {
 
@@ -798,6 +799,48 @@ EtsString *JSONStringify(JSValue *jsvalue)
     return res.value_or(nullptr);
 }
 
+static void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
+{
+    auto *main = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
+    auto *mainCoro = static_cast<EtsCoroutine *>(main);
+    auto *coro = EtsCoroutine::GetCurrent();
+
+    auto proc = [&]() {
+        auto *ctx = InteropCtx::Current(coro);
+        napi_env env = ctx->GetJSEnv();
+        napi_value completionValue;
+        if (value == nullptr) {
+            napi_get_null(env, &completionValue);
+        } else {
+            auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
+            completionValue = refconv->Wrap(ctx, value);
+        }
+        napi_status status = state == EtsPromise::STATE_RESOLVED ? napi_resolve_deferred(env, deferred, completionValue)
+                                                                 : napi_reject_deferred(env, deferred, completionValue);
+        if (status != napi_ok) {
+            napi_throw_error(env, nullptr, "Cannot resolve promise");
+        }
+    };
+
+    if (coro != mainCoro) {
+        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
+        auto *curCtx = EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>();
+        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(&proc, curCtx);
+    } else {
+        proc();
+    }
+}
+
+static void PromiseInteropResolve(EtsObject *value, EtsLong deferred)
+{
+    SettleJsPromise(value, reinterpret_cast<napi_deferred>(deferred), EtsPromise::STATE_RESOLVED);
+}
+
+static void PromiseInteropReject(EtsObject *value, EtsLong deferred)
+{
+    SettleJsPromise(value, reinterpret_cast<napi_deferred>(deferred), EtsPromise::STATE_REJECTED);
+}
+
 const IntrinsicsAPI G_INTRINSICS_API = {
     JSRuntimeFinalizationRegistryCallback,
     JSRuntimeNewJSValueDouble,
@@ -869,6 +912,8 @@ const IntrinsicsAPI G_INTRINSICS_API = {
     ConvertFromLocal<JSConvertJSValue>,
     ConvertFromLocal<JSConvertString>,
     CompilerConvertLocalToRefType,
+    PromiseInteropResolve,
+    PromiseInteropReject,
 };
 
 const IntrinsicsAPI *GetIntrinsicsAPI()

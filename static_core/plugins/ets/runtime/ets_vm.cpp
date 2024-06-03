@@ -67,18 +67,6 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
     return mem::MemoryManager::Create(ctx, allocator, gcType, gcSettings, gcTriggerConfig, heapOptions);
 }
 
-void PandaEtsVM::PromiseListenerInfo::UpdateRefToMovedObject()
-{
-    if (promise_->IsForwarded()) {
-        promise_ = EtsPromise::FromCoreType(ark::mem::GetForwardAddress(promise_));
-    }
-}
-
-void PandaEtsVM::PromiseListenerInfo::OnPromiseStateChanged(EtsHandle<EtsPromise> &promise)
-{
-    listener_->OnPromiseStateChanged(promise);
-}
-
 /* static */
 bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
@@ -583,18 +571,6 @@ void PandaEtsVM::SweepVmRefs(const GCObjectVisitor &gcObjectVisitor)
             }
         }
     }
-    {
-        os::memory::LockHolder lock(promiseListenersLock_);
-        auto it = promiseListeners_.begin();
-        while (it != promiseListeners_.end()) {
-            if (gcObjectVisitor(it->GetPromise()) == ObjectStatus::DEAD_OBJECT) {
-                auto toRemove = it++;
-                promiseListeners_.erase(toRemove);
-            } else {
-                ++it;
-            }
-        }
-    }
 }
 
 void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
@@ -709,11 +685,6 @@ void PandaEtsVM::UpdateVmRefs()
             }
         }
     }
-    {
-        os::memory::LockHolder lock(promiseListenersLock_);
-        std::for_each(promiseListeners_.begin(), promiseListeners_.end(),
-                      [](auto &entry) { entry.UpdateRefToMovedObject(); });
-    }
 }
 
 static mem::Reference *EtsNapiObjectToGlobalReference(ets_object globalRef)
@@ -761,30 +732,4 @@ void PandaEtsVM::Abort(const char *message /* = nullptr */)
 {
     Runtime::Abort(message);
 }
-
-void PandaEtsVM::AddPromiseListener(EtsPromise *promise, PandaUniquePtr<PromiseListener> &&listener)
-{
-    os::memory::LockHolder lock(promiseListenersLock_);
-    promiseListeners_.emplace_back(PromiseListenerInfo(promise, std::move(listener)));
-}
-
-void PandaEtsVM::FirePromiseStateChanged(EtsHandle<EtsPromise> &promise)
-{
-    os::memory::LockHolder lock(promiseListenersLock_);
-    auto it = promiseListeners_.begin();
-    while (it != promiseListeners_.end()) {
-        if (it->GetPromise() == promise.GetPtr()) {
-            // In stackful coroutine implementation (with JS mode enabled), the OnPromiseStateChanged call
-            // might trigger a PandaEtsVM::AddPromiseListener call within the same thread, causing a
-            // double acquire of promise_listeners_lock_ and hence an assertion failure
-            // NOTE(konstanting, I67QXC): handle this situation
-            it->OnPromiseStateChanged(promise);
-            auto toRemove = it++;
-            promiseListeners_.erase(toRemove);
-        } else {
-            ++it;
-        }
-    }
-}
-
 }  // namespace ark::ets

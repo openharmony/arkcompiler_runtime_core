@@ -105,6 +105,8 @@ static const IntrinsicsAPI S_INTRINSICS_API = {
     NotImplementedAdapter,
     NotImplementedAdapter,
     NotImplementedAdapter,
+    NotImplementedAdapter,
+    NotImplementedAdapter,
     // clang-format on
 };
 
@@ -377,6 +379,16 @@ void *CompilerLoadJSConstantPoolIntrinsic()
 void CompilerInitJSCallClassForCtxIntrinsic(void *klass)
 {
     return S_INTRINSICS_API->CompilerInitJSCallClassForCtx(klass);
+}
+
+void PromiseInteropResolveIntrinsic(EtsObject *value, EtsLong deferred)
+{
+    S_INTRINSICS_API->PromiseInteropResolve(value, deferred);
+}
+
+void PromiseInteropRejectIntrinsic(EtsObject *value, EtsLong deferred)
+{
+    S_INTRINSICS_API->PromiseInteropReject(value, deferred);
 }
 
 }  // namespace intrinsics
