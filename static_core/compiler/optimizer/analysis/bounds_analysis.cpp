@@ -828,45 +828,8 @@ void BoundsAnalysis::VisitShr(GraphVisitor *v, Inst *inst)
     CalcNewBoundsRangeBinary<Opcode::Shr>(v, inst);
 }
 
-// check that AShr is div, if it's true calc range as div, if not like AShr.
-// Note: div can be replaced by ashr + shr + add + ashr in Peepholes::TryReplaceDivByShrAndAshr
 void BoundsAnalysis::VisitAShr(GraphVisitor *v, Inst *inst)
 {
-    auto typeSize = DataType::GetTypeSize(inst->GetType(), inst->GetBasicBlock()->GetGraph()->GetArch());
-    bool isDiv = true;
-    uint64_t n = 0;
-    Inst *x = nullptr;
-    auto add = inst->GetInput(0).GetInst();
-    auto cnst = inst->GetInput(1).GetInst();
-    isDiv &= cnst->IsConst() && add->GetOpcode() == Opcode::Add;
-    if (isDiv) {
-        n = cnst->CastToConstant()->GetInt64Value();
-        auto shr = add->GetInput(0).GetInst();
-        x = add->GetInput(1).GetInst();
-        isDiv &= shr->GetOpcode() == Opcode::Shr;
-        if (isDiv) {
-            auto ashr = shr->GetInput(0).GetInst();
-            cnst = shr->GetInput(1).GetInst();
-            isDiv &= ashr->GetOpcode() == Opcode::AShr && cnst->IsConst() &&
-                     cnst->CastToConstant()->GetInt64Value() == (typeSize - n);
-            if (isDiv) {
-                isDiv &= ashr->GetInput(0).GetInst() == x;
-                cnst = ashr->GetInput(1).GetInst();
-                isDiv &= cnst->IsConst() && cnst->CastToConstant()->GetInt64Value() == (typeSize - 1U);
-            }
-        }
-    }
-    if (isDiv) {
-        auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
-        auto range = bri->FindBoundsRange(inst->GetBasicBlock(), x);
-        auto lenArray = range.GetLenArray();
-        auto res = range.Div(BoundsRange(1U << n));
-        if (range.IsNotNegative() && lenArray != nullptr) {
-            res.SetLenArray(lenArray);
-        }
-        bri->SetBoundsRange(inst->GetBasicBlock(), inst, res);
-        return;
-    }
     CalcNewBoundsRangeBinary<Opcode::AShr>(v, inst);
 }
 

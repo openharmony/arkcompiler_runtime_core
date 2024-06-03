@@ -435,7 +435,7 @@ class Checker
   def IR_COUNT(match)
     return 0 if @options.release
 
-    @ir_scope.lines.count { |inst| contains?(inst, match) }
+    @ir_scope.lines.count { |inst| contains?(inst, match) && !contains?(inst, /^Method:/) }
   end
 
   def BLOCK_COUNT

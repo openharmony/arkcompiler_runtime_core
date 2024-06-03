@@ -490,6 +490,122 @@ TEST_F(Encoder64Test, DivTest)
 }
 
 template <typename T>
+bool TestDivImm(Encoder64Test *test)
+{
+    static_assert(std::is_integral_v<T>);
+    bool isSigned = std::is_signed_v<T>;
+    using ExtT = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
+
+    auto innerIters = static_cast<uint64_t>(std::ceil(std::sqrt(ITERATION)));
+
+    for (uint64_t i = 0; i < ITERATION; ++i) {
+        test->PreWork();
+
+        // First type-dependency
+        auto param1 = test->GetParameter(TypeInfo(T(0)), 0);
+
+        T imm = RandomGen<T>();
+        while (!test->GetEncoder()->CanOptimizeImmDivMod(bit_cast<uint64_t>(static_cast<ExtT>(imm)), isSigned)) {
+            imm = RandomGen<T>();
+        }
+        ASSERT(imm != T(0));
+
+        // Main test call
+        test->GetEncoder()->EncodeDiv(param1, param1, Imm(imm), isSigned);
+
+        // Finalize
+        test->PostWork();
+
+        // If encode unsupported - now print error
+        if (!test->GetEncoder()->GetResult()) {
+            std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+            return false;
+        }
+        // Change this for enable print disasm
+        test->Dump(false);
+
+        // Main test loop:
+        for (uint64_t j = 0; j < innerIters; ++j) {
+            // Second type-dependency
+            T op1 = RandomGen<T>();
+            // Main check - compare parameter and
+            // return value
+            if (!test->CallCode<T>(op1, (op1 / imm))) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+TEST_F(Encoder64Test, DivImmTest)
+{
+    EXPECT_TRUE(TestDivImm<int32_t>(this));
+    EXPECT_TRUE(TestDivImm<int64_t>(this));
+    EXPECT_TRUE(TestDivImm<uint32_t>(this));
+    EXPECT_TRUE(TestDivImm<uint64_t>(this));
+}
+
+template <typename T>
+bool TestModImm(Encoder64Test *test)
+{
+    static_assert(std::is_integral_v<T>);
+    bool isSigned = std::is_signed_v<T>;
+    using ExtT = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
+
+    auto innerIters = static_cast<uint64_t>(std::ceil(std::sqrt(ITERATION)));
+
+    for (uint64_t i = 0; i < ITERATION; ++i) {
+        test->PreWork();
+
+        // First type-dependency
+        auto param1 = test->GetParameter(TypeInfo(T(0)), 0);
+
+        T imm = RandomGen<T>();
+        while (!test->GetEncoder()->CanOptimizeImmDivMod(bit_cast<uint64_t>(static_cast<ExtT>(imm)), isSigned)) {
+            imm = RandomGen<T>();
+        }
+        ASSERT(imm != T(0));
+
+        // Main test call
+        test->GetEncoder()->EncodeMod(param1, param1, Imm(imm), isSigned);
+
+        // Finalize
+        test->PostWork();
+
+        // If encode unsupported - now print error
+        if (!test->GetEncoder()->GetResult()) {
+            std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+            return false;
+        }
+        // Change this for enable print disasm
+        test->Dump(false);
+
+        // Main test loop:
+        for (uint64_t j = 0; j < innerIters; ++j) {
+            // Second type-dependency
+            T op1 = RandomGen<T>();
+            // Main check - compare parameter and
+            // return value
+            if (!test->CallCode<T>(op1, (op1 % imm))) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+TEST_F(Encoder64Test, ModImmTest)
+{
+    EXPECT_TRUE(TestModImm<int32_t>(this));
+    EXPECT_TRUE(TestModImm<int64_t>(this));
+    EXPECT_TRUE(TestModImm<uint32_t>(this));
+    EXPECT_TRUE(TestModImm<uint64_t>(this));
+}
+
+template <typename T>
 bool TestModMainLoop(Encoder64Test *test)
 {
     // Main test loop:

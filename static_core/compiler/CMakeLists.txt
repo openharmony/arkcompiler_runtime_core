@@ -395,6 +395,7 @@ set(PANDA_COMPILER_TESTS_LIBRARIES arkcompiler arkbase arkassembler arkruntime a
 set(ENCODER_TESTS_SOURCES
     tests/encoder_operands.cpp
     tests/constructor_test.cpp
+    tests/fast_divisor_test.cpp
     )
 
 if(PANDA_COMPILER_ENABLE)

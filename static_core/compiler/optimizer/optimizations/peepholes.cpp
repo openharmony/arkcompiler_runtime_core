@@ -1693,35 +1693,6 @@ void Peepholes::TrySimplifyShifts(Inst *inst)
     }
 }
 
-void Peepholes::TryReplaceDivByShrAndAshr(Inst *inst, uint64_t unsignedVal, Inst *input0)
-{
-    auto bb = inst->GetBasicBlock();
-    auto graph = bb->GetGraph();
-    auto signedVal = static_cast<int64_t>(unsignedVal);
-    int64_t n = GetPowerOfTwo(signedVal < 0 ? -signedVal : signedVal);
-    // "inst", "ashr", "shr", "add", "result" one by one, so we need check SaveStateOSR only between "inst" and
-    // "input0". "input0" is input of "inst", so we don't need check SaveStateOsr in this case
-    if (n != -1) {
-        auto typeSize = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
-        auto ashr =
-            graph->CreateInstAShr(inst->GetType(), INVALID_PC, input0, graph->FindOrCreateConstant(typeSize - 1));
-        bb->InsertAfter(ashr, inst);
-        auto shr = graph->CreateInstShr(inst->GetType(), INVALID_PC, ashr, graph->FindOrCreateConstant(typeSize - n));
-        bb->InsertAfter(shr, ashr);
-        auto add = graph->CreateInstAdd(inst->GetType(), INVALID_PC, shr, input0);
-        bb->InsertAfter(add, shr);
-        Inst *result = graph->CreateInstAShr(inst->GetType(), INVALID_PC, add, graph->FindOrCreateConstant(n));
-        bb->InsertAfter(result, add);
-        if (signedVal < 0) {
-            auto div = result;
-            result = graph->CreateInstNeg(inst->GetType(), INVALID_PC, div);
-            bb->InsertAfter(result, div);
-        }
-        inst->ReplaceUsers(result);
-        PEEPHOLE_IS_APPLIED(this, inst);
-    }
-}
-
 bool Peepholes::TrySimplifyAddSubWithZeroInput(Inst *inst)
 {
     auto input0 = inst->GetInput(0).GetInst();
@@ -2087,22 +2058,6 @@ void Peepholes::TryReplaceDivByShift(Inst *inst)
             CreateAndInsertInst(Opcode::Shr, inst, input0, power);
             PEEPHOLE_IS_APPLIED(this, inst);
         }
-    } else {
-        // case 3:
-        // 0.signed Parameter
-        // 1.i64 Const 2^n -> {v2}
-        // 2.signed DIV v0, v1 -> {v3}
-        // 3.signed INST v2
-        // ===>
-        // 0.signed Parameter
-        // 1.i64 Const n -> {v2}
-        // 2.signed ASHR v0, type_size - 1 -> {v4} // 0 or -1
-        // 4.signed SHR v2, type_size - n -> {v5} //  0 or 2^n - 1
-        // 5.signed ADD v4, v0 -> {v6}
-        // 6.signed ASHR v5, n -> {v3 or v7}
-        // if n < 0 7.signed NEG v6 ->{v3}
-        // 3.signed INST v6 or v7
-        TryReplaceDivByShrAndAshr(inst, unsignedVal, input0);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,16 +41,43 @@ TEST(MathHelpers, GetIntLog2)
 
 TEST(MathHelpers, IsPowerOfTwo)
 {
-    EXPECT_TRUE(IsPowerOfTwo(1U));
-    EXPECT_TRUE(IsPowerOfTwo(2U));
-    EXPECT_TRUE(IsPowerOfTwo(4U));
-    EXPECT_TRUE(IsPowerOfTwo(64U));
-    EXPECT_TRUE(IsPowerOfTwo(1024U));
-    EXPECT_TRUE(IsPowerOfTwo(2048U));
-    EXPECT_FALSE(IsPowerOfTwo(3U));
-    EXPECT_FALSE(IsPowerOfTwo(63U));
-    EXPECT_FALSE(IsPowerOfTwo(65U));
-    EXPECT_FALSE(IsPowerOfTwo(100U));
+    auto testIsPowerOfTwo = [](uint64_t num, bool expect) {
+        EXPECT_EQ(expect, IsPowerOfTwo(num));
+        EXPECT_EQ(expect, IsPowerOfTwo(bit_cast<int64_t>(num)));
+        // NB! (-num) for unsigned num is well-defined for all num values (unlike for signed -(INT64_MIN))
+        EXPECT_EQ(expect, IsPowerOfTwo(bit_cast<int64_t>(-num)));
+    };
+
+    testIsPowerOfTwo(0U, false);
+    testIsPowerOfTwo(1U, true);
+    testIsPowerOfTwo(2U, true);
+    testIsPowerOfTwo(4U, true);
+    testIsPowerOfTwo(64U, true);
+    testIsPowerOfTwo(1024U, true);
+    testIsPowerOfTwo(2048U, true);
+    testIsPowerOfTwo(3U, false);
+    testIsPowerOfTwo(63U, false);
+    testIsPowerOfTwo(65U, false);
+    testIsPowerOfTwo(100U, false);
+    testIsPowerOfTwo(bit_cast<uint64_t>(std::numeric_limits<int64_t>::min()), true);
+}
+
+TEST(MathHelpers, AbsOrMin)
+{
+    auto testAbsOrMin = [](int64_t num, int64_t expect) { EXPECT_EQ(expect, AbsOrMin(num)); };
+
+    testAbsOrMin(0L, 0L);
+    testAbsOrMin(1L, 1L);
+    testAbsOrMin(10L, 10L);
+    testAbsOrMin(1000L, 1000L);
+
+    testAbsOrMin(-1L, 1L);
+    testAbsOrMin(-10L, 10L);
+    testAbsOrMin(-1000L, 1000L);
+
+    // NB! AbsOrMin(INT64_MIN) gives INT64_MIN (negative value)
+    testAbsOrMin(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::min());
+    testAbsOrMin(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::max());
 }
 
 TEST(MathHelpers, GetPowerOfTwoValue32)

@@ -20,6 +20,7 @@ Encoder (implementation of math and mem Low-level emitters)
 #include <cstddef>
 #include "compiler/optimizer/code_generator/target/aarch64/target.h"
 #include "compiler/optimizer/code_generator/encode.h"
+#include "compiler/optimizer/code_generator/fast_divisor.h"
 #include "scoped_tmp_reg.h"
 #include "compiler/optimizer/code_generator/relocations.h"
 
@@ -1728,6 +1729,103 @@ void Aarch64Encoder::EncodeFMod(Reg dst, Reg src0, Reg src1)
     }
 }
 
+void Aarch64Encoder::EncodeSignedDiv(Reg dst, Reg src0, Imm imm)
+{
+    int64_t divisor = imm.GetAsInt();
+
+    FastConstSignedDivisor fastDivisor(divisor, dst.GetSize());
+    int64_t magic = fastDivisor.GetMagic();
+
+    ScopedTmpReg tmp(this, dst.GetType());
+    Reg tmp64 = tmp.GetReg().As(INT64_TYPE);
+    EncodeMov(tmp, Imm(magic));
+
+    int64_t extraShift = 0;
+    if (dst.GetSize() == DOUBLE_WORD_SIZE) {
+        GetMasm()->Smulh(VixlReg(tmp), VixlReg(src0), VixlReg(tmp));
+    } else {
+        GetMasm()->Smull(VixlReg(tmp64), VixlReg(src0), VixlReg(tmp));
+        extraShift = WORD_SIZE;
+    }
+
+    bool useSignFlag = false;
+    if (divisor > 0 && magic < 0) {
+        GetMasm()->Adds(VixlReg(tmp64), VixlReg(tmp64), VixlShift(Shift(src0.As(INT64_TYPE), extraShift)));
+        useSignFlag = true;
+    } else if (divisor < 0 && magic > 0) {
+        GetMasm()->Subs(VixlReg(tmp64), VixlReg(tmp64), VixlShift(Shift(src0.As(INT64_TYPE), extraShift)));
+        useSignFlag = true;
+    }
+
+    int64_t shift = fastDivisor.GetShift();
+    EncodeAShr(dst.As(INT64_TYPE), tmp64, Imm(shift + extraShift));
+
+    // result = (result < 0 ? result + 1 : result)
+    if (useSignFlag) {
+        GetMasm()->Cinc(VixlReg(dst), VixlReg(dst), vixl::aarch64::Condition::mi);
+    } else {
+        GetMasm()->Add(VixlReg(dst), VixlReg(dst), VixlShift(Shift(dst, ShiftType::LSR, dst.GetSize() - 1U)));
+    }
+}
+
+void Aarch64Encoder::EncodeUnsignedDiv(Reg dst, Reg src0, Imm imm)
+{
+    auto divisor = bit_cast<uint64_t>(imm.GetAsInt());
+
+    FastConstUnsignedDivisor fastDivisor(divisor, dst.GetSize());
+    uint64_t magic = fastDivisor.GetMagic();
+
+    ScopedTmpReg tmp(this, dst.GetType());
+    Reg tmp64 = tmp.GetReg().As(INT64_TYPE);
+    EncodeMov(tmp, Imm(magic));
+
+    uint64_t extraShift = 0;
+    if (dst.GetSize() == DOUBLE_WORD_SIZE) {
+        GetMasm()->Umulh(VixlReg(tmp), VixlReg(src0), VixlReg(tmp));
+    } else {
+        GetMasm()->Umull(VixlReg(tmp64), VixlReg(src0), VixlReg(tmp));
+        extraShift = WORD_SIZE;
+    }
+
+    uint64_t shift = fastDivisor.GetShift();
+    if (!fastDivisor.GetAdd()) {
+        EncodeShr(dst.As(INT64_TYPE), tmp64, Imm(shift + extraShift));
+    } else {
+        ASSERT(shift >= 1U);
+        if (extraShift > 0U) {
+            EncodeShr(tmp64, tmp64, Imm(extraShift));
+        }
+        EncodeSub(dst, src0, tmp);
+        GetMasm()->Add(VixlReg(dst), VixlReg(tmp), VixlShift(Shift(dst, ShiftType::LSR, 1U)));
+        EncodeShr(dst, dst, Imm(shift - 1U));
+    }
+}
+
+void Aarch64Encoder::EncodeDiv(Reg dst, Reg src0, Imm imm, bool isSigned)
+{
+    ASSERT(dst.IsScalar() && dst.GetSize() >= WORD_SIZE);
+    ASSERT(CanOptimizeImmDivMod(bit_cast<uint64_t>(imm.GetAsInt()), isSigned));
+    if (isSigned) {
+        EncodeSignedDiv(dst, src0, imm);
+    } else {
+        EncodeUnsignedDiv(dst, src0, imm);
+    }
+}
+
+void Aarch64Encoder::EncodeMod(Reg dst, Reg src0, Imm imm, bool isSigned)
+{
+    ASSERT(dst.IsScalar() && dst.GetSize() >= WORD_SIZE);
+    ASSERT(CanOptimizeImmDivMod(bit_cast<uint64_t>(imm.GetAsInt()), isSigned));
+    // dst = src0 - imm * (src0 / imm)
+    ScopedTmpReg tmp(this, dst.GetType());
+    EncodeDiv(tmp, src0, imm, isSigned);
+
+    ScopedTmpReg immReg(this, dst.GetType());
+    EncodeMov(immReg, imm);
+
+    GetMasm()->Msub(VixlReg(dst), VixlReg(immReg), VixlReg(tmp), VixlReg(src0));
+}
+
 void Aarch64Encoder::EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1)
 {
     if (dst.IsFloat()) {
@@ -2711,6 +2809,11 @@ bool Aarch64Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
     }
 #endif  // NDEBUG
     return vixl::aarch64::Assembler::IsImmLogical(imm, size);
+}
+
+bool Aarch64Encoder::CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const
+{
+    return CanOptimizeImmDivModCommon(imm, isSigned);
 }
 
 /*

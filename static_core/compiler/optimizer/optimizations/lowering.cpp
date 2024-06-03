@@ -255,7 +255,145 @@ void Lowering::VisitMul([[maybe_unused]] GraphVisitor *v, Inst *inst)
 
 void Lowering::VisitDiv([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
+    if (TryReplaceDivPowerOfTwo(v, inst)) {
+        return;
+    }
+    if (TryReplaceDivModNonPowerOfTwo(v, inst)) {
+        return;
+    }
     LowerMulDivMod<Opcode::Div>(inst);
+}
+
+void Lowering::ReplaceSignedDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst, int64_t sValue)
+{
+    // 0.signed Parameter
+    // 1.i64 Const 2^n -> {v2}
+    // 2.signed DIV v0, v1 -> {v3}
+    // 3.signed INST v2
+    // ===>
+    // 0.signed Parameter
+    // 1.i64 Const n -> {v2}
+    // 2.signed ASHR v0, type_size - 1 -> {v4} // 0 or -1
+    // 4.signed SHR v2, type_size - n -> {v5} //  0 or 2^n - 1
+    // 5.signed ADD v4, v0 -> {v6}
+    // 6.signed ASHR v5, n -> {v3 or v7}
+    // if n < 0 7.signed NEG v6 ->{v3}
+    // 3.signed INST v6 or v7
+
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto input0 = inst->GetInput(0).GetInst();
+    int64_t n = GetPowerOfTwo(bit_cast<uint64_t>(helpers::math::AbsOrMin(sValue)));
+    ASSERT(n != -1);
+
+    auto typeSize = DataType::GetTypeSize(inst->GetType(), graph->GetArch());
+    auto ashr =
+        graph->CreateInstAShr(inst->GetType(), inst->GetPc(), input0, graph->FindOrCreateConstant(typeSize - 1));
+    inst->InsertBefore(ashr);
+    auto shr = graph->CreateInstShr(inst->GetType(), inst->GetPc(), ashr, graph->FindOrCreateConstant(typeSize - n));
+    inst->InsertBefore(shr);
+    auto add = graph->CreateInstAdd(inst->GetType(), inst->GetPc(), shr, input0);
+    inst->InsertBefore(add);
+    Inst *ashr2 = graph->CreateInstAShr(inst->GetType(), inst->GetPc(), add, graph->FindOrCreateConstant(n));
+
+    auto result = ashr2;
+    if (sValue < 0) {
+        inst->InsertBefore(ashr2);
+        result = graph->CreateInstNeg(inst->GetType(), inst->GetPc(), ashr2);
+    }
+
+    InsertInstruction(inst, result);
+
+    LowerShift(ashr);
+    LowerShift(shr);
+    LowerShift(ashr2);
+}
+
+void Lowering::ReplaceUnsignedDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst, uint64_t uValue)
+{
+    // 0.unsigned Parameter
+    // 1.i64 Const 2^n -> {v2}
+    // 2.un-signed DIV v0, v1 -> {v3}
+    // 3.unsigned INST v2
+    // ===>
+    // 0.unsigned Parameter
+    // 1.i64 Const n -> {v2}
+    // 2.un-signed SHR v0, v1 -> {v3}
+    // 3.unsigned INST v2
+
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    auto input0 = inst->GetInput(0).GetInst();
+
+    int64_t n = GetPowerOfTwo(uValue);
+    ASSERT(n != -1);
+    auto power = graph->FindOrCreateConstant(n);
+    auto shrInst = graph->CreateInstShr(inst->GetType(), inst->GetPc(), input0, power);
+    InsertInstruction(inst, shrInst);
+
+    LowerShift(shrInst);
+}
+
+bool Lowering::TryReplaceDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    if (inst->GetBasicBlock()->GetGraph()->IsBytecodeOptimizer()) {
+        return false;
+    }
+    if (DataType::IsFloatType(inst->GetType())) {
+        return false;
+    }
+    auto c = inst->GetInput(1).GetInst();
+    if (!c->IsConst()) {
+        return false;
+    }
+
+    uint64_t uValue = c->CastToConstant()->GetInt64Value();
+    auto sValue = bit_cast<int64_t>(uValue);
+
+    auto input0 = inst->GetInput(0).GetInst();
+    bool isSigned = DataType::IsTypeSigned(input0->GetType());
+    if ((isSigned && !helpers::math::IsPowerOfTwo(sValue)) || (!isSigned && !helpers::math::IsPowerOfTwo(uValue))) {
+        return false;
+    }
+
+    if (isSigned) {
+        ReplaceSignedDivPowerOfTwo(v, inst, sValue);
+    } else {
+        ReplaceUnsignedDivPowerOfTwo(v, inst, uValue);
+    }
+    return true;
+}
+
+bool Lowering::TryReplaceDivModNonPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    auto graph = inst->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer()) {
+        return false;
+    }
+    if (DataType::IsFloatType(inst->GetType())) {
+        return false;
+    }
+    auto c = inst->GetInput(1).GetInst();
+    if (!c->IsConst()) {
+        return false;
+    }
+
+    uint64_t uValue = c->CastToConstant()->GetInt64Value();
+
+    auto input0 = inst->GetInput(0).GetInst();
+    bool isSigned = DataType::IsTypeSigned(input0->GetType());
+
+    if (!graph->GetEncoder()->CanOptimizeImmDivMod(uValue, isSigned)) {
+        return false;
+    }
+
+    if (inst->GetOpcode() == Opcode::Div) {
+        auto divImmInst = graph->CreateInstDivI(inst->GetType(), inst->GetPc(), input0, uValue);
+        InsertInstruction(inst, divImmInst);
+    } else {
+        ASSERT(inst->GetOpcode() == Opcode::Mod);
+        auto modImmInst = graph->CreateInstModI(inst->GetType(), inst->GetPc(), input0, uValue);
+        InsertInstruction(inst, modImmInst);
+    }
+    return true;
 }
 
 bool Lowering::TryReplaceModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -270,19 +408,21 @@ bool Lowering::TryReplaceModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *i
     if (!c->IsConst()) {
         return false;
     }
-    auto value = c->CastToConstant()->GetInt64Value();
-    if (value == 0) {
-        return false;
-    }
-    auto absValue = std::abs(static_cast<int64_t>(value));
-    if (BitCount(absValue) != 1) {
-        return false;
-    }
+
+    uint64_t uValue = c->CastToConstant()->GetInt64Value();
+    auto sValue = bit_cast<int64_t>(uValue);
+
     auto input0 = inst->GetInput(0).GetInst();
-    if (DataType::IsTypeSigned(input0->GetType())) {
-        ReplaceSignedModPowerOfTwo(v, inst, absValue);
+    bool isSigned = DataType::IsTypeSigned(input0->GetType());
+    if ((isSigned && !helpers::math::IsPowerOfTwo(sValue)) || (!isSigned && !helpers::math::IsPowerOfTwo(uValue))) {
+        return false;
+    }
+
+    if (isSigned) {
+        int64_t absValue = helpers::math::AbsOrMin(sValue);
+        ReplaceSignedModPowerOfTwo(v, inst, bit_cast<uint64_t>(absValue));
     } else {
-        ReplaceUnsignedModPowerOfTwo(v, inst, absValue);
+        ReplaceUnsignedModPowerOfTwo(v, inst, uValue);
     }
     return true;
 }
@@ -355,6 +495,9 @@ void Lowering::ReplaceUnsignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, In
 void Lowering::VisitMod([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     if (TryReplaceModPowerOfTwo(v, inst)) {
+        return;
+    }
+    if (TryReplaceDivModNonPowerOfTwo(v, inst)) {
         return;
     }
     LowerMulDivMod<Opcode::Mod>(inst);

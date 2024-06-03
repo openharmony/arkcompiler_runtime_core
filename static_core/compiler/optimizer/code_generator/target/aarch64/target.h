@@ -232,6 +232,10 @@ public:
     void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeDiv(Reg dst, Reg src0, Imm imm, bool isSigned) override;
+    void EncodeSignedDiv(Reg dst, Reg src0, Imm imm);
+    void EncodeUnsignedDiv(Reg dst, Reg src0, Imm imm);
+    void EncodeMod(Reg dst, Reg src0, Imm imm, bool isSigned) override;
     void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
 
     void EncodeAddOverflow(compiler::LabelHolder::LabelId id, Reg dst, Reg src0, Reg src1, Condition cc) override;
@@ -338,6 +342,7 @@ public:
     bool CanEncodeAndNot() override;
     bool CanEncodeXorNot() override;
     bool CanEncodeShiftedOperand(ShiftOpcode opcode, ShiftType shiftType) override;
+    bool CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const override;
 
     size_t GetCursorOffset() const override;
     void SetCursorOffset(size_t offset) override;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,13 +47,28 @@ constexpr uint64_t GetIntLog2(const uint64_t x)
     return static_cast<uint64_t>(panda_bit_utils_ctzll(x));
 }
 
+template <typename T>
+inline constexpr T AbsOrMin(T v)
+{
+    static_assert(std::is_integral_v<T> && std::is_signed_v<T>);
+    if (UNLIKELY(v == std::numeric_limits<T>::min())) {
+        return v;
+    }
+    return std::abs(v);
+}
+
 /// return value is power of two
 template <typename T>
-constexpr bool IsPowerOfTwo(T value)
+inline constexpr bool IsPowerOfTwo(T value)
 {
-    ASSERT(value > 0);
-    // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    return (value & (value - 1)) == 0;
+    static_assert(std::is_integral_v<T>);
+    if constexpr (std::is_unsigned_v<T>) {
+        return (value != 0U) && (value & (value - 1U)) == 0U;
+    } else {
+        using UT = std::make_unsigned_t<T>;
+        auto absValue = bit_cast<UT>(AbsOrMin(value));
+        return (absValue != 0U) && (absValue & (absValue - 1U)) == 0U;
+    }
 }
 
 /// returns an integer power of two but not greater than value.

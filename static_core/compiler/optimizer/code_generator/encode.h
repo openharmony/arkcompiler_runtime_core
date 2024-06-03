@@ -186,6 +186,8 @@ public:
     virtual void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1);
     virtual void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1);
     virtual void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1);
+    virtual void EncodeDiv(Reg dst, Reg src0, Imm imm, bool isSigned);
+    virtual void EncodeMod(Reg dst, Reg src0, Imm imm, bool isSigned);
     virtual void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1);
     virtual void EncodeMov(Reg dst, Imm src);
     virtual void EncodeLdr(Reg dst, bool dstSigned, MemRef mem);
@@ -299,6 +301,7 @@ public:
     virtual bool CanEncodeImmAddSubCmp(int64_t imm, uint32_t size, bool signedCompare);
     virtual bool CanEncodeImmMulDivMod(uint64_t imm, uint32_t size);
     virtual bool CanEncodeImmLogical(uint64_t imm, uint32_t size);
+    virtual bool CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const;
     virtual bool CanEncodeScale(uint64_t imm, uint32_t size);
     virtual bool CanEncodeShift(uint32_t size);
     virtual bool CanEncodeBitCount();
@@ -453,6 +456,15 @@ protected:
         return static_cast<double>((1ULL << static_cast<unsigned>(std::numeric_limits<double>::digits)) - 1);
     }
 
+    static constexpr bool CanOptimizeImmDivModCommon(uint64_t imm, bool isSigned)
+    {
+        if (!isSigned) {
+            return imm > 0U;
+        }
+        auto signedImm = bit_cast<int64_t>(imm);
+        return signedImm <= -2L || signedImm >= 2L;
+    }
+
 private:
     ArenaAllocator *allocator_;
     RegistersDescription *regfile_ {nullptr};
@@ -474,7 +486,6 @@ private:
     // If true, then ScopedTmpReg can use LR as a temp register.
     bool enableLrAsTempReg_ {false};
 };  // Encoder
-
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_ENCODE_H
