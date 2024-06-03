@@ -93,7 +93,7 @@ sub:
       - method: "fill"
         ret_type: Iterable<number>
         params:
-          - paramOf(11.0)
+          - paramOf(11.0, "Infinity")
           - paramOf(*default_inds)
           - paramOf(*default_inds)
         mandatory: 1

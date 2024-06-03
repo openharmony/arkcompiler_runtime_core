@@ -707,8 +707,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{elementCompat}}, start?: number, end?: number): {{N}}Array {
-        return this.fill(value{{fromElementCompat}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+    public fill(value: {{elementCompat}}, start?: number, end?: number): this {
+        {%- if (N != 'Float32') and (N != 'Float64') %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill(value{{fromElementCompat}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -718,8 +722,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{elementCompat}}, start: int, end?: number): {{N}}Array {
-        return this.fill(value{{fromElementCompat}}, start as int, asIntOrDefault(end, this.lengthInt))
+    public fill(value: {{elementCompat}}, start: int, end?: number): this {
+        {%- if (N != 'Float32') and (N != 'Float64') %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill(value{{fromElementCompat}}, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -729,8 +737,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{elementCompat}}, start: int, end: number): {{N}}Array {
-        return this.fill(value{{fromElementCompat}}, start as int, end as int)
+    public fill(value: {{elementCompat}}, start: int, end: number): this {
+        {%- if (N != 'Float32') and (N != 'Float64') %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill(value{{fromElementCompat}}, start as int, end as int)
+        return this
     }
 
     /**
@@ -740,8 +752,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{elementCompat}}, start: number, end: int): {{N}}Array {
-        return this.fill(value{{fromElementCompat}}, start as int, end as int)
+    public fill(value: {{elementCompat}}, start: number, end: int): this {
+        {%- if (N != 'Float32') and (N != 'Float64') %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill(value{{fromElementCompat}}, start as int, end as int)
+        return this
     }
 
     /**
@@ -751,9 +767,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{elementCompat}}, start: int, end: int): {{N}}Array {
+    public fill(value: {{elementCompat}}, start: int, end: int): this {
         {%- if N != 'Float64' %}
-        return this.fill(value{{fromElementCompat}}, start as int, end as int)
+        {%- if (N != 'Float32') %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill(value{{fromElementCompat}}, start as int, end as int)
+        return this
         {%- else %}
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
@@ -772,8 +792,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{T}}, start?: number, end?: number): {{N}}Array {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt));
+    public fill(value: {{T}}, start?: number, end?: number): this {
+        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt));
+        return this
     }
 
     /**
@@ -783,8 +804,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{T}}, start: int, end?: number): {{N}}Array {
-        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt));
+    public fill(value: {{T}}, start: int, end?: number): this {
+        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt));
+        return this
     }
 
     /**
@@ -794,8 +816,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{T}}, start: int, end: number): {{N}}Array {
-        return this.fill(value, start as int, end as int);
+    public fill(value: {{T}}, start: int, end: number): this {
+        this.fill(value, start as int, end as int);
+        return this
     }
 
     /**
@@ -805,8 +828,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{T}}, start: number, end: int): {{N}}Array {
-        return this.fill(value, start as int, end as int);
+    public fill(value: {{T}}, start: number, end: int): this {
+        this.fill(value, start as int, end as int);
+        return this
     }
 
     /**
@@ -816,7 +840,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns modified {{N}}Array
      */
-    public fill(value: {{T}}, start: int, end: int): {{N}}Array {
+    public fill(value: {{T}}, start: int, end: int): this {
         const k = normalizeIndex(start, this.lengthInt)
         const finalPos = normalizeIndex(end, this.lengthInt)
         for (let i: int = k; i < finalPos; ++i) {

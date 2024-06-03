@@ -585,7 +585,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: number, start?: number, end?: number): Uint8ClampedArray {
-        return this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -596,7 +597,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: number, start: int, end?: number): Uint8ClampedArray {
-        return this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+        this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -607,7 +609,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: number, start: int, end: number): Uint8ClampedArray {
-        return this.fill(value as int, start as int, end as int)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -618,7 +621,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: number, start: number, end: int): Uint8ClampedArray {
-        return this.fill(value as int, start as int, end as int)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -629,7 +633,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: number, start: int, end: int): Uint8ClampedArray {
-        return this.fill(value as int, start as int, end as int)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -640,7 +645,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: int, start?: number, end?: number): Uint8ClampedArray {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -651,7 +657,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: int, start: int, end?: number): Uint8ClampedArray {
-        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -662,7 +669,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: int, start: int, end: number): Uint8ClampedArray {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -673,7 +681,8 @@ export class Uint8ClampedArray implements Iterable<Number> {
      * @returns modified Uint8ClampedArray
      */
     public fill(value: int, start: number, end: int): Uint8ClampedArray {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -3068,7 +3077,9 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: number, start?: number, end?: number): Uint8Array {
-        return this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -3079,7 +3090,9 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: number, start: int, end?: number): Uint8Array {
-        return this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -3090,7 +3103,9 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: number, start: int, end: number): Uint8Array {
-        return this.fill(value as int, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -3101,7 +3116,9 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: number, start: number, end: int): Uint8Array {
-        return this.fill(value as int, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -3112,7 +3129,9 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: number, start: int, end: int): Uint8Array {
-        return this.fill(value as int, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -3123,7 +3142,8 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: int, start?: number, end?: number): Uint8Array {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -3134,7 +3154,8 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: int, start: int, end?: number): Uint8Array {
-        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -3145,7 +3166,8 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: int, start: int, end: number): Uint8Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -3156,7 +3178,8 @@ export class Uint8Array implements Iterable<Number> {
      * @returns modified Uint8Array
      */
     public fill(value: int, start: number, end: int): Uint8Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -5554,7 +5577,9 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: number, start?: number, end?: number): Uint16Array {
-        return this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -5565,7 +5590,9 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: number, start: int, end?: number): Uint16Array {
-        return this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -5576,7 +5603,9 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: number, start: int, end: number): Uint16Array {
-        return this.fill(value as int, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -5587,7 +5616,9 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: number, start: number, end: int): Uint16Array {
-        return this.fill(value as int, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -5598,7 +5629,9 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: number, start: int, end: int): Uint16Array {
-        return this.fill(value as int, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as int, start as int, end as int)
+        return this
     }
 
     /**
@@ -5609,7 +5642,8 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: int, start?: number, end?: number): Uint16Array {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -5620,7 +5654,8 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: int, start: int, end?: number): Uint16Array {
-        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -5631,7 +5666,8 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: int, start: int, end: number): Uint16Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -5642,7 +5678,8 @@ export class Uint16Array implements Iterable<Number> {
      * @returns modified Uint16Array
      */
     public fill(value: int, start: number, end: int): Uint16Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -8067,7 +8104,9 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: number, start?: number, end?: number): Uint32Array {
-        return this.fill(value as long, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value as long, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -8078,7 +8117,9 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: number, start: int, end?: number): Uint32Array {
-        return this.fill(value as long, start as int, asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value as long, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -8089,7 +8130,9 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: number, start: int, end: number): Uint32Array {
-        return this.fill(value as long, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as long, start as int, end as int)
+        return this
     }
 
     /**
@@ -8100,7 +8143,9 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: number, start: number, end: int): Uint32Array {
-        return this.fill(value as long, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as long, start as int, end as int)
+        return this
     }
 
     /**
@@ -8111,7 +8156,9 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: number, start: int, end: int): Uint32Array {
-        return this.fill(value as long, start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value as long, start as int, end as int)
+        return this
     }
 
     /**
@@ -8122,7 +8169,8 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: long, start?: number, end?: number): Uint32Array {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -8133,7 +8181,8 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: long, start: int, end?: number): Uint32Array {
-        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -8144,7 +8193,8 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: long, start: int, end: number): Uint32Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -8155,7 +8205,8 @@ export class Uint32Array implements Iterable<Number> {
      * @returns modified Uint32Array
      */
     public fill(value: long, start: number, end: int): Uint32Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -10580,7 +10631,9 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start?: number, end?: number): BigUint64Array {
-        return this.fill(value.getULong(), asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value.getULong(), asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -10591,7 +10644,9 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: int, end?: number): BigUint64Array {
-        return this.fill(value.getULong(), start as int, asIntOrDefault(end, this.lengthInt))
+        value = this.zeroIfInfinity(value)
+        this.fill(value.getULong(), start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -10602,7 +10657,9 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: int, end: number): BigUint64Array {
-        return this.fill(value.getULong(), start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value.getULong(), start as int, end as int)
+        return this
     }
 
     /**
@@ -10613,7 +10670,9 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: number, end: int): BigUint64Array {
-        return this.fill(value.getULong(), start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value.getULong(), start as int, end as int)
+        return this
     }
 
     /**
@@ -10624,7 +10683,9 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: BigInt, start: int, end: int): BigUint64Array {
-        return this.fill(value.getULong(), start as int, end as int)
+        value = this.zeroIfInfinity(value)
+        this.fill(value.getULong(), start as int, end as int)
+        return this
     }
 
     /**
@@ -10635,7 +10696,8 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: long, start?: number, end?: number): BigUint64Array {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -10646,7 +10708,8 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: long, start: int, end?: number): BigUint64Array {
-        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -10657,7 +10720,8 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: long, start: int, end: number): BigUint64Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -10668,7 +10732,8 @@ export class BigUint64Array implements Iterable<BigInt> {
      * @returns modified BigUint64Array
      */
     public fill(value: long, start: number, end: int): BigUint64Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
