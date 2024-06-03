@@ -69,6 +69,8 @@ ohos_shared_library("abc2program") {
     "$ark_root/libpandafile:libarkfile",
   ]
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   if (!is_standard_system) {
     relative_install_dir = "ark"
   }
@@ -130,6 +132,8 @@ ohos_executable("abc2prog") {
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
 
   libs = platform_libs
   if (!is_mac && !is_mingw) {
