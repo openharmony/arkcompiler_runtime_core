@@ -1264,7 +1264,6 @@ bool Parser::ParseOperandVreg()
     if (p[0] == 'v') {
         p.remove_prefix(1);
         int64_t number = static_cast<int64_t>(ToNumber(p));
-
         if (number > *(context_.max_value_of_reg)) {
             *(context_.max_value_of_reg) = number;
         }
