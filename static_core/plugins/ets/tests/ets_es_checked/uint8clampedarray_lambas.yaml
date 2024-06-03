@@ -47,6 +47,15 @@ sub:
           (x: number, i: number, s: Uint8ClampedArray): boolean => (x + i) < 0
         - |
           (x: number, i: number, s: Uint8ClampedArray): boolean => (x + i) == 1
+      void_lambdas:
+        - |
+          (): void => {}
+        - |
+          (x: number): void => { x = x*2 }
+        - |
+          (x: number, i: number): void => { x = x*2 }
+        - |
+          (x: number, i: number, s: Uint8ClampedArray): void => { s[i] = x + 1000 }
     sub:
       - method: find
         params:
@@ -60,3 +69,7 @@ sub:
       - method: "every"
         params:
           - paramOf *bool_lambdas
+      - method: "forEach"
+        ret_type: void
+        params:
+          - paramOf *void_lambdas
