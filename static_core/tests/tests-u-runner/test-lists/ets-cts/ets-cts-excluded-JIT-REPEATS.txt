@@ -9,8 +9,7 @@
 07.expressions/29.assignment/01.simple_assignment_operator/ord21.ets
 07.expressions/29.assignment/01.simple_assignment_operator/ord25.ets
 07.expressions/29.assignment/01.simple_assignment_operator/ord26.ets
-09.classes/04.field_declarations/01.static_fields/static_field_declaration.ets
-11.enums/02.enum_type_methods/enum_type_methods_valueof.ets
+09.classes/05.field_declarations/01.static_fields/static_field_declaration.ets
 
 # RUNTIME_TIMEOUT - it required more than 600sec
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/nase2.ets
@@ -18,17 +17,17 @@
 
 # fails in JIT mode with --opt-level=0
 02.lexical_elements/09.literals/08.undefined_literal/undef_literal1.ets
-04.names_declarations_and_scopes/04.scopes/interface_level1.ets
-04.names_declarations_and_scopes/04.scopes/interface_level2.ets
+04.names_declarations_and_scopes/05.scopes/interface_level1.ets
+04.names_declarations_and_scopes/05.scopes/interface_level2.ets
 07.expressions/09.field_access_expressions/safe_field_access_0.ets
 07.expressions/09.field_access_expressions/safe_field_access_1.ets
-15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/cond_f1_1.ets
-15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/cond_f2_1.ets
-15.semantic_rules/06.compatibility_features/01.extended_conditional_expressions/if_f2_1.ets
+18.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f1_1.ets
+18.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f2_1.ets
+18.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/if_f2_1.ets
 
 # fails in JIT mode with --opt-level=2
-04.names_declarations_and_scopes/04.scopes/interface_level1.ets
-04.names_declarations_and_scopes/04.scopes/interface_level2.ets
+04.names_declarations_and_scopes/05.scopes/interface_level1.ets
+04.names_declarations_and_scopes/05.scopes/interface_level2.ets
 
 # 16032 Timeouts
 escompat/ArrayTest.ets

@@ -156,6 +156,10 @@
   title: 'Type null'
   status: 'Finished'
 
+'3.8.9':
+  title: 'Type undefined'
+  status: 'Finished'
+
 '3.8.10':
   title: 'Tuple Types'
   status: 'Finished'
@@ -185,66 +189,70 @@
   status: 'Finished'
 
 '4.4':
+  title: 'Accessible'
+  status: 'No testable assertions'
+
+'4.5':
   title: 'Scopes'
   status: 'Finished'
 
-'4.5':
+'4.6':
   title: 'Type Declarations'
   status: 'No testable assertions'
 
-'4.5.1':
+'4.6.1':
   title: 'Type Alias Declaration'
   status: 'Finished'
 
-'4.6':
+'4.7':
   title: 'Variable and Constant Declarations'
   status: 'No testable assertions'
 
-'4.6.1':
+'4.7.1':
   title: 'Variable Declarations'
   status: 'Finished'
 
-'4.6.2':
+'4.7.2':
   title: 'Constant Declarations'
   status: 'Finished'
 
-'4.6.3':
+'4.7.3':
   title: 'Type Compatibility with Initializer'
   status: 'Finished'
 
-'4.6.4':
+'4.7.4':
   title: 'Type Inference from Initializer'
   status: 'Finished'
 
-'4.7':
+'4.8':
   title: 'Function Declarations'
   status: 'Finished'
 
-'4.7.1':
+'4.8.1':
   title: 'Signatures'
   status: 'No testable assertions'
 
-'4.7.2':
+'4.8.2':
   title: 'Parameter List'
   status: 'Finished'
 
-'4.7.4':
+'4.8.4':
   title: 'Optional Parameters'
   status: 'Finished'
 
-'4.7.5':
+'4.8.5':
   title: 'Rest Parameter'
   status: 'Finished'
 
-'4.7.6':
+'4.8.6':
   title: 'Shadowing by Parameter'
   status: 'Finished'
 
-'4.7.7':
+'4.8.7':
   title: 'Return Type'
   status: 'Finished'
 
-'4.7.8':
+'4.8.9':
   title: 'Function Overload Signatures'
   status: 'Finished'
 
@@ -257,7 +265,7 @@
   status: 'Finished'
 
 '5.2':
-  title: 'Generic Parameters'
+  title: 'Type Parameters'
   status: 'Finished'
 
 '5.3':
@@ -265,11 +273,11 @@
   status: 'Finished'
 
 '5.4':
-  title: 'Generic Instantiations'
+  title: 'Type Parameter Default'
   status: 'Finished'
 
 '5.5':
-  title: 'Type Parameter Default'
+  title: 'Generic Instantiations'
   status: 'Finished'
 
 '5.6':
@@ -282,7 +290,7 @@
 
 '6.5':
   title: 'Implicit Conversions'
-  status: 'Finished'
+  status: 'No testable assertions'
 
 '6.5.1':
   title: 'Primitive Types Conversions'
@@ -336,6 +344,10 @@
   title: 'Enumeration to String Conversions'
   status: 'Finished'
 
+'7':
+  title: 'Expressions'
+  status: 'No testable assertions'
+
 '7.1':
   title: 'Evaluation of Expressions'
   status: 'Finished'
@@ -373,7 +385,7 @@
   status: 'No testable assertions'
 
 '8.16':
-  title: 'Assert Statements'  # Tested in 17.5.3 Assert Statements
+  title: 'Assert Statements'  # Tested in 17.6.3 Assert Statements
   status: 'No testable assertions'
 
 '9':
@@ -381,11 +393,11 @@
   status: 'No testable assertions'
 
 '9.6.4':
-  title: 'Final Methods'  # Tested in 17.8.2 Final Methods
+  title: 'Final Methods'  # Tested in 17.9.2 Final Methods
   status: 'No testable assertions'
 
 '9.6.6':
-  title: 'Native Methods'  # Tested in 17.7.2 Native Methods
+  title: 'Native Methods'  # Tested in 17.8.2 Native Methods
   status: 'No testable assertions'
 
 '10':
@@ -420,22 +432,6 @@
   title: 'Ambient Declarations'
   status: 'No testable assertions'
 
-'15':
-  title: 'Semantic Rules'
-  status: 'No testable assertions'
-
-'15.3':
-  title: 'Type Compatibility'
-  status: 'No testable assertions'  # Implicit Conversion is tested in 6.5
-
-'15.6':
-  title: 'Compatibility Features'
-  status: 'No testable assertions'
-
-'15.6.1':
-  title: 'Extended Conditional Expressions'
-  status: 'Finished'
-
 '16':
   title: 'Support for GUI Programming'
   status: 'No testable assertions'
@@ -452,51 +448,59 @@
   title: 'Character Type and Literals'
   status: 'No testable assertions'
 
-'17.5':
+'17.6':
   title: 'Statements'
   status: 'No testable assertions'
 
-'17.6':
+'17.7':
   title: 'Function and Method Overloading'
   status: 'No testable assertions'
 
-'17.7':
+'17.8':
   title: 'Native Functions and Methods'
   status: 'No testable assertions'
 
-'17.8':
+'17.9':
   title: 'Final Classes and Methods'
   status: 'No testable assertions'
 
-'17.9':
+'17.9.1':
+  title: 'Final Classes'
+  status: 'Finished'
+
+'17.9.2':
+  title: 'Final Methods'
+  status: 'Finished'
+
+'17.10':
   title: 'Default and Static Interface Methods'
   status: 'No testable assertions'
 
-'17.14':
+'17.15':
   title: 'Exceptions'
   status: 'Finished'
 
-'17.14.1':
+'17.15.1':
   title: 'Throwing Functions'
   status: 'Finished'
 
-'17.14.2':
+'17.15.2':
   title: 'Non-Throwing Functions'
   status: 'Finished'
 
-'17.14.3':
+'17.15.3':
   title: 'Rethrowing Functions'
   status: 'Finished'
 
-'17.14.4':
+'17.15.4':
   title: 'Exceptions and Initialization Expression'
   status: 'Finished'
 
-'17.14.5':
+'17.15.5':
   title: 'Exceptions and Errors Inside Field Initializers'
   status: 'Finished'
 
-'17.15':
+'17.16':
   title: 'Coroutines'
   status: 'No testable assertions'
 
@@ -505,11 +509,23 @@
   status: 'No testable assertions'
 
 '18':
-  title: 'Standard Library'
+  title: 'Semantic Rules'
   status: 'No testable assertions'
 
+'18.3':
+  title: 'Type Compatibility'
+  status: 'No testable assertions'  # Implicit Conversion is tested in 6.5
+
+'18.7':
+  title: 'Compatibility Features'
+  status: 'No testable assertions'
+
+'18.7.1':
+  title: 'Extended Conditional Expressions'
+  status: 'Finished'
+
 '19':
-  title: 'Grammar Summary'
+  title: 'Standard Library'
   status: 'No testable assertions'
 
 '20':
@@ -521,5 +537,9 @@
   status: 'No testable assertions'
 
 '22':
+  title: 'Grammar Summary'
+  status: 'No testable assertions'
+
+'23':
   title: 'Contributors'
   status: 'No testable assertions'
