@@ -1180,7 +1180,6 @@ BoundsRange BoundsAnalysis::CalcNewBoundsRangeMul(const BoundsRangeInfo *bri, co
     auto input1 = inst->GetDataFlowInput(inst->GetInput(1).GetInst());
     auto range0 = bri->FindBoundsRange(inst->GetBasicBlock(), input0);
     auto range1 = bri->FindBoundsRange(inst->GetBasicBlock(), input1);
-
     if (!range0.IsMaxRange() || !range1.IsMaxRange()) {
         return range0.Mul(range1);
     }
