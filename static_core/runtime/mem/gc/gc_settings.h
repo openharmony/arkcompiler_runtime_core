@@ -177,6 +177,8 @@ public:
 
     uint32_t GetG1GcPauseIntervalInMillis() const;
 
+    bool G1SinglePassCompactionEnabled() const;
+
 private:
     // clang-tidy complains about excessive padding
     /// Garbage rate threshold of a tenured region to be included into a mixed collection
@@ -256,6 +258,7 @@ private:
     /// True if G1 should updates remsets concurrently
     bool g1EnableConcurrentUpdateRemset_ = false;
     bool g1EnablePauseTimeGoal_ {false};
+    bool g1SinglePassCompactionEnabled_ = true;
 };
 
 }  // namespace ark::mem

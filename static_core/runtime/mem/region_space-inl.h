@@ -87,6 +87,12 @@ void *Region::Alloc(size_t alignedSize)
     return ToVoidPtr(oldTop);
 }
 
+inline void Region::UndoAlloc(void *addr)
+{
+    RegionAllocCheck alloc(this);
+    top_ = ToUintPtr(addr);
+}
+
 template <typename ObjectVisitor>
 void Region::IterateOverObjects(const ObjectVisitor &visitor)
 {

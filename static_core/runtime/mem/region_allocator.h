@@ -358,13 +358,12 @@ public:
     }
 
 private:
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    template <bool atomic = true, RegionFlag REGION_TYPE>
+    template <bool USE_ATOMIC = true, RegionFlag REGION_TYPE>
     Region *GetCurrentRegion()
     {
         Region **curRegion = GetCurrentRegionPointerUnsafe<REGION_TYPE>();
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (atomic) {
+        if constexpr (USE_ATOMIC) {
             // Atomic with relaxed order reason: data race with cur_region with no synchronization or ordering
             // constraints imposed on other reads or writes
             return reinterpret_cast<std::atomic<Region *> *>(curRegion)->load(std::memory_order_relaxed);
@@ -373,13 +372,12 @@ private:
         return *curRegion;
     }
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    template <bool atomic = true, RegionFlag REGION_TYPE>
+    template <bool USE_ATOMIC = true, RegionFlag REGION_TYPE>
     void SetCurrentRegion(Region *region)
     {
         Region **curRegion = GetCurrentRegionPointerUnsafe<REGION_TYPE>();
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (atomic) {
+        if constexpr (USE_ATOMIC) {
             // Atomic with relaxed order reason: data race with cur_region with no synchronization or ordering
             // constraints imposed on other reads or writes
             reinterpret_cast<std::atomic<Region *> *>(curRegion)->store(region, std::memory_order_relaxed);
@@ -400,51 +398,35 @@ private:
         return nullptr;
     }
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    template <bool atomic = true, RegionFlag REGION_TYPE>
+    template <bool USE_ATOMIC = true, RegionFlag REGION_TYPE>
     void ResetCurrentRegion()
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
-            SetCurrentRegion<atomic, REGION_TYPE>(&fullRegion_);
+            SetCurrentRegion<USE_ATOMIC, REGION_TYPE>(&fullRegion_);
             return;
         }
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_OLD) {
-            // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-            if constexpr (atomic) {
-                os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
-                GetRegionQueuePointer<REGION_TYPE>()->clear();
-                return;
-            }
+            os::memory::LockHolder<os::memory::Mutex, USE_ATOMIC> lock(*GetQueueLock<REGION_TYPE>());
             GetRegionQueuePointer<REGION_TYPE>()->clear();
             return;
         }
         UNREACHABLE();
     }
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    template <bool atomic = true, RegionFlag REGION_TYPE>
+    template <bool USE_ATOMIC = true, RegionFlag REGION_TYPE>
     bool IsInCurrentRegion(Region *region)
     {
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE == RegionFlag::IS_EDEN) {
-            return GetCurrentRegion<atomic, REGION_TYPE>() == region;
+            return GetCurrentRegion<USE_ATOMIC, REGION_TYPE>() == region;
         }
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (REGION_TYPE != RegionFlag::IS_OLD) {
             LOG(FATAL, ALLOC) << "Region type is neither eden nor old";
         }
-        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (atomic) {
-            os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
-            for (auto i : *GetRegionQueuePointer<REGION_TYPE>()) {
-                if (i == region) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        os::memory::LockHolder<os::memory::Mutex, USE_ATOMIC> lock(*GetQueueLock<REGION_TYPE>());
         for (auto i : *GetRegionQueuePointer<REGION_TYPE>()) {
             if (i == region) {
                 return true;
@@ -453,44 +435,39 @@ private:
         return false;
     }
 
-    // NOLINTNEXTLINE(readability-identifier-naming)
-    template <bool atomic = true, RegionFlag REGION_TYPE>
+public:
+    template <bool USE_ATOMIC = true, RegionFlag REGION_TYPE>
     Region *PopFromRegionQueue()
     {
         PandaVector<Region *> *regionQueue = GetRegionQueuePointer<REGION_TYPE>();
-        Region *region = nullptr;
-        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (atomic) {
-            os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
-            if (!regionQueue->empty()) {
-                region = regionQueue->back();
-                regionQueue->pop_back();
-            }
-            return region;
-            // NOLINTNEXTLINE(readability-misleading-indentation)
+        os::memory::LockHolder<os::memory::Mutex, USE_ATOMIC> lock(*GetQueueLock<REGION_TYPE>());
+        if (regionQueue->empty()) {
+            return nullptr;
         }
-        if (!regionQueue->empty()) {
-            region = regionQueue->back();
-            regionQueue->pop_back();
-        }
+        auto *region = regionQueue->back();
+        regionQueue->pop_back();
         return region;
     }
 
     // NOLINTNEXTLINE(readability-identifier-naming)
-    template <bool atomic = true, RegionFlag REGION_TYPE>
+    template <bool USE_ATOMIC = true, RegionFlag REGION_TYPE>
     void PushToRegionQueue(Region *region)
     {
         PandaVector<Region *> *regionQueue = GetRegionQueuePointer<REGION_TYPE>();
-        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (atomic) {
-            os::memory::LockHolder lock(*GetQueueLock<REGION_TYPE>());
-            regionQueue->push_back(region);
-            return;
-            // NOLINTNEXTLINE(readability-misleading-indentation)
-        }
+        os::memory::LockHolder<os::memory::Mutex, USE_ATOMIC> lock(*GetQueueLock<REGION_TYPE>());
         regionQueue->push_back(region);
     }
 
+    template <bool USE_ATOMIC = true, RegionFlag REGION_TYPE>
+    Region *CreateAndSetUpNewRegionWithLock()
+    {
+        os::memory::LockHolder<LockConfigT, USE_ATOMIC> lock(this->regionLock_);
+        Region *regionTo = this->template CreateAndSetUpNewRegion<AllocConfigT>(DEFAULT_REGION_SIZE, REGION_TYPE);
+        ASSERT(regionTo != nullptr);
+        return regionTo;
+    }
+
+private:
     template <RegionFlag REGION_TYPE>
     os::memory::Mutex *GetQueueLock()
     {

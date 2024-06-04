@@ -39,6 +39,7 @@ class ReferenceProcessor {
 public:
     using ReferenceCheckPredicateT = typename GC::ReferenceCheckPredicateT;
     using ReferenceProcessPredicateT = typename GC::ReferenceProcessPredicateT;
+    using ReferenceProcessorT = typename GC::ReferenceProcessorT;
 
     explicit ReferenceProcessor() = default;
     NO_COPY_SEMANTIC(ReferenceProcessor);
@@ -54,6 +55,12 @@ public:
      */
     virtual bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                              const ReferenceCheckPredicateT &pred) const = 0;
+    /// True if current object is Reference and referent in collection set
+    virtual bool IsReference([[maybe_unused]] const BaseClass *baseCls, [[maybe_unused]] const ObjectHeader *ref) const
+    {
+        ASSERT_PRINT(false, "Should be implemented by subclasses");
+        return false;
+    }
 
     /**
      * Save reference for future processing and handle it with GC point of view (mark needed fields, if necessary)
@@ -61,6 +68,13 @@ public:
      */
     virtual void HandleReference(GC *gc, GCMarkingStackType *objectsStack, const BaseClass *cls,
                                  const ObjectHeader *object, const ReferenceProcessPredicateT &pred) = 0;
+    /// Save reference for future processing and handle it with GC point of view (traverse needed fields, if necessary)
+    virtual void HandleReference([[maybe_unused]] GC *gc, [[maybe_unused]] const BaseClass *cls,
+                                 [[maybe_unused]] const ObjectHeader *object,
+                                 [[maybe_unused]] const ReferenceProcessorT &processor)
+    {
+        ASSERT_PRINT(false, "Should be implemented by subclasses");
+    }
 
     /**
      * Process all references which we discovered by GC.
@@ -68,6 +82,15 @@ public:
      */
     virtual void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                                    const mem::GC::ReferenceClearPredicateT &pred) = 0;
+    /**
+     * Process all references which we discovered by GC.
+     * Predicate checks which references should be processed
+     */
+    virtual void ProcessReferencesAfterCompaction([[maybe_unused]] bool clearSoftReferences,
+                                                  [[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred)
+    {
+        ASSERT_PRINT(false, "Should be implemented by subclasses");
+    }
 
     /// Collect all processed references. They were cleared on the previous phase - we only collect them.
     virtual ark::mem::Reference *CollectClearedReferences() = 0;

@@ -32,10 +32,14 @@
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 #include "runtime/mem/object_helpers-inl.h"
 #include "runtime/mem/rem_set-inl.h"
-#include "runtime/include/thread.h"
+#include "runtime/include/thread-inl.h"
 #include "runtime/include/managed_thread.h"
 #include "runtime/mem/gc/g1/ref_updater.h"
 #include "runtime/mem/region_space.h"
+#include "runtime/include/stack_walker-inl.h"
+#include "runtime/mem/refstorage/global_object_storage.h"
+#include "runtime/mem/gc/g1/g1-evacuate-regions-worker-state-inl.h"
+#include "runtime/mem/gc/g1/g1-evacuate-regions-task.h"
 
 namespace ark::mem {
 
@@ -589,6 +593,11 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             this->GetInternalAllocator()->Delete(taskUpdatedRefsQueue);
             break;
         }
+        case GCWorkersTaskTypes::TASK_EVACUATE_REGIONS: {
+            auto *evacuationTask = task->Cast<G1EvacuateRegionsTask<LanguageConfig>>();
+            evacuationTask->Work();
+            break;
+        }
         default:
             LOG(FATAL, GC) << "Unimplemented for " << GCWorkersTaskTypesToString(task->GetType());
             UNREACHABLE();
@@ -791,7 +800,7 @@ void G1GC<LanguageConfig>::CollectAndMoveYoungRegions(const CollectionSet &colle
 {
     if (!collectionSet.Young().empty()) {
         CollectionSet cs(collectionSet.Young());
-        if (HaveEnoughSpaceToMove(cs)) {
+        if (HaveEnoughRegionsToMove(cs.Movable().size())) {
             LOG_DEBUG_GC << "Iterative full GC. Collecting " << cs.size() << " young regions";
             UpdateCollectionSet(cs);
             CollectAndMove<true>(cs);
@@ -1076,6 +1085,97 @@ static bool RemsetRegionPredicate(const Region *r)
 }
 
 template <class LanguageConfig>
+void G1GC<LanguageConfig>::EvacuateCollectionSet(const GCTask &task)
+{
+    ScopedTiming t(__FUNCTION__, *this->GetTiming());
+    RemSet<> remset;
+    MergeRemSet(&remset);
+
+    for (auto *region : remset.GetDirtyRegions()) {
+        // MarkBitmap is used instead of LiveBitmap in ScanRemset. See comment there.
+        region->GetLiveBitmap()->CopyTo(region->GetMarkBitmap());
+    }
+
+    ParallelCompactionTask<LanguageConfig> parallelCompactionTask(this, this->GetG1ObjectAllocator(), &remset,
+                                                                  collectionSet_);
+    parallelCompactionTask.Run();
+
+    this->CommonUpdateRefsToMovedObjects();
+    HandleReferences(task);
+    ActualizeRemSets();
+
+    parallelCompactionTask.FlushDirtyCards(updatedRefsQueue_);
+    parallelCompactionTask.Finish();
+
+    this->memStats_.template RecordSizeMovedYoung<false>(parallelCompactionTask.GetCopiedBytesYoung());
+    this->memStats_.template RecordCountMovedYoung<false>(parallelCompactionTask.GetCopiedObjectsYoung());
+    this->memStats_.template RecordSizeMovedTenured<false>(parallelCompactionTask.GetCopiedBytesOld());
+    this->memStats_.template RecordCountMovedTenured<false>(parallelCompactionTask.GetCopiedObjectsOld());
+    this->memStats_.template RecordSizeFreedYoung<false>(parallelCompactionTask.GetFreedBytesYoung());
+    this->memStats_.template RecordSizeFreedTenured<false>(parallelCompactionTask.GetFreedBytesOld());
+
+    this->GetPandaVm()->UpdateMovedStrings();
+    SweepRegularVmRefs();
+
+    ResetRegionAfterMixedGC();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::MergeRemSet(RemSet<> *remset)
+{
+    ScopedTiming t(__FUNCTION__, *this->GetTiming());
+    for (auto *region : collectionSet_) {
+        remset->Merge(region->GetRemSet());
+    }
+
+    constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / RemSet<>::Bitmap::GetNumBits();
+    auto *cardTable = this->GetCardTable();
+    for (auto *card : dirtyCards_) {
+        auto range = cardTable->GetMemoryRange(card);
+        auto addr = range.GetStartAddress();
+        auto region = ark::mem::AddrToRegion(ToVoidPtr(addr));
+        if (!RemsetRegionPredicate(region)) {
+            // Skip cards which correspond to regions in the collection set because live objects in collection set are
+            // traversed during evacuation anyway.
+            continue;
+        }
+        auto endAddr = range.GetEndAddress();
+        while (addr < endAddr) {
+            remset->AddRef(ToVoidPtr(addr));
+            addr += MEM_SIZE;
+        }
+    }
+
+    // All dirty cards which do not correspond to regions in the collection set are processed and reenqueued in case of
+    // cross region references during evacuation, see EvacuationObjectPointerHandler::ProcessObjectPointer
+    dirtyCards_.clear();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::HandleReferences(const GCTask &task)
+{
+    ScopedTiming t(__FUNCTION__, *this->GetTiming());
+    auto refClearPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+    this->ProcessReferences(task, refClearPred);
+    this->GetPandaVm()->GetGlobalObjectStorage()->ClearWeakRefs(refClearPred);
+    ProcessDirtyCards();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ResetRegionAfterMixedGC()
+{
+    auto *objectAllocator = this->GetG1ObjectAllocator();
+    if (!collectionSet_.Young().empty()) {
+        objectAllocator->ResetYoungAllocator();
+    }
+    {
+        GCScope<TRACE_TIMING> resetRegions("ResetRegions", this);
+        objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
+                                               OSPagesPolicy::IMMEDIATE_RETURN, false>(collectionSet_.Tenured());
+    }
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleRegions)
 {
     ASSERT(!this->IsFullGC());
@@ -1084,10 +1184,14 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
     uint64_t youngPauseTime;
     {
         time::Timer timer(&youngPauseTime, true);
-        MixedMarkAndCacheRefs(task, collectibleRegions);
-        ClearYoungCards(collectibleRegions);
-        ClearTenuredCards(collectibleRegions);
-        CollectAndMove<false>(collectibleRegions);
+        if (SinglePassCompactionAvailable()) {
+            EvacuateCollectionSet(task);
+        } else {
+            MixedMarkAndCacheRefs(task, collectibleRegions);
+            ClearYoungCards(collectibleRegions);
+            ClearTenuredCards(collectibleRegions);
+            CollectAndMove<false>(collectibleRegions);
+        }
         ClearRefsFromRemsetsCache();
         this->GetObjectGenAllocator()->InvalidateSpaceData();
     }
@@ -1095,6 +1199,35 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
         this->GetStats()->AddTimeValue(youngPauseTime, TimeTypeStats::YOUNG_PAUSED_TIME);
     }
     LOG_DEBUG_GC << "G1GC RunGC end";
+}
+
+template <class LanguageConfig>
+bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
+{
+    if (!this->GetSettings()->G1SinglePassCompactionEnabled()) {
+        return false;
+    }
+
+    if (this->GetSettings()->G1EnablePauseTimeGoal()) {
+        // pause time goal should be corrected for single pass collection
+        return false;
+    }
+
+    if (!this->GetPandaVm()->SupportGCSinglePassCompaction()) {
+        return false;
+    }
+
+    if (g1PromotionRegionAliveRate_ <= 0) {
+        return false;
+    }
+
+    for (auto *region : collectionSet_) {
+        if (region->HasPinnedObjects()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 template <class LanguageConfig>
@@ -1823,7 +1956,10 @@ void G1GC<LanguageConfig>::StartReleasePagesIfNeeded(ReleasePagesStatus oldStatu
 template <class LanguageConfig>
 bool G1GC<LanguageConfig>::HaveEnoughSpaceToMove(const CollectionSet &collectibleRegions)
 {
-    return HaveEnoughRegionsToMove(collectibleRegions.Movable().size());
+    // extra regions are required because workers concurrenly evacuate objects to several regions
+    size_t extraRegions =
+        this->GetPandaVm()->SupportGCSinglePassCompaction() ? this->GetSettings()->GCWorkersCount() : 0;
+    return HaveEnoughRegionsToMove(collectibleRegions.Movable().size() + extraRegions);
 }
 
 template <class LanguageConfig>

@@ -138,6 +138,7 @@ public:
     using ReferenceCheckPredicateT = std::function<bool(const ObjectHeader *)>;
     using ReferenceClearPredicateT = std::function<bool(const ObjectHeader *)>;
     using ReferenceProcessPredicateT = std::function<bool(const ObjectHeader *)>;
+    using ReferenceProcessorT = std::function<void(void *)>;
 
     static constexpr bool EmptyReferenceProcessPredicate([[maybe_unused]] const ObjectHeader *ref)
     {
@@ -317,6 +318,9 @@ public:
     /// Process all references which GC found in marking phase.
     void ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceClearPredicateT &pred);
 
+    /// Process all references which were found during evacuation
+    void ProcessReferences(const GCTask &task, const ReferenceClearPredicateT &pred);
+
     size_t GetNativeBytesRegistered()
     {
         // Atomic with relaxed order reason: data race with native_bytes_registered_ with no synchronization or ordering
@@ -407,9 +411,12 @@ public:
 
     /// Return true of ref is an instance of reference or it's ancestor, false otherwise
     bool IsReference(const BaseClass *cls, const ObjectHeader *ref, const ReferenceCheckPredicateT &pred);
+    bool IsReference(const BaseClass *cls, const ObjectHeader *ref);
 
     void ProcessReference(GCMarkingStackType *objectsStack, const BaseClass *cls, const ObjectHeader *ref,
                           const ReferenceProcessPredicateT &pred);
+    void ProcessReferenceForSinglePassCompaction(const BaseClass *cls, const ObjectHeader *ref,
+                                                 const ReferenceProcessorT &processor);
 
     ALWAYS_INLINE ObjectAllocatorBase *GetObjectAllocator() const
     {

@@ -431,6 +431,7 @@ Class *EtsClassLinkerExtension::CreateClassRoot(const uint8_t *descriptor, Class
         ASSERT(objectHeader != nullptr);
 
         klass = InitializeClass(objectHeader, descriptor, vtableSize, imtSize, size);
+        klass->SetObjectSize(EtsClass::GetSize(size));
         EtsClass::FromRuntimeClass(klass)->AsObject()->SetClass(EtsClass::FromRuntimeClass(klass));
     } else {
         klass = CreateClass(descriptor, vtableSize, imtSize, size);

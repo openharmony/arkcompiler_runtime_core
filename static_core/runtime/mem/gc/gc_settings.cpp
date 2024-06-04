@@ -64,6 +64,7 @@ GCSettings::GCSettings(const RuntimeOptions &options, panda_file::SourceLang lan
     g1MaxGcPauseMs_ = options.GetG1PauseTimeGoalMaxGcPause();
     g1GcPauseIntervalMs_ = options.WasSetG1PauseTimeGoalGcPauseInterval() ? options.GetG1PauseTimeGoalGcPauseInterval()
                                                                           : g1MaxGcPauseMs_ + 1;
+    g1SinglePassCompactionEnabled_ = options.IsG1SinglePassCompactionEnabled();
     LOG_IF(FullGCBombingFrequency() && RunGCInPlace(), FATAL, GC)
         << "full-gc-bombimg-frequency and run-gc-in-place options can't be used together";
 }
@@ -281,6 +282,11 @@ uint32_t GCSettings::GetG1MaxGcPauseInMillis() const
 uint32_t GCSettings::GetG1GcPauseIntervalInMillis() const
 {
     return g1GcPauseIntervalMs_;
+}
+
+bool GCSettings::G1SinglePassCompactionEnabled() const
+{
+    return g1SinglePassCompactionEnabled_;
 }
 
 }  // namespace ark::mem

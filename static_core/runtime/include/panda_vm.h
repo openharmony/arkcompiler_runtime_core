@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,7 @@ public:
                                   [[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred)
     {
     }
+
     virtual void HandleEnqueueReferences() {}
     virtual void HandleGCFinished() {}
     /*
@@ -226,6 +227,11 @@ public:
     void ClearMarkQueue();
 
     virtual void ClearInteropHandleScopes([[maybe_unused]] Frame *frame) {}
+
+    virtual bool SupportGCSinglePassCompaction() const
+    {
+        return false;
+    }
 
     NO_MOVE_SEMANTIC(PandaVM);
     NO_COPY_SEMANTIC(PandaVM);

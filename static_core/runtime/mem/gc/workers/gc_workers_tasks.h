@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ enum class GCWorkersTaskTypes : uint32_t {
     TASK_RETURN_FREE_PAGES_TO_OS,
     TASK_UPDATE_REMSET_REFS,
     TASK_ENQUEUE_REMSET_REFS,
+    TASK_EVACUATE_REGIONS,
 };
 
 constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
@@ -53,6 +54,8 @@ constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
             return "Update remset references task";
         case GCWorkersTaskTypes::TASK_ENQUEUE_REMSET_REFS:
             return "Enqueue remset references task";
+        case GCWorkersTaskTypes::TASK_EVACUATE_REGIONS:
+            return "Evacuate regions task";
         default:
             return "Unknown task";
     }

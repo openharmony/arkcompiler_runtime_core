@@ -257,6 +257,8 @@ public:
     template <bool ATOMIC = true>
     NO_THREAD_SANITIZE void *Alloc(size_t alignedSize);
 
+    NO_THREAD_SANITIZE void UndoAlloc(void *addr);
+
     template <typename ObjectVisitor>
     void IterateOverObjects(const ObjectVisitor &visitor);
 

@@ -411,6 +411,11 @@ options:
   default: true
   description: Enable parallel references updating in GC if it is supported (now it is G1). If we don't have gc workers, this options will be ignored.
 
+- name: g1-single-pass-compaction-enabled
+  type: bool
+  default: true
+  description: Enable single pass compaction mode for G1 GC if it is supported by VM implementation
+
 - name: reference-processor-enable
   type: bool
   default: true
