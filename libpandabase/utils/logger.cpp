@@ -157,7 +157,7 @@ void Logger::Log(Level level, Component component, const std::string &str)
         return;
     }
 
-    os::memory::LockHolder lock(mutex);
+    os::memory::LockHolder<os::memory::Mutex> lock(mutex);
     if (!IsLoggingOn(level, component)) {
         return;
     }
@@ -197,7 +197,7 @@ void Logger::InitializeFileLogging(const std::string &log_file, Level level, con
         return;
     }
 
-    os::memory::LockHolder lock(mutex);
+    os::memory::LockHolder<os::memory::Mutex> lock(mutex);
 
     if (IsInitialized()) {
         return;
@@ -228,7 +228,7 @@ void Logger::InitializeHiLogging(Level level, const ComponentMask &component_mas
     }
 
     {
-        os::memory::LockHolder lock(mutex);
+        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
 
         if (IsInitialized()) {
             return;
@@ -247,7 +247,7 @@ void Logger::InitializeStdLogging(Level level, const ComponentMask &component_ma
     }
 
     {
-        os::memory::LockHolder lock(mutex);
+        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
 
         if (IsInitialized()) {
             return;
@@ -265,7 +265,7 @@ void Logger::InitializeDummyLogging(Level level, const ComponentMask &component_
     }
 
     {
-        os::memory::LockHolder lock(mutex);
+        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
 
         if (IsInitialized()) {
             return;
@@ -285,7 +285,7 @@ void Logger::Destroy()
     Logger *l = nullptr;
 
     {
-        os::memory::LockHolder lock(mutex);
+        os::memory::LockHolder<os::memory::Mutex> lock(mutex);
 
         if (!IsInitialized()) {
             return;
