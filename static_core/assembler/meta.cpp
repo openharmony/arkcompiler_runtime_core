@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,7 +139,6 @@ static Expected<ScalarValue, Metadata::Error> CreatePrimitiveValue(std::string_v
     }
 
     auto converted = res.Value();
-
     if (converted > maxValue) {
         return Unexpected(Metadata::Error("Value is out of range", Metadata::Error::Type::INVALID_VALUE));
     }
@@ -220,7 +219,6 @@ std::optional<Metadata::Error> AnnotationMetadata::AnnotationElementBuilder::Add
     ASSERT(type_.has_value());
 
     auto type = type_.value();
-
     if (type == Value::Type::ARRAY) {
         ASSERT(componentType_.has_value());
         type = componentType_.value();
