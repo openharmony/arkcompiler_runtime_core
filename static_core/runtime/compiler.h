@@ -259,6 +259,11 @@ public:
         return mda.GetClassId().GetOffset();
     }
 
+    uint64_t GetUniqClassId(ClassPtr klass) const override
+    {
+        return ClassCast(klass)->GetUniqId();
+    }
+
     bool HasNativeException(MethodPtr method) const override;
     bool IsMethodExternal(MethodPtr parentMethod, MethodPtr calleeMethod) const override;
 

@@ -247,7 +247,7 @@ public:
     // NOLINTNEXTLINE(*-explicit-constructor)
     operator bool() const
     {
-        return class_ != 0;
+        return IsValid();
     }
 
     ClassType GetClass() const
@@ -5339,6 +5339,7 @@ class PANDA_PUBLIC_API UnresolvedStoreStaticInst : public NeedBarrierMixin<Fixed
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
+    static constexpr size_t STORED_INPUT_INDEX = 0U;
 
     UnresolvedStoreStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))
@@ -5380,6 +5381,7 @@ class PANDA_PUBLIC_API StoreResolvedObjectFieldStaticInst : public NeedBarrierMi
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
+    static constexpr size_t STORED_INPUT_INDEX = 1U;
 
     StoreResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m))

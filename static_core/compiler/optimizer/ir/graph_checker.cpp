@@ -1210,6 +1210,7 @@ void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, Basi
 void GraphChecker::VisitMov(GraphVisitor *v, Inst *inst)
 {
     CheckUnaryOperationTypes(v, inst);
+    UNREACHABLE();
 }
 void GraphChecker::VisitNeg(GraphVisitor *v, Inst *inst)
 {
@@ -2359,6 +2360,10 @@ void GraphChecker::VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unus
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, saveState != nullptr,
                                         std::cerr << "CheckCast instruction must have SaveState as input 2: " << *inst
                                                   << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !inst->HasUsers(),
+                                        std::cerr << "CheckCast must not have users: " << *inst << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::NO_TYPE,
+                                        std::cerr << "CheckCast must not have type: " << *inst << std::endl);
     if (inst->CanDeoptimize()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
             v, (saveState->GetOpcode() == Opcode::SaveState || saveState->GetOpcode() == Opcode::SaveStateDeoptimize),

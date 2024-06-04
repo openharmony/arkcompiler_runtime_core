@@ -155,6 +155,7 @@ set(OPTIMIZER_SOURCES
         optimizer/pass_manager_statistics.cpp
         optimizer/pipeline.cpp
         optimizer/analysis/alias_analysis.cpp
+        optimizer/analysis/alias_visitor.cpp
         optimizer/analysis/bounds_analysis.cpp
         optimizer/analysis/countable_loop_parser.cpp
         optimizer/analysis/catch_inputs.cpp
@@ -162,6 +163,7 @@ set(OPTIMIZER_SOURCES
         optimizer/analysis/linear_order.cpp
         optimizer/analysis/liveness_analyzer.cpp
         optimizer/analysis/liveness_use_table.cpp
+        optimizer/analysis/live_in_analysis.cpp
         optimizer/analysis/live_registers.cpp
         optimizer/analysis/loop_analyzer.cpp
         optimizer/analysis/monitor_analysis.cpp
@@ -348,6 +350,7 @@ set(PANDA_COMPILER_TESTS_SOURCES
     tests/method_properties_test.cpp
     tests/monitor_analysis_test.cpp
     tests/move_constants_test.cpp
+    tests/ref_set_test.cpp
     tests/osr_test.cpp
     tests/panda_runner.cpp
     tests/peepholes_test.cpp

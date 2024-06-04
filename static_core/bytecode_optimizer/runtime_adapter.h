@@ -307,8 +307,11 @@ public:
     }
 
     FieldPtr ResolveField([[maybe_unused]] MethodPtr method, size_t id, [[maybe_unused]] bool isStatic,
-                          [[maybe_unused]] bool allowExternal, uint32_t * /* class_id */) override
+                          [[maybe_unused]] bool allowExternal, uint32_t *classId) override
     {
+        if (classId != nullptr) {
+            *classId = GetClassIdForField(method, id);
+        }
         return reinterpret_cast<FieldPtr>(id);
     }
 

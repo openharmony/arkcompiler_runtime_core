@@ -56,6 +56,10 @@ options:
     type: bool
     default: false
     description: Suppress dumping of some data (bc, SaveState instructions, etc)
+  - name: no-checks
+    type: bool
+    default: false
+    description: Dump data-flow inputs instead of check instructions
   - name: life-intervals
     type: bool
     default: false
@@ -166,6 +170,7 @@ options:
     - reserve-sb-buffer
     - savestate-opt
     - try-catch-resolving
+    - type-propagation
     - vn-opt
     - bridges-ss
     - pm

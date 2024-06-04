@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #include "inst_generator.h"
 
 namespace ark::compiler {
-// CC-OFFNXT(huge_method, G.FUN.01) big switch-case
+// CC-OFFNXT(huge_method, huge_cyclomatic_complexity, G.FUN.01) big switch-case
 Graph *GraphCreator::GenerateGraph(Inst *inst)
 {
     Graph *graph;
@@ -150,7 +150,9 @@ Graph *GraphCreator::GenerateGraph(Inst *inst)
             }
         }
     }
-    if (inst->GetType() == DataType::NO_TYPE || inst->IsStore()) {
+    if (inst->GetOpcode() == Opcode::CheckCast) {
+        runtime_.returnType_ = DataType::REFERENCE;
+    } else if (inst->GetType() == DataType::NO_TYPE || inst->IsStore()) {
         runtime_.returnType_ = DataType::VOID;
     } else {
         runtime_.returnType_ = inst->GetType();
@@ -564,6 +566,7 @@ Inst *GraphCreator::CreateCheckInstByPackArgs(const PackArgsForCkeckInst &pack)
     Inst *ret = nullptr;
     DataType::Type type = pack.type;
     if (pack.inst->GetOpcode() == Opcode::CheckCast) {
+        pack.inst->SetType(DataType::NO_TYPE);
         ret = pack.graph->CreateInstReturn(type, INVALID_PC, pack.param1);
     } else {
         auto newInst = pack.graph->CreateInst(pack.opcode);

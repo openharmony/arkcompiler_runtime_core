@@ -988,6 +988,11 @@ public:
         return 0;
     }
 
+    virtual uint64_t GetUniqClassId([[maybe_unused]] ClassPtr klass) const
+    {
+        return 0;
+    }
+
     virtual IdType GetClassIdWithinFile([[maybe_unused]] MethodPtr method, [[maybe_unused]] ClassPtr klass) const
     {
         return 0;

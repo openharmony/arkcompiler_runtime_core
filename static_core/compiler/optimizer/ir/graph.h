@@ -428,6 +428,11 @@ public:
     {
         FlagDynUnitTest::Set(true, &bitFields_);
     }
+    bool IsUnitTest() const
+    {
+        static constexpr uintptr_t FAKE_FILE = 0xdeadf;
+        return method_ == nullptr || ToUintPtr(runtime_->GetBinaryFileForMethod(method_)) == FAKE_FILE;
+    }
 #else
     bool IsRegAllocApplied() const
     {
