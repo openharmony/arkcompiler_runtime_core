@@ -166,17 +166,17 @@ the declared interface also implements all the interfaces that the interface
 A compile-time error occurs if:
 
 -  ``typeReference`` in the ``extends`` clause of an interface declaration
-   names an interface type that is not accessible (see :ref:`Scopes`).
+   names an interface type that is not accessible (see :ref:`Accessible`).
 -  Type arguments of ``typeReference`` denote a parameterized type that
    is not well-formed (see :ref:`Generic Instantiations`).
--  There is a cycle in ``extends`` graph.
+-  The ``extends`` graph has a cycle.
 -  At least one ``typeReference`` is an alias of one of primitive, enumeration,
    union, or function  types.
 -  Any type argument is a wildcard type.
 
 
 Each ``typeReference`` in the ``extends`` clause of an interface declaration
-must name an accessible interface type (see :ref:`Scopes`). Otherwise, a
+must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
 compile-time error occurs.
 
 .. index::
@@ -245,8 +245,31 @@ class ``Object`` to which every class is an extension).
 
 A compile-time error occurs if an interface depends on itself.
 
-.. ``ClassCircularityError`` is thrown if circularly declared interfaces
-   are detected as interfaces are loaded at runtime.
+If superinterfaces have default implementations (see
+:ref:`Default Method Declarations`) for some method ``m`` then the current interface which
+extends these interfaces should have method ``m`` declared with the
+override-compatible signature (see :ref:`Override-Compatible Signatures`) or
+all these methods refer to the same implementation and this default
+implementation will be the current class method.
+Otherwise a :index:`compile-time error` occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I1 { foo () {} }
+    interface I2 { foo () {} }
+    interface C1 extends I1, I2 {
+       foo () {} // foo() from C1 overrides both foo() from I1 and foo() from I2
+    }
+    interface C2 implements I1, I2 {
+       // Compile-time error as foo() from I1 and foo() from I2 have different implementations
+    }
+    interface I3 extends I1 {}
+    interface I4 extends I1 {}
+    interface C3 extends I3, I4 {
+       // OK, as foo() from I3 and foo() from I4 refer to the same implementation
+    }
+
 
 .. index::
    compile-time error
@@ -367,8 +390,8 @@ the following:
 -  A getter, if a property is marked as ``readonly``;
 -  Otherwise, both a getter and a setter with the same name.
 
-If '``?``' is used after the name of the property, then its actual type is
-``type | undefined``.
+If '``?``' is used after the name of the property, then it is semantically 
+equivalent to the property type ``type | undefined``.
 
 
 .. index::
@@ -531,18 +554,18 @@ Semantic checks are described in
 **Note**: As any interface property implicitly defines a getter, a setter,
 or both, the semantic rules for methods are applied to properties.
 
-Private methods defined in superinterfaces are not accessible
-in the interface body.
+Private methods defined in superinterfaces are not accessible (see
+:ref:`Accessible`) in the interface body.
 
 .. index::
    inheritance
 
 A compile-time error occurs if:
 
--  The interface *I* declares a ``private`` method *m*;
--  The signature of *m* is compatible with the ``public`` instance method
+-  Interface *I* declares a ``private`` method *m*;
+-  Signature of *m* is compatible with the ``public`` instance method
    :math:`m'` in a superinterface of *I* (see :ref:`Override-Compatible Signatures`); and
--  :math:`m'` is otherwise accessible to code in *I*.
+-  :math:`m'` is otherwise accessible (see :ref:`Accessible`) to code in *I*.
 
 .. index::
    compile-time error

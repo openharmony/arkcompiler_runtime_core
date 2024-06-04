@@ -330,19 +330,20 @@ expression value, and ``doStatement`` first executes the statement:
 .. code-block:: typescript
    :linenos:
 
-    // existing variable
+    // existing variable is used as a loop index variable
     let i: number
     for (i = 1; i < 10; i++) {
       console.log(i)
     }
 
-    // new variable, explicit type:
+    // new variable is declared as a loop index variable with its type
+    // explicitly specified
     for (let i: number = 1; i < 10; i++) {
       console.log(i)
     }
 
-    // new variable, implicit type
-    // inferred from variable declaration
+    // new variable is declared as loop index variable with its type
+    // inferred from its initialization part of the declaration
     for (let i = 1; i < 10; i++) {
       console.log(i)
     }
@@ -429,18 +430,16 @@ feature (see :ref:`For-of Type Annotation`).
       console.log(ch)
     }
 
-    // new variable 'ch', its type is
-    // inferred from expression
+    // new variable 'ch', its type is inferred from expression after 'of'
     for (let ch of "a string object") {
       console.log(ch)
     }
 
-    // new variable 'element', its type is
-    // inferred from expression, and it 
-    // cannot be assigned with a new value
-    // in the loop body
+    // new variable 'element', its type is inferred from expression after 'of',
+    // and it cannot be assigned with a new value in the loop body
     for (const element of [1, 2, 3]) {
       console.log(element)
+      element = 66 // Compile-time error as 'element' is 'const'
     }
 
 
@@ -650,11 +649,11 @@ result of successful evaluation of the value of a ``switch`` expression.
         ;
 
     caseClause
-        : 'case' expression ':' (statement+ | block)?
+        : 'case' expression ':' statement*
         ;
 
     defaultClause
-        : 'default' ':' (statement+ | block)?
+        : 'default' ':' statement*
         ;
 
 The ``switch`` expression type must be of type ``char``, ``byte``, ``short``,
@@ -872,10 +871,10 @@ control is transferred to the ``catch`` clause.
 
 A ``catch`` clause consists of two parts:
 
--  *Catch identifier* that provides access to the object associated with
+-  A *catch identifier* that provides access to the object associated with
    the error thrown; and
 
--  Block of code that handles the situation.
+-  A block of code that handles the situation.
 
 The type of *catch identifier* is ``Object``.
 

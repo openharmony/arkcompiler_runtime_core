@@ -61,11 +61,11 @@ when considering class or interface types.
 *Direct supertypes* of a non-generic class, or of the interface type *C*
 are **all** of the following:
 
--  The direct superclass of *C* (as mentioned in its extension clause, see
+-  Direct superclass of *C* (as mentioned in its extension clause, see
    :ref:`Class Extension Clause`) or type ``Object`` if *C* has no extension
    clause specified.
 
--  The direct superinterfaces of *C* (as mentioned in the implementation
+-  Direct superinterfaces of *C* (as mentioned in the implementation
    clause of *C*, see :ref:`Class Implementation Clause`).
 
 -  Class ``Object`` if *C* is an interface type with no direct superinterfaces
@@ -90,9 +90,9 @@ are **all** of the following:
 (for a generic class or interface type declaration ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>
 with *n*>0) are **all** of the following:
 
--  The direct superclass of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
+-  Direct superclass of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
 
--  The direct superinterfaces of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
+-  Direct superinterfaces of ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`>.
 
 -  Type ``Object`` if ``C`` <``F``:sub:`1` ``,..., F``:sub:`n`> is a generic
    interface type with no direct superinterfaces.
@@ -244,6 +244,118 @@ compatible with type *T*:sub:`1`.
 
 |
 
+.. _Type Inference:
+
+Type Inference
+**************
+
+.. meta:
+    frontend_status: Partly
+
+In spite of the fact that |LANG| supports strong typing, it allows not to
+burden the programmer to specify type annotations everywhere. Smart compiler
+can infer the type of some entities from the surrounding context. Such
+technique called type inference allows to keep the readability of the program
+code, to type less and focus on the business logic while keeping the
+type-safety. There are several contexts where the type inference can be applied
+by the compiler:
+
+- variable and constant declarations (see :ref:`Type Inference from Initializer`)
+- implicit generic instantiations (see :ref:`Implicit Generic Instantiations`) 
+- function or method return type (see :ref:`Return Type Inference`)
+- array literal type inference (see :ref:`Array Type Inference from Context`, 
+  :ref:`Array Type Inference from Types of Elements`)
+- smart types (see :ref:`Smart Types`)
+
+|
+
+.. _Smart Types:
+
+Smart Types
+===========
+
+.. meta:
+   frontend_status: Partly
+   todo: implement a dataflow check for loops and try-catch blocks
+
+As every data entity - variable (see :ref:`Variable and Constant Declarations`),
+class variable (see :ref:`Field Declarations`), or local variable (see
+:ref:`Parameter List` and :ref:`Local Declarations`) of some function or method
+has its static type, the type which was expliclty specified or inferred at the
+point of its declaration. This type defines the set of operations which can
+be applied to such entity. Namely what methods can be called and which other
+entities can be accessed having this entity as a reciever of the operation.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a = new Object
+    a.toString() // entity 'a' has method toString()
+
+There could be cases when the type of an entity (mostly local variables) is a
+class or interface type (see :ref:`Classes` and :ref:`Interfaces`) or union
+type (see :ref:`Union Types`) and in the particular context of the program the
+compiler can narrow (smart cast) the static type to a more precise type (smart
+type) and allow operations which are specific to such narrowed type.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: number | string = 666
+    a++ /* Here we know for sure that type of 'a' is number and number-specific
+           operations are type-safe */
+
+    class Base {}
+    class Derived extends Base { method () {} }
+    let b: base = new Derived
+    b.method () /* Here we know for sure that type of 'b' is Derived and Derived-specific
+           operations are type-safe */
+
+Other examples are explicit calls to instanceof (see
+:ref:`InstanceOf Expression`) or checks against null (see
+:ref:`Reference Equality`) as part of if statements (see
+:ref:`if Statements`) or conditional expression (see
+:ref:`Conditional Expressions`)
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (b: Base, d: Derived|null) {
+        if (b instanceof Derived) {
+            b.method()
+        }
+        if (d != null) {
+            d.method()
+        }
+    }
+
+So, for such cases the smart compiler can deduce smart type of an entity and
+will not require unnecesary ``as`` conversions (see :ref:`Cast Expressions`).
+
+There are tricky cases related to overloading (see
+:ref:`Function and Method Overloading`) when a smart type may lead to the call
+of the function or method (see :ref:`Function or Method Selection`) which suits
+the smart type of an argument rather than the static one.
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (p: Base) {}
+    function foo (p: Derived) {}
+
+    let b: Base = new Derived
+    foo (b) // potential ambiguity in case of smart type, foo(p:Base) is to be called
+    foo (b as Derived) // no ambiguity,  foo(p:Derived) is to be called
+
+Particular cases supported by the compiler are determined by the compiler
+implementation.
+
+
+
+
+
+|
+
 .. _Overloading and Overriding:
 
 Overloading and Overriding
@@ -284,25 +396,24 @@ See :ref:`Overloading for Functions`,
 Overload-Equivalent Signatures
 ==============================
 
-Signatures *S*:sub:`1` with *n* parameters,
-and *S*:sub:`2` with *m* parameters are
-*overload-equivalent* if:
+Signatures *S*:sub:`1` with *n* parameters, and *S*:sub:`2` with *m* parameters
+are *overload-equivalent* if:
 
 -  ``n = m``;
 
--  A parameter type at some position in *S*:sub:`1` is a *type parameter*
-   (see :ref:`Generic Parameters`), and a parameter type at the same position
+-  Parameter type at some position in *S*:sub:`1` is a *type parameter*
+   (see :ref:`Type Parameters`), and a parameter type at the same position
    in *S*:sub:`2` is any reference type or type parameter;
 
--  A parameter type at some position in *S*:sub:`1` is a *generic type*
+-  Parameter type at some position in *S*:sub:`1` is a *generic type*
    *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
    same position in *S*:sub:`2` is also *G* with any list of type arguments;
 
 -  All other parameter types in *S*:sub:`1` are equal
    to parameter types in the same positions in *S*:sub:`2`.
 
+Parameter names and return types do not influence *overload-equivalence*.
 
-Parameter names and return types do not influence *override-equivalence*.
 The following signatures are *overload-equivalent*:
 
 .. code-block-meta:
@@ -344,6 +455,17 @@ and
    class G<T>
    (y: G<Number>): void
    (x: G<T>): void 
+
+and
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+   class G<T, S>
+   (y: T): void
+   (x: S): void 
 
 The following signatures are not *overload-equivalent*:
 
@@ -396,10 +518,10 @@ example below:
 The signature ``S``:sub:`2` is override-compatible with ``S``:sub:`1` only
 if **all** of the following conditions are met:
 
-1. The number of parameters of both methods is the same, i.e., ``n = m``.
+1. Number of parameters of both methods is the same, i.e., ``n = m``.
 2. Each type ``T``:sub:`i` is override-compatible with type ``U``:sub:`i`
    for ``i`` in ``1..n+1``. Type override compatibility is defined below.
-3. The number of type parameters of either method is the same, i.e.,
+3. Number of type parameters of either method is the same, i.e.,
    ``k = l``.
 
 There are two cases of type override-compatibility, as types are used as either
@@ -458,19 +580,19 @@ The semantics is illustrated by the example below:
        // Overriding kinds for parameters
        override kinds_of_parameters(
           p1: Base, // contravaraint parameter type
-          p2: (q: Derived)=>Base, // covariant parameter type, contravariant return type
-          p3: Number, // compile-time error: parameter type is not override-compatible
-          p4: number, // compile-time error: parameter type is not override-compatible
-          p5: Derived[],  // covariant array element type
-          p6: [Derived, Derived] // covariant tuple type elements
+          p2: (q: Derived)=>Base, // Covariant parameter type, contravariant return type
+          p3: Number, // Compile-time error: parameter type is not override-compatible
+          p4: number, // Compile-time error: parameter type is not override-compatible
+          p5: Derived[], // Covariant array element type
+          p6: [Derived, Derived] // Covariant tuple type elements
        )
        // Overriding kinds for return type
-       override kinds_of_return_type1(): Derived // covariant return type
-       override kinds_of_return_type2(): (q: Base)=> Derived // contravariant parameter type, covariant return type
-       override kinds_of_return_type3(): Number // compile-time error: return type is not override-compatible
-       override kinds_of_return_type4(): number // compile-time error: return type is not override-compatible
-       override kinds_of_return_type5(): Derived[] // covariant array element type
-       override kinds_of_return_type6(): [Derived, Derived] // covariant tuple type elements
+       override kinds_of_return_type1(): Derived // Covariant return type
+       override kinds_of_return_type2(): (q: Base)=> Derived // Contravariant parameter type, covariant return type
+       override kinds_of_return_type3(): Number // Compile-time error: return type is not override-compatible
+       override kinds_of_return_type4(): number // Compile-time error: return type is not override-compatible
+       override kinds_of_return_type5(): Derived[] // Covariant array element type
+       override kinds_of_return_type6(): [Derived, Derived] // Covariant tuple type elements
     }
 
 The example below illustrates override-compatibility with ``Object``:
@@ -488,26 +610,26 @@ The example below illustrates override-compatibility with ``Object``:
     class Derived extends Base {
        override kinds_of_parameters( // Object is a supertype for all types except primitive ones
           p1: Object, p2: Object,
-          p3: Object, //  compile-time error: number and Object are not override-compatible
+          p3: Object, // Compile-time error: number and Object are not override-compatible
           p4: Object, p5: Object, p6: Object
        )
     class Derived1 extends Base { 
-       override kinds_of_return_type(): Base // valid overriding
+       override kinds_of_return_type(): Base // Valid overriding
     }
     class Derived2 extends Base {
-       override kinds_of_return_type(): (q: Derived)=> Base // valid overriding
+       override kinds_of_return_type(): (q: Derived)=> Base // Valid overriding
     }
     class Derived3 extends Base {
-       override kinds_of_return_type(): number // compile-time error: number and Object are not override-compatible
+       override kinds_of_return_type(): number // Compile-time error: number and Object are not override-compatible
     }
     class Derived4 extends Base {
-       override kinds_of_return_type(): Number // valid overriding
+       override kinds_of_return_type(): Number // Valid overriding
     }
     class Derived5 extends Base {
-       override kinds_of_return_type(): Base[] // valid overriding
+       override kinds_of_return_type(): Base[] // Valid overriding
     }
     class Derived6 extends Base {
-       override kinds_of_return_type(): [Base, Base] // valid overriding
+       override kinds_of_return_type(): [Base, Base] // Valid overriding
     }
 
 |
@@ -521,8 +643,8 @@ Only *overloading* must be considered for functions because inheritance for
 functions is not defined.
 
 The correctness check for functions overloading is performed if two or more
-functions with the same name are accessible in a scope.
-A function can be defined in or imported to the scope.
+functions with the same name are accessible (see :ref:`Accessible`) in a scope
+(see :ref:`Scopes`). A function can be defined in or imported to the scope.
 
 Semantic check for such two functions is as follows:
 
@@ -541,40 +663,40 @@ Overloading and Overriding in Classes
 Both *overloading* and *overriding* must be considered in case of classes for
 methods and partly for constructors.
 
-**Note**: Only accessible methods are subject for overloading and overriding.
-For example, if a superclass contains a ``private`` method, and a subclass
-has a method with the same name, then neither overriding nor overloading
-is considered.
+**Note**: Only accessible (see :ref:`Accessible`) methods are subject for
+overloading and overriding. For example, if a superclass contains a ``private``
+method, and a subclass has a method with the same name, then neither overriding
+nor overloading is considered.
 
 **Note**: Accessors are considered methods here.
 
 Overriding member may keep or extend the access modifer (see
-:ref:`Access Modifiers`) of the inherited or implemented member, otherwise a 
+:ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a 
 compile-time error occurs.
 
 .. code-block:: typescript
    :linenos:
 
    class Base {
-      public public_member() {} 
-      protected protected_member() {} 
-      internal internal_member() {} 
-      private private_member() {} 
+      public public_member() {}
+      protected protected_member() {}
+      internal internal_member() {}
+      private private_member() {}
    }
 
    interface Interface {
-      public_member() // all members are public in interfaces
+      public_member() // All members are public in interfaces
    }
 
    class Derived extends Base implements Interface {
-      public override public_member() {} 
-         // public member can be overriden and/or implemented by the public one
-      public override protected_member() {} 
-         // protected member can be overriden by the protected or public one
+      public override public_member() {}
+         // Public member can be overriden and/or implemented by the public one
+      public override protected_member() {}
+         // Protected member can be overriden by the protected or public one
       internal internal_member() {} 
-         // internal member can be overriden by the internal one only
-      override private_member() {} 
-         // it is a compile-time error to attempt to override private member
+         // Internal member can be overriden by the internal one only
+      override private_member() {}
+         // A compile-time error occurs if an attempt is made to override private member
    }
 
 Semantic rules that work in various contexts are represented in the following
@@ -736,16 +858,16 @@ Overloading and Overriding in Interfaces
 
    interface anInterface {
       instance_method_1() 
-      instance_method_1()  // compile-time error: instance method duplication
+      instance_method_1()  // Compile-time error: instance method duplication
 
       static static_method_1() {}
-      static static_method_1() {} // compile-time error: static method duplication
+      static static_method_1() {} // Compile-time error: static method duplication
 
       instance_method_2() 
-      instance_method_2(p: number)  // valid overloading
+      instance_method_2(p: number)  // Valid overloading
 
       static static_method_2() {}
-      static static_method_2(p: string) {} // valid overloading
+      static static_method_2(p: string) {} // Valid overloading
 
    }
 
@@ -828,13 +950,13 @@ Code with compile-time errors is represented in the example below:
    :linenos:
 
     function f4(x: number): void
-    function f4(x: boolean): number // this signature does not fit
+    function f4(x: boolean): number // This signature does not fit
     function f4(x: number | string): void {
         /*body*/
     }
 
     function f5(x: number): void
-    function f5(x: string): number // wrong return type
+    function f5(x: string): number // Wrong return type
     function f5(x: number | string): void {
         /*body*/
     }

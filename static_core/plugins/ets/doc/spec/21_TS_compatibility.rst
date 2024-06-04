@@ -125,8 +125,9 @@ Difference in Overload Signatures
 .. meta:
     frontend_status: Partly
 
-*Implementaion signature* is considered as an accessible entity. The following
-code is valid in |LANG| (while it causes a compile-time error in |TS|):
+*Implementaion signature* is considered as an accessible (see
+:ref:`Accessible`) entity. The following code is valid in |LANG| (while it
+causes a compile-time error in |TS|):
 
 .. code-block-meta:
    not-subset

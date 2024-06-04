@@ -31,6 +31,10 @@ my %skip_list_snippets = (
         code_ok  => 1, # Classes as object, no reasonable example
         code_bad => 0,
     },
+    158 => {
+        code_ok  => 1, # Sendable class decorators, no reasonable example
+        code_bad => 0,
+    },
 );
 
 sub recipe_init
@@ -532,6 +536,13 @@ sub assert_code_snippets
         155 => { code_bad => 'skip', code_ok => 'skip' },
         156 => { code_bad => 'skip', code_ok => 'skip' },
         157 => { code_bad => 'skip', code_ok => 'skip' },
+        158 => { code_bad => 'skip', code_ok => 'skip' },
+        159 => { code_bad => 'skip', code_ok => 'skip' },
+        160 => { code_bad => 'skip', code_ok => 'skip' },
+        161 => { code_bad => 'skip', code_ok => 'skip' },
+        162 => { code_bad => 'skip', code_ok => 'skip' },
+        163 => { code_bad => 'skip', code_ok => 'skip' },
+        164 => { code_bad => 'skip', code_ok => 'skip' },
     );
 
     my $at_least_one_error = 0;

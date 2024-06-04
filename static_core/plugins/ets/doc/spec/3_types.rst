@@ -30,7 +30,7 @@ a given type.
 |LANG| is a statically typed language. It means that the type of every
 declared entity and every expression is known at compile time. The type of
 an entity is either set explicitly by a developer, or inferred implicitly
-by the compiler.
+(see :ref:`Type Inference`) by the compiler.
 
 There are two categories of types:
 
@@ -52,7 +52,7 @@ presented as source code in |LANG|.
    compile time
    value type
    reference type
-   implicit inference
+   type inference
    compiler
    predefined type
    user-defined type
@@ -87,6 +87,15 @@ Predefined types include the following:
    ``void``, ``never``, and ``undefined``;
 
 -  Class types: ``Object``, ``String``, ``Array<T>``, and ``BigInt``.
+
+
+.. _Primitive Types:
+
+Primitive Types
+===============
+
+.. meta:
+    frontend_status: Done
 
 The predefined value types are called *primitive types*. Primitive type names
 are reserved, i.e., they cannot be used for user-defined type names. Primitive
@@ -143,7 +152,7 @@ User-Defined Types
 -  Function types (see :ref:`Function Types`);
 -  Tuple types (see :ref:`Tuple Types`);
 -  Union types (see :ref:`Union Types`); and
--  Type parameters (see :ref:`Generic Parameters`).
+-  Type parameters (see :ref:`Type Parameters`).
 
 .. index::
    user-defined type
@@ -358,7 +367,7 @@ A type reference refers to a type by one of the following:
 
 -  *Simple* or *qualified* type name (see :ref:`Names`),
 -  Type alias (see :ref:`Type Alias Declaration`), or
--  Type parameter (see :ref:`Generic Parameters`) name with '``!``' sign
+-  Type parameter (see :ref:`Type Parameters`) name with '``!``' sign
    (see :ref:`NonNullish Type Parameter`).
 
 
@@ -448,10 +457,10 @@ below.
 
 -  Comparison operators that produce a value of type ``boolean``:
 
-   +  Numerical comparison operators '``<``', '``<=``', '``>``', and '``>=``'
-      (see :ref:`Numerical Comparison Operators`);
+   +  Numerical relational operators '``<``', '``<=``', '``>``', and '``>=``'
+      (see :ref:`Numerical Relational Operators`);
    +  Numerical equality operators '``==``' and '``!=``' (see
-      :ref:`Value Equality for Numeric Types`);
+      :ref:`Numerical Equality Operators`);
 
 -  Numerical operators that produce values of types ``int``, ``long``, or
    ``bigint``:
@@ -492,7 +501,7 @@ below.
    BigInt
    integer value
    comparison operator
-   numerical comparison operator
+   numerical relational operator
    numerical equality operator
    equality operator
    numerical operator
@@ -510,7 +519,7 @@ below.
    additive operator
    multiplicative operator
    increment operator
-   numerical comparison operator
+   numerical relational operator
    numerical equality operator
    decrement operator
    signed shift operator
@@ -617,10 +626,10 @@ discussed below.
 
 -  Comparison operators that produce a value of type *boolean*:
 
-   - Numerical comparison operators '``<``', '``<=``', '``>``', and '``>=``'
-     (see :ref:`Numerical Comparison Operators`);
+   - Numerical relational operators '``<``', '``<=``', '``>``', and '``>=``'
+     (see :ref:`Numerical Relational Operators`);
    - Numerical equality operators '``==``' and '``!=``' (see
-     :ref:`Value Equality for Numeric Types`);
+     :ref:`Numerical Equality Operators`);
 
 -  Numerical operators that produce values of type ``float`` or ``double``:
 
@@ -658,7 +667,7 @@ discussed below.
    floating-point type
    floating-point number
    operator
-   numerical comparison operator
+   numerical relational operator
    numerical equality operator
    comparison operator
    boolean type
@@ -923,7 +932,7 @@ Reference Types
 -  ``Never`` type (see :ref:`Type never`), ``null`` type (see :ref:`Type null`),
    ``undefined`` type (see :ref:`Type undefined`), ``void`` type (see
    :ref:`Type void`); and
--  Type parameters (see :ref:`Generic Parameters`).
+-  Type parameters (see :ref:`Type Parameters`).
 
 .. index::
    class type
@@ -1097,8 +1106,8 @@ Type ``string`` has dual semantics:
 -  If a string is created, assigned or passed as an argument, then it behaves
    like a reference type (see :ref:`Reference Types`).
 -  All ``string`` operations (see :ref:`String Concatenation`,
-   :ref:`Value Equality for Strings` and
-   :ref:`String Comparison Operators`) handle strings as values (see
+   :ref:`String Equality Operators` and
+   :ref:`String Relational Operators`) handle strings as values (see
    :ref:`Value Types`).
 
 If the result is not a constant expression (see :ref:`Constant Expressions`),
@@ -1719,6 +1728,7 @@ another:
    literal
 
 #. All nested union types are linearized.
+#. All type aliases if any are recursively replaced with non-alias types.
 #. Identical types within the union type are replaced for a single type.
 #. Identical literals within the union type are replaced for a single literal.
 #. If at least one type in the union is ``Object``, then all other non-nullish
@@ -1728,6 +1738,10 @@ another:
    numeric type (see :ref:`Numeric Types Hierarchy`) is to stay in the union,
    while others are removed. Any numeric literal that fits into the largest
    numeric type in a union, is removed.
+#. If there is a non-empty group of boxed numeric types (see
+   :ref:`Boxed Types`) in a union, then the largest boxed numeric type
+   (Byte->Short->Int->Long->Float->Double) is to stay in the union, while
+   others are removed.
 #. If a primitive type after boxing (see :ref:`Boxing Conversions`) is equal to
    another union type, then the initial type is removed.
 #. If a literal of union type belongs to the values of a type that is part
@@ -2019,9 +2033,9 @@ numbers larger than the maximal value of type ``long``. This type uses the
 arbitrary-precision arithmetic. Values of type ``bigint`` can be created from
 the following:
 
-- BigInt literals (see :ref:`BigInt Literals`); or
-- Numeric types, by using a call to the standard library (see
-  :ref:`Standard Library`) class ``BigInt`` method.
+- ``BigInt`` literals (see :ref:`BigInt Literals`); or
+- Numeric type values, by using a call to the standard library (see
+  :ref:`Standard Library`) class ``BigInt`` methods or constructors.
 
 Similarly to ``string``, ``bigint`` type has dual semantics.
 
@@ -2059,7 +2073,7 @@ initialization (see :ref:`Variable Declarations`), including the following:
 
 .. - All primitive types and *string* (see the table below).
 
-- All primitive types (see the table below);
+- Primitive types (see the table below);
 - All union types that have at least one nullish (see :ref:`Nullish Types`)
   value, and use an appropriate nullish value as default (see the table below).
 

@@ -39,7 +39,7 @@ Generic Declarations
 ********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Types used as generic parameters in a generic are called *type parameters*.
 
@@ -66,36 +66,12 @@ specified in the instantiation are called *type arguments*.
    construct
    type argument
 
-In an *implicit* instantiation, type arguments are not specified explicitly.
-They are inferred from the context the generic is referred in. Implicit
-instantiation is possible only for functions and methods.
-
-The result of instantiation is a *real*, non-parameterized program entity:
-class, interface, method, constructor, or function. The entity is handled
-exactly as an ordinary class, interface, method, constructor, or function.
-
-Conceptually, a generic class, an interface, a method, a constructor, or a
-function defines a set of classes, interfaces, methods, constructors, or
-functions respectively (see :ref:`Generic Instantiations`).
-
-.. index::
-   implicit instantiation
-   instantiation
-   type argument
-   context
-   non-parameterized entity
-   method
-   class
-   interface
-   constructor
-   function
-
 |
 
-.. _Generic Parameters:
+.. _Type Parameters:
 
-Generic Parameters
-******************
+Type Parameters
+***************
 
 .. meta:
     frontend_status: Done
@@ -104,7 +80,7 @@ A class, an interface, or a function must be parameterized by at least one
 *type parameter* to be a *generic*. The type parameter is declared in the type
 parameter section. It can be used as an ordinary type inside a *generic*.
 
-Syntactically, a type parameter is an unqualified identifier with the proper
+Syntactically, a type parameter is an unqualified identifier with a proper
 scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
 can have a *constraint* (see :ref:`Type Parameter Constraint`). A type
 parameter can have a default type (see :ref:`Type Parameter Default`).
@@ -178,12 +154,7 @@ Type Parameter Constraint
 
 .. meta:
     frontend_status: Partly
-    todo: overloading functions with bound, and resolving call for correct overload
-    todo: Checking of boundaries on call site
-    todo: Further checks on multiple parameter bounds
-    todo: Implement union type support for constraints
-    todo: Adapt spec change: T without constraint doesn't mean "T extends Object|null" anymore.
-
+    todo: support keyof constraint #17436
 
 If a type parameter has restrictions, or *constraints*, then such constraints
 must be followed by the corresponding type argument in a generic instantiation.
@@ -285,13 +256,69 @@ section depends on itself.
 
 |
 
+.. _Type Parameter Default:
+
+Type Parameter Default
+**********************
+
+.. meta:
+    frontend_status: Done
+
+Type parameters of generic types can have defaults. This situation allows
+dropping a type argument when a particular type of instantiation is used.
+However, a compile-time error occurs if a type parameter without a
+default type follows a type parameter with a default type in the
+declaration of a generic type.
+
+The examples below illustrate this for both classes and functions:
+
+.. index::
+   type parameter
+   generic type
+   type argument
+   type parameter default
+   instantiation
+   class
+   function
+   compile-time error
+
+
+.. code-block-meta:
+    expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    class SomeType {}
+    interface Interface <T1 = SomeType> { }
+    class Base <T2 = SomeType> { }
+    class Derived1 extends Base implements Interface { }
+    // Derived1 is semantically equivalent to Derived2
+    class Derived2 extends Base<SomeType> implements Interface<SomeType> { }
+
+    function foo<T = number>(): T {
+        // ...
+    }
+    foo() // this call is semantically equivalent to the call below
+    foo<number>()
+
+    class C1 <T1, T2 = number, T3> {}
+    // That is a compile-time error, as T2 has default but T3 does not
+
+    class C2 <T1, T2 = number, T3 = string> {}
+    let c1 = new C2<number>          // equal to C2<number, number, string>
+    let c2 = new C2<number, string>  // equal to C2<number, string, string>
+    let c3 = new C2<number, Object, number> // all 3 type arguments provided
+
+|
+
 .. _Generic Instantiations:
 
 Generic Instantiations
 **********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 As mentioned before, a generic class, interface, or function declaration
 defines a set of corresponding non-generic entities. A generic entity
@@ -370,59 +397,37 @@ Any two generic instantiations are considered *provably distinct* if:
 
 |
 
-.. _Type Parameter Default:
+.. _Implicit Generic Instantiations:
 
-Type Parameter Default
-**********************
+Implicit Generic Instantiations
+===============================
 
 .. meta:
     frontend_status: Done
 
-Type parameters of generic types can have defaults. This situation allows
-dropping a type argument when a particular type of instantiation is used.
-However, a compile-time error occurs if a type parameter without a
-default type follows a type parameter with a default type in the
-declaration of a generic type.
+In an *implicit* instantiation, type arguments are not specified explicitly.
+They are inferred from the context the generic is referred in. Implicit
+instantiation is possible only for functions and methods.
 
-The examples below illustrate this for both classes and functions:
+The result of instantiation is a *real*, non-parameterized program entity:
+class, interface, method, constructor, or function. The entity is handled
+exactly as an ordinary class, interface, method, constructor, or function.
+
+Conceptually, a generic class, an interface, a method, a constructor, or a
+function defines a set of classes, interfaces, methods, constructors, or
+functions respectively (see :ref:`Generic Instantiations`).
 
 .. index::
-   type parameter
-   generic type
-   type argument
-   type parameter default
+   implicit instantiation
    instantiation
+   type argument
+   context
+   non-parameterized entity
+   method
    class
+   interface
+   constructor
    function
-   compile-time error
-
-
-.. code-block-meta:
-    expect-cte:
-
-.. code-block:: typescript
-   :linenos:
-
-    class SomeType {}
-    interface Interface <T1 = SomeType> { }
-    class Base <T2 = SomeType> { }
-    class Derived1 extends Base implements Interface { }
-    // Derived1 is semantically equivalent to Derived2
-    class Derived2 extends Base<SomeType> implements Interface<SomeType> { }
-
-    function foo<T = number>(): T {
-        // ...
-    }
-    foo() // this call is semantically equivalent to the call below
-    foo<number>()
-
-    class C1 <T1, T2 = number, T3> {}
-    // That is a compile-time error, as T2 has default but T3 does not
-
-    class C2 <T1, T2 = number, T3 = string> {}
-    let c1 = new C2<number>          // equal to C2<number, number, string>
-    let c2 = new C2<number, string>  // equal to C2<number, string, string>
-    let c3 = new C2<number, Object, number> // all 3 type arguments provided
 
 |
 
@@ -432,8 +437,7 @@ Type Arguments
 **************
 
 .. meta:
-    frontend_status: Partly
-    todo: implement "Type Argument Variance" fully
+    frontend_status: Done
 
 Type arguments can be reference types or wildcards.
 
@@ -484,8 +488,7 @@ Type Argument Variance
 ======================
 
 .. meta:
-    frontend_status: Partly
-    todo: implement semantic, now in/out is only parsed and ignored
+    frontend_status: Done
 
 The variance for type arguments can be specified with wildcards (*use-site
 variance*). It allows changing type variance of an *invariant* type parameter.

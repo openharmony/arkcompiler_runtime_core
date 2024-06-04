@@ -82,6 +82,16 @@ must use appropriate lowering to implement such methods by using library
 function calls.
 
 
+.. _Generic and function types peculiarities:
+
+Generic and function types peculiarities
+****************************************
+
+Current compiler and runtime implementations use type erasure and thus affects
+how generics and function types behave. This is expected to be changed in the
+future. Particular example can be found here :ref:`InstanceOf Expression` the
+last bullet of the compile-time errors list.
+
 .. raw:: pdf
 
    PageBreak

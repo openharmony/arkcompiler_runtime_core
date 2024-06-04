@@ -48,9 +48,13 @@ Ambient functions, methods, and constructors have no bodies.
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
-        | enumDeclaration
+        | 'const'? enumDeclaration
         )
         ;
+
+An ambient enumeration type declaration
+can be prefixed by ``const`` keyword for |TS| compatibility.
+It does not have any influence to the declared type.
 
 A compile-time error occurs if the modifier ``declare`` is used in a context
 that is already ambient:
@@ -69,6 +73,8 @@ that is already ambient:
    ambient
 
 |
+
+.. _Ambient Constant Declarations:
 
 Ambient Constant Declarations
 *****************************
@@ -99,6 +105,8 @@ must be a numeric or a string literal.
 
 |
 
+.. _Ambient Function Declarations:
+
 Ambient Function Declarations
 *****************************
 
@@ -120,7 +128,7 @@ Ambient Function Declarations
 
 A compile-time error occurs if:
 
--  An explicit return type is not specified for an ambient function declaration;
+-  Explicit return type is not specified for an ambient function declaration;
 -  Not all overload signatures are marked as ambient in top-level ambient
    overload signatures.
 
@@ -165,6 +173,8 @@ Ambient function declarations cannot specify function bodies.
 
 |
 
+.. _Ambient Class Declarations:
+
 Ambient Class Declarations
 **************************
 
@@ -186,6 +196,8 @@ Ambient Class Declarations
         | ambientMethodDeclaration
         | ambientAccessorDeclaration
         | ambientIndexerDeclaration
+        | ambientCallSignatureDeclaration
+        | ambientIterableDeclaration
         )
         ;
     
@@ -239,6 +251,14 @@ Ambient constructor, method, and accessor declarations have no bodies:
         )
         ;       
        
+.. _Ambient Indexer:
+
+Ambient Indexer
+===============
+
+.. meta:
+    frontend_status: None
+       
 Ambient indexer declarations specify the indexing of a class instance
 in an ambient context. This feature is provided for compatibility with |TS|:
 
@@ -250,11 +270,83 @@ in an ambient context. This feature is provided for compatibility with |TS|:
 
 **Restriction**: *indexType* must be ``number``.
 
+.. code-block:: typescript
+   :linenos:
+
+    declare class C {
+        [index: number]: number
+    }
+
+
 **Note**: *Ambient indexer declaration* is supported in ambient contexts only.
 If ambient class implementation is written in |LANG|, then it must conform to
 :ref:`Indexable Types`.
 
+.. _Ambient Call Signature:
+
+Ambient Call Signature
+======================
+
+.. meta:
+    frontend_status: None
+       
+Ambient call signature declarations used to specify *callable types*
+in an ambient context. This feature is provided for compatibility with |TS|:
+
+.. code-block:: abnf
+
+    ambientCallSignatureDeclaration:
+        signature
+        ;
+
+.. code-block:: typescript
+   :linenos:
+
+    declare class C {
+        (someArg: number): boolean
+    }
+
+**Note**: *Ambient class signature declaration* is supported in ambient contexts only.
+If ambient class implementation is written in |LANG|, then it must conform to
+:ref:`Callable Types with Invoke Method`.
+
+.. _Ambient Iterable:
+
+Ambient Iterable
+================
+
+.. meta:
+    frontend_status: None
+       
+Ambient iterable declarations defines that a class instance is iterable.
+This feature is provided for compatibility with |TS|
+and can be used in an ambient context only:
+
+.. code-block:: abnf
+
+    ambientIterableDeclaration:
+        '[Symbol.iterator]' '(' ')' returnType
+        ;
+
+**Restriction**: *returnType* must be a type that
+implements ``Iterator`` interface defined in the standard library (see
+:ref:`Standard Library`).
+
+.. code-block:: typescript
+   :linenos:
+
+    declare class C {
+        [Symbol.iterator]: CIterator
+    }
+
+
+**Note**: *Ambient iterable declaration* is supported in ambient contexts only.
+If ambient class implementation is written in |LANG|, then it must conform to
+:ref:`Iterable Types`.
+
 |
+
+.. _Ambient Interface Declarations:
 
 Ambient Interface Declarations
 ******************************
@@ -271,6 +363,8 @@ Ambient Interface Declarations
 
 |
 
+.. _Ambient Namespace Declarations:
+
 Ambient Namespace Declarations
 ******************************
 
@@ -280,6 +374,12 @@ Ambient Namespace Declarations
 Namespaces are used to logically group multiple entities. |LANG| supports
 ambient namespaces to provide better compatibility with |TS| that often uses
 them to specify the platform API or a third-party library API.
+    
+    
+Namespaces are used to logically group multiple entities.
+The |LANG| supports ambient namespaces
+to provide better compatibility with TS, where there are often
+used to specify platform API or 3rd library API.
     
 .. code-block:: abnf
 
@@ -298,10 +398,13 @@ them to specify the platform API or a third-party library API.
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
-        | enumDeclaration
+        | 'const'? enumDeclaration
         | typeAlias
         )
         ;
+
+An enumeration type declaration can be prefixed by ``const`` keyword for |TS| compatibility.
+It does not have any influence to the declared type.
 
 Only exported entities can be accessed outside a namespace.
 

@@ -87,7 +87,7 @@ expression rules:
 
 There are three options the ``objectReference`` refers to:
 
-- Class or interface that are to handle static members;
+- A class or an interface that are to handle static members;
 - ``Super`` that is to access shadowed fields or constructors declared in the
   superclass, or the overridden method version of the superclass;
 - *primaryExpression* that is to refer to an instance variable of a class
@@ -542,13 +542,13 @@ is called a *simple name*.
 
 A *simple name* refers to the following:
 
--  Entity declared in the current compilation unit;
--  Local variable or parameter of the surrounding function or method.
+-  An entity declared in the current compilation unit;
+-  A local variable or parameter of the surrounding function or method.
 
 A *qualifiedName* that is not a *simple name* refers to the following:
 
--  Entity imported from a compilation unit, or
--  Member of some class or interface.
+-  An entity imported from a compilation unit, or
+-  A member of some class or interface.
 
 
 .. index::
@@ -945,7 +945,7 @@ An identifier in each *name-value pair* must name a field of the class *C*,
 or a field of any superclass of class *C*.
 
 A compile-time error occurs if the identifier does not name an *accessible
-member field* (:ref:`Scopes`) in the type *C*:
+member field* (see :ref:`Accessible`) in the type *C*:
 
 .. index::
    identifier
@@ -979,12 +979,12 @@ pair* is not compatible (see :ref:`Type Compatibility`) with the field type:
 
 If class *C* is to be used in an object literal, then it must have a
 *parameterless* constructor (explicit or default) that is *accessible*
-in the class composite context.
+(see :ref:`Accessible`) in the class composite context.
 
 A compile-time error occurs if:
 
 -  *C* does not contain a parameterless constructor; or
--  No constructor is accessible.
+-  No constructor is accessible (see :ref:`Accessible`).
 
 This is presented in the examples below:
 
@@ -1180,7 +1180,7 @@ is to be performed by the following steps:
 
    -  Evaluation of the expression; and
    -  Assigning the value of the expression to the corresponding field
-      of *x*.
+      of *x* as its initial value. It works for *readonly* fields too.
 
 .. index::
    object literal
@@ -1238,9 +1238,9 @@ array type (see :ref:`Array Types`). Otherwise, a compile-time error occurs.
 
 A *spread expression* for arrays can be evaluated as follows:
 
--  At compilation time by the compiler if *expression* is constant (see
+-  By the compiler at compile time if *expression* is constant (see
    :ref:`Constant Expressions`);
--  During program execution otherwise.
+-  At runtime otherwise.
 
 An array referred by the *expression* is broken by the evaluation into a
 sequence of values. This sequence is used where a spread expression is used.
@@ -1408,7 +1408,8 @@ An object reference used for Field Access must be a non-nullish reference
 type *T*. Otherwise, a compile-time error occurs.
 
 Field access expression is valid if the identifier refers to an accessible
-member field in type *T*. A compile-time error occurs otherwise.
+(see :ref:`Accessible`) member field in type *T*. A compile-time error occurs
+otherwise.
 
 .. index::
    access
@@ -1530,8 +1531,8 @@ A compile-time error occurs if forms with the keyword ``super`` occur:
 
 The field access expression *super.f* is handled in the same way as the
 expression *this.f* in the body of class *S*. Assuming that *super.f*
-appears within class *C*, *f* is accessible in *S* from class *C* (see
-:ref:`Scopes`) while:
+appears within class *C*, *f* is accessible (see :ref:`Accessible`) in *S* from
+class *C* while:
 
 -  The direct superclass of *C* is class *S*;
 -  The direct superclass of the class denoted by *T* is a class with *S*
@@ -1659,29 +1660,17 @@ Step 2: Selection of Method
 .. meta:
     frontend_status: Done
 
-After the type to use is known, the call method must be determined.
-The goal is to select one from all potentially applicable methods.
-
-As there is more than one applicable method, the *most specific* method must
-be selected. The method selection process results in a set of applicable
-methods, and is described in :ref:`Function or Method Selection`.
+After the type to use is known, the method to call must be determined. As
+|LANG| supports overloading, the method selection process (see
+:ref:`Function or Method Selection`) results in a set of applicable methods. If
+this set has only one element then the method to call is identified, otherwise
+it is a compile-time error (no method to call or ambuguity as more than two
+applicable methods avaialble).
 
 .. index::
    method selection
-   call method
+   method to call
    type
-   most specific method
-   applicable method
-   overload resolution
-
-A compile-time error occurs if the set of applicable methods:
-
--  Is empty; or
--  Has more than one candidate.
-
-.. index::
-   compile-time error
-   method selection
    applicable method
 
 |
@@ -1694,8 +1683,8 @@ Step 3: Semantic Correctness Check
 .. meta:
     frontend_status: Done
 
-In this step, the single method to call (the *most specific* method) is known,
-and the following set of semantic checks must be performed:
+In this step, the single method to call is known, and the following set of
+semantic checks must be performed:
 
 -  If the method call has the form ``typeReference.identifier``, then the
    method must be declared ``static``. Otherwise, a compile-time error occurs.
@@ -1714,7 +1703,7 @@ and the following set of semantic checks must be performed:
 
 .. index::
    semantic correctness check
-   most specific method
+   best match
    method call
    static method call
    compile-time error
@@ -1750,8 +1739,8 @@ is described below:
    or method call arguments.
 
 3. Suppose *M* is a set of candidates (functions or methods with the same name)
-   that are accessible at the point of call. The following actions are
-   performed for every candidate:
+   that are accessible (see :ref:`Accessible`) at the point of call. The
+   following actions are performed for every candidate:
 
   3.1 If the signature of *j*’th candidate has optional parameters or a rest
   parameter, then the *TA* list for this candidate is rebuilt according to the
@@ -1781,19 +1770,19 @@ is described below:
 .. code-block:: typescript
    :linenos:
 
-    function foo (p: A | B) { ... }                      // 1
-    function foo (p: A | C) { ... }                      // 2
-    function foo (p1: int, p2: SomeOtherType ) { ... }   // 3
-    function foo (p1: int, p2?: int ) { ... }            // 4
+    function foo (p: A | B) { ... }                      // #1
+    function foo (p: A | C) { ... }                      // #2
+    function foo (p1: int, p2: SomeOtherType ) { ... }   // #3
+    function foo (p1: int, p2?: int ) { ... }            // #4
 
-    foo(new A) // three applicable candidates for this call: 1,2,4
+    foo(new A) // three applicable candidates for this call: #1,#2,#4
 
-    function goo (p1: Base)                // 1
-    function goo (p2: Base|SomeOtherType)  // 2
-    function goo (...p3: Base[])           // 3
-    
-    goo (new Base) // three applicable candidates for this call
-    
+    function goo (p1: Base)                // #1
+    function goo (p2: Base|SomeOtherType)  // #2
+    function goo (...p3: Base[])           // #3
+
+    goo (new Base) // three applicable candidates for this call: #1, #2, #3
+
 |
 
   3.2 The following check is performed for each candidate from the set *M*.
@@ -1833,12 +1822,12 @@ is described below:
    type T1 = A | B
    type T2 = A | C
  
-   function goo (p: T1) { ... }  // 1
-   function goo (p: T2) { ... }  // 2
+   function goo (p: T1) { ... }  // #1
+   function goo (p: T2) { ... }  // #2
  
-   goo (new A)       // Two applicable candidates
-   goo (new A as T1) // Applicable candidate: 1
-   goo (new A as T2) // Applicable candidate: 2
+   goo (new A)       // Two applicable candidates: #1, #2
+   goo (new A as T1) // One applicable candidate: #1
+   goo (new A as T2) // One applicable candidate: #2
 
 |
 
@@ -1854,6 +1843,7 @@ The examples are presented below:
 
 .. code-block-meta:
 
+
 .. code-block:: typescript
    :linenos:
 
@@ -1864,18 +1854,259 @@ The examples are presented below:
           // After step 3.2: still two applicable candidates
           // After step 3.3: apply boxing conversion – one applicable candidate
    
-   function goo (p: (p: T) => T) { ... }   // 1
-   function goo (p: (p: T) => U) { ... }   // 2
+   function goo (p: (p: T) => T) { ... }   // #1
+   function goo (p: (p: T) => U) { ... }   // #2
+
  
    // Return types of call arguments are taken into account here
    
    goo ((p: T) => T {}) // After steps 3.1, 3.2: two candidates
-                        // After step 3.3: the single candidate 1
+                        // After step 3.3: the single candidate #1
                         
    goo ((p: T) => U {}) // After steps 3.1, 3.2: two candidates
-                        // After step 3.3: the single candidate 2
+                        // After step 3.3: the single candidate #2
 
-4. The list *A* of applicable candidates is now ready.
+
+|
+
+  3.4 If the list of applicable candidates has two or more candidates the best
+  match candidate is to be identified if possible. This process depends on
+  types of arguments being passed and types of parameter sets of
+  candidates and it should be applied to different pairs of argument and
+  parameter types. The following cases are to be considered:
+
+     - candidates has only one argument-parameter type difference
+     - candidates has only several argument-parameter type difference
+   
+  In addition the following kinds of types are to be inspected: 
+
+     - types are related with inheritance
+     - optional and rest parameter types
+     - union types
+
+  3.4.1 Inheritance: the type of an argument is compatible (see
+  :ref:`Type Compatibility`) with one of parameter types which is the nearest
+  (least lower bound of the set) in the inheritance graph to it.
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      foo(p: Base)    {} // Version #1
+      foo(p: Derived) {} // Version #2
+      // parameter types set: {p: {Base, Deived}}
+   }
+   class Derived extends Base {}
+   class NextDerived extends Derived {}
+
+   let b: Base = new Derived
+   b.foo(b) // Best match is Version #1:
+            // static type of the argument is equal to the type of parameter
+            // Base => {Base, Derived}
+     
+   b.foo(new Derived) // Best match is Version #2:
+            // static type of the argument is equal to the type of parameter
+            // Derived => {Base, Derived}
+
+   b.foo(new NextDerived) // Best match is Version #2:
+            // static type of the argument is compatible with Derived as it is nearest
+            // NextDerived => {Base, Derived}
+
+   function bar (p: (p: Base) => void)    {} // Version #1
+   function bar (p: (p: Derived) => void) {} // Version #2
+      // parameter types set: {p: {(p: Base) => void), (p: Derived) => void}}
+
+   let fun_arg1: (p: Base) => void = (p: Base):void => {}
+   bar (fun_arg1) // Version #1 to be called as (p: Base) => void fits it
+
+   let fun_arg2: (p: Derived) => void = (p: Derived):void => {}
+   bar (fun_arg2) // Version #2 to be called as (p: Derived):void fits it
+
+   interface T1 {}
+   interface T2 {}
+   class T3 implements T1, T2 {}
+   class T4 implements T1, T2 {}
+   function foo (p: T1) {} // Version #1
+   function foo (p: T2) {} // Version #2
+      // parameter types set: {p: {T1, T2}}
+
+   foo (new T3) // No best match! 
+     // T3 => {T1, T2} - T3 is compatible with both types
+
+   foo (new T4) // No best match! 
+     // T4 => {T1, T2} - T4 is compatible with both types
+
+
+|
+
+  3.4.2 Optional and rest parameter types: simpler types win over more
+  complicated ones, less parameters wins over more parameters.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(p: number)  {} // Version #1
+   function foo(p?: number) {} // Version #2
+      // parameter types set: {p: {number, number|undefined}}
+   foo (5) // Version #1 to be called
+      // number => {number, number|undefined} non-union type is the best match
+
+   function foo(p: number)             {} // Version #1
+   function foo(p: number, s?: string) {} // Version #2
+      // parameter types set: {p: {number, number}, s: {_, string|undefined}}
+   foo (5) // Version #1 to be called
+      // number => {number, number} such ambiguity is resolved to a version with less parameters
+
+   function foo (p: number)      {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+      // parameter types set: {p: {number, number[]}}
+   foo(5) // Version #1 to be called
+      // number => {number, number[]} simple type wins over array
+
+   function foo (p?: number)     {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+      // parameter types set: {p: {number|undefined, number[]}}
+   foo() // Version #1 to be called
+      // _ => {number|undefined, number[]} union wins over array
+
+   function foo ()               {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+      // parameter types set: {p: {_, number[]}}
+   foo() // Version #1 to be called
+      // _ => {_, number[]} no type wins over array
+
+   function foo (p: number)      {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+   function foo (p?: number)     {} // Version #3
+      // parameter types set: {p: {number, number[], number|undefined}}
+   foo(5) // Version #1 to be called
+      // number => {number, number[], number|undefined} simple type wins over array and union
+
+|
+
+
+  3.4.3 Union types: no best match if domains of two union types intersect and
+  argument type fits the intersection. 
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo (p: string|number)  {} // Version #1
+   function foo (p: string|boolean) {} // Version #2
+      // parameter types set: {p: {string|number, string|boolean}}
+   foo ("some string") // No best match! 
+      // string => {string|number, string|boolean} string fits both union types
+
+   function bar (p: string)         {} // Version #1
+   function bar (p: string|boolean) {} // Version #2
+      // parameter types set: {p: {string, string|boolean}}
+   foo ("some string") // Version #1 to be called
+      // string => {string, string|boolean} non-union type is the best match
+
+|
+
+
+  3.4.4 Several arguments: if several arguments match different versions then
+  there is no best match occurs. To have a best match all arguments should fit
+  the same version.
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {}
+   class Derived extends Base {}
+
+   function foo(p1: Base,    p2: Derived) {} // Version #1
+   function foo(p1: Derived, p2: Base)    {} // Version #2
+      // parameter types set: {p1: {Base, Derived}, p2: {Derived, Base}}
+   foo (new Derived, new Derived) // No best match!
+      // {Derived, Derived} => {p1: {Base, Derived}, p2: {Base, Derived}} 
+      // 1st Derived matches Version #2, but 2nd Derived matches Version #1 - no best match
+
+   function bar(p1: Base,    p2: Derived) {} // Version #1
+   function bar(p1: Derived, p2: Base)    {} // Version #2
+   function bar(p1: Derived, p2: Derived) {} // Version #3
+   function bar(p1: Base,    p2: Base)    {} // Version #4
+      // parameter types set: {p1: {Base, Derived, Derived, Base}, p2: {Derived, Base, Derived, Base}}
+   foo (new Derived, new Base) // // Version #2 to be called
+      // {Derived, Base} => {{Base, Derived, Derived, Base}, {Derived, Base, Derived, Base}} 
+      // Derived matches Version #2 and #3, Base matches Version #2 and #4 -
+      // intersection gives Version #2 as the best match
+
+|
+
+  3.4.5 Best match identification general algorithm.
+
+  For the call: 
+
+    foo(``expr``:sub:`1`, ``expr``:sub:`2`, .. , ``expr``:sub:`i`,  .. ``expr``:sub:`n`) 
+
+    It implies that there is a vector of argument expression types
+    corresponding to each argument expression type
+
+    ``T``:sub:`1`, ``T``:sub:`2`, .. , ``T``:sub:`i`, .. ``T``:sub:`n`
+ 
+  There is a list of ``m`` applicable candidates with the following signatures
+  (only parameter type involved) (matrix of types): 
+
+    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1n1`)
+
+    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2n2`)
+
+    ...
+
+    foo (``T``:sub:`m1`, ``T``:sub:`m2`, .. ``T``:sub:`mnm`)
+
+    where ``T``:sub:`ij` is the type of ``j-th`` parameter of the ``i-th``
+    candidate and ``j`` in ``1`` .. ``n``:sub:`i` and ``i`` in ``1`` .. ``m``
+
+  [TBD]
+
+  - define a subset of applicable candidates with min (``n``:sub:`1`, ... ``n``:sub:`m`)
+  - if only one candidate left then it is the best match candidate
+  - otherwise the list of applcable candidates will look like 
+
+    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1k`)
+
+    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2k`)
+
+    ...
+
+    foo (``T``:sub:`l1`, ``T``:sub:`l2`, .. ``T``:sub:`lk`)
+
+    where l <= m and k = min (``n``:sub:`1`, ... ``n``:sub:`m`) and k >= n
+
+  - start from the last parameter j = k
+
+  - ``j-th`` column types to be grouped into class/interface types group and
+    all other types group. 
+
+  - if class/interface types group is not empty then
+     
+     + all candidates from the other group are to be removed from the
+       applicable candidates list.
+     + if only one candidate left then goto 4.
+     + otherwise for all pairs of candidates (x, y) the following check is to
+       be performed until no removales occur
+
+       - if parameter types of (x) are compatible to parameter types of (y) then
+          - if not (parameter types of (y) are compatible to parameter types of (x)) then x is removed
+       - else if not (parameter types of (y) are compatible to parameter types of (x)) then y is removed
+
+     + goto 4.
+
+  - if class/interface types group is empty then
+    
+    + if there are union types then then goto 4.
+    + if there are optional parameters then goto 4. 
+    + if there are rest parameters then goto 4.
+  
+  - select the next parameter to the left (j = j - 1) and repeat the same
+    checks except for the rest parameters till j == 0
+
+4. List *A* of applicable candidates is now ready. If it has only 1 element
+   then it is the best match candidate.
+
 
 |
 
@@ -1902,9 +2133,9 @@ call is called *trailing lambda call* (see :ref:`Trailing Lambda` for details).
 
 A compile-time error occurs if:
 
--  The ``typeArguments`` clause is present, and any of the type arguments is a
-   wildcard (see :ref:`Type Arguments`).
--  The expression type is different than the function type.
+-  Clause ``typeArguments`` is present, and any of type arguments is a
+   wildcard (see :ref:`Type Arguments`);
+-  The expression type is different than the function type;
 -  The expression type is nullish but without '``?.``' (see
    :ref:`Chaining Operator`).
 
@@ -1923,9 +2154,9 @@ A compile-time error occurs if:
 If the operator '``?.``' (see :ref:`Chaining Operator`) is present, and the
 *expression* evaluates to a nullish value, then:
 
--  The *arguments* are not evaluated;
--  The call is not performed; and
--  The result of the *functionCallExpression* is ``undefined``.
+-  *Arguments* are not evaluated;
+-  Call is not performed; and
+-  Result of *functionCallExpression* is ``undefined``.
 
 The function call is *safe* because it handles nullish values properly.
 
@@ -1951,29 +2182,15 @@ Step 1: Selection of Function
 .. meta:
     frontend_status: Done
 
-One function must be selected from all potentially applicable functions as a
-function can be overloaded.
-
-The *most specific* function must be selected where there are more than one
-applicable functions.
-
-Function selection process results in a set of applicable functions as
-described in :ref:`Function or Method Selection`.
+As |LANG| supports overloading, the function selection process (see
+:ref:`Function or Method Selection`) results in a set of applicable functions.
+If this set has only one element then the function to call is identified,
+otherwise it is a compile-time error (no function to call or ambiguity as more
+than two applicable functions avaialble).
 
 .. index::
    function selection
-   overloaded function
-   applicable function
-
-A compile-time error occurs if the set of applicable functions:
-
--  Is empty; or
--  Has more than one candidate.
-
-.. index::
-   compile-time error
-   function
-   function selection
+   function to call
    applicable function
 
 |
@@ -2048,9 +2265,9 @@ If the operator '``?.``' (see :ref:`Chaining Operator`) is present in an
 indexing expression, then:
 
 -  The type of the object reference expression must be a nullish type based
-   on an array type or on the ``Record`` type. Otherwise, a compile-time error
+   on array type or ``Record`` type. Otherwise, a compile-time error
    occurs.
--  The object reference expression must be checked to evaluate to nullish
+-  Object reference expression must be checked to evaluate to nullish
    value. If it does, then the entire *indexingExpression* equals ``undefined``.
 
 
@@ -2147,7 +2364,7 @@ elements can be modified by changing the resultant variable fields:
 
 An array indexing expression evaluated at runtime behaves as follows:
 
--  First, the object reference expression is evaluated.
+-  The object reference expression is evaluated first.
 -  If the evaluation completes abruptly, then so does the indexing
    expression, and the index expression is not evaluated.
 -  If the evaluation completes normally, then the index expression is evaluated.
@@ -2256,7 +2473,7 @@ In the code above, the type of *y* is ``string | undefined``, and the value of
 
 An indexing expression evaluated at runtime behaves as follows:
 
--  First, the object reference expression is evaluated.
+-  The object reference expression is evaluated first.
 -  If the evaluation completes abruptly, then so does the indexing
    expression, and the index expression is not evaluated.
 -  If the evaluation completes normally, then the index expression is
@@ -2519,27 +2736,30 @@ Any ``instanceof`` expression is of type ``boolean``.
 The expression operand of the operator ``instanceof`` must be of a reference
 type. Otherwise, a compile-time error occurs.
 
-A compile-time error occurs if type operand of the operator ``instanceof`` is
-one of the following:
+A compile-time error occurs if ``type`` operand of the operator ``instanceof``
+is one of the following:
 
-   - Type parameter (see :ref:`Generic Parameters`),
+   - Type parameter (see :ref:`Type Parameters`),
+   - Primitive type (see :ref:`Primitive Types`),
    - Union type that contains type parameter after normalization
      (see :ref:`Union Types Normalization`),
    - *Generic type* (see :ref:`Generics`)---this temporary limitation
-     is expected to be removed in the future.
+     is expected to be removed in the future (see
+     :ref:`Generic and function types peculiarities`).
 
-If the type of expression at compile time is compatible with type (see
+If the type of ``expression`` at compile time is compatible with ``type`` (see
 :ref:`Type Compatibility`), then the result of the ``instanceof`` expression
 is ``true``.
 
 Otherwise, an ``instanceof`` expression checks during program execution
-whether the type of the value the expression successfully evaluates to is
-compatible with type (see :ref:`Type Compatibility`).
+whether the type of the value the ``expression`` successfully evaluates to is
+compatible with ``type`` (see :ref:`Type Compatibility`). 
 If so, then the result of the ``instanceof`` expression is ``true``.
 Otherwise, the result is ``false``.
-If the expression evaluation causes exception or error, then execution
-control is transferred to a proper ``catch`` section or runtime system,
-and the result of the ``instanceof`` expression cannot be determined.
+
+If the expression evaluation causes exception or error, then
+execution control is transferred to a proper ``catch`` section or runtime
+system, and the result of the ``instanceof`` expression cannot be determined.
 
 .. index::
    instanceof expression
@@ -2567,7 +2787,7 @@ and the result of the ``instanceof`` expression cannot be determined.
 *********************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 .. code-block:: abnf
 
@@ -2637,7 +2857,7 @@ evaluation:
 +---------------------------------+-------------------------+-----------------------------+
 | ``T|null``, when ``T`` is a     | "object"                | .. code-block:: typescript  |
 | class, interface or array       |                         |                             |
-|                                 |                         |  let x: Object |= null      |
+|                                 |                         |  let x: Object | null       |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
 | ``enum``                        | "number"                | .. code-block:: typescript  |
@@ -3514,14 +3734,14 @@ arithmetic:
    -  Negative if the operands have different signs.
 
 
--  The division results in a signed infinity (the sign is determined by
+-  Division produces a signed infinity (the sign is determined by
    the rule above) if:
 
    -  Infinity is divided by a finite value; and
    -  A nonzero finite value is divided by zero.
 
 
--  The division results in a signed zero (the sign is determined by the
+-  Division produces a signed zero (the sign is determined by the
    rule above) if:
 
    -  A finite value is divided by infinity; and
@@ -3852,7 +4072,7 @@ IEEE 754 arithmetic:
 -  The result is ``NaN`` if:
 
    -  Either operand is ``NaN``; or
-   -  The operands are two infinities of opposite sign.
+   -  The operands are two infinities of the opposite signs.
 
 
 -  The sum of two infinities of the same sign is the infinity of that sign.
@@ -3862,8 +4082,9 @@ IEEE 754 arithmetic:
 -  The sum of zero and a nonzero finite value is equal to the nonzero operand.
 -  The sum of two nonzero finite values of the same magnitude and opposite sign
    is positive zero.
--  If infinity, zero, or ``NaN`` are not involved, and the operands have the same
-   sign or different magnitudes, then the exact sum is computed mathematically.
+-  If infinity, zero, or ``NaN`` are not involved, and the operands have the
+   same sign or different magnitudes, then the exact sum is computed
+   mathematically.
 
 
 If the magnitude of the sum is too large to represent, then the operation
@@ -4064,22 +4285,22 @@ relational expression depends on the types of operands. It is a compile-time
 error if at least one type of operands is different from types described below.
 
 .. index::
-   numerical comparison operator
+   numerical relational operator
    relational operator
    relational expression
    boolean
 
 |
 
-.. _Numerical Comparison Operators:
+.. _Numerical Relational Operators:
 
-Numerical Comparison Operators
+Numerical Relational Operators
 ==============================
 
 .. meta:
     frontend_status: Done
 
-The type of each operand in a numerical comparison operator must be convertible
+The type of each operand in a numerical relational operator must be convertible
 (see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a compile-time
 error occurs.
 
@@ -4093,7 +4314,7 @@ performed on each operand as follows:
    ``float`` or ``double``.
 
 .. index::
-   numerical comparison operator
+   numerical relational operator
    operand
    conversion
    compile-time error
@@ -4153,9 +4374,9 @@ or floating-point operands other than ``NaN``:
    NaN
    operator
 
-.. _String Comparison Operators:
+.. _String Relational Operators:
 
-String Comparison Operators
+String Relational Operators
 ===========================
 
 .. meta:
@@ -4163,16 +4384,16 @@ String Comparison Operators
 
 Results of all string comparisons are defined as follows:
 
--  The operator '``<``' delivers ``true`` if the string value of the left-hand
+-  Operator '``<``' delivers ``true`` if the string value of the left-hand
    operand is lexicographically less than the string value of the right-hand
    operand, or ``false`` otherwise.
--  The operator '``<=``' delivers ``true`` if the string value of the left-hand
+-  Operator '``<=``' delivers ``true`` if the string value of the left-hand
    operand is lexicographically less than or equal to the string value of the
    right-hand operand, or ``false`` otherwise.
--  The operator '``>``' delivers ``true`` if the string value of the left-hand
+-  Operator '``>``' delivers ``true`` if the string value of the left-hand
    operand is lexicographically greater than the string value of the right-hand
    operand, or ``false`` otherwise.
--  The operator '``>=``' delivers ``true`` if the string value of the left-hand
+-  Operator '``>=``' delivers ``true`` if the string value of the left-hand
    operand is lexicographically greater than or equal to the string value of the
    right-hand operand, or ``false`` otherwise.
 
@@ -4181,41 +4402,56 @@ Results of all string comparisons are defined as follows:
    string comparison
    string value
 
-.. _Boolean Comparison Operators:
+.. _Bigint Relational Operators:
 
-Boolean Comparison Operators
+Bigint Relational Operators
+===========================
+
+.. meta:
+    frontend_status: Done
+
+The type of each operand in a bigint relational operator must be ``bigint``. 
+Otherwise, a compile-time error occurs.
+
+All bigint relational operators compare bigint values.
+
+.. index::
+   bigint comparison
+
+.. _Boolean Relational Operators:
+
+Boolean Relational Operators
 ============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 Results of all boolean comparisons are defined as follows:
 
--  The operator '``<``' delivers ``true`` if the left-hand operand is ``false``
+-  Operator '``<``' delivers ``true`` if the left-hand operand is ``false``
    and the right-hand operand is true, or ``false`` otherwise.
--  The operator '``<=``' delivers ``true`` if the left-hand operand is ``false``
+-  Operator '``<=``' delivers ``true`` if the left-hand operand is ``false``
    and the right-hand operand is ``true`` or ``false``, or ``false`` otherwise.
--  The operator '``>``' delivers ``true`` if the left-hand operand is ``true``
+-  Operator '``>``' delivers ``true`` if the left-hand operand is ``true``
    and the right-hand operand is ``false``, or ``false`` otherwise.
--  The operator '``>=``' delivers ``true`` if the left-hand operand is ``true``
+-  Operator '``>=``' delivers ``true`` if the left-hand operand is ``true``
    and the right-hand operand is ``false`` or ``true``, or ``false`` otherwise.
 
 
-.. _Enumeration Comparison Operators:
+.. _Enumeration Relational Operators:
 
-Enumeration Comparison Operators
+Enumeration Relational Operators
 ================================
 
 .. meta:
     frontend_status: Done
 
 If both operands are of the same Enumeration type (see :ref:`Enumerations`),
-then :ref:`Numerical Comparison Operators` or :ref:`String Comparison Operators`
+then :ref:`Numerical Relational Operators` or :ref:`String Relational Operators`
 are used depending on the kind of enumeration constant value
 ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 
 Otherwise, a compile-time error occurs.
-
 
 |
 
@@ -4240,9 +4476,6 @@ Any equality expression is of type ``boolean``. The result of operators '``==``'
 and '``===``' is ``true`` if operands are *equal* (see below). Otherwise, the
 result is ``false``.
 
-In all cases, ``a != b`` produces the same result as ``!(a == b)``, and
-``a !== b`` produces the same result as ``!(a === b)``.
-
 Equality operators group left-to-right.
 Equality operators are commutative if operand expressions cause no side
 effects.
@@ -4251,37 +4484,52 @@ Equality operators are similar to relational operators, except for their
 lower precedence (:math:`a < b==c < d` is ``true`` if both :math:`a < b`
 and :math:`c < d` have the same ``truth`` value).
 
-The choice of *value equality* or *reference equality* depends on the
-the types of operands used:
+In all cases, ``a != b`` produces the same result as ``!(a == b)``, and
+``a !== b`` produces the same result as ``!(a === b)``.
+
+The result of operators '``==``' and '``===``' is the same in all cases,
+except the comparison of ``null`` and ``undefined`` values 
+(see :ref:`Reference Equality`).
+
+Depending on the the types of operands used, one of the following 
+variants of equality evaluation is used:
 
 -  *Value equality* is applied to entities of primitive types
    (see :ref:`Value Types`), their boxed versions (see :ref:`Boxed Types`),
-   ``strings`` (see :ref:`Type string`), and ``BigInt`` (see :ref:`BigInt Type`).
--  *Reference equality* is applied to entities of reference types
-   (see :ref:`Reference Types`) except ``string`` and ``BigInt``.
+   type ``string`` (see :ref:`Type string`), 
+   type ``bigint`` (see :ref:`BigInt Type`) 
+   and enumeration types (see :ref:`Enumerations`).
+-  *Reference Equality based on actual (dynamic) type* is applied to values of 
+   type ``Object`` (:ref:`Object Class Type`), 
+   values of union types (:ref:`Union Types`),
+   and type parameters (:ref:`Type Parameters`).
+-  *Reference equality* is applied to entities of all reference types
+   (see :ref:`Reference Types`) that are not mentioned in the 
+   previous items.
 
 Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
-- :ref:`Value Equality for Numeric Types` if operands are of numeric types,
-  or boxed version of numeric types;
+- :ref:`Numerical Equality Operators` if operands are of numeric types,
+  or type ``char`` or boxed version of numeric types;
 
-- :ref:`Value Equality for Booleans` if both operands are of type ``boolean``
+- :ref:`String Equality Operators` if both operands are of type ``string``;
+
+- :ref:`Bigint Equality Operators` if both operands are of type ``bigint``;
+
+- :ref:`Boolean Equality Operators` if both operands are of type ``boolean``
   or ``Boolean``;
-
-- :ref:`Value Equality for Characters` if both operands are of type ``char``
-  or ``Char``;
-
-- :ref:`Value Equality for Strings` if both operands are of type ``string``;
  
-- :ref:`Equality with null or undefined` if one operand is ``null`` or
-  ``undefined``;
- 
-- :ref:`Reference Equality` if both operands are of compatible reference types;
+- :ref:`Enumeration Equality Operators` if both operands are of enumeration type;
 
-- If both operands are of the same Enumeration type (see :ref:`Enumerations`),
-  then :ref:`Value Equality for Numeric Types` or :ref:`Value Equality for Strings`
-  are used depending on the kind of enumeration constant values
-  (:ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`);
+- :ref:`Reference Equality based on actual type` if at least one operand is of ``Object`` type
+  or union type or is a type parameter;
+
+- :ref:`Reference Equality` if both operands are of compatible reference types
+  except types ``string``, ``bigint``, ``Object``, union types and type parameters;
+
+- :ref:`Extended Equality with null or undefined` if one operand is ``null`` or
+  ``undefined``.
+
 
 - Otherwise, a compile-time error occurs.
 
@@ -4299,17 +4547,21 @@ Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
    comparison
    operand
 
-.. _Value Equality for Numeric Types:
+.. _Numerical Equality Operators:
 
-Value Equality for Numeric Types
-================================
+Numerical Equality Operators
+============================
 
 .. meta:
     frontend_status: Done
 
-The numeric types conversion (see :ref:`Primitive Types Conversions`)
-is performed on the operands of a value equality operator if
-each operand is of a numeric type or the boxed version of a numeric type.
+*Value equality* is used for operands of numeric types:
+``number``, ``byte``, ``short``, ``int``, ``long``, ``float``, ``double`` 
+and ``char`` type and their correspondong boxed types.
+
+The type of each operand in a numerical equality operator must be convertible
+(see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a compile-time
+error occurs.
 
 If the converted type of the operands is ``int`` or ``long``, then an
 integer equality test is performed.
@@ -4335,11 +4587,11 @@ following IEEE 754 standard rules:
 -  The result of '``==``' is ``false`` but the result of '``!=``' is
    ``true`` if either operand is ``NaN``.
 
-   The test :math:`x != x` is ``true`` only if *x* is ``NaN``.
+   The test ``x != x`` is ``true`` only if *x* is ``NaN``.
 
 -  Positive zero equals negative zero.
 
--  The equality operators consider two distinct floating-point values unequal
+-  Equality operators consider two distinct floating-point values unequal
    in any other situation.
 
    For example, if one value represents positive infinity, and the other
@@ -4357,7 +4609,7 @@ or floating-point operands other than ``NaN``:
    operand, then the operator '``!=``' produces the value ``true``.
    Otherwise, the result is ``false``.
 
-The following example illustrates *value equality*:
+The following example illustrates *numerical equality*:
 
 .. code-block:: typescript
    :linenos:
@@ -4375,25 +4627,23 @@ The following example illustrates *value equality*:
 
 .. index::
    NaN
-   equality operator
+   value equality
    floating-point value
    floating-point operand
    positive infinity
    negative infinity
-   comparison
-   operand
-   operator
 
 |
 
-.. _Value Equality for Strings:
+.. _String Equality Operators:
 
-Value Equality for Strings
-==========================
+String Equality Operators
+=========================
 
 .. meta:
     frontend_status: Done
 
+*Value equality* is used for operands of ``string`` type.
 Two strings are equal if they represent the same sequence of characters:
 
 .. code-block:: typescript
@@ -4407,20 +4657,43 @@ Two strings are equal if they represent the same sequence of characters:
    }
    foo("hello") // prints "true"
 
+.. index::
+   value equality
+   
 |
 
-.. _Value Equality for Booleans:
+.. _Bigint Equality Operators:
 
-Value Equality for Booleans
-===========================
+Bigint Equality Operators
+==========================
+
+.. meta:
+    frontend_status: None
+
+*Value equality* is used for operands of ``bigint`` type.
+Two bigibnts are equal if they have the same value:
+
+.. code-block:: typescript
+   :linenos:
+
+   let x = 2n
+   x == 2n // true
+
+.. index::
+   value equality
+
+|
+
+.. _Boolean Equality Operators:
+
+Boolean Equality Operators
+==========================
 
 .. meta:
     frontend_status: Done
 
-The operation is a *boolean equality* if each operand is of type ``boolean`` or
+*Value equality* is used for operands of `of type ``boolean`` or
 ``Boolean``.
-
-Boolean equality operators are associative.
 
 If an operand is of type ``Boolean``, then the unboxing conversion must be
 performed (see :ref:`Primitive Types Conversions`).
@@ -4433,68 +4706,255 @@ If both operands are either ``true`` or ``false``, then the result of
 '``!=``' is ``false``. Otherwise, the result is ``true``.
 
 .. index::
-   value equality operator
+   value equality
    type boolean
    type Boolean
    boolean equality
    value equality operator
-   associativity
    operand
    unboxing conversion
-   numeric type
-   predefined numeric types conversion
 
 |
 
-.. _Value Equality for Characters:
+.. _Enumeration Equality Operators:
 
-Value Equality for Characters
-=============================
+Enumeration Equality Operators
+==============================
 
 .. meta:
     frontend_status: Done
 
-The operation is a *character equality* if each operand is of type ``char``
-or ``Char``.
+If both operands are of the same Enumeration type (see :ref:`Enumerations`),
+then :ref:`Numerical Equality Operators` or :ref:`String Equality Operators`
+are used depending on the kind of enumeration constant value
+( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 
-Character equality operators are associative.
-
-If an operand is of type ``Char``, then the unboxing conversion must be
-performed (see :ref:`Primitive Types Conversions`).
-
-If both operands (after the unboxing conversion is performed if required)
-contain the same character code, then the result of '``==``' is ``true``.
-Otherwise, the result is ``false``.
-
-If both operands contain different character codes, then the result
-of '``!=``' is ``false``. Otherwise, the result is ``true``.
-
-.. index::
-   value equality operator
-   equality operator
-   character type
-   operation
-   character equality
-   associativity
-   unboxing conversion
-   predefined numeric types conversion
-   numeric types
-   character code
+Otherwise, a compile-time error occurs.
 
 |
 
-.. _Equality with null or undefined:
+.. _Reference Equality Based on Actual Type:
 
-Equality with ``null`` or ``undefined``
+Reference Equality Based on Actual Type
 =======================================
 
 .. meta:
     frontend_status: Done
 
+If an operand of an equality operator is of ``Object`` type or an union type or
+of a type parameter, the evaluation of the operator
+is based on the actual type of this operand. 
+If another operand is of other types, its static type is used for evaluation.
+
+If the actual types of objects are compatible, the corresponding evaluation of
+equality operator is used, otherwise, the result of ``==`` and ``===``
+operators is ``false``.
+
+.. _Object Type Equality Operators:
+
+Object Type Equality Operators
+------------------------------
+
+.. meta:
+    frontend_status: Done
+
+The value of ``Object`` type can be compared to a value of any reference type.
+
+The following example illustrates equality with a value of ``Object`` type:
+
+.. code-block:: typescript
+   :linenos:
+
+	function equToString(a: Object, b: string): boolean {
+        return a == b
+	}
+
+    equToString("aa", "aa") // true, string equality
+    equToString(1,  "aa") // false, not compatible types
+
+    function equ(a: Object, b: Object): boolean {
+        return a == b
+    }
+    
+    equ(1, 1) // true, numerical equality
+    equ(1, 2) // false, numerical equality
+    equ(1, new Number(1)) // true, numerical equality
+    
+    equ("aa", "aa") // true, string equality
+    equ(1, "aa") // false, not compatible types
+
+
+**Note**, that actual type of ``Object`` value cannot be of
+
+- an union type, as only the current value of an union type variable can be assigned
+  to the ``Object`` variable;
+
+- a type parameter, if it does not have type constraint
+  (see :ref:`Type Parameter Constraint`), see example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function check(a: Object) {}
+
+    class G<A, B extends Number> {
+        foo(x: A, y: B) {
+            check(x) // compile-type error, A is not assignable to Object 
+            check(y) // ok, B is assignable to Object (as it is, at least, Number)
+        }
+    }
+
+|
+
+.. _Union Equality Operators:
+
+Union Equality Operators
+------------------------
+
+Assume that one operand is of type *T*:sub:`1` and other is of type *T*:sub:`2`
+and at least one of *T*:sub:`1` and *T*:sub:`2` is a union type. A compile-time
+error occurs if there is no overlap between *T*:sub:`1` and *T*:sub:`2`,
+meaning that there is no value that belongs to both *T*:sub:`1` and
+*T*:sub:`2`. Note, that any union type has overlap with value of ``Object`` type.
+
+The following example illustrates equality with values of two union types:
+
+.. code-block:: typescript
+   :linenos:
+
+    function f1(x: number | string, y: boolean | null): boolean {
+        return x == y // compile-time error, types have no overlap
+    }
+
+    function f2(x: number | string, y: boolean | "abc"): boolean {
+        return x == y // ok, types have overlap - value "abc"
+    }
+
+
+If the actual types of values are compatible, the corresponding evaluation of
+equality operator is used, otherwise, the result of ``==`` and ``===``
+operators is ``false``:
+
+.. code-block:: typescript
+   :linenos:
+
+    function equ(x: number | string, y: string): boolean {
+        return x == y
+    }
+
+    console.log(equ("aa", "aa")) // string equality: prints true
+    console.log(equ("ab", "aa")) // string equality: prints false
+    console.log(equ(1, "aa")) // different types: prints false
+
+|
+
+.. _Type Parameter Equality Operators:
+
+Type Parameter Equality Operators
+---------------------------------
+
+.. meta:
+    frontend_status: Done
+
+If one operand is of a type parameter,
+for the second operand can be of any reference type,
+inclduing a type parameter.
+
+If the actual types of objects are compatible, the corresponding evaluation of
+equality operator is used, otherwise, the result of ``==`` and ``===``
+operators is ``false``:
+
+.. code-block:: typescript
+   :linenos:
+
+    function equ<A>(x: A, y: A): boolean {
+        return x == y
+    }
+
+    console.log(equ<string>("aa", "aa")) // string equality: prints true
+    console.log(equ<number>(1, 2)) // numerical equality: prints false
+
+|
+
+.. _Reference Equality:
+
+Reference Equality
+==================
+
+.. meta:
+    frontend_status: Partly
+    todo: adapt latest specification changes
+
+The reference equality compares operands of two reference types
+except types string, bigint, Object, union types and type parameters. 
+See also :ref:`Extended Equality with null or undefined`
+for extended semantics.
+
+A compile-time error occurs if:
+
+-  Any operand is not of a reference type.
+
+-  There is no implicit conversion (see :ref:`Implicit Conversions`) that
+   can convert the type of either operand to the type of the other.
+
+The result of '``==``' or '``===``' is ``true`` if both operand values:
+
+-  Are ``null``;
+-  Are ``undefined``; or
+-  Refer to the same object, array, or function.
+
+For the '``==``' operator the result is additionally ``true`` if one operand value
+is ``null`` and other is ``undefined``.
+
+Otherwise, the result is ``false``.
+
+.. index::
+   reference equality
+   reference type operand
+   entity
+   class
+   function
+   compile-time error
+   reference type
+
+This semantics is illustrated by the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+   class X {}
+   new X() == new X() // false, two different object of class X
+   new X() === new X() // false, the same
+   let x1 = new X()
+   let x2 = x1
+   x1 == x2 // true, as x1 and x2 refer to the same object
+   x1 === x2 // true, the same
+
+   new Number(5) === new Number(5) // true, value equality is used
+   new Number(5) == new Number(6) // false, value equality is used
+
+   null == undefined // true
+   null === undefined // false
+
+|
+
+.. _Extended Equality with null or undefined:
+
+Extended Equality with ``null`` or ``undefined``
+================================================
+
+.. meta:
+    frontend_status: None
+    todo: adapt latest specification changes
+
+|LANG| provides extended semantics for equality with ``null`` and ``undefined``
+to ensure better alignment with TypeScript.
+
 Any entity can be compared to ``null`` by using the operators ``==`` and ``!=``.
 This comparison can return ``true`` only for the entities of *nullable* types
-if they actually have the ``null`` value during the program execution. It must
-be known during the compilation if other kinds of tests return ``false``.
+if they actually have the ``null`` value during the program execution. 
+In all other cases the comparison with ``null`` returns ``false`` and this is 
+known in compile-time.
 
 Similarly, a comparison to ``undefined`` produces ``false`` unless the variable
 being compared is of type ``undefined``, or of a union type that has ``undefined``
@@ -4533,61 +4993,6 @@ The following comparison is evaluated at runtime:
     }
 
 |
-
-.. _Reference Equality:
-
-Reference Equality
-==================
-
-.. meta:
-    frontend_status: Partly
-    todo: adapt latest specification changes
-
-The reference equality compares two reference type operands.
-
-A compile-time error occurs if:
-
--  Any operand is not of a reference type.
-
--  There is no implicit conversion (see :ref:`Implicit Conversions`) that
-   can convert the type of either operand to the type of the other.
-
-The result of '``==``' or '``===``' is ``true`` if both operand values:
-
--  Are ``null``;
--  Are ``undefined``; or
--  Refer to the same object, array, or function.
-
-Otherwise, the result is ``false``.
-
-.. index::
-   reference equality
-   reference type operand
-   entity
-   class
-   function
-   compile-time error
-   reference type
-
-This semantics is illustrated by the following example:
-
-.. code-block:: typescript
-   :linenos:
-
-   class X {}
-   new X() == new X() // false, two different object of class X
-   new X() === new X() // false, the same
-   let x1 = new X()
-   let x2 = x1
-   x1 == x2 // true, as x1 and x2 refer to the same object
-   x1 === x2 // true, the same
-
-   new Number(5) === new Number(5) // true, value equality is used
-
-   new Number(5) == new Number(5) // true, value equality is used
-
-|
-
 
 .. _Bitwise and Logical Expressions:
 
@@ -4886,11 +5291,11 @@ the value of *b* to *a*).
 The result of the first operand in an assignment operator (represented by
 expression1) must be one of the following:
 
--  A named variable, such as a local variable, or a field of the current
+-  Named variable, such as a local variable, or a field of the current
    object or class;
--  A computed variable resultant from a field access (see
+-  Computed variable resultant from a field access (see
    :ref:`Field Access Expression`); or
--  An array or record component access (see :ref:`Indexing Expressions`).
+-  Array or record component access (see :ref:`Indexing Expressions`).
 
 .. index::
    assignment
@@ -4937,7 +5342,7 @@ Simple Assignment Operator
 
 A compile-time error occurs if the type of the right-hand operand
 (*expression2*) is not compatible (see :ref:`Type Compatibility`) with
-the type of the variable (see :ref:`Generic Parameters`). Otherwise,
+the type of the variable (see :ref:`Type Parameters`). Otherwise,
 the expression is evaluated at runtime in one of the following ways:
 
 1. If the left-hand operand *expression1* is a field access expression
@@ -4946,9 +5351,9 @@ the expression is evaluated at runtime in one of the following ways:
 
    #. *expression1* *e* is evaluated: if the evaluation of *e*
       completes abruptly, then so does the assignment expression.
-   #. The right-hand operand *expression2* is evaluated: if the evaluation
+   #. Right-hand operand *expression2* is evaluated: if the evaluation
       completes abruptly, then so does the assignment expression.
-   #. The value of the right-hand operand as computed above is assigned
+   #. Value of the right-hand operand as computed above is assigned
       to the variable denoted by *e.f*.
 
 .. index::
@@ -4968,7 +5373,7 @@ the expression is evaluated at runtime in one of the following ways:
    :ref:`Array Indexing Expression`), possibly enclosed in a pair of
    parentheses, then:
 
-   #. The array reference subexpression of the left-hand operand is evaluated.
+   #. Array reference subexpression of the left-hand operand is evaluated.
       If this evaluation completes abruptly, then so does the assignment
       expression. In that case, the right-hand operand and the index
       subexpression are not evaluated, and the assignment does not occur.
@@ -5047,7 +5452,7 @@ the expression is evaluated at runtime in one of the following ways:
    :ref:`Record Indexing Expression`), possibly enclosed in a pair of
    parentheses, then:
 
-   #. The object reference subexpression of the left-hand operand is evaluated.
+   #. Object reference subexpression of the left-hand operand is evaluated.
       If this evaluation completes abruptly, then so does the assignment
       expression.
       In that case, the right-hand operand and the index subexpression are not
@@ -5082,7 +5487,7 @@ the expression is evaluated at runtime in one of the following ways:
 
 If none of the above is true, then the following three steps are required:
 
-#. The left-hand operand is evaluated to produce a variable. If the
+#. Left-hand operand is evaluated to produce a variable. If the
    evaluation completes abruptly, then so does the assignment expression.
    In that case, the right-hand operand is not evaluated, and the assignment
    does not occur.
@@ -5163,7 +5568,7 @@ of the following ways:
 2. If the left-hand operand expression is an array access expression (see
    :ref:`Array Indexing Expression`), then:
 
-   -  The array reference subexpression of the left-hand operand is
+   -  Array reference subexpression of the left-hand operand is
       evaluated. If the evaluation completes abruptly, then so does
       the assignment expression.
       In that case, the right-hand operand and the index subexpression
@@ -5337,9 +5742,9 @@ conditional expression.
 The following steps are performed as the evaluation of a conditional expression
 occurs at runtime:
 
-#. The first operand expression of a conditional expression is
-   evaluated. The unboxing conversion is performed on the result if
-   necessary. If the unboxing conversion fails, then so does the evaluation
+#. The operand expression of a conditional expression is evaluated first.
+   The unboxing conversion is performed on the result if necessary.
+   If the unboxing conversion fails, then so does the evaluation
    of the conditional expression.
 
 #. If the value of the first operand is ``true``, then the second operand
@@ -5792,14 +6197,18 @@ Constant Expressions
 .. meta:
     frontend_status: Done
 
+*Constant expressions* are the expressions
+with values that can be evaluated at compile time.
+
 .. code-block:: abnf
 
     constantExpression:
         expression
         ;
 
-A *constant expression* is an expression that denotes a value of a primitive
-type, or of type ``string`` that completes normally while being composed only
+A *constant expression* is an expression of a predefined value type
+(:ref:`Predefined Types`), 
+or of type ``string`` that completes normally while being composed only
 of the following:
 
 -  Literals of a primitive type, and literals of type ``string`` (see
@@ -5833,10 +6242,7 @@ of the following:
 -  Parenthesized expressions (see :ref:`Parenthesized Expression`) that contain
    constant expressions;
 
--  Simple names that refer to constant variables;
-
--  Qualified names that have the form ``typeReference'.'identifier``, and refer
-   to constant variables.
+-  Simple names or qualified names that refer to constant variables with compile-time expressions as initializers.
 
 .. index::
    constant expression

@@ -282,15 +282,15 @@ keywords*) but are valid identifiers elsewhere:
 +-----------------+--------------------+-------------------+-------------------+
 |                 |                    |                   |                   |
 +=================+====================+===================+===================+
-|    ``catch``    |    ``get``         |    ``out``        |    ``throws``     |
+|    ``catch``    |    ``get``         |    ``of``         |    ``struct``     |
 +-----------------+--------------------+-------------------+-------------------+
-|    ``declare``  |    ``in``          |    ``readonly``   |    ``type``       |
+|    ``declare``  |    ``in``          |    ``out``        |    ``throws``     |
 +-----------------+--------------------+-------------------+-------------------+
-|    ``default``  |   ``instanceof``   |    ``rethrows``   |    ``typeof``     |
+|    ``default``  |   ``instanceof``   |    ``readonly``   |    ``type``       |
 +-----------------+--------------------+-------------------+-------------------+
-|    ``finally``  |    ``keyof``       |    ``set``        |                   |
+|    ``finally``  |    ``keyof``       |    ``rethrows``   |    ``typeof``     |
 +-----------------+--------------------+-------------------+-------------------+
-|    ``from``     |    ``of``          |    ``struct``     |                   |
+|    ``from``     |    ``namespace``   |    ``set``        |                   |
 +-----------------+--------------------+-------------------+-------------------+
 
 
@@ -588,7 +588,7 @@ A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
 
 .. code-block:: abnf
 
-    BigIntLiteral:
+    BigIntLiteral: 
       '0n'
       | [1-9] ('_'? [0-9])* 'n'
       ;
@@ -599,6 +599,8 @@ It is presented by the examples below:
 
     153n // BigInt literal
     1_153n // BigInt literal
+    -153n // negative BigInt literal
+
 
 The underscore character '``_``' used between successive digits can be used to
 denote a ``BigInt`` literal and improve readability. Underscore characters in

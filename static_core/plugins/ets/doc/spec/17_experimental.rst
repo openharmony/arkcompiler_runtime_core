@@ -141,10 +141,10 @@ and makes them parts of an independent compilation unit.
 
 The *export* and *import* features are used to organize communication between
 *packages*. An entity exported from one package becomes known to---and
-accessible in---another package which imports that feature. Various
-options are provided to simplify export/import, e.g., by defining
-non-exported, i.e., ``internal`` declarations that are not accessible from
-the outside of the package.
+accessible (see :ref:`Accessible`) in---another package which imports that
+feature. Various options are provided to simplify export/import, e.g., by
+defining non-exported, i.e., ``internal`` declarations that are not accessible
+(see :ref:`Accessible`) from the outside of the package.
 
 In addition, |LANG| supports the *package* initialization semantics that
 makes a *package* even more independent from the environment.
@@ -268,10 +268,9 @@ Character Type and Operations
 |LANG| provides a number of operators to act on character values as discussed
 below.
 
-- Character equality operators '``==``' and '``!=``' (see :ref:`Value Equality for Characters`);
-- All remaining operators are identical to the integer operators (see
-  :ref:`Integer Types and Operations`) for they handle character values as
-  integers of type *int* (see :ref:`Widening Primitive Conversions`).
+All character operators are identical to the integer operators (see
+:ref:`Integer Types and Operations`) for they handle character values as
+integers of type *int* (see :ref:`Widening Primitive Conversions`).
 
 The class ``Char`` provides constructors, methods, and constants that are
 parts of the |LANG| standard library (see :ref:`Standard Library`).
@@ -352,9 +351,10 @@ follows:
 
 
 A :index:`compile-time error` occurs if ``typeReference`` refers to a class
-that does not contain an accessible parameterless constructor, or constructor
-with all parameters of the second form of optional parameters (see
-:ref:`Optional Parameters`), or if ``typeReference`` has no a default value:
+that does not contain an accessible (see :ref:`Accessible`) parameterless
+constructor, or constructor with all parameters of the second form of optional
+parameters (see :ref:`Optional Parameters`), or if ``typeReference`` has no a
+default value:
 
 .. code-block-meta:
    expect-cte:
@@ -564,17 +564,15 @@ Iterable Types
 **************
 
 .. meta:
-    frontend_status: Partly
-    todo: Implement [Symbol.iterator]() alias for $_iterator()
-    todo: fix segfault on the example in the spec
+    frontend_status: Done
 
 A class or an interface can be made *iterable*, meaning that their instances
 can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
 A type is *iterable* if it declares a parameterless function with name
-``$_iterator`` and signature ``(): ITER``, where ``ITER`` is a type that
+``$_iterator`` and signature ``(): ITER``, where ``ITER`` is a class that
 implements ``Iterator`` interface defined in the standard library (see
-:ref:`Standard Library`).
+:ref:`Standard Library`) or interface which extends this interface.
 
 The example below defines *iterable* class *C*:
 
@@ -645,6 +643,153 @@ It can be removed in the future versions of the language.
 
 |
 
+.. _Callable Types:
+
+Callable Types
+**************
+
+.. meta:
+    frontend_status: Done
+
+A type is *callable* if the name of the type can be used in a call expression.
+A call expression that uses the name of a type is called a *type call
+expression*. Only class and struct types can be callable. To make a type
+callable, a static method with the name ``invoke`` or ``instantiate`` must be
+defined or inherited:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static invoke() { console.log("invoked") }
+    }
+    C() // prints: invoked
+    C.invoke() // also prints: invoked
+    
+In the above example, ``C()`` is a *type call expression*. It is the short
+form of the normal method call ``C.invoke()``. Using an explicit call is always
+valid for the methods ``invoke`` and ``instantiate``.
+
+**Note**: Only a constructor---not the methods ``invoke`` or ``instantiate``---is
+called in a *new expression*:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static invoke() { console.log("invoked") }
+        constructor() { console.log("constructed") }
+    }
+    let x = new C() // constructor is called
+
+The methods ``invoke`` and ``instantiate`` are similar but have differences as
+discussed below.
+
+A :index:`compile-time error` occurs if a callable type contains both the
+``invoke`` and ``instantiate`` methods.
+
+|
+
+.. _Callable Types with Invoke Method:
+
+Callable Types with Invoke Method
+=================================
+
+.. meta:
+    frontend_status: Done
+
+The method ``invoke`` can have an arbitrary signature. It can be used in a
+*type call expression* in either case. If the signature has parameters, then
+the call must contain corresponding arguments.
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Add {
+        static invoke(a: number, b: number): number { 
+            return a + b
+        }
+    }
+    console.log(Add(2, 2)) // prints: 4
+    
+|
+
+.. _Callable Types with Instantiate Method:
+
+Callable Types with Instantiate Method
+======================================
+
+.. meta:
+    frontend_status: Partly
+    todo: es2panda segfaults on the first example
+
+The method ``instantiate`` can have an arbitrary signature by itself.
+If it is to be used in a *type call expression*, then its first parameter
+must be a ``factory`` (i.e., it must be a *parameterless function type
+returning some class or struct type*).
+The method can have or not have other parameters, and those parameters can
+be arbitrary.
+
+In a *type call expression*, the argument corresponding to the ``factory``
+parameter is passed implicitly:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static instantiate(factory: () => C): C { 
+            return factory()
+        }
+    }
+    let x = C() // factory is passed implicitly
+    
+    // Explicit call of 'instantiate' requires explicit 'factory':
+    let y = C.instantiate(() => { return new C()})
+
+If the method ``instantiate`` has additional parameters, then the call must
+contain corresponding arguments:
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        name = ""
+        static instantiate(factory: () => C, name: string): C { 
+            let x = factory()
+            x.name = name
+            return x
+        }
+    }
+    let x = C("Bob") // factory is passed implicitly
+
+A :index:`compile-time error` occurs in a *type call expression* with type *T*,
+if:
+
+- *T* has neither method ``invoke`` nor  method ``instantiate``; or
+- *T* has the method ``instantiate`` but its first parameter is not
+  a ``factory``.
+
+.. code-block-meta:
+    expect-cte
+
+.. code-block:: typescript
+   :linenos:
+
+    class C {
+        static instantiate(factory: string): C { 
+            return factory()
+        }
+    }
+    let x = C() // compile-time error, wrong 'instantiate' 1st parameter
+
+|
+
 .. _Statements Experimental:
 
 Statements
@@ -701,10 +846,10 @@ scope.
 
 A ``catch`` clause has two parts:
 
--  An exception parameter that provides access to the object associated
+-  Exception parameter that provides access to the object associated
    with the exception or the error occurred; and
 
--  A block of code that is to handle the situation.
+-  Block of code that is to handle the situation.
 
 .. index::
    exception
@@ -727,10 +872,10 @@ handled by any previous clause. The type of that parameter is of the class
 
 A :index:`compile-time error` occurs if:
 
--  The default ``catch`` clause is not the last ``catch`` clause in a
+-  Default ``catch`` clause is not the last ``catch`` clause in a
    ``try`` statement.
 
--  The type reference of an exception parameter (if any) is neither the
+-  Type reference of an exception parameter (if any) is neither the
    class ``Exception`` or ``Error``, nor a class derived from ``Exception`` or
    ``Error``.
 
@@ -751,13 +896,13 @@ A :index:`compile-time error` occurs if:
         try {
           let res = divide(a, b)
 
-          // division successful, further processing ...
+          // Division successful, further processing ...
         }
         catch (d: ZeroDivisorException) {
-          // handle zero division situation 
+          // Handle zero division situation
         }
         catch (e) {
-          // handle all other errors or exceptions 
+          // Handle all other errors or exceptions
         }
       }
 
@@ -968,7 +1113,27 @@ If two or more methods within a class have the same name, and their signatures
 are not *overload-equivalent*, then such methods are considered *overloaded*.
 
 Method overloading declarations cause no :index:`compile-time error` on their
-own.
+own except the case when there could be instantiation which will cause
+*overload-equivalent* methods in the instantiated class or interface.
+
+.. code-block:: typescript
+   :linenos:
+
+     class Template<T> {
+        foo (p: number) { ... }
+        foo (p: T) { ... }
+     }
+     let instantiation: Template<number> 
+       // Leads to two *overload-equivalent* methods
+
+     intrface ITemplate<T> {
+        foo (p: number)
+        foo (p: T)
+     }
+     function foo (instantiation: ITemplate<number>) { ... }
+       // Leads to two *overload-equivalent* methods
+
+
 
 If the signatures of two or more methods with the same name are not
 *overload-equivalent*, then the return types of those methods, or the
@@ -1023,17 +1188,18 @@ Declaration Distinguishable by Signatures
 .. meta:
     frontend_status: Done
 
-Declarations with the same name are distinguishable by signatures if:
+Declarations with the same name are distinguishable by signatures if such
+declarations are one of the following:
 
--  They are functions with the same name, but their signatures are not
+-  Functions with the same name and signatures that are not
    *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and 
    :ref:`Function Overloading`).
 
--  They are methods with the same name, but their signatures are not
+-  Methods with the same name and signatures that are not
    *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`,
    :ref:`Class Method Overloading`, and :ref:`Interface Method Overloading`).
 
--  They are constructors of the same class, but their signatures are not
+-  Constructors of the same class and signatures that are not
    *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and
    :ref:`Constructor Overloading`).
 
@@ -1041,7 +1207,6 @@ Declarations with the same name are distinguishable by signatures if:
    signature
    function overloading
    overload-equivalent signature
-   interface method overloading
    class method overloading
 
 
@@ -1119,10 +1284,10 @@ written in another programming language (e.g., *C*).
 
 A :index:`compile-time error` occurs if:
 
--  A method declaration contains the keyword ``abstract`` along with the
+-  The method declaration contains the keyword ``abstract`` along with the
    keyword ``native``.
 
--  A ``native`` method has a body (see :ref:`Method Body`) that is a block
+-  The ``native`` method has a body (see :ref:`Method Body`) that is a block
    instead of a simple semicolon or empty body.
 
 .. index::
@@ -1155,15 +1320,15 @@ Final Classes
 .. meta:
     frontend_status: Done
 
-A class may be declared *final* to prevent its extension. A class declared
-*final* cannot have subclasses, and no method of a *final* class can be
+A class may be declared ``final`` to prevent its extension. A class declared
+``final`` cannot have subclasses, and no method of a ``final`` class can be
 overridden.
 
 If a class type *F* expression is declared *final*, then only a class *F*
 object can be its value.
 
 A :index:`compile-time error` occurs if the ``extends`` clause of a class
-declaration contains another class that is *final*.
+declaration contains another class that is ``final``.
 
 .. index::
    final class
@@ -1185,15 +1350,15 @@ Final Methods
 .. meta:
     frontend_status: Done
 
-A method can be declared *final* to prevent it from being overridden (see
+A method can be declared ``final`` to prevent it from being overridden (see
 :ref:`Overloading and Overriding`) in subclasses.
 
 A :index:`compile-time error` occurs if:
 
--  A method declaration contains the keyword ``abstract`` or ``static``
+-  The method declaration contains the keyword ``abstract`` or ``static``
    along with the keyword ``final``.
 
--  A method declared *final* is overridden.
+-  A method declared ``final`` is overridden.
 
 .. index::
    final method
@@ -1285,7 +1450,7 @@ A :index:`compile-time error` occurs if:
 -  The body of a ``static`` method attempts to use the keywords ``this`` or
    ``super``.
 
--  The header or body of a ``static`` method of an interface contains the
+-  The header or the body of a ``static`` method of an interface contains the
    name of any surrounding declaration’s type parameter.
 
 .. index::
@@ -1349,8 +1514,8 @@ The keyword ``this`` inside an extension function corresponds to the receiver
 object (i.e., ``typeReference`` before the dot).
 
 Class or interface referred by typeReference, and ``private`` or ``protected``
-members are not accessible within the bodies of their *extension functions*.
-Only ``public`` members can be accessed:
+members are not accessible (see :ref:`Accessible`) within the bodies of their
+*extension functions*. Only ``public`` members can be accessed:
 
 .. index::
    keyword this
@@ -1395,8 +1560,8 @@ Only ``public`` members can be accessed:
 The form of such calls depends on whether ``static`` was or was not used while
 declaring. This affects the kind of receiver to be used for the call:
 
--  A *static extension function* requires the name of type (class or interface).
--  A *non-static extension function* requires a variable (as in the examples
+-  *Static extension function* requires the name of type (class or interface).
+-  *Non-static extension function* requires a variable (as in the examples
    below).
 
 
@@ -1405,12 +1570,12 @@ declaring. This affects the kind of receiver to be used for the call:
 
       class A {
           foo () { ...
-             this.bar() // non-static extension function is called with this.
-             A.goo() // static extension function is called with class name receiver
+             this.bar() // Non-static extension function is called with this.
+             A.goo() // Static extension function is called with class name receiver
              ...
           }
       }
-      function A.bar () { ... 
+      function A.bar () { ...
          this.foo() // Method foo() is called
          A.goo() // Other static extension function is called with class name receiver
          ...
@@ -1456,7 +1621,7 @@ As illustrated by the examples below, an *extension function* can be:
       import {bar} from "a.ets" // import name 'bar'
       class A {
           foo () { ...
-             this.bar() // non-static extension function is called with this.
+             this.bar() // Non-static extension function is called with this.
              A.goo() // static extension function is called with class name receiver
              ...
           }
@@ -1712,10 +1877,10 @@ Enumeration Methods
 
 Several static methods are available to handle each enumeration type as follows:
 
--  ``values()`` returns an array of enumeration constants in the order of
+-  Method ``values()`` returns an array of enumeration constants in the order of
    declaration.
--  ``getValueOf(name: string)`` returns an enumeration constant with the given
-   name, or throws an error if no constant with such name exists.
+-  Method ``getValueOf(name: string)`` returns an enumeration constant with the
+   given name, or throws an error if no constant with such name exists.
 
 .. index::
    enumeration method
@@ -1735,10 +1900,10 @@ Several static methods are available to handle each enumeration type as follows:
 
 There is an additional method for instances of any enumeration type:
 
--  ``valueOf()`` returns an ``int`` or ``string`` value of an enumeration
+-  Method ``valueOf()`` returns an ``int`` or ``string`` value of an enumeration
    constant depending on the type of the enumeration constant.
 
--  ``getName()`` returns the name of an enumeration constant.
+-  Method ``getName()`` returns the name of an enumeration constant.
 
 .. code-block-meta:
 
@@ -2136,7 +2301,8 @@ The following expression is used to create and launch a coroutine:
       launchExpression: 'launch' expression;
 
 A :index:`compile-time error` occurs if that expression is not a *function call
-expression* (see :ref:`Function Call Expression`).
+expression* (see :ref:`Function Call Expression`) or is not a method call one
+(see :ref:`Method Call Expression`).
 
 .. code-block:: typescript
    :linenos:
@@ -2680,8 +2846,8 @@ A :index:`compile-time error` occurs if:
 
 A *package module* implicitly imports (see :ref:`Implicit Import`) all exported
 entities from the core packages of the standard library (see
-:ref:`Standard Library`). All entities from these packages are accessible as
-simple names.
+:ref:`Standard Library`). All entities from these packages are accessible (see
+:ref:`Accessible`) as simple names.
 
 A *package module* can directly access all top-level entities declared in all
 modules that constitute the package.
@@ -2711,11 +2877,12 @@ Internal Access Modifier
     todo: Implement in libpandafile, implement semantic, now it is parsed and ignored - #16088
 
 The modifier ``internal`` indicates that a class member, a constructor, or
-an interface member is accessible within its compilation unit only.
-If the compilation unit is a package (see :ref:`Packages`), then ``internal``
-members can be used in any *package module*. If the compilation unit is a
-separate module (see :ref:`Separate Modules`), then ``internal`` members can be
-used within this module.
+an interface member is accessible (see :ref:`Accessible`) within its
+compilation unit only. If the compilation unit is a package (see
+:ref:`Packages`), then ``internal`` members can be used in any
+*package module*. If the compilation unit is a separate module (see
+:ref:`Separate Modules`), then ``internal`` members can be used within this
+module.
 
 .. index::
    modifier
@@ -2790,7 +2957,7 @@ While importing functions, the following situations can occur:
 -  Different imported functions have the same name but different signatures, or
    a function (functions) of the current module and an imported function
    (functions) have the same name but different signatures. This situation is
-   *overloading*. All such functions are accessible.
+   *overloading*. All such functions are accessible (see :ref:`Accessible`).
 
 -  A function (functions) of the current module and an imported function
    (functions) have the same name and overload-equivalent signature. This
