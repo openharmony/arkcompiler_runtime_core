@@ -692,3 +692,26 @@ function testPromiseRaceRejected(): void {
         globalTest!.success();
     });
 }
+
+let promiseFixture: Promise<void>|null = null;
+
+function getPromise(): Promise<void> {
+    promiseFixture = Promise.resolve();
+    return promiseFixture!;
+}
+
+function setAndCheckPromise(p: Promise<void>): void {
+    globalTest = new Test();
+    if (promiseFixture == null) {
+        console.log("Promise is not set");
+        globalTest!.fail();
+    }
+    if (promiseFixture !== p) {
+        console.log("Expected the returned promise and the argument are the same but they differs");
+        globalTest!.fail();
+    }
+}
+
+function getTheSamePromise(p: Promise<void>): Promise<void> {
+    return p;
+}

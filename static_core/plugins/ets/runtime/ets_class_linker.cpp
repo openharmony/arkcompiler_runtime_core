@@ -97,6 +97,11 @@ EtsClass *EtsClassLinker::GetPromiseClass()
     return EtsClass::FromRuntimeClass(ext_->GetPromiseClass());
 }
 
+EtsClass *EtsClassLinker::GetPromiseRefClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetPromiseRefClass());
+}
+
 EtsClass *EtsClassLinker::GetArrayBufferClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetArrayBufferClass());

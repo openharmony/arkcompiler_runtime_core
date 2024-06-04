@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ public:
     void CreateLink(EtsObject *source, EtsObject *target) override;
 
 private:
-    void CreatePromiseLink(JSValue *jsPromise, EtsPromise *etsPromise);
+    void CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise);
 };
 }  // namespace ark::ets::interop::js
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_JS_INTEROP_JOB_QUEUE_H_

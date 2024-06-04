@@ -32,6 +32,7 @@ static constexpr std::string_view EXCEPTION                            = "Lstd/c
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
+static constexpr std::string_view PROMISE_REF                          = "Lstd/core/PromiseRef;";
 static constexpr std::string_view INTERNAL_UNDEFINED                   = "Lstd/core/__internal_undefined;";
 static constexpr std::string_view STRING                               = "Lstd/core/String;";
 static constexpr std::string_view WEAK_REF                             = "Lstd/core/WeakRef;";

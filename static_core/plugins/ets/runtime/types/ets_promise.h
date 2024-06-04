@@ -129,6 +129,17 @@ public:
         return GetLinkedPromise(EtsCoroutine::GetCurrent()) != nullptr;
     }
 
+    EtsObject *GetInteropObject(EtsCoroutine *coro)
+    {
+        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, interopObject_));
+        return EtsObject::FromCoreType(obj);
+    }
+
+    void SetInteropObject(EtsCoroutine *coro, EtsObject *o)
+    {
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, interopObject_), o->GetCoreType());
+    }
+
     EtsObject *GetLinkedPromise(EtsCoroutine *coro)
     {
         auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_));
@@ -234,9 +245,10 @@ private:
         thenQueue_;  // the queue of 'then' calbacks which will be called when the Promise gets resolved
     ObjectPointer<EtsObjectArray>
         catchQueue_;  // the queue of 'catch' callback which will be called when the Promise gets rejected
+    ObjectPointer<EtsObject> interopObject_;  // internal object used in js interop
     ObjectPointer<EtsObject> linkedPromise_;  // linked JS promise as JSValue (if exists)
-    EtsLong event_;
     EtsInt thenQueueSize_;
+    EtsLong event_;
     EtsInt catchQueueSize_;
     uint32_t state_;  // the Promise's state
 

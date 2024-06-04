@@ -545,6 +545,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
             EtsClass::FromRuntimeClass(promiseClass_)->GetMethod("subscribeOnAnotherPromise"));
         ASSERT(subscribeOnAnotherPromiseMethod_ != nullptr);
     }
+    promiseRefClass_ = CacheClass(PROMISE_REF);
     arraybufClass_ = CacheClass(ARRAY_BUFFER);
     stringBuilderClass_ = CacheClass(STRING_BUILDER);
     arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);
