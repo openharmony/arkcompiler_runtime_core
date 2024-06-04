@@ -521,10 +521,6 @@ class JSONWriter {
     private isStringifiableFieldType(field: Field): boolean {
         const fieldType = field.getType()
 
-        // NOTE(cheezzario) this assertion will be dropped after #17184 fix
-        assert !(fieldType instanceof InterfaceType && (fieldType as InterfaceType).getName().startsWith("std.core.Function")) 
-                : "lambda typed fields not supported yet"
-
         if (field.isStatic() || fieldType instanceof LambdaType) {
             return false
         }

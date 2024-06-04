@@ -181,7 +181,7 @@ public:
     bool IsAnnotation() const;
     bool IsEnum() const;
     PANDA_PUBLIC_API bool IsStringClass() const;
-    bool IsLambdaClass() const;
+    bool IsFunctionalClass() const;
     bool IsUnionClass() const;
     bool IsUndefined() const;
     bool IsClassClass() const;

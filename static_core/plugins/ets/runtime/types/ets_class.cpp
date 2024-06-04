@@ -609,10 +609,10 @@ bool EtsClass::IsStringClass() const
     return GetRuntimeClass()->IsStringClass();
 }
 
-bool EtsClass::IsLambdaClass() const
+bool EtsClass::IsFunctionalClass() const
 {
-    // NOTE(petr-shumilov): Make more clear
-    return !GetRuntimeClass()->IsPrimitive() && GetRuntimeClass()->GetName().rfind(LAMBDA_PREFIX, 0) == 0;
+    auto *ifuncClass = EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetIFunctionClass();
+    return ifuncClass->GetRuntimeClass()->IsAssignableFrom(GetRuntimeClass());
 }
 
 bool EtsClass::IsUnionClass() const

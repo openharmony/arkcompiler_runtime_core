@@ -132,6 +132,11 @@ EtsClass *EtsClassLinker::GetTypeAPIParameterClass()
     return EtsClass::FromRuntimeClass(ext_->GetTypeAPIParameterClass());
 }
 
+EtsClass *EtsClassLinker::GetIFunctionClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetIFunctionClass());
+}
+
 Method *EtsClassLinker::GetSubscribeOnAnotherPromiseMethod()
 {
     return ext_->GetSubscribeOnAnotherPromiseMethod();

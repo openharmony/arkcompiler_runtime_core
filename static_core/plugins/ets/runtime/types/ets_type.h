@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@ static constexpr char CLASS_TYPE_PREFIX = 'L';
 static constexpr char METHOD_PREFIX = 'M';
 static constexpr const char *NULL_TYPE_DESC = "Null";
 static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
+static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *LAMBDA_METHOD_NAME = "invoke";
 static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';

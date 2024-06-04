@@ -61,6 +61,7 @@ public:
     EtsClass *GetTypeAPIFieldClass();
     EtsClass *GetTypeAPIMethodClass();
     EtsClass *GetTypeAPIParameterClass();
+    EtsClass *GetIFunctionClass();
     // NOTE(molotkovmikhail): Need to implement a method cache that should be accessible by some class and method ids.
     Method *GetSubscribeOnAnotherPromiseMethod();
 

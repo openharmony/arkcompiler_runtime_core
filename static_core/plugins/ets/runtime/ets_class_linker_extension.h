@@ -142,6 +142,11 @@ public:
         return typeapiParameterClass_;
     }
 
+    Class *GetIFunctionClass()
+    {
+        return ifuncClass_;
+    }
+
     Class *GetBoxBooleanClass()
     {
         return boxBooleanClass_;
@@ -251,6 +256,7 @@ private:
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;
     Class *typeapiParameterClass_ = nullptr;
+    Class *ifuncClass_ = nullptr;
     // escompat
     Class *sharedMemoryClass_ = nullptr;
 };

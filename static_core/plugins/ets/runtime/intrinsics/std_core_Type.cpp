@@ -73,6 +73,8 @@ static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
         result = static_cast<EtsByte>(EtsTypeAPIKind::FLOAT);
     } else if (td == ark::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::DOUBLE);
+    } else if (refType->IsFunctionalClass()) {
+        result = static_cast<EtsByte>(EtsTypeAPIKind::FUNCTIONAL);
     } else if (refType->IsInterface()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::INTERFACE);
     } else if (refType->IsArrayClass()) {
@@ -81,8 +83,6 @@ static EtsByte GetRefTypeKind(const PandaString &td, const EtsClass *refType)
         result = static_cast<EtsByte>(EtsTypeAPIKind::TUPLE);
     } else if (refType->IsStringClass()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::STRING);
-    } else if (refType->IsLambdaClass()) {
-        result = static_cast<EtsByte>(EtsTypeAPIKind::LAMBDA);
     } else if (refType->IsUnionClass()) {
         result = static_cast<EtsByte>(EtsTypeAPIKind::UNION);
     } else if (refType->IsUndefined()) {
