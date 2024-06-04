@@ -22,7 +22,9 @@ int main()
         std::string_view abc_filename = "test.abc";
         auto abc_file = panda::defect_scan_aux::AbcFile::Open(abc_filename);
         if (abc_file == nullptr) {
-            std::cout << "  --- abc file obj is null ---" << std::endl;
+            std::cerr << "  --- abc file obj is null ---" << std::endl;
+            std::cerr << "  --- please add the file to be detected to the executable file path ---" << std::endl;
+            return 0;
         }
         size_t def_func_cnt = abc_file->GetDefinedFunctionCount();
         std::cout << "  --- function count: " << def_func_cnt << " ---" << std::endl;
