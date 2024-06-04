@@ -14,11 +14,14 @@
  */
 
 #include "ziparchivehandle_fuzzer.h"
+
+#include <string>
 #include "libziparchive/zip_archive.h"
 
 namespace OHOS {
     void ZipArchiveHandleFuzzTest(const uint8_t* data, size_t size)
     {
+        std::string str(data, data + size);
         {
             // CloseArchive test
             panda::ZipArchiveHandle handle = nullptr;
@@ -43,13 +46,13 @@ namespace OHOS {
         {
             // LocateFile test
             panda::ZipArchiveHandle zipfile = nullptr;
-            const char* filename = reinterpret_cast<char*>(const_cast<uint8_t*>(data));
+            const char* filename = str.c_str();
             panda::LocateFile(zipfile, filename);
         }
         {
             // OpenArchive test
             panda::ZipArchiveHandle handle = nullptr;
-            const char* path = reinterpret_cast<char*>(const_cast<uint8_t*>(data));
+            const char* path = str.c_str();
             panda::OpenArchive(handle, path);
         }
         {

@@ -22,7 +22,9 @@ namespace OHOS {
     {
         panda::GetHash32(data, size);
 
-        panda::GetHash32String(data);
+        std::string str(data, data + size);
+        uint8_t* string_data = reinterpret_cast<uint8_t*>(const_cast<char*>(str.c_str()));
+        panda::GetHash32String(string_data);
 
         panda::merge_hashes(size, size);
 

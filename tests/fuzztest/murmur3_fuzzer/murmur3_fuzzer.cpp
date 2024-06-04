@@ -25,7 +25,9 @@ namespace OHOS {
 
         panda::MurmurHash32<seed>::GetHash32Impl(data, size);
 
-        panda::MurmurHash32<seed>::GetHash32StringImpl(data);
+        std::string str(data, data + size);
+        uint8_t* string_data = reinterpret_cast<uint8_t*>(const_cast<char*>(str.c_str()));
+        panda::MurmurHash32<seed>::GetHash32StringImpl(string_data);
     }
 }
 
