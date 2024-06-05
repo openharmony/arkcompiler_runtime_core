@@ -145,7 +145,7 @@ void BytecodeGen::AddLineNumber(const Inst *inst, const size_t idx)
 void BytecodeGen::AddColumnNumber(const Inst *inst, const uint32_t idx)
 {
     if (ir_interface_ != nullptr && idx < result_.size()) {
-        auto cn = ir_interface_->GetLineNumberByPc(inst->GetPc());
+        auto cn = ir_interface_->GetColumnNumberByPc(inst->GetPc());
         result_[idx].ins_debug.SetColumnNumber(cn);
     }
 }
