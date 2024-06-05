@@ -59,16 +59,6 @@ FunctionKindToStringMap PandasmDumperUtils::function_kind_to_string_map_ = {
     {panda_file::FunctionKind::CONCURRENT_FUNCTION, "FunctionKind::CONCURRENT_FUNCTION"},
 };
 
-OpcodeLiteralIdIndexMap PandasmDumperUtils::opcode_literal_id_index_map_ = {
-    {pandasm::Opcode::CREATEARRAYWITHBUFFER, 0},
-    {pandasm::Opcode::CREATEOBJECTWITHBUFFER, 0},
-    {pandasm::Opcode::DEFINECLASSWITHBUFFER, 1},
-    {pandasm::Opcode::NEWLEXENVWITHNAME, 0},
-    {pandasm::Opcode::WIDE_NEWLEXENVWITHNAME, 0},
-    {pandasm::Opcode::CALLRUNTIME_CREATEPRIVATEPROPERTY, 0},
-    {pandasm::Opcode::CALLRUNTIME_DEFINESENDABLECLASS, 1},
-};
-
 std::string PandasmDumperUtils::GetFunctionKindString(panda_file::FunctionKind function_kind)
 {
     auto it = function_kind_to_string_map_.find(function_kind);
