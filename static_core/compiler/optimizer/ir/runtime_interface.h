@@ -355,6 +355,11 @@ public:
         return false;
     }
 
+    virtual bool IsMethodStringConcat([[maybe_unused]] MethodPtr method) const
+    {
+        return false;
+    }
+
     virtual bool IsMethodStringBuilderConstructorWithStringArg([[maybe_unused]] MethodPtr method) const
     {
         return false;
@@ -733,6 +738,16 @@ public:
     }
 
     virtual ClassPtr GetStringClass([[maybe_unused]] MethodPtr method) const
+    {
+        return nullptr;
+    }
+
+    virtual ClassPtr GetStringBuilderClass() const
+    {
+        return nullptr;
+    }
+
+    virtual MethodPtr GetStringBuilderDefaultConstructor() const
     {
         return nullptr;
     }
@@ -1237,6 +1252,16 @@ public:
     }
 
     virtual IntrinsicId GetStringIsCompressedIntrinsicId() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual IntrinsicId GetStringBuilderAppendStringIntrinsicId() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual IntrinsicId GetStringBuilderToStringIntrinsicId() const
     {
         UNREACHABLE();
     }

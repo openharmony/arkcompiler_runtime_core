@@ -27,6 +27,7 @@
 #include "optimizer/optimizations/cleanup.h"
 #include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
+#include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "events/events.h"
@@ -1155,6 +1156,7 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
         graphInl->RunPass<BranchElimination>();
         graphInl->RunPass<Cleanup>();
     }
+    graphInl->RunPass<OptimizeStringConcat>();
     graphInl->RunPass<SimplifyStringBuilder>();
 
     auto inlinedInstsCount = CalculateInstructionsCount(graphInl);

@@ -88,21 +88,6 @@ bool HasAppendInstructions(Inst *instance, Loop *loop)
     return false;
 }
 
-bool IsStringBuilderInstance(Inst *inst)
-{
-    if (inst->GetOpcode() != Opcode::NewObject) {
-        return false;
-    }
-
-    auto klass = GetObjectClass(inst);
-    if (klass == nullptr) {
-        return false;
-    }
-
-    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
-    return runtime->IsClassStringBuilder(klass);
-}
-
 Inst *GetStringBuilderAppendChainInstance(Inst *appendInstruction)
 {
     // For code like this:

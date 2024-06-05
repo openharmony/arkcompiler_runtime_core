@@ -25,12 +25,15 @@
 
 namespace ark::compiler {
 
+bool IsStringBuilderInstance(Inst *inst);
+bool IsMethodStringConcat(Inst *inst);
 bool IsMethodStringBuilderConstructorWithStringArg(Inst *inst);
 bool IsMethodStringBuilderConstructorWithCharArrayArg(Inst *inst);
 bool IsStringBuilderToString(Inst *inst);
 bool IsMethodStringBuilderDefaultConstructor(Inst *inst);
 void InsertBeforeWithSaveState(Inst *inst, Inst *before);
 void InsertAfterWithSaveState(Inst *inst, Inst *after);
+void InsertBeforeWithInputs(Inst *inst, Inst *before);
 using FindInputPredicate = std::function<bool(Input &input)>;
 bool HasInput(Inst *inst, const FindInputPredicate &predicate);
 bool HasInputPhiRecursively(Inst *inst, Marker visited, const FindInputPredicate &predicate);
