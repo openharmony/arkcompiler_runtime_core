@@ -25,7 +25,7 @@ tags: []
 class Buffer {
 }
 
-class ArrayBuffer extends Buffer {
+class TestArrayBuffer extends Buffer {
     constructor(size:  number) {
     }
 }
@@ -38,7 +38,7 @@ export final class ArrayBackedConstructor {
     public static readonly BYTES_PER_ELEMENT: number = 1;
 
     public constructor() {
-        this(new ArrayBuffer(0), 0, 0);
+        this(new TestArrayBuffer(0), 0, 0);
     }
 
     public constructor(buf: Buffer, offset: number, length: number) {

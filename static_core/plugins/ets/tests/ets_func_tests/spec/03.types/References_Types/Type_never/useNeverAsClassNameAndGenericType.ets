@@ -16,7 +16,7 @@
 /*---
 desc: 03.08.04 never Type
 name: 03.types/08.reference_types/04.never_type/useNeverAsClassNameAndGenericType
-tags: []
+tags: [negative, compile-only]
 ---*/
 
 class never<never> {

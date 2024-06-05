@@ -20,12 +20,12 @@ tags:
 
 ---*/
 
-class Node<T> {
-    readonly parent: Node<T>|undefined;
+class TestNode<T> {
+    readonly parent: TestNode<T>|undefined;
 }
 
 class Tree<T> {
-    private current: Node<T>;
+    private current: TestNode<T>;
     up(): void {
         let parent = this.current.parent
         this.current = parent!

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,12 @@
 let counter = 0
 let addCoroutineId: long = 0;
 
-class Coroutine {
+class JSCoroutine {
     public static native getCoroutineId(): long
 }
 
 async function add(a: int): Promise<Object> {
-    addCoroutineId = Coroutine.getCoroutineId();
+    addCoroutineId = JSCoroutine.getCoroutineId();
     counter += a;
     return new Promise<Object>((resolve: (value: Object) => void): void => {
         resolve(new Object());
@@ -29,7 +29,7 @@ async function add(a: int): Promise<Object> {
 }
 
 export function main(): int {
-    let mainCoroutineId: long = Coroutine.getCoroutineId();
+    let mainCoroutineId: long = JSCoroutine.getCoroutineId();
     add(5);
     if (counter != 5) {
         console.print("Invalid counter: expected 5 but was " + counter + "\n");

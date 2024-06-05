@@ -13,12 +13,6 @@
  * limitations under the License.
  */
 
-enum Type {
-    Long,
-    Float,
-    Double
-}
-
 // simple fast pseudo-random generator
 function xorshift(state: long): long {
     state ^= state << 13;

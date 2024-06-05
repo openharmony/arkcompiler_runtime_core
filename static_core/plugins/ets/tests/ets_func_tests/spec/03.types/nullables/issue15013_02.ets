@@ -19,9 +19,9 @@
  tags: 
  ---*/
 
-import {NullishType} from './issue15013_to_export'
+import {TestNullishType} from './issue15013_to_export'
 
-function foo<T>(x: T): NullishType {
+function foo<T>(x: T): TestNullishType {
   return x
 }
 

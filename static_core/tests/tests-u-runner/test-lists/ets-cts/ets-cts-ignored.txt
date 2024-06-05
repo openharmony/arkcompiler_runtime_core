@@ -2128,3 +2128,13 @@
 
 # 16863: reference equality
 15.semantic_rules/02.variance/01.invariance/invariance_function_ref_equality.ets
+
+# es2panda: #16408 Cannot declare ambient constant variable
+14.ambient_declarations/ambient_declarations_1.ets 
+14.ambient_declarations/ambient_declarations_3.ets
+
+# 17358: Avoid variable and type alias name collisions
+02.lexical_elements/07.keywords/types_8.ets
+02.lexical_elements/07.keywords/types_10.ets
+02.lexical_elements/07.keywords/types_2.ets
+# end of es2panda fails

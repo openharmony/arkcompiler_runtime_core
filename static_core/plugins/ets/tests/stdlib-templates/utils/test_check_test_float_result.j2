@@ -14,7 +14,6 @@
  */
 
 const DBL_EPSILON : double = 1.0e-6;
-const doubleEpsilon: double = 2.22045e-16
 function checkTestResult(actual : {{.item.result_type}}, expected : {{.item.result_type}}) : int {
 
 {%- if item.result_type_nature == "Float" or item.result_type == "Double" or item.result_type == "double" or item.result_type == "float"%}
