@@ -394,6 +394,7 @@ private:
     void UpdateRefsFromRemSets(const Visitor &visitor);
 
     void CacheRefsFromRemsets(const MemRangeRefsChecker &refsChecker);
+    bool IsCollectionSetFullyPromoted() const;
 
     void ClearRefsFromRemsetsCache();
 

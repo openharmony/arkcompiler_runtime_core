@@ -1119,7 +1119,7 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
     RefCacheBuilder<LanguageConfig> builder(this, &uniqueRefsFromRemsets_, regionSizeBits_, &objectsStack);
     auto refsChecker = [this, &builder](Region *region, const MemRange &memRange) {
         IterateOverRefsInMemRange(memRange, region, builder);
-        return builder.AllCrossRegionRefsProcessed();
+        return false;
     };
 
     analytics_.ReportMarkingStart(ark::time::GetCurrentTimeInNanos());
@@ -1160,6 +1160,7 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
         this->MarkStackMixed(&objectsStack);
         ASSERT(objectsStack.Empty());
         if (useGcWorkers) {
+            GCScope<TRACE_TIMING> waitingTiming("WaitUntilTasksEnd", this);
             this->GetWorkersTaskPool()->WaitUntilTasksEnd();
         }
     }
@@ -1373,7 +1374,10 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
     if constexpr (FULL_GC) {
         UpdateRefsFromRemSets(refUpdater);
     } else {
-        VisitRemSets(refUpdater);
+        // We don't need to create Remset for promoted regions because we already have them
+        if (!IsCollectionSetFullyPromoted()) {
+            VisitRemSets(refUpdater);
+        }
     }
     LOG_DEBUG_GC << "=== Update non ex-cset -> ex-cset references. END. ===";
     if constexpr (ENABLE_WORKERS) {
@@ -1382,6 +1386,7 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
             updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefQueue->begin(), updatedRefQueue->end());
             this->GetInternalAllocator()->Delete(updatedRefQueue);
         }
+        GCScope<TRACE_TIMING> waitingTiming("WaitUntilTasksEnd", this);
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
     this->CommonUpdateRefsToMovedObjects();
@@ -2026,6 +2031,20 @@ void G1GC<LanguageConfig>::UpdateRefsFromRemSets(const Visitor &visitor)
         return true;
     };
     CacheRefsFromRemsets(refsChecker);
+}
+
+template <class LanguageConfig>
+bool G1GC<LanguageConfig>::IsCollectionSetFullyPromoted() const
+{
+    if (!collectionSet_.Tenured().empty()) {
+        return false;
+    }
+    for (Region *region : collectionSet_.Young()) {
+        if (!region->HasFlag(RegionFlag::IS_PROMOTED)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 template <class LanguageConfig>
