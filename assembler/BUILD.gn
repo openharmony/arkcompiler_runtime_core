@@ -148,6 +148,7 @@ ohos_static_library("libarkassembler_frontend_static") {
   subsystem_name = "arkcompiler"
 }
 
+# ark_asm_static is a legcay component for ts2abc and is no longer valid
 ohos_source_set("ark_asm_static") {
   sources = [ "pandasm.cpp" ]
 
@@ -176,14 +177,6 @@ ohos_source_set("ark_asm_static") {
     ldflags = platform_ldflags
   }
 
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
-}
-
-ohos_executable("ark_asm") {
-  deps = [ ":ark_asm_static" ]
-
-  install_enable = false
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
