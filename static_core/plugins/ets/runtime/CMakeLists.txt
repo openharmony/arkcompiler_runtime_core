@@ -27,12 +27,14 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_runtime_interface.cpp
     ${ETS_EXT_SOURCES}/ets_vm.cpp
     ${ETS_EXT_SOURCES}/ets_stubs.cpp
+    ${ETS_EXT_SOURCES}/ets_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
     ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
     ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_ArrayBuffer.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Date.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Runtime.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp

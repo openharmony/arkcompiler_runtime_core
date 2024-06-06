@@ -169,6 +169,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
         coroutineManager_ = allocator->New<ThreadedCoroutineManager>(EtsCoroutine::Create<Coroutine>);
     }
     rendezvous_ = allocator->New<Rendezvous>(this);
+    taskpool_ = allocator->New<Taskpool>();
 
     InitializeRandomEngine();
 }
@@ -178,6 +179,7 @@ PandaEtsVM::~PandaEtsVM()
     auto allocator = mm_->GetHeapManager()->GetInternalAllocator();
     ASSERT(allocator != nullptr);
 
+    allocator->Delete(taskpool_);
     allocator->Delete(rendezvous_);
     allocator->Delete(runtimeIface_);
     allocator->Delete(coroutineManager_);

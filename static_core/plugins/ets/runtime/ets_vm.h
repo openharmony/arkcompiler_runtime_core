@@ -59,6 +59,7 @@
 #include "plugins/ets/runtime/job_queue.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_taskpool.h"
 
 namespace ark::ets {
 
@@ -269,6 +270,16 @@ public:
         return jobQueue_.get();
     }
 
+    Taskpool *GetTaskpool()
+    {
+        return taskpool_;
+    }
+
+    const Taskpool *GetTaskpool() const
+    {
+        return taskpool_;
+    }
+
     void InitJobQueue(JobQueue *jobQueue)
     {
         ASSERT(jobQueue_ == nullptr);
@@ -370,6 +381,7 @@ private:
     os::memory::Mutex finalizationRegistryLock_;
     PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
     PandaUniquePtr<JobQueue> jobQueue_;
+    Taskpool *taskpool_ {nullptr};
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     std::function<void(Frame *)> clearInteropHandleScopes_;

@@ -1222,6 +1222,70 @@ intrinsics:
       args: [std.core.Object]
     impl: ark::ets::intrinsics::EtsArrayBufferFrom
 
+########################
+# escompat.taskpool #
+########################
+  - name: TaskpoolGenerateId
+    space: ets
+    class_name: escompat.taskpoolTask
+    method_name: generateId
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::GenerateTaskId
+
+  - name: TaskpoolTaskSubmitted
+    space: ets
+    class_name: escompat.taskpool
+    method_name: taskSubmitted
+    static: true
+    signature:
+      ret: void
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskpoolTaskSubmitted
+
+  - name: TaskpoolTaskStarted
+    space: ets
+    class_name: escompat.taskpool
+    method_name: taskStarted
+    static: true
+    signature:
+      ret: u1
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskpoolTaskStarted
+
+  - name: TaskpoolTaskFinished
+    space: ets
+    class_name: escompat.taskpool
+    method_name: taskFinished
+    static: true
+    signature:
+      ret: u1
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskpoolTaskFinished
+
+  - name: TaskpoolCancelTask
+    space: ets
+    class_name: escompat.taskpool
+    method_name: cancelImpl
+    static: true
+    signature:
+      ret: void
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskpoolCancelTask
+
+  - name: TaskpoolIsTaskCancel
+    space: ets
+    class_name: escompat.taskpoolTask
+    method_name: isCancel
+    static: true
+    signature:
+      ret: u1
+      args: []
+    impl: ark::ets::intrinsics::TaskpoolIsTaskCanceled
+
+
 ###################
 # std.time.Chrono #
 ###################
