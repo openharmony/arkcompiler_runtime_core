@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,6 +122,47 @@
 //! INST_NEXT    "NewObject"
 //! INST_NEXT    "CallLaunchStatic"
 //! EVENT        /Compilation,ETSGLOBAL::main2,.*,COMPILED/
+
+//! CHECKER      Test inline method with launch inst in JIT
+//! RUN          force_jit: true, options: "", entry: "ETSGLOBAL::main3"
+//! METHOD       "ETSGLOBAL::main3"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     "LoadRuntimeClass"
+//! INST_NOT     "ResolveVirtual"
+//! INST_NOT     "CallResolvedLaunchVirtual"
+//! PASS_AFTER   "Inline"
+//! INST         "LoadRuntimeClass"
+//! INST_NEXT    "NewObject"
+//! INST_NEXT    "ResolveVirtual"
+//! INST_NEXT    "CallResolvedLaunchVirtual"
+//! EVENT        /Compilation,ETSGLOBAL::main3,.*,COMPILED/
+//! EVENT        /Inline,ETSGLOBAL::main3,ETSGLOBAL::launchF,.*STATIC,SUCCESS/
+
+//! CHECKER      Test inline method with launch inst in AOT
+//! RUN_PAOC     options: ""
+//! METHOD       "ETSGLOBAL::main3"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     "LoadRuntimeClass"
+//! INST_NOT     "ResolveVirtual"
+//! INST_NOT     "CallResolvedLaunchVirtual"
+//! PASS_AFTER   "Inline"
+//! INST         "LoadRuntimeClass"
+//! INST_NEXT    "NewObject"
+//! INST_NEXT    "ResolveVirtual"
+//! INST_NEXT    "CallResolvedLaunchVirtual"
+//! EVENT        /Compilation,ETSGLOBAL::main3,.*,COMPILED/
+//! EVENT        /Inline,ETSGLOBAL::main3,ETSGLOBAL::launchF,.*STATIC,SUCCESS/
+//! RUN          entry: "ETSGLOBAL::main3"
+
+//! CHECKER      Test inline method with launch inst in LLVM
+//! RUN_LLVM     options: ""
+//! METHOD       "ETSGLOBAL::main3"
+//! PASS_AFTER   "IrBuilder"
+//! INST_NOT     "LoadRuntimeClass"
+//! INST_NOT     "ResolveVirtual"
+//! INST_NOT     "CallResolvedLaunchVirtual"
+//! RUN          entry: "ETSGLOBAL::main3"
+
 let counter = 0
 
 class Foo {
@@ -181,5 +222,21 @@ export function main2(): int {
         console.print("Invalid counter: expected 11 but was " + counter + "\n");
         return 1;
     }
+    return 0;
+}
+
+function foo(arg1: int, arg2: int): int
+{
+    return arg1 + arg2;
+}
+
+function launchF(func: Function2<Int, Int, NullishType>, arg1: Int, arg2: Int): Promise<NullishType>
+{
+    return launch func(arg1, arg2);
+}
+
+function main3(): int {
+    let res = await launchF(foo, 1, 2);
+    assert(res == 3);
     return 0;
 }
