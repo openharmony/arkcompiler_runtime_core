@@ -243,11 +243,7 @@ void GC::SetupCpuAffinityAfterConcurrent()
     if (!gcSettings_.ManageGcThreadsAffinity()) {
         return;
     }
-    // Try to set GC Thread on best CPUs after concurrent
-    if (!os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::BEST)) {
-        // If it failed for only best CPUs then try to use best + middle CPUs mask after concurrent
-        os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::BEST | os::CpuPower::MIDDLE);
-    }
+    os::CpuAffinityManager::SetAffinityForCurrentThread(os::CpuPower::BEST | os::CpuPower::MIDDLE);
     // Some GCs don't use GC Workers
     if (workersTaskPool_ != nullptr && this->GetSettings()->UseThreadPoolForGC()) {
         static_cast<GCWorkersThreadPool *>(workersTaskPool_)->SetAffinityForGCWorkers();
