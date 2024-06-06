@@ -199,32 +199,3 @@ options:
   type: bool
   default: false
   description: Enable JS interop mode (affects launch behaviour and async functions)
-
-- name: workers-type
-  lang:
-    - ets
-  type: std::string
-  default: taskmanager
-  possible_values:
-  - threadpool
-  - taskmanager
-  description: Set type of additional VM workers. VM uses these workers to speed up internal algorithms (JIT, GC, etc.)
-
-- name: taskmanager-workers-count
-  lang:
-    - ets
-  type: uint32_t
-  default: 4
-  description: Number of worker threads for the taskmanager. Option is used only for --worker-type=taskmanager
-
-- name: task-statistics-impl-type
-  lang:
-    - ets
-  type: std::string
-  default: no-stat
-  possible_values:
-  - simple
-  - fine-grained
-  - lock-free
-  - no-stat
-  description: Set type of task statistics implementation that will be used to store information about tasks, if use set `no-stat` there will be no statistics usage

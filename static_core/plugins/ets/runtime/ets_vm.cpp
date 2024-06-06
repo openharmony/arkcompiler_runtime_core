@@ -80,11 +80,10 @@ void PandaEtsVM::PromiseListenerInfo::OnPromiseStateChanged(EtsHandle<EtsPromise
 /* static */
 bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
-    auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
-    if (options.GetWorkersType(langStr) == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
+    if (options.GetWorkersType() == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
         auto *taskScheduler = taskmanager::TaskScheduler::Create(
-            options.GetTaskmanagerWorkersCount(langStr),
-            taskmanager::TaskStatisticsImplTypeFromString(options.GetTaskStatisticsImplType(langStr)));
+            options.GetTaskmanagerWorkersCount(),
+            taskmanager::TaskStatisticsImplTypeFromString(options.GetTaskStatisticsImplType()));
         if (taskScheduler == nullptr) {
             return false;
         }
