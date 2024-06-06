@@ -62,6 +62,7 @@ report:
     detailed-report-file: None
     spec-report: False
     spec-report-file: None
+    spec-report-yaml: None
     spec-file: None
 quick:
     enable: false

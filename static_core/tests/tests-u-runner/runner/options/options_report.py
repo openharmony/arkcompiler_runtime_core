@@ -34,6 +34,7 @@ class ReportOptions:
             "detailed-report-file": self.detailed_report_file,
             "spec-report": self.spec_report,
             "spec-report-file": self.spec_report_file,
+            "spec-report-yaml": self.spec_report_yaml,
             "spec-file": self.spec_file
         }
 
@@ -84,6 +85,15 @@ class ReportOptions:
 
     @cached_property
     @value(
+        yaml_path="report.spec-report-yaml",
+        cli_name="spec_report_yaml",
+        cast_to_type=_to_path
+    )
+    def spec_report_yaml(self) -> Optional[str]:
+        return None
+
+    @cached_property
+    @value(
         yaml_path="report.spec-file",
         cli_name="spec_file",
         cast_to_type=_to_path
@@ -101,6 +111,8 @@ class ReportOptions:
             '--spec-report' if self.spec_report else '',
             f'--spec-report-file={self.spec_report_file}'
             if self.spec_report_file else '',
+            f'--spec-report-yaml={self.spec_report_yaml}'
+            if self.spec_report_yaml else '',
             f'--spec-file={self.spec_file}'
             if self.spec_file else ''
         ]

@@ -213,8 +213,9 @@ Detailed report shows test statistics for every folder
 ## ArkTS Specification coverage report
 
 ArkTS Specification coverage report shows test statistics for every specification chapter or section
-- `--spec-report`/`report.spec-report: True` - if it's specified the report is generated
-- `--spec-report-file FILE`/`report.spec-report-file: FILE` - specifies file/path where the report should be saved to
+- `--spec-report`/`report.spec-report: True` - if it's specified the two report files are generated
+- `--spec-report-file FILE`/`report.spec-report-file: FILE` - specifies file/path to output the markdown-formatted report
+- `--spec-report-yaml FILE`/`report.spec-report-yaml: FILE` - specifies file/path to output the YAML-formatted report
 - `--spec-file FILE`/`report.spec-file: FILE` - specifies file/path to the specification PDF file
 
 ## Verbose and logging options:
