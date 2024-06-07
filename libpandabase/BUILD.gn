@@ -143,6 +143,10 @@ if (is_mingw) {
   } else {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
   }
+
+  if (is_mac) {
+    libarkbase_sources += [ "$ark_root/libpandabase/os/filesystem.cpp" ]
+  }
 }
 
 if (is_debug) {
