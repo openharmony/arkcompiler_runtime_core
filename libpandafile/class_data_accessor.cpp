@@ -48,9 +48,9 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
         if (tag == ClassTag::INTERFACES) {
             num_ifaces_ = helpers::ReadULeb128(&sp);
             ifaces_offsets_sp_ = sp;
-            size_t size = IDX_SIZE * num_ifaces_;
-            THROW_IF(sp.Size() < size, File::INVALID_FILE_OFFSET);
-            sp = sp.SubSpan(size);
+            size_t scale = IDX_SIZE * num_ifaces_;
+            THROW_IF(sp.Size() < scale, File::INVALID_FILE_OFFSET);
+            sp = sp.SubSpan(scale);
         }
 
         THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
