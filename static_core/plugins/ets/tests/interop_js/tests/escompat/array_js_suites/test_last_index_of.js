@@ -30,14 +30,15 @@ const TestJSLastIndexOf = etsMod.getFunction('Array_TestJSLastIndexOf');
   arr.push('foo');
 
   const EXPECT_2 = 2;
+  const EXPECT_MINUS_1 = -1
 
   // TODO(kprokopenko) after #14765 no undefined must be passed
-  ASSERT_EQ(arr.lastIndexOf('foo', undefined), EXPECT_2);
-  ASSERT_EQ(arr.lastIndexOf('not in array', undefined), -1);
+  ASSERT_EQ(arr.lastIndexOf('foo', undefined), EXPECT_MINUS_1);
+  ASSERT_EQ(arr.lastIndexOf('not in array', undefined), EXPECT_MINUS_1);
 
   const IDX_2 = 2;
   ASSERT_EQ(arr.lastIndexOf('foo', IDX_2), EXPECT_2);
-  ASSERT_EQ(arr.lastIndexOf('not in array', IDX_2), -1);
+  ASSERT_EQ(arr.lastIndexOf('not in array', IDX_2), EXPECT_MINUS_1);
 }
 
 GCJSRuntimeCleanup();

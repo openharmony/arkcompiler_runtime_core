@@ -1500,6 +1500,8 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
      * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
      * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+     * If `fromIndex` is undefined then `fromIndex = 0`
+     * If `fromIndex` is ommited then `fromIndex = length()-1`
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
@@ -1528,16 +1530,36 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Returns the last index at which a given element can be found in the array,
      * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
      *
-     * @param element element to locate in the array.
+     * @param searchElement element to locate in the array.
      * @param fromIndex zero-based index at which to start searching backwards.
      * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
      * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
      * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+     * If `fromIndex` is undefined then `fromIndex = 0`
+     * If `fromIndex` is ommited then `fromIndex = length()-1`
      *
      * @returns The last index of the element in the array; -1 if not found.
      */
-    public lastIndexOf(element: T, fromIndex?: Number): number {
-        return this.lastIndexOf(element, asIntOrDefault(fromIndex, this.actualLength - 1));
+    public lastIndexOf(searchElement: T, fromIndex: number|undefined): number {
+        return this.lastIndexOf(searchElement, asIntOrDefault(fromIndex, 0));
+    }
+
+    /**
+     * Returns the last index at which a given element can be found in the array,
+     * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
+     *
+     * @param searchElement element to locate in the array.
+     * @param fromIndex zero-based index at which to start searching backwards.
+     * Negative index counts back from the end of the array — if `fromIndex` < 0, `fromIndex` + `length()` is used.
+     * If `fromIndex` < `-length()`, the array is not searched and -1 is returned.
+     * If `fromIndex` >= `length()` then `array.length - 1` is used, causing the entire array to be searched.
+     * If `fromIndex` is undefined then `fromIndex = 0`
+     * If `fromIndex` is ommited then `fromIndex = length()-1`
+     *
+     * @returns The last index of the element in the array; -1 if not found.
+     */
+    public lastIndexOf(searchElement: T): number {
+        return this.lastIndexOf(searchElement, this.actualLength - 1);
     }
 
     /**

@@ -20,6 +20,7 @@ sub:
     self_type: Array<number>
     vars:
       default_inds: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.1, 5.0, 100.0, -1.1, 2.0, "Infinity", "-Infinity", "NaN", "0x8 as number", "-0o4 as number"]
+      default_inds_undef: ["self.length", "-self.length", "self.length - 1", "-self.length + 1", 1.1, 5.0, 100.0, -1.1, 2.0, "Infinity", "-Infinity", "NaN", "0x8 as number", "-0o4 as number", "undefined"]
       default_search: ["NaN", "-NaN", "Infinity", "-Infinity", 0.0, "-0.0", 100, 1]
       reduce_lamdbas:
         - |
@@ -59,8 +60,8 @@ sub:
       - method: "fill"
         params:
           - paramOf(1.0, 12.0)
-          - paramOf(*default_inds)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
+          - paramOf(*default_inds_undef)
         mandatory: 1
       - self:
           - |
@@ -70,7 +71,7 @@ sub:
             params:
               - paramOf(*default_inds)
               - paramOf(*default_inds)
-              - paramOf(*default_inds)
+              - paramOf(*default_inds_undef)
             mandatory: 2
           - method: "splice"
             ret_type: Array<number>
@@ -83,23 +84,23 @@ sub:
       - method: "slice"
         ret_type: Array<number>
         params:
-          - paramOf(*default_inds)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
+          - paramOf(*default_inds_undef)
         mandatory: 0
       - method: includes
         params:
           - paramOf(*default_search)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
         mandatory: 1
       - method: indexOf
         params:
           - paramOf(*default_search)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
         mandatory: 1
       - method: lastIndexOf
         params:
           - paramOf(*default_search)
-          - paramOf(*default_inds)
+          - paramOf(*default_inds_undef)
         mandatory: 1
       - method: toString
       - self:
