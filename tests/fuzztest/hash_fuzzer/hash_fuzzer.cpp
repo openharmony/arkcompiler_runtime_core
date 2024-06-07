@@ -26,8 +26,8 @@ namespace OHOS {
 
         panda::merge_hashes(size, size);
 
-        uint32_t lhash_uint32_t = reinterpret_cast<uint32_t>(data);
-        uint32_t rhash_uint32_t = reinterpret_cast<uint32_t>(data);
+        uint32_t lhash_uint32_t = static_cast<uint32_t>(size);
+        uint32_t rhash_uint32_t = static_cast<uint32_t>(size);
         panda::merge_hashes(lhash_uint32_t, rhash_uint32_t);
     }
 }
