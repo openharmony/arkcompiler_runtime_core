@@ -221,7 +221,8 @@ void Encoder::EncodeCompareTest([[maybe_unused]] Reg dst, [[maybe_unused]] Reg s
     SetFalseResult();
 }
 
-void Encoder::EncodeAtomicByteOr([[maybe_unused]] Reg addr, [[maybe_unused]] Reg value)
+void Encoder::EncodeAtomicByteOr([[maybe_unused]] Reg addr, [[maybe_unused]] Reg value,
+                                 [[maybe_unused]] bool fastEncoding)
 {
     SetFalseResult();
 }
@@ -828,7 +829,7 @@ bool Encoder::IsLrAsTempRegEnabled() const
     return enableLrAsTempReg_;
 }
 
-bool Encoder::IsLrAsTempRegEnabledAndReleased()
+bool Encoder::IsLrAsTempRegEnabledAndReleased() const
 {
     return IsLrAsTempRegEnabled() && IsScratchRegisterReleased(GetTarget().GetLinkReg());
 }
@@ -843,7 +844,7 @@ size_t Encoder::GetFrameSize() const
     return frameSize_;
 }
 
-bool Encoder::IsScratchRegisterReleased([[maybe_unused]] compiler::Reg reg)
+bool Encoder::IsScratchRegisterReleased([[maybe_unused]] compiler::Reg reg) const
 {
     return false;
 }
@@ -851,6 +852,11 @@ bool Encoder::IsScratchRegisterReleased([[maybe_unused]] compiler::Reg reg)
 size_t Encoder::GetScratchRegistersCount() const
 {
     return GetScratchRegistersMask().Count();
+}
+
+size_t Encoder::GetScratchRegistersWithLrCount() const
+{
+    return GetScratchRegistersCount() + static_cast<size_t>(IsLrAsTempRegEnabledAndReleased());
 }
 
 RegMask Encoder::GetScratchRegistersMask() const

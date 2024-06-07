@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,10 @@ void CodegenNative::CreateFrameInfo()
     frame->SetSetupFrame(false);
     // we don't need to save FP and LR registers only for leaf methods
     frame->SetSaveFrameAndLinkRegs(!GetGraph()->GetMethodProperties().IsLeaf());
+    // we may use lr reg as temp only if we saved lr in the prologue
+    if (GetTarget().SupportLinkReg()) {
+        GetEncoder()->EnableLrAsTempReg(frame->GetSaveFrameAndLinkRegs());
+    }
     // we never need to save unused registers in native mode
     frame->SetSaveUnusedCalleeRegs(false);
     // we have to sub/add SP in prologue/epilogue in the following cases:

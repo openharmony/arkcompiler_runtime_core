@@ -209,7 +209,7 @@ public:
     // Additional check for isnan-comparison
     virtual void EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc);
     virtual void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc);
-    virtual void EncodeAtomicByteOr(Reg addr, Reg value);
+    virtual void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding);
     struct ArgsCompressedStringCharAt {
         Reg dst;
         Reg str;
@@ -356,8 +356,9 @@ public:
     virtual Reg AcquireScratchRegister(TypeInfo type);
     virtual void AcquireScratchRegister(Reg reg);
     virtual void ReleaseScratchRegister(Reg reg);
-    virtual bool IsScratchRegisterReleased(Reg reg);
+    virtual bool IsScratchRegisterReleased(Reg reg) const;
     size_t GetScratchRegistersCount() const;
+    size_t GetScratchRegistersWithLrCount() const;
     virtual RegMask GetScratchRegistersMask() const;
     size_t GetScratchFPRegistersCount() const;
     virtual RegMask GetScratchFpRegistersMask() const;
@@ -431,7 +432,7 @@ public:
 
     bool IsLrAsTempRegEnabled() const;
 
-    bool IsLrAsTempRegEnabledAndReleased();
+    bool IsLrAsTempRegEnabledAndReleased() const;
     NO_COPY_SEMANTIC(Encoder);
     NO_MOVE_SEMANTIC(Encoder);
 

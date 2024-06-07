@@ -265,7 +265,7 @@ public:
 
     void EncodeCompare(Reg dst, Reg src0, Reg src1, Condition cc) override;
     void EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc) override;
-    void EncodeAtomicByteOr(Reg addr, Reg value) override;
+    void EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding) override;
 
     void EncodeSelect(ArgsSelect &&args) override;
     void EncodeSelect(ArgsSelectImm &&args) override;
@@ -345,7 +345,7 @@ public:
     Reg AcquireScratchRegister(TypeInfo type) override;
     void AcquireScratchRegister(Reg reg) override;
     void ReleaseScratchRegister(Reg reg) override;
-    bool IsScratchRegisterReleased(Reg reg) override;
+    bool IsScratchRegisterReleased(Reg reg) const override;
 
     RegMask GetScratchRegistersMask() const override;
     RegMask GetScratchFpRegistersMask() const override;

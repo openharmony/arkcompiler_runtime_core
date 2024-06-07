@@ -698,6 +698,7 @@ options:
     - crc32
     - sse42
     - jscvt
+    - atomics
   description: Set compiler CPU features
   tags: [perf]
   delimiter: ","

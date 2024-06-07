@@ -225,7 +225,12 @@ std::string LLVMCompiler::GetCPUForArch(Arch arch)
     std::string cpu;
     switch (arch) {
         case Arch::AARCH64:
+#if defined(PANDA_TARGET_ARM64) && defined(PANDA_TARGET_LINUX)
+            // Avoid specifying default cortex for arm64-linux
+            cpu = g_options.WasSetLlvmCpu() ? g_options.GetLlvmCpu() : "";
+#else
             cpu = g_options.GetLlvmCpu();
+#endif
             break;
         case Arch::X86_64:
             cpu = g_options.WasSetLlvmCpu() ? g_options.GetLlvmCpu() : "";

@@ -2446,12 +2446,48 @@ void Aarch64Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc
     GetMasm()->Cset(VixlReg(dst), ConvertTest(cc));
 }
 
-void Aarch64Encoder::EncodeAtomicByteOr(Reg addr, Reg value)
+void Aarch64Encoder::EncodeAtomicByteOr(Reg addr, Reg value, bool fastEncoding)
 {
+    if (fastEncoding) {
 #ifndef NDEBUG
-    vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kAtomics);
+        vixl::CPUFeaturesScope scope(GetMasm(), vixl::CPUFeatures::kAtomics);
 #endif
-    GetMasm()->Stsetb(VixlReg(value, BYTE_SIZE), MemOperand(VixlReg(addr)));
+        GetMasm()->Stsetb(VixlReg(value, BYTE_SIZE), MemOperand(VixlReg(addr)));
+        return;
+    }
+
+    // Slow encoding, should not be used in production code!!!
+    auto linkReg = GetTarget().GetLinkReg();
+    auto frameReg = GetTarget().GetFrameReg();
+    static constexpr size_t PAIR_OFFSET = 2 * DOUBLE_WORD_SIZE_BYTES;
+
+    ScopedTmpRegLazy tmp1(this);
+    ScopedTmpRegLazy tmp2(this);
+    Reg orValue;
+    Reg storeResult;
+    bool hasTemps = GetScratchRegistersWithLrCount() >= 2U;
+    if (hasTemps) {
+        tmp1.AcquireWithLr();
+        tmp2.AcquireWithLr();
+        orValue = tmp1.GetReg().As(INT32_TYPE);
+        storeResult = tmp2.GetReg().As(INT32_TYPE);
+    } else {
+        GetMasm()->stp(VixlReg(frameReg), VixlReg(linkReg),
+                       MemOperand(vixl::aarch64::sp, -PAIR_OFFSET, vixl::aarch64::AddrMode::PreIndex));
+        orValue = frameReg.As(INT32_TYPE);
+        storeResult = linkReg.As(INT32_TYPE);
+    }
+
+    auto *loop = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    GetMasm()->Bind(loop);
+    GetMasm()->Ldxrb(VixlReg(orValue), MemOperand(VixlReg(addr)));
+    GetMasm()->Orr(VixlReg(orValue), VixlReg(orValue), VixlReg(value, WORD_SIZE));
+    GetMasm()->Stxrb(VixlReg(storeResult), VixlReg(orValue), MemOperand(VixlReg(addr)));
+    GetMasm()->Cbnz(VixlReg(storeResult), loop);
+    if (!hasTemps) {
+        GetMasm()->ldp(VixlReg(frameReg), VixlReg(linkReg),
+                       MemOperand(vixl::aarch64::sp, PAIR_OFFSET, vixl::aarch64::AddrMode::PostIndex));
+    }
 }
 
 void Aarch64Encoder::EncodeCmp(Reg dst, Reg src0, Reg src1, Condition cc)
@@ -2812,7 +2848,7 @@ void Aarch64Encoder::ReleaseScratchRegister(Reg reg)
     }
 }
 
-bool Aarch64Encoder::IsScratchRegisterReleased(Reg reg)
+bool Aarch64Encoder::IsScratchRegisterReleased(Reg reg) const
 {
     if (reg == GetTarget().GetLinkReg()) {
         return !lrAcquired_;

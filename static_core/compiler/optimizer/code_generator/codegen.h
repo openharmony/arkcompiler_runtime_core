@@ -434,6 +434,8 @@ private:
     template <typename... Args>
     void FillPostWrbCallParams(MemRef mem, Args &&...params);
 
+    void EmitAtomicByteOr(Reg addr, Reg value);
+
 private:
     ArenaAllocator *allocator_;
     ArenaAllocator *localAllocator_;
