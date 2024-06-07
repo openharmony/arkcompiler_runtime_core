@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -761,18 +761,22 @@ private:
     {
         std::string paramStr(argstr);
         if (IsIntegerNumber(paramStr)) {
-            int num;
+            int64_t result = 0;
             errno = 0;
             if (StartsWith(paramStr, "0x")) {
                 const int hex = 16;
-                num = std::stoi(paramStr, nullptr, hex);
+                result = std::strtol(paramStr.c_str(), nullptr, hex);
             } else {
-                num = std::stoi(paramStr);
+                const int dec = 10;
+                result = std::strtol(paramStr.c_str(), nullptr, dec);
             }
 
-            if (errno == ERANGE) {
+            int num = static_cast<int>(result);
+            if (num != result || errno == ERANGE) {
                 errstr_ +=
                     "pandargs: \"" + arg->GetName() + "\" argument has invalid parameter value \"" + paramStr + "\"\n";
+
+                return 1;
             }
 
             if (IsIntegerArgInRange(arg, num)) {
@@ -876,6 +880,8 @@ private:
             if (errno == ERANGE) {
                 errstr_ +=
                     "pandargs: \"" + arg->GetName() + "\" argument has invalid parameter value \"" + paramStr + "\"\n";
+
+                return 1;
             }
 
             if (IsIntegerArgInRange<uint64_t>(arg, num)) {
@@ -895,18 +901,22 @@ private:
     {
         std::string paramStr(argstr);
         if (IsUintNumber(paramStr)) {
+            uint64_t result = 0;
             errno = 0;
-            uint32_t num;
             if (StartsWith(paramStr, "0x")) {
                 const int hex = 16;
-                num = std::strtoull(paramStr.c_str(), nullptr, hex);
+                result = std::strtoull(paramStr.c_str(), nullptr, hex);
             } else {
                 const int dec = 10;
-                num = std::strtoull(paramStr.c_str(), nullptr, dec);
+                result = std::strtoull(paramStr.c_str(), nullptr, dec);
             }
-            if (errno == ERANGE) {
+
+            auto num = static_cast<uint32_t>(result);
+            if (num != result || errno == ERANGE) {
                 errstr_ +=
                     "pandargs: \"" + arg->GetName() + "\" argument has invalid parameter value \"" + paramStr + "\"\n";
+
+                return 1;
             }
 
             if (IsIntegerArgInRange<uint32_t>(arg, num)) {
