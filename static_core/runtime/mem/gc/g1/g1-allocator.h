@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,6 +199,24 @@ public:
 
     void CompactTenuredRegions(const PandaVector<Region *> &regions, const GCObjectVisitor &deathChecker,
                                const ObjectVisitorEx &moveChecker);
+
+    template <bool USE_ATOMIC = true>
+    Region *PopFromOldRegionQueue()
+    {
+        return objectAllocator_->template PopFromRegionQueue<USE_ATOMIC, RegionFlag::IS_OLD>();
+    }
+
+    template <bool USE_ATOMIC = true>
+    void PushToOldRegionQueue(Region *region)
+    {
+        objectAllocator_->template PushToRegionQueue<USE_ATOMIC, RegionFlag::IS_OLD>(region);
+    }
+
+    template <bool USE_ATOMIC = true>
+    Region *CreateAndSetUpNewOldRegion()
+    {
+        return objectAllocator_->template CreateAndSetUpNewRegionWithLock<USE_ATOMIC, RegionFlag::IS_OLD>();
+    }
 
     void ClearCurrentTenuredRegion()
     {

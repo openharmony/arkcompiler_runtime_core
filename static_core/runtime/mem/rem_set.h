@@ -66,6 +66,9 @@ public:
         return bitmaps_.size();
     }
 
+    void Merge(RemSet<> *other);
+    PandaUnorderedSet<Region *> GetDirtyRegions();
+
     /**
      * Used in the barrier. Record the reference from the region of objAddr to the region of valueAddr.
      * @param objAddr - address of the object
@@ -102,6 +105,13 @@ public:
         static constexpr size_t GetNumBits()
         {
             return GetBitmapSizeInBytes() * BITS_PER_BYTE;
+        }
+
+        void Merge(Bitmap other)
+        {
+            for (size_t i = 0; i < SIZE; i++) {
+                bitmap_[i] |= other.bitmap_[i];
+            }
         }
 
         void Set(size_t idx)

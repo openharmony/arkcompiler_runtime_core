@@ -92,6 +92,25 @@ void RemSet<LockConfigT>::InvalidateRefsFromRegion(Region *invalidRegion)
     invalidRemset->refRegions_.clear();
 }
 
+template <typename LockConfigT>
+void RemSet<LockConfigT>::Merge(RemSet<> *other)
+{
+    for (auto &[bitmap_begin_addr, bitmap] : other->bitmaps_) {
+        bitmaps_[bitmap_begin_addr].Merge(bitmap);
+    }
+}
+
+template <typename LockConfigT>
+PandaUnorderedSet<Region *> RemSet<LockConfigT>::GetDirtyRegions()
+{
+    PandaUnorderedSet<Region *> regions;
+    for (auto &[bitmap_begin_addr, _] : bitmaps_) {
+        auto *region = AddrToRegion(ToVoidPtr(bitmap_begin_addr));
+        regions.insert(region);
+    }
+    return regions;
+}
+
 /* static */
 template <typename LockConfigT>
 template <bool NEED_LOCK>

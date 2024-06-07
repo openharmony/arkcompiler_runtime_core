@@ -34,6 +34,11 @@ public:
 
     void ClearReferent();
 
+    void SetReferent(EtsObject *addr)
+    {
+        referent_ = addr;
+    }
+
 private:
     // Such field has the same layout as referent in std.core.WeakRef class
     ObjectPointer<EtsObject> referent_;

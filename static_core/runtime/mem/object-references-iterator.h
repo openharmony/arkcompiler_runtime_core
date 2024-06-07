@@ -33,12 +33,27 @@ public:
     template <bool INTERRUPTIBLE, typename Handler>
     static bool Iterate(ObjectHeader *obj, Handler *handler, void *begin, void *end);
 
+    template <typename Handler>
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler);
+
+    template <typename Handler>
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+
 private:
     template <bool INTERRUPTIBLE, typename Handler>
-    static bool IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler);
+    static bool Iterate(Class *cls, ObjectHeader *obj, Handler *handler);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool Iterate(Class *cls, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool IterateObjectReferences(ObjectHeader *object, Class *objClass, Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateObjectReferences(ObjectHeader *object, Class *cls, Handler *handler, void *begin, void *end);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool IterateClassReferences(Class *cls, Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateClassReferences(Class *cls, Handler *handler, void *begin, void *end);
@@ -59,9 +74,27 @@ public:
     template <bool INTERRUPTIBLE, typename Handler>
     static bool Iterate(ObjectHeader *obj, Handler *handler, void *begin, void *end);
 
+    template <typename Handler>
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler);
+
+    template <typename Handler>
+    static bool IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+
 private:
     template <bool INTERRUPTIBLE, typename Handler>
+    static bool Iterate(HClass *cls, ObjectHeader *obj, Handler *handler);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool Iterate(HClass *cls, ObjectHeader *obj, Handler *handler, void *begin, void *end);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler);
+
+    template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler, void *begin, void *end);
+
+    template <bool INTERRUPTIBLE, typename Handler>
+    static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler);
 
     template <bool INTERRUPTIBLE, typename Handler>
     static bool IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler, void *begin, void *end);

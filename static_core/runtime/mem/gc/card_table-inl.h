@@ -148,6 +148,20 @@ void CardTable::VisitMarkedCompact(CardVisitor cardVisitor)
     }
 }
 
+#ifndef NDEBUG
+inline bool CardTable::IsClear()
+{
+    bool clear = true;
+    VisitMarked(
+        [&clear](const MemRange &range) {
+            LOG(ERROR, GC) << "Card [" << ToVoidPtr(range.GetStartAddress()) << " - "
+                           << ToVoidPtr(range.GetEndAddress()) << "] is not clear";
+            clear = false;
+        },
+        CardTableProcessedFlag::VISIT_MARKED | CardTableProcessedFlag::VISIT_PROCESSED);
+    return clear;
+}
+#endif
 }  // namespace ark::mem
 
 #endif  // RUNTIME_MEM_GC_CARD_TABLE_INL_H

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,6 +103,8 @@ public:
     void UpdateMovedRefs();
 
     void ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred);
+
+    void ClearWeakRefs(const mem::GC::ReferenceClearPredicateT &pred);
 
     size_t GetSize();
 
@@ -309,16 +311,15 @@ private:
             }
         }
 
-        void ClearUnmarkedWeakRefs(const GC *gc, const mem::GC::ReferenceClearPredicateT &pred)
+        void ClearWeakRefs(const mem::GC::ReferenceClearPredicateT &pred)
         {
-            ASSERT(IsMarking(gc->GetGCPhase()));
             os::memory::WriteLockHolder lk(mutex_);
 
             for (auto &ref : storage_) {
                 if (IsBusy(ref)) {
                     auto obj = reinterpret_cast<ObjectHeader *>(ref);
-                    if (obj != nullptr && pred(obj) && !gc->IsMarked(obj)) {
-                        LOG(DEBUG, GC) << "Clear not marked weak-reference: " << std::hex << ref << " object: " << obj;
+                    if (obj != nullptr && pred(obj)) {
+                        LOG(DEBUG, GC) << "Clear weak-reference: " << obj;
                         ref = reinterpret_cast<uintptr_t>(nullptr);
                     }
                 }

@@ -429,6 +429,13 @@ void GC::ProcessReference(GCMarkingStackType *objectsStack, const BaseClass *cls
     referenceProcessor_->HandleReference(this, objectsStack, cls, ref, pred);
 }
 
+void GC::ProcessReferenceForSinglePassCompaction(const BaseClass *cls, const ObjectHeader *ref,
+                                                 const ReferenceProcessorT &processor)
+{
+    ASSERT(referenceProcessor_ != nullptr);
+    referenceProcessor_->HandleReference(this, cls, ref, processor);
+}
+
 void GC::AddReference(ObjectHeader *fromObj, ObjectHeader *object)
 {
     ASSERT(IsMarked(object));
@@ -454,6 +461,20 @@ void GC::ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceC
     if (processedRef != nullptr) {
         os::memory::LockHolder holder(*clearedReferencesLock_);
         // NOTE(alovkov): ged rid of cleared_references_ and just enqueue refs here?
+        clearedReferences_->push_back(processedRef);
+    }
+}
+
+void GC::ProcessReferences(const GCTask &task, const ReferenceClearPredicateT &pred)
+{
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    LOG(DEBUG, REF_PROC) << "Start processing cleared references";
+    ASSERT(referenceProcessor_ != nullptr);
+    bool clearSoftReferences = task.reason == GCTaskCause::OOM_CAUSE || IsExplicitFull(task);
+    referenceProcessor_->ProcessReferencesAfterCompaction(clearSoftReferences, pred);
+    Reference *processedRef = referenceProcessor_->CollectClearedReferences();
+    if (processedRef != nullptr) {
+        os::memory::LockHolder holder(*clearedReferencesLock_);
         clearedReferences_->push_back(processedRef);
     }
 }
@@ -570,6 +591,12 @@ bool GC::IsReference(const BaseClass *cls, const ObjectHeader *ref, const Refere
 {
     ASSERT(referenceProcessor_ != nullptr);
     return referenceProcessor_->IsReference(cls, ref, pred);
+}
+
+bool GC::IsReference(const BaseClass *cls, const ObjectHeader *ref)
+{
+    ASSERT(referenceProcessor_ != nullptr);
+    return referenceProcessor_->IsReference(cls, ref);
 }
 
 void GC::EnqueueReferences()

@@ -171,6 +171,10 @@ public:
         return DIRTY_CARD;
     }
 
+#ifndef NDEBUG
+    bool IsClear();
+#endif
+
     class Card {
     public:
         using Status = uint8_t;

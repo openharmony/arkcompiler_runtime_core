@@ -19,6 +19,9 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 
+#include "plugins/ets/runtime/types/ets_class.h"
+#include "plugins/ets/runtime/types/ets_weak_reference.h"
+
 namespace ark::mem::ets {
 
 class EtsReferenceProcessor final : public ReferenceProcessor {
@@ -32,12 +35,17 @@ public:
 
     bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                      const ReferenceCheckPredicateT &pred) const final;
+    bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref) const final;
 
     void HandleReference(GC *gc, GCMarkingStackType *objectsStack, const BaseClass *cls, const ObjectHeader *object,
                          const ReferenceProcessPredicateT &pred) final;
+    void HandleReference(GC *gc, const BaseClass *cls, const ObjectHeader *object,
+                         const ReferenceProcessorT &processor) final;
 
     void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                            const mem::GC::ReferenceClearPredicateT &pred) final;
+    void ProcessReferencesAfterCompaction(bool clearSoftReferences,
+                                          const mem::GC::ReferenceClearPredicateT &pred) final;
 
     ark::mem::Reference *CollectClearedReferences() final
     {
@@ -58,12 +66,38 @@ public:
     size_t GetReferenceQueueSize() const final;
 
 private:
+    template <typename Handler>
+    void ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler);
     mutable os::memory::Mutex weakRefLock_;
     PandaUnorderedSet<ObjectHeader *> weakReferences_ GUARDED_BY(weakRefLock_);
     GC *gc_ {nullptr};
     ark::ets::EtsObject *undefinedObject_ {nullptr};
 };
 
+template <typename Handler>
+void EtsReferenceProcessor::ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler)
+{
+    os::memory::LockHolder lock(weakRefLock_);
+    while (!weakReferences_.empty()) {
+        auto *weakRefObj = weakReferences_.extract(weakReferences_.begin()).value();
+        ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
+        auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
+        auto *referent = weakRef->GetReferent();
+        if (referent == nullptr || referent == undefinedObject_) {
+            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
+                                 << " because referent is nullish";
+            continue;
+        }
+        auto *referentObj = referent->GetCoreType();
+        if (!pred(referentObj)) {
+            LOG(DEBUG, REF_PROC) << "Don't process reference " << GetDebugInfoAboutObject(weakRefObj)
+                                 << " because referent " << GetDebugInfoAboutObject(referentObj) << " failed predicate";
+            continue;
+        }
+
+        handler(weakRefObj, referentObj);
+    }
+}
 }  // namespace ark::mem::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_MEM_ETS_REFERENCE_PROCESSOR_H

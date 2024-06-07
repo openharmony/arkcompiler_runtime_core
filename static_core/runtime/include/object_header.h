@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,13 +67,12 @@ public:
         markWord_ = markWord.Value();
     }
 
-    inline MarkWord AtomicGetMark() const
+    inline MarkWord AtomicGetMark(std::memory_order memoryOrder = std::memory_order_seq_cst) const
     {
-        auto ptr = const_cast<MarkWord *>(reinterpret_cast<const MarkWord *>(&markWord_));
-        auto atomicPtr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
-        // Atomic with seq_cst order reason: data race with markWord_ with requirement for sequentially consistent order
-        // where threads observe all modifications in the same order
-        return atomicPtr->load(std::memory_order_seq_cst);
+        auto *ptr = const_cast<MarkWord *>(reinterpret_cast<const MarkWord *>(&markWord_));
+        auto *atomicPtr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
+        // Atomic with parameterized order reason: memory order passed as argument
+        return atomicPtr->load(memoryOrder);
     }
 
     inline void SetClass(BaseClass *klass)
@@ -185,17 +184,20 @@ public:
     inline void *FieldAddr(int offset) const;
 
     template <bool STRONG = true>
-    bool AtomicSetMark(MarkWord &oldMarkWord, MarkWord newMarkWord)
+    bool AtomicSetMark(MarkWord &oldMarkWord, MarkWord newMarkWord,
+                       std::memory_order memoryOrder = std::memory_order_seq_cst)
     {
         // This is the way to operate with casting MarkWordSize <-> MarkWord and atomics
         auto ptr = reinterpret_cast<MarkWord *>(&markWord_);
         auto atomicPtr = reinterpret_cast<std::atomic<MarkWord> *>(ptr);
         // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
         if constexpr (STRONG) {  // NOLINT(bugprone-suspicious-semicolon)
-            return atomicPtr->compare_exchange_strong(oldMarkWord, newMarkWord);
+            // Atomic with parameterized order reason: memory order passed as argument
+            return atomicPtr->compare_exchange_strong(oldMarkWord, newMarkWord, memoryOrder);
         }
         // CAS weak may return false results, but is more efficient, use it only in loops
-        return atomicPtr->compare_exchange_weak(oldMarkWord, newMarkWord);
+        // Atomic with parameterized order reason: memory order passed as argument
+        return atomicPtr->compare_exchange_weak(oldMarkWord, newMarkWord, memoryOrder);
     }
 
     // Accessors to typical Class types

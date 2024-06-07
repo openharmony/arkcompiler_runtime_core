@@ -221,6 +221,16 @@ private:
     /// GC for young generation. Runs with STW.
     void RunGC(GCTask &task, const CollectionSet &collectibleRegions);
 
+    /**
+     * Return true if garbage can be collected in single pass (VM supports it, no pinned objects, GC is not postponed
+     * etc) otherwise false
+     */
+    bool SinglePassCompactionAvailable();
+    void EvacuateCollectionSet(const GCTask &task);
+    void MergeRemSet(RemSet<> *remset);
+    void HandleReferences(const GCTask &task);
+    void ResetRegionAfterMixedGC();
+
     /// GC for tenured generation.
     void RunTenuredGC(const GCTask &task);
 
@@ -496,6 +506,8 @@ private:
     friend class RefCacheBuilder;
     friend class G1GCTest;
     friend class RemSetChecker;
+    template <class>
+    friend class G1EvacuateRegionsWorkerState;
 };
 
 template <MTModeT MT_MODE>

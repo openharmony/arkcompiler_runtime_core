@@ -20,8 +20,28 @@
 #include "runtime/include/object_accessor.h"
 #include "runtime/mem/region_allocator.h"
 #include "runtime/mem/rem_set-inl.h"
+#include "runtime/mem/gc/g1/g1-gc.h"
 
 namespace ark::mem {
+template <LangTypeT LANG_TYPE>
+struct ObjectReference;
+
+template <>
+struct ObjectReference<LANG_TYPE_STATIC> {
+    using Type = ObjectPointerType *;
+};
+
+template <>
+struct ObjectReference<LANG_TYPE_DYNAMIC> {
+    using Type = coretypes::TaggedType *;
+};
+
+template <typename LanguageConfig>
+class G1GC;
+
+template <typename LanguageConfig>
+class G1EvacuateRegionsWorkerState;
+
 class RemsetObjectPointerHandler {
 public:
     RemsetObjectPointerHandler(Region *fromRegion, size_t regionSizeBits, const std::atomic_bool &deferCards)
@@ -64,6 +84,41 @@ private:
     RemSetT *fromRemset_;
     size_t regionSizeBits_;
     const std::atomic_bool &deferCards_;
+};
+
+template <class LanguageConfig>
+class EvacuationObjectPointerHandler {
+public:
+    using Ref = typename ObjectReference<LanguageConfig::LANG_TYPE>::Type;
+
+    explicit EvacuationObjectPointerHandler(G1EvacuateRegionsWorkerState<LanguageConfig> *workerState)
+        : gc_(workerState->GetGC()), workerState_(workerState)
+    {
+    }
+
+    bool ProcessObjectPointer(Ref ref) const
+    {
+        ProcessObjectPointerHelper(ref);
+        return true;
+    }
+
+private:
+    void ProcessObjectPointerHelper(Ref ref) const
+    {
+        auto o = ObjectAccessor::Load(ref);
+        if (!ObjectAccessor::IsHeapObject(o)) {
+            return;
+        }
+        auto *obj = ObjectAccessor::DecodeNotNull(o);
+        if (gc_->InGCSweepRange(obj)) {
+            workerState_->PushToQueue(ref);
+        } else if (!workerState_->IsSameRegion(ref, obj)) {
+            workerState_->EnqueueCard(ref);
+        }
+    }
+
+    G1GC<LanguageConfig> *gc_;
+    G1EvacuateRegionsWorkerState<LanguageConfig> *workerState_;
 };
 }  // namespace ark::mem
 
