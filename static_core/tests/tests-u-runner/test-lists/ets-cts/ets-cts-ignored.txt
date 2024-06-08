@@ -2139,3 +2139,54 @@
 # end of es2panda failure
 # es2panda: 15945: The test failed because of a different error. The check for this case is not implemented yet
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_5.ets
+
+# es2panda: #16408 Cannot declare ambient constant variable
+14.ambient_declarations/ambient_declarations_1.ets 
+14.ambient_declarations/ambient_declarations_3.ets
+
+# es2panda: #16262 Declare leads to RTE
+14.ambient_declarations/ambient_declarations_4.ets
+14.ambient_declarations/ambient_declarations_5.ets
+14.ambient_declarations/ambient_declarations_6.ets
+14.ambient_declarations/ambient_declarations_25.ets
+14.ambient_declarations/ambient_declarations_26.ets
+14.ambient_declarations/ambient_declarations_27.ets
+14.ambient_declarations/ambient_declarations_28.ets
+14.ambient_declarations/ambient_declarations_29.ets
+14.ambient_declarations/ambient_declarations_30.ets
+14.ambient_declarations/ambient_declarations_32.ets
+14.ambient_declarations/ambient_declarations_33.ets
+14.ambient_declarations/ambient_declarations_34.ets
+14.ambient_declarations/ambient_declarations_36.ets
+14.ambient_declarations/ambient_declarations_37.ets
+14.ambient_declarations/ambient_declarations_38.ets
+14.ambient_declarations/ambient_declarations_39.ets
+14.ambient_declarations/ambient_declarations_41.ets
+14.ambient_declarations/ambient_declarations_42.ets
+14.ambient_declarations/ambient_declarations_43.ets
+14.ambient_declarations/ambient_declarations_54.ets
+
+# es2panda: #16409 Cannot declare class without body (ambient declarations)
+14.ambient_declarations/ambient_declarations_8.ets
+14.ambient_declarations/ambient_declarations_9.ets
+14.ambient_declarations/ambient_declarations_10.ets
+14.ambient_declarations/ambient_declarations_11.ets
+14.ambient_declarations/ambient_declarations_12.ets
+14.ambient_declarations/ambient_declarations_13.ets
+14.ambient_declarations/ambient_declarations_55.ets
+14.ambient_declarations/ambient_declarations_56.ets
+
+# es2panda: #16410 Cannot declare function with optional parameters (ambient declarations)
+14.ambient_declarations/ambient_declarations_7.ets
+
+# es2panda: #16411 Cannot declare final class 
+14.ambient_declarations/ambient_declarations_15.ets 
+14.ambient_declarations/ambient_declarations_57.ets
+14.ambient_declarations/bad_ambient_declarations_9.ets
+
+# es2panda: #16415 Cannot declare static field in generic ambient class
+14.ambient_declarations/ambient_declarations_24.ets
+
+# es2panda: #16861 Unexpected token error message when using initalizers in the ambient contexts
+14.ambient_declarations/bad_ambient_declarations_0.ets
+14.ambient_declarations/bad_ambient_declarations_1.ets
