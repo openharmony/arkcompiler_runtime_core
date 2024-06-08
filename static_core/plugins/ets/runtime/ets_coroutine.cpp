@@ -103,6 +103,9 @@ void EtsCoroutine::RequestCompletion(Value returnValue)
                                   << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
             intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc));
         } else {
+            if (retObject != nullptr && retObject->IsInstanceOf(GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
+                retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
+            }
             intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject);
         }
     } else {
@@ -112,6 +115,14 @@ void EtsCoroutine::RequestCompletion(Value returnValue)
             << HasPendingException();
     }
     Coroutine::RequestCompletion(returnValue);
+}
+
+EtsObject *EtsCoroutine::GetValueFromPromiseSync(EtsPromise *promise)
+{
+    if (promise->IsPending()) {
+        return intrinsics::EtsAwaitPromise(promise);
+    }
+    return promise->GetValue(this);
 }
 
 panda_file::Type EtsCoroutine::GetReturnType()

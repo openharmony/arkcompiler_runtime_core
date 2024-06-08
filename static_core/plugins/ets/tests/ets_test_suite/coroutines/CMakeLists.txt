@@ -126,6 +126,14 @@ add_ets_coroutines_test(FILE await.ets
                         MODE "INT" "JIT"
 )
 
+add_ets_coroutines_test(FILE launch_launch.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "THREADED"
+                        OPTION_SETS_THREADED "DEFAULT"
+                        WORKERS "AUTO" "ONE"
+                        MODE "INT" "JIT"
+)
+
 if (NOT PANDA_TARGET_ARM32)
     add_ets_coroutines_test(FILE await.ets
                             SKIP_ARM32_COMPILER
