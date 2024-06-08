@@ -14,7 +14,7 @@
 module:
   name: paoc
   namespace: ark::paoc
-  descritpition: Application to compile panda files
+  description: Application to compile panda files
 
 options:
   - name: paoc-panda-files

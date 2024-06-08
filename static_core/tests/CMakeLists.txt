@@ -727,6 +727,7 @@ function(add_test_file)
                     LLVMAOT_OPTIONS "${ARG_LLVMAOT_OPTIONS} --compiler-non-optimizing=true --llvm-gc-check=true"
                     ${RUNTIME_FAIL_TEST}
                 )
+                add_dependencies(${suite} ${target}-llvmaot-noopt-${gc_type})
                 add_dependencies(cts-llvmaot-tests ${target}-llvmaot-noopt-${gc_type})
             endif()
         endif()

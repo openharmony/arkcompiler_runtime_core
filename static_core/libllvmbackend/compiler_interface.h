@@ -38,7 +38,7 @@ struct CompilerInterface {
 
     virtual Expected<bool, std::string> CanCompile(ark::compiler::Graph *graph) = 0;
     virtual bool AddGraph(ark::compiler::Graph *graph) = 0;
-    virtual void CompileAll() = 0;
+    virtual void FinishCompile() = 0;
     virtual bool HasCompiledCode() = 0;
     virtual bool IsIrFailed() = 0;
 

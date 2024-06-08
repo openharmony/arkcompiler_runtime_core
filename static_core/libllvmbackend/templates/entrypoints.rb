@@ -93,8 +93,7 @@ class Entrypoint
   end
 
   def bridge
-    bridge = @dscr['bridge']
-    return bridge.upcase
+    @dscr['bridge'].upcase
   end
 
 end

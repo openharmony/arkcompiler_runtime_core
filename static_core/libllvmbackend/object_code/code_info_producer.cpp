@@ -24,6 +24,7 @@
 static constexpr unsigned LOCATION_STEP = 2U;
 static constexpr unsigned START_OFFSET = 3U;
 static constexpr unsigned DWARF_AARCH64_BASE_REG = 19U;
+[[maybe_unused]] static constexpr unsigned DWARF_MAX_REG = 32U;
 
 namespace ark::llvmbackend {
 
@@ -59,7 +60,7 @@ void CodeInfoProducer::AddFaultMapSymbol(Method *method, uint32_t symbol)
 }
 
 /// Fill a CodeInfoBuilder with proper data for the passed METHOD.
-void CodeInfoProducer::Produce(Method *method, ark::compiler::CodeInfoBuilder *builder) const
+void CodeInfoProducer::Produce(Method *method, compiler::CodeInfoBuilder *builder) const
 {
     builder->BeginMethod(0, compilation_->GetVirtualRegistersCount(method));
 
@@ -142,7 +143,7 @@ unsigned CodeInfoProducer::CollectRoots(const LLVMStackMap::RecordAccessor &reco
         const auto &loc = record.getLocation(i);
         auto kind = loc.getKind();
         // We expect spilled references or constant null pointers that may come from "deopt" bundle
-        ASSERT(kind == LLVMStackMap::LocationKind::Indirect ||
+        ASSERT(kind == LLVMStackMap::LocationKind::Indirect || kind == LLVMStackMap::LocationKind::Register ||
                (kind == LLVMStackMap::LocationKind::Constant && loc.getSmallConstant() == 0));
         // Spilled value
         if (kind == LLVMStackMap::LocationKind::Indirect) {
@@ -155,15 +156,20 @@ unsigned CodeInfoProducer::CollectRoots(const LLVMStackMap::RecordAccessor &reco
             } else {
                 stack->SetBit(slot - fl.GetFirstSpillSlot());
             }
+        } else if (kind == LLVMStackMap::LocationKind::Register) {
+            unsigned reg = loc.getDwarfRegNum();
+            ASSERT(reg < DWARF_MAX_REG);
+            reg = arch_ == Arch::X86_64 ? LLVMArkInterface::X86RegNumberConvert(reg) : reg;
+            regMask |= (1U << reg);
         }
     }
     LLVM_LOG(DEBUG, STACKMAPS) << "Register mask:" << regMask;
+    ASSERT((regMask & ~(GetCalleeRegsMask(arch_, false).GetValue() | GetCallerRegsMask(arch_, false).GetValue())) == 0);
     return regMask;
 }
 
-void CodeInfoProducer::BuildSingleRegMap(ark::compiler::CodeInfoBuilder *builder,
-                                         const LLVMStackMap::RecordAccessor &record, int32_t methodIdIndex,
-                                         int32_t vregsCount, uint64_t stackSize) const
+void CodeInfoProducer::BuildSingleRegMap(compiler::CodeInfoBuilder *builder, const LLVMStackMap::RecordAccessor &record,
+                                         int32_t methodIdIndex, int32_t vregsCount, uint64_t stackSize) const
 {
     int32_t vregsTotal = record.getLocation(methodIdIndex + INLINE_VREG_COUNT).getSmallConstant();
     std::vector<int> ordered;
@@ -191,29 +197,32 @@ void CodeInfoProducer::BuildSingleRegMap(ark::compiler::CodeInfoBuilder *builder
             uint64_t constVal = stackmap_->getConstant(loc.getConstantIndex()).getValue();
             builder->AddConstant(constVal, vregType, vregVregType);
         } else if (loc.getKind() == LLVMStackMap::LocationKind::Indirect) {
-            bool constexpr FP = true;
             auto slot = GetArkFrameSlot(loc, stackSize, fl.GetSlotSize());
             compiler::VRegInfo::Location vregLoc;
             int32_t value;
-            if (slot <= fl.GetCalleeLastSlot(!FP)) {
+            if (slot <= fl.GetCalleeLastSlot(false)) {
                 vregLoc = compiler::VRegInfo::Location::REGISTER;
-                value = GetFirstCalleeReg(arch_, !FP) + fl.GetCalleeLastSlot(!FP) - slot;
-            } else if (slot <= fl.GetCalleeLastSlot(FP)) {
+                value = GetFirstCalleeReg(arch_, false) + fl.GetCalleeLastSlot(false) - slot;
+            } else if (slot <= fl.GetCalleeLastSlot(true)) {
                 vregLoc = compiler::VRegInfo::Location::FP_REGISTER;
-                value = GetFirstCalleeReg(arch_, FP) + fl.GetCalleeLastSlot(FP) - slot;
+                value = GetFirstCalleeReg(arch_, true) + fl.GetCalleeLastSlot(true) - slot;
             } else {
                 vregLoc = compiler::VRegInfo::Location::SLOT;
                 value = slot;
             }
             ASSERT(value > 0);
             builder->AddVReg(compiler::VRegInfo(value, vregLoc, vregType, vregVregType));
+        } else if (loc.getKind() == LLVMStackMap::LocationKind::Register) {
+            unsigned reg = loc.getDwarfRegNum();
+            reg = arch_ == Arch::X86_64 ? LLVMArkInterface::X86RegNumberConvert(reg) : reg;
+            builder->AddVReg(compiler::VRegInfo(reg, compiler::VRegInfo::Location::REGISTER, vregType, vregVregType));
         } else {
             UNREACHABLE();
         }
     }
 }
 
-void CodeInfoProducer::BuildRegMap(ark::compiler::CodeInfoBuilder *builder, const LLVMStackMap::RecordAccessor &record,
+void CodeInfoProducer::BuildRegMap(compiler::CodeInfoBuilder *builder, const LLVMStackMap::RecordAccessor &record,
                                    uint64_t stackSize) const
 {
     auto deoptCount = record.getLocation(LOCATION_DEOPT_COUNT).getSmallConstant();

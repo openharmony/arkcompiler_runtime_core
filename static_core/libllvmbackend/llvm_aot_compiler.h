@@ -27,6 +27,7 @@
 
 #include <llvm/Object/StackMapParser.h>
 #include <llvm/Support/Mutex.h>
+#include <llvm/Support/ThreadPool.h>
 
 namespace ark::compiler {
 class LLVMAotBuilder;
@@ -83,7 +84,7 @@ public:
 
     bool AddGraph(ark::compiler::Graph *graph) override;
 
-    void CompileAll() override;
+    void FinishCompile() override;
 
     bool HasCompiledCode() override
     {
@@ -146,7 +147,13 @@ private:
     ark::compiler::RuntimeInterface *runtime_;
     std::unique_ptr<Spreader> spreader_;
     std::atomic<uint32_t> compiledModules_ {0};
+    std::shared_ptr<WrappedModule> currentModule_;
     llvm::sys::Mutex lock_ {};
+    std::unique_ptr<llvm::ThreadPool> threadPool_;
+
+    int32_t semaphore_ {0};
+    std::condition_variable cv_;
+    std::mutex mutex_;
 };
 }  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_AOT_COMPILER_H

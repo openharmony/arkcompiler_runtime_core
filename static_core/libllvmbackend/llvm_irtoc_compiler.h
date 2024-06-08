@@ -44,7 +44,7 @@ public:
 
     bool AddGraph(ark::compiler::Graph *graph) override;
 
-    void CompileAll() override;
+    void FinishCompile() override;
 
     bool IsEmpty() override
     {

@@ -106,6 +106,16 @@ bool LLVMIrConstructor::EmitStringBuilderAppendString(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitStringBuilderToString(Inst *inst)
+{
+    auto offset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, offset, builder_.getPtrTy());
+    auto eid = RuntimeInterface::EntrypointId::STRING_BUILDER_TO_STRING;
+    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), klass});
+    ValueMapAdd(inst, call);
+    return true;
+}
+
 llvm::Value *LLVMIrConstructor::CreateStringBuilderAppendLong(Inst *inst)
 {
     auto sb = GetInputValue(inst, 0);

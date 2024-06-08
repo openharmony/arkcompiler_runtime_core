@@ -119,7 +119,7 @@ if(PANDA_WITH_COMPILER)
     set (COMPILER_OPTIONS "--compiler-check-final=true")
     add_custom_target(ets-compile-stdlib-default
         COMMENT "Running ark_aot compilation for etsstdlib with default options"
-        COMMAND ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh --prefix="${PANDA_RUN_PREFIX}" --binary-dir=${CMAKE_BINARY_DIR} --compiler-options=${COMPILER_OPTIONS} -paoc-output=${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.an
+        COMMAND ${CMAKE_SOURCE_DIR}/plugins/ets/compiler/tools/paoc_compile_stdlib.sh --prefix="${PANDA_RUN_PREFIX}" --binary-dir=${CMAKE_BINARY_DIR} -compiler-options="${COMPILER_OPTIONS}" -paoc-output=${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.an
         DEPENDS ark_aot etsstdlib
     )
 endif()

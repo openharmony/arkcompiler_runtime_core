@@ -47,22 +47,36 @@ ArkGVN::ArkGVN(LLVMArkInterface *arkInterface) : arkInterface_ {arkInterface} {}
 
 llvm::PreservedAnalyses ArkGVN::run(llvm::Function &function, llvm::FunctionAnalysisManager &analysisManager)
 {
-    ASSERT(dfsState_.empty());
-    bool changed = false;
-
+    ASSERT(workStack_.empty());
+    ASSERT(bbTables_.empty());
     GvnBuiltins builtins = {LoadClass(function.getParent()), LoadInitClass(function.getParent()),
                             LoadString(function.getParent()), ResolveVirtual(function.getParent())};
 
     auto &tree = analysisManager.getResult<llvm::DominatorTreeAnalysis>(function);
-    RunOnBasicBlock(tree.getRoot(), tree, changed, builtins);
-    ASSERT(dfsState_.empty());
+    bool changed = RunOnFunction(tree, builtins);
+    ASSERT(workStack_.empty());
+    bbTables_.clear();
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
-void ArkGVN::RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree &tree, bool &changed,
-                             const GvnBuiltins &builtins)
+bool ArkGVN::RunOnFunction(const llvm::DominatorTree &tree, const GvnBuiltins &builtins)
 {
-    dfsState_.emplace_back();
+    bool changed = false;
+    workStack_.push_back(tree.getRoot());
+    while (!workStack_.empty()) {
+        auto block = workStack_.back();
+        changed |= RunOnBasicBlock(block, tree, builtins);
+        workStack_.pop_back();
+        for (const auto &child : tree.getNode(block)->children()) {
+            workStack_.push_back(child->getBlock());
+        }
+    }
+    return changed;
+}
+
+bool ArkGVN::RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree &tree, const GvnBuiltins &builtins)
+{
+    bool changed = false;
     for (auto iter = block->begin(), endIter = block->end(); iter != endIter;) {
         auto callInst = llvm::dyn_cast<llvm::CallInst>(&*iter);
         iter++;
@@ -75,41 +89,35 @@ void ArkGVN::RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree 
             continue;
         }
 
-        llvm::Value *alternative = FindDominantCall(builtinKey);
+        llvm::Value *alternative = FindDominantCall(builtinKey, block, tree);
         if (alternative != nullptr) {
+            ASSERT(tree.dominates(alternative, callInst));
             // need replace instruction by another
             callInst->replaceAllUsesWith(alternative);
             callInst->eraseFromParent();
             changed |= true;
-        } else {
-            if (builtinKey.builtinTy == RESOLVE_VIRTUAL_METHOD && arkInterface_->IsArm64() &&
-                llvm::isa<llvm::ConstantInt>(callInst->getOperand(1))) {
-                auto func = callInst->getFunction();
-                auto slotId = arkInterface_->CreateIntfInlineCacheSlotId(func);
-                auto aotGot = func->getParent()->getGlobalVariable("__aot_got");
-                auto builder = llvm::IRBuilder<>(callInst);
-                auto arrayType = llvm::ArrayType::get(builder.getInt64Ty(), 0);
-                llvm::Value *slot = builder.CreateConstInBoundsGEP2_64(arrayType, aotGot, 0, slotId);
-                callInst->setArgOperand(2U, slot);
-                changed |= true;
-            }
+            continue;
+        }
+        if (builtinKey.builtinTy == RESOLVE_VIRTUAL_METHOD && arkInterface_->IsArm64() &&
+            llvm::isa<llvm::ConstantInt>(callInst->getOperand(1))) {
+            auto func = callInst->getFunction();
+            auto slotId = arkInterface_->CreateIntfInlineCacheSlotId(func);
+            auto aotGot = func->getParent()->getGlobalVariable("__aot_got");
+            auto builder = llvm::IRBuilder<>(callInst);
+            auto arrayType = llvm::ArrayType::get(builder.getInt64Ty(), 0);
+            llvm::Value *slot = builder.CreateConstInBoundsGEP2_64(arrayType, aotGot, 0, slotId);
+            callInst->setArgOperand(2U, slot);
+            changed |= true;
+        }
 
-            auto &currentTable = dfsState_.back();
-            currentTable.insert({builtinKey, callInst});
-            if (builtinKey.builtinTy == LOAD_AND_INIT_CLASS) {
-                BuiltinKey loadClass = builtinKey;
-                loadClass.builtinTy = LOAD_CLASS;
-                currentTable.insert({loadClass, callInst});
-            }
+        bbTables_[block].insert({builtinKey, callInst});
+        if (builtinKey.builtinTy == LOAD_AND_INIT_CLASS) {
+            BuiltinKey loadClass = builtinKey;
+            loadClass.builtinTy = LOAD_CLASS;
+            bbTables_[block].insert({loadClass, callInst});
         }
     }
-
-    for (const auto &child : tree.getNode(block)->children()) {
-        auto childBlock = child->getBlock();
-        RunOnBasicBlock(childBlock, tree, changed, builtins);
-    }
-
-    dfsState_.pop_back();
+    return changed;
 }
 
 ArkGVN::BuiltinKey ArkGVN::ParseBuiltin(const llvm::CallInst *callInst, const GvnBuiltins &builtins)
@@ -150,14 +158,18 @@ ArkGVN::BuiltinKey ArkGVN::ParseBuiltin(const llvm::CallInst *callInst, const Gv
     return result;
 }
 
-llvm::Value *ArkGVN::FindDominantCall(const ArkGVN::BuiltinKey &curBuiltin)
+llvm::Value *ArkGVN::FindDominantCall(const ArkGVN::BuiltinKey &curBuiltin, llvm::BasicBlock *block,
+                                      const llvm::DominatorTree &tree)
 {
-    for (auto &table : dfsState_) {
+    do {
+        auto table = bbTables_[block];
         auto dominant = table.find(curBuiltin);
         if (dominant != table.end()) {
             return dominant->second;
         }
-    }
+        auto idom = tree.getNode(block)->getIDom();
+        block = idom == nullptr ? nullptr : idom->getBlock();
+    } while (block != nullptr);
     return nullptr;
 }
 

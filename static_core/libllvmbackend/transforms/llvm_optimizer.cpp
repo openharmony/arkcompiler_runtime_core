@@ -225,7 +225,7 @@ void LLVMOptimizer::OptimizeModule(llvm::Module *module) const
         if (!isIrtocMode) {
             AddPassIf(functionPm, passes::PruneDeopt());
             AddPassIf(functionPm, passes::ArkGVN(arkInterface_));
-            AddPassIf(functionPm, passes::MemBarriers(arkInterface_));
+            AddPassIf(functionPm, passes::MemBarriers(arkInterface_, options_.optimize));
             AddPassIf(functionPm, passes::IntrinsicsLowering(arkInterface_));
             AddPassIf(functionPm, passes::PandaRuntimeLowering(arkInterface_));
             AddPassIf(functionPm, passes::InsertSafepoints(), options_.useSafepoint);

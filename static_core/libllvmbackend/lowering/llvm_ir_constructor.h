@@ -44,6 +44,7 @@ private:
     bool EmitStringConcat2(Inst *inst);
     bool EmitStringConcat3(Inst *inst);
     bool EmitStringConcat4(Inst *inst);
+    bool EmitStringCompareTo(Inst *inst);
     bool EmitIsInf(Inst *inst);
     bool EmitUnreachable(Inst *inst);
     bool EmitNothing(Inst *inst);
@@ -132,8 +133,6 @@ private:
     llvm::Value *CreateBinaryImmOp(Inst *inst, llvm::Instruction::BinaryOps opcode, uint64_t c);
     llvm::Value *CreateShiftOp(Inst *inst, llvm::Instruction::BinaryOps opcode);
     llvm::Value *CreateSignDivMod(Inst *inst, llvm::Instruction::BinaryOps opcode);
-    llvm::Value *CreateAArch64SignDivMod(Inst *inst, llvm::Instruction::BinaryOps opcode, llvm::Value *x,
-                                         llvm::Value *y);
     llvm::Value *CreateFloatComparison(CmpInst *cmpInst, llvm::Value *x, llvm::Value *y);
     llvm::Value *CreateIntegerComparison(CmpInst *inst, llvm::Value *x, llvm::Value *y);
     llvm::Value *CreateNewArrayWithRuntime(Inst *inst);

@@ -14,7 +14,7 @@
 module:
   name: llvm
   namespace: ark::llvmbackend
-  descritpition: LLVM AOT compiler for panda
+  description: LLVM AOT compiler for panda
 
 options:
   - name: llvm-allow-breakage
@@ -120,10 +120,10 @@ options:
     default: "aarch64v8.2a-unknown-linux-gnu"
     description: Set target triple
   - name: llvmaot-threads
-    type: uint32_t
-    default: 1
+    type: int32_t
+    default: -1
     description: >
       Enables parallel compilation of different modules (see also --llvmaot-methods-per-module)
-      in LLVMAOT mode. Default value is 1 and compilation is sequential. Bigger values allow
+      in LLVMAOT mode. Default value is -1 and compilation is sequential. Bigger values allow
       to specify amount of parallel compilation threads. Value 0 allows to check available
       hardware parallelism level (#CPUs) automatically.
