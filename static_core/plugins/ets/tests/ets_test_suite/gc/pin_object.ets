@@ -34,13 +34,12 @@ function simpleTest(): void throws {
 function allocatePinnedArrayTest(): void throws {
     let obj = GC.allocatePinnedIntArray(10);
     assert obj != null : "Allocated object must not be null";
-    assert GC.getObjectSpaceType(obj) == GC.YOUNG_SPACE : "The array before GC must be placed in young space";
+    assert GC.getObjectSpaceType(obj) == GC.TENURED_SPACE : "The pinned array after GC must be placed in tenured space";
     let addr_before_gc: long = GC.getObjectAddress(obj);
     // Run GC
     let gc_id = GC.startGC(GC.MIXED_CAUSE);
     GC.waitForFinishGC(gc_id);
     let addr_after_gc: long = GC.getObjectAddress(obj);
-    assert GC.getObjectSpaceType(obj) == GC.TENURED_SPACE : "The pinned array after GC must be placed in tenured space";
     GC.unpinObject(obj);
 
     assert addr_before_gc == addr_after_gc : "Pinned array must has a fixed address.\n" +

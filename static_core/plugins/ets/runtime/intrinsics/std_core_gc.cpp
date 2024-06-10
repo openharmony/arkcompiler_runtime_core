@@ -303,7 +303,7 @@ template <class ResArrayType>
                           "Object pinning does not support with current GC");
         return nullptr;
     }
-    auto *array = ResArrayType::Create(length);
+    auto *array = ResArrayType::Create(length, SpaceType::SPACE_TYPE_OBJECT, true);
 
     if (array == nullptr) {
         PandaStringStream ss;
@@ -311,7 +311,6 @@ template <class ResArrayType>
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR, ss.str());
         return nullptr;
     }
-    vm->GetHeapManager()->PinObject(array->GetCoreType());
 
     return array;
 }
