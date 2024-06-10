@@ -822,8 +822,25 @@ export final class Int8Array implements Iterable<Number> {
     }
 
     /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int8Array
+     */
+    public static of(...items: number[]): Int8Array {
+        let res = new Int8Array(items.length)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, res.zeroIfInfinity(items[i]) as byte)
+        }
+        return res
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @returns new Int8Array
      */
     public static from(arrayLike: ArrayLike<number>): Int8Array {
@@ -832,8 +849,11 @@ export final class Int8Array implements Iterable<Number> {
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new Int8Array
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int8Array {
@@ -3322,8 +3342,25 @@ export final class Int16Array implements Iterable<Number> {
     }
 
     /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int16Array
+     */
+    public static of(...items: number[]): Int16Array {
+        let res = new Int16Array(items.length)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, res.zeroIfInfinity(items[i]) as short)
+        }
+        return res
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @returns new Int16Array
      */
     public static from(arrayLike: ArrayLike<number>): Int16Array {
@@ -3332,8 +3369,11 @@ export final class Int16Array implements Iterable<Number> {
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new Int16Array
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int16Array {
@@ -5799,8 +5839,25 @@ export final class Int32Array implements Iterable<Number> {
     }
 
     /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int32Array
+     */
+    public static of(...items: number[]): Int32Array {
+        let res = new Int32Array(items.length)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, res.zeroIfInfinity(items[i]) as int)
+        }
+        return res
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @returns new Int32Array
      */
     public static from(arrayLike: ArrayLike<number>): Int32Array {
@@ -5809,8 +5866,11 @@ export final class Int32Array implements Iterable<Number> {
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new Int32Array
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Int32Array {
@@ -8303,8 +8363,21 @@ export final class BigInt64Array implements Iterable<BigInt> {
     }
 
     /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigInt64Array
+     */
+    public static of(...items: number[]): BigInt64Array {
+        throw new Error("BigInt64Array.of: not implemented")
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @returns new BigInt64Array
      */
     public static from(arrayLike: ArrayLike<number>): BigInt64Array {
@@ -8313,8 +8386,11 @@ export final class BigInt64Array implements Iterable<BigInt> {
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new BigInt64Array
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): BigInt64Array {
@@ -10719,8 +10795,25 @@ export final class Float32Array implements Iterable<Number> {
     }
 
     /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Float32Array
+     */
+    public static of(...items: number[]): Float32Array {
+        let res = new Float32Array(items.length)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i] as float)
+        }
+        return res
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @returns new Float32Array
      */
     public static from(arrayLike: ArrayLike<number>): Float32Array {
@@ -10729,8 +10822,11 @@ export final class Float32Array implements Iterable<Number> {
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new Float32Array
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float32Array {
@@ -13113,8 +13209,25 @@ export final class Float64Array implements Iterable<Number> {
     }
 
     /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Float64Array
+     */
+    public static of(...items: number[]): Float64Array {
+        let res = new Float64Array(items.length)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i] as double)
+        }
+        return res
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @returns new Float64Array
      */
     public static from(arrayLike: ArrayLike<number>): Float64Array {
@@ -13123,8 +13236,11 @@ export final class Float64Array implements Iterable<Number> {
 
     /**
      * Creates an array from an array-like or iterable object.
+     *
      * @param arrayLike An array-like or iterable object to convert to an array.
+     *
      * @param mapfn A mapping function to call on every element of the array.
+     *
      * @returns new Float64Array
      */
     public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): Float64Array {
