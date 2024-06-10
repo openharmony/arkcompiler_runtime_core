@@ -112,6 +112,10 @@ static constexpr std::string_view OUT_OF_MEMORY_ERROR                  = "Lstd/c
 static constexpr std::string_view STACK_OVERFLOW_ERROR                 = "Lstd/core/StackOverflowError;";
 static constexpr std::string_view STRING_INDEX_OUT_OF_BOUNDS_ERROR     = "Lstd/core/StringIndexOutOfBoundsError;";
 
+static constexpr std::string_view DOUBLE_TO_STRING_CACHE_ELEMENT       = "Lstd/core/DoubleToStringCacheElement;";
+static constexpr std::string_view FLOAT_TO_STRING_CACHE_ELEMENT        = "Lstd/core/FloatToStringCacheElement;";
+static constexpr std::string_view LONG_TO_STRING_CACHE_ELEMENT         = "Lstd/core/LongToStringCacheElement;";
+
 // Error classes
 static constexpr std::string_view ERROR_OPTIONS                        = "Lescompat/ErrorOptions;";
 static constexpr std::string_view RANGE_ERROR                          = "Lescompat/RangeError;";

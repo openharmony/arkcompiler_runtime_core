@@ -44,6 +44,7 @@ panda_ets_add_gtest(
         ets_promise_test.cpp
         ets_arraybuf_test.cpp
         ets_string_builder_members_test.cpp
+        ets_to_string_cache_test.cpp
     LIBRARIES
         arkassembler
         arkruntime

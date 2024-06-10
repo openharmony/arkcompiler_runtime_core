@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,15 @@ public:
         const auto *data = reinterpret_cast<const uint8_t *>(utf8);
         return reinterpret_cast<EtsString *>(
             coretypes::String::CreateFromUtf8(data, length, ctx, Runtime::GetCurrent()->GetPandaVM()));
+    }
+
+    static EtsString *CreateFromAscii(const char *str, uint32_t length)
+    {
+        ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
+        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+        const auto *data = reinterpret_cast<const uint8_t *>(str);
+        return reinterpret_cast<EtsString *>(
+            coretypes::String::CreateFromMUtf8(data, length, length, true, ctx, Runtime::GetCurrent()->GetPandaVM()));
     }
 
     static EtsString *CreateFromUtf16(const ets_char *utf16, ets_int length)

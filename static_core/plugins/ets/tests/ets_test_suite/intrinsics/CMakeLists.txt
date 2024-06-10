@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -36,6 +36,11 @@ set(intrinsics_tests
     stringbuilder_oom
     stringbuilder
 )
+
+if (NOT PANDA_TARGET_ARM32)
+    # need coroutine support
+    list(APPEND intrinsics_tests to_string_cache)
+endif()
 
 set(intrinsics_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")
 set(intrinsics_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")

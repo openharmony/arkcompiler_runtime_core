@@ -235,8 +235,7 @@ export final class StringBuilder {
      * @returns result of the conversion
      */
     public static toString(f: float): String {
-        let boxed: Float = f;
-        return boxed.toString();
+        return Float.toString(f);
     }
 
     /**
@@ -247,8 +246,24 @@ export final class StringBuilder {
      * @returns result of the conversion
      */
     public static toString(d: double): String {
-        let boxed: Double = d;
-        return boxed.toString();
+        return Double.toString(d);
     }
 
+}
+
+final class DoubleToStringCacheElement {
+    string: string;
+    pad: int;
+    number: double;
+}
+
+final class FloatToStringCacheElement {
+    string: string;
+    number: float;
+}
+
+final class LongToStringCacheElement {
+    string: string;
+    pad: int;
+    number: long;
 }

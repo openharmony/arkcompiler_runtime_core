@@ -19,6 +19,7 @@
 #include "intrinsics.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "unicode/locid.h"
 #include "unicode/coll.h"
 #include "unicode/numberformatter.h"
@@ -50,7 +51,12 @@ double ParseFloat(EtsString *s, const uint32_t flags)
 
 EtsString *StdCoreDoubleToString(double number, int radix)
 {
-    return helpers::FpToString(number, radix);
+    if (UNLIKELY(radix != helpers::DECIMAL)) {
+        return helpers::FpToString(number, radix);
+    }
+    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    ASSERT(cache != nullptr);
+    return cache->GetOrCache(EtsCoroutine::GetCurrent(), number);
 }
 
 EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)

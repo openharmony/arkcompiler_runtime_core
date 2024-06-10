@@ -73,6 +73,10 @@ public:
     DEFAULT_MOVE_SEMANTIC(PromiseListener);
 };
 
+class DoubleToStringCache;
+class FloatToStringCache;
+class LongToStringCache;
+
 class PandaEtsVM final : public PandaVM, public EtsVM {  // NOLINT(fuchsia-multiple-inheritance)
 public:
     static Expected<PandaEtsVM *, PandaString> Create(Runtime *runtime, const RuntimeOptions &options);
@@ -320,6 +324,21 @@ public:
         return true;
     }
 
+    DoubleToStringCache *GetDoubleToStringCache()
+    {
+        return doubleToStringCache_;
+    }
+
+    FloatToStringCache *GetFloatToStringCache()
+    {
+        return floatToStringCache_;
+    }
+
+    LongToStringCache *GetLongToStringCache()
+    {
+        return longToStringCache_;
+    }
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
@@ -390,6 +409,9 @@ private:
     std::function<void(void *)> destroyExternalData_;
     // for JS Atomics
     os::memory::Mutex atomicsMutex_;
+    DoubleToStringCache *doubleToStringCache_ {nullptr};
+    FloatToStringCache *floatToStringCache_ {nullptr};
+    LongToStringCache *longToStringCache_ {nullptr};
 
     ExternalData externalData_ {};
 

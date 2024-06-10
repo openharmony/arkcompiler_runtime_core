@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_HELPERS_
 
+#include <charconv>
 #include <cmath>
 #include <cstdint>
 #include <type_traits>
@@ -115,12 +116,12 @@ inline double PowHelper(uint64_t number, int16_t exponent, uint8_t radix)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
     expI = u.bits.exponent + expI;
-    if (((expI & ~coretypes::DOUBLE_EXPONENT_MASK) != 0) || expI == 0) {  // NOLINT(hicpp-signed-bitwise)
+    if (((expI & ~coretypes::DOUBLE_EXPONENT_MAX) != 0) || expI == 0) {  // NOLINT(hicpp-signed-bitwise)
         if (expI > 0) {
             return std::numeric_limits<double>::infinity();
         }
-        if (expI < -static_cast<int>(coretypes::DOUBLE_SIGNIFICAND_SIZE)) {
-            return -std::numeric_limits<double>::infinity();
+        if (expI <= -static_cast<int>(coretypes::DOUBLE_SIGNIFICAND_SIZE)) {
+            return 0;
         }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
         u.bits.exponent = 0;
@@ -213,7 +214,7 @@ inline double Strtod(const char *str, int exponent, uint8_t radix)
     } else {
         result = number * std::pow(radix, exponent);
     }
-    if (!std::isfinite(result)) {
+    if (!std::isfinite(result) || (result == 0 && number != 0)) {
         result = PowHelper(number, exponent, radix);
     }
     return sign == Sign::NEG ? -result : result;
@@ -300,69 +301,6 @@ FpType StrToFp(char *str, char **strEnd)
     }
 }
 
-template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-void GetBase(FpType d, int digits, int *decpt, char *buf, char *bufTmp, int size)
-{
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    int result = snprintf_s(bufTmp, size, size - 1, "%+.*e", digits - 1, d);
-    if (result == -1) {
-        LOG(FATAL, ETS) << "snprintf_s failed";
-        UNREACHABLE();
-    }
-    // mantissa
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    buf[0] = bufTmp[1];
-    if (digits > 1) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (memcpy_s(buf + 1U, digits, bufTmp + 2U, digits) != EOK) {  // 2 means add the point char to buf
-            LOG(FATAL, ETS) << "snprintf_s failed";
-            UNREACHABLE();
-        }
-    }
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    buf[digits + 1] = '\0';
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    char *endBuf = bufTmp + size;
-    const size_t positive = (digits > 1) ? 1 : 0;
-    // exponent
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    *decpt = std::strtol(bufTmp + digits + 2U + positive, &endBuf, TEN) + 1;  // 2 means ignore the integer and point
-}
-
-template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-int GetMinimumDigits(FpType d, int *decpt, char *buf)
-{
-    int digits = 0;
-
-    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char bufTmp[BUF_SIZE] = {0};
-
-    // find the minimum amount of digits
-    int minDigits = 1;
-    int maxDigits = std::is_same_v<FpType, double> ? DOUBLE_MAX_PRECISION : FLOAT_MAX_PRECISION;
-
-    while (minDigits < maxDigits) {
-        digits = (minDigits + maxDigits) / 2_I;
-        GetBase(d, digits, decpt, buf, bufTmp, sizeof(bufTmp));
-
-        bool same = StrToFp<FpType>(bufTmp, nullptr) == d;
-        if (same) {
-            // no need to keep the trailing zeros
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            while (digits >= 2_I && buf[digits] == '0') {  // 2 means ignore the integer and point
-                digits--;
-            }
-            maxDigits = digits;
-        } else {
-            minDigits = digits + 1;
-        }
-    }
-    digits = maxDigits;
-    GetBase(d, digits, decpt, buf, bufTmp, sizeof(bufTmp));
-
-    return digits;
-}
-
 double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, uint32_t flags);
 double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int radix);
 EtsString *DoubleToExponential(double number, int digit);
@@ -380,77 +318,49 @@ inline const char *FpNonFiniteToString(FpType number)
     return std::signbit(number) ? "-Infinity" : "Infinity";
 }
 
-template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
-void FpToStringDecimalRadix(FpType number, PandaString &result)
+template <typename FpType>
+char *SmallFpToString(FpType number, bool negative, char *buffer);
+
+template <typename FpType>
+Span<char> FpToStringDecimalRadixMainCase(FpType number, bool negative, Span<char> buffer);
+
+// NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true, typename Cb>
+auto FpToStringDecimalRadix(FpType number, Cb cb)
 {
-    ASSERT(result.empty());
-    using SignedInt = typename ark::helpers::TypeHelperT<sizeof(FpType) * CHAR_BIT, true>;
     static constexpr FpType MIN_BOUND = 0.1;
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    std::array<char, BUF_SIZE + 2U> buffer;
+
+    if (INT_MIN < number && number < static_cast<FpType>(INT_MAX)) {
+        if (auto intVal = static_cast<int32_t>(number); number == static_cast<double>(intVal)) {
+            auto bufferEnd = std::to_chars(buffer.begin(), buffer.end(), intVal).ptr;
+            return cb({buffer.begin(), static_cast<size_t>(bufferEnd - buffer.begin())});
+        }
+    }
 
     // isfinite checks if the number is normal, subnormal or zero, but not infinite or NaN.
     if (!std::isfinite(number)) {
-        result = FpNonFiniteToString(number);
-        return;
+        auto *str = FpNonFiniteToString(number);
+        return cb(str);
     }
 
+    bool negative = false;
     if (number < 0) {
-        result += "-";
+        negative = true;
         number = -number;
     }
-    if (MIN_BOUND <= number && number < 1) {
+    if (!std::is_same_v<FpType, double> && MIN_BOUND <= number && number < 1) {
         // Fast path. In this case, n==0, just need to calculate k and s.
-        result += "0.";
-        SignedInt power = TEN;
-        SignedInt s = 0;
-        for (int k = 1; k <= intrinsics::helpers::FLOAT_MAX_PRECISION; ++k) {
-            int digit = static_cast<SignedInt>(number * power) % TEN;
-            s = s * TEN + digit;
-            result.append(ToPandaString(digit));
-            if (s / static_cast<FpType>(power) == number) {  // s * (10 ** -k)
-                break;
-            }
-            power *= TEN;
-        }
-        return;
+        auto bufferEnd = SmallFpToString(number, negative, buffer.begin());
+        return cb({buffer.begin(), static_cast<size_t>(bufferEnd - buffer.begin())});
     }
 
-    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char buffer[BUF_SIZE] = {0};
-    int n = 0;
-    int k = intrinsics::helpers::GetMinimumDigits(number, &n, buffer);
-    PandaString base(buffer);
-
-    if (0 < n && n <= 21_I) {  // NOLINT(readability-magic-numbers)
-        base.erase(1, 1);
-        if (k <= n) {
-            // 6. If k ≤ n ≤ 21, return the String consisting of the code units of the k digits of the decimal
-            // representation of s (in order, with no leading zeroes), followed by n−k occurrences of the code unit
-            // 0x0030 (DIGIT ZERO).
-            base += PandaString(n - k, '0');
-        } else {
-            // 7. If 0 < n ≤ 21, return the String consisting of the code units of the most significant n digits of the
-            // decimal representation of s, followed by the code unit 0x002E (FULL STOP), followed by the code units of
-            // the remaining k−n digits of the decimal representation of s.
-            base.insert(n, 1, '.');
-        }
-    } else if (-6_I < n && n <= 0) {  // NOLINT(readability-magic-numbers)
-        // 8. If −6 < n ≤ 0, return the String consisting of the code unit 0x0030 (DIGIT ZERO), followed by the code
-        // unit 0x002E (FULL STOP), followed by −n occurrences of the code unit 0x0030 (DIGIT ZERO), followed by the
-        // code units of the k digits of the decimal representation of s.
-        base.erase(1, 1);
-        base = PandaString("0.") + PandaString(-n, '0') + base;
-    } else {
-        if (k == 1) {
-            // 9. Otherwise, if k = 1, return the String consisting of the code unit of the single digit of s
-            base.erase(1, 1);
-        }
-        // followed by code unit 0x0065 (LATIN SMALL LETTER E), followed by the code unit 0x002B (PLUS SIGN) or the code
-        // unit 0x002D (HYPHEN-MINUS) according to whether n−1 is positive or negative, followed by the code units of
-        // the decimal representation of the integer abs(n−1) (with no leading zeroes).
-        base += (n >= 1 ? PandaString("e+") : "e") + ToPandaString(n - 1);
-    }
-    result += base;
+    auto newBuffer = FpToStringDecimalRadixMainCase(number, negative, Span(buffer));
+    return cb({newBuffer.begin(), newBuffer.size()});
 }
+// NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
 template <typename FpType, std::enable_if_t<std::is_floating_point_v<FpType>, bool> = true>
 inline float FpDelta(FpType number)
@@ -477,9 +387,8 @@ EtsString *FpToString(FpType number, int radix)
     }
 
     if (radix == helpers::DECIMAL) {
-        PandaString result;
-        helpers::FpToStringDecimalRadix(number, result);
-        return EtsString::CreateFromMUtf8(result.data());
+        return helpers::FpToStringDecimalRadix(
+            number, [](std::string_view str) { return EtsString::CreateFromAscii(str.data(), str.length()); });
     }
 
     // isfinite checks if the number is normal, subnormal or zero, but not infinite or NaN.

@@ -27,6 +27,8 @@
 #include "runtime/arch/memory_helpers.h"
 #include <unistd.h>
 
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+
 namespace ark::ets::intrinsics {
 
 static inline constexpr size_t NULL_BYTES_NUM = 5;
@@ -82,20 +84,19 @@ EtsString *StdCoreToStringChar(EtsChar i)
 
 EtsString *StdCoreToStringShort(EtsShort i)
 {
-    std::string s = std::to_string(i);
-    return EtsString::CreateFromMUtf8(s.c_str());
+    return StdCoreToStringLong(i);
 }
 
 EtsString *StdCoreToStringInt(EtsInt i)
 {
-    std::string s = std::to_string(i);
-    return EtsString::CreateFromMUtf8(s.c_str());
+    return StdCoreToStringLong(i);
 }
 
 EtsString *StdCoreToStringLong(EtsLong i)
 {
-    std::string s = std::to_string(i);
-    return EtsString::CreateFromMUtf8(s.c_str());
+    auto *cache = PandaEtsVM::GetCurrent()->GetLongToStringCache();
+    ASSERT(cache != nullptr);
+    return cache->GetOrCache(EtsCoroutine::GetCurrent(), i);
 }
 
 ObjectHeader *StdCoreStringBuilderAppendString(ObjectHeader *sb, EtsString *str)
