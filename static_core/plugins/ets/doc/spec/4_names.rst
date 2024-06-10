@@ -184,23 +184,6 @@ occurs:
 
 |
 
-.. _Accessible:
-
-Accessible
-**********
-
-.. meta:
-    frontend_status: Done
-
-Entity is considered accessible if it belongs to the current scope (see
-:ref:`Scopes`) and means that
-
- - function or method can be called;
- - variable can be read or changed;
- - type can be used in declarations or extends/implements clauses.
-
-|
-
 .. _Scopes:
 
 Scopes
@@ -211,22 +194,15 @@ Scopes
 
 Different entity declarations introduce new names in different *scopes*. Scope
 (see :ref:`Scopes`) is the region of program text where an entity is declared,
-and other regions where it can be used. The following entities always referred
+and other regions it can be used in. The following entities are always referred
 to by their qualified names only:
 
--  Class and interface members (both static and instance ones),
+-  Class and interface members (both static and instance ones);
 -  Entities imported via qualified import.
 
 Other entities are referred to by their simple (unqualified) names.
 
-Names of different entities can be used for different purposes as follows:
-
-- Type name is used to declare variables, constants, parameters, class fields,
-  or interface properties;
-- Function or method name is used to call the function or method;
-- Variable name can be used to read or change the value of the variable;
-- Compilation unit name introduced as a result of import All with Qualified
-  Access to deal with exported entities.
+Entities within the scope are accessible (see :ref:`Accessible`).
 
 .. index::
    scope
@@ -404,6 +380,29 @@ operator '``.``' to an instance. Accessing them otherwise is not possible.
    enum member
    instance
    dot operator
+
+|
+
+.. _Accessible:
+
+Accessible
+**********
+
+.. meta:
+    frontend_status: Done
+
+Entity is considered accessible if it belongs to the current scope (see
+:ref:`Scopes`) and means that its name can be used for different purposes as
+follows:
+
+- Type name is used to declare variables, constants, parameters, class fields,
+  or interface properties;
+- Function or method name is used to call the function or method;
+- Variable name is used to read or change the value of the variable;
+- Compilation unit name introduced as a result of import with Bind All with
+  Qualified Access (see :ref:`Bind All with Qualified Access`) is used to deal
+  with exported entities.
+
 
 |
 
@@ -624,8 +623,8 @@ variable is determined as follows:
 
 -  *T* is the type specified in a type annotation (if any) of the declaration.
 
-   - If '``?``' is used after the name of the variable, then it is semantically 
-     equivalent to the variable type ``type | undefined``.
+   - If the name of the variable is followed by '``?``', then the variable is
+     semantically equivalent to the variable type ``type | undefined``.
    - If the declaration also has an initializer, then the initializer expression
      type must be compatible with *T* (see :ref:`Type Compatibility with Initializer`).
 

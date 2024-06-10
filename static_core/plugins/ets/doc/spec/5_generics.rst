@@ -18,19 +18,19 @@ Generics
 .. meta:
     frontend_status: Partly
 
-Class, interface, type alias, method, constructor, and function are program
-entities that can be parameterized in the |LANG| language by one or several
-types.  Such parameterized entity introduces a *generic declaration* (called
-*generic* for brevity).
+Class, interface, type alias, method, and function are program entities that
+can be parameterized in |LANG| by one or several types. An entity so
+parameterized introduces a *generic declaration* (called *a generic* for
+brevity).
 
 Types used as generic parameters in a generic are called *type parameters*
 (see :ref:`Type Parameters`).
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
-is the action that converts a *generic* into a real program entity: ordinary
-class, interface, type, function, etc.
-Instantiation can be performed either explicitly or implicitly.
-More details are here (see :ref:`Generic Instantiations`)
+is the action that converts a *generic* into a real program entity: non-generic
+class, interface, union, array, function, or method.
+Instantiation (see :ref:`Generic Instantiations`) can be performed either
+explicitly or implicitly.
 
 
 .. index::
@@ -96,12 +96,12 @@ parameter can have a default type (see :ref:`Type Parameter Default`).
         ;
 
     typeParameterDefault:
-        '=' typeReference
+        '=' typeReference ('[]')?
         ;
 
-A generic class, interface, type alias, method, constructor, or function
-defines a set of parameterized classes, interfaces, types, methods,
-constructors, or functions respectively (see :ref:`Generic Instantiations`).
+A generic class, interface, type alias, method, or function defines a set of
+parameterized classes, interfaces, unions, arrays, methods, or functions
+respectively (see :ref:`Generic Instantiations`).
 One type argument can define only one set for each possible parameterization of
 the type parameter section.
 
@@ -135,8 +135,8 @@ Type Parameter Constraint
     frontend_status: Partly
     todo: support keyof constraint #17436
 
-If there is a need to constraint possible instantiations then for every type
-parameter its own *constraint* can be set.
+If there possible instantiations need to be constrained, then an individual
+*constraint* can be set for every type parameter.
 
 In every type parameter, a constraint can follow the keyword ``extends``. The
 constraint is denoted as a single type parameter *T*. If no constraint is
@@ -248,6 +248,8 @@ dropping a type argument when a particular type of instantiation is used.
 However, a :index:`compile-time error` occurs if a type parameter without a
 default type follows a type parameter with a default type in the
 declaration of a generic type.
+Also a :index:`compile-time error` occurs if a type parameter default refers to
+a type parameter defined after the current type parameter.
 
 The examples below illustrate this for both classes and functions:
 
@@ -288,6 +290,11 @@ The examples below illustrate this for both classes and functions:
     let c1 = new C2<number>          // equal to C2<number, number, string>
     let c2 = new C2<number, string>  // equal to C2<number, string, string>
     let c3 = new C2<number, Object, number> // all 3 type arguments provided
+ 
+    function foo <T1 = T2, T2 = T1> () {}
+    // That is a compile-time error, 
+    // as T1's default refers to T2, which is defined after the T1
+    // T2's default is valid as it refers to already defined type parameter T1
 
 |
 
@@ -299,29 +306,41 @@ Generic Instantiations
 .. meta:
     frontend_status: Done
 
-As mentioned before, a generic class, interface, type alias, or function
-declaration defines a set of corresponding non-generic entities. A generic entity
-must be *instantiated* in order to get a non-generic entity out of it.
+As mentioned before, a generic class, interface, type alias, function, or method
+declaration defines a set of corresponding non-generic entities. A generic
+entity must be *instantiated* in order to make it a non-generic entity.
 
-The result of instantiation is a *real*, non-parameterized program entity:
-class, interface, type, method, constructor, or function. The entity is handled
-exactly as an ordinary class, interface, type, method, constructor, or function.
+The result of instantiation is a *real*, non-parameterized program entity, e.g.,
+class, interface, union, array, method, or function, that is handled in a
+usual way.
 
-Conceptually, a generic class, an interface, a type alias, a method,
-a constructor, or a function defines a set of classes, interfaces, types,
-methods, constructors, or functions respectively.
+Conceptually, a generic class, an interface, a type alias, a method, or a
+function defines a set of non-generics classes, interfaces, unions, arrays,
+methods, or functions respectively.
 
-The explicit instantiation is specified by providing a list of *type arguments*
-that substitute corresponding type parameters of the generic:
-*Explicit* generic instantiation is the language construct that specifies
-real types, which substitute type parameters of a *generic*. Real types
-specified in the instantiation are called *type arguments*.
+An explicit instantiation is specified by providing a list of *type arguments*
+that substitute corresponding type parameters of the generic. An explicit
+generic instantiation is the language construct that specifies real types to substitute type parameters of a *generic*. Real types specified in an
+instantiation are called *type arguments*.
 
 .. code-block:: typescript
    :linenos:
 
-    class G<T> {}    // Generic declaration
-    let x: G<number> // Explicit generic instantiation, type argument provided
+    class G<T> {}    // Generic class declaration
+    let x: G<number> // Explicit class instantiation, type argument provided
+
+    class A {
+       method <T> () {}  // Generic method declaration
+    }
+    let a = new A()
+    a.method<string> () // Explicit method instantiation, type argument provided
+
+    function foo <T> () {} // Generic function declaration
+    foo <string> () // Explicit function instantiation, type argument provided
+
+    type MyArray<T> = T[] // Generic type declaration
+    let array: MyArray<boolean> = [true, false] // Explicit array instantiation, type argument provided
+
 
 .. index::
    instantiation
@@ -341,7 +360,7 @@ for the generic declaration *G*.
    lines 312, 314, 336 - initially the type was *T*:sub:`1`, ``...``, *T*:sub:`n`
    lines 321, 322 - initially *C*:sub:`1`, ``...``, *C*:sub:`n` and *T*:sub:`1`, ``...``, *T*:sub:`n` 
 
-If ``C``:sub:`1`, ``...``, ``C``:sub:`n` is the constraint for the corresponding
+If ``C``:sub:`1`, ``...``, ``C``:sub:`n` is a constraint for the corresponding
 type parameters ``T``:sub:`1`, ``...``, ``T``:sub:`n` of a generic declaration,
 then *T*:sub:`i` is a subtype (see :ref:`Subtyping`) of each constraint type
 *C*:sub:`i`. All subtypes of the type listed in the corresponding constraint
@@ -360,8 +379,8 @@ A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 *well-formed* if **all** of the following is true:
 
 -  The generic declaration name is *G*.
--  The number of type arguments equals that of *G*’s type parameters.
--  All type arguments are subtypes (see :ref:`Subtyping`) of a corresponding
+-  The number of type arguments equals the number of type parameters of *G*.
+-  All type arguments are subtypes (see :ref:`Subtyping`) of the corresponding
    type parameter constraint.
 
 A :index:`compile-time error` occurs if an instantiation is not well-formed.
@@ -403,8 +422,9 @@ Implicit Generic Instantiations
     frontend_status: Partly
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
-They are inferred (see :ref:`Type Inference`) from the context the generic is
-referred in. Implicit instantiation is possible only for functions and methods.
+Such type arguments are inferred (see :ref:`Type Inference`) from the context
+the generic is referred in. Implicit instantiation is only possible for
+functions and methods.
 
 .. code-block:: typescript
    :linenos:
@@ -608,7 +628,8 @@ Partial Utility Type
     frontend_status: None
 
 Type ``Partial<T>`` constructs a type with all properties of *T* set to
-optional. *T* must be a class or an interface type:
+optional. *T* must be a class or an interface type. No methods of *T* are part
+of ``Partial<T>`` type.
 
 .. code-block:: typescript
    :linenos:
@@ -637,6 +658,20 @@ type that is analogous:
         description?: string
     }
 
+Type ``T`` is a subtype of ``Partial<T>``, thus allows assignments.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+       f1: string = ""
+       f2: number = 1
+       f3: boolean = true
+    }
+    let x = new A
+    let y: Partial<A> = x // OK
+
+
 |
 
 .. Required Utility Type:
@@ -650,6 +685,7 @@ Required Utility Type
 Type ``Required<T>`` is opposite to ``Partial<T>``.
 It constructs a type with all properties of *T* set to
 be required (not optional). *T* must be a class or an interface type.
+No methods of *T* are part of ``Required<T>`` type.
 
 .. code-block:: typescript
    :linenos:
@@ -676,6 +712,10 @@ is transformed to a distinct type that is analogous:
         description: string
     }
 
+Type ``T`` is not a subtype of ``Required<T>``, and variables of Required<T>
+are to be initialized with the valid object literals.
+
+
 |
 
 .. _Readonly Utility Type:
@@ -688,7 +728,9 @@ Readonly Utility Type
 
 Type ``Readonly<T>`` constructs a type with all properties of *T* set to
 readonly. It means that the properties of the constructed value cannot be
-reassigned. *T* must be a class or an interface type:
+reassigned. *T* must be a class or an interface type. No methods of *T* are
+part of ``Readonly<T>`` type.
+
 
 .. code-block:: typescript
    :linenos:
@@ -702,6 +744,20 @@ reassigned. *T* must be a class or an interface type:
     };
 
     myIssue.title = "Two" // compile-time error: readonly property
+
+Type ``T`` is a subtype of ``Readonly<T>``, thus allows assignments.
+
+.. code-block:: typescript
+   :linenos:
+
+    class A {
+       f1: string = ""
+       f2: number = 1
+       f3: boolean = true
+    }
+    let x = new A
+    let y: Readonly<A> = x // OK
+
 
 |
 

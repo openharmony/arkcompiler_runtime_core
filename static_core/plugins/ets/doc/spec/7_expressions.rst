@@ -769,7 +769,7 @@ at respective positions, then the type of the array literal is a tuple type.
    :linenos:
 
     let tuple: [number, string] = [1, "hello"] // ok
-    
+
     let incorrect: [number, string] = ["hello", 1] // compile-time error
 
 |
@@ -852,11 +852,11 @@ expression (see :ref:`New Expressions`):
        '{' valueSequence? '}'
        ;
 
-    valueSequence: 
+    valueSequence:
        nameValue (',' nameValue)* ','?
        ;
 
-    nameValue: 
+    nameValue:
        identifier ':' expression
        ;
 
@@ -1103,11 +1103,11 @@ type:
        '{' keyValueSequence? '}'
        ;
 
-    keyValueSequence: 
+    keyValueSequence:
        keyValue (',' keyValue)* ','?
        ;
 
-    keyValue: 
+    keyValue:
        expression ':' expression
        ;
 
@@ -1126,7 +1126,7 @@ the second expression denotes a value, and must be of type ``Value``:
         "John": 25,
         "Mary": 21,
     }
-    
+
     console.log(map["John"]) // prints 25
 
 
@@ -1250,9 +1250,9 @@ It can be an assignment, a call of a function, or a method.
 
 .. code-block:: typescript
    :linenos:
-   
+
     let array1 = [1, 2, 3]
-    let array2 = [4, 5]   
+    let array2 = [4, 5]
     let array3 = [...array1, ...array2] // spread array1 and array2 elements
        // while building new array literal during compile-time
     console.log(array3) // prints [1, 2, 3, 4, 5]
@@ -1663,17 +1663,22 @@ Step 2: Selection of Method
     frontend_status: Done
 
 After the type to use is known, the method to call must be determined. As
-|LANG| supports overloading, the method selection process (see
-:ref:`Function or Method Selection`) results in a set of applicable methods. If
-this set has only one element then the method to call is identified, otherwise
-it is a :index:`compile-time error` (no method to call or ambuguity as more
-than two applicable methods avaialble).
+|LANG| supports overloading, more then one method may be accessible
+under the method name used in the call.
+
+In this case, all accessible methods are called
+*potentially applicable candidates* and
+:ref:`Overload Resolution` is used to select the method to call.
+If *overload resolution* can definitely select just one method,
+this method will be called,
+otherwise it is a :index:`compile-time error`
+(no method to call or ambiguity
+as more than one applicable methods avaialble).
 
 .. index::
-   method selection
+   overload resolution
    method to call
-   type
-   applicable method
+   potentially applicable candidat
 
 |
 
@@ -1721,399 +1726,6 @@ semantic checks must be performed:
 
 |
 
-.. _Function or Method Selection:
-
-Function or Method Selection
-============================
-
-.. meta:
-    frontend_status: Partly
-    todo: adapt the implementation to the latest specification (handle rest, union, functional types properly)
-    todo: make the ISA/assembler/runtime handle union types without collision - eg foo(arg: A|B) and foo(arg: C|D)
-
-Function or method selection is the process of choosing functions or methods
-that are applicable for a function or a method call. The choosing algorithm
-is described below:
-
-1. An empty list *A* of applicable candidates is created.
-
-2. The argument types are taken from the call to compose the list
-   *TA* = (*ta*:sub:`1`, *ta*:sub:`2`, ... *ta*:sub:`n`), where *ta*:sub:`i`
-   is the type of the *i*’th argument, and `n` is the number of function
-   or method call arguments.
-
-3. Suppose *M* is a set of candidates (functions or methods with the same name)
-   that are accessible (see :ref:`Accessible`) at the point of call. The
-   following actions are performed for every candidate:
-
-  3.1 If the signature of *j*’th candidate has optional parameters or a rest
-  parameter, then the *TA* list for this candidate is rebuilt according to the
-  following rules:
-
-    - Until there is an optional parameter with the ordinal number *n+1* (i.e.,
-      that has no argument in *TA*), the type of the optional parameter keeps
-      being added to the *TA* list as *ta*:sub:`n+1`;
-
-    - If there is a rest parameter with the ordinal number *n+1*, then the
-      type of the rest parameter is added to the *TA* list as *ta*:sub:`n+1`;
-
-    - If there is a rest parameter with the ordinal number *m* that is less
-      then *n*, then *ta*:sub:`m`, ... *ta*:sub:`n` are deleted from *TA*
-      list. The type of the rest parameter is added to the *TA* list as
-      *ta*:sub:`m`. A :index:`compile-time error` occurs if any element of
-      *ta*:sub:`m`, ... *ta*:sub:`n` is not compatible with the element type
-      of the rest parameter.
-
-  If the number of parameters of the *j*’th candidate is not equal to the
-  length of the *TA* list, then the candidate is not added to the set *A*.
-
-  The examples are presented below:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (p: A | B) { ... }                      // #1
-    function foo (p: A | C) { ... }                      // #2
-    function foo (p1: int, p2: SomeOtherType ) { ... }   // #3
-    function foo (p1: int, p2?: int ) { ... }            // #4
-
-    foo(new A) // three applicable candidates for this call: #1,#2,#4
-
-    function goo (p1: Base)                // #1
-    function goo (p2: Base|SomeOtherType)  // #2
-    function goo (...p3: Base[])           // #3
-
-    goo (new Base) // three applicable candidates for this call: #1, #2, #3
-
-|
-
-  3.2 The following check is performed for each candidate from the set *M*.
-  Each type *ta*:sub:`i` from the list *TA* is compared to the type of the
-  *i*’th candidate parameter. When performing the comparison, the rules of
-  type compatibility (see :ref:`Type Compatibility`) are used with no
-  consideration for the following:
-
-  - Possible boxing conversion (see :ref:`Boxing Conversions`);
-  - Possible unboxing conversion (see :ref:`Unboxing Conversions`);
-
-  A candidate that meets the requirements of the check is added to the *A*
-  list of applicable candidates.
-
-  The examples are presented below:
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base { }
-   class Derived extends Base { }
-
-   function foo(p: Base) { ... }
-   function foo(p: Derived) { ... }
-
-   foo(new Derived) // two applicable candidates for this call:
-                    // the argument of type Derived can be
-                    // implicitly converted to Base
-   foo(new Base)    // one applicable candidate
-
-   function boo (p: T1) { ... }
-   function boo (p: T1|T2) { ... }
-
-   boo (new T1 ) // two applicable candidates for this call
-   boo (new T2)  // one applicable candidate
-
-   type T1 = A | B
-   type T2 = A | C
- 
-   function goo (p: T1) { ... }  // #1
-   function goo (p: T2) { ... }  // #2
- 
-   goo (new A)       // Two applicable candidates: #1, #2
-   goo (new A as T1) // One applicable candidate: #1
-   goo (new A as T2) // One applicable candidate: #2
-
-|
-
-  3.3 If after the check the list of applicable candidates is still empty, then
-  step 3.2 of this algorithm is performed again. Each type *ta*:sub:`i`, to
-  which type compatibility rules are not applied successfully in the previous
-  step, is compared again to the type of the *i*’th candidate parameter.
-  This time the rules of type compatibility consider possible boxing and
-  unboxing conversions. A candidate that meets the requirements of the
-  check is added to the *A* list of applicable candidates.
-
-The examples are presented below:
-
-.. code-block-meta:
-
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(p: SomeOtherType) { ... }
-   function foo(p: Int) { ... }
-
-   foo(1) // After step 3.1: two applicable candidates for this call
-          // After step 3.2: still two applicable candidates
-          // After step 3.3: apply boxing conversion – one applicable candidate
-   
-   function goo (p: (p: T) => T) { ... }   // #1
-   function goo (p: (p: T) => U) { ... }   // #2
-
- 
-   // Return types of call arguments are taken into account here
-   
-   goo ((p: T) => T {}) // After steps 3.1, 3.2: two candidates
-                        // After step 3.3: the single candidate #1
-                        
-   goo ((p: T) => U {}) // After steps 3.1, 3.2: two candidates
-                        // After step 3.3: the single candidate #2
-
-
-|
-
-  3.4 If the list of applicable candidates has two or more candidates the best
-  match candidate is to be identified if possible. This process depends on
-  types of arguments being passed and types of parameter sets of
-  candidates and it should be applied to different pairs of argument and
-  parameter types. The following cases are to be considered:
-
-     - candidates has only one argument-parameter type difference
-     - candidates has only several argument-parameter type difference
-   
-  In addition the following kinds of types are to be inspected: 
-
-     - types are related with inheritance
-     - optional and rest parameter types
-     - union types
-
-  3.4.1 Inheritance: the type of an argument is compatible (see
-  :ref:`Type Compatibility`) with one of parameter types which is the nearest
-  (least lower bound of the set) in the inheritance graph to it.
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      foo(p: Base)    {} // Version #1
-      foo(p: Derived) {} // Version #2
-      // parameter types set: {p: {Base, Deived}}
-   }
-   class Derived extends Base {}
-   class NextDerived extends Derived {}
-
-   let b: Base = new Derived
-   b.foo(b) // Best match is Version #1:
-            // static type of the argument is equal to the type of parameter
-            // Base => {Base, Derived}
-     
-   b.foo(new Derived) // Best match is Version #2:
-            // static type of the argument is equal to the type of parameter
-            // Derived => {Base, Derived}
-
-   b.foo(new NextDerived) // Best match is Version #2:
-            // static type of the argument is compatible with Derived as it is nearest
-            // NextDerived => {Base, Derived}
-
-   function bar (p: (p: Base) => void)    {} // Version #1
-   function bar (p: (p: Derived) => void) {} // Version #2
-      // parameter types set: {p: {(p: Base) => void), (p: Derived) => void}}
-
-   let fun_arg1: (p: Base) => void = (p: Base):void => {}
-   bar (fun_arg1) // Version #1 to be called as (p: Base) => void fits it
-
-   let fun_arg2: (p: Derived) => void = (p: Derived):void => {}
-   bar (fun_arg2) // Version #2 to be called as (p: Derived):void fits it
-
-   interface T1 {}
-   interface T2 {}
-   class T3 implements T1, T2 {}
-   class T4 implements T1, T2 {}
-   function foo (p: T1) {} // Version #1
-   function foo (p: T2) {} // Version #2
-      // parameter types set: {p: {T1, T2}}
-
-   foo (new T3) // No best match! 
-     // T3 => {T1, T2} - T3 is compatible with both types
-
-   foo (new T4) // No best match! 
-     // T4 => {T1, T2} - T4 is compatible with both types
-
-
-|
-
-  3.4.2 Optional and rest parameter types: simpler types win over more
-  complicated ones, less parameters wins over more parameters.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(p: number)  {} // Version #1
-   function foo(p?: number) {} // Version #2
-      // parameter types set: {p: {number, number|undefined}}
-   foo (5) // Version #1 to be called
-      // number => {number, number|undefined} non-union type is the best match
-
-   function foo(p: number)             {} // Version #1
-   function foo(p: number, s?: string) {} // Version #2
-      // parameter types set: {p: {number, number}, s: {_, string|undefined}}
-   foo (5) // Version #1 to be called
-      // number => {number, number} such ambiguity is resolved to a version with less parameters
-
-   function foo (p: number)      {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-      // parameter types set: {p: {number, number[]}}
-   foo(5) // Version #1 to be called
-      // number => {number, number[]} simple type wins over array
-
-   function foo (p?: number)     {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-      // parameter types set: {p: {number|undefined, number[]}}
-   foo() // Version #1 to be called
-      // _ => {number|undefined, number[]} union wins over array
-
-   function foo ()               {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-      // parameter types set: {p: {_, number[]}}
-   foo() // Version #1 to be called
-      // _ => {_, number[]} no type wins over array
-
-   function foo (p: number)      {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-   function foo (p?: number)     {} // Version #3
-      // parameter types set: {p: {number, number[], number|undefined}}
-   foo(5) // Version #1 to be called
-      // number => {number, number[], number|undefined} simple type wins over array and union
-
-|
-
-
-  3.4.3 Union types: no best match if domains of two union types intersect and
-  argument type fits the intersection. 
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo (p: string|number)  {} // Version #1
-   function foo (p: string|boolean) {} // Version #2
-      // parameter types set: {p: {string|number, string|boolean}}
-   foo ("some string") // No best match! 
-      // string => {string|number, string|boolean} string fits both union types
-
-   function bar (p: string)         {} // Version #1
-   function bar (p: string|boolean) {} // Version #2
-      // parameter types set: {p: {string, string|boolean}}
-   foo ("some string") // Version #1 to be called
-      // string => {string, string|boolean} non-union type is the best match
-
-|
-
-
-  3.4.4 Several arguments: if several arguments match different versions then
-  there is no best match occurs. To have a best match all arguments should fit
-  the same version.
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {}
-   class Derived extends Base {}
-
-   function foo(p1: Base,    p2: Derived) {} // Version #1
-   function foo(p1: Derived, p2: Base)    {} // Version #2
-      // parameter types set: {p1: {Base, Derived}, p2: {Derived, Base}}
-   foo (new Derived, new Derived) // No best match!
-      // {Derived, Derived} => {p1: {Base, Derived}, p2: {Base, Derived}} 
-      // 1st Derived matches Version #2, but 2nd Derived matches Version #1 - no best match
-
-   function bar(p1: Base,    p2: Derived) {} // Version #1
-   function bar(p1: Derived, p2: Base)    {} // Version #2
-   function bar(p1: Derived, p2: Derived) {} // Version #3
-   function bar(p1: Base,    p2: Base)    {} // Version #4
-      // parameter types set: {p1: {Base, Derived, Derived, Base}, p2: {Derived, Base, Derived, Base}}
-   foo (new Derived, new Base) // // Version #2 to be called
-      // {Derived, Base} => {{Base, Derived, Derived, Base}, {Derived, Base, Derived, Base}} 
-      // Derived matches Version #2 and #3, Base matches Version #2 and #4 -
-      // intersection gives Version #2 as the best match
-
-|
-
-  3.4.5 Best match identification general algorithm.
-
-  For the call: 
-
-    foo(``expr``:sub:`1`, ``expr``:sub:`2`, .. , ``expr``:sub:`i`,  .. ``expr``:sub:`n`) 
-
-    It implies that there is a vector of argument expression types
-    corresponding to each argument expression type
-
-    ``T``:sub:`1`, ``T``:sub:`2`, .. , ``T``:sub:`i`, .. ``T``:sub:`n`
- 
-  There is a list of ``m`` applicable candidates with the following signatures
-  (only parameter type involved) (matrix of types): 
-
-    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1n1`)
-
-    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2n2`)
-
-    ...
-
-    foo (``T``:sub:`m1`, ``T``:sub:`m2`, .. ``T``:sub:`mnm`)
-
-    where ``T``:sub:`ij` is the type of ``j-th`` parameter of the ``i-th``
-    candidate and ``j`` in ``1`` .. ``n``:sub:`i` and ``i`` in ``1`` .. ``m``
-
-  [TBD]
-
-  - define a subset of applicable candidates with min (``n``:sub:`1`, ... ``n``:sub:`m`)
-  - if only one candidate left then it is the best match candidate
-  - otherwise the list of applcable candidates will look like 
-
-    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1k`)
-
-    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2k`)
-
-    ...
-
-    foo (``T``:sub:`l1`, ``T``:sub:`l2`, .. ``T``:sub:`lk`)
-
-    where l <= m and k = min (``n``:sub:`1`, ... ``n``:sub:`m`) and k >= n
-
-  - start from the last parameter j = k
-
-  - ``j-th`` column types to be grouped into class/interface types group and
-    all other types group. 
-
-  - if class/interface types group is not empty then
-     
-     + all candidates from the other group are to be removed from the
-       applicable candidates list.
-     + if only one candidate left then goto 4.
-     + otherwise for all pairs of candidates (x, y) the following check is to
-       be performed until no removales occur
-
-       - if parameter types of (x) are compatible to parameter types of (y) then
-          - if not (parameter types of (y) are compatible to parameter types of (x)) then x is removed
-       - else if not (parameter types of (y) are compatible to parameter types of (x)) then y is removed
-
-     + goto 4.
-
-  - if class/interface types group is empty then
-    
-    + if there are union types then then goto 4.
-    + if there are optional parameters then goto 4. 
-    + if there are rest parameters then goto 4.
-  
-  - select the next parameter to the left (j = j - 1) and repeat the same
-    checks except for the rest parameters till j == 0
-
-4. List *A* of applicable candidates is now ready. If it has only 1 element
-   then it is the best match candidate.
-
-
-|
-
 .. _Function Call Expression:
 
 Function Call Expression
@@ -2121,10 +1733,11 @@ Function Call Expression
 
 .. meta:
     frontend_status: Partly
-    todo: Adapt recent spec changes in "Function or Method Selection" section to the es2panda implementation
+    todo: Adapt recent spec changes in "Overload Resolution" section to the es2panda implementation
 
-A *function call expression* is used to call a function (see
-:ref:`Function Types`) or a lambda expression (see :ref:`Lambda Expressions`):
+A *function call expression* is used to call a function (see :ref:`Function Declarations`),
+a variable of a function type (:ref:`Function Types`)
+or a lambda expression (see :ref:`Lambda Expressions`):
 
 .. code-block:: abnf
 
@@ -2164,8 +1777,10 @@ If the operator '``?.``' (see :ref:`Chaining Operator`) is present, and the
 
 The function call is *safe* because it handles nullish values properly.
 
-:ref:`Step 1 Selection of Function` and :ref:`Step 2 Semantic Correctness Check`
-below specify the steps to follow to determine what function is being called.
+There are two steps that determine
+and check the function to be called at compile time
+:ref:`Step 1 Selection of Function`
+and :ref:`Step 2 Semantic Correctness Check`.
 
 .. index::
    chaining operator
@@ -2186,16 +1801,25 @@ Step 1: Selection of Function
 .. meta:
     frontend_status: Done
 
-As |LANG| supports overloading, the function selection process (see
-:ref:`Function or Method Selection`) results in a set of applicable functions.
-If this set has only one element then the function to call is identified,
-otherwise it is a :index:`compile-time error` (no function to call or ambiguity
-as more than two applicable functions avaialble).
+If the expression in the call is in the form of *qualifiedName*,
+several functions may be accessible under this name, as
+|LANG| supports overloading.
+
+In this case, all accessible functions are called
+*potentially applicable candidates* and
+:ref:`Overload Resolution` is used to select the function to call.
+If *overload resolution* can definitely select just one function,
+this function will be called,
+otherwise it is a :index:`compile-time error`
+(no function to call or ambiguity
+as more than one applicable functions avaialble).
+
+In other case, *overload resolution* is not used.
 
 .. index::
-   function selection
+   overload resolution
    function to call
-   applicable function
+   potentially applicable candidate
 
 |
 
@@ -2346,7 +1970,7 @@ elements can be modified by changing the resultant variable fields:
 
 .. code-block:: typescript
    :linenos:
-   
+
     let names: string[] = ["Alice", "Bob", "Carol"]
     console.log(name[1]) // prints Bob
     string[1] = "Martin"
@@ -2364,7 +1988,7 @@ elements can be modified by changing the resultant variable fields:
     let an_array = [1, 2, 3]
     let element = an_array [3.5] // Compile-time error
     function foo (index: number) {
-       let element = an_array [index] 
+       let element = an_array [index]
           // Runtime-time error if index is not integer
     }
 
@@ -2424,9 +2048,9 @@ The result of an indexing expression is of type ``Value``.
 
 .. code-block:: typescript
    :linenos:
-   
+
     type Keys = 'key1' | 'key2' | 'key3'
-   
+
     let x: Record<Keys, number> = {
         'key1': 1,
         'key2': 2,
@@ -2440,7 +2064,7 @@ literal:
 
 .. code-block:: typescript
    :linenos:
-   
+
     console.log(x['key4']) // compile-time error
     x['another key'] = 5 // compile-time error
 
@@ -2457,7 +2081,7 @@ The result of an indexing expression is of type ``Value | undefined``.
 
     let x: Record<number, string> = {
         1: "hello",
-        2: "buy", 
+        2: "buy",
     }
 
     function foo(n: number): string | undefined {
@@ -2540,7 +2164,7 @@ The result of the entire primary expression is then ``undefined``.
    :linenos:
 
     class Person {
-        name: string 
+        name: string
         spouse?: Person = undefined
         constructor(name: string) {
             this.name = name
@@ -2761,7 +2385,7 @@ is ``true``.
 
 Otherwise, an ``instanceof`` expression checks during program execution
 whether the type of the value the ``expression`` successfully evaluates to is
-compatible with ``type`` (see :ref:`Type Compatibility`). 
+compatible with ``type`` (see :ref:`Type Compatibility`).
 If so, then the result of the ``instanceof`` expression is ``true``.
 Otherwise, the result is ``false``.
 
@@ -3016,7 +2640,7 @@ following example:
 
     let x$ = expression1
     if (x$ == null) {x = expression2} else x = x$!
-    
+
     // Type of x is NonNullishType(expression1)|Type(expression2)
 
 
@@ -4419,7 +4043,7 @@ Bigint Relational Operators
 .. meta:
     frontend_status: Done
 
-The type of each operand in a bigint relational operator must be ``bigint``. 
+The type of each operand in a bigint relational operator must be ``bigint``.
 Otherwise, a :index:`compile-time error` occurs.
 
 All bigint relational operators compare bigint values.
@@ -4497,23 +4121,23 @@ In all cases, ``a != b`` produces the same result as ``!(a == b)``, and
 ``a !== b`` produces the same result as ``!(a === b)``.
 
 The result of operators '``==``' and '``===``' is the same in all cases,
-except the comparison of ``null`` and ``undefined`` values 
+except the comparison of ``null`` and ``undefined`` values
 (see :ref:`Reference Equality`).
 
-Depending on the the types of operands used, one of the following 
+Depending on the the types of operands used, one of the following
 variants of equality evaluation is used:
 
 -  *Value equality* is applied to entities of primitive types
    (see :ref:`Value Types`), their boxed versions (see :ref:`Boxed Types`),
-   type ``string`` (see :ref:`Type string`), 
-   type ``bigint`` (see :ref:`BigInt Type`) 
+   type ``string`` (see :ref:`Type string`),
+   type ``bigint`` (see :ref:`BigInt Type`)
    and enumeration types (see :ref:`Enumerations`).
--  *Reference Equality based on actual (dynamic) type* is applied to values of 
-   type ``Object`` (:ref:`Object Class Type`), 
+-  *Reference Equality based on actual (dynamic) type* is applied to values of
+   type ``Object`` (:ref:`Object Class Type`),
    values of union types (:ref:`Union Types`),
    and type parameters (:ref:`Type Parameters`).
 -  *Reference equality* is applied to entities of all reference types
-   (see :ref:`Reference Types`) that are not mentioned in the 
+   (see :ref:`Reference Types`) that are not mentioned in the
    previous items.
 
 Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
@@ -4527,7 +4151,7 @@ Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
 - :ref:`Boolean Equality Operators` if both operands are of type ``boolean``
   or ``Boolean``;
- 
+
 - :ref:`Enumeration Equality Operators` if both operands are of enumeration type;
 
 - :ref:`Reference Equality based on actual type` if at least one operand is of ``Object`` type
@@ -4565,7 +4189,7 @@ Numerical Equality Operators
     frontend_status: Done
 
 *Value equality* is used for operands of numeric types:
-``number``, ``byte``, ``short``, ``int``, ``long``, ``float``, ``double`` 
+``number``, ``byte``, ``short``, ``int``, ``long``, ``float``, ``double``
 and ``char`` type and their correspondong boxed types.
 
 The type of each operand in a numerical equality operator must be convertible
@@ -4625,12 +4249,12 @@ The following example illustrates *numerical equality*:
 
    5 == 5 // true
    5 != 5 // false
-   
+
    5 === 5 // true
-   
+
    5 == new Number(5) // true
    5 === new Number(5) // true
-   
+
    new Number(5) == new Number(5) // true
    5 == 5.0 // true
 
@@ -4660,7 +4284,7 @@ Two strings are equal if they represent the same sequence of characters:
 
    "abc" == "abc" // true
    "abc" === "ab" + "c" // true
-   
+
    function foo(s: string) {
       console.log(s == "hello")
    }
@@ -4668,7 +4292,7 @@ Two strings are equal if they represent the same sequence of characters:
 
 .. index::
    value equality
-   
+
 |
 
 .. _Bigint Equality Operators:
@@ -4752,7 +4376,7 @@ Reference Equality Based on Actual Type
 
 If an operand of an equality operator is of ``Object`` type or an union type or
 of a type parameter, the evaluation of the operator
-is based on the actual type of this operand. 
+is based on the actual type of this operand.
 If another operand is of other types, its static type is used for evaluation.
 
 If the actual types of objects are compatible, the corresponding evaluation of
@@ -4784,11 +4408,11 @@ The following example illustrates equality with a value of ``Object`` type:
     function equ(a: Object, b: Object): boolean {
         return a == b
     }
-    
+
     equ(1, 1) // true, numerical equality
     equ(1, 2) // false, numerical equality
     equ(1, new Number(1)) // true, numerical equality
-    
+
     equ("aa", "aa") // true, string equality
     equ(1, "aa") // false, not compatible types
 
@@ -4808,7 +4432,7 @@ The following example illustrates equality with a value of ``Object`` type:
 
     class G<A, B extends Number> {
         foo(x: A, y: B) {
-            check(x) // compile-type error, A is not assignable to Object 
+            check(x) // compile-type error, A is not assignable to Object
             check(y) // ok, B is assignable to Object (as it is, at least, Number)
         }
     }
@@ -4896,7 +4520,7 @@ Reference Equality
     todo: adapt latest specification changes
 
 The reference equality compares operands of two reference types
-except types string, bigint, Object, union types and type parameters. 
+except types string, bigint, Object, union types and type parameters.
 See also :ref:`Extended Equality with null or undefined`
 for extended semantics.
 
@@ -4962,8 +4586,8 @@ to ensure better alignment with TypeScript.
 
 Any entity can be compared to ``null`` by using the operators ``==`` and ``!=``.
 This comparison can return ``true`` only for the entities of *nullable* types
-if they actually have the ``null`` value during the program execution. 
-In all other cases the comparison with ``null`` returns ``false`` and this is 
+if they actually have the ``null`` value during the program execution.
+In all other cases the comparison with ``null`` returns ``false`` and this is
 known in compile-time.
 
 Similarly, a comparison to ``undefined`` produces ``false`` unless the variable
@@ -5772,7 +5396,7 @@ The examples below represent different scenarios with standalone expressions:
     class B extends A {}
 
     condition ? new A() : new B() // A | B => A
-  
+
     condition ? 5 : 6             // 5 | 6
 
     condition ? "5" : 6           // "5" | 6
@@ -6218,7 +5842,7 @@ with values that can be evaluated at compile time.
         ;
 
 A *constant expression* is an expression of a predefined value type
-(:ref:`Predefined Types`), 
+(:ref:`Predefined Types`),
 or of type ``string`` that completes normally while being composed only
 of the following:
 

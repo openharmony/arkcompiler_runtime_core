@@ -19,7 +19,7 @@ Standard Library
     frontend_status: Partly
 
 The Standard Library of the |LANG| language defines the required set of types,
-classes, variables, constants, and functions that provide APIs for effective and
+variables, constants, functions and annotations that provide APIs for effective and
 convenient programming. 
 
 The Standard Library has two parts: the common part provides |TS| compatibility,

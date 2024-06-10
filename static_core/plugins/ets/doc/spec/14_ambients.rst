@@ -256,7 +256,7 @@ Ambient Indexer
 ===============
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
        
 Ambient indexer declarations specify the indexing of a class instance
 in an ambient context. This feature is provided for compatibility with |TS|:
@@ -287,7 +287,7 @@ Ambient Call Signature
 ======================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
        
 Ambient call signature declarations used to specify *callable types*
 in an ambient context. This feature is provided for compatibility with |TS|:
@@ -433,11 +433,16 @@ Namespace nesting is allowed:
         }
     }
 
-The manner the entities defined in an ambient namespace can be implemented
-in |LANG| is not yet defined (**TBD**).
-
 A namespace is not an object but just a scope for entities that can only be
 accessed by using quilified names.
+
+.. _Implementing Ambient Namespace Declaration:
+
+Implementing Ambient Namespace Declaration
+==========================================
+
+The :ref:`Annotation namespace` must be applied to classes and functions
+that implement corresponding entities declared in the ambient namespace.
 
 
 .. raw:: pdf

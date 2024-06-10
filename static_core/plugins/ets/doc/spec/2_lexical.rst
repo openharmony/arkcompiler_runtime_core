@@ -18,7 +18,7 @@ Lexical Elements
 .. meta:
     frontend_status: Done
 
-This chapter discusses the lexical structure of the |LANG| programming language
+This chapter discusses the lexical structure of the |LANG| programming language,
 and the analytical conventions.
 
 |
@@ -56,7 +56,7 @@ Lexical Input Elements
 .. meta:
     frontend_status: Done
 
-The language has lexical input elements of the following types:
+The language has the following types of lexical input elements:
 
 -  :ref:`White Spaces`,
 -  :ref:`Line Separators`,
@@ -74,7 +74,7 @@ White Spaces
     frontend_status: Done
 
 White spaces are lexical input elements that separate tokens from one another.
-Whitespaces never occur within a token. White spaces include the following:
+White spaces include the following:
 
 - Space (U+0020),
 
@@ -90,7 +90,8 @@ Whitespaces never occur within a token. White spaces include the following:
 
 
 White spaces improve source code readability and help avoiding ambiguities.
-White spaces are ignored by the syntactic grammar, but can occur within a comment.
+White spaces are ignored by the syntactic grammar. White spaces never occur
+within a signle token, but can occur within a comment.
 
 .. index::
    lexical input element
@@ -416,7 +417,7 @@ Integer Literals
 
 Integer literals represent numbers that do not have a decimal point or
 an exponential part. Integer literals can be written with bases 16
-(hexadecimal), 10 (decimal), 8 (octal), and 2 (binary).
+(hexadecimal), 10 (decimal), 8 (octal), and 2 (binary) as follows:
 
 .. index::
    integer
@@ -459,7 +460,7 @@ an exponential part. Integer literals can be written with bases 16
       '0' [bB] ( [01] | [01] [01_]* [01] )
       ;
 
-It is presented by the examples below:
+Integral literals with different bases are represented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -471,10 +472,10 @@ It is presented by the examples below:
     0o777 // octal literal
     0b101 // binary literal
 
-The underscore character '``_``' after a base prefix or between successive
+The underscore character '``_``' after the base prefix or between successive
 digits can be used to denote an integer literal and improve readability.
 Underscore characters in such positions do not change the values of literals.
-However, an underscore character must not be the very first or the very last
+However, the underscore character must not be the very first or the very last
 symbol of an integer literal.
 
 .. index::
@@ -485,10 +486,10 @@ symbol of an integer literal.
    underscore character
 
 Integer literals are of type ``int`` if the value can be represented by a
-32-bit number; it is of type ``long`` otherwise. In variable and constant
+32-bit number. Otherwise, it is of type ``long``. In variable and constant
 declarations, an integer literal can be implicitly converted to another
 integer type or type ``char`` (see :ref:`Type Compatibility with Initializer`).
-In all other places an explicit cast must be used (see :ref:`Cast Expressions`).
+An explicit cast must be used elsewhere (see :ref:`Cast Expressions`).
 
 .. index::
    integer literal
@@ -514,7 +515,7 @@ Floating-Point Literals
 
 *Floating-point literals* represent decimal numbers and consist of a
 whole-number part, a decimal point, a fraction part, an exponent, and
-a float type suffix:
+a float type suffix as follows:
 
 .. code-block:: abnf
 
@@ -536,7 +537,7 @@ a float type suffix:
         'f'
         ;
 
-It is presented by the examples below:
+The concept is presented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -548,10 +549,10 @@ It is presented by the examples below:
     1e10
     1e10f
 
-The underscore character '``_``' after a base prefix or between successive
+The underscore character '``_``' after the base prefix or between successive
 digits can be used to denote a floating-point literal and improve readability.
 Underscore characters in such positions do not change the values of literals.
-However, an underscore character must not be the very first and the very
+However, the underscore character must not be the very first and the very
 last symbol of an integer literal.
 
 A floating-point literal is of type ``float`` if *float type suffix* is present.
@@ -595,7 +596,7 @@ A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
       | [1-9] ('_'? [0-9])* 'n'
       ;
 
-It is presented by the examples below:
+The concept is presented by the examples below:
 
 .. code-block:: typescript
 
@@ -606,12 +607,12 @@ It is presented by the examples below:
 
 The underscore character '``_``' used between successive digits can be used to
 denote a ``BigInt`` literal and improve readability. Underscore characters in
-such positions do not change the values of literals. However, an underscore
+such positions do not change the values of literals. However, the underscore
 character must not be the very first or the very last symbol of a ``BigInt``
 literal.
 
 Strings that represent numbers or any integer values can be converted to
-``bigint`` by using the built-in functions:
+``bigint`` by using built-in functions:
 
 
 .. code-block-meta:
@@ -629,7 +630,7 @@ Strings that represent numbers or any integer values can be converted to
 
 Two other static methods allow taking *bitsCount* lower bits of a
 ``BigInt`` number and return them as a result. Signed and unsigned versions
-are both possible:
+are both possible as seen below:
 
 .. code-block:: typescript
 
@@ -680,7 +681,7 @@ single or double quotes. A special form of string literals is
 *template literal* (see :ref:`Template Literals`).
 
 ``String`` literals are of type ``string``. Type ``string`` is a predefined
-reference type (see :ref:`Type String`).
+reference type (see :ref:`Type String`):
 
 .. index::
    string literal
@@ -815,7 +816,8 @@ evaluated at compile time. The evaluation of a template string is called
         | LineContinuation
         ;
 
-See :ref:`String Interpolation Expressions` for the grammar of *embeddedExpression*.
+The grammar of *embeddedExpression* is described in
+:ref:`String Interpolation Expressions`.
 
 An example of a multi-line string is provided below:
 
@@ -827,8 +829,8 @@ An example of a multi-line string is provided below:
                     which should be enclosed in 
                     backticks`
 
-*Template* literals are of type ``string``, which is a predefined reference
-type (see :ref:`Type string`).
+*Template* literals are of type ``string``. Type ``string`` is a predefined
+reference type (see :ref:`Type string`).
 
 |
 
@@ -841,7 +843,7 @@ type (see :ref:`Type string`).
     frontend_status: Done
 
 *Null literal* is the only literal to denote a reference without pointing
-at any entity. It is represented by the keyword ``null``. 
+at any entity. The null literal is represented by the keyword ``null``:
 
 .. code-block:: abnf
 
@@ -872,8 +874,8 @@ of a value. The *null literal* is, by definition, the only value of type
 
 *Undefined literal* is the only literal to denote a reference with a value
 that is not defined. *Undefined literal* is the only value of type
-``undefined`` (see :ref:`Type undefined`). It is represented by the keyword
-``undefined``.
+``undefined`` (see :ref:`Type undefined`). The undefined literal is
+represented by the keyword ``undefined``:
 
 .. code-block:: abnf
 

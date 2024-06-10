@@ -399,9 +399,9 @@ This conversion can lose precision or range, resulting in the following:
 -  Float zero from a nonzero double; and
 -  Float infinity from a finite double.
 
-A double ``NaN`` is converted to a float ``NaN``.
+Double ``NaN`` is converted to float ``NaN``.
 
-A double infinity is converted to the same-signed floating-point infinity.
+Double infinity is converted to same-signed floating-point infinity.
 
 A numeric casting conversion of a floating-point type operand to types
 ``short``, ``byte``, or ``char`` is performed in the following two steps:
@@ -423,13 +423,11 @@ target types ``long`` or ``int`` is performed by the following rules:
   *round-toward-zero* mode.
 
 
-A numeric casting conversion from an integer type (or char)
-to smaller integer type (or char) *I* 
-discards all bits except the *N* lowest ones, 
-where *N* is the number of bites used to represent type *I*.
-This conversion can loose information about the magnitude of the numeric
-value, also the sign of the resulting value can differ from the sign of 
-the original value.
+A numeric casting conversion from an integer type (or char) to smaller integer
+type (or char) *I* discards all bits except the *N* lowest ones, where *N* is
+the number of bits used to represent type *I*. This conversion can lose the
+information on the magnitude of the numeric value. The sign of the resulting
+value can differ from that of the original value.
 
 
 .. index::
@@ -694,6 +692,12 @@ types or of type ``char`` to a value of a smaller integer type provided that:
     let c: char = 0x42E // ok, int -> char conversion
     b = 128 // compile-time-error, value is out of range
     b = 1.0 // compile-time-error, floating-point value cannot be converted
+
+    function foo (p: byte) {}   // Version #1
+    function foo (p: number) {} // Version #2
+
+    foo (100)  // Version #1 is called as int is safely narrowed into byte
+    foo (1000) // Version #2 is called as int is safely widened into double/number
 
 These conversions never cause runtime errors.
 
@@ -1143,9 +1147,7 @@ Type Parameter Conversions
     frontend_status: Done
 
 A value of ``type parameter`` type can be converted only to the same
-``type parameter`` type.
-
-This conversion never causes runtime errors.
+``type parameter`` type. This conversion never causes runtime errors.
 
 .. code-block:: typescript
    :linenos:
@@ -1161,8 +1163,8 @@ This conversion never causes runtime errors.
 
             t1 = t2 // compile-time error
             t2 = t1 // compile-time error
-			t1 = t3 // compile-time error
-			t3 = t1 // compile-time error
+            t1 = t3 // compile-time error
+            t3 = t1 // compile-time error
         }
     }
 
