@@ -18,7 +18,7 @@
 #include "utils/json_parser.h"
 
 namespace OHOS {
-    void JsonParserFuzzTest(const uint8_t* data, [[maybe_unused]] size_t size)
+    void JsonParserFuzzTest(const uint8_t* data, size_t size)
     {
         std::string str(data, data + size);
         panda::JsonObject obj(str);
