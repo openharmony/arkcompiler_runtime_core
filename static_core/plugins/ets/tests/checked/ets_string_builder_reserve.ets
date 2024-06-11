@@ -13,288 +13,283 @@
  * limitations under the License.
  */
 
-// All the checkers below tests if a specific constant appears after a pass transformation applied
-// For example:
-//      INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+){7,}\)/
-// checks if Constant 0x2 instruction (number of append calls counted) appears and has more than 7 users.
-
 //! CHECKER       AOT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true"
 //!
 //! METHOD        "ETSGLOBAL::reserve0"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::reserve1"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::reserve2"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve3"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){11,}\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){11,}\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve4"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=4)"
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve5"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=5)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=5)"
 //!
 //! METHOD        "ETSGLOBAL::nested_loop_reserve6"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xe\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=14)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xe\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=14)"
 //!
 //! METHOD        "ETSGLOBAL::if_reserve7"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::if_reserve8"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=4)"
 //!
 //! METHOD        "ETSGLOBAL::if_loop_reserve9"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=6)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=6)"
 //!
 //! METHOD        "ETSGLOBAL::loop_if_reserve10"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=9)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=9)"
 //!
 //! METHOD        "ETSGLOBAL::uncountable_loop_reserve11"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::uncountable_loop_reserve12"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::uncountable_loop_reserve13"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::switch_reserve14"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=4)"
 //!
 //! METHOD        "ETSGLOBAL::switch_reserve15"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=10)"
 //!
 //! METHOD        "ETSGLOBAL::reverse_loop_reserve16"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::step2_reverse_loop_reserve17"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::step2_reverse_loop_reserve18"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::step5_loop_reserve19"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
+//! INST_NOT      "NewArray (size=5)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
+//! INST          "NewArray (size=5)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_reserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_if_reserve21"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_if_reserve22"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_loop_reserve23"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x13\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=19)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x13\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=19)"
 //!
 //! METHOD        "ETSGLOBAL::types_reserve24"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=10)"
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve25"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){3,}\)/
+//! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){3,}\)/
+//! INST_COUNT    "NewArray (size=3)",2
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
+//! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
+//! INST_COUNT    "NewArray (size=3)",2
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve28"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::partially_uncountable_reserve29"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=6)"
+//! INST_NOT      "NewArray (size=9)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=6)"
+//! INST_NOT      "NewArray (size=9)"
 //!
 //! METHOD        "ETSGLOBAL::try_catch_reserve30"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::try_finally_reserve31"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::out_reserve32"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::in_reserve33"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){2,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){2,}*\)/
+//! INST_NOT      "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::global_reserve34"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::chain_reserve35"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::more_types_reserve36"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x14\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=20)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x14\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=20)"
 //!
 //! METHOD        "ETSGLOBAL::nested_loop_reserve37"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xc\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=12)"
+//! INST_NOT      "NewArray (size=9)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xc\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST          /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=12)"
+//! INST          "NewArray (size=9)"
 //!
 //! METHOD        "ETSGLOBAL::uber_reserve38"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4e\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=78)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4e\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=78)"
 //!
 //! METHOD        "ETSGLOBAL::store_reserve39"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::chain_reserve40"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::chain_reserve41"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::arg_reserve42"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::store_reserve43"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::store_reserve44"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
@@ -302,287 +297,287 @@
 //!
 //! METHOD        "ETSGLOBAL::reserve0"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::reserve1"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST          "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::reserve2"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve3"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){9,}\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){9,}\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve4"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=4)"
 //!
 //! METHOD        "ETSGLOBAL::loop_reserve5"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=5)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=5)"
 //!
 //! METHOD        "ETSGLOBAL::nested_loop_reserve6"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xe\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=14)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xe\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=14)"
 //!
 //! METHOD        "ETSGLOBAL::if_reserve7"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST          "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::if_reserve8"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=4)"
 //!
 //! METHOD        "ETSGLOBAL::if_loop_reserve9"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=6)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=6)"
 //!
 //! METHOD        "ETSGLOBAL::loop_if_reserve10"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=9)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=9)"
 //!
 //! METHOD        "ETSGLOBAL::uncountable_loop_reserve11"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::uncountable_loop_reserve12"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::uncountable_loop_reserve13"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::switch_reserve14"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=4)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=4)"
 //!
 //! METHOD        "ETSGLOBAL::switch_reserve15"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=10)"
 //!
 //! METHOD        "ETSGLOBAL::reverse_loop_reserve16"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::step2_reverse_loop_reserve17"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::step2_reverse_loop_reserve18"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::step5_loop_reserve19"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
+//! INST_NOT      "NewArray (size=5)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x5\s*->\s*\(v[0-9]+(,\s*v[0-9]+){5,}\)/
+//! INST          "NewArray (size=5)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_reserve20"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_if_reserve21"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_if_reserve22"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::multi_toString_loop_reserve23"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x13\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=19)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x13\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=19)"
 //!
 //! METHOD        "ETSGLOBAL::types_reserve24"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=10)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xa\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=10)"
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve25"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){3,}\)/
+//! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){3,}\)/
+//! INST_COUNT    "NewArray (size=3)",2
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve26"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
+//! INST_COUNT    "NewArray (size=3)",1
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+){8,}\)/
+//! INST_COUNT    "NewArray (size=3)",2
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve27"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::lenArray_reserve28"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::partially_uncountable_reserve29"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=6)"
+//! INST_NOT      "NewArray (size=9)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x6\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=6)"
+//! INST_NOT      "NewArray (size=9)"
 //!
 //! METHOD        "ETSGLOBAL::try_catch_reserve30"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST          "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::try_finally_reserve31"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::out_reserve32"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){1,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::in_reserve33"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){2,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+){2,}\)/
+//! INST_NOT      "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::global_reserve34"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x1\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=1)"
 //!
 //! METHOD        "ETSGLOBAL::chain_reserve35"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::more_types_reserve36"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x14\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=20)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x14\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=20)"
 //!
 //! METHOD        "ETSGLOBAL::nested_loop_reserve37"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0xc\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST_NOT      /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=12)"
+//! INST_NOT      "NewArray (size=9)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0xc\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
-//! INST          /Constant\s+0x9\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=12)"
+//! INST          "NewArray (size=9)"
 //!
 //! METHOD        "ETSGLOBAL::uber_reserve38"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x4e\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=78)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x4e\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=78)"
 //!
 //! METHOD        "ETSGLOBAL::store_reserve39"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::chain_reserve40"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::chain_reserve41"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=3)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          /Constant\s+0x3\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST          "NewArray (size=3)"
 //!
 //! METHOD        "ETSGLOBAL::arg_reserve42"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::store_reserve43"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::store_reserve44"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 //! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST_NOT      /Constant\s+0x2\s*->\s*\(v[0-9]+(,\s*v[0-9]+)*\)/
+//! INST_NOT      "NewArray (size=2)"
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events occured
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=false --compiler-inlining=true", entry: "ETSGLOBAL::main_events_check"
-//! EVENT         /SbBufferRealloc/
+//! EVENT         "SbBufferRealloc"
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main_events_check"
-//! EVENT_NOT     /SbBufferRealloc/
+//! EVENT_NOT     "SbBufferRealloc"
 
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events occured (uber_only)
 //! SKIP_IF       @architecture == "arm32"
@@ -593,7 +588,7 @@
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only)
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main_uber_only"
-//! EVENT_NOT     /SbBufferRealloc/
+//! EVENT_NOT     "SbBufferRealloc"
 
 function reserve0() : string {
     let sb0 = new StringBuilder()           // not applied, due to no append calls found
