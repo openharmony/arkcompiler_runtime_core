@@ -692,7 +692,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start?: number, end?: number): {{element['name']}}Array {
-        return this.fill({{fromElementCompat % 'value'}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        {%- if element.get('name') != 'Uint8Clamped' %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill({{fromElementCompat % 'value'}}, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -703,7 +707,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: int, end?: number): {{element['name']}}Array {
-        return this.fill({{fromElementCompat % 'value'}}, start as int, asIntOrDefault(end, this.lengthInt))
+        {%- if element.get('name') != 'Uint8Clamped' %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill({{fromElementCompat % 'value'}}, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -714,7 +722,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: int, end: number): {{element['name']}}Array {
-        return this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+        {%- if element.get('name') != 'Uint8Clamped' %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+        return this
     }
 
     /**
@@ -725,7 +737,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: number, end: int): {{element['name']}}Array {
-        return this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+        {%- if element.get('name') != 'Uint8Clamped' %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+        return this
     }
 
     /**
@@ -736,7 +752,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['subsetType']}}, start: int, end: int): {{element['name']}}Array {
-        return this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+        {%- if element.get('name') != 'Uint8Clamped' %}
+        value = this.zeroIfInfinity(value)
+        {%- endif %}
+        this.fill({{fromElementCompat % 'value'}}, start as int, end as int)
+        return this
     }
 
     /**
@@ -747,7 +767,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['etsType']}}, start?: number, end?: number): {{element['name']}}Array {
-        return this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        this.fill(value, asIntOrDefault(start, 0 as int), asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -758,7 +779,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['etsType']}}, start: int, end?: number): {{element['name']}}Array {
-        return this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        this.fill(value, start as int, asIntOrDefault(end, this.lengthInt))
+        return this
     }
 
     /**
@@ -769,7 +791,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['etsType']}}, start: int, end: number): {{element['name']}}Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
@@ -780,7 +803,8 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns modified {{element['name']}}Array
      */
     public fill(value: {{element['etsType']}}, start: number, end: int): {{element['name']}}Array {
-        return this.fill(value, start as int, end as int)
+        this.fill(value, start as int, end as int)
+        return this
     }
 
     /**
