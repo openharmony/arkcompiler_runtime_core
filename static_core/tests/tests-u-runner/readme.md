@@ -55,12 +55,13 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
       - `std-core-dir`
       - `std-math-dir`
       - `std-time-dir`
-      - `std-serialization-dir`
       - `chapter-1-of-4`
       - `chapter-2-of-4`
       - `chapter-3-of-4`
       - `chapter-4-of-4`
--   `--ets-runtime` - ETS runtime tests
+-   `--ets-es-checked` - `ETS tests that cross validate results with ts`
+    `--ets-gc-stress` - `GC stress tests`
+-   `--ets-runtime` - `ETS runtime tests`
     Tests folder: `ets_frontend/ets2panda/test/runtime/ets`
 -   `--ets-cts` - CTS language specification tests
     Tests folder: `plugins/ets/tests/ets-templates`
@@ -70,15 +71,15 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
       - `chapter03` - `03.types`
       - `chapter04` - `04.names_declarations_and_scopes`
       - `chapter05` - `05.generics`
-      - `chapter06` - `06.conversions_and_contexts`
+      - `chapter06` - `06.contexts_and_conversions`
       - `chapter07` - `07.expressions`
       - `chapter08` - `08.statements`
       - `chapter09` - `09.classes`
       - `chapter10` - `10.interfaces`
       - `chapter11` - `11.enumerations`
-      - `chapter12` - `12.errors`
+      - `chapter12` - `12.errors_handling`
       - `chapter13` - `13.modules_and_compilation_units`
-      - `chapter14` - `14.semantic_rules`
+      - `chapter15` - `15.semantic_rules`
       - `chapter17` - `17.experimental_features`
       - `chapters02-05`
       - `chapters06-09`
@@ -90,11 +91,6 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
 -   `--parser` - parser (aka regression)
 -   `--hermes` - Hermes JS runtime tests. To run tests from the Hermes suite, specify environment variables `HERMES_REVISION` and `HERMES_URL` in the `.env` file.
 -   `--test262` - Test262 JS parser and runtime tests. To run tests from the test262 suite, specify environment variables `TEST262_REVISION` and `TEST262_URL` in the `.env` file.
--   `--ets-func-tests` - tests for ArkTS: standard library and ets func tests
--   `--ets-runtime` - ETS runtime tests
--   `--ets-cts` - CTS language specification tests
--   `--ets-gc-stress` - GC stress tests
--   `--ets-es-checked` - ETS tests that cross validate results with ts
 
 Additionally, a test suite can be specified with the option `--test-suite`: for example, for test262 `--test-suite test262`,
 for ets-func-tests `--test-suite ets_func_tests`
