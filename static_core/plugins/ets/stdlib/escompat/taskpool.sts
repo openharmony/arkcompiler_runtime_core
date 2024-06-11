@@ -394,11 +394,11 @@ export class taskpool {
      * @param group The task group for execution
      * @returns Promise for array of results of executed tasks from the group
      */
-    static execute(group: taskpoolTaskGroup /*, priority?: Priority */): Promise<NullishType[]> {
+    static execute(group: taskpoolTaskGroup /*, priority?: Priority */): Promise<Array<NullishType>> {
         let tasksCount: long = group.tasks.length as long;
         if (tasksCount == 0) {
             group.isSubmitted = true;
-            return Promise.resolve(new NullishType[0]);
+            return Promise.resolve(new Array<NullishType>());
         }
         taskpool.taskGroupSubmitted(group.id, tasksCount);
         let promises = new Array<Promise<NullishType>>();

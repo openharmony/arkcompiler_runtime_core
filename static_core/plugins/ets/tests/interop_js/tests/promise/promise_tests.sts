@@ -448,8 +448,7 @@ async function testAsyncVoidNothing() {}
 function testPromiseAllEmpty(): void {
     globalTest = new Test();
     let promises: Promise<Object>[] = [];
-    Promise.all(promises).then<void>((v: Object): void => {
-        let values: Object[] = v as Object[];
+    Promise.all(promises).then<void>((values: Array<Object>): void => {
         if (values == null || values.length != 0) {
             globalTest!.fail();
         } else {
@@ -466,7 +465,7 @@ function testPromiseAllResolved(): void {
 
     Promise.all<Object>([
         p1, p2, p3
-    ]).then<void>((values: Object[]): void => {
+    ]).then<void>((values: Array<Object>): void => {
         if (values.length != 3) {
             globalTest!.fail();
         }
@@ -509,7 +508,7 @@ function testPromiseAllRawValues(): void {
 
     Promise.all<Object>([
         p1, p2, p3
-    ]).then<void>((values: Object[]): void => {
+    ]).then<void>((values: Array<Object>): void => {
         if (values.length != 3) {
             globalTest!.fail();
         }
@@ -533,7 +532,7 @@ function testPromiseAllIterable(): void {
     array.push("def");
     array.push(Promise.resolve<Object>("xyz"));
 
-    Promise.all<Object>(array).then<void>((values: Object[]): void => {
+    Promise.all<Object>(array).then<void>((values: Array<Object>): void => {
         if (values.length != 3) {
             globalTest!.fail();
         }

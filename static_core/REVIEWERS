@@ -139,6 +139,7 @@ static_core/plugins/ets/stdlib/std/debug/concurrency/                         @k
 static_core/plugins/ets/tests/interop_js/tests/checked/                       @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/compiler/                      @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
+static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 @ivan-tyulyandin @anton-sysoev @dmitriitr @konstanting @udav
 
 /abc2program/ @ctw-ian
 /assembler/ @ctw-ian
