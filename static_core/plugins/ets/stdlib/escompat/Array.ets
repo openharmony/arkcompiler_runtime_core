@@ -52,7 +52,7 @@ class ArrayKeysIterator<T> implements IterableIterator<number> {
         return new IteratorResult<number>(this.idx++ as number)
     }
 
-    override iterator(): IterableIterator<number> {
+    override $_iterator(): IterableIterator<number> {
         return this
     }
 }
@@ -177,13 +177,13 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const verifyCompiles: Iterable<T> = arr
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
             if (a instanceof String) {
-                return (a as String).iterator() as Iterator<T>
+                return (a as String).$_iterator() as Iterator<T>
             }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
                 const m = aType.getMethod(i);
-                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                     return m.invoke(a, [])! as Iterator<T>
                 }
             }
@@ -539,7 +539,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Returns an iterator over all values
      */
-    public override iterator(): IterableIterator<T> {
+    public override $_iterator(): IterableIterator<T> {
         return this.values()
     }
 
@@ -1937,7 +1937,7 @@ class ArrayValuesIterator_T<T> implements IterableIterator<T> {
         return new IteratorResult<T>(this.parent.$_get_unsafe(this.idx++))
     }
 
-    override iterator(): IterableIterator<T> {
+    override $_iterator(): IterableIterator<T> {
         return this;
     }
 }
@@ -1959,7 +1959,7 @@ class ArrayEntriesIterator_T<T> implements IterableIterator<[number, T]> {
         return new IteratorResult<[number, T]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, T]> {
+    override $_iterator(): IterableIterator<[number, T]> {
         return this;
     }
 }

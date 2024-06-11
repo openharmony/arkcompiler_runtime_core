@@ -25,7 +25,7 @@ class Int8ArrayIteratorKeys implements IterableIterator<Number> {
         this.length = parent.length as int
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -45,7 +45,7 @@ class Int8ArrayIterator implements IterableIterator<Number> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -65,7 +65,7 @@ class Int8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[Number, Number]> {
         return this;
     }
 
@@ -83,7 +83,7 @@ class Int8ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 /**
  * JS Int8Array API-compatible class
  */
-export final class Int8Array implements Iterable<Number> {
+export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 1
     internal readonly lengthInt: int
 
@@ -431,8 +431,8 @@ export final class Int8Array implements Iterable<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): number {
-        return this.$_get(index as int)
+    public $_get(index: number): Number {
+        return this.$_get(index as int) as Number
     }
 
     /**
@@ -881,7 +881,7 @@ export final class Int8Array implements Iterable<Number> {
         let i: long
         for (i = 0; i < mNum; i++) {
             m = aType.getMethod(i);
-            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                 break
             }
         }
@@ -928,13 +928,13 @@ export final class Int8Array implements Iterable<Number> {
         // NOTE(aleksander-sotov): Reflection is used due to #15523
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
             if (a instanceof String) {
-                return (a as String).iterator() as Iterator<T>
+                return (a as String).$_iterator() as Iterator<T>
             }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
                 const m = aType.getMethod(i);
-                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                     return m.invoke(a, [])! as Iterator<T>
                 }
             }
@@ -1499,17 +1499,10 @@ export final class Int8Array implements Iterable<Number> {
 
     /**
      * Iteratorable interface implementation
+     *
      * @returns iterator over all elements
      */
-    public override iterator(): IterableIterator<Number> {
-        return this.values()
-    }
-
-    /**
-     * Iteratorable interface implementation
-     * @returns iterator over all elements
-     */
-    public $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this.values()
     }
 
@@ -2552,7 +2545,7 @@ class Int16ArrayIteratorKeys implements IterableIterator<Number> {
         this.length = parent.length as int
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -2572,7 +2565,7 @@ class Int16ArrayIterator implements IterableIterator<Number> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -2592,7 +2585,7 @@ class Int16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[Number, Number]> {
         return this;
     }
 
@@ -2610,7 +2603,7 @@ class Int16ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 /**
  * JS Int16Array API-compatible class
  */
-export final class Int16Array implements Iterable<Number> {
+export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 2
     internal readonly lengthInt: int
 
@@ -2965,8 +2958,8 @@ export final class Int16Array implements Iterable<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): number {
-        return this.$_get(index as int)
+    public $_get(index: number): Number {
+        return this.$_get(index as int) as Number
     }
 
     /**
@@ -3415,7 +3408,7 @@ export final class Int16Array implements Iterable<Number> {
         let i: long
         for (i = 0; i < mNum; i++) {
             m = aType.getMethod(i);
-            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                 break
             }
         }
@@ -3462,13 +3455,13 @@ export final class Int16Array implements Iterable<Number> {
         // NOTE(aleksander-sotov): Reflection is used due to #15523
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
             if (a instanceof String) {
-                return (a as String).iterator() as Iterator<T>
+                return (a as String).$_iterator() as Iterator<T>
             }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
                 const m = aType.getMethod(i);
-                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                     return m.invoke(a, [])! as Iterator<T>
                 }
             }
@@ -4033,17 +4026,10 @@ export final class Int16Array implements Iterable<Number> {
 
     /**
      * Iteratorable interface implementation
+     *
      * @returns iterator over all elements
      */
-    public override iterator(): IterableIterator<Number> {
-        return this.values()
-    }
-
-    /**
-     * Iteratorable interface implementation
-     * @returns iterator over all elements
-     */
-    public $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this.values()
     }
 
@@ -5090,7 +5076,7 @@ class Int32ArrayIteratorKeys implements IterableIterator<Number> {
         this.length = parent.length as int
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -5110,7 +5096,7 @@ class Int32ArrayIterator implements IterableIterator<Number> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -5130,7 +5116,7 @@ class Int32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[Number, Number]> {
         return this;
     }
 
@@ -5148,7 +5134,7 @@ class Int32ArrayIteratorEntries implements IterableIterator<[Number, Number]> {
 /**
  * JS Int32Array API-compatible class
  */
-export final class Int32Array implements Iterable<Number> {
+export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 4
     internal readonly lengthInt: int
 
@@ -5476,8 +5462,8 @@ export final class Int32Array implements Iterable<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): number {
-        return this.$_get(index as int)
+    public $_get(index: number): Number {
+        return this.$_get(index as int) as Number
     }
 
     /**
@@ -5926,7 +5912,7 @@ export final class Int32Array implements Iterable<Number> {
         let i: long
         for (i = 0; i < mNum; i++) {
             m = aType.getMethod(i);
-            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                 break
             }
         }
@@ -5973,13 +5959,13 @@ export final class Int32Array implements Iterable<Number> {
         // NOTE(aleksander-sotov): Reflection is used due to #15523
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
             if (a instanceof String) {
-                return (a as String).iterator() as Iterator<T>
+                return (a as String).$_iterator() as Iterator<T>
             }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
                 const m = aType.getMethod(i);
-                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                     return m.invoke(a, [])! as Iterator<T>
                 }
             }
@@ -6544,17 +6530,10 @@ export final class Int32Array implements Iterable<Number> {
 
     /**
      * Iteratorable interface implementation
+     *
      * @returns iterator over all elements
      */
-    public override iterator(): IterableIterator<Number> {
-        return this.values()
-    }
-
-    /**
-     * Iteratorable interface implementation
-     * @returns iterator over all elements
-     */
-    public $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this.values()
     }
 
@@ -7601,7 +7580,7 @@ class BigInt64ArrayIteratorKeys implements IterableIterator<Number> {
         this.length = parent.length as int
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -7621,7 +7600,7 @@ class BigInt64ArrayIterator implements IterableIterator<BigInt> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<BigInt> {
+    public override $_iterator(): IterableIterator<BigInt> {
         return this;
     }
 
@@ -7641,7 +7620,7 @@ class BigInt64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]>
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<[Number, BigInt]> {
+    public override $_iterator(): IterableIterator<[Number, BigInt]> {
         return this;
     }
 
@@ -7659,7 +7638,7 @@ class BigInt64ArrayIteratorEntries implements IterableIterator<[Number, BigInt]>
 /**
  * JS BigInt64Array API-compatible class
  */
-export final class BigInt64Array implements Iterable<BigInt> {
+export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
     public static readonly BYTES_PER_ELEMENT: number = 8
     internal readonly lengthInt: int
 
@@ -8015,7 +7994,7 @@ export final class BigInt64Array implements Iterable<BigInt> {
      * @returns a primitive at index
      */
     public $_get(index: number): BigInt {
-        return this.$_get(index as int)
+        return this.$_get(index as int) as BigInt
     }
 
     /**
@@ -9010,17 +8989,10 @@ export final class BigInt64Array implements Iterable<BigInt> {
 
     /**
      * Iteratorable interface implementation
+     *
      * @returns iterator over all elements
      */
-    public override iterator(): IterableIterator<BigInt> {
-        return this.values()
-    }
-
-    /**
-     * Iteratorable interface implementation
-     * @returns iterator over all elements
-     */
-    public $_iterator(): IterableIterator<BigInt> {
+    public override $_iterator(): IterableIterator<BigInt> {
         return this.values()
     }
 
@@ -10067,7 +10039,7 @@ class Float32ArrayIteratorKeys implements IterableIterator<Number> {
         this.length = parent.length as int
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -10087,7 +10059,7 @@ class Float32ArrayIterator implements IterableIterator<Number> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -10107,7 +10079,7 @@ class Float32ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[Number, Number]> {
         return this;
     }
 
@@ -10125,7 +10097,7 @@ class Float32ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
 /**
  * JS Float32Array API-compatible class
  */
-export final class Float32Array implements Iterable<Number> {
+export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 4
     internal readonly lengthInt: int
 
@@ -10463,8 +10435,8 @@ export final class Float32Array implements Iterable<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): number {
-        return this.$_get(index as int)
+    public $_get(index: number): Number {
+        return this.$_get(index as int) as Number
     }
 
     /**
@@ -10905,7 +10877,7 @@ export final class Float32Array implements Iterable<Number> {
         let i: long
         for (i = 0; i < mNum; i++) {
             m = aType.getMethod(i);
-            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                 break
             }
         }
@@ -10952,13 +10924,13 @@ export final class Float32Array implements Iterable<Number> {
         // NOTE(aleksander-sotov): Reflection is used due to #15523
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
             if (a instanceof String) {
-                return (a as String).iterator() as Iterator<T>
+                return (a as String).$_iterator() as Iterator<T>
             }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
                 const m = aType.getMethod(i);
-                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                     return m.invoke(a, [])! as Iterator<T>
                 }
             }
@@ -11523,17 +11495,10 @@ export final class Float32Array implements Iterable<Number> {
 
     /**
      * Iteratorable interface implementation
+     *
      * @returns iterator over all elements
      */
-    public override iterator(): IterableIterator<Number> {
-        return this.values()
-    }
-
-    /**
-     * Iteratorable interface implementation
-     * @returns iterator over all elements
-     */
-    public $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this.values()
     }
 
@@ -12580,7 +12545,7 @@ class Float64ArrayIteratorKeys implements IterableIterator<Number> {
         this.length = parent.length as int
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -12600,7 +12565,7 @@ class Float64ArrayIterator implements IterableIterator<Number> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -12620,7 +12585,7 @@ class Float64ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<[Number, Number]> {
+    public override $_iterator(): IterableIterator<[Number, Number]> {
         return this;
     }
 
@@ -12638,7 +12603,7 @@ class Float64ArrayIteratorEntries implements IterableIterator<[Number, Number]> 
 /**
  * JS Float64Array API-compatible class
  */
-export final class Float64Array implements Iterable<Number> {
+export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     public static readonly BYTES_PER_ELEMENT: number = 8
     internal readonly lengthInt: int
 
@@ -12950,8 +12915,8 @@ export final class Float64Array implements Iterable<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): number {
-        return this.$_get(index as int)
+    public $_get(index: number): Number {
+        return this.$_get(index as int) as Number
     }
 
     /**
@@ -13323,7 +13288,7 @@ export final class Float64Array implements Iterable<Number> {
         let i: long
         for (i = 0; i < mNum; i++) {
             m = aType.getMethod(i);
-            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                 break
             }
         }
@@ -13370,13 +13335,13 @@ export final class Float64Array implements Iterable<Number> {
         // NOTE(aleksander-sotov): Reflection is used due to #15523
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
             if (a instanceof String) {
-                return (a as String).iterator() as Iterator<T>
+                return (a as String).$_iterator() as Iterator<T>
             }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
                 const m = aType.getMethod(i);
-                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                     return m.invoke(a, [])! as Iterator<T>
                 }
             }
@@ -13930,17 +13895,10 @@ export final class Float64Array implements Iterable<Number> {
 
     /**
      * Iteratorable interface implementation
+     *
      * @returns iterator over all elements
      */
-    public override iterator(): IterableIterator<Number> {
-        return this.values()
-    }
-
-    /**
-     * Iteratorable interface implementation
-     * @returns iterator over all elements
-     */
-    public $_iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this.values()
     }
 

@@ -211,7 +211,7 @@ function testTypedUArrayIterator(): number {
     return fail;
   }
 
-  let arrayIterator = typedUArray.iterator();
+  let arrayIterator = typedUArray.$_iterator();
   let next = arrayIterator.next();
   let counter: number = 0;
   while (!next.done) {

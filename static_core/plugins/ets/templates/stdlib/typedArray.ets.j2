@@ -41,7 +41,7 @@ class {{N}}ArrayIteratorKeys implements IterableIterator<Number> {
         this.length = parent.length as int
     }
 
-    public override iterator(): IterableIterator<Number> {
+    public override $_iterator(): IterableIterator<Number> {
         return this;
     }
 
@@ -61,7 +61,7 @@ class {{N}}ArrayIterator implements IterableIterator<{{subsetTypeValues}}> {
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<{{subsetTypeValues}}> {
+    public override $_iterator(): IterableIterator<{{subsetTypeValues}}> {
         return this;
     }
 
@@ -83,7 +83,7 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
         this.parent = parent
     }
 
-    public override iterator(): IterableIterator<{{subsetTypeValuesEntries}}> {
+    public override $_iterator(): IterableIterator<{{subsetTypeValuesEntries}}> {
         return this;
     }
 
@@ -101,7 +101,7 @@ class {{N}}ArrayIteratorEntries implements IterableIterator<{{subsetTypeValuesEn
 /**
  * JS {{N}}Array API-compatible class
  */
-export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
+export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLike<{{subsetTypeValues}}> {
     public static readonly BYTES_PER_ELEMENT: number = {{S}}
     internal readonly lengthInt: int
 
@@ -489,8 +489,8 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): {{elementCompat}} {
-        return this.$_get(index as int)
+    public $_get(index: number): {{subsetTypeValues}} {
+        return this.$_get(index as int) as {{subsetTypeValues}}
     }
 
     /**
@@ -1025,7 +1025,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         let i: long
         for (i = 0; i < mNum; i++) {
             m = aType.getMethod(i);
-            if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+            if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                 break
             }
         }
@@ -1080,13 +1080,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
         // NOTE(aleksander-sotov): Reflection is used due to #15523
         const getIteratorFromIterable = (a: Object): Iterator<T> => {
             if (a instanceof String) {
-                return (a as String).iterator() as Iterator<T>
+                return (a as String).$_iterator() as Iterator<T>
             }
             const aType = Type.of(a) as ClassType
             const mNum = aType.getMethodsNum();
             for (let i = 0; i < mNum; i++) {
                 const m = aType.getMethod(i);
-                if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
                     return m.invoke(a, [])! as Iterator<T>
                 }
             }
@@ -1680,17 +1680,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}> {
 
     /**
      * Iteratorable interface implementation
+     *
      * @returns iterator over all elements
      */
-    public override iterator(): IterableIterator<{{subsetTypeValues}}> {
-        return this.values()
-    }
-
-    /**
-     * Iteratorable interface implementation
-     * @returns iterator over all elements
-     */
-    public $_iterator(): IterableIterator<{{subsetTypeValues}}> {
+    public override $_iterator(): IterableIterator<{{subsetTypeValues}}> {
         return this.values()
     }
 

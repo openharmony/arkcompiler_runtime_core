@@ -61,7 +61,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<number> {
         return new IteratorResult<number>(this.idx++ as number)
     }
 
-    override iterator(): IterableIterator<number> {
+    override $_iterator(): IterableIterator<number> {
         return this
     }
 }
@@ -1440,7 +1440,7 @@ class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
         return new IteratorResult<boolean>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<boolean> {
+    override $_iterator(): IterableIterator<boolean> {
         return this;
     }
 }
@@ -1462,7 +1462,7 @@ class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]
         return new IteratorResult<[number, boolean]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, boolean]> {
+    override $_iterator(): IterableIterator<[number, boolean]> {
         return this;
     }
 }
@@ -2841,7 +2841,7 @@ class ArrayValuesIterator_byte implements IterableIterator<byte> {
         return new IteratorResult<byte>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<byte> {
+    override $_iterator(): IterableIterator<byte> {
         return this;
     }
 }
@@ -2863,7 +2863,7 @@ class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
         return new IteratorResult<[number, byte]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, byte]> {
+    override $_iterator(): IterableIterator<[number, byte]> {
         return this;
     }
 }
@@ -4242,7 +4242,7 @@ class ArrayValuesIterator_short implements IterableIterator<short> {
         return new IteratorResult<short>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<short> {
+    override $_iterator(): IterableIterator<short> {
         return this;
     }
 }
@@ -4264,7 +4264,7 @@ class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
         return new IteratorResult<[number, short]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, short]> {
+    override $_iterator(): IterableIterator<[number, short]> {
         return this;
     }
 }
@@ -5643,7 +5643,7 @@ class ArrayValuesIterator_int implements IterableIterator<int> {
         return new IteratorResult<int>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<int> {
+    override $_iterator(): IterableIterator<int> {
         return this;
     }
 }
@@ -5665,7 +5665,7 @@ class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
         return new IteratorResult<[number, int]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, int]> {
+    override $_iterator(): IterableIterator<[number, int]> {
         return this;
     }
 }
@@ -7044,7 +7044,7 @@ class ArrayValuesIterator_long implements IterableIterator<long> {
         return new IteratorResult<long>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<long> {
+    override $_iterator(): IterableIterator<long> {
         return this;
     }
 }
@@ -7066,7 +7066,7 @@ class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
         return new IteratorResult<[number, long]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, long]> {
+    override $_iterator(): IterableIterator<[number, long]> {
         return this;
     }
 }
@@ -8453,7 +8453,7 @@ class ArrayValuesIterator_float implements IterableIterator<float> {
         return new IteratorResult<float>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<float> {
+    override $_iterator(): IterableIterator<float> {
         return this;
     }
 }
@@ -8475,7 +8475,7 @@ class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
         return new IteratorResult<[number, float]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, float]> {
+    override $_iterator(): IterableIterator<[number, float]> {
         return this;
     }
 }
@@ -9862,7 +9862,7 @@ class ArrayValuesIterator_double implements IterableIterator<double> {
         return new IteratorResult<double>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<double> {
+    override $_iterator(): IterableIterator<double> {
         return this;
     }
 }
@@ -9884,7 +9884,7 @@ class ArrayEntriesIterator_double implements IterableIterator<[number, double]> 
         return new IteratorResult<[number, double]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, double]> {
+    override $_iterator(): IterableIterator<[number, double]> {
         return this;
     }
 }
@@ -11263,7 +11263,7 @@ class ArrayValuesIterator_char implements IterableIterator<char> {
         return new IteratorResult<char>(this.parent[this.idx++])
     }
 
-    override iterator(): IterableIterator<char> {
+    override $_iterator(): IterableIterator<char> {
         return this;
     }
 }
@@ -11285,7 +11285,7 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
         return new IteratorResult<[number, char]>(vl);
     }
 
-    override iterator(): IterableIterator<[number, char]> {
+    override $_iterator(): IterableIterator<[number, char]> {
         return this;
     }
 }

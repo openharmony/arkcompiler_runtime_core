@@ -26,14 +26,14 @@ class MyIterable<T> implements IterableIterator<T> {
         return new IteratorResult<T>(true, undefined)
     }
 
-    public iterator() : IterableIterator<T> {
+    public $_iterator() : IterableIterator<T> {
         return this;
     }
 }
 
 class MyClass {
     public constructor(element: Iterable<Int>) {
-        let it = element.iterator();
+        let it = element.$_iterator();
         while(true) {
             const v = it.next();
             if (v.done) {

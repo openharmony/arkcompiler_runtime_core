@@ -104,7 +104,7 @@ class GlobalRegExpStringIterator implements IterableIterator<RegExpMatchArray> {
         return new IteratorResult<RegExpMatchArray>(match)
     }
 
-    override iterator(): IterableIterator<RegExpMatchArray> {
+    override $_iterator(): IterableIterator<RegExpMatchArray> {
         return this
     }
 }
@@ -129,7 +129,7 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
         return new IteratorResult<RegExpMatchArray>(match)
     }
 
-    override iterator(): IterableIterator<RegExpMatchArray> {
+    override $_iterator(): IterableIterator<RegExpMatchArray> {
         return this
     }
 }

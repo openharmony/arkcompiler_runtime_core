@@ -266,7 +266,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     }
 
     private static toArray<U>(values: Iterable<U>): U[] {
-        let it = values.iterator();
+        let it = values.$_iterator();
         let v = it.next();
         if (v.done) {
             return new U[0];

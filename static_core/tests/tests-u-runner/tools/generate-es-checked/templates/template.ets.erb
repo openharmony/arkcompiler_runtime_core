@@ -41,7 +41,7 @@ class ArrayValueIterator implements IterableIterator<NullishType> {
     this.val = val
   }
 
-  override iterator(): IterableIterator<NullishType> {
+  override $_iterator(): IterableIterator<NullishType> {
     return this;
   }
 
@@ -86,7 +86,7 @@ function getIteratorFromIterable(a: NullishType, aTypeUncasted: Type): Iterator<
   const mNum = aType.getMethodsNum();
   for (let i = 0; i < mNum; i++) {
     const m = aType.getMethod(i);
-    if (m.getName() == "iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
+    if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
       KNOWN_ITERABLES.push(new IterableData(aType, m));
       return m.invoke(a, [])! as Iterator<NullishType>
     }

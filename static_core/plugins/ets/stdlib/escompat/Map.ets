@@ -225,7 +225,7 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
         return this.s.mappedIterator<V>((x: ListNode): V => { return (x.val as MapEntry<K, V>).value })
     }
 
-    override iterator(): IterableIterator<[K, V]> {
+    override $_iterator(): IterableIterator<[K, V]> {
         return this.entries()
     }
 

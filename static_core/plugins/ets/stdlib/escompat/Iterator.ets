@@ -40,11 +40,11 @@ export interface Iterator<out T> {
 }
 
 export interface Iterable<out T> {
-    iterator(): Iterator<T>;
+    $_iterator(): Iterator<T>;
 }
 
 export interface IterableIterator<out T> extends Iterator<T>, Iterable<T> {
-    iterator(): IterableIterator<T> {
+    $_iterator(): IterableIterator<T> {
         return this;
     }
 }

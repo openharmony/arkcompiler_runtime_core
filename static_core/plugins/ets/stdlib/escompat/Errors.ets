@@ -76,7 +76,7 @@ export class AggregateError extends Error {
     constructor(errors: Iterable<Error>, message?: String, options?: ErrorOptions) {
         super("AggregateError", message, options);
         let iteratorList = new ArrayAsListObject()
-        iteratorForEach<Error>(errors.iterator(), (x: Error) : void => {
+        iteratorForEach<Error>(errors.$_iterator(), (x: Error) : void => {
             iteratorList.pushBack(x)
         })
         this.errors = iteratorList.toArray() as Error[]
