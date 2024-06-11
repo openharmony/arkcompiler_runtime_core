@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-function CreateWeakRefString(): WeakRef<String>
+function CreateWeakRefString(s: string): WeakRef<String>
 {
-    let obj = new String("string");
+    let obj = "Hello " + s;
     assert obj != null : "New string object must be correctly allocated";
     return new WeakRef<String>(obj);
 }
@@ -50,7 +50,7 @@ function RegisterNativeAllocation(): void {
 }
 
 function main(): int {
-    let weak_ref_string = CreateWeakRefString();
+    let weak_ref_string = CreateWeakRefString("world!");
 
     try {
         // Calling RegisterNativeAllocation to trigger GC

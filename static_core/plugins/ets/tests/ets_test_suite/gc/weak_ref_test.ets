@@ -20,9 +20,9 @@ function CreateWeakRefObject(): WeakRef<Object>
     return new WeakRef<Object>(obj);
 }
 
-function CreateWeakRefString(): WeakRef<String>
+function CreateWeakRefString(s: string): WeakRef<String>
 {
-    let obj = new String("string");
+    let obj = "Hello " + s;
     assert obj != null : "New string object must be correctly allocated";
     return new WeakRef<String>(obj);
 }
@@ -32,7 +32,7 @@ const reachable_obj = new Object();
 
 function main(): int {
     let wr = CreateWeakRefObject();
-    let wrs = CreateWeakRefString();
+    let wrs = CreateWeakRefString("world!");
     let wr_with_reachable = new WeakRef<Object>(reachable_obj);
     // Run Full GC for referent collection
     try {
