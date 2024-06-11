@@ -16,6 +16,7 @@
 #include "tests/unit_test.h"
 #include "tests/inst_generator.h"
 #include "llvm_aot_compiler.h"
+#include "llvm_options.h"
 #include "libpandafile/file_item_container.h"
 
 #include "aot/aot_builder/llvm_aot_builder.h"
@@ -32,7 +33,7 @@ public:
     void GenerateOp(Opcode op)
     {
         ASSERT(op != Opcode::Builtin);
-        if (op == Opcode::Intrinsic || op == Opcode::SpillFill || op == Opcode::ReturnInlined) {
+        if (op == Opcode::Intrinsic || op == Opcode::SpillFill) {
             return;
         }
         auto it = instGenerator_.Generate(op);
@@ -48,28 +49,21 @@ public:
             aotBuilder.SetArch(graph->GetArch());
             aotBuilder.SetRuntime(graph->GetRuntime());
 
-            bool status = false;
             LLVMAotCompiler llvm(graph->GetRuntime(), graphCreator_.GetAllocator(), &aotBuilder, "", "inst-gen.abc");
-            auto can = llvm.CanCompile(graph);
-            ASSERT(can.HasValue());
-            if (can.HasValue() && can.Value()) {
-                if (graph->GetAotData() == nullptr) {
-                    uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
-                    auto aotData = graph->GetAllocator()->New<compiler::AotData>(
-                        nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
-                        aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
-                        aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
-                    aotData->SetUseCha(true);
-                    graph->SetAotData(aotData);
-                }
-                llvm.AddGraph(graph);
-                status = !llvm.IsIrFailed();
-                if (!status) {
-                    graph->Dump(&std::cerr);
-                }
-                // If CanCompile is true, the code must be compiled
-                ASSERT(status);
+
+            if (graph->GetAotData() == nullptr) {
+                uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
+                auto aotData = graph->GetAllocator()->New<compiler::AotData>(
+                    nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
+                    aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
+                    aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
+                aotData->SetUseCha(true);
+                graph->SetAotData(aotData);
             }
+            auto res = llvm.TryAddGraph(graph);
+            ASSERT(res.HasValue() && !llvm.IsIrFailed());
+            bool status = res.Value();
+
             // NOLINTNEXTLINE(hicpp-signed-bitwise)
             fullInstStat[(i)->GetType()] &= static_cast<int>(status);
             allInstNumber_++;
@@ -97,27 +91,21 @@ public:
             compiler::g_options.SetCompilerEncodeIntrinsics(false);
         }
 
-        bool status = false;
         LLVMAotCompiler llvm(graph->GetRuntime(), graphCreator_.GetAllocator(), &aotBuilder, "", "inst-gen.abc");
-        auto can = llvm.CanCompile(graph);
-        if (can.HasValue() && can.Value()) {
-            if (graph->GetAotData() == nullptr) {
-                uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
-                auto aotData = graph->GetAllocator()->New<compiler::AotData>(
-                    nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
-                    aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
-                    aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
-                aotData->SetUseCha(true);
-                graph->SetAotData(aotData);
-            }
-            llvm.AddGraph(graph);
-            status = !llvm.IsIrFailed();
-            if (!status) {
-                graph->Dump(&std::cerr);
-            }
-            // If CanCompile is true, the code must be compiled
-            ASSERT(status);
+
+        if (graph->GetAotData() == nullptr) {
+            uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
+            auto aotData = graph->GetAllocator()->New<compiler::AotData>(
+                nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
+                aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
+                aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
+            aotData->SetUseCha(true);
+            graph->SetAotData(aotData);
         }
+        auto res = llvm.TryAddGraph(graph);
+        ASSERT(!llvm.IsIrFailed());
+        bool status = res.HasValue() && res.Value();
+
         if (!encodes) {
             compiler::g_options.SetCompilerEncodeIntrinsics(true);
         }
@@ -131,6 +119,7 @@ public:
 
     void Generate() override
     {
+        compiler::g_options.SetCompilerNonOptimizing(true);
         for (const auto &op : instGenerator_.GetMap()) {
             GenerateOp(op.first);
         }

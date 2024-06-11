@@ -59,6 +59,19 @@ void DebugDataBuilder::SetLocation(Instruction *inst, uint32_t line, uint32_t co
     inst->setDebugLoc(DILocation::get(func->getContext(), line, column, func->getSubprogram()));
 }
 
+void DebugDataBuilder::AppendInlinedAt(llvm::Instruction *inst, llvm::Function *function, uint32_t line,
+                                       uint32_t column)
+{
+    auto original = inst->getDebugLoc();
+
+    auto inlinedAtNode = DILocation::getDistinct(function->getContext(), line, column, original.getScope());
+    llvm::DenseMap<const llvm::MDNode *, llvm::MDNode *> cache;
+    auto inlinedAt = llvm::DebugLoc::appendInlinedAt(original, inlinedAtNode, function->getContext(), cache);
+    auto newDebugInfo = DILocation::getDistinct(function->getContext(), original.getLine(), original->getColumn(),
+                                                original.getScope(), inlinedAt);
+    inst->setDebugLoc(newDebugInfo);
+}
+
 void DebugDataBuilder::Finalize()
 {
     builder_->finalize();

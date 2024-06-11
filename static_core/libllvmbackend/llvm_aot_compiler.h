@@ -77,12 +77,10 @@ private:
 
 class LLVMAotCompiler final : public LLVMCompiler {
 public:
-    Expected<bool, std::string> CanCompile(ark::compiler::Graph *graph) override;
+    explicit LLVMAotCompiler(compiler::RuntimeInterface *runtime, ArenaAllocator *allocator,
+                             compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename);
 
-    explicit LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::ArenaAllocator *allocator,
-                             ark::compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename);
-
-    bool AddGraph(ark::compiler::Graph *graph) override;
+    Expected<bool, std::string> TryAddGraph(compiler::Graph *graph) override;
 
     void FinishCompile() override;
 
@@ -106,11 +104,12 @@ private:
 
     static std::vector<std::string> GetFeaturesForArch(Arch arch);
 
-    void RunArkPasses(ark::compiler::Graph *graph);
+    bool RunArkPasses(compiler::Graph *graph);
 
-    bool AddGraphToModule(ark::compiler::Graph *graph, WrappedModule &module, AddGraphMode addGraphMode);
+    Expected<bool, std::string> AddGraphToModule(compiler::Graph *graph, WrappedModule &module,
+                                                 AddGraphMode addGraphMode);
 
-    ark::compiler::CompiledMethod AdaptCode(ark::Method *method, Span<const uint8_t> machineCode);
+    compiler::CompiledMethod AdaptCode(Method *method, Span<const uint8_t> machineCode);
 
     void PrepareAotGot(WrappedModule *wrappedModule);
 
@@ -125,26 +124,28 @@ private:
     ArkAotLinker::RoDataSections LinkModule(WrappedModule *wrappedModule, ArkAotLinker *linker,
                                             AotBuilderOffsets *offsets);
 
-    void AddInlineMethodByDepth(WrappedModule &module, ark::compiler::Graph *caller,
+    void AddInlineMethodByDepth(WrappedModule &module, compiler::Graph *caller,
                                 compiler::RuntimeInterface::MethodPtr method, int32_t depth);
 
-    void AddInlineFunctionsByDepth(WrappedModule &module, ark::compiler::Graph *caller, int32_t depth);
+    void AddInlineFunctionsByDepth(WrappedModule &module, compiler::Graph *caller, int32_t depth);
 
-    llvm::Expected<ark::compiler::Graph *> CreateGraph(ArenaAllocator &allocator, ArenaAllocator &localAllocator,
-                                                       Method &method);
+    llvm::Expected<compiler::Graph *> CreateGraph(ArenaAllocator &allocator, ArenaAllocator &localAllocator,
+                                                  Method &method);
+
+    void PreOpt2(compiler::Graph *graph);
 
 private:
     llvm::ExitOnError exitOnErr_;
 
-    ArenaVector<ark::Method *> methods_;
-    ark::compiler::LLVMAotBuilder *aotBuilder_;
+    ArenaVector<Method *> methods_;
+    compiler::LLVMAotBuilder *aotBuilder_;
     std::string cmdline_;
     std::string filename_;
 
     bool compiled_ {false};
     bool irFailed_ {false};
 
-    ark::compiler::RuntimeInterface *runtime_;
+    compiler::RuntimeInterface *runtime_;
     std::unique_ptr<Spreader> spreader_;
     std::atomic<uint32_t> compiledModules_ {0};
     std::shared_ptr<WrappedModule> currentModule_;

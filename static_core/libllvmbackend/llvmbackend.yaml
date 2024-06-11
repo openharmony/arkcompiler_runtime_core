@@ -25,10 +25,6 @@ options:
     type: bool
     default: true
     description: Use Ark Compiler as fallback
-  - name: llvm-safemode
-    type: bool
-    default: false
-    description: Compile only simple functions (no calls/loops)
   - name: llvm-inlining
     type: bool
     default: true
@@ -36,6 +32,14 @@ options:
       Enable inlining optimization. Default value is overridden by explicit
       --compiler-inlining which in turn can be overridden by passing this
       option explicitly
+  - name: llvm-pre-opt
+    type: uint32_t
+    default: 0
+    description: >
+      Level of pre-optimization that LLVMAOT does.
+      0 means running small number of Ark passes before compiling by LLVM.
+      1 means same as 0 but allows Ark Inliner to perform inlining
+      2 is the same as 1 but runs more Ark passes
   - name: llvm-recursive-inlining
     type: bool
     default: true
@@ -76,7 +80,6 @@ options:
       - all
       - infra
       - stackmaps
-      - entry
       - ir
     description: Set log llvm components
     delimiter: ","

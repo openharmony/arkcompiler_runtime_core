@@ -17,7 +17,7 @@
 #! RUN            options: "", entry: "_GLOBAL::main"
 
 #! CHECKER        VirtualToStatic at LLVM AOT
-#! RUN_LLVM       options: ""
+#! RUN_LLVM       options: "--llvm-pre-opt=0"
 #! EVENT          "Inline,_GLOBAL::main,Factory::newFactory,6,VIRTUAL,DEVIRTUALIZED"
 #! EVENT          "Paoc,Compiling Factory::newFactory using llvm"
 #! EVENT          "Paoc,Compiling _GLOBAL::main using llvm"

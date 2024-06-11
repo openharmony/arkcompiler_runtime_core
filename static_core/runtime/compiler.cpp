@@ -773,6 +773,20 @@ bool PandaRuntimeInterface::HasSafepointDuringCall() const
 #endif
 }
 
+RuntimeInterface::ThreadPtr PandaRuntimeInterface::CreateCompilerThread()
+{
+    ASSERT(Thread::GetCurrent() != nullptr);
+    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    return allocator->New<Thread>(PandaVM::GetCurrent(), Thread::ThreadType::THREAD_TYPE_COMPILER);
+}
+
+void PandaRuntimeInterface::DestroyCompilerThread(ThreadPtr thread)
+{
+    ASSERT(thread != nullptr);
+    auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    allocator->Delete(static_cast<Thread *>(thread));
+}
+
 InlineCachesWrapper::CallKind InlineCachesWrapper::GetClasses(PandaRuntimeInterface::MethodPtr m, uintptr_t pc,
                                                               ArenaVector<RuntimeInterface::ClassPtr> *classes)
 {

@@ -137,3 +137,9 @@ llvm_passes:
     Expand atomic operations' pointer operand into 64-bit pointer
   type: [function]
   setup: default
+
+- name: AArch64FixupSDiv
+  description: >
+    Replace `select -1, neg, sdiv/srem` instructions with `sdiv/srem` on AArch64
+  type: [function]
+  setup: custom

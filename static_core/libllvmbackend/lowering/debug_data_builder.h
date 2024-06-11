@@ -39,6 +39,8 @@ public:
 
     void SetLocation(llvm::Instruction *inst, uint32_t line, uint32_t column = 1);
 
+    void AppendInlinedAt(llvm::Instruction *inst, llvm::Function *function, uint32_t line, uint32_t column = 1);
+
     void Finalize();
 
     ~DebugDataBuilder();

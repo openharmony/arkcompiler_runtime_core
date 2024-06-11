@@ -12,7 +12,7 @@
 # limitations under the License.
 
 #! CHECKER        Memset
-#! RUN_LLVM       options: ""
+#! RUN_LLVM       options: "--llvm-pre-opt=0"
 #! EVENT          "Paoc,Trying to compile method: _GLOBAL::main"
 #! EVENT          "Paoc,Lowering @llvm.memset"
 #! EVENT          "Paoc,Compiling _GLOBAL::main using llvm"

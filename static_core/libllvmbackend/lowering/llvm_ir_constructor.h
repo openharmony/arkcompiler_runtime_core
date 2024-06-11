@@ -29,8 +29,6 @@
 namespace ark::compiler {
 
 class LLVMIrConstructor : public GraphVisitor {
-    using RuntimeCallId = std::variant<RuntimeInterface::EntrypointId, RuntimeInterface::IntrinsicId>;
-
     bool IsSafeCast(Inst *inst, unsigned int index);
     bool TryEmitIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId arkId);
 
@@ -128,7 +126,7 @@ private:
     void CreateCheckCastInner(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId);
 
     void CreateInterpreterReturnRestoreRegs(RegMask &regMask, size_t offset, bool fp);
-    llvm::Value *CreateLoadClassById(Inst *inst, uint32_t typeId, bool forceInitialization);
+    llvm::Value *CreateLoadClassById(Inst *inst, uint32_t typeId, bool init);
     llvm::Value *CreateBinaryOp(Inst *inst, llvm::Instruction::BinaryOps opcode);
     llvm::Value *CreateBinaryImmOp(Inst *inst, llvm::Instruction::BinaryOps opcode, uint64_t c);
     llvm::Value *CreateShiftOp(Inst *inst, llvm::Instruction::BinaryOps opcode);
@@ -161,6 +159,8 @@ private:
     void CreateDeoptimizationBranch(Inst *inst, llvm::Value *deoptimize, RuntimeInterface::EntrypointId exception,
                                     llvm::ArrayRef<llvm::Value *> arguments = llvm::None);
     ArenaVector<llvm::OperandBundleDef> CreateSaveStateBundle(Inst *inst, bool noReturn = false);
+    void EncodeSaveStateInputs(ArenaVector<llvm::Value *> *vals, SaveStateInst *ss);
+    void EncodeInlineInfo(Inst *inst, llvm::Instruction *instruction);
     void CreatePreWRB(Inst *inst, llvm::Value *mem);
     void CreatePostWRB(Inst *inst, llvm::Value *mem, llvm::Value *offset, llvm::Value *value);
     llvm::Value *CreateMemoryFence(memory_order::Order order);
@@ -186,7 +186,6 @@ private:
     ArenaVector<llvm::Value *> GetIntrinsicArguments(llvm::FunctionType *intrinsicFunctionType, IntrinsicInst *inst);
     void SetIntrinsicParamAttrs(llvm::CallInst *call, IntrinsicInst *inst, llvm::ArrayRef<llvm::Value *> args);
 
-    llvm::StringRef GetRuntimeFunctionName(RuntimeCallId id);
     llvm::FunctionType *GetFunctionTypeForCall(CallInst *call);
 
     llvm::Value *GetThreadRegValue();
@@ -221,11 +220,7 @@ private:
     void ValueMapAdd(Inst *inst, llvm::Value *value, bool setName = true);
     void FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, llvm::Value *> *map, Inst *inst, llvm::Value *value);
 
-    void WrapArkCall(Inst *orig, llvm::CallInst *call)
-    {
-        // Ark calls may call GC inside, so add statepoint
-        debugData_->SetLocation(call, orig->GetPc());
-    }
+    void WrapArkCall(Inst *orig, llvm::CallInst *call);
 
     void AddBlock(BasicBlock *pb, llvm::BasicBlock *lb)
     {
@@ -280,6 +275,8 @@ protected:
     static void VisitParameter(GraphVisitor *v, Inst *inst);
     static void VisitReturnVoid(GraphVisitor *v, Inst *inst);
     static void VisitReturn(GraphVisitor *v, Inst *inst);
+    static void VisitReturnInlined(GraphVisitor *v, Inst *inst);
+    static void VisitReturnI(GraphVisitor *v, Inst *inst);
     static void VisitTry(GraphVisitor *v, Inst *inst);
     static void VisitSaveState(GraphVisitor *v, Inst *inst);
     static void VisitSaveStateDeoptimize(GraphVisitor *v, Inst *inst);
@@ -393,7 +390,7 @@ public:
     static void InsertArkFrameInfo(llvm::Module *module, Arch arch);
     static void ProvideSafepointPoll(llvm::Module *module, llvmbackend::LLVMArkInterface *arkInterface, Arch arch);
 
-    static Expected<bool, std::string> CanCompile(Graph *graph);
+    static std::string CheckGraph(Graph *graph);
     static bool CanCompile(Inst *inst);
 
 #ifndef NDEBUG

@@ -1466,6 +1466,16 @@ public:
         return nullptr;
     }
 
+    virtual ThreadPtr CreateCompilerThread()
+    {
+        return nullptr;
+    }
+
+    virtual void DestroyCompilerThread([[maybe_unused]] ThreadPtr thread)
+    {
+        UNREACHABLE();
+    }
+
     virtual void SetCurrentThread([[maybe_unused]] ThreadPtr thread) const
     {
         UNREACHABLE();

@@ -108,12 +108,20 @@ static llvm::CallingConv::ID GetFastPathCallingConv(uint32_t numArgs)
     }
 }
 
-bool LLVMIrtocCompiler::AddGraph(compiler::Graph *graph)
+Expected<bool, std::string> LLVMIrtocCompiler::TryAddGraph(compiler::Graph *graph)
 {
     ASSERT(graph != nullptr);
     ASSERT(graph->GetArch() == GetArch());
     ASSERT(!graph->SupportManagedCode());
-    auto method = graph->GetMethod();
+
+    if (graph->IsDynamicMethod()) {
+        return false;
+    }
+
+    std::string graphError = LLVMIrConstructor::CheckGraph(graph);
+    if (!graphError.empty()) {
+        return Unexpected(graphError);
+    }
 
     LLVMIrConstructor ctor(graph, module_.get(), GetLLVMContext(), &arkInterface_, debugData_);
     auto llvmFunction = ctor.GetFunc();
@@ -136,24 +144,16 @@ bool LLVMIrtocCompiler::AddGraph(compiler::Graph *graph)
     }
 
     bool noInline = IsInliningDisabled(graph);
-
     bool builtIr = ctor.BuildIr(noInline);
     if (!builtIr) {
-        irFailed_ = true;
-        LLVM_LOG(ERROR, INFRA) << "LLVM failed to build IR for method " << arkInterface_.GetUniqMethodName(method);
+        LLVM_LOG(ERROR, INFRA) << "Failed to build LLVM IR";
         llvmFunction->deleteBody();
-        return false;
+        return Unexpected(std::string("Failed to build LLVM IR"));
     }
 
-    LLVM_LOG(DEBUG, INFRA) << "LLVM built LLVM IR for method  " << arkInterface_.GetUniqMethodName(method);
-    methods_.push_back(static_cast<Method *>(method));
+    LLVM_LOG(DEBUG, INFRA) << "LLVM built LLVM IR for method  " << arkInterface_.GetUniqMethodName(graph->GetMethod());
+    methods_.push_back(static_cast<Method *>(graph->GetMethod()));
     return true;
-}
-
-Expected<bool, std::string> LLVMIrtocCompiler::CanCompile(ark::compiler::Graph *graph)
-{
-    LLVM_LOG(DEBUG, INFRA) << "LLVM checking graph for method " << arkInterface_.GetUniqMethodName(graph->GetMethod());
-    return LLVMIrConstructor::CanCompile(graph);
 }
 
 void LLVMIrtocCompiler::FinishCompile()

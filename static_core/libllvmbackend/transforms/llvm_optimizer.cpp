@@ -15,6 +15,7 @@
 
 #include "llvm_optimizer.h"
 
+#include "passes/aarch64_fixup_sdiv.h"
 #include "passes/ark_inlining.h"
 #include "passes/ark_gvn.h"
 #include "passes/ark_speculation.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,8 +201,9 @@ Inst *LoopIdioms::CreateArrayInitIntrinsic(StoreInst *store, CountableLoopInfo *
     auto fillArray = GetGraph()->CreateInstIntrinsic(DataType::VOID, store->GetPc(), intrinsicId);
     fillArray->ClearFlag(inst_flags::Flags::REQUIRE_STATE);
     fillArray->ClearFlag(inst_flags::Flags::RUNTIME_CALL);
+    fillArray->ClearFlag(inst_flags::Flags::CAN_THROW);
     fillArray->SetInputs(GetGraph()->GetAllocator(), {{store->GetArray(), DataType::REFERENCE},
-                                                      {store->GetStoredValue(), store->GetStoredValue()->GetType()},
+                                                      {store->GetStoredValue(), type},
                                                       {info->init, DataType::INT32},
                                                       {info->test, DataType::INT32}});
     return fillArray;

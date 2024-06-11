@@ -17,12 +17,19 @@
 static inline bool CanCompileIntrinsic(compiler::RuntimeInterface::IntrinsicId id)
 {
     switch (id) {
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_8:
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_16:
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_32:
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_64:
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F32:
+        case RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F64:
+            return true;
 % Runtime::intrinsics.each do |intrinsic|
 %   if (intrinsic.space != "ecmascript")
-        case compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
-            return true;
+        case RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:
 %   end
 % end
+            return true;
         default:
             return false;
     }
