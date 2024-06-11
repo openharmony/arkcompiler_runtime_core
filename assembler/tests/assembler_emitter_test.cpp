@@ -1374,4 +1374,107 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_023, TestSize.Level1)
         });
     }
 }
+
+/**
+ * @tc.name: assembly_emitter_test_024
+ * @tc.desc: Verify the AsmEmitter::Emit Handle Same Record.
+ * @tc.type: FUNC
+ * @tc.require: I9OWSZ
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_024, TestSize.Level1)
+{
+    Parser p1;
+    auto source1 = R"(
+        .record Rec {
+            u8 rec <value=0>
+        }
+    )";
+    Parser p2;
+    auto source2 = R"(
+        .record Rec {
+            u8 rec <value=0>
+        }
+    )";
+    auto res1 = p1.Parse(source1);
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto res2 = p2.Parse(source2);
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    std::vector<Program *> progs;
+    progs.push_back(&res1.Value());
+    progs.push_back(&res2.Value());
+    const std::string filename = "source.pa";;
+    auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
+    EXPECT_TRUE(pf);
+}
+
+/**
+ * @tc.name: assembly_emitter_test_025
+ * @tc.desc: Verify the AsmEmitter::Emit Handle Same Record.
+ * @tc.type: FUNC
+ * @tc.require: I9OWSZ
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_025, TestSize.Level1)
+{
+    Parser p1;
+    auto source1 = R"(
+        .record Rec {
+            u8 rec <value=0>
+        }
+    )";
+    Parser p2;
+    auto source2 = R"(
+        .record Rec {
+            u8 rec <value=1>
+        }
+    )";
+    auto res1 = p1.Parse(source1);
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto res2 = p2.Parse(source2);
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    std::vector<Program *> progs;
+    progs.push_back(&res1.Value());
+    progs.push_back(&res2.Value());
+    const std::string filename = "source.pa";;
+    auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
+    EXPECT_FALSE(pf);
+    EXPECT_EQ(AsmEmitter::GetLastError(), "Field {Rec.rec} has different value.");
+}
+
+/**
+ * @tc.name: assembly_emitter_test_026
+ * @tc.desc: Verify the AsmEmitter::Emit Handle Same Record.
+ * @tc.type: FUNC
+ * @tc.require: I9OWSZ
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_026, TestSize.Level1)
+{
+    Parser p1;
+    auto source1 = R"(
+        .record Rec {
+            u8 rec1 <value=0>
+        }
+    )";
+    Parser p2;
+    auto source2 = R"(
+        .record Rec {
+            u8 rec2 <value=0>
+        }
+    )";
+    auto res1 = p1.Parse(source1);
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto res2 = p2.Parse(source2);
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    std::vector<Program *> progs;
+    progs.push_back(&res1.Value());
+    progs.push_back(&res2.Value());
+    const std::string filename = "source.pa";;
+    auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
+    EXPECT_TRUE(pf);
+}
 }
