@@ -84,11 +84,61 @@ export class IllegalStateException extends Exception {
     }
 }
 
-// TODO(orlovskiymaxim): where exactly not found?
 /**
- * Represents exception that is thrown when class is not found ?
+ * Represents exception that is thrown when class is not found
  */
 export final class ClassNotFoundException extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * Represents exception that is thrown when verifier detects errors in class
+ */
+export final class VerifyError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * Represents exception that is thrown when linker detects errors in class
+ */
+export final class LinkageError extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
+
+/**
+ * Represents exception that is thrown when runtime detects incompatible changes in class
+ */
+export final class IncompatibleClassChangeError extends Exception {
     constructor() {
         super();
     }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H_
-#define PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H_
+interface I {
+    foo(): int
+}
 
-#include "runtime/include/vtable_builder_standard.h"
+class A implements I {
+    public override foo(): int { return 1 }
+}
 
-namespace ark {
-
-struct CoreVTableOverridePred {
-    bool operator()([[maybe_unused]] const MethodInfo *info1, [[maybe_unused]] const MethodInfo *info2) const
-    {
-        return true;
-    }
-};
-
-using CoreVTableBuilder = StandardVTableBuilder<CoreVTableOverridePred>;
-
-}  // namespace ark
-
-#endif  // PANDA_RUNTIME_CORE_CORE_VTABLE_BUILDER_H_
+function main(): void {
+    assert ((x: I) => x.foo())(new A()) == 1;
+}

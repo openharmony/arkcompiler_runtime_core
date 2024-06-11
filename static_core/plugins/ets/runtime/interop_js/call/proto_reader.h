@@ -17,6 +17,7 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CALL_PROTO_READER_H
 
 #include "runtime/include/class_linker-inl.h"
+#include "libpandafile/proto_data_accessor-inl.h"
 
 namespace ark::ets::interop::js {
 

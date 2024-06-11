@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include "runtime/core/core_itable_builder.h"
 #include "runtime/core/core_vtable_builder.h"
-#include "runtime/include/vtable_builder-inl.h"
+#include "runtime/include/vtable_builder_standard-inl.h"
 #include "runtime/handle_scope-inl.h"
 
 namespace ark {
@@ -99,14 +99,15 @@ void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *m
     }
 }
 
-PandaUniquePtr<ITableBuilder> CoreLanguageContext::CreateITableBuilder() const
+PandaUniquePtr<ITableBuilder> CoreLanguageContext::CreateITableBuilder(
+    [[maybe_unused]] ClassLinkerErrorHandler *errHandler) const
 {
     return MakePandaUnique<CoreITableBuilder>();
 }
 
-PandaUniquePtr<VTableBuilder> CoreLanguageContext::CreateVTableBuilder() const
+PandaUniquePtr<VTableBuilder> CoreLanguageContext::CreateVTableBuilder(ClassLinkerErrorHandler *errHandler) const
 {
-    return MakePandaUnique<CoreVTableBuilder>();
+    return MakePandaUnique<CoreVTableBuilder>(errHandler);
 }
 
 PandaVM *CoreLanguageContext::CreateVM(Runtime *runtime, const RuntimeOptions &options) const

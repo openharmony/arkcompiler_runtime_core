@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,10 @@ public:
 
     File::EntityId GetReferenceType(size_t i);
 
+    Type GetType(size_t idx) const;
+
+    uint32_t GetNumElements();
+
     size_t GetRefNum()
     {
         if (refTypesSp_.data() == nullptr) {
@@ -76,8 +80,6 @@ public:
 
 private:
     void SkipShorty();
-
-    Type GetType(size_t idx) const;
 
     const File &pandaFile_;
     File::EntityId protoId_;

@@ -117,7 +117,7 @@ set(SOURCES
     time_utils.cpp
     timing.cpp
     compiler.cpp
-    vtable_builder.cpp
+    vtable_builder_base.cpp
     imtable_builder.cpp
     cframe.cpp
     stack_walker.cpp

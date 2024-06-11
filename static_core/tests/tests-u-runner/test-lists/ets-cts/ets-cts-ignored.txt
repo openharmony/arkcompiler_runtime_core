@@ -2104,6 +2104,16 @@
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-un_13.ets
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var-un_13.ets
 
+# 16840
+10.interfaces/04.interface_members/methods_overriding.ets
+10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.ets
+10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.ets
+17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over1_4.ets
+17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_4.ets
+18.semantic_rules/05.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_3.ets
+18.semantic_rules/05.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_4.ets
+18.semantic_rules/05.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_5.ets
+
 # es2panda fails: 14691 Abstract classes and interfaces cannot be instantied with array creation expression
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_3.ets
 04.names_declarations_and_scopes/08.function_declarations/function_decl_5.ets

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,6 +126,12 @@ bool RunVerifier(const Options &cliOptions)
     {
         ScopedManagedCodeThread managedObjThread(ManagedThread::GetCurrent());
         if (classNames.empty() && methodNames.empty()) {
+            PandaVector<const panda_file::File *> pfiles;
+            classLinker.EnumeratePandaFiles([&pfiles](const panda_file::File &file) {
+                pfiles.push_back(&file);
+                return true;
+            });
+
             auto handleFile = [&result, &classLinker, &enqueueClass](const panda_file::File &file) {
                 LOG(INFO, VERIFIER) << "Processing file" << file.GetFilename();
                 for (auto id : file.GetClasses()) {
@@ -154,7 +160,11 @@ bool RunVerifier(const Options &cliOptions)
                 return true;
             };
 
-            classLinker.EnumeratePandaFiles(handleFile);
+            for (auto pf : pfiles) {
+                if (!handleFile(*pf)) {
+                    break;
+                }
+            }
 
             if (verifyLibraries) {
                 classLinker.EnumerateBootPandaFiles(handleFile);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,19 +22,23 @@ namespace ark {
 
 class CoreITableBuilder : public ITableBuilder {
 public:
-    void Build([[maybe_unused]] ClassLinker *classLinker, [[maybe_unused]] Class *base,
+    bool Build([[maybe_unused]] ClassLinker *classLinker, [[maybe_unused]] Class *base,
                [[maybe_unused]] Span<Class *> classInterfaces, [[maybe_unused]] bool isInterface) override
     {
         if (base == nullptr) {  // for panda.Object
-            return;
+            return true;
         }
         ASSERT(!base->IsPrimitive());
         ASSERT(base->GetITable().Size() == 0);
         ASSERT(classInterfaces.Empty());
         ASSERT(!isInterface);
+        return true;
     }
 
-    void Resolve([[maybe_unused]] Class *klass) override {};
+    bool Resolve([[maybe_unused]] Class *klass) override
+    {
+        return true;
+    }
 
     void UpdateClass([[maybe_unused]] Class *klass) override {};
 
@@ -43,7 +47,7 @@ public:
     ITable GetITable() const override
     {
         return {};
-    };
+    }
 };
 
 }  // namespace ark

@@ -30,7 +30,7 @@
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/method.h"
-#include "runtime/include/vtable_builder.h"
+#include "runtime/include/vtable_builder_interface.h"
 #include "runtime/interpreter/acc_vregister.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_options.h"
@@ -287,9 +287,9 @@ public:
 
     void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const override;
 
-    PandaUniquePtr<ITableBuilder> CreateITableBuilder() const override;
+    PandaUniquePtr<ITableBuilder> CreateITableBuilder(ClassLinkerErrorHandler *errHandler) const override;
 
-    PandaUniquePtr<VTableBuilder> CreateVTableBuilder() const override;
+    PandaUniquePtr<VTableBuilder> CreateVTableBuilder(ClassLinkerErrorHandler *errHandler) const override;
 
     bool InitializeClass(ClassLinker *classLinker, ManagedThread *thread, Class *klass) const override
     {

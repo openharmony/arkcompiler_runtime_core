@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <deque>
 #include <list>
+#include <forward_list>
 #include <stack>
 #include <queue>
 #include <vector>
@@ -43,6 +44,8 @@ template <class T, bool USE_OOM_HANDLER = false, class ArenaContainer = ArenaDeq
 using ArenaQueue = std::queue<T, ArenaContainer>;
 template <class T, bool USE_OOM_HANDLER = false>
 using ArenaList = std::list<T, ArenaAllocatorAdapter<T, USE_OOM_HANDLER>>;
+template <class T, bool USE_OOM_HANDLER = false>
+using ArenaForwardList = std::forward_list<T, ArenaAllocatorAdapter<T, USE_OOM_HANDLER>>;
 template <class Key, class Compare = std::less<Key>, bool USE_OOM_HANDLER = false>
 using ArenaSet = std::set<Key, Compare, ArenaAllocatorAdapter<Key, USE_OOM_HANDLER>>;
 template <class Key, class T, class Compare = std::less<Key>, bool USE_OOM_HANDLER = false>

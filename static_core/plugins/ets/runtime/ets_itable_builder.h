@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +31,11 @@ namespace ark::ets {
 
 class EtsITableBuilder : public ITableBuilder {
 public:
-    void Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces, bool isInterface) override;
+    explicit EtsITableBuilder(ClassLinkerErrorHandler *errHandler) : errorHandler_(errHandler) {}
 
-    void Resolve(Class *klass) override;
+    bool Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces, bool isInterface) override;
+
+    bool Resolve(Class *klass) override;
 
     void UpdateClass(Class *klass) override;
 
@@ -46,6 +48,7 @@ public:
 
 private:
     ITable itable_;
+    ClassLinkerErrorHandler *errorHandler_;
 };
 
 }  // namespace ark::ets

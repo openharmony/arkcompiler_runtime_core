@@ -308,25 +308,28 @@ private:
     panda_file::ClassDataAccessor *dataAccessor_;
 };
 
-ClassLinker::ClassInfo ClassLinker::GetClassInfo(panda_file::ClassDataAccessor *dataAccessor, Class *base,
-                                                 Span<Class *> interfaces, ClassLinkerContext *context)
+bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
+                                 Span<Class *> interfaces, ClassLinkerContext *context,
+                                 ClassLinkerErrorHandler *errorHandler)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(dataAccessor);
 
-    auto vtableBuilder = ctx.CreateVTableBuilder();
-    auto itableBuilder = ctx.CreateITableBuilder();
-    auto imtableBuilder = ctx.CreateIMTableBuilder();
+    info.vtableBuilder = ctx.CreateVTableBuilder(errorHandler);
+    info.itableBuilder = ctx.CreateITableBuilder(errorHandler);
+    info.imtableBuilder = ctx.CreateIMTableBuilder();
 
-    itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface());
-    vtableBuilder->Build(dataAccessor, base, itableBuilder->GetITable(), context);
-    imtableBuilder->Build(dataAccessor, itableBuilder->GetITable());
+    if (!info.itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface())) {
+        return false;
+    }
+    if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
+        return false;
+    }
+    info.imtableBuilder->Build(dataAccessor, info.itableBuilder->GetITable());
 
     ClassDataAccessorWrapper dataAccessorWrapper(dataAccessor);
-    size_t numSfields = 0;
-    size_t size =
-        GetClassSize(dataAccessorWrapper, vtableBuilder->GetVTableSize(), imtableBuilder->GetIMTSize(), &numSfields);
-
-    return {size, numSfields, std::move(vtableBuilder), std::move(itableBuilder), std::move(imtableBuilder)};
+    info.size = GetClassSize(dataAccessorWrapper, info.vtableBuilder->GetVTableSize(),
+                             info.imtableBuilder->GetIMTSize(), &info.numSfields);
+    return true;
 }
 
 class ClassDataAccessor {
@@ -354,24 +357,27 @@ private:
     Span<Field> fields_;
 };
 
-ClassLinker::ClassInfo ClassLinker::GetClassInfo(Span<Method> methods, Span<Field> fields, Class *base,
-                                                 Span<Class *> interfaces, bool isInterface)
+bool ClassLinker::SetupClassInfo(ClassLinker::ClassInfo &info, Span<Method> methods, Span<Field> fields, Class *base,
+                                 Span<Class *> interfaces, bool isInterface, ClassLinkerErrorHandler *errorHandler)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*base);
 
-    auto vtableBuilder = ctx.CreateVTableBuilder();
-    auto itableBuilder = ctx.CreateITableBuilder();
-    auto imtableBuilder = ctx.CreateIMTableBuilder();
+    info.vtableBuilder = ctx.CreateVTableBuilder(errorHandler);
+    info.itableBuilder = ctx.CreateITableBuilder(errorHandler);
+    info.imtableBuilder = ctx.CreateIMTableBuilder();
 
-    itableBuilder->Build(this, base, interfaces, isInterface);
-    vtableBuilder->Build(methods, base, itableBuilder->GetITable(), isInterface);
-    imtableBuilder->Build(itableBuilder->GetITable(), isInterface);
+    if (!info.itableBuilder->Build(this, base, interfaces, isInterface)) {
+        return false;
+    }
+    if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
+        return false;
+    }
+    info.imtableBuilder->Build(info.itableBuilder->GetITable(), isInterface);
 
     ClassDataAccessor dataAccessor(fields);
-    size_t numSfields = 0;
-    size_t size = GetClassSize(dataAccessor, vtableBuilder->GetVTableSize(), imtableBuilder->GetIMTSize(), &numSfields);
-
-    return {size, numSfields, std::move(vtableBuilder), std::move(itableBuilder), std::move(imtableBuilder)};
+    info.size = GetClassSize(dataAccessor, info.vtableBuilder->GetVTableSize(), info.imtableBuilder->GetIMTSize(),
+                             &info.numSfields);
+    return true;
 }
 
 static void LoadMethod(Method *method, panda_file::MethodDataAccessor *methodDataAccessor, Class *klass,
@@ -406,7 +412,7 @@ static void LoadMethod(Method *method, panda_file::MethodDataAccessor *methodDat
     }
 }
 
-void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &aotClass, size_t methodIndex)
+static void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &aotClass, size_t methodIndex)
 {
     ASSERT(aotClass.IsValid());
     if (method->IsIntrinsic()) {
@@ -425,6 +431,27 @@ void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &aotClass
     }
 }
 
+static void SetupCopiedMethods(Span<Method> methods, Span<const CopiedMethod> copiedMethods)
+{
+    size_t const numMethods = methods.size() - copiedMethods.size();
+
+    for (size_t i = 0; i < copiedMethods.size(); i++) {
+        Method *method = &methods[numMethods + i];
+        InitializeMemory(method, copiedMethods[i].GetMethod());
+        method->SetIsDefaultInterfaceMethod();
+        switch (copiedMethods[i].GetStatus()) {
+            case CopiedMethod::Status::ORDINARY:
+                break;
+            case CopiedMethod::Status::ABSTRACT:
+                method->SetCompiledEntryPoint(GetAbstractMethodStub());
+                break;
+            case CopiedMethod::Status::CONFLICT:
+                method->SetCompiledEntryPoint(GetDefaultConflictMethodStub());
+                break;
+        }
+    }
+}
+
 bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::ClassDataAccessor *dataAccessor,
                               [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
@@ -433,14 +460,13 @@ bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::Cl
     uint32_t numVmethods = klass->GetNumVirtualMethods();
     uint32_t numSmethods = numMethods - numVmethods;
 
-    auto &copiedMethods = classInfo->vtableBuilder->GetCopiedMethods();
-    uint32_t n = numMethods + copiedMethods.size();
-
-    if (n == 0) {
+    auto copiedMethods = classInfo->vtableBuilder->GetCopiedMethods();
+    uint32_t totalNumMethods = numMethods + copiedMethods.size();
+    if (totalNumMethods == 0) {
         return true;
     }
 
-    Span<Method> methods {allocator_->AllocArray<Method>(n), n};
+    Span<Method> methods {allocator_->AllocArray<Method>(totalNumMethods), totalNumMethods};
 
     size_t smethodIdx = numVmethods;
     size_t vmethodIdx = 0;
@@ -473,20 +499,8 @@ bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::Cl
         methodIndex++;
     });
 
-    for (size_t i = 0; i < copiedMethods.size(); i++) {
-        size_t idx = numMethods + i;
-        InitializeMemory(&methods[idx], copiedMethods[i].method);
-        methods[idx].SetIsDefaultInterfaceMethod();
-        if (copiedMethods[i].defaultAbstract) {
-            methods[idx].SetCompiledEntryPoint(GetAbstractMethodStub());
-        }
-        if (copiedMethods[i].defaultConflict) {
-            methods[idx].SetCompiledEntryPoint(GetDefaultConflictMethodStub());
-        }
-    }
-
+    SetupCopiedMethods(methods, copiedMethods);
     klass->SetMethods(methods, numVmethods, numSmethods);
-
     return true;
 }
 
@@ -734,10 +748,11 @@ bool ClassLinker::LinkMethods(Class *klass, ClassInfo *classInfo,
                               [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
     classInfo->vtableBuilder->UpdateClass(klass);
-    classInfo->itableBuilder->Resolve(klass);
+    if (!classInfo->itableBuilder->Resolve(klass)) {
+        return false;
+    }
     classInfo->itableBuilder->UpdateClass(klass);
     classInfo->imtableBuilder->UpdateClass(klass);
-
     return true;
 }
 
@@ -847,7 +862,10 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, 
                               ClassLinkerExtension *ext, ClassLinkerErrorHandler *errorHandler)
 {
     ASSERT(context != nullptr);
-    ClassInfo classInfo = GetClassInfo(classDataAccessor, baseClass, interfaces, context);
+    ClassInfo classInfo {};
+    if (!SetupClassInfo(classInfo, classDataAccessor, baseClass, interfaces, context, errorHandler)) {
+        return nullptr;
+    }
 
     auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
                                    classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
@@ -873,30 +891,23 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, 
     klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
     klass->SetNumStaticFields(classInfo.numSfields);
 
+    auto const onFail = [this, descriptor, klass](std::string_view msg) {
+        FreeClass(klass);
+        LOG(ERROR, CLASS_LINKER) << msg << " '" << descriptor << "'";
+        return nullptr;
+    };
     if (!LoadMethods(klass, &classInfo, classDataAccessor, errorHandler)) {
-        FreeClass(klass);
-        LOG(ERROR, CLASS_LINKER) << "Cannot load methods of class '" << descriptor << "'";
-        return nullptr;
+        return onFail("Cannot load methods of class");
     }
-
     if (!LoadFields(klass, classDataAccessor, errorHandler)) {
-        FreeClass(klass);
-        LOG(ERROR, CLASS_LINKER) << "Cannot load fields of class '" << descriptor << "'";
-        return nullptr;
+        return onFail("Cannot load fields of class");
     }
-
     if (!LinkMethods(klass, &classInfo, errorHandler)) {
-        FreeClass(klass);
-        LOG(ERROR, CLASS_LINKER) << "Cannot link methods of class '" << descriptor << "'";
-        return nullptr;
+        return onFail("Cannot link methods of class");
     }
-
     if (!LinkFields(klass, errorHandler)) {
-        FreeClass(klass);
-        LOG(ERROR, CLASS_LINKER) << "Cannot link fields of class '" << descriptor << "'";
-        return nullptr;
+        return onFail("Cannot link fields of class");
     }
-
     return klass;
 }
 
@@ -1026,7 +1037,10 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescripto
     auto *ext = GetExtension(baseClass->GetSourceLang());
     ASSERT(ext != nullptr);
 
-    ClassInfo classInfo = GetClassInfo(methods, fields, baseClass, interfaces, isInterface);
+    ClassInfo classInfo {};
+    if (!SetupClassInfo(classInfo, methods, fields, baseClass, interfaces, isInterface, nullptr)) {
+        return nullptr;
+    }
 
     // Need to protect ArenaAllocator and loaded_classes_
     auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),

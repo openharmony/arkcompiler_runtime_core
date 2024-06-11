@@ -1,5 +1,8 @@
 std/core/std_core_string_String_fromCharCode_005.ets
 std/core/std_core_string_String_localeCompare_string_001.ets
+### Issue 16242
+std/core/std_core_string_String_localeCompare_string_005.ets
+### Issue 16242 end
 ### Issue 10945, 11969 begin
 std/core/std_core_char_static_Char_isPartOfSurrogatePair.ets
 std/core/std_core_char_static_Char_isValidCodePoint.ets

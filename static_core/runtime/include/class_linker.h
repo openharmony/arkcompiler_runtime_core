@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/mem/panda_string.h"
 #include "runtime/include/method.h"
-#include "runtime/include/vtable_builder.h"
+#include "runtime/include/vtable_builder_interface.h"
 
 namespace ark {
 
@@ -54,6 +54,9 @@ public:
         METHOD_NOT_FOUND,
         NO_CLASS_DEF,
         CLASS_CIRCULARITY,
+        OVERRIDES_FINAL,
+        MULTIPLE_OVERRIDE,
+        MULTIPLE_IMPLEMENT,
     };
 
     ClassLinker(mem::InternalAllocatorPtr allocator, std::vector<std::unique_ptr<ClassLinkerExtension>> &&extensions);
@@ -312,11 +315,11 @@ public:
 
 private:
     struct ClassInfo {
-        size_t size;
-        size_t numSfields;
         PandaUniquePtr<VTableBuilder> vtableBuilder;
         PandaUniquePtr<ITableBuilder> itableBuilder;
         PandaUniquePtr<IMTableBuilder> imtableBuilder;
+        size_t size;
+        size_t numSfields;
     };
 
     Field *GetFieldById(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
@@ -346,20 +349,23 @@ private:
     std::optional<Span<Class *>> LoadInterfaces(panda_file::ClassDataAccessor *cda, ClassLinkerContext *context,
                                                 ClassLinkerErrorHandler *errorHandler);
 
-    bool LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler);
+    [[nodiscard]] bool LinkFields(Class *klass, ClassLinkerErrorHandler *errorHandler);
 
-    bool LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor, ClassLinkerErrorHandler *errorHandler);
+    [[nodiscard]] bool LoadFields(Class *klass, panda_file::ClassDataAccessor *dataAccessor,
+                                  ClassLinkerErrorHandler *errorHandler);
 
-    bool LinkMethods(Class *klass, ClassInfo *classInfo, ClassLinkerErrorHandler *errorHandler);
+    [[nodiscard]] bool LinkMethods(Class *klass, ClassInfo *classInfo, ClassLinkerErrorHandler *errorHandler);
 
-    bool LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::ClassDataAccessor *dataAccessor,
-                     ClassLinkerErrorHandler *errorHandler);
+    [[nodiscard]] bool LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::ClassDataAccessor *dataAccessor,
+                                   ClassLinkerErrorHandler *errorHandler);
 
-    ClassInfo GetClassInfo(panda_file::ClassDataAccessor *dataAccessor, Class *base, Span<Class *> interfaces,
-                           ClassLinkerContext *context);
+    [[nodiscard]] bool SetupClassInfo(ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
+                                      Span<Class *> interfaces, ClassLinkerContext *context,
+                                      ClassLinkerErrorHandler *errorHandler);
 
-    ClassInfo GetClassInfo(Span<Method> methods, Span<Field> fields, Class *base, Span<Class *> interfaces,
-                           bool isInterface);
+    [[nodiscard]] bool SetupClassInfo(ClassInfo &info, Span<Method> methods, Span<Field> fields, Class *base,
+                                      Span<Class *> interfaces, bool isInterface,
+                                      ClassLinkerErrorHandler *errorHandler);
 
     void OnError(ClassLinkerErrorHandler *errorHandler, Error error, const PandaString &msg);
 

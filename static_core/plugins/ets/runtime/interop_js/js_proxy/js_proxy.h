@@ -28,7 +28,7 @@ namespace ark::ets::interop::js::js_proxy {
 
 class JSProxy {
 public:
-    static std::unique_ptr<JSProxy> Create(EtsClass *etsClass, Span<Method *> proxyMethods);
+    static std::unique_ptr<JSProxy> Create(EtsClass *etsClass, Span<Method *> targetMethods);
 
     EtsClass *GetProxyClass() const
     {

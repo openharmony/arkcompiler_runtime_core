@@ -48,30 +48,46 @@ static std::unique_ptr<uint8_t[]> MakeProxyDescriptor(const uint8_t *descriptorP
     return proxyDescriptorData;
 }
 
+static void InitProxyMethod(Class *cls, Method *src, Method *proxy)
+{
+    new (proxy) Method(src);
+
+    proxy->SetAccessFlags((src->GetAccessFlags() & ~(ACC_ABSTRACT | ACC_DEFAULT_INTERFACE_METHOD)) | ACC_FINAL);
+    proxy->SetClass(cls);
+    proxy->SetCompiledEntryPoint(reinterpret_cast<void *>(CallJSProxyBridge));
+}
+
 /*static*/
-std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> proxyMethods)
+std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> targetMethods)
 {
     Class *cls = etsClass->GetRuntimeClass();
-    ASSERT(!IsProxyClass(cls));
+    ASSERT(!IsProxyClass(cls) && !etsClass->IsFinal());
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
 
-    Span<Method> implMethods {classLinker->GetAllocator()->AllocArray<Method>(proxyMethods.size()),
-                              proxyMethods.size()};
+    PandaVector<size_t> targetMethodsIdx;
 
-    for (size_t i = 0; i < proxyMethods.size(); ++i) {
-        auto *m = proxyMethods[i];
-        auto newMethod = new (&implMethods[i]) Method(m);
-        newMethod->SetCompiledEntryPoint(reinterpret_cast<void *>(CallJSProxyBridge));
+    for (size_t i = 0; i < targetMethods.size(); ++i) {
+        auto m = targetMethods[i];
+        if (!m->IsFinal()) {  // NOTE(vpukhov): consider internal methods, final methods in builtins
+            targetMethodsIdx.push_back(i);
+        }
+    }
+
+    size_t const numTargets = targetMethodsIdx.size();
+    Span<Method> proxyMethods {classLinker->GetAllocator()->AllocArray<Method>(numTargets), numTargets};
+
+    for (size_t i = 0; i < numTargets; ++i) {
+        InitProxyMethod(cls, targetMethods[targetMethodsIdx[i]], &proxyMethods[i]);
     }
 
     auto descriptor = MakeProxyDescriptor(cls->GetDescriptor());
-    uint32_t accessFlags = cls->GetAccessFlags();
+    uint32_t accessFlags = cls->GetAccessFlags() | ACC_PROXY | ACC_FINAL;
     Span<Field> fields {};
     Class *baseClass = cls;
     Span<Class *> interfaces {};
     ClassLinkerContext *context = cls->GetLoadContext();
 
-    Class *proxyCls = classLinker->BuildClass(descriptor.get(), true, accessFlags, implMethods, fields, baseClass,
+    Class *proxyCls = classLinker->BuildClass(descriptor.get(), true, accessFlags, proxyMethods, fields, baseClass,
                                               interfaces, context, false);
     proxyCls->SetState(Class::State::INITIALIZING);
     proxyCls->SetState(Class::State::INITIALIZED);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@
 #include "runtime/include/imtable_builder.h"
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/language_config.h"
-#include "runtime/include/vtable_builder.h"
+#include "runtime/include/vtable_builder_interface.h"
 #include "runtime/include/tooling/inspector_extension.h"
 #include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/include/stack_walker.h"
@@ -207,12 +207,14 @@ public:
         return nullptr;
     }
 
-    virtual PandaUniquePtr<ITableBuilder> CreateITableBuilder() const
+    virtual PandaUniquePtr<ITableBuilder> CreateITableBuilder(
+        [[maybe_unused]] ClassLinkerErrorHandler *errHandler) const
     {
         return nullptr;
     }
 
-    virtual PandaUniquePtr<VTableBuilder> CreateVTableBuilder() const
+    virtual PandaUniquePtr<VTableBuilder> CreateVTableBuilder(
+        [[maybe_unused]] ClassLinkerErrorHandler *errHandler) const
     {
         return nullptr;
     }
@@ -576,14 +578,14 @@ public:
         return base_->CreateIMTableBuilder();
     }
 
-    PandaUniquePtr<ITableBuilder> CreateITableBuilder()
+    PandaUniquePtr<ITableBuilder> CreateITableBuilder(ClassLinkerErrorHandler *errHandler)
     {
-        return base_->CreateITableBuilder();
+        return base_->CreateITableBuilder(errHandler);
     }
 
-    PandaUniquePtr<VTableBuilder> CreateVTableBuilder()
+    PandaUniquePtr<VTableBuilder> CreateVTableBuilder(ClassLinkerErrorHandler *errHandler)
     {
-        return base_->CreateVTableBuilder();
+        return base_->CreateVTableBuilder(errHandler);
     }
 
     bool InitializeClass(ClassLinker *classLinker, ManagedThread *thread, Class *klass) const
