@@ -24,12 +24,12 @@ cases:
   - decl: |-
       class Base { foo<T = SomeType, U = OtherType>(): BiConsumer<T, U> { return new BiConsumer<T, U>() } }
     use: |-
-      new Base().foo().accept(new OtherType(), new SomeType())
+      new Base().foo<OtherType, SomeType>().accept(new OtherType(), new SomeType())
   - decl: |-
       class Base { foo<T, U = SomeType>(): BiConsumer<T, U> { return new BiConsumer<T, U>() } }
     use: |-
-      new Base().foo().accept(new SomeType(), new SomeType())
+      new Base().foo<SomeType>().accept(new SomeType(), new SomeType())
   - decl: |-
       class Base { foo<T, U = T[]>(): BiConsumer<T, U> { return new BiConsumer<T, U>() } }
     use: |-
-      new Base().foo().accept(new SomeType(), [new SomeType()])
+      new Base().foo<SomeType>().accept(new SomeType(), [new SomeType()])
