@@ -119,6 +119,7 @@ void CodegenFastPath::GeneratePrologue()
     savedRegisters_ = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
     if (GetTarget().SupportLinkReg() && hasRuntimeCalls) {
         savedRegisters_ |= GetTarget().GetLinkReg().GetMask();
+        GetEncoder()->EnableLrAsTempReg(true);
     }
 
     if (GetUsedVRegs().Any()) {

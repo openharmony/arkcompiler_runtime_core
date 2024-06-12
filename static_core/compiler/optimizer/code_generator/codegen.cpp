@@ -285,6 +285,15 @@ void Codegen::IntrinsicSaveTlabStatsSafe([[maybe_unused]] IntrinsicInst *inst, [
     GetEncoder()->SetFalseResult();
 }
 
+void Codegen::EmitAtomicByteOr(Reg addr, Reg value)
+{
+    bool fastEncoding = true;
+    if (GetArch() == Arch::AARCH64 && !g_options.IsCpuFeatureEnabled(CpuFeature::ATOMICS)) {
+        fastEncoding = false;
+    }
+    GetEncoder()->EncodeAtomicByteOr(addr, value, fastEncoding);
+}
+
 #ifdef INTRINSIC_SLOW_PATH_ENTRY_ENABLED
 // NOLINTNEXTLINE(readability-function-size)
 void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
@@ -343,7 +352,7 @@ void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst
             GetEncoder()->EncodeUnsignedExtendBytesToShorts(dst, src[0]);
             break;
         case RuntimeInterface::IntrinsicId::INTRINSIC_ATOMIC_BYTE_OR:
-            GetEncoder()->EncodeAtomicByteOr(src[FIRST_OPERAND], src[SECOND_OPERAND]);
+            EmitAtomicByteOr(src[FIRST_OPERAND], src[SECOND_OPERAND]);
             break;
         default:
             UNREACHABLE();

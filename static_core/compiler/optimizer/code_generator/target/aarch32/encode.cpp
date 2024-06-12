@@ -195,7 +195,7 @@ void Aarch32Encoder::ReleaseScratchRegister(Reg reg)
     }
 }
 
-bool Aarch32Encoder::IsScratchRegisterReleased(Reg reg)
+bool Aarch32Encoder::IsScratchRegisterReleased(Reg reg) const
 {
     if (reg == GetTarget().GetLinkReg()) {
         return !lrAcquired_;
@@ -2972,7 +2972,7 @@ void Aarch32Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc
     GetMasm()->Mov(ConvertTest(cc).Negate(), VixlReg(dst), 0x0);
 }
 
-void Aarch32Encoder::EncodeAtomicByteOr([[maybe_unused]] Reg addr, [[maybe_unused]] Reg value)
+void Aarch32Encoder::EncodeAtomicByteOr(Reg addr, Reg value, [[maybe_unused]] bool fastEncoding)
 {
     /**
      * .try:

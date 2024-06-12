@@ -226,7 +226,7 @@ void Amd64RegisterDescription::ReleaseScratchRegister(Reg reg)
     }
 }
 
-bool Amd64RegisterDescription::IsScratchRegisterReleased(Reg reg)
+bool Amd64RegisterDescription::IsScratchRegisterReleased(Reg reg) const
 {
     if (reg.GetType().IsFloat()) {
         return scratchv_.Has(reg.GetId());

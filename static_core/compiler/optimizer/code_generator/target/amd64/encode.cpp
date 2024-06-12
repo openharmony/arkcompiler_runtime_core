@@ -2082,7 +2082,7 @@ void Amd64Encoder::EncodeCompareTest(Reg dst, Reg src0, Reg src1, Condition cc)
     GetMasm()->set(ArchCcTest(cc), ArchReg(dst, BYTE_SIZE));
 }
 
-void Amd64Encoder::EncodeAtomicByteOr(Reg addr, Reg value)
+void Amd64Encoder::EncodeAtomicByteOr(Reg addr, Reg value, [[maybe_unused]] bool fastEncoding)
 {
     GetMasm()->lock().or_(asmjit::x86::byte_ptr(ArchReg(addr)), ArchReg(value, ark::compiler::BYTE_SIZE));
 }
@@ -2871,7 +2871,7 @@ void Amd64Encoder::ReleaseScratchRegister(Reg reg)
     (static_cast<Amd64RegisterDescription *>(GetRegfile()))->ReleaseScratchRegister(reg);
 }
 
-bool Amd64Encoder::IsScratchRegisterReleased(Reg reg)
+bool Amd64Encoder::IsScratchRegisterReleased(Reg reg) const
 {
     return (static_cast<Amd64RegisterDescription *>(GetRegfile()))->IsScratchRegisterReleased(reg);
 }
