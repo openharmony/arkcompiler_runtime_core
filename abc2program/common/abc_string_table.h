@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,6 @@ private:
     std::set<uint32_t> string_id_set;
 };
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC_STRING_TABLE_H
+#endif  // ABC2PROGRAM_ABC_STRING_TABLE_H

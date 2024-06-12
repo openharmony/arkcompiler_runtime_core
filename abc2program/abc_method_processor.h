@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ class AbcMethodProcessor : public AbcFileEntityProcessor {
     uint32_t GetNumArgs() const;
     void FillFunctionKind();
     void FillFunctionMetaData();
+    void FillFunctionAttributes();
     void FillAccessFlags();
     void FillCodeData();
-    void AddFunctionIntoFunctionTable();
     void FillDebugInfo();
     void FillSourceFile();
     void FillSourceCode();

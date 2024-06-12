@@ -64,4 +64,4 @@ void AbcAnnotationProcessor::FillAnnotationElements(std::vector<pandasm::Annotat
     }
 }
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program

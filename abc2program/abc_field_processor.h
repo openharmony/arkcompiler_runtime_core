@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,19 @@ public:
     void FillProgramData() override;
 
 private:
-    void FillFieldData(pandasm::Field &field);
-    void FillFieldName(pandasm::Field &field);
-    void FillFieldType(pandasm::Field &field);
-    void FillFieldMetaData(pandasm::Field &field);
-    void FillFieldAttributes(pandasm::Field &field);
-    void FillFieldAnnotations(pandasm::Field &field);
-    void FillMetaDataValue(pandasm::Field &field);
+    void FillFieldData();
+    void FillFieldName();
+    void FillFieldType();
+    void FillFieldMetaData();
+    void FillFieldAttributes();
+    void FillFieldAnnotations();
+    void FillMetaDataValue();
     pandasm::Record &record_;
     AbcTypeConverter type_converter_;
     std::unique_ptr<panda_file::FieldDataAccessor> field_data_accessor_;
+    pandasm::Field field_;
 };
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC_FIELD_PROCESSOR_H
+#endif  // ABC2PROGRAM_ABC_FIELD_PROCESSOR_H

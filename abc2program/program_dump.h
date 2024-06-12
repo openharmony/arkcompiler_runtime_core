@@ -19,22 +19,14 @@
 #include <iostream>
 #include <assembly-program.h>
 #include "common/abc_string_table.h"
+#include "dump_utils.h"
 
 namespace panda::abc2program {
 
-enum class ProgramDumperSource {
-    ECMASCRIPT = 0,
-    PANDA_ASSEMBLY = 1,
-};
-
-using LiteralTagToStringMap = std::unordered_map<panda_file::LiteralTag, std::string>;
-using LabelMap = std::unordered_map<std::string, std::string>;
-
 class PandasmProgramDumper {
 public:
-    PandasmProgramDumper() {}
     void Dump(std::ostream &os, const pandasm::Program &program);
-    void SetDumperSource(ProgramDumperSource dumper_source);
+    void SetDumperSource(PandasmDumperSource dumper_source);
     void SetAbcFilePath(const std::string &abc_file_path);
 
 private:
@@ -50,6 +42,7 @@ private:
     void DumpRecordSourceFile(std::ostream &os, const pandasm::Record &record) const;
     void DumpFunctionTable(std::ostream &os);
     void DumpFunction(std::ostream &os, const pandasm::Function &function);
+    void DumpFunctionKind(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionAnnotations(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionHead(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionReturnType(std::ostream &os, const pandasm::Function &function) const;
@@ -68,31 +61,26 @@ private:
     void DumpArrayValue(std::ostream &os, const pandasm::ArrayValue &array) const;
     void DumpScalarValue(std::ostream &os, const pandasm::ScalarValue &scalar) const;
     void GetOriginalDumpIns(const pandasm::Function &function);
-    pandasm::Ins DeepCopyIns(const pandasm::Ins &input) const;
-    pandasm::Function::CatchBlock DeepCopyCatchBlock(const pandasm::Function::CatchBlock &catch_block) const;
     void GetFinalDumpIns();
     void GetInvalidOpLabelMap();
     void HandleInvalidopInsLabel(size_t invalid_op_idx, pandasm::Ins &invalid_op_ins);
     pandasm::Ins *GetNearestValidopIns4InvalidopIns(size_t invalid_op_ins_idx);
-    void GetFinallyLabelMap();
+    void GetFinalLabelMap();
     void UpdateLabels4DumpIns(std::vector<pandasm::Ins*> &dump_ins, const LabelMap &label_map) const;
     void UpdateLabels4DumpInsAtIndex(size_t idx, std::vector<pandasm::Ins*> &dump_ins,
                                      const LabelMap &label_map) const;
     std::string GetMappedLabel(const std::string &label, const LabelMap &label_map) const;
-    void SetFinallyLabelAtIndex(size_t idx);
-    void DumpFinallyIns(std::ostream &os);
+    void HandleFinalLabelAtIndex(size_t idx);
+    void DumpFinalIns(std::ostream &os);
     void DumpFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionCatchBlocks4PandaAssembly(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionCatchBlocks4EcmaScript(std::ostream &os, const pandasm::Function &function) const;
     void DumpCatchBlock(std::ostream &os, const pandasm::Function::CatchBlock &catch_block) const;
     void UpdateCatchBlock(pandasm::Function::CatchBlock &catch_block) const;
     std::string GetUpdatedCatchBlockLabel(const std::string &orignal_label) const;
-    bool IsMatchLiteralId(const pandasm::Ins &pa_ins) const;
-    size_t GetLiteralIdIndexInIns(const pandasm::Ins &pa_ins) const;
     void ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const;
     void DumpStrings(std::ostream &os) const;
     std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
-    std::string LiteralTagToString(const panda_file::LiteralTag &tag) const;
     template <typename T>
     void SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const;
     template <typename T>
@@ -123,21 +111,21 @@ private:
     void SerializeLiterals(const pandasm::LiteralArray &lit_array, T &os) const;
     template <typename T>
     void SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, T &os, size_t i) const;
-    static LiteralTagToStringMap literal_tag_to_string_map_;
-    static std::unordered_map<pandasm::Opcode, size_t> opcode_literal_id_index_map_;
-    ProgramDumperSource dumper_source_ = ProgramDumperSource::ECMASCRIPT;
+    template <typename T>
+    void SerializeNestedLiteralArrayById(T &os, const std::string &literal_array_id_name) const;
+    PandasmDumperSource dumper_source_ = PandasmDumperSource::ECMASCRIPT;
     std::string abc_file_path_;
     std::vector<pandasm::Ins> original_dump_ins_;
     std::vector<pandasm::Ins*> original_dump_ins_ptrs_;
     std::vector<pandasm::Ins*> final_dump_ins_ptrs_;
-    LabelMap invalid_op_label_to_nearest_valid_op_label_map_;
-    LabelMap finally_label_map_;
+    LabelMap invalid_op_label_map_;
+    LabelMap final_label_map_;
     const pandasm::Program *program_ = nullptr;
     size_t regs_num_ = 0;
     std::unordered_map<pandasm::Ins*, uint32_t> original_ins_index_map_;
     std::unordered_map<pandasm::Ins*, uint32_t> final_ins_index_map_;
 };
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_PROGRANM_DUMPER_PROGRAM_DUMP_H
+#endif  // ABC2PROGRAM_PROGRANM_DUMPER_PROGRAM_DUMP_H

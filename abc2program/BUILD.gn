@@ -38,6 +38,7 @@ abc2program_sources = [
   "common/abc_code_converter.cpp",
   "common/abc_file_utils.cpp",
   "common/abc_string_table.cpp",
+  "dump_utils.cpp",
   "program_dump.cpp",
 ]
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,36 +26,6 @@ class AbcFileEntityProcessor {
 public:
     AbcFileEntityProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container);
 
-    bool AddRecord(const panda_file::File::EntityId &class_id, const pandasm::Record &record)
-    {
-        return entity_container_.AddRecord(class_id, record);
-    }
-
-    bool AddFunction(const panda_file::File::EntityId &method_id, const pandasm::Function &function)
-    {
-        return entity_container_.AddFunction(method_id, function);
-    }
-
-    bool AddField(const panda_file::File::EntityId &field_id, const pandasm::Field &field)
-    {
-        return entity_container_.AddField(field_id, field);
-    }
-
-    const pandasm::Record *GetRecordById(const panda_file::File::EntityId &class_id) const
-    {
-        return entity_container_.GetRecordById(class_id);
-    }
-
-    const pandasm::Function *GetFunctionById(const panda_file::File::EntityId &method_id) const
-    {
-        return entity_container_.GetFunctionById(method_id);
-    }
-
-    const pandasm::Field *GetFieldById(const panda_file::File::EntityId &field_id) const
-    {
-        return entity_container_.GetFieldById(field_id);
-    }
-
 protected:
     virtual void FillProgramData() = 0;
     panda_file::File::EntityId entity_id_;
@@ -63,8 +33,8 @@ protected:
     const panda_file::File *file_ = nullptr;
     AbcStringTable *string_table_ = nullptr;
     pandasm::Program *program_ = nullptr;
-}; // class AbcFileEntityProcessor
+};  // class AbcFileEntityProcessor
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC_FILE_ENTITY_PROCESSOR_H
+#endif  // ABC2PROGRAM_ABC_FILE_ENTITY_PROCESSOR_H

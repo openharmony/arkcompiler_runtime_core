@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,4 +189,4 @@ void AbcModuleArrayProcessor::FillEntrySize(std::vector<panda::pandasm::LiteralA
         idx_num += LITERAL_NUMS[index-1] * num;
     }
 }
-} // namespace panda::abc2program
+}  // namespace panda::abc2program

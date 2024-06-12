@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 #include "abc2program_driver.h"
 #include "abc2program_test_utils.h"
 #include "common/abc_file_utils.h"
+#include "modifiers.h"
 
 using namespace testing::ext;
 
@@ -105,7 +106,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_func_annotation
  * @tc.name: abc2program_hello_world_test_field_metadata
  * @tc.desc: get program field metadata.
  * @tc.type: FUNC
- * @tc.require:
+ * @tc.require: issueI98NGN
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_field_metadata, TestSize.Level1)
 {
@@ -124,7 +125,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_field_metadata,
  * @tc.name: abc2program_hello_world_test_lang
  * @tc.desc: get program language.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI96G2J
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_lang, TestSize.Level1)
 {
@@ -137,7 +138,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_lang, TestSize.
  * @tc.name: abc2program_hello_world_test_literalarray_table
  * @tc.desc: get program literalarray_table.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI9DK5D
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_literalarray_table, TestSize.Level1)
 {
@@ -195,7 +196,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_async_method_literals, TestSize.
  * @tc.name: abc2program_hello_world_test_record_table
  * @tc.desc: get program record_table.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI96G2J
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_record_table, TestSize.Level1)
 {
@@ -214,7 +215,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_record_table, T
  * @tc.name: abc2program_hello_world_test_fields
  * @tc.desc: get program record_table.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI98NGN
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_fields, TestSize.Level1)
 {
@@ -236,7 +237,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_fields, TestSiz
  * @tc.name: abc2program_hello_world_test_strings
  * @tc.desc: get existed string.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI96G2J
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_strings, TestSize.Level1)
 {
@@ -248,7 +249,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_strings, TestSi
  * @tc.name: abc2program_hello_world_test_function_kind_access_flags
  * @tc.desc: get existed function_kind.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI9BPIO
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_function_kind_access_flags, TestSize.Level1)
 {
@@ -256,14 +257,14 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_function_kind_a
     panda_file::FunctionKind function_kind = function.function_kind;
     EXPECT_TRUE(function_kind == panda_file::FunctionKind::FUNCTION);
     uint32_t access_flags = function.metadata->GetAccessFlags();
-    EXPECT_TRUE(access_flags == 0x08);
+    EXPECT_TRUE((access_flags & ACC_STATIC) != 0);
 }
 
 /**
  * @tc.name: abc2program_code_test_function_foo_part1
  * @tc.desc: get program fuction foo.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI989S6
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part1, TestSize.Level1)
 {
@@ -318,7 +319,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part1, Te
  * @tc.name: abc2program_code_test_function_foo_part2
  * @tc.desc: get program fuction foo.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI989S6
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part2, TestSize.Level1)
 {
@@ -373,7 +374,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part2, Te
  * @tc.name: abc2program_code_test_function_foo_part3
  * @tc.desc: get program fuction foo.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI989S6
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part3, TestSize.Level1)
 {
@@ -433,7 +434,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part3, Te
  * @tc.name: abc2program_code_test_function_foo_part4
  * @tc.desc: get program fuction foo.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI989S6
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, TestSize.Level1)
 {
@@ -484,7 +485,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, Te
  * @tc.name: abc2program_code_test_function_goo
  * @tc.desc: get program fuction goo.
  * @tc.type: FUNC
- * @tc.require: file path and name
+ * @tc.require: issueI989S6
  */
 HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize.Level1)
 {

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 
 namespace panda::abc2program {
 
-const panda::panda_file::SourceLang lang = panda::panda_file::SourceLang::ECMASCRIPT;
+const panda::panda_file::SourceLang LANG_ECMA = panda::panda_file::SourceLang::ECMASCRIPT;
 
 class Abc2ProgramEntityContainer {
 public:
@@ -38,15 +38,6 @@ public:
     const panda_file::File &GetAbcFile() const;
     AbcStringTable &GetAbcStringTable() const;
     pandasm::Program &GetProgram() const;
-    bool AddRecord(uint32_t class_id, const pandasm::Record &record);
-    bool AddRecord(const panda_file::File::EntityId &class_id, const pandasm::Record &record);
-    bool AddFunction(uint32_t method_id, const pandasm::Function &function);
-    bool AddFunction(const panda_file::File::EntityId &method_id, const pandasm::Function &function);
-    bool AddField(uint32_t field_id, const pandasm::Field &field);
-    bool AddField(const panda_file::File::EntityId &field_id, const pandasm::Field &field);
-    const pandasm::Record *GetRecordById(const panda_file::File::EntityId &class_id) const;
-    const pandasm::Function *GetFunctionById(const panda_file::File::EntityId &method_id) const;
-    const pandasm::Field *GetFieldById(const panda_file::File::EntityId &field_id) const;
 
     std::string GetFullRecordNameById(const panda_file::File::EntityId &class_id);
     std::string GetFullMethodNameById(uint32_t method_id);
@@ -75,9 +66,6 @@ private:
     AbcStringTable &string_table_;
     pandasm::Program &program_;
     const panda_file::DebugInfoExtractor &debug_info_extractor_;
-    std::unordered_map<uint32_t, const pandasm::Record*> record_map_;
-    std::unordered_map<uint32_t, const pandasm::Function*> function_map_;
-    std::unordered_map<uint32_t, const pandasm::Field*> field_map_;
     std::unordered_map<uint32_t, std::string> record_full_name_map_;
     std::unordered_map<uint32_t, std::string> method_full_name_map_;
     std::unordered_set<uint32_t> module_literal_array_id_set_;
@@ -85,8 +73,8 @@ private:
     std::unordered_set<uint32_t> processed_nested_literal_array_id_set_;
     std::unordered_set<uint32_t> unprocessed_nested_literal_array_id_set_;
     uint32_t current_class_id_{0};
-}; // class Abc2ProgramEntityContainer
+};  // class Abc2ProgramEntityContainer
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC2PROGRAM_ENTITY_CONTAINER_H
+#endif  // ABC2PROGRAM_ABC2PROGRAM_ENTITY_CONTAINER_H

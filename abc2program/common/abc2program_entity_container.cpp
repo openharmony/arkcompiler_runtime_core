@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,79 +39,6 @@ pandasm::Program &Abc2ProgramEntityContainer::GetProgram() const
 const panda_file::DebugInfoExtractor &Abc2ProgramEntityContainer::GetDebugInfoExtractor() const
 {
     return debug_info_extractor_;
-}
-
-bool Abc2ProgramEntityContainer::AddRecord(uint32_t class_id, const pandasm::Record &record)
-{
-    auto it = record_map_.find(class_id);
-    if (it != record_map_.end()) {
-        return false;
-    }
-    record_map_.emplace(class_id, &record);
-    return true;
-}
-
-bool Abc2ProgramEntityContainer::AddRecord(const panda_file::File::EntityId &class_id, const pandasm::Record &record)
-{
-    return AddRecord(class_id.GetOffset(), record);
-}
-
-bool Abc2ProgramEntityContainer::AddFunction(uint32_t method_id, const pandasm::Function &function)
-{
-    auto it = function_map_.find(method_id);
-    if (it != function_map_.end()) {
-        return false;
-    }
-    function_map_.emplace(method_id, &function);
-    return true;
-}
-
-bool Abc2ProgramEntityContainer::AddFunction(const panda_file::File::EntityId &method_id,
-                                             const pandasm::Function &function)
-{
-    return AddFunction(method_id.GetOffset(), function);
-}
-
-bool Abc2ProgramEntityContainer::AddField(uint32_t field_id, const pandasm::Field &field)
-{
-    auto it = field_map_.find(field_id);
-    if (it != field_map_.end()) {
-        return false;
-    }
-    field_map_.emplace(field_id, &field);
-    return true;
-}
-
-bool Abc2ProgramEntityContainer::AddField(const panda_file::File::EntityId &field_id, const pandasm::Field &field)
-{
-    return AddField(field_id.GetOffset(), field);
-}
-
-const pandasm::Record *Abc2ProgramEntityContainer::GetRecordById(const panda_file::File::EntityId &class_id) const
-{
-    auto it = record_map_.find(class_id.GetOffset());
-    if (it != record_map_.end()) {
-        return it->second;
-    }
-    return nullptr;
-}
-
-const pandasm::Function *Abc2ProgramEntityContainer::GetFunctionById(const panda_file::File::EntityId &method_id) const
-{
-    auto it = function_map_.find(method_id.GetOffset());
-    if (it != function_map_.end()) {
-        return it->second;
-    }
-    return nullptr;
-}
-
-const pandasm::Field *Abc2ProgramEntityContainer::GetFieldById(const panda_file::File::EntityId &field_id) const
-{
-    auto it = field_map_.find(field_id.GetOffset());
-    if (it != field_map_.end()) {
-        return it->second;
-    }
-    return nullptr;
 }
 
 std::string Abc2ProgramEntityContainer::GetFullRecordNameById(const panda_file::File::EntityId &class_id)

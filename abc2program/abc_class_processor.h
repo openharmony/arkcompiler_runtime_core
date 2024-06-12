@@ -16,7 +16,6 @@
 #ifndef ABC2PROGRAM_ABC_CLASS_PROCESSOR_H
 #define ABC2PROGRAM_ABC_CLASS_PROCESSOR_H
 
-#include <map>
 #include "abc_file_entity_processor.h"
 #include "class_data_accessor-inl.h"
 
@@ -29,16 +28,18 @@ public:
 
 private:
     void FillRecord();
-    void FillRecordData(pandasm::Record &record);
-    void FillRecordSourceFile(pandasm::Record &record);
-    void FillRecordMetaData(pandasm::Record &record);
-    void FillRecordAttributes(pandasm::Record &record);
-    void FillRecordAnnotations(pandasm::Record &record);
-    void FillFields(pandasm::Record &record);
+    void FillRecordData();
+    void FillRecordName();
+    void FillRecordSourceFile();
+    void FillRecordMetaData();
+    void FillRecordAttributes();
+    void FillRecordAnnotations();
+    void FillFields();
     void FillFunctions();
     std::unique_ptr<panda_file::ClassDataAccessor> class_data_accessor_;
+    pandasm::Record record_;
 };
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC_CLASS_PROCESSOR_H
+#endif  // ABC2PROGRAM_ABC_CLASS_PROCESSOR_H

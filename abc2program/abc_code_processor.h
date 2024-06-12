@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ private:
     uint32_t curr_catch_begin_pc_ = 0;
     uint32_t curr_catch_end_pc_ = 0;
     const panda_file::DebugInfoExtractor &debug_info_extractor_;
-}; // AbcCodeProcessor
+};  // AbcCodeProcessor
 
-} // namespace panda::abc2program
+}  // namespace panda::abc2program
 
-#endif // ABC2PROGRAM_ABC_CODE_PROCESSOR_H
+#endif  // ABC2PROGRAM_ABC_CODE_PROCESSOR_H

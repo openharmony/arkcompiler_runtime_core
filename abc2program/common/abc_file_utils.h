@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,10 @@
 #define ABC2PROGRAM_ABC_FILE_UTILS_H
 
 #include <string>
-#include <assembly-program.h>
+#include "assembly-program.h"
 #include "file.h"
 
 namespace panda::abc2program {
-
-// function_kind_mask
-constexpr uint32_t MASK_9_TO_16_BITS = 0x0000FF00;
-constexpr uint32_t LOWEST_8_BIT_MASK = 0x000000FF;
-constexpr uint32_t BITS_8_SHIFT = 8;
 
 // type name
 constexpr std::string_view GLOBAL_TYPE_NAME = "_GLOBAL";
@@ -44,41 +39,6 @@ constexpr std::string_view DOT = ".";
 // attribute constant
 constexpr std::string_view ABC_ATTR_EXTERNAL = "external";
 constexpr std::string_view ABC_ATTR_STATIC = "static";
-
-// dump constant
-constexpr std::string_view DUMP_TITLE_SOURCE_BINARY = "# source binary: ";
-constexpr std::string_view DUMP_TITLE_LANGUAGE = ".language ";
-constexpr std::string_view DUMP_TITLE_LITERALS = "# LITERALS";
-constexpr std::string_view DUMP_TITLE_RECORDS = "# RECORDS";
-constexpr std::string_view DUMP_TITLE_RECORD = ".record ";
-constexpr std::string_view DUMP_TITLE_RECORD_SOURCE_FILE = ".record.source_file ";
-constexpr std::string_view DUMP_TITLE_METHODS = "# METHODS";
-constexpr std::string_view DUMP_TITLE_FUNCTION = ".function ";
-constexpr std::string_view DUMP_TITLE_CATCH_ALL = ".catchall :";
-constexpr std::string_view DUMP_TITLE_CATCH = ".catch :";
-constexpr std::string_view DUMP_TITLE_STRING = "# STRING\n";
-constexpr std::string_view DUMP_TITLE_SEPARATOR = "# ====================\n";
-constexpr std::string_view DUMP_TITLE_LOCAL_VAR_TABLE = "# LOCAL_VARIABLE_TABLE:";
-constexpr std::string_view DUMP_CONTENT_ECMASCRIPT = "ECMAScript";
-constexpr std::string_view DUMP_CONTENT_PANDA_ASSEMBLY = "PandaAssembly";
-constexpr std::string_view DUMP_CONTENT_SPACE = " ";
-constexpr std::string_view DUMP_CONTENT_DOUBLE_SPACES = "  ";
-constexpr std::string_view DUMP_CONTENT_TRIPLE_SPACES = "   ";
-constexpr std::string_view DUMP_CONTENT_NONUPLE_SPACES = "         ";
-constexpr std::string_view DUMP_CONTENT_TAB = "\t";
-constexpr std::string_view DUMP_CONTENT_SINGLE_ENDL = "\n";
-constexpr std::string_view DUMP_CONTENT_DOUBLE_ENDL = "\n\n";
-constexpr std::string_view DUMP_CONTENT_ATTR_EXTERNAL = "<external>";
-constexpr std::string_view DUMP_CONTENT_ATTR_STATIC = "<static>";
-constexpr std::string_view DUMP_CONTENT_FUNCTION_PARAM_NAME_PREFIX = "a";
-constexpr std::string_view DUMP_CONTENT_TRY_BEGIN_LABEL = "try_begin_label : ";
-constexpr std::string_view DUMP_CONTENT_TRY_END_LABEL = "try_end_label : ";
-constexpr std::string_view DUMP_CONTENT_CATCH_BEGIN_LABEL = "catch_begin_label : ";
-constexpr std::string_view DUMP_CONTENT_CATCH_END_LABEL = "catch_end_label : ";
-constexpr std::string_view DUMP_CONTENT_LOCAL_VAR_TABLE = "#\t Start   Length  Register           Name   Signature\n";
-constexpr std::string_view DUMP_CONTENT_LINE_NUMBER = " # line: ";
-constexpr std::string_view DUMP_CONTENT_COLUMN_NUMBER = " # column: ";
-constexpr std::string_view DUMP_CONTENT_NESTED_LITERALARRAY = "$$NESTED-LITERALARRAY$$";
 
 // literal array name
 constexpr std::string_view UNDERLINE = "_";

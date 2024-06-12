@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 #include "abc_method_processor.h"
 #include "abc_code_processor.h"
 #include "method_data_accessor-inl.h"
+#include "file_items.h"
 
 namespace panda::abc2program {
 
@@ -23,8 +24,7 @@ AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id,
                                        Abc2ProgramEntityContainer &entity_container)
     : AbcFileEntityProcessor(entity_id, entity_container),
       type_converter_(AbcTypeConverter(*string_table_)),
-      function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_),
-                                  panda_file::SourceLang::ECMASCRIPT)),
+      function_(pandasm::Function(entity_container_.GetFullMethodNameById(entity_id_), LANG_ECMA)),
       debug_info_extractor_(entity_container.GetDebugInfoExtractor())
 {
     method_data_accessor_ = std::make_unique<panda_file::MethodDataAccessor>(*file_, entity_id_);
@@ -33,7 +33,7 @@ AbcMethodProcessor::AbcMethodProcessor(panda_file::File::EntityId entity_id,
 void AbcMethodProcessor::FillProgramData()
 {
     FillFunctionData();
-    AddFunctionIntoFunctionTable();
+    program_->function_table.emplace(function_.name, std::move(function_));
 }
 
 void AbcMethodProcessor::FillFunctionData()
@@ -48,19 +48,13 @@ void AbcMethodProcessor::FillFunctionData()
     FillConcurrentModuleRequests();
 }
 
-void AbcMethodProcessor::AddFunctionIntoFunctionTable()
-{
-    std::string full_method_name = entity_container_.GetFullMethodNameById(entity_id_);
-    program_->function_table.emplace(full_method_name, std::move(function_));
-}
-
 void AbcMethodProcessor::FillProto()
 {
     uint32_t params_num = GetNumArgs();
     pandasm::Type any_type = pandasm::Type(ANY_TYPE_NAME, 0);
     function_.return_type = any_type;
     for (uint8_t i = 0; i < params_num; i++) {
-        function_.params.emplace_back(pandasm::Function::Parameter(any_type, lang));
+        function_.params.emplace_back(pandasm::Function::Parameter(any_type, LANG_ECMA));
     }
 }
 
@@ -78,26 +72,31 @@ uint32_t AbcMethodProcessor::GetNumArgs() const
 void AbcMethodProcessor::FillFunctionKind()
 {
     uint32_t method_acc_flags = method_data_accessor_->GetAccessFlags();
-    uint32_t function_kind_u32 = ((method_acc_flags & MASK_9_TO_16_BITS) >> BITS_8_SHIFT);
-    panda_file::FunctionKind function_kind = static_cast<panda_file::FunctionKind>(function_kind_u32);
-    function_.SetFunctionKind(function_kind);
+    uint32_t func_kind_u32 = ((method_acc_flags & panda_file::FUNCTION_KIND_MASK) >> panda_file::FLAG_WIDTH);
+    panda_file::FunctionKind func_kind = static_cast<panda_file::FunctionKind>(func_kind_u32);
+    function_.SetFunctionKind(func_kind);
 }
 
 void AbcMethodProcessor::FillFunctionMetaData()
 {
+    FillFunctionAttributes();
+    FillAccessFlags();
+}
+
+void AbcMethodProcessor::FillFunctionAttributes()
+{
     if (method_data_accessor_->IsStatic()) {
-        function_.metadata->SetAttribute("static");
+        function_.metadata->SetAttribute(ABC_ATTR_STATIC);
     }
     if (file_->IsExternal(method_data_accessor_->GetMethodId())) {
-        function_.metadata->SetAttribute("external");
+        function_.metadata->SetAttribute(ABC_ATTR_EXTERNAL);
     }
-    FillAccessFlags();
 }
 
 void AbcMethodProcessor::FillAccessFlags()
 {
     uint32_t access_flags = method_data_accessor_->GetAccessFlags();
-    access_flags = (access_flags & LOWEST_8_BIT_MASK);
+    access_flags = (access_flags & panda_file::FLAG_MASK);
     function_.metadata->SetAccessFlags(access_flags);
 }
 
