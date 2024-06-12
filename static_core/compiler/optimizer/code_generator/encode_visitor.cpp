@@ -84,6 +84,27 @@ BINARRY_IMM_OPS(BINARY_IMM_OPERATION)
 #undef BINARY_IMM_OPERATION
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define BINARY_IMM_SIGN_OPERATION(opc)                                                       \
+    void EncodeVisitor::Visit##opc##I(GraphVisitor *visitor, Inst *inst)                     \
+    {                                                                                        \
+        auto type = inst->GetType();                                                         \
+        auto binop = inst->CastTo##opc##I();                                                 \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);                          \
+        auto [dst, src0] = enc->GetCodegen()->ConvertRegisters<1U>(inst);                    \
+        enc->GetEncoder()->Encode##opc(dst, src0, Imm(binop->GetImm()), IsTypeSigned(type)); \
+    }
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define BINARY_IMM_SIGN_OPS(DEF) \
+    DEF(Div)                     \
+    DEF(Mod)
+
+BINARY_IMM_SIGN_OPS(BINARY_IMM_SIGN_OPERATION)
+
+#undef BINARY_IMM_SIGN_OPS
+#undef BINARY_IMM_SIGN_OPERATION
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BINARY_SIGN_UNSIGN_OPERATION(opc)                                         \
     void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
     {                                                                             \

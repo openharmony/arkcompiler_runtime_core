@@ -1136,17 +1136,27 @@ void GraphChecker::VisitMulI([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitDivI([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto type = inst->GetType();
-    ASSERT_DO_EXT_VISITOR(DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) &&
-                              !DataType::IsReference(type),
-                          (std::cerr << "\nDivI must have Int32 type\n", inst->Dump(&std::cerr)));
+    if (static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer()) {
+        ASSERT_DO_EXT_VISITOR(DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) &&
+                                  !DataType::IsReference(type),
+                              (std::cerr << "\nDivI must have Int32 type\n", inst->Dump(&std::cerr)));
+    } else {
+        ASSERT_DO_EXT_VISITOR(!DataType::IsLessInt32(type) && !DataType::IsReference(type),
+                              (std::cerr << "\nDivI must have at least Int32 type\n", inst->Dump(&std::cerr)));
+    }
     CheckUnaryOperationTypes(inst);
 }
 void GraphChecker::VisitModI([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto type = inst->GetType();
-    ASSERT_DO_EXT_VISITOR(DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) &&
-                              !DataType::IsReference(type),
-                          (std::cerr << "\nModI must have Int32 type\n", inst->Dump(&std::cerr)));
+    if (static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer()) {
+        ASSERT_DO_EXT_VISITOR(DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) &&
+                                  !DataType::IsReference(type),
+                              (std::cerr << "\nDivI must have Int32 type\n", inst->Dump(&std::cerr)));
+    } else {
+        ASSERT_DO_EXT_VISITOR(!DataType::IsLessInt32(type) && !DataType::IsReference(type),
+                              (std::cerr << "\nDivI must have at least Int32 type\n", inst->Dump(&std::cerr)));
+    }
     CheckUnaryOperationTypes(inst);
 }
 void GraphChecker::VisitAndI([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -1954,7 +1964,8 @@ void GraphChecker::VisitNegativeCheck([[maybe_unused]] GraphVisitor *v, Inst *in
     if (inst->GetBasicBlock()->GetGraph()->IsDynamicMethod()) {
         // In dynamic methods for negative values we creates f64 Mod, so we insert NegativeCheck before Mod
         // Lowering can change Mod to And(I)
-        CheckThrows(inst, {Opcode::NewArray, Opcode::MultiArray, Opcode::Phi, Opcode::Mod, Opcode::And, Opcode::AndI});
+        CheckThrows(inst, {Opcode::NewArray, Opcode::MultiArray, Opcode::Phi, Opcode::Mod, Opcode::ModI, Opcode::And,
+                           Opcode::AndI});
     } else {
         CheckThrows(inst, {Opcode::NewArray, Opcode::MultiArray, Opcode::Phi});
     }
@@ -1967,7 +1978,7 @@ void GraphChecker::VisitNotPositiveCheck([[maybe_unused]] GraphVisitor *v, Inst 
     ASSERT_DO_EXT_VISITOR(DataType::GetCommonType(opType) == DataType::INT64,
                           (std::cerr << "Type of NotPositiveCheck must be integer\n", inst->Dump(&std::cerr)));
     ASSERT(inst->GetBasicBlock()->GetGraph()->IsDynamicMethod());
-    CheckThrows(inst, {Opcode::Phi, Opcode::Mod});
+    CheckThrows(inst, {Opcode::Phi, Opcode::Mod, Opcode::ModI});
 }
 
 void GraphChecker::VisitZeroCheck([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -1976,7 +1987,7 @@ void GraphChecker::VisitZeroCheck([[maybe_unused]] GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto opType = op->GetType();
     ASSERT_DO_EXT_VISITOR(DataType::GetCommonType(opType) == DataType::INT64,
                           (std::cerr << "Type of ZeroCheck input must be integer\n", inst->Dump(&std::cerr)));
-    CheckThrows(inst, {Opcode::Div, Opcode::Mod, Opcode::Phi});
+    CheckThrows(inst, {Opcode::Div, Opcode::DivI, Opcode::Mod, Opcode::ModI, Opcode::Phi});
 }
 
 void GraphChecker::VisitDeoptimizeIf([[maybe_unused]] GraphVisitor *v, Inst *inst)

@@ -872,14 +872,12 @@ instructions:
     base: BinaryImmOperation
     signature: [d-int, int]
     flags: [low_level, acc_write, acc_read, ifcvt]
-    modes: [bytecode_opt]
     description: Divide value with immediate.
 
   - opcode: ModI
     base: BinaryImmOperation
     signature: [d-int, int]
     flags: [low_level, acc_write, acc_read, ifcvt]
-    modes: [bytecode_opt]
     description: Modulo instruction with immediate.
 
   - opcode: ShlI

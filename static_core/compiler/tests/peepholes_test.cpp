@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2987,29 +2987,20 @@ TEST_F(PeepholesTest, TestDivCase3SignedPositive)
             }
         }
 
-        ASSERT_TRUE(graph1->RunPass<Peepholes>());
+        ASSERT_FALSE(graph1->RunPass<Peepholes>());
         graph1->RunPass<Cleanup>();
 
-        auto typeSize = DataType::GetTypeSize(type, graph1->GetArch());
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
             PARAMETER(0U, 0U);
             INS(0U).SetType(type);
-            CONSTANT(1U, typeSize - 1L);
-            CONSTANT(5U, typeSize - 2L);  // type size - log2(4)
-            CONSTANT(8U, 2U);             // log2(4)
+            CONSTANT(1U, 4U);
             BASIC_BLOCK(2U, -1L)
             {
-                INST(2U, Opcode::AShr).Inputs(0U, 1U);
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
                 INS(2U).SetType(type);
-                INST(4U, Opcode::Shr).Inputs(2U, 5U);
-                INS(4U).SetType(type);
-                INST(6U, Opcode::Add).Inputs(4U, 0U);
-                INS(6U).SetType(type);
-                INST(7U, Opcode::AShr).Inputs(6U, 8U);
-                INS(7U).SetType(type);
-                INST(3U, Opcode::Return).Inputs(7U);
+                INST(3U, Opcode::Return).Inputs(2U);
                 INS(3U).SetType(type);
             }
         }
@@ -3035,31 +3026,20 @@ TEST_F(PeepholesTest, TestDivCase3SignedNegative)
             }
         }
 
-        ASSERT_TRUE(graph1->RunPass<Peepholes>());
+        ASSERT_FALSE(graph1->RunPass<Peepholes>());
         graph1->RunPass<Cleanup>();
 
-        auto typeSize = DataType::GetTypeSize(type, graph1->GetArch());
         auto graph2 = CreateEmptyGraph();
         GRAPH(graph2)
         {
             PARAMETER(0U, 0U);
             INS(0U).SetType(type);
-            CONSTANT(1U, typeSize - 1L);
-            CONSTANT(5U, typeSize - 4L);  // type size - log2(16)
-            CONSTANT(8U, 4U);             // log2(16)
+            CONSTANT(1U, -16L);
             BASIC_BLOCK(2U, -1L)
             {
-                INST(2U, Opcode::AShr).Inputs(0U, 1U);
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
                 INS(2U).SetType(type);
-                INST(4U, Opcode::Shr).Inputs(2U, 5U);
-                INS(4U).SetType(type);
-                INST(6U, Opcode::Add).Inputs(4U, 0U);
-                INS(6U).SetType(type);
-                INST(7U, Opcode::AShr).Inputs(6U, 8U);
-                INS(7U).SetType(type);
-                INST(9U, Opcode::Neg).Inputs(7U);
-                INS(9U).SetType(type);
-                INST(3U, Opcode::Return).Inputs(9U);
+                INST(3U, Opcode::Return).Inputs(2U);
                 INS(3U).SetType(type);
             }
         }

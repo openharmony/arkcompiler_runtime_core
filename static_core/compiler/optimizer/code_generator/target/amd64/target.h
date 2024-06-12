@@ -272,6 +272,10 @@ public:
     void EncodeMin(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
     void EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
+    void EncodeDiv(Reg dst, Reg src0, Imm imm, bool isSigned) override;
+    void EncodeSignedDiv(Reg dst, Reg src0, Imm imm);
+    void EncodeUnsignedDiv(Reg dst, Reg src0, Imm imm);
+    void EncodeMod(Reg dst, Reg src0, Imm imm, bool isSigned) override;
     void EncodeMax(Reg dst, bool dstSigned, Reg src0, Reg src1) override;
 
     void EncodeAddOverflow(compiler::LabelHolder::LabelId id, Reg dst, Reg src0, Reg src1, Condition cc) override;
@@ -332,6 +336,7 @@ public:
     bool CanEncodeImmLogical(uint64_t imm, uint32_t size) override;
     bool CanEncodeScale(uint64_t imm, uint32_t size) override;
     bool CanEncodeBitCount() override;
+    bool CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const override;
 
     void EncodeCompareAndSwap(Reg dst, Reg obj, Reg offset, Reg val, Reg newval) override;
     void EncodeCompareAndSwap(Reg dst, Reg addr, Reg val, Reg newval) override;

@@ -156,7 +156,6 @@ private:
     bool TrySimplifyShlShlAdd(Inst *inst);
     bool TryReassociateShlShlAddSub(Inst *inst);
     void TrySimplifyNeg(Inst *inst);
-    void TryReplaceDivByShrAndAshr(Inst *inst, uint64_t unsignedVal, Inst *input0);
     void TryReplaceDivByShift(Inst *inst);
     bool TrySimplifyCompareCaseInputInv(Inst *inst, Inst *input);
     bool TrySimplifyCompareWithBoolInput(Inst *inst, bool *isOsrBlocked);

@@ -20,6 +20,7 @@ Encoder (implementation of math and mem Low-level emitters)
 
 #include "libpandabase/utils/utils.h"
 #include "compiler/optimizer/code_generator/relocations.h"
+#include "compiler/optimizer/code_generator/fast_divisor.h"
 #include "operands.h"
 #include "scoped_tmp_reg.h"
 #include "target/amd64/target.h"
@@ -1481,6 +1482,123 @@ void Amd64Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
     GetMasm()->bind(crossroad);
 }
 
+void Amd64Encoder::EncodeSignedDiv(Reg dst, Reg src0, Imm imm)
+{
+    int64_t divisor = imm.GetAsInt();
+
+    Reg ax(ConvertRegNumber(asmjit::x86::rax.id()), dst.GetType());
+    Reg dx(ConvertRegNumber(asmjit::x86::rdx.id()), dst.GetType());
+
+    if (dst != ax) {
+        GetMasm()->push(ArchReg(ax, DOUBLE_WORD_SIZE));
+    }
+    if (dst != dx) {
+        GetMasm()->push(ArchReg(dx, DOUBLE_WORD_SIZE));
+    }
+
+    FastConstSignedDivisor fastDivisor(divisor, dst.GetSize());
+    int64_t magic = fastDivisor.GetMagic();
+
+    ScopedTmpReg tmp(this, dst.GetType());
+    EncodeMov(tmp, src0);
+    EncodeMov(ax, src0);
+    EncodeMov(dx, Imm(magic));
+    GetMasm()->imul(ArchReg(dx));
+
+    if (divisor > 0 && magic < 0) {
+        EncodeAdd(dx, dx, tmp);
+    } else if (divisor < 0 && magic > 0) {
+        EncodeSub(dx, dx, tmp);
+    }
+
+    int64_t shift = fastDivisor.GetShift();
+    EncodeAShr(dst, dx, Imm(shift));
+
+    // result = (result < 0 ? result + 1 : result)
+    EncodeShr(tmp, dst, Imm(dst.GetSize() - 1U));
+    EncodeAdd(dst, dst, tmp);
+
+    if (dst != dx) {
+        GetMasm()->pop(ArchReg(dx, DOUBLE_WORD_SIZE));
+    }
+    if (dst != ax) {
+        GetMasm()->pop(ArchReg(ax, DOUBLE_WORD_SIZE));
+    }
+}
+
+void Amd64Encoder::EncodeUnsignedDiv(Reg dst, Reg src0, Imm imm)
+{
+    auto divisor = bit_cast<uint64_t>(imm.GetAsInt());
+
+    Reg ax(ConvertRegNumber(asmjit::x86::rax.id()), dst.GetType());
+    Reg dx(ConvertRegNumber(asmjit::x86::rdx.id()), dst.GetType());
+
+    if (dst != ax) {
+        GetMasm()->push(ArchReg(ax, DOUBLE_WORD_SIZE));
+    }
+    if (dst != dx) {
+        GetMasm()->push(ArchReg(dx, DOUBLE_WORD_SIZE));
+    }
+
+    FastConstUnsignedDivisor fastDivisor(divisor, dst.GetSize());
+    uint64_t magic = fastDivisor.GetMagic();
+
+    ScopedTmpReg tmp(this, dst.GetType());
+    if (fastDivisor.GetAdd()) {
+        EncodeMov(tmp, src0);
+    }
+    EncodeMov(ax, src0);
+    EncodeMov(dx, Imm(magic));
+    GetMasm()->mul(ArchReg(dx));
+
+    uint64_t shift = fastDivisor.GetShift();
+    if (!fastDivisor.GetAdd()) {
+        EncodeShr(dst, dx, Imm(shift));
+    } else {
+        ASSERT(shift >= 1U);
+        EncodeSub(tmp, tmp, dx);
+        EncodeShr(tmp, tmp, Imm(1U));
+        EncodeAdd(tmp, tmp, dx);
+        EncodeShr(dst, tmp, Imm(shift - 1U));
+    }
+
+    if (dst != dx) {
+        GetMasm()->pop(ArchReg(dx, DOUBLE_WORD_SIZE));
+    }
+    if (dst != ax) {
+        GetMasm()->pop(ArchReg(ax, DOUBLE_WORD_SIZE));
+    }
+}
+
+void Amd64Encoder::EncodeDiv(Reg dst, Reg src0, Imm imm, bool isSigned)
+{
+    ASSERT(dst.IsScalar() && dst.GetSize() >= WORD_SIZE);
+    ASSERT(CanOptimizeImmDivMod(bit_cast<uint64_t>(imm.GetAsInt()), isSigned));
+    if (isSigned) {
+        EncodeSignedDiv(dst, src0, imm);
+    } else {
+        EncodeUnsignedDiv(dst, src0, imm);
+    }
+}
+
+void Amd64Encoder::EncodeMod(Reg dst, Reg src0, Imm imm, bool isSigned)
+{
+    ASSERT(dst.IsScalar() && dst.GetSize() >= WORD_SIZE);
+    ASSERT(CanOptimizeImmDivMod(bit_cast<uint64_t>(imm.GetAsInt()), isSigned));
+
+    // dst = src0 - imm * (src0 / imm)
+    ScopedTmpReg tmp(this, dst.GetType());
+    EncodeDiv(tmp, src0, imm, isSigned);
+    if (dst.GetSize() == WORD_SIZE) {
+        GetMasm()->imul(ArchReg(tmp), ArchReg(tmp), asmjit::imm(imm.GetAsInt()));
+    } else {
+        ScopedTmpRegU64 immReg(this);
+        EncodeMov(immReg, imm);
+        EncodeMul(tmp, tmp, immReg);
+    }
+    EncodeSub(dst, src0, tmp);
+}
+
 void Amd64Encoder::EncodeModFloat(Reg dst, Reg src0, Reg src1)
 {
     ASSERT(dst.IsFloat());
@@ -2581,6 +2699,11 @@ bool Amd64Encoder::CanEncodeImmLogical(uint64_t imm, uint32_t size)
 bool Amd64Encoder::CanEncodeBitCount()
 {
     return asmjit::CpuInfo::host().hasFeature(asmjit::x86::Features::kPOPCNT);
+}
+
+bool Amd64Encoder::CanOptimizeImmDivMod(uint64_t imm, bool isSigned) const
+{
+    return CanOptimizeImmDivModCommon(imm, isSigned);
 }
 
 void Amd64Encoder::EncodeIsInf(Reg dst, Reg src)

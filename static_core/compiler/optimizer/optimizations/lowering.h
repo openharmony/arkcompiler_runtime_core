@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -400,9 +400,13 @@ private:
     static void InPlaceLowerIfImm(IfImmInst *inst, Inst *input, Inst *cst, ConditionCode cc, DataType::Type inputType);
     static void LowerIfImmToIf(IfImmInst *inst, Inst *input, ConditionCode cc, DataType::Type inputType);
     static void LowerToDeoptimizeCompare(Inst *inst);
+    static bool TryReplaceDivPowerOfTwo(GraphVisitor *v, Inst *inst);
+    static bool TryReplaceDivModNonPowerOfTwo(GraphVisitor *v, Inst *inst);
     static bool TryReplaceModPowerOfTwo(GraphVisitor *v, Inst *inst);
     static void ReplaceSignedModPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t absValue);
     static void ReplaceUnsignedModPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t absValue);
+    static void ReplaceSignedDivPowerOfTwo(GraphVisitor *v, Inst *inst, int64_t sValue);
+    static void ReplaceUnsignedDivPowerOfTwo(GraphVisitor *v, Inst *inst, uint64_t uValue);
 
 private:
     SaveStateBridgesBuilder ssb_;

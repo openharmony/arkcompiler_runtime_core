@@ -601,7 +601,7 @@ TEST_F(BoundsAnalysisTest, ShlTest)
     EXPECT_EQ(BoundsRange(16U, 0x0FFFFFFFFFFFFFFFU).Shl(BoundsRange(4U)), BoundsRange());
 }
 
-TEST_F(BoundsAnalysisTest, AShrDivTest)
+TEST_F(BoundsAnalysisTest, SignedDivTest)
 {
     GRAPH(GetGraph())
     {
@@ -614,8 +614,8 @@ TEST_F(BoundsAnalysisTest, AShrDivTest)
         }
     }
 
-    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+    ASSERT_FALSE(GetGraph()->RunPass<Cleanup>());
 
     auto bb = &BB(2U);
 
@@ -623,16 +623,11 @@ TEST_F(BoundsAnalysisTest, AShrDivTest)
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 31U);
-        CONSTANT(5U, 30U);  // type size - log2(4)
-        CONSTANT(8U, 2U);   // log2(4)
+        CONSTANT(1U, 4U);
         BASIC_BLOCK(2U, -1L)
         {
-            INST(2U, Opcode::AShr).s32().Inputs(0U, 1U);
-            INST(4U, Opcode::Shr).s32().Inputs(2U, 5U);
-            INST(6U, Opcode::Add).s32().Inputs(4U, 0U);
-            INST(7U, Opcode::AShr).s32().Inputs(6U, 8U);
-            INST(3U, Opcode::Return).s32().Inputs(7U);
+            INST(2U, Opcode::Div).s32().Inputs(0U, 1U);
+            INST(3U, Opcode::Return).s32().Inputs(2U);
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));

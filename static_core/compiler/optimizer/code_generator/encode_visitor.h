@@ -99,18 +99,20 @@ protected:
 #define BINARY_IMM_OPERATION(opc) static void Visit##opc##I(GraphVisitor *visitor, Inst *inst)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BINARRY_IMM_OPS(DEF) \
-    DEF(Add);                \
-    DEF(Sub);                \
-    DEF(Shl);                \
-    DEF(AShr);               \
-    DEF(And);                \
-    DEF(Or);                 \
-    DEF(Xor)
+#define BINARY_IMM_OPS(DEF) \
+    DEF(Add);               \
+    DEF(Sub);               \
+    DEF(Shl);               \
+    DEF(AShr);              \
+    DEF(And);               \
+    DEF(Or);                \
+    DEF(Xor);               \
+    DEF(Div);               \
+    DEF(Mod)
 
-    BINARRY_IMM_OPS(BINARY_IMM_OPERATION);
+    BINARY_IMM_OPS(BINARY_IMM_OPERATION);
 
-#undef BINARRY_IMM_OPS
+#undef BINARY_IMM_OPS
 #undef BINARY_IMM_OPERATION
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

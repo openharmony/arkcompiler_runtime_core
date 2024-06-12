@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2420,6 +2420,134 @@ TEST_F(LoweringTest, LowerUnsignedCast)
 
     EXPECT_TRUE(RegAlloc(graph));
     EXPECT_TRUE(graph->RunPass<Codegen>());
+}
+
+TEST_F(LoweringTest, UnsignedDivPowerOfTwo)
+{
+    for (auto type : {DataType::UINT32, DataType::UINT64}) {
+        auto graph1 = CreateEmptyLowLevelGraph();
+        GRAPH(graph1)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, 4U);
+            BASIC_BLOCK(2U, -1L)
+            {
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
+            }
+        }
+        ASSERT_TRUE(graph1->RunPass<Lowering>());
+        graph1->RunPass<Cleanup>();
+        auto graph2 = CreateEmptyLowLevelGraph();
+        GRAPH(graph2)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            BASIC_BLOCK(2U, -1L)
+            {
+                INST(2U, Opcode::ShrI).Inputs(0U).Imm(2U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
+            }
+        }
+        ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
+    }
+}
+
+TEST_F(LoweringTest, SignedDivPowerOfTwoPositive)
+{
+    for (auto type : {DataType::INT32, DataType::INT64}) {
+        auto graph1 = CreateEmptyLowLevelGraph();
+        GRAPH(graph1)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, 4U);
+            BASIC_BLOCK(2U, -1L)
+            {
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
+            }
+        }
+
+        ASSERT_TRUE(graph1->RunPass<Lowering>());
+        graph1->RunPass<Cleanup>();
+
+        auto typeSize = DataType::GetTypeSize(type, graph1->GetArch());
+        auto graph2 = CreateEmptyLowLevelGraph();
+        GRAPH(graph2)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            BASIC_BLOCK(2U, -1L)
+            {
+                INST(2U, Opcode::AShrI).Inputs(0U).Imm(typeSize - 1L);
+                INS(2U).SetType(type);
+                INST(4U, Opcode::ShrI).Inputs(2U).Imm(typeSize - 2L);  // type size - log2(4)
+                INS(4U).SetType(type);
+                INST(6U, Opcode::Add).Inputs(4U, 0U);
+                INS(6U).SetType(type);
+                INST(7U, Opcode::AShrI).Inputs(6U).Imm(2U);  // log2(4)
+                INS(7U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(7U);
+                INS(3U).SetType(type);
+            }
+        }
+        ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
+    }
+}
+
+TEST_F(LoweringTest, SignedDivPowerOfTwoNegative)
+{
+    for (auto type : {DataType::INT32, DataType::INT64}) {
+        auto graph1 = CreateEmptyLowLevelGraph();
+        GRAPH(graph1)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            CONSTANT(1U, -16L);
+            BASIC_BLOCK(2U, -1L)
+            {
+                INST(2U, Opcode::Div).Inputs(0U, 1U);
+                INS(2U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(type);
+            }
+        }
+
+        ASSERT_TRUE(graph1->RunPass<Lowering>());
+        graph1->RunPass<Cleanup>();
+
+        auto typeSize = DataType::GetTypeSize(type, graph1->GetArch());
+        auto graph2 = CreateEmptyLowLevelGraph();
+        GRAPH(graph2)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            BASIC_BLOCK(2U, -1L)
+            {
+                INST(2U, Opcode::AShrI).Inputs(0U).Imm(typeSize - 1L);
+                INS(2U).SetType(type);
+                INST(4U, Opcode::ShrI).Inputs(2U).Imm(typeSize - 4L);  // type size - log2(16)
+                INS(4U).SetType(type);
+                INST(6U, Opcode::Add).Inputs(4U, 0U);
+                INS(6U).SetType(type);
+                INST(7U, Opcode::AShrI).Inputs(6U).Imm(4U);  // log2(16)
+                INS(7U).SetType(type);
+                INST(9U, Opcode::Neg).Inputs(7U);
+                INS(9U).SetType(type);
+                INST(3U, Opcode::Return).Inputs(9U);
+                INS(3U).SetType(type);
+            }
+        }
+        ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
+    }
 }
 
 TEST_F(LoweringTest, SignedModPowerOfTwo)

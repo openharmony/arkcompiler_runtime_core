@@ -288,13 +288,10 @@ bool CheckFcmpInputs(Inst *input0, Inst *input1)
 // if n not power of 2 return -1;
 int64_t GetPowerOfTwo(uint64_t n)
 {
-    int64_t result = -1;
-    if (n != 0 && (n & (n - 1)) == 0) {
-        for (; n != 0; n >>= 1U) {
-            ++result;
-        }
+    if (!helpers::math::IsPowerOfTwo(n)) {
+        return -1;
     }
-    return result;
+    return helpers::math::GetIntLog2(n);
 }
 
 bool IsInputTypeMismatch(Inst *inst, int32_t inputIndex, Arch arch)

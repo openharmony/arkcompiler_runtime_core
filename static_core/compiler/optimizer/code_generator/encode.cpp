@@ -129,6 +129,18 @@ void Encoder::EncodeMod([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigne
     SetFalseResult();
 }
 
+void Encoder::EncodeDiv([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src0, [[maybe_unused]] Imm imm,
+                        [[maybe_unused]] bool isSigned)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeMod([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src0, [[maybe_unused]] Imm imm,
+                        [[maybe_unused]] bool isSigned)
+{
+    SetFalseResult();
+}
+
 void Encoder::EncodeMax([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] Reg src0,
                         [[maybe_unused]] Reg src1)
 {
@@ -444,6 +456,11 @@ bool Encoder::CanEncodeImmAddSubCmp([[maybe_unused]] int64_t imm, [[maybe_unused
 }
 
 bool Encoder::CanEncodeImmMulDivMod([[maybe_unused]] uint64_t imm, [[maybe_unused]] uint32_t size)
+{
+    return false;
+}
+
+bool Encoder::CanOptimizeImmDivMod([[maybe_unused]] uint64_t imm, [[maybe_unused]] bool isSigned) const
 {
     return false;
 }
