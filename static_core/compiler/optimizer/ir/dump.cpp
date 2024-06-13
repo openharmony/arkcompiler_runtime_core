@@ -583,7 +583,19 @@ void NewObjectInst::DumpOpcode(std::ostream *out) const
 
 void NewArrayInst::DumpOpcode(std::ostream *out) const
 {
-    DumpTypedOpcode(out, GetOpcode(), GetTypeId(), GetBasicBlock()->GetGraph()->GetLocalAllocator());
+    auto allocator = GetBasicBlock()->GetGraph()->GetLocalAllocator();
+    auto adapter = allocator->Adapter();
+    ArenaString space(" ", adapter);
+    ArenaString opc(GetOpcodeString(GetOpcode()), adapter);
+    ArenaString id(IdToString(GetTypeId(), allocator), adapter);
+    ArenaString size("", adapter);
+    ASSERT(GetInputsCount() > 1);
+    auto sizeInst = GetDataFlowInput(1);
+    if (sizeInst->IsConst()) {
+        auto sizeValue = sizeInst->CastToConstant()->GetIntValue();
+        size = ArenaString("(size=", adapter) + ToArenaString(sizeValue, allocator) + ")";
+    }
+    (*out) << std::setw(INDENT_OPCODE) << opc + space + size + space + id + space;
 }
 
 void LoadConstArrayInst::DumpOpcode(std::ostream *out) const
