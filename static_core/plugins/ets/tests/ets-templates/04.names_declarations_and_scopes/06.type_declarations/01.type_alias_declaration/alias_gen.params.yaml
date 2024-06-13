@@ -83,7 +83,7 @@ cases:
       let ok: boolean = v.ok;
 
   - defs: |-
-      class B<out T, in U, V extends Exception> {
+      class B<out T, in U, V extends Error> {
           public ok = true;
       }
       type BetterB<T, U> = B<T, U, NullPointerError>;
@@ -124,7 +124,7 @@ cases:
       let ok: boolean = v.ok;
 
   - defs: |-
-      interface I<out T, in V, U extends Exception> {}
+      interface I<out T, in V, U extends Error> {}
       type Intf = I<Int, Long, NullPointerError>;
       class A implements Intf {
           public ok = true;
