@@ -62,13 +62,6 @@ void AbcCodeProcessor::FillInsWithoutLabels()
     uint32_t inst_idx = 0;
     while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
         pandasm::Ins pa_ins = code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
-        // type of FLDAI immediate should be double.
-        // TODO remove codes below after abc instruction conversion support FLDAI.
-        if (pa_ins.opcode == pandasm::Opcode::FLDAI) {
-            ASSERT(pa_ins.imms.size() == 1);
-            ASSERT(std::get_if<int64_t>(&pa_ins.imms[0]) != nullptr);
-            pa_ins.imms[0] = bit_cast<double>(std::get<int64_t>(pa_ins.imms[0]));
-        }
         /*
          * Private field jump_inst_idx_vec_ store all jump inst idx in a pandasm::Function.
          * For example, a pandasm::Function has 100 pandasm::Ins with only 4 jump pandasm::Ins.

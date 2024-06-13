@@ -21,6 +21,7 @@ abc2program_sources = [
   "$target_gen_dir/abc_inst_convert.cpp",
   "$target_gen_dir/abc_opcode_convert.cpp",
   "$target_gen_dir/abc_type_convert.cpp",
+  "$target_gen_dir/program_dump_utils.cpp",
   "abc2program_compiler.cpp",
   "abc2program_driver.cpp",
   "abc2program_log.cpp",
@@ -65,6 +66,7 @@ ohos_shared_library("abc2program") {
     ":abc_type_convert_cpp",
     ":isa_gen_abc2program_abc_inst_convert_cpp",
     ":isa_gen_abc2program_abc_opcode_convert_cpp",
+    ":isa_gen_abc2program_program_dump_utils_cpp",
     "$ark_root/assembler:libarkassembler",
     "$ark_root/libpandabase:libarkbase",
     "$ark_root/libpandafile:libarkfile",
@@ -99,6 +101,7 @@ ohos_static_library("abc2program_frontend_static") {
     ":abc_type_convert_cpp",
     ":isa_gen_abc2program_abc_inst_convert_cpp",
     ":isa_gen_abc2program_abc_opcode_convert_cpp",
+    ":isa_gen_abc2program_program_dump_utils_cpp",
     "$ark_root/assembler:libarkassembler_frontend_static",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
@@ -150,6 +153,7 @@ ark_isa_gen("isa_gen_abc2program") {
   template_files = [
     "abc_opcode_convert.cpp.erb",
     "abc_inst_convert.cpp.erb",
+    "program_dump_utils.cpp.erb",
   ]
   sources = "common"
   destination = "$target_gen_dir"
