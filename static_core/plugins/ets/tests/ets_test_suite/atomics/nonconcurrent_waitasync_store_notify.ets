@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
+let buf: SharedArrayBuffer;
+let arr: Int32Array;
 
 function main() {
-    let buf = new SharedArrayBuffer(4);
-    let arr = new Int8Array(buf, 0, 1);
+    let c = new Console()
 
-    Atomics.store(arr, 0, 10);
-    assert(Atomics.load(arr, 0) == 10)
+    buf = new SharedArrayBuffer(4);
+    arr = new Int32Array(buf, 0, 1);
+
+    let promise: Promise<string> = Atomics.waitAsync(arr, 0, 0);
+    Atomics.store(arr, 0, 5);
+    let count = Atomics.notify(arr, 0);
+    let res: string = await promise;
+    assert(res == "ok" || res == "not-equal")
 }

@@ -49,10 +49,11 @@ export class Atomics {
      * isLockFree(n) returns true if Atomic operations for typed arrays where "BYTER_PER_ELEMENT == n"
      * use hardware atomics instructions instead of locks.
      *
-     * Warning: currently, all Atomic operations use locks, but isLockFree(4) following the ECMA specification returns true.
+     * Warning: currently, all Atomic operations use locks,
+     * but isLockFree(1), isLockFree(2), isLockFree(4), isLockFree(8) following the ECMA specification return true.
      */
-    public isLockFree(byteSize: int): boolean {
-        return byteSize == 4
+    public static isLockFree(byteSize: int): boolean {
+        return byteSize == 1 || byteSize == 2 || byteSize == 4 || byteSize == 8
     }
 
     public static add(typedArray: Int8Array | Int16Array | Int32Array | BigInt64Array | Uint8Array | Uint16Array | Uint32Array | BigUint64Array, index: int, value: number): number {
@@ -152,8 +153,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicAddU64(indexedPosition, value as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -255,8 +255,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicAndU64(indexedPosition, value as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -366,8 +365,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicCompareExchangeU64(indexedPosition, expectedValue as long, replacementValue as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -461,8 +459,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicExchangeU64(indexedPosition, value as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -540,8 +537,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicLoadU64(indexedPosition)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -643,8 +639,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicOrU64(indexedPosition, value as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -730,8 +725,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicStoreU64(indexedPosition, value as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -833,8 +827,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicSubU64(indexedPosition, value as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -936,8 +929,7 @@ export class Atomics {
                 let mem = (buffer as SharedArrayBuffer).getSharedMemory()
                 return mem.atomicXorU64(indexedPosition, value as long)
             }
-        }
-        else {
+        } else {
             throw new Error("Unhandled array type!")
         }
     }
@@ -947,11 +939,24 @@ export class Atomics {
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
-    public static wait(typedArray: Int32Array, offset: int, value: int): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let mem = Atomics.requireSharedMemory(typedArray.buffer)
-        let result = mem.atomicWaitI32(indexedPosition, value)
-        return Atomics.interpretWaitResult(result)
+    public static wait(typedArray: Int32Array | BigInt64Array, offset: int, value: number): string {
+        if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let mem = Atomics.requireSharedMemory(typedArray.buffer)
+            let result = mem.atomicWaitI32(indexedPosition, value as int)
+            return Atomics.interpretWaitResult(result)
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let mem = Atomics.requireSharedMemory(typedArray.buffer)
+            let result = mem.atomicWaitI64(indexedPosition, value as long)
+            return Atomics.interpretWaitResult(result)
+        } else {
+            throw new Error("Unhandled array type!")
+        }
+    }
+
+    public static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: number): Promise<string> {
+        return launch Atomics.wait(typedArray, offset, value)
     }
 
     /**
@@ -960,99 +965,78 @@ export class Atomics {
      *
      * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
      */
-    public static wait(typedArray: Int32Array, offset: int, value: int, timeout: long): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let mem = Atomics.requireSharedMemory(typedArray.buffer)
-        let result = mem.atomicTimedWaitI32(indexedPosition, value, timeout)
-        return Atomics.interpretWaitResult(result)
+    public static wait(typedArray: Int32Array | BigInt64Array, offset: int, value: number, timeout: long): string {
+        if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let mem = Atomics.requireSharedMemory(typedArray.buffer)
+            let result = mem.atomicTimedWaitI32(indexedPosition, value as int, timeout)
+            return Atomics.interpretWaitResult(result)
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let mem = Atomics.requireSharedMemory(typedArray.buffer)
+            let result = mem.atomicTimedWaitI64(indexedPosition, value as long, timeout)
+            return Atomics.interpretWaitResult(result)
+        } else {
+            throw new Error("Unhandled array type!")
+        }
+    }
+
+    public static waitAsync(typedArray: Int32Array | BigInt64Array, offset: int, value: number, timeout: long): Promise<string> {
+        return launch Atomics.wait(typedArray, offset, value, timeout)
     }
 
     /**
      * Notifies (wakes up) threads that are suspended by the Atomics.wait() calls at the given index.
-     * (index = typedArray.byteOffset + offset * 4)
-     *
-     * Note: This method also wakes up threads suspended by the BigInt64Array Atomics.wait(t64, offset64) calls.
-     * But if and only if 't64' views the same Buffer as 'typedArray' and 'offset64' and 'offset' point at the same index in that Buffer.
+     * (index = typedArray.byteOffset + offset * sizeof(arrayElement))
      */
-    public static notify(typedArray: Int32Array, offset: int): int {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return 0
+    public static notify(typedArray: Int32Array | BigInt64Array, offset: int): int {
+        if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return 0
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicNotify(indexedPosition)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return 0
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicNotify(indexedPosition)
+            }
         } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicNotify(indexedPosition)
+            throw new Error("Unhandled array type!")
         }
     }
 
     /**
-     * Operates exactly like Atomics.notify(Int32Array, int) but specifies the maximum number of threads to notify using 'count'.
+     * Operates exactly like Atomics.notify(Int32Array | BigInt64Array, int) but specifies the maximum number of threads to notify using 'count'.
      */
-    public static notify(typedArray: Int32Array, offset: int, count: int): int {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return 0
+    public static notify(typedArray: Int32Array | BigInt64Array, offset: int, count: int): int {
+        if (typedArray instanceof Int32Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return 0
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicBoundedNotify(indexedPosition, count)
+            }
+        } else if (typedArray instanceof BigInt64Array) {
+            let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
+            let buffer = typedArray.buffer
+            if (buffer instanceof ArrayBuffer) {
+                return 0
+            } else {
+                let mem = (buffer as SharedArrayBuffer).getSharedMemory()
+                return mem.atomicBoundedNotify(indexedPosition, count)
+            }
         } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicBoundedNotify(indexedPosition, count)
-        }
-    }
-
-    /**
-     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify.
-     *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
-     */
-    public static wait(typedArray: BigInt64Array, offset: int, value: long): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let mem = Atomics.requireSharedMemory(typedArray.buffer)
-        let result = mem.atomicWaitI64(indexedPosition, value)
-        return Atomics.interpretWaitResult(result)
-    }
-
-    /**
-     * If "typedArray[offset] != value" suspends the current thread until it is notified by Atomics.notify
-     * or until the given timeout passes.
-     *
-     * Note: An Atomics.notify call will wake up this thread even if "typedArray[offset] == value".
-     */
-    public static wait(typedArray: BigInt64Array, offset: int, value: long, timeout: long): string {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, Int32Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let mem = Atomics.requireSharedMemory(typedArray.buffer)
-        let result = mem.atomicTimedWaitI64(indexedPosition, value, timeout)
-        return Atomics.interpretWaitResult(result)
-    }
-
-    /**
-     * Notifies (wakes up) threads that are suspended by the Atomics.wait() calls at the given index.
-     * (index = typedArray.byteOffset + offset * 8)
-     *
-     * Note: This method also wakes up threads suspended by the Int32Array Atomics.wait(t32, offset32) calls.
-     * But if and only if 't32' views the same Buffer as 'typedArray' and 'offset32' and 'offset' point at the same index in that Buffer.
-     */
-    public static notify(typedArray: BigInt64Array, offset: int): long {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return 0
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicNotify(indexedPosition)
-        }
-    }
-
-    /**
-     * Operates exactly like Atomics.notify(Int32Array, int) but specifies the maximum number of threads to notify using 'count'.
-     */
-    public static notify(typedArray: BigInt64Array, offset: int, count: int): long {
-        let indexedPosition = Atomics.validateAtomicAccess(typedArray.byteOffset as int, BigInt64Array.BYTES_PER_ELEMENT as int, typedArray.length as int, offset)
-        let buffer = typedArray.buffer
-        if (buffer instanceof ArrayBuffer) {
-            return 0
-        } else {
-            let mem = (buffer as SharedArrayBuffer).getSharedMemory()
-            return mem.atomicBoundedNotify(indexedPosition, count)
+            throw new Error("Unhandled array type!")
         }
     }
 }
