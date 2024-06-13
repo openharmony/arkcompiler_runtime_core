@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,13 +14,13 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Supertype relation among array types
+desc: Subtyping relation among the generic interface types with same parameters
+tags: [compile-only]
 ---*/
 
-class B {}
+interface A {}
+interface B {}
 
-function main(): void {
-  let b1 = new B();
-  let b2 = new B();
-  let instance: Object[] = [b1, b2];
-}
+interface C<T extends A, G extends B> {}
+
+interface D<T extends A, G extends B> extends C<T, G> {}

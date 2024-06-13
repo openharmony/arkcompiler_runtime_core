@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,14 +14,16 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Subtyping relation among the generic class and Object
+desc: Subtyping relation among the generic class types with same parameters
 ---*/
 
 class A {}
-final class B extends A {}
+class B extends A {}
+class C<T extends A> {}
 
-final class C<T extends A> {}
+final class D<T extends A> extends C<T> {}
+
 
 function main(): void {
-  let instance: Object = new C<B>();
+  let instance: C<B> = new D<B>();
 }

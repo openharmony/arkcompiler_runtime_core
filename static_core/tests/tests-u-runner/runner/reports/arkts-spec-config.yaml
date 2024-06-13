@@ -432,6 +432,22 @@
   title: 'Ambient Declarations'
   status: 'No testable assertions'
 
+'15':
+  title: 'Semantic Rules'
+  status: 'No testable assertions'
+
+'15.3':
+  title: 'Type Compatibility'
+  status: 'No testable assertions'  # Implicit Conversion is tested in 6.5
+
+'15.7':
+  title: 'Compatibility Features'
+  status: 'No testable assertions'
+
+'15.7.1':
+  title: 'Extended Conditional Expressions'
+  status: 'Finished'
+
 '16':
   title: 'Support for GUI Programming'
   status: 'No testable assertions'
@@ -507,22 +523,6 @@
 '17.18':
   title: 'Generics Experimental'
   status: 'No testable assertions'
-
-'18':
-  title: 'Semantic Rules'
-  status: 'No testable assertions'
-
-'18.3':
-  title: 'Type Compatibility'
-  status: 'No testable assertions'  # Implicit Conversion is tested in 6.5
-
-'18.7':
-  title: 'Compatibility Features'
-  status: 'No testable assertions'
-
-'18.7.1':
-  title: 'Extended Conditional Expressions'
-  status: 'Finished'
 
 '19':
   title: 'Standard Library'
