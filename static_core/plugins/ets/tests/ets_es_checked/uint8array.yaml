@@ -150,5 +150,14 @@ sub:
           - expr: Uint8Array.of(pars)
             rest:
               - combinationRest "NaN", "10.0", "Infinity"
-
-
+      - method: "keys"
+      - method: "join"
+        params:
+           - |
+             paramOf("'---'", "''", "undefined")
+        mandatory: 0
+      - method: "includes"
+        params:
+          - paramOf(*default_search)
+          - paramOf(*default_inds_undef)
+        mandatory: 1
