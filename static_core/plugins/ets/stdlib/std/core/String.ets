@@ -23,7 +23,7 @@ type StringOrRegExp = String | RegExp
 /**
  * Unicode string
  */
-export class String extends Object implements Comparable<String>, JSONable<String>, Iterable<String> {
+export final class String extends Object implements Comparable<String>, JSONable<String>, Iterable<String> {
 
     // The constructors below are implemented via initobj instruction
     /**
@@ -707,14 +707,23 @@ export class String extends Object implements Comparable<String>, JSONable<Strin
         let rLength = r.getLength();
         if (q + rLength > s.getLength()) {
             return -1;
-        } else {
-            for (let i = 0; i < rLength; ++i) {
-                if (s.codePointAt(q + i) != r.codePointAt(i)) {
-                    return -1;
-                }
-            }
-            return q + rLength;
         }
+        if (rLength == 0) {
+            // For making algorithm compiler-friendly
+            // should be removed after BoundsAnalysis improvement
+            return q;
+        }
+        for (let i = 0; i < rLength - 1; ++i) {
+            if (s.codePointAt(q + i) != r.codePointAt(i)) {
+                return -1;
+            }
+        }
+        if (s.codePointAt(q + rLength - 1) != r.codePointAt(rLength - 1) as int) {
+            // For making algorithm compiler-friendly
+            // should be removed after BoundsAnalysis improvement
+            return -1;
+        }
+        return q + rLength;
     }
 
     /**
