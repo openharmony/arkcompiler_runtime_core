@@ -63,7 +63,6 @@ ohos_source_set("ets_interop_js_napi_static") {
     "js_refconvert_builtin.cpp",
     "js_refconvert_function.cpp",
     "js_value.cpp",
-    "pending_promise_listener.cpp",
     "ts2ets_copy.cpp",
   ]
   if (current_cpu == "amd64" || current_cpu == "x64" ||

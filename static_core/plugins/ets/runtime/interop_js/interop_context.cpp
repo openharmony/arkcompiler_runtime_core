@@ -148,6 +148,15 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
         ASSERT(jsvalueFregistryRegister_ != nullptr);
     }
 
+    {
+        EtsClass *promiseInteropClass =
+            EtsClass::FromRuntimeClass(CacheClass(etsClassLinker, "Lstd/interop/js/PromiseInterop;"));
+        ASSERT(promiseInteropClass != nullptr);
+        promiseInteropConnectMethod_ =
+            promiseInteropClass->GetMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
+        ASSERT(promiseInteropConnectMethod_ != nullptr);
+    }
+
     etsProxyRefStorage_ = ets_proxy::SharedReferenceStorage::Create();
     ASSERT(etsProxyRefStorage_.get() != nullptr);
 

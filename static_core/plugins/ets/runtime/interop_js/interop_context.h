@@ -302,6 +302,11 @@ public:
         return promiseClass_;
     }
 
+    Method *GetPromiseInteropConnectMethod() const
+    {
+        return promiseInteropConnectMethod_;
+    }
+
     Class *GetErrorClass() const
     {
         return errorClass_;
@@ -472,6 +477,7 @@ private:
     std::set<Class *> functionalInterfaces_ {};
 
     Method *jsvalueFregistryRegister_ {};
+    Method *promiseInteropConnectMethod_ = nullptr;
 
     // ets_proxy data
     EtsObject *pendingNewInstance_ {};

@@ -809,3 +809,28 @@ intrinsics:
     impl: ark::ets::interop::js::intrinsics::CompilerConvertLocalToRefTypeIntrinsic
     interop_intrinsic_kind: unwrap
     clear_flags: [heap_inv]
+
+###########################
+# std.core.PromiseInterop #
+###########################
+  - name: PromiseInteropResolve
+    space: ets
+    class_name: std.interop.js.PromiseInterop
+    method_name: resolve
+    static: true
+    signature:
+      ret: void
+      args: [std.core.Object, i64]
+    impl: ark::ets::interop::js::intrinsics::PromiseInteropResolveIntrinsic
+    clear_flags: [can_throw]
+
+  - name: PromiseInteropReject
+    space: ets
+    class_name: std.interop.js.PromiseInterop
+    method_name: reject
+    static: true
+    signature:
+      ret: void
+      args: [std.core.Object, i64]
+    impl: ark::ets::interop::js::intrinsics::PromiseInteropRejectIntrinsic
+    clear_flags: [can_throw]

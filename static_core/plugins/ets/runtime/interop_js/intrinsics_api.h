@@ -101,6 +101,8 @@ struct IntrinsicsAPI {
     JSValue *(*CompilerConvertLocalToJSValue)(void *val);
     EtsString *(*CompilerConvertLocalToString)(void *val);
     EtsObject *(*CompilerConvertLocalToRefType)(void *klassPtr, void *val);
+    void (*PromiseInteropResolve)(EtsObject *value, EtsLong deferred);
+    void (*PromiseInteropReject)(EtsObject *value, EtsLong deferred);
     // NOLINTEND(readability-identifier-naming)
 };
 

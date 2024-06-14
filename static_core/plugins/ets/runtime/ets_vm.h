@@ -62,17 +62,6 @@
 
 namespace ark::ets {
 
-class PromiseListener {
-public:
-    PromiseListener() = default;
-    virtual ~PromiseListener() = default;
-
-    virtual void OnPromiseStateChanged(EtsHandle<EtsPromise> &) = 0;
-
-    DEFAULT_COPY_SEMANTIC(PromiseListener);
-    DEFAULT_MOVE_SEMANTIC(PromiseListener);
-};
-
 class DoubleToStringCache;
 class FloatToStringCache;
 class LongToStringCache;
@@ -286,10 +275,6 @@ public:
         jobQueue_.reset(jobQueue);
     }
 
-    PANDA_PUBLIC_API void AddPromiseListener(EtsPromise *promise, PandaUniquePtr<PromiseListener> &&listener);
-
-    void FirePromiseStateChanged(EtsHandle<EtsPromise> &promise);
-
     std::mt19937 &GetRandomEngine()
     {
         ASSERT(randomEngine_);
@@ -366,26 +351,6 @@ private:
         randomEngine_.emplace(rd());
     }
 
-    class PromiseListenerInfo {
-    public:
-        PromiseListenerInfo(EtsPromise *promise, PandaUniquePtr<PromiseListener> &&listener)
-            : promise_(promise), listener_(std::move(listener))
-        {
-        }
-
-        EtsPromise *GetPromise() const
-        {
-            return promise_;
-        }
-
-        void UpdateRefToMovedObject();
-        void OnPromiseStateChanged(EtsHandle<EtsPromise> &promise);
-
-    private:
-        EtsPromise *promise_;
-        PandaUniquePtr<PromiseListener> listener_;
-    };
-
     explicit PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::MemoryManager *mm);
 
     Runtime *runtime_ {nullptr};
@@ -405,9 +370,6 @@ private:
     os::memory::Mutex finalizationRegistryLock_;
     PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
     PandaUniquePtr<JobQueue> jobQueue_;
-    os::memory::Mutex promiseListenersLock_;
-    // NOTE(audovichenko) Should be refactored #12030
-    PandaList<PromiseListenerInfo> promiseListeners_ GUARDED_BY(promiseListenersLock_);
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     std::function<void(Frame *)> clearInteropHandleScopes_;

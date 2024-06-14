@@ -47,7 +47,6 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         interop_common.cpp
         ts2ets_copy.cpp
         js_job_queue.cpp
-        pending_promise_listener.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
     LIBRARIES
         arkruntime

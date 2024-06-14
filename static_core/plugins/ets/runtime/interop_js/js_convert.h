@@ -360,7 +360,10 @@ JSCONVERT_WRAP(Promise)
     napi_deferred deferred;
     napi_value jsPromise;
     NAPI_CHECK_FATAL(napi_create_promise(env, &deferred, &jsPromise));
-    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
+    hpromise->Lock();
+    uint32_t state = hpromise->GetState();
+    hpromise->Unlock();
+    if (state != EtsPromise::STATE_PENDING) {
         EtsObject *value = hpromise->GetValue(coro);
         napi_value completionValue;
         if (value == nullptr) {
@@ -375,7 +378,10 @@ JSCONVERT_WRAP(Promise)
             NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
         }
     } else {
-        coro->GetPandaVM()->AddPromiseListener(etsVal, MakePandaUnique<PendingPromiseListener>(deferred));
+        ASSERT_MANAGED_CODE();
+        Method *connect = ctx->GetPromiseInteropConnectMethod();
+        std::array<Value, 2U> args = {Value(hpromise.GetPtr()), Value(reinterpret_cast<int64_t>(deferred))};
+        connect->Invoke(coro, args.data());
     }
     EtsPromiseRef *ref = EtsPromiseRef::Create(coro);
     ref->SetTarget(coro, hpromise->AsObject());
