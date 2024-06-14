@@ -124,6 +124,11 @@ public:
         return arrayAsListIntClass_;
     }
 
+    Class *GetArrayClass()
+    {
+        return arrayClass_;
+    }
+
     Class *GetArrayBufferClass()
     {
         return arraybufClass_;
@@ -262,6 +267,7 @@ private:
     Class *promiseClass_ = nullptr;
     Method *subscribeOnAnotherPromiseMethod_ = nullptr;
     Class *promiseRefClass_ = nullptr;
+    Class *arrayClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;
     Class *arrayAsListIntClass_ = nullptr;

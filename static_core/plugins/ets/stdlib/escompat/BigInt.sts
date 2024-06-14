@@ -20,73 +20,82 @@ package escompat;
  */
 export type bigint = BigInt;
 
-type Vec = ArrayAsListInt;
+type Vec = Array<Int>;
 
 /**
  * BigInt class stub
  */
 export final class BigInt {
     private bytes: Vec;
-    private sign: boolean;
+    // NOTE: the 30 bit mask is maximum possible for now, as with base 2^31 or 2^32
+    // we have some issues stil to investigate; mostly because we use Ints' as array
+    // elements. and ArkTS does not support unsigned types.
 
-    private static readonly MASKS_LEFT_SHIFT: int[] = [0b00000000,
-                                                       0b10000000,
-                                                       0b11000000,
-                                                       0b11100000,
-                                                       0b11110000,
-                                                       0b11111000,
-                                                       0b11111100,
-                                                       0b11111110,
-                                                       0b11111111];
+    private static readonly shiftSys: long = 30 as long;
+    private static readonly baseSys: long = 1 << BigInt.shiftSys;
+    private static readonly maskSys: long = BigInt.baseSys - (1 as long);
 
-    private static readonly MASKS_RIGHT_SHIFT: int[] = [0b00000000,
-                                                        0b00000001,
-                                                        0b00000011,
-                                                        0b00000111,
-                                                        0b00001111,
-                                                        0b00011111,
-                                                        0b00111111,
-                                                        0b01111111,
-                                                        0b11111111];
+    internal static resetBytes(b: Vec):void {
+        for (let i = 0; i<b.length; i++) {
+            b[i] = 0;
+        }
+    }
+    internal static fromLongHelper(val: long, bitLen: int): Vec {
+        // get required array of Ints' size to store whole value
+        // split by suported mode (baseSys)
+        let size = (bitLen < BigInt.shiftSys ? 1 : (bitLen / BigInt.shiftSys + 1))
+        size += 1 // allocate some space for sign 'digit', i.e. MSD
+
+        let digits: Vec = new Vec(size)
+        for (let i = 0; i<size; i++) {
+            let d: long = val & BigInt.maskSys
+            val = val >> BigInt.shiftSys
+            digits[i] = d as Int
+        }
+
+        // remove leading zeroes of 0xFFs if duplicated
+        BigInt.stripDigits(digits);
+        return digits
+    }
 
     constructor() {
         this.bytes = new Vec(1);
-        this.sign = true;
+        this.bytes[0] = 0;
+        this.checkMsd()
     }
 
     constructor(d: byte) {
-        let bigint = new BigInt((d as Byte).toString());
-        this.bytes = bigint.bytes;
-        this.sign = bigint.sign;
+        this.bytes = BigInt.fromLongHelper(d as long, 8)
+        this.checkMsd()
     }
 
     constructor(d: short) {
-        let bigint = new BigInt((d as Short).toString());
-        this.bytes = bigint.bytes;
-        this.sign = bigint.sign;
+        this.bytes = BigInt.fromLongHelper(d as long, 16)
+        this.checkMsd()
     }
 
     constructor(d: int) {
-        let bigint = new BigInt((d as Int).toString());
-        this.bytes = bigint.bytes;
-        this.sign = bigint.sign;
+        this.bytes = BigInt.fromLongHelper(d as long, 32)
+        this.checkMsd()
     }
 
     constructor(d: long) {
-        let bigint = new BigInt((d as Long).toString());
-        this.bytes = bigint.bytes;
-        this.sign = bigint.sign;
+        this.bytes = BigInt.fromLongHelper(d, 64)
+        this.checkMsd()
     }
 
     constructor(d: double) {
+        // should we cast it to long at then use internal helper?
+        // i.e. like this: this.bytes = BigInt.fromLongHelper(d as long, 64)
         let bigint = new BigInt((d as Double).toString());
         this.bytes = bigint.bytes;
-        this.sign = bigint.sign;
+        this.checkMsd()
     }
 
     constructor(d: string) {
         this.bytes = new Vec();
         this.parseFromString(d);
+        this.checkMsd()
     }
 
     constructor(d: boolean) {
@@ -96,17 +105,17 @@ export final class BigInt {
     constructor(d: BigInt) {
         let bigint = d.clone();
         this.bytes = bigint.bytes;
-        this.sign = bigint.sign;
+        this.checkMsd()
+    }
+
+    constructor(v: Vec) {
+        this.bytes = v;
+        this.checkMsd()
     }
 
     internal static fromULong(val: long): BigInt {
-        // NOTE (ikorobkov): needs to check by tests
-        // let a: long = (val >> 63) & 1
-        // a = a << 63
-        // let b = val & 0x7fffffffffffffff
-        // let c = a + b
-        // return new BigInt(c)
-        return new BigInt(val)
+        let ret = new BigInt(BigInt.fromLongHelper(val, 64));
+        return ret
     }
 
     internal getULong(): long {
@@ -120,8 +129,8 @@ export final class BigInt {
         let res: long = 0;
 
         for (let i = 0; i < len; i++) {
-            res = res << 8
-            res += bts.at(i)
+            res = res << BigInt.shiftSys
+            res += bts[i]
         }
         if (this.negative()) {
             res *= -1
@@ -131,7 +140,16 @@ export final class BigInt {
     }
 
     public equals(to: BigInt): boolean {
-        return this.toString().equals(to.toString());
+        if (this.bytes.length != to.bytes.length) {
+            return false;
+        }
+        // check the 'sign' digit first
+        for (let i = this.bytes.length - 1; i >= 0; i--) {
+            if (this.bytes[i] != to.bytes[i]) {
+                return false
+            }
+        }
+        return true;
     }
 
     equals(other: NullishType): boolean {
@@ -180,10 +198,11 @@ export final class BigInt {
     }
 
     public override toString(): string {
+
         let digits = this.bytesToDigits(this.asBytes(), this.negative());
 
-        if (digits.size() == 1) {
-            if (digits.at(0) == 0) {
+        if (digits.length == 1) {
+            if (digits[0] == 0) {
                 return "0";
             }
         }
@@ -193,21 +212,26 @@ export final class BigInt {
             s += "-";
         }
 
-        for (let i = 0; i < digits.size(); i++) {
-            s += digits.at(i).toString();
+        for (let i = 0; i < digits.length; i++) {
+            s += digits[i].toString();
         }
 
         return s;
     }
 
     public toString(radix: double): string {
-        if (this.equals(0n)) {
+        if (this.isZero()) {
             return "0"
         }
         const radixInt = radix as int
+        if (radixInt == 10) {
+            return this.toString()
+        }
+
         const q = radixInt as number
         const qBigInt = new BigInt(q)
         let buff = ""
+
         let absolute = this.abs()
         while (absolute > 0n) {
             // temporary solution, need to optimize divide-mod operations
@@ -231,7 +255,7 @@ export final class BigInt {
         }
         // operatorLeftShift temporary has limitations to 255 on rhs
         // in this case must be bits <= 255
-        //  please check `operatorLeftShift` implementation
+        // please check `operatorLeftShift` implementation
 
         // 2^(bits-1)
         const half = 1n << new BigInt(bits-1)
@@ -240,66 +264,62 @@ export final class BigInt {
         const masked = num & mask
         // maxRepresentable = 2^(bits) = mask + 1
         // if masked > 2^(bits-1) : masked - maxRepresentableValue : masked
-        return masked >= half ? masked - (mask + 1n): masked
+        return masked >= half ? masked - (mask + 1n) : masked
     }
 
     public static asUintN(bits: long, num: BigInt): BigInt {
         // operatorLeftShift temporary has limitations to 255 on rhs
         // in this case must be bits <= 255
-        //  please check `operatorLeftShift` implementation
+        // please check `operatorLeftShift` implementation
         return num & ((1n << (new BigInt(bits))) - 1n)
     }
 
     public negative(): boolean {
-        return this.sign == false;
+        this.checkMsd()
+        return (this.bytes[this.bytes.length-1] & BigInt.maskSys) == BigInt.maskSys
     }
 
     public positive(): boolean {
-        return this.sign == true;
+        return (this.bytes[this.bytes.length-1] & BigInt.maskSys) == 0x00
     }
 
     private getSign(): boolean {
-        return this.sign;
+        return this.positive();
     }
 
     private length(): int {
-        return this.bytes.size();
-    }
-
-    private setSign(sign: boolean): void {
-        if ((this.sign == false) && (sign == true)) {
-            this.bytes = BigInt.from2sCompliment(this.bytes);
-        }
-
-        if ((this.sign == true) && (sign == false)) {
-            this.bytes = BigInt.to2sComplement(this.bytes);
-        }
-
-        this.sign = sign;
+        return this.bytes.length as int;
     }
 
     private isZero(): boolean {
-        if (this.bytes.size() == 0) {
-            return false;
+        if (this.bytes.length == 0) {
+            assert(false): "zero-length is not allowed!";
         }
 
-        let zero = true;
-        for (let i = 0; i < this.bytes.size(); i++) {
-            if (this.bytes.at(i) != 0) {
-                zero = false;
-                break;
-            }
+        // zero always has only one significant digit/byte set to zero.
+        if (this.bytes.length == 1 && this.bytes[0] == 0) {
+            return true;
         }
 
-        return zero;
+        return false;
     }
 
     private clone(): BigInt {
         let bigint = new BigInt();
-        bigint.setSign(this.sign);
         bigint.setBytes(this.asBytes());
+        this.checkMsd()
 
         return bigint;
+    }
+
+    // remove duplicated leading 0x0 and 0xff
+    // leaving only one explicit 0x0 or 0xff
+    // to keep it as sign
+    private static stripDigits(d: Vec): Vec {
+        for (let i = d.length-1; (i > 0) && (d[i] == d[i-1]); --i) {
+            d.pop();
+        }
+        return d;
     }
 
     public operatorAdd(other: BigInt): BigInt {
@@ -307,121 +327,40 @@ export final class BigInt {
         let lhs = this.clone();
         let rhs = other.clone();
 
-        if (lhs.negative() && rhs.negative()) {
-            return -(-lhs + (-rhs));
-        }
-
-        // Different signs - perform subtraction
-        if (lhs.negative() && !rhs.negative()) {
-            lhs.setSign(true);
-            return -(lhs - rhs);
-        } else if (!lhs.negative() && rhs.negative()) {
-            rhs.setSign(true);
-            return lhs - rhs;
-        }
-
-        // Pad the shorter number with zeroes to make them of equal length
-        let max_len = max(lhs.length(), rhs.length()) as int;
+        let ret: BigInt = new BigInt();
+        let max_len = max(lhs.length(), rhs.length()) as int + 1;
         lhs.addBytes(max_len - lhs.length());
         rhs.addBytes(max_len - rhs.length());
-
-        let l = lhs.asBytes();
-        let r = rhs.asBytes();
-        let res = result.asBytes();
-        res = new Vec();
-
-        let carry = 0;
+        let carry: long = 0;
+        let sum: long = 0;
+        let res: Vec = new Vec(max_len);
         for (let i = 0; i < max_len; i++) {
-            let sum = l.at(i) + r.at(i) + carry;
-            carry = sum / 256;
-            res.pushBack(sum % 256);
+            sum = carry;
+            carry = 0;
+            if (i < lhs.length()) {
+                sum += (lhs.bytes[i] as long) & BigInt.maskSys;
+            }
+            if (i < rhs.length()) {
+                sum += (rhs.bytes[i] as long) & BigInt.maskSys;
+            }
+            if (sum >= BigInt.baseSys) {
+                sum = sum - BigInt.baseSys;
+                carry = 1 as long;
+                res[i] = sum as int
+            } else {
+                carry = sum >> BigInt.shiftSys;
+                res[i] = (sum & BigInt.maskSys) as int;
+            }
         }
-
-        if (carry > 0) {
-            res.pushBack(carry);
-        }
-
-        result.setBytes(res);
-
-        return result;
+        res = BigInt.stripDigits(res)
+        ret.setBytes(res);
+        ret.checkMsd();
+        return ret;
     }
 
     public operatorSubtract(other: BigInt): BigInt {
-        let result = new BigInt();
-        let lhs = this.clone();
-        let rhs = other.clone();
-
-        if (lhs.negative() && rhs.negative()) {
-            return lhs + (-rhs);
-        }
-
-        // Different signs - perform addition
-        if (lhs.negative() && !rhs.negative()) {
-            lhs.setSign(true);
-            return -(lhs + rhs);
-        } else if (!lhs.negative() && rhs.negative()) {
-            rhs.setSign(true);
-            return lhs + rhs;
-        }
-
-        if (lhs.abs() > rhs.abs()) {
-        } else {
-            result.setSign(false);
-        }
-
-        // Pad the shorter number with zeroes to make them of equal length
-        let max_len = max(lhs.length(), rhs.length()) as int;
-        lhs.addBytes(max_len - lhs.length());
-        rhs.addBytes(max_len - rhs.length());
-
-        let l = lhs.asBytes();
-        let r = rhs.asBytes();
-        let res = result.asBytes();
-        res = new Vec();
-
-        let borrow = 0;
-        for (let i = 0; i < max_len; i++) {
-            let byte1 = l.at(i);
-            let byte2 = r.at(i);
-            let diff = byte1 - byte2 - borrow;
-
-            if (diff < 0) {
-                diff += 256;
-                borrow = 1;
-            } else {
-                borrow = 0;
-            }
-
-            res.pushFront(diff);
-        }
-
-        while (!(res.size() == 0)) {
-            if (res.at(0) == 0) {
-                res.popFront();
-                continue;
-            }
-
-            break;
-        }
-
-        res = BigInt.reverse(res);
-        if (res.size() == 0) {
-            res.pushFront(0);
-        }
-
-        let zero = true;
-        for (let i = 0; i < res.size(); i++) {
-            if (res.at(i) != 0) {
-                zero = false;
-            }
-        }
-
-        if (zero) {
-            result.setSign(true);
-        }
-
-        result.setBytes(res);
-        return result;
+        let rhs = BigInt.to2sComplement(other);
+        return this.operatorAdd(rhs);
     }
 
     public operatorMultiply(other: BigInt): BigInt {
@@ -429,250 +368,212 @@ export final class BigInt {
             return new BigInt();
         }
 
-        let result = new BigInt();
-        if (this.getSign() == other.getSign()) {
-            result.setSign(true);
-        } else {
-            result.setSign(false);
+        let result = new BigInt(0);
+        let lhs = this;
+        let rhs = other;
+
+        if (lhs.negative()) {
+            lhs = BigInt.to2sComplement(lhs);
         }
-
-        let len1 = this.length();
-        let len2 = other.length();
-        let num1 = this.asBytes();
-        let num2 = other.asBytes();
-
-        if (this.negative()) {
-            num1 = BigInt.from2sCompliment(num1);
+        if (rhs.negative()) {
+            rhs = BigInt.to2sComplement(rhs);
         }
-
-        if (other.negative()) {
-            num2 = BigInt.from2sCompliment(num2);
-        }
-
-        num1 = BigInt.reverse(num1);
-        num2 = BigInt.reverse(num2);
-        let product = new Vec(len1 + len2, 0);
-        for (let i = len1 - 1; i >= 0; i--) {
-            let mulflag = 0;
-            let addflag = 0;
-            for (let j = len2 - 1; j >= 0; j--) {
-                let temp1 = num1.at(i) * num2.at(j) + mulflag;
-                mulflag = temp1 / 256;
-                temp1 = temp1 % 256;
-                let temp2 = product.at(i + j + 1) + temp1 + addflag;
-                product.set(i + j + 1, temp2 % 256);
-                addflag = temp2 / 256;
+        // we're little endian, means digits at our vector
+        // are stored as little-endian manner
+        let product: Vec = new Vec(lhs.bytes.length + rhs.bytes.length);
+        for (let i = 0; i < lhs.bytes.length; i++) {
+            let tmp = new BigInt(0);
+            BigInt.resetBytes(product)
+            let div: long = 0;
+            let rem: long = 0;
+            for (let j = 0; j < rhs.bytes.length; j++) {
+                let mul: long = ((lhs.bytes[i] as long) * (rhs.bytes[j] as long)) + div;
+                div = 0;
+                rem = 0;
+                if (mul >= (BigInt.baseSys as long)) {
+                    div = mul >> (BigInt.shiftSys as long);
+                    rem = mul & (BigInt.maskSys  as long);
+                } else {
+                    rem = mul
+                }
+                product[i + j] = rem as Int;
             }
-
-            product.set(i, (product.at(i) + mulflag + addflag) % 256);
+            tmp.setBytes(product);
+            result.checkMsd()
+            tmp.checkMsd()
+            result = result + tmp;
         }
 
-        if (!(product.size() == 0)) {
-            if (product.at(0) == 0) {
-                product.popFront();
-            }
+        if (this.negative() != other.negative()) {
+            result = BigInt.to2sComplement(result)
         }
-
-        product = BigInt.reverse(product);
-        if (result.negative()) {
-            product = BigInt.to2sComplement(product);
-        }
-
-        result.setBytes(product);
 
         return result;
+    }
+
+    private static getCnt(from: long, to:long): long {
+        assert (from <= to): `from:${from}, to:${to}`
+        return (from + ((to - from)/(2 as long)))
+    }
+
+    private getNearestDivider(divident: BigInt, divisor: BigInt): [Int, BigInt] {
+        let sub = divident - divisor;
+        if (sub.negative()) {
+            // i.e. divisor is greater than divident, so the latter is a remainder
+            return [0, divident];
+        }
+
+        let from: long = 1
+        let to: long = BigInt.baseSys - (1 as long)
+        let cnt: long = BigInt.getCnt(from, to);
+        let res2: BigInt;
+
+        let done = false;
+        do {
+            let res1 = divident - ((new BigInt(cnt)) * divisor);
+            let b1: boolean = res1.negative()
+            if (res1.isZero())
+            {
+                return [cnt as Int, res1];
+            }
+            res2 = divident - ((new BigInt(cnt-(1 as long)))*divisor);
+            let b2: boolean = res2.positive()
+            if (res2.isZero())
+            {
+                cnt--;
+                done = true;
+                return [cnt as Int, res2];
+            }
+            if (b1 && b2)
+            {
+                cnt--;
+                done = true;
+            }
+            if (!b1) {
+                from = cnt;
+                cnt = BigInt.getCnt(from, to);
+
+            }
+            if (!b2) {
+                to = cnt;
+                cnt = BigInt.getCnt(from, to);
+            }
+        } while (!done)
+
+        return [cnt as Int, res2];
+    }
+
+    private doDivide(other: BigInt): [Vec, Vec] {
+        let divident = this;
+        let divisor = other;
+
+        if (divident.negative())
+        {
+            divident = BigInt.to2sComplement(divident)
+        }
+        if (divisor.negative())
+        {
+            divisor = BigInt.to2sComplement(divisor)
+        }
+
+        let div = new BigInt();
+        let idx = divident.bytes.length - 1;
+        let res = new Vec(1);
+        res[0] = 0; // explicitly init array with Int(0)
+        for (let i=0; i<divisor.bytes.length && idx >=0; i++, idx--) {
+            div.bytes.unshift(divident.bytes[idx]);
+        }
+
+        do {
+            let ret: [Int, BigInt];
+            ret = this.getNearestDivider(div, divisor);
+            res.unshift(ret[0]);
+            if (idx>=0) {
+                ret[1].bytes.unshift(divident.bytes[idx]);
+            }
+            div = ret[1];
+        } while(idx-- >= 0);
+
+        return [res, div.asBytes()]
+    }
+
+    private operatorDivideInternal(other: BigInt): [BigInt, BigInt] {
+        if (other.isZero()) {
+            throw new Error("BigInt: division by zero")
+        }
+
+        let div_res = this.doDivide(other)
+        let quot: Vec = div_res[0]
+        let rem: Vec = div_res[1]
+
+        if (quot.length == 0) {
+            quot.push(0);
+        }
+
+        if (rem.length == 0) {
+            rem.push(0);
+        }
+
+        let quotent: BigInt = new BigInt(quot);
+        let remainder: BigInt = new BigInt(rem);
+
+        if (this.negative() != other.negative()) {
+            quotent = BigInt.to2sComplement(quotent);
+        }
+        if (this.negative()) {
+            remainder = BigInt.to2sComplement(remainder);
+        }
+
+        return [quotent, remainder];
     }
 
     public operatorDivide(other: BigInt): BigInt {
-        // NOTE(kkonsw): currently divide operation is very slow
-        if (other.isZero()) {
-            throw new Error("BigInt: division by zero")
-        }
-
-        let result = new BigInt();
-        if (this.getSign() == other.getSign()) {
-            result.setSign(true);
-        } else {
-            result.setSign(false);
-        }
-
-        let bytes = this.asBytes();
-        if (this.negative()) {
-            bytes = BigInt.from2sCompliment(bytes);
-        }
-
-        let rhs = other.clone();
-        if (rhs.negative()) {
-            // Change bytes representation
-            rhs.setSign(true);
-        }
-
-        bytes = BigInt.reverse(bytes);
-        let res = new Vec();
-
-        let carry = new BigInt();
-        let mask = new BigInt("256");
-        for (let i = 0; i < bytes.size(); i++) {
-            let current = new BigInt();
-            let b = new BigInt(bytes.at(i).toString());
-            current = b + carry * mask;
-
-            if (rhs > current) {
-                carry = current;
-                bytes.set(i, 0);
-                continue;
-            }
-
-            // Calculate quotient and remainder
-            let temp: BigInt[] = current.divideHelper(rhs);
-            bytes.set(i, temp[0].asByte());
-            carry = temp[1];
-            res.pushBack(bytes.at(i));
-        }
-
-        res = BigInt.reverse(res);
-        if (res.size() == 0) {
-            res.pushBack(0);
-        }
-
-        if (result.negative()) {
-            res = BigInt.to2sComplement(res);
-        }
-
-        result.setBytes(res);
-        return result;
+        let ret = (this.operatorDivideInternal(other))[0]
+        BigInt.stripDigits(ret.bytes)
+        return ret;
     }
 
     public operatorModule(other: BigInt): BigInt {
-        // NOTE(kkonsw): currently module operation is very slow
-        if (other.isZero()) {
-            throw new Error("BigInt: division by zero")
+        let ret = (this.operatorDivideInternal(other))[1]
+        BigInt.stripDigits(ret.bytes)
+        return ret;
+    }
+
+    private bitwiseHelper(other:BigInt, fn:(a:Int, b:Int)=>Int): BigInt {
+        let lhs: BigInt = this;
+        let rhs: BigInt = other;
+        let max_len = max(lhs.length(), rhs.length());
+
+        if (this.length() > other.length()) {
+            rhs = other.clone();
+            rhs.addBytes(max_len - other.length());
+        } else if (this.length() < other.length()) {
+            lhs = this.clone();
+            lhs.addBytes(max_len - this.length());
         }
 
         let result = new BigInt();
-        let bytes = this.asBytes();
+        let res = new Vec(max_len);
 
-        if (this.negative()) {
-            bytes = BigInt.from2sCompliment(bytes);
+        for (let i = 0; i < max_len; i++) {
+            res[i] = fn(lhs.bytes[i], rhs.bytes[i]);
         }
 
-        let rhs = other.clone();
-        if (rhs.negative()) {
-            // Change bytes representation
-            rhs.setSign(true);
-        }
-
-        bytes = BigInt.reverse(bytes);
-        let mask = new BigInt("256");
-        for (let i = 0; i < bytes.size(); i++) {
-            let current = new BigInt();
-            let b = new BigInt(bytes.at(i).toString());
-            current = b + result * mask;
-
-            if (rhs > current) {
-                result = current;
-                bytes.set(i, 0);
-                continue;
-            }
-
-            // Calculate quotient and remainder
-            let temp: BigInt[] = current.divideHelper(rhs);
-            bytes.set(i, temp[0].asByte());
-            result = temp[1];
-        }
-
-        if (this.negative() && rhs.negative()) {
-            result.sign = false;
-        }
-
-        if (this.negative() && rhs.positive()) {
-            result.sign = false;
-        }
-
-        if (this.positive() && rhs.positive()) {
-            result.sign = true;
-        }
-
-        if (result.negative()) {
-            result.bytes = BigInt.to2sComplement(result.bytes);
-        }
-
+        BigInt.stripDigits(res)
+        result.setBytes(res);
         return result;
     }
 
     public operatorBitwiseOr(other: BigInt): BigInt {
-        let result = new BigInt();
-        let num1 = this.asBytes();
-        let num2 = other.asBytes();
-
-        let min_len = min(num1.size(), num2.size()) as int;
-        let res = result.asBytes();
-        res = new Vec();
-
-        for (let i = 0; i < min_len; i++) {
-            res.pushBack(num1.at(i) | num2.at(i));
-        }
-
-        for (let i = min_len; i < num1.size(); i++) {
-            res.pushBack(num1.at(i) | 0x00);
-        }
-
-        for (let i = min_len; i < num2.size(); i++) {
-            res.pushBack(num2.at(i) | 0x00);
-        }
-
-        result.setBytes(res);
-        return result;
+        return this.bitwiseHelper(other, (a:Int, b:Int) => {return (a | b)})
     }
 
     public operatorBitwiseAnd(other: BigInt): BigInt {
-        let result = new BigInt();
-        let num1 = this.asBytes();
-        let num2 = other.asBytes();
-
-        let min_len = min(num1.size(), num2.size()) as int;
-        let res = result.asBytes();
-        res = new Vec();
-
-        for (let i = 0; i < min_len; i++) {
-            res.pushBack(num1.at(i) & num2.at(i));
-        }
-
-        for (let i = min_len; i < num1.size(); i++) {
-            res.pushBack(num1.at(i) & 0x00);
-        }
-
-        for (let i = min_len; i < num2.size(); i++) {
-            res.pushBack(num2.at(i) & 0x00);
-        }
-
-        result.setBytes(res);
-        return result;
+        return this.bitwiseHelper(other, (a:Int, b:Int) => {return (a & b)})
     }
 
     public operatorBitwiseXor(other: BigInt): BigInt {
-        let result = new BigInt();
-        let num1 = this.asBytes();
-        let num2 = other.asBytes();
-
-        let min_len = min(num1.size(), num2.size()) as int;
-        let res = result.asBytes();
-        res = new Vec();
-
-        for (let i = 0; i < min_len; i++) {
-            res.pushBack(num1.at(i) ^ num2.at(i));
-        }
-
-        for (let i = min_len; i < num1.size(); i++) {
-            res.pushBack(num1.at(i) ^ 0x00);
-        }
-
-        for (let i = min_len; i < num2.size(); i++) {
-            res.pushBack(num2.at(i) ^ 0x00);
-        }
-
-        result.setBytes(res);
-        return result;
+        return this.bitwiseHelper(other, (a:Int, b:Int) => {return (a ^ b)})
     }
 
     public operatorGreaterThan(other: BigInt): boolean {
@@ -684,53 +585,12 @@ export final class BigInt {
             return false;
         }
 
-        if (this.positive() && other.positive()) {
-            const l = this.asBytes();
-            const r = other.asBytes();
-
-            const ls = l.size()
-            const rs = r.size()
-            const maxSize = ls > rs ? ls : rs
-
-            // if |X| = |Y| we need check that forall xi>yi
-            // if |X| < |Y| or |Y| < |X| we can add zeros to the smallest of the vectors
-            // and reduce to the case when the vector lengths are the same
-
-            for (let i = maxSize - 1; i >= 0; i--) {
-                let left_byte = i < ls ? l.at(i) : 0;
-                let right_byte = i < rs ? r.at(i) : 0;
-                if (left_byte == right_byte) {
-                    continue;
-                }
-                return left_byte > right_byte;
-            }
-            // in this case forall i: xi=yi => numbers is equals
-
+        let sub = this.operatorSubtract(other);
+        if (sub.negative() || sub.isZero()) {
             return false;
         }
 
-        if (this.negative() && other.negative()) {
-            let l = BigInt.from2sCompliment(this.asBytes());
-            let r = BigInt.from2sCompliment(other.asBytes());
-
-            const ls = l.size()
-            const rs = r.size()
-            const maxSize = ls > rs ? ls : rs
-
-            for (let i = maxSize - 1; i >= 0; i--) {
-                let left_byte = i < ls ? l.at(i) : 0;
-                let right_byte = i < rs ? r.at(i) : 0;
-                if (left_byte == right_byte) {
-                    continue;
-                }
-
-                return left_byte < right_byte;
-            }
-
-            return false;
-        }
-
-        return false;
+        return true;
     }
 
     public operatorLessThan(other: BigInt): boolean {
@@ -750,45 +610,23 @@ export final class BigInt {
             throw new Error("BigInt: left shift against negative number")
         }
 
-        // NOTE(kkonsw): temporary limitation,
-        // unlimited values here can create really big integers that will require a lot of memory
-        let max_shift = new BigInt("255");
+        // we can't shift more than container can hold
+        let max_shift = new BigInt(BigInt.baseSys - 1);
         if (other.abs() > max_shift) {
             throw new Error("BigInt: too many digits in integer")
         }
 
-        let result = this.clone();
-        let n = (other / new BigInt("8")).asByte();
-        let r = (other % new BigInt("8")).asByte();
-
-        let res = result.asBytes();
-        if (result.negative()) {
-            res = BigInt.from2sCompliment(res);
+        let lhs = this;
+        if (other.isZero()) {
+            return lhs;
         }
 
-        let overflow = 0;
-        for (let i = 0; i < res.size(); i++) {
-            let temp = res.at(i);
-            res.set(i, (res.at(i) << r) % 256);
-            res.set(i, res.at(i) | overflow);
-            overflow = (temp & BigInt.MASKS_LEFT_SHIFT[r]) >>> (8 - r)
-            overflow = overflow % 256
+        let limit:long = other.longValue()
+        for (let i:long = 0; i<limit; i++) {
+            lhs = lhs + lhs;
         }
-
-        if (overflow > 0) {
-            res.pushBack(overflow);
-        }
-
-        for (let i = 0; i < n; i++) {
-            res.pushFront(0);
-        }
-
-        if (result.negative()) {
-            res = BigInt.to2sComplement(res);
-        }
-
-        result.setBytes(res);
-        return result;
+        BigInt.stripDigits(lhs.bytes)
+        return lhs;
     }
 
     public operatorRightShift(other: BigInt): BigInt {
@@ -796,51 +634,44 @@ export final class BigInt {
             throw new Error("BigInt: left shift against negative number")
         }
 
-        let result = this.clone();
-        let n = other / new BigInt("8");
-        let r = (other % new BigInt("8")).asByte();
+        let lhs = this.clone();
+        if (other.isZero()) {
+            return lhs;
+        }
 
-        let res = result.asBytes();
+        // consider shifting limits, as we can not shift more
+        // than stored at the BigInt object
+        let bit: long = (1 << (BigInt.shiftSys - 1)) ;
+        // it is equal to  len * 8 or len * log2(baseSys)
+        let limit: long = this.length() * BigInt.shiftSys;
+        let lval: long = other.longValue()
+        limit = limit >= lval ? lval : limit;
 
-        let count = new BigInt();
-        while (res.size() != 0) {
-            if (count.equals(n)) {
-                break;
+        let last: long = 0x0;
+        for (let i: long = 0; i < limit; i++) {
+
+            let first: long = lhs.negative() ? 1 : 0;
+            for (let j: int = (lhs.bytes.length as int) - 1; j>=0; j--) {
+
+                let a: long = (lhs.bytes[j] as long) & BigInt.maskSys;
+                last = a & 0x1;
+                a = (a >> 1) & BigInt.maskSys;
+                if (first) {
+                    a = a | bit
+                }
+
+                lhs.bytes[j] = (a & BigInt.maskSys) as Int
+                first = last;
             }
-
-            res.popFront();
-            count++;
         }
 
-        res = BigInt.reverse(res);
-
-        let overflow = 0;
-        if (this.negative()) {
-            overflow = BigInt.MASKS_LEFT_SHIFT[r];
-        }
-
-        for (let i = 0; i < res.size(); i++) {
-            let temp = res.at(i);
-            res.set(i, (res.at(i) >>> r) % 256);
-            res.set(i, res.at(i) | overflow);
-            overflow = ((temp & BigInt.MASKS_RIGHT_SHIFT[r]) << (8 - r)) % 256;
-        }
-
-        res = BigInt.reverse(res);
-        if (res.size() > 1 && res.at(res.size() - 1) == 255 && r > 0) {
-            res.popBack();
-        }
-        if (res.size() == 0) {
-            res.pushBack(0);
-        }
-
-        result.setBytes(res);
-        return result;
+        BigInt.stripDigits(lhs.bytes)
+        lhs.checkMsd();
+        return lhs;
     }
 
     public operatorIncrement(): BigInt {
         let result = new BigInt("1") + this;
-        this.sign = result.sign;
         this.bytes = result.bytes;
         return result
     }
@@ -848,89 +679,49 @@ export final class BigInt {
     public operatorDecrement(): BigInt {
         let result = this.clone();
         result = result - new BigInt("1");
-        this.sign = result.sign;
         this.bytes = result.bytes;
         return result
     }
 
+    private static invertBytes(bytes: Vec): void{
+        for (let i = 0; i < bytes.length; i++) {
+            bytes[i] = (~bytes[i]) & BigInt.maskSys as Int;
+        }
+    }
+
     public operatorBitwiseNot(): BigInt {
         let result = this.clone();
-        let bytes = result.bytes;
-
-        for (let i = 0; i < bytes.size(); i++) {
-            let a = bytes.at(i);
-            let b = ~a;
-            if (b < 0) {
-                b = 256 + b;
-            }
-
-            bytes.set(i, b);
-        }
-
-        if (this.positive()) {
-            result.sign = false;
-        }
-
-        if (this.negative()) {
-            result.sign = true;
-        }
-
-        result.setBytes(bytes);
+        BigInt.invertBytes(result.bytes);
         return result;
     }
 
+    private checkMsd(): Int {
+        let msd = (this.bytes[this.bytes.length - 1] & BigInt.maskSys)
+        if (msd != 0 && msd != BigInt.maskSys) {
+            assert(false): `Invalid value format stored: MSD:${msd}, len: ${this.bytes.length}`
+        }
+        return msd as Int;
+    }
+
     private addBytes(n: int): void {
+        let msd = this.checkMsd();
         for (let i = 0; i < n; i++) {
-            this.bytes.pushBack(0);
+            this.bytes.push(msd);
         }
     }
 
     public negate(): BigInt {
-        let result = this.clone();
-        if (this.negative()) {
-            result.setSign(true);
-        } else {
-            result.setSign(false);
-        }
-
+        let result = BigInt.to2sComplement(this);
         return result;
     };
 
-    private divideHelper(other: BigInt): BigInt[] {
-        if (other > this) {
-            return [new BigInt(), this.clone()];
-        }
-
-        let remainder = this.clone();
-        let quotient = new BigInt();
-        let inc = new BigInt("1");
-        while (remainder >= other) {
-            remainder = remainder - other;
-            quotient = quotient + inc;
-        }
-
-        if (remainder.negative()) {
-            remainder = new BigInt();
-        }
-
-        return [quotient, remainder];
-    }
-
-    // NOTE(kkonsw): should return byte
-    private asByte(): int {
-        if (this.bytes.size() != 0) {
-            return this.bytes.at(0) % 256;
-        }
-
-        return 0;
-    }
-
     private abs(): BigInt {
-        let result = this.clone();
-        if (result.negative()) {
-            result.setSign(true);
+        let result: BigInt;
+        if (this.negative()) {
+            result = BigInt.to2sComplement(this);
+        } else {
+            result = this.clone();
         }
-
         return result;
     }
 
@@ -939,9 +730,9 @@ export final class BigInt {
     }
 
     private asBytes(): Vec {
-        let bytes = new Vec(this.length(), 0);
+        let bytes = new Vec(this.length());
         for (let i = 0; i < this.length(); i++) {
-            bytes.set(i, this.bytes.at(i));
+            bytes[i] = this.bytes[i];
         }
 
         return bytes;
@@ -950,22 +741,60 @@ export final class BigInt {
     private bytesToDigits(input: Vec, negative: boolean): Vec {
         let bytes = input;
         if (negative) {
-            bytes = BigInt.from2sCompliment(bytes);
+            bytes = BigInt.to2sComplement(bytes);
         }
 
         let rbytes = BigInt.reverse(bytes);
         let digits = new Vec();
         let mask = new Vec();
-        mask.pushBack(2);
-        mask.pushBack(5);
-        mask.pushBack(6);
-
-        for (let i = 0; i < rbytes.size(); i++) {
+        if (BigInt.shiftSys == 8) {
+            mask.push(2);
+            mask.push(5);
+            mask.push(6);
+        } else if (BigInt.shiftSys == 16) {
+            mask.push(6);
+            mask.push(5);
+            mask.push(5);
+            mask.push(3);
+            mask.push(6);
+        } else if (BigInt.shiftSys == 24){
+            mask.push(1);
+            mask.push(6);
+            mask.push(7);
+            mask.push(7);
+            mask.push(7);
+            mask.push(2);
+            mask.push(1);
+            mask.push(6);
+        } else if (BigInt.shiftSys == 30) {
+            mask.push(1);
+            mask.push(0);
+            mask.push(7);
+            mask.push(3);
+            mask.push(7);
+            mask.push(4);
+            mask.push(1);
+            mask.push(8);
+            mask.push(2);
+            mask.push(4);
+        } else if (BigInt.shiftSys == 32) {
+            mask.push(4);
+            mask.push(2);
+            mask.push(9);
+            mask.push(4);
+            mask.push(9);
+            mask.push(6);
+            mask.push(7);
+            mask.push(2);
+            mask.push(9);
+            mask.push(6);
+        }
+        for (let i = 0; i < rbytes.length; i++) {
             digits = BigInt.multiplyDigits(digits, mask);
             let temp = new Vec();
-            let b = rbytes.at(i).toString();
+            let b = rbytes[i].toString();
             for (let j = 0; j < b.length; j++) {
-                temp.pushBack(b.charAt(j) - c'0');
+                temp.push(b.charAt(j) - c'0');
             }
 
             digits = BigInt.addDigits(digits, temp);
@@ -985,8 +814,7 @@ export final class BigInt {
         }
 
         let firstChar = s.charAt(0)
-        this.sign = firstChar != c'-';
-
+        let negative: boolean = (firstChar == c'-');
         let start = 0;
         if (firstChar == c'-' || firstChar == c'+') {
             start = 1;
@@ -1016,16 +844,25 @@ export final class BigInt {
                     throw new Error("Can't convert number " + s + " to BigInt because it's not an integer");
                 }
             } else {
-                digits.pushBack(s.charAt(i) - c'0');
+                digits.push(s.charAt(i) - c'0');
             }
         }
 
         // In case of unnormalized float, e.g. 0e-3, append at least one 0.
-        for (let i = 0; i < shift || digits.size() == 0; i++) {
-            digits.pushBack(0);
+        for (let i = 0; i < shift || digits.length == 0; i++) {
+            digits.push(0);
         }
 
+        // here we have absolute value of input
         this.toBytes(digits);
+        // add leading zero to let it be properly
+        // handled betweed 2s complement and vise versa codes
+        this.bytes.push(0);
+
+        if (negative) {
+            this.bytes = BigInt.to2sComplement(this.bytes);
+        }
+        BigInt.stripDigits(this.bytes);
     }
 
     private static parseInt(s: string, start: int, end: int): int {
@@ -1047,32 +884,28 @@ export final class BigInt {
     }
 
     private toBytes(digits: Vec) {
-        while (!(digits.size() == 0)) {
-            let carry = 0;
-            for (let i = 0; i < digits.size(); i++) {
-                let current = digits.at(i) + (carry as short) * 10;
-                if (current < 256) {
+        while (!(digits.length == 0)) {
+            let carry: long = 0;
+            for (let i = 0; i < digits.length; i++) {
+                let current: long = (digits[i] as long) + (carry as long) * (10 as long);
+                if (current < BigInt.baseSys) {
                     carry = current;
-                    digits.set(i, 0);
+                    digits[i] = 0
                     continue;
                 }
 
-                digits.set(i, current / 256);
-                carry = current % 256;
+                digits[i] = (current >> BigInt.shiftSys) as Int
+                carry = current & BigInt.maskSys;
             }
 
-            this.bytes.pushBack(carry);
-            while (!(digits.size() == 0)) {
-                if (digits.at(0) == 0) {
-                    digits.popFront();
+            this.bytes.push(carry as Int);
+            while (!(digits.length == 0)) {
+                if (digits[0] == 0) {
+                    digits.shift();
                 } else {
                     break;
                 }
             }
-        }
-
-        if (this.negative()) {
-            this.bytes = BigInt.to2sComplement(this.bytes);
         }
     }
 
@@ -1102,40 +935,48 @@ export final class BigInt {
     }
 
     private static multiplyDigits(lhs: Vec, rhs: Vec): Vec {
-        if ((lhs.size() == 0) || (rhs.size() == 0)) {
-            return new Vec(1, 0);
+        if ((lhs.length == 0) || (rhs.length == 0)) {
+            let r = new Vec(1);
+            r[0] =0
+            return r;
         }
 
-        if (lhs.at(0) == 0) {
-            return new Vec(1, 0);
+        if (lhs[0] == 0) {
+            let r = new Vec(1);
+            r[0] =0
+            return r;
         }
 
-        if (rhs.at(0) == 0) {
-            return new Vec(1, 0);
+        if (rhs[0] == 0) {
+            let r = new Vec(1);
+            r[0] =0
+            return r;
         }
 
-        let len1 = lhs.size();
-        let len2 = rhs.size();
-        let product = new Vec(len1 + len2, 0);
+        let len1: int = lhs.length as int;
+        let len2: int = rhs.length as int;
+        let product = new Vec(len1 + len2);
+        BigInt.resetBytes(product)
 
         for (let i = len1 - 1; i >= 0; i--) {
             let mulflag = 0;
             let addflag = 0;
             for (let j = len2 - 1; j >= 0; j--) {
-                let temp1 = lhs.at(i) * rhs.at(j) + mulflag;
+                let temp1: int = lhs[i] * rhs[j] + mulflag;
+
                 mulflag = temp1 / 10;
                 temp1 = temp1 % 10;
-                let temp2 = product.at(i + j + 1) + temp1 + addflag;
-                product.set(i + j + 1, temp2 % 10);
+                let temp2 = product[i + j + 1] + temp1 + addflag;
+                product[i + j + 1] = temp2 % 10;
                 addflag = temp2 / 10;
             }
 
-            product.set(i, (product.at(i) + mulflag + addflag) % 256);
+            product[i] = ((product[i] + mulflag + addflag) & BigInt.maskSys) as int;
         }
 
-        if (!(product.size() == 0)) {
-            if (product.at(0) == 0) {
-                product.popFront();
+        if (!(product.length == 0)) {
+            if (product[0] == 0) {
+                product.shift();
             }
         }
 
@@ -1144,76 +985,58 @@ export final class BigInt {
 
     private static reverse(input: Vec): Vec {
         let result = new Vec();
-        for (let i = 0; i < input.size(); i++) {
-            result.pushFront(input.at(i));
+        for (let i = 0; i < input.length; i++) {
+            result.unshift(input[i]);
         }
 
         return result;
     }
 
-    private static from2sCompliment(input: Vec): Vec {
-        let bytes = input;
-        for (let i = 0; i < bytes.size(); i++) {
-            if (bytes.at(i) > 0) {
-                bytes.set(i, bytes.at(i) - 1);
-                break;
-            } else {
-                bytes.set(i, 0xff);
-            }
+    private static to2sComplement(input: BigInt): BigInt {
+        // Perform 2's complement for negative numbers.
+        if (input.isZero()) {
+            // no sense, it will be the same
+            return input;
         }
-
-        for (let i = 0; i < bytes.size(); i++) {
-            bytes.set(i, 255 - bytes.at(i));
-        }
-
-        return bytes;
+        let rhs = input.clone()
+        BigInt.invertBytes(rhs.bytes);
+        let one = new BigInt(1);
+        let ret = (rhs + one);
+        return ret;
     }
 
     private static to2sComplement(input: Vec): Vec {
         // Perform 2's complement for negative numbers.
-        let bytes = input;
-        for (let i = 0; i < bytes.size(); i++) {
-            bytes.set(i, 255 - bytes.at(i));
-        }
-
-        // Add 1 to complete 2's complement.
-        let carry: short = 1;
-        for (let i = 0; i < bytes.size(); i++) {
-            let current: short = bytes.at(i) + carry as short;
-            bytes.set(i, current % 256);
-            carry = ((current >>> 8) as short)
-        }
-
-        return bytes;
+        let a: BigInt = new BigInt()
+        a.setBytes(input);
+        return BigInt.to2sComplement(a).bytes;
     }
 
     private static addDigits(lhs: Vec, rhs: Vec): Vec {
         let result = new Vec();
-        let l = lhs;
-        let r = rhs;
 
-        let max_len = max(l.size(), r.size()) as int;
+        let max_len = max(lhs.length, rhs.length) as int;
 
         // Pad the shorter number with zeroes to make them of equal length
-        let l_len = max_len - l.size();
+        let l_len = max_len - lhs.length;
         for (let i = 0; i < l_len; i++) {
-            l.pushFront(0);
+            lhs.unshift(0);
         }
 
-        let r_len = max_len - r.size();
+        let r_len = max_len - rhs.length;
         for (let i = 0; i < r_len; i++) {
-            r.pushFront(0);
+            rhs.unshift(0);
         }
 
-        let carry = 0;
-        for (let i = max_len - 1; i >= 0; i--) {
-            let sum = l.at(i) + r.at(i) + carry;
+        let carry: Int = 0;
+        for (let i: int = max_len - 1; i >= 0; i--) {
+            let sum: Int = lhs[i] + rhs[i] + carry;
             carry = sum / 10;
-            result.pushFront(sum % 10);
+            result.unshift(sum % 10);
         }
 
         if (carry > 0) {
-            result.pushFront(carry);
+            result.unshift(carry);
         }
 
         return result;
@@ -1227,8 +1050,8 @@ export final class BigInt {
     public doubleValue(): double {
         let buff = 0 as number
         const bytes = this.abs().bytes
-        for (let i = 0; i < bytes.size(); ++i) {
-            buff += (bytes.at(i) as double) * Math.pow(256, i)
+        for (let i = 0; i < bytes.length; ++i) {
+            buff += (bytes[i] as double) * Math.pow(BigInt.baseSys, i)
         }
         return this.negative() ? -buff : buff
     }

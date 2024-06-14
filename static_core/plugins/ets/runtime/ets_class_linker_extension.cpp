@@ -549,6 +549,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     arraybufClass_ = CacheClass(ARRAY_BUFFER);
     stringBuilderClass_ = CacheClass(STRING_BUILDER);
     arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);
+    arrayClass_ = CacheClass(ARRAY);
     typeapiFieldClass_ = CacheClass(FIELD);
     typeapiMethodClass_ = CacheClass(METHOD);
     typeapiParameterClass_ = CacheClass(PARAMETER);
