@@ -101,9 +101,8 @@ class MapEntry<K, V> extends Entry<K, V> {
     }
 }
 
-export type Record<K, V> = Map<K, V>;
 
-export final class Map<K, V> implements ReadonlyMap<K, V> {
+export class Map<K, V> implements ReadonlyMap<K, V> {
     private s: Set<MapEntry<K, V>> = new Set<MapEntry<K, V>>()
 
     /**
@@ -272,5 +271,16 @@ export final class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override forEach(fn: (v: V) => void): void {
         iteratorForEach<V>(this.values(), fn)
+    }
+    
+}
+
+export class Record<K extends Numeric | string, V> extends Map<K, V> {
+    $_get(k : K) : V | undefined {
+        return super.get(k)
+    }
+
+    $_set(k: K, v: V) : void {
+        super.set(k, v)
     }
 }

@@ -312,7 +312,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         if (this.thenQueue == null) {
             this.thenQueue = Promise.EMPTY_QUEUE;
         }
-        this.thenQueue = this.ensureCapacity(this.thenQueue!, this.thenQueueSize + 1);
+        this.thenQueue = Promise.ensureCapacity(this.thenQueue!, this.thenQueueSize + 1);
         this.thenQueue![this.thenQueueSize] = job;
         ++this.thenQueueSize;
     }
@@ -322,7 +322,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         if (this.catchQueue == null) {
             this.catchQueue = Promise.EMPTY_QUEUE;
         }
-        this.catchQueue = this.ensureCapacity(this.catchQueue!, this.catchQueueSize + 1);
+        this.catchQueue = Promise.ensureCapacity(this.catchQueue!, this.catchQueueSize + 1);
         this.catchQueue![this.catchQueueSize] = job;
         ++this.catchQueueSize;
     }

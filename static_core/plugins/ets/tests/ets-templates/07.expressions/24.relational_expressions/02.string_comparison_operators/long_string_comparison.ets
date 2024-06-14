@@ -23,5 +23,6 @@ function main(): void {
   assert (str1000 >= str1000) == true;
   assert (str1000 >= str1001) == false;
   assert (str1000 <= str1001) == true;
-  assert (str1000 < str1001) == false;
+  assert (str1000 < str1001) == true;
+  assert (str1000 > str1001) == false;
 }
