@@ -178,8 +178,7 @@ class ManyFields {
 
     static constant = "constant"
 
-    // NOTE(cheezzario) reflection issue #17184 ( 'lambda' typed fields identified as 'InterfaceType' instead of 'LambdaType' )
-    // lambda = () => "lambda"
+    lambda = () => "lambda"
 
     undef3 = undefined
 }

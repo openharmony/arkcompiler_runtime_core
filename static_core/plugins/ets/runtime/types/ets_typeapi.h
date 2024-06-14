@@ -42,7 +42,7 @@ enum class EtsTypeAPIKind : EtsByte {
     INTERFACE = 0xCU,
     ARRAY = 0xDU,
     TUPLE = 0xEU,
-    LAMBDA = 0xFU,
+    FUNCTIONAL = 0xFU,
     METHOD = 0x10U,
     UNION = 0x11U,
     UNDEFINED = 0x12U,

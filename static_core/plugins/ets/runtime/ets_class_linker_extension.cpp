@@ -550,6 +550,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     typeapiFieldClass_ = CacheClass(FIELD);
     typeapiMethodClass_ = CacheClass(METHOD);
     typeapiParameterClass_ = CacheClass(PARAMETER);
+    ifuncClass_ = CacheClass(IFUNCTION);
     sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
     jsvalueClass_ = CacheClass(JS_VALUE);
     CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });

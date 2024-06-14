@@ -78,6 +78,7 @@ static constexpr std::string_view FUNCTION14                           = "Lstd/c
 static constexpr std::string_view FUNCTION15                           = "Lstd/core/Function15;";
 static constexpr std::string_view FUNCTION16                           = "Lstd/core/Function16;";
 static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
+static constexpr std::string_view IFUNCTION                    = "Lstd/core/Function;";
 
 // Exception classes
 static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_EXCEPTION      = "Lstd/core/ArgumentOutOfRangeException;";

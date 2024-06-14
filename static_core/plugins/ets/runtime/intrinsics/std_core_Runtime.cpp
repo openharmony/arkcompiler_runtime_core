@@ -77,7 +77,7 @@ EtsString *StdCoreRuntimeTypeof(EtsObject *obj)
         if (obj->IsStringClass()) {
             return EtsString::CreateFromMUtf8("string");
         }
-        if (obj->GetClass()->IsLambdaClass()) {
+        if (obj->GetClass()->IsFunctionalClass()) {
             return EtsString::CreateFromMUtf8("function");
         }
         auto ext = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM())
