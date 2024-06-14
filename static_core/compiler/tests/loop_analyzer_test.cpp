@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,18 @@ public:
     NO_COPY_SEMANTIC(LoopAnalyzerTest);
     NO_MOVE_SEMANTIC(LoopAnalyzerTest);
 
+    template <typename T, typename Blocks>
+    void CheckVectorEqualSet(Blocks blocks, std::set<T *> &&excepct)
+    {
+        ASSERT_EQ(blocks.size(), excepct.size());
+
+        std::set<T *> result;
+        for (auto block : blocks) {
+            result.insert(block);
+        }
+        EXPECT_EQ(result, excepct);
+    }
+
     template <typename T>
     void CheckVectorEqualSet(ArenaVector<T *> blocks, std::set<T *> &&excepct)
     {
@@ -37,7 +49,8 @@ public:
         EXPECT_EQ(result, excepct);
     }
 
-    void CheckVectorEqualBlocksIdSet(ArenaVector<BasicBlock *> blocks, std::vector<int> &&bbIds)
+    template <typename Blocks>
+    void CheckVectorEqualBlocksIdSet(Blocks blocks, std::vector<int> &&bbIds)
     {
         std::set<BasicBlock *> bbSet;
         for (auto id : bbIds) {

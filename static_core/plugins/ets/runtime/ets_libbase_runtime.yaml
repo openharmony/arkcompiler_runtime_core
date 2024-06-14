@@ -142,7 +142,7 @@ intrinsics:
       ret: f32
       args: [ f32, f32 ]
     impl: ark::intrinsics::MaxF32
-    safe_intrinsic: ThrowUndefined
+    safe_intrinsic: true
 
   - name: StdMathMaxF64
     space: ets

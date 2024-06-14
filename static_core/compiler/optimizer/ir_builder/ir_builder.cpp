@@ -21,9 +21,11 @@
 #include "code_data_accessor-inl.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
+#include "optimizer/analysis/hotness_propagation.h"
 #include "method_data_accessor-inl.h"
 
 namespace ark::compiler {
+
 bool IrBuilder::RunImpl()
 {
     COMPILER_LOG(INFO, IR_BUILDER) << "Start building ir for method: "
@@ -45,19 +47,21 @@ bool IrBuilder::RunImpl()
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->RunPass<LoopAnalyzer>();
 
-    InstBuilder instBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
-    instBuilder.Prepare(isInlinedGraph_);
-    instDefs_.resize(vregsCount + GetGraph()->GetEnvCount());
-    COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
-    for (auto bb : GetGraph()->GetBlocksRPO()) {
-        if (!BuildBasicBlock(bb, &instBuilder, instructionsBuf)) {
-            return false;
+    {
+        InstBuilder instBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
+        instBuilder.Prepare(isInlinedGraph_);
+        instDefs_.resize(vregsCount + GetGraph()->GetEnvCount());
+        COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
+        for (auto bb : GetGraph()->GetBlocksRPO()) {
+            if (!BuildBasicBlock(bb, &instBuilder, instructionsBuf)) {
+                return false;
+            }
         }
+        GetGraph()->RunPass<DominatorsTree>();
+        GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
+        GetGraph()->RunPass<LoopAnalyzer>();
+        instBuilder.FixInstructions();
     }
-    GetGraph()->RunPass<DominatorsTree>();
-    GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
-    GetGraph()->RunPass<LoopAnalyzer>();
-    instBuilder.FixInstructions();
     if (GetGraph()->GetRuntime()->IsMemoryBarrierRequired(GetMethod())) {
         SetMemoryBarrierFlag();
     }
@@ -69,8 +73,12 @@ bool IrBuilder::RunImpl()
         }
         GetGraph()->GetPassManager()->GetStatistics()->AddPbcInstNum(pbcInstNum);
     }
+
     COMPILER_LOG(INFO, IR_BUILDER) << "IR successfully built: " << GetGraph()->GetVectorBlocks().size()
                                    << " basic blocks, " << GetGraph()->GetCurrentInstructionId() << " instructions";
+
+    HotnessPropagation(GetGraph()).Run();
+
     return true;
 }
 

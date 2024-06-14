@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,8 @@ public:
     static constexpr size_t FALSE_SUCC_IDX = 1;
     explicit BasicBlock(Graph *graph, uint32_t guestPc = INVALID_PC);
 
+    using SuccsVector = SmallVector<BasicBlock *, 2U, ArenaAllocatorT<false>, true>;
+
 public:
     void SetId(uint32_t id)
     {
@@ -83,11 +85,11 @@ public:
         return preds_;
     }
 
-    ArenaVector<BasicBlock *> &GetSuccsBlocks()
+    SuccsVector &GetSuccsBlocks()
     {
         return succs_;
     }
-    const ArenaVector<BasicBlock *> &GetSuccsBlocks() const
+    const SuccsVector &GetSuccsBlocks() const
     {
         return succs_;
     }
@@ -121,6 +123,16 @@ public:
     bool IsInverted() const
     {
         return inverted_;
+    }
+
+    void SetHotness(int64_t hotness)
+    {
+        hotness_ = hotness;
+    }
+
+    auto GetHotness() const
+    {
+        return hotness_;
     }
 
     BasicBlock *GetTrueSuccessor() const
@@ -647,7 +659,7 @@ private:
     ArenaVector<BasicBlock *> preds_;
 
     // List of successors blocks.
-    ArenaVector<BasicBlock *> succs_;
+    SuccsVector succs_;
 
     // List of dominated blocks.
     ArenaVector<BasicBlock *> domBlocks_;
@@ -672,6 +684,7 @@ private:
 
     uint32_t tryId_ {INVALID_ID};
     bool inverted_ {false};
+    int64_t hotness_ {};
 
     template <const IterationType T, const IterationDirection D>
     friend class InstIterator;

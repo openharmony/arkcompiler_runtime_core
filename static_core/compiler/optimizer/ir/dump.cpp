@@ -151,8 +151,8 @@ ArenaString PcToString(uint32_t pc, ArenaAllocator *allocator)
     return ArenaString(outString.str(), allocator->Adapter());
 }
 
-void BBDependence(const char *type, const ArenaVector<BasicBlock *> &bbVector, std::ostream *out,
-                  ArenaAllocator *allocator)
+template <typename T>
+void BBDependence(const char *type, const T &bbVector, std::ostream *out, ArenaAllocator *allocator)
 {
     bool flFirst = true;
     (*out) << type << ": [";
@@ -1274,6 +1274,7 @@ void BasicBlock::Dump(std::ostream *out) const
     (*out) << '\n';
     // properties
     BlockProps(this, out);
+    (*out) << "hotness=" << GetHotness() << '\n';
     // instructions
     for (auto inst : this->AllInsts()) {
         inst->Dump(out);

@@ -442,14 +442,14 @@ options:
 
 - name: compiler-inlining-max-insts
   type: uint32_t
-  default: 1250
+  default: 512
   description: Maximum number of the IR instructions to be inlined, including instructions of the current graph.
   recommended_values: [50,2000]
   tags: [perf]
 
 - name: compiler-inlining-max-depth
   type: uint32_t
-  default: 5
+  default: 12
   description: Maximum depth of the inlining.
   recommended_values: [1,20]
   tags: [perf]

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -537,6 +537,38 @@ public:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
             vector.clear();
         }
+    }
+
+    iterator erase(iterator it)
+    {
+        ASSERT(size() > 0);
+        ASSERT(it != end());
+        if (!IsStatic()) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            auto vectorIt = vector.erase(vector.begin() + (it - begin()));
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+            return iterator(data() + (vectorIt - vector.begin()));
+        }
+        auto newIt = it;
+        auto copyIt = it + 1;
+        auto endIt = end();
+        while (copyIt != endIt) {
+            *it = *copyIt;
+            it++;
+            copyIt++;
+        }
+        it->~T();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        buffer.size--;
+        return newIt;
+    }
+
+    reference front()
+    {
+        ASSERT(size() > 0);
+
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+        return IsStatic() ? buffer.data[0] : vector.front();
     }
 
     reference back()
