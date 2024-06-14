@@ -176,6 +176,8 @@ class ManyFields {
     posinf = Infinity
     neginf = -Infinity
 
+    nl: string | null = null
+
     static constant = "constant"
 
     lambda = () => "lambda"
@@ -212,7 +214,7 @@ function testObjectFieldsStringify(): int {
     const expectedJson = `{"boxBool":true,"boxBools":[true],"boxByte":1,"boxBytes":[1],` +
             `"boxShort":1,"boxShorts":[1],"boxInt":1,"boxInts":[1,1],"boxLong":1,"boxLongs":[1],` +
             `"boxFloat":1.1,"boxFloats":[1.1],"boxDouble":1.1,"boxDoubles":[1.1],` +
-            `"nan":null,"posinf":null,"neginf":null}`
+            `"nan":null,"posinf":null,"neginf":null,"nl":null}`
     const actualJson = JSON.stringify(new ManyFields())
 
     let result = test(expectedJson == actualJson, "object with fields")
@@ -354,7 +356,7 @@ function testStringifyInterface(): int {
         fn: Fn<number, number> = new IdentityFn<number>()
     }
 
-    testResult = test('{"fn":{}}' == JSON.stringify(new WithFn()), "class with interface typed field")
+    testResult += test('{"fn":{}}' == JSON.stringify(new WithFn()), "class with interface typed field")
 
     return testResult
 }
@@ -369,6 +371,14 @@ class TrafficLight {
 
 function testStringifyEnum(): int {
     return test('{"color":1}' == JSON.stringify(new TrafficLight()), "enum field")
+}
+
+function testStringifyNullUndefined(): int {
+    let testResult = test("null" == JSON.stringify(null), "standalone null")
+
+    testResult += test("undefined" == JSON.stringify(undefined), "standalone undefined")
+
+    return testResult
 }
 
 function main(): int {
@@ -396,6 +406,7 @@ function main(): int {
     failures += testStringifyUnion()
     failures += testStringifyInterface()
     failures += testStringifyEnum()
+    failures += testStringifyNullUndefined()
 
     if (failures == 0) {
         console.println("PASSED: All tests run")

@@ -117,6 +117,7 @@ export class JSON {
 
     private static readonly ESCAPED_CHARS: char[] = [c'\"', c'\\', c'\/', c'\b', c'\f', c'\n', c'\r', c'\t']
     private static readonly NON_ESCAPED_CHARS: char[] = [c'"', c'\\', c'/', c'b', c'f', c'n', c'r', c't']
+    private static readonly JSON_SPACE_INDENT_LIMIT = 10
 
     /**
      * Converts String to JSON format
@@ -143,14 +144,79 @@ export class JSON {
     }
 
     /**
-     * Converts Object to JSON format
+     * Converts an object to a JavaScript Object Notation (JSON) string.
      *
-     * @param d: Object - byte to be converted to a JSON as an Object
+     * @param obj: Object An object to be converted.
      *
      * @returns String - JSON representation of Object
      */
     public static stringify(obj: NullishType): String {
         return new JSONWriter().write(obj)
+    }
+
+    /**
+     * Converts an object to a JavaScript Object Notation (JSON) string.
+     *
+     * @param obj: Object An object to be converted.
+     *
+     * @param replacer A function that transforms the results.
+     *
+     * @param space A string or number that's used to insert white space 
+     * (including indentation, line break characters, etc.) into the output JSON string for readability purposes.
+     *
+     * @returns String - JSON representation of Object
+     */
+    public static stringify(
+                obj: NullishType, 
+                replacer: ((key: string, value: NullishType) => NullishType) | undefined | null, 
+                space?: string | number): string {
+
+        const replacerOpt: ((key: string, value: NullishType) => NullishType) | undefined = (replacer === null) ? undefined : replacer
+
+        if (space instanceof String || space === undefined) {
+            return new JSONWriter(replacerOpt, space).write(obj)
+        } else {
+            return new JSONWriter(replacerOpt, JSON.spaceFromNumber(space as number)).write(obj)
+        }
+    }
+
+    /**
+     * Converts an object to a JavaScript Object Notation (JSON) string.
+     *
+     * @param obj: Object An object to be converted.
+     *
+     * @param replacer An array with elements indicating names of the properties in the object 
+     * that should be included in the resulting JSON string
+     *
+     * @param space A string or number that's used to insert white space 
+     * (including indentation, line break characters, etc.) into the output JSON string for readability purposes.
+     *
+     * @returns String - JSON representation of Object
+     */
+    public static stringify(obj: NullishType, replacer: (string | number)[], space?: string | number): string {
+        const filter = new string[replacer.length]
+        for (let i = 0; i < replacer.length; i++) {
+            filter[i] = `${replacer[i]}`
+        }
+
+        if (space instanceof String || space === undefined) {
+            return new JSONWriter(filter, space).write(obj)
+        } else {
+            return new JSONWriter(filter, JSON.spaceFromNumber(space as number)).write(obj)
+        }
+    }
+
+    private static spaceFromNumber(space: number): String {
+        let spacesCount = 0
+        if (space > 0) {
+            if (space > JSON.JSON_SPACE_INDENT_LIMIT) {
+                spacesCount = JSON.JSON_SPACE_INDENT_LIMIT
+            } else {
+                spacesCount = space as int
+            }
+        }
+
+        return " ".repeat(spacesCount)
     }
 
     public static native stringify(d: JSValue): String;
@@ -443,19 +509,53 @@ class JSONWriter {
     private static readonly STD_CORE_INTEROP_JSVALUE_TYPE = (Type.of([] as JSValue[]) as ArrayType).getElementType()
     private static readonly ESCOMPAT_ARRAY_TYPE = Type.of(new Array<Object>(0))
 
+    private readonly replacer: ((key: String, value: NullishType) => NullishType) | undefined
+    private readonly fieldsFilter: string[]
+    private readonly space: String | undefined
+
+    private readonly useReplacer: boolean
+    private readonly useFieldsFilter: boolean
+    private readonly useIndent: boolean
+
+    private indentLevel: int = 0
+
     private readonly path = new Set<Object>()
-    private readonly buffer = new StringBuilder()
+    private buffer = new StringBuilder()
+
+    constructor(replacer?: (key: String, value: NullishType) => NullishType, space?: String) {
+        this.replacer = replacer
+        this.fieldsFilter = []
+        this.space = space
+
+        this.useReplacer = this.replacer != undefined
+        this.useFieldsFilter = false
+        this.useIndent = !(this.space == undefined || this.space == "")
+    }
+
+    constructor(filter: string[], space?: String) {
+        this.replacer = undefined
+        this.fieldsFilter = filter
+        this.space = space
+
+        this.useReplacer = false
+        this.useFieldsFilter = true
+        this.useIndent = !(this.space == undefined || this.space == "")
+    }
 
     write(obj: NullishType): String {
-        this.writeObject(obj)
+        if (this.useReplacer) {
+            this.writeObject(this.replacer!("", obj))
+        } else {
+            this.writeObject(obj)
+        }
 
         return this.buffer.toString()
     }
 
     private writeObject(obj: NullishType): void {
-        if (obj == null) {
+        if (obj === null) {
             this.buffer.append("null")
-        } else if (obj == undefined) {
+        } else if (obj === undefined) {
             this.buffer.append("undefined")
         } else if (obj instanceof String) {
             this.buffer.append(JSON.stringify(obj as String))
@@ -481,44 +581,119 @@ class JSONWriter {
     }
 
     private writeClassValue(obj: Object, objType: ClassType): void {
-        this.buffer.append("{")
+        const currentBuffer = this.buffer
+        this.buffer = new StringBuilder("{")
 
-        const objValue = Value.of(obj) as ClassValue
-        const objFieldsCount = objValue.getFieldsNum()
-        if (objFieldsCount > 0) {
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
+        }
+
+        const writableFields = this.getWritableFields(objType, Value.of(obj) as ClassValue)
+
+        let fieldDumped = false
+        if (writableFields.length > 0) {
             this.path.add(obj)
-
-            let fieldDumped = false
-            for (let fieldIdx = 0; fieldIdx < objFieldsCount; fieldIdx++) {
-                const objField = objType.getField(fieldIdx)
-                if (!this.isStringifiableFieldType(objField)) {
-                    continue
-                }
-
-                const objFieldValue = objValue.getField(fieldIdx)
-                if (objFieldValue.getData() !== undefined) {
-                    if (fieldDumped) {
-                        this.buffer.append(",")
-                    } else {
-                        fieldDumped = true
-                    }
-                    
-                    this.buffer.append('"')
-                    this.buffer.append(objField.getName())
-                    this.buffer.append('":')
-
-                    this.checkReferencesCycle(objFieldValue.getData())
-                    this.writeObject(objFieldValue.getData())
-                }
-            }
-
+            fieldDumped = this.writeClassFields(writableFields)
             this.path.delete(obj)
         }
 
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
         this.buffer.append("}")
+
+        if (fieldDumped) {
+            currentBuffer.append(this.buffer.toString())
+        } else {
+            currentBuffer.append("{}")
+        }
+
+        this.buffer = currentBuffer
     }
 
-    private isStringifiableFieldType(field: Field): boolean {
+    private writeClassFields(writableFields: Array<[Field, Value]>): boolean {
+        const FIELD_TYPE = 0
+        const FIELD_VALUE = 1
+
+        let fieldDumped = false
+        for (let fieldIdx = 0; fieldIdx < writableFields.length; fieldIdx++) {
+            const fieldTypeValuePair = writableFields[fieldIdx]
+
+            const objField = fieldTypeValuePair[FIELD_TYPE]
+            const objFieldValue = fieldTypeValuePair[FIELD_VALUE]
+
+            const objToDump = this.useReplacer ? this.replacer!(objField.getName(), objFieldValue.getData()) : objFieldValue.getData()
+            if (objToDump !== undefined) {
+                if (fieldDumped) {
+                    this.buffer.append(",")
+                    if (this.useIndent) {
+                        this.buffer.append("\n")
+                    }
+                } else {
+                    fieldDumped = true
+                }
+
+                this.checkReferencesCycle(objToDump)
+                this.writePadding()
+                
+                this.buffer.append('"')
+                this.buffer.append(objField.getName())
+                this.buffer.append('":')
+
+                if (this.useIndent) {
+                    this.buffer.append(" ")
+                }
+
+                this.writeObject(objToDump)
+            }
+        }
+
+        return fieldDumped
+    }
+
+    private getWritableFields(classType: ClassType, classValue: ClassValue): Array<[Field, Value]> {
+        const writableFields = new Array<[Field, Value]>()
+
+        if (this.useFieldsFilter) {
+            for (let fieldIdx = 0; fieldIdx < this.fieldsFilter.length; fieldIdx++) {
+                const fieldName = this.fieldsFilter[fieldIdx]
+                if (!classType.hasField(fieldName)) {
+                    continue
+                }
+
+                const fieldType = classType.getFieldByName(fieldName)
+                if (!this.isWritableFieldType(fieldType)) {
+                    continue
+                }
+
+                const fieldValue = classValue.getFieldByName(fieldName)
+
+                const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
+                writableFields.push(fieldTypeValuePair)
+            }
+        } else {
+            const fieldsCount = classValue.getFieldsNum()
+            for (let fieldIdx = 0; fieldIdx < fieldsCount; fieldIdx++) {
+                const fieldType = classType.getField(fieldIdx)
+                if (!this.isWritableFieldType(fieldType)) {
+                    continue
+                }
+
+                const fieldValue = classValue.getField(fieldIdx)
+
+                const fieldTypeValuePair: [Field, Value] = [fieldType, fieldValue]
+                writableFields.push(fieldTypeValuePair)
+            }
+        }
+
+        return writableFields
+    }
+
+    private isWritableFieldType(field: Field): boolean {
         const fieldType = field.getType()
 
         if (field.isStatic() || fieldType instanceof LambdaType) {
@@ -531,7 +706,12 @@ class JSONWriter {
     private writeArrayValue(arrayValue: ArrayValue, arrayType: ArrayType): void {
         this.buffer.append("[")
 
-        const arrayLength = arrayValue.getLength()
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
+        }
+
+        const arrayLength = arrayValue.getLength() as int
         if (arrayLength > 0) {
             const array: Object = arrayValue.getData()!
 
@@ -540,20 +720,31 @@ class JSONWriter {
             const lastElementIndex = arrayLength - 1
 
             for (let idx = 0; idx < lastElementIndex; idx++) {
-                this.writeArrayElementValue(arrayValue.getElement(idx))
+                this.writeArrayElementValue(arrayValue.getElement(idx), idx)
                 this.buffer.append(",")
+
+                if (this.useIndent) {
+                    this.buffer.append("\n")
+                }
             }
 
-            this.writeArrayElementValue(arrayValue.getElement(lastElementIndex))
+            this.writeArrayElementValue(arrayValue.getElement(lastElementIndex), lastElementIndex)
 
             this.path.delete(array)
         }
 
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
+
         this.buffer.append("]")
     }
 
-    private writeArrayElementValue(elemValue: Value): void {
-        this.writeObjectsArrayElement(elemValue.getData())
+    private writeArrayElementValue(elemValue: Value, elemIndex: int): void {
+        this.writeObjectsArrayElement(elemValue.getData(), elemIndex)
     }
 
     private writeValueTypeWrapper(obj: Object): boolean {
@@ -589,42 +780,69 @@ class JSONWriter {
     private writeEscompatArray<T>(array: Array<T>): void {
         this.buffer.append("[")
 
+        if (this.useIndent) {
+            this.buffer.append("\n")
+            this.indentLevel += 1
+        }
+
         if (array.length > 0) {
             this.path.add(array)
 
-            const lastElementIndex = array.length - 1
+            const lastElementIndex = (array.length as int) - 1
 
             for (let idx = 0; idx < lastElementIndex; idx++) {
-                this.writeObjectsArrayElement(array[idx])
+                this.writeObjectsArrayElement(array[idx], idx)
                 this.buffer.append(",")
+
+                if (this.useIndent) {
+                    this.buffer.append("\n")
+                }
             }
 
-            this.writeObjectsArrayElement(array[lastElementIndex])
+            this.writeObjectsArrayElement(array[lastElementIndex], lastElementIndex)
 
             this.path.delete(array)
         }
 
+        if (this.useIndent) {
+            this.indentLevel -= 1
+            this.buffer.append("\n")
+        }
+
+        this.writePadding()
+
         this.buffer.append("]")
     }
 
-    private writeObjectsArrayElement(arrayElement: NullishType): void {
-        const arrayElementType = Type.of(arrayElement)
-        if (arrayElement == null || arrayElement == undefined || arrayElementType instanceof LambdaType) {
+    private writeObjectsArrayElement(arrayElement: NullishType, elementIndex: int): void {
+        this.writePadding()
+
+        const replacedArrayElement = this.useReplacer ? this.replacer!("" + elementIndex, arrayElement) : arrayElement
+
+        const arrayElementType = Type.of(replacedArrayElement)
+        if (replacedArrayElement == null || arrayElementType instanceof LambdaType) {
             this.buffer.append("null")
         } else {
-            this.checkReferencesCycle(arrayElement)
-            this.writeObject(arrayElement)
+            this.checkReferencesCycle(replacedArrayElement)
+            this.writeObject(replacedArrayElement)
         }
     }
 
     private checkReferencesCycle(obj: NullishType): void {
-        if (obj == null || obj == undefined) {
+        if (obj == null) {
             return
         }
 
         const cycleDetected = this.path.has(obj)
         if (cycleDetected) {
             throw new TypeError("cyclic object value")
+        }
+    }
+
+    private writePadding() {
+        if (this.indentLevel > 0) {
+            const indent = this.space!.repeat(this.indentLevel)
+            this.buffer.append(indent)
         }
     }
 }
