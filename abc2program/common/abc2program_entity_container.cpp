@@ -57,20 +57,16 @@ std::string Abc2ProgramEntityContainer::GetFullRecordNameById(const panda_file::
     return record_full_name;
 }
 
-std::string Abc2ProgramEntityContainer::GetFullMethodNameById(uint32_t method_id)
+std::string Abc2ProgramEntityContainer::GetFullMethodNameById(const panda_file::File::EntityId &method_id)
 {
-    auto it = method_full_name_map_.find(method_id);
+    auto method_id_offset = method_id.GetOffset();
+    auto it = method_full_name_map_.find(method_id_offset);
     if (it != method_full_name_map_.end()) {
         return it->second;
     }
-    std::string full_method_name = ConcatFullMethodNameById(panda_file::File::EntityId(method_id));
-    method_full_name_map_.emplace(method_id, full_method_name);
+    std::string full_method_name = ConcatFullMethodNameById(method_id);
+    method_full_name_map_.emplace(method_id_offset, full_method_name);
     return full_method_name;
-}
-
-std::string Abc2ProgramEntityContainer::GetFullMethodNameById(const panda_file::File::EntityId &method_id)
-{
-    return GetFullMethodNameById(method_id.GetOffset());
 }
 
 std::string Abc2ProgramEntityContainer::ConcatFullMethodNameById(const panda_file::File::EntityId &method_id)
@@ -118,9 +114,9 @@ void Abc2ProgramEntityContainer::AddModuleLiteralArrayId(uint32_t module_literal
     module_literal_array_id_set_.insert(module_literal_array_id);
 }
 
-void Abc2ProgramEntityContainer::AddUnnestedLiteralArrayId(const panda_file::File::EntityId &literal_array_id)
+void Abc2ProgramEntityContainer::AddUnnestedLiteralArrayId(uint32_t literal_array_id)
 {
-    unnested_literal_array_id_set_.insert(literal_array_id.GetOffset());
+    unnested_literal_array_id_set_.insert(literal_array_id);
 }
 
 void Abc2ProgramEntityContainer::AddProcessedNestedLiteralArrayId(uint32_t nested_literal_array_id)
@@ -145,11 +141,6 @@ std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(uint32_t literal_a
     auto cur_record_name = GetFullRecordNameById(panda_file::File::EntityId(current_class_id_));
     name << cur_record_name << UNDERLINE << literal_array_id;
     return name.str();
-}
-
-std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id)
-{
-    return GetLiteralArrayIdName(literal_array_id.GetOffset());
 }
 
 void Abc2ProgramEntityContainer::AddProgramString(const std::string &str) const

@@ -34,8 +34,8 @@ std::string AbcCodeConverter::IDToString(BytecodeInstruction bc_ins, panda_file:
         return str_constant;
     } else {
         ASSERT(bc_ins.IsIdMatchFlag(idx, BytecodeInstruction::Flags::LITERALARRAY_ID));
-        entity_container_.AddUnnestedLiteralArrayId(entity_id);
-        return entity_container_.GetLiteralArrayIdName(entity_id);
+        entity_container_.AddUnnestedLiteralArrayId(entity_id.GetOffset());
+        return entity_container_.GetLiteralArrayIdName(entity_id.GetOffset());
     }
 }
 

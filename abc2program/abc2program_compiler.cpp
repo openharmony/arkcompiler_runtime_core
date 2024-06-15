@@ -19,6 +19,14 @@
 
 namespace panda::abc2program {
 
+Abc2ProgramCompiler::~Abc2ProgramCompiler()
+{
+    if (prog_ != nullptr) {
+        delete prog_;
+        prog_ = nullptr;
+    }
+}
+
 bool Abc2ProgramCompiler::OpenAbcFile(const std::string &file_path)
 {
     file_ = panda_file::File::Open(file_path);
@@ -61,6 +69,21 @@ const panda_file::File &Abc2ProgramCompiler::GetAbcFile() const
 const panda_file::DebugInfoExtractor &Abc2ProgramCompiler::GetDebugInfoExtractor() const
 {
     return *debug_info_extractor_;
+}
+
+pandasm::Program *Abc2ProgramCompiler::CompileAbcFile()
+{
+    prog_ = new pandasm::Program();
+    prog_->lang = LANG_ECMA;
+    auto classes = file_->GetClasses();
+    for (size_t i = 0; i < classes.size(); i++) {
+        panda_file::File::EntityId record_id(classes[i]);
+        if (file_->IsExternal(record_id)) {
+            UNREACHABLE();
+        }
+        CompileAbcClass(record_id, *prog_);
+    }
+    return prog_;
 }
 
 void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &record_id,

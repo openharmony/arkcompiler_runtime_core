@@ -27,6 +27,14 @@ class Lit {
   *lit() {}
 }
 
+class NestedLiteralArray {
+  num: number = 1;
+  NestedLiteralArray() {}
+  constructor() {
+    'use sendable'
+  }
+}
+
 msg : string = '';
 
 function foo() {
@@ -64,7 +72,22 @@ function goo() {
 
 function hoo() {
   varA = 1.23;
-  var obj = {async * method() {}};
+  let obj = {async * method() {}};
+}
+
+var add = (a, b) => a + b;
+add(1, 2);
+
+function* generateFunc() {
+  yield 'hello';
+}
+
+async function* asyncGenerateFunc() {
+  yield 'hello';
+}
+
+const asyncArrowFunc = async () => {
+  
 }
 
 foo();

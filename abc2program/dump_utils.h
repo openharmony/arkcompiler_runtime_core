@@ -64,7 +64,6 @@ constexpr std::string_view DUMP_CONTENT_RIGHT_SQUARE_BRACKET = "]";
 constexpr std::string_view DUMP_CONTENT_LEFT_PARENTHESIS = "(";
 constexpr std::string_view DUMP_CONTENT_RIGHT_PARENTHESIS = ")";
 constexpr std::string_view DUMP_CONTENT_COMMA = ",";
-constexpr std::string_view DUMP_CONTENT_NESTED_LITERALARRAY = "$$NESTED_LITERALARRAY$$";
 constexpr std::string_view DUMP_CONTENT_LOCAL_VAR_TABLE = "#\t Start   Length  Register           Name   Signature\n";
 constexpr std::string_view DUMP_CONTENT_LINE_NUMBER = " # line: ";
 constexpr std::string_view DUMP_CONTENT_COLUMN_NUMBER = " # column: ";
@@ -89,6 +88,7 @@ public:
     static std::string GetMappedLabel(const std::string &label, const LabelMap &label_map);
     static pandasm::Ins DeepCopyIns(const pandasm::Ins &input);
     static pandasm::Function::CatchBlock DeepCopyCatchBlock(const pandasm::Function::CatchBlock &catch_block);
+    static uint32_t GetLiteralArrayIdFromName(const std::string &literal_array_id_name);
 
     static LiteralTagToStringMap literal_tag_to_string_map_;
     static OpcodeLiteralIdIndexMap opcode_literal_id_index_map_;

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "common/abc_file_utils.h"
 #include "dump_utils.h"
 
 namespace panda::abc2program {
@@ -149,6 +150,17 @@ pandasm::Function::CatchBlock PandasmDumperUtils::DeepCopyCatchBlock(
     res.catch_begin_label = catch_block.catch_begin_label;
     res.catch_end_label = catch_block.catch_end_label;
     return res;
+}
+
+uint32_t PandasmDumperUtils::GetLiteralArrayIdFromName(const std::string &literal_array_id_name)
+{
+    auto pos = literal_array_id_name.rfind(UNDERLINE);
+    ASSERT(pos != std::string::npos);
+    std::stringstream id_str(literal_array_id_name.substr(pos + 1));
+    uint32_t id = 0;
+    id_str >> id;
+    ASSERT(id_str.good());
+    return id;
 }
 
 }  // namespace panda::abc2program

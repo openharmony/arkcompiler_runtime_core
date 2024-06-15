@@ -79,7 +79,7 @@ private:
     std::string GetUpdatedCatchBlockLabel(const std::string &orignal_label) const;
     void ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const;
     void DumpStrings(std::ostream &os) const;
-    std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const;
+    std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array, uint32_t id) const;
     template <typename T>
     void SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const;
     template <typename T>
@@ -112,7 +112,7 @@ private:
     void SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, T &os, size_t i) const;
     template <typename T>
     void SerializeNestedLiteralArrayById(T &os, const std::string &literal_array_id_name) const;
-    PandasmDumperSource dumper_source_ = PandasmDumperSource::ECMASCRIPT;
+    PandasmDumperSource dumper_source_ = PandasmDumperSource::PANDA_ASSEMBLY;
     std::string abc_file_path_;
     std::vector<pandasm::Ins> original_dump_ins_;
     std::vector<pandasm::Ins*> original_dump_ins_ptrs_;
@@ -123,6 +123,7 @@ private:
     size_t regs_num_ = 0;
     std::unordered_map<pandasm::Ins*, uint32_t> original_ins_index_map_;
     std::unordered_map<pandasm::Ins*, uint32_t> final_ins_index_map_;
+    mutable std::unordered_set<uint32_t> processing_literal_array_id_set_;
 };
 
 }  // namespace panda::abc2program

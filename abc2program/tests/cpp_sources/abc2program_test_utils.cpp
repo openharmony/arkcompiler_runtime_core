@@ -19,27 +19,48 @@
 
 namespace panda::abc2program {
 
-std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"", ".#~@0=#HelloWorld",
-                                                                                    ".#~@1=#Lit", ".#*#hoo",
-                                                                                    ".#*#foo", ".#*#goo",
-                                                                                    ".#~@0>#instance_initializer",
-                                                                                    "HelloWorld", "varA", "error",
+std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_ = {"",
+                                                                                    ".#*#add",
+                                                                                    ".#*#asyncArrowFunc",
+                                                                                    ".#*#asyncGenerateFunc",
+                                                                                    ".#*#foo",
+                                                                                    ".#*#generateFunc",
+                                                                                    ".#*#goo",
+                                                                                    ".#*#hoo",
+                                                                                    ".#~@0=#HelloWorld",
+                                                                                    ".#~@1=#Lit",
+                                                                                    ".#~@2=#NestedLiteralArray",
+                                                                                    "HelloWorld",
+                                                                                    "error",
+                                                                                    "hello",
                                                                                     "inner catch",
-                                                                                    "masg", "max", "min", "msg",
-                                                                                    "null", "outter catch",
-                                                                                    "print", "prototype", "str",
-                                                                                    "string", "toString", "x"};
+                                                                                    "masg",
+                                                                                    "max",
+                                                                                    "min",
+                                                                                    "msg",
+                                                                                    "null",
+                                                                                    "num",
+                                                                                    "outter catch",
+                                                                                    "print",
+                                                                                    "prototype",
+                                                                                    "str",
+                                                                                    "string",
+                                                                                    "toString",
+                                                                                    "varA",
+                                                                                    "x"};
 std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {"_ESModuleRecord",
                                                                                     "_ESSlotNumberAnnotation",
                                                                                     "_ESScopeNamesRecord",
                                                                                     "_GLOBAL"};
 std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord",
+                                                                                          "_ESScopeNamesRecord",
+                                                                                          "_GLOBAL",
                                                                                           "_GLOBAL",
                                                                                           "_GLOBAL",
                                                                                           "_GLOBAL",
                                                                                           "_GLOBAL"};
 
-std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 6, 8, 21};
+std::set<size_t> Abc2ProgramTestUtils::helloworld_expected_literals_sizes_ = {2, 6, 8, 10, 21};
 
 template <typename T>
 bool Abc2ProgramTestUtils::ValidateStrings(const T &strings, const T &expected_strings)

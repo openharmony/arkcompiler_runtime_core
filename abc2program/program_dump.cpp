@@ -45,7 +45,7 @@ void PandasmProgramDumper::SetAbcFilePath(const std::string &abc_file_path)
 
 void PandasmProgramDumper::DumpAbcFilePath(std::ostream &os) const
 {
-    if (dumper_source_ == PandasmDumperSource::ECMASCRIPT) {
+    if (abc_file_path_.empty()) {
         return;
     }
     std::string file_abs_path = os::file::File::GetAbsolutePath(abc_file_path_).Value();
@@ -74,7 +74,8 @@ void PandasmProgramDumper::DumpLiteralArrayTable(std::ostream &os) const
         if (dumper_source_ == PandasmDumperSource::PANDA_ASSEMBLY) {
             os << it->first << DUMP_CONTENT_SPACE;
         }
-        os << SerializeLiteralArray(it->second);
+        auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(it->first);
+        os << SerializeLiteralArray(it->second, id);
         os << DUMP_CONTENT_DOUBLE_ENDL;
     }
     os << DUMP_CONTENT_DOUBLE_ENDL;
@@ -124,7 +125,7 @@ void PandasmProgramDumper::DumpFieldList(std::ostream &os, const pandasm::Record
     for (const auto &it : record.field_list) {
         DumpField(os, it);
     }
-    os << DUMP_CONTENT_SINGLE_ENDL << DUMP_CONTENT_RIGHT_CURLY_BRACKET << DUMP_CONTENT_SINGLE_ENDL;
+    os << DUMP_CONTENT_RIGHT_CURLY_BRACKET << DUMP_CONTENT_SINGLE_ENDL;
 }
 
 void PandasmProgramDumper::DumpField(std::ostream &os, const pandasm::Field &field) const
@@ -139,7 +140,6 @@ void PandasmProgramDumper::DumpFieldMetaData(std::ostream &os, const pandasm::Fi
     if (field.metadata->GetValue()) {
         DumpScalarValue(os, *(field.metadata->GetValue()));
     }
-    os << std::endl;
 }
 
 void PandasmProgramDumper::DumpAnnotationData(std::ostream &os, const pandasm::AnnotationData &anno) const
@@ -624,11 +624,12 @@ void PandasmProgramDumper::ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const
     auto it = program_->literalarray_table.find(id_str);
     ASSERT(it != program_->literalarray_table.end());
     const pandasm::LiteralArray &literal_array = it->second;
-    std::string replaced_value = SerializeLiteralArray(literal_array);
+    auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(it->first);
+    std::string replaced_value = SerializeLiteralArray(literal_array, id);
     pa_ins.ids[idx] = replaced_value;
 }
 
-std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralArray &lit_array) const
+std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralArray &lit_array, uint32_t id) const
 {
     if (lit_array.literals_.empty()) {
         return "";
@@ -641,7 +642,9 @@ std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralAr
     }
     ss << lit_array.literals_.size();
     ss << DUMP_CONTENT_SPACE << DUMP_CONTENT_LEFT_SQUARE_BRACKET << DUMP_CONTENT_SPACE;
+    processing_literal_array_id_set_.emplace(id);
     SerializeValues(lit_array, ss);
+    processing_literal_array_id_set_.erase(id);
     ss << DUMP_CONTENT_RIGHT_SQUARE_BRACKET << DUMP_CONTENT_RIGHT_CURLY_BRACKET;
     return ss.str();
 }
@@ -851,10 +854,17 @@ void PandasmProgramDumper::SerializeLiteralsAtIndex(const pandasm::LiteralArray 
 template <typename T>
 void PandasmProgramDumper::SerializeNestedLiteralArrayById(T &os, const std::string &literal_array_id_name) const
 {
-    if (dumper_source_ == PandasmDumperSource::ECMASCRIPT) {
-        os << DUMP_CONTENT_NESTED_LITERALARRAY;  // we use "$$NESTED-LITERALARRAY$$" as a place holder
-    } else {
+    if (dumper_source_ != PandasmDumperSource::ECMASCRIPT) {
         os << literal_array_id_name;
+        return;
+    }
+    auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(literal_array_id_name);
+    if (processing_literal_array_id_set_.find(id) == processing_literal_array_id_set_.end()) {
+        auto it = program_->literalarray_table.find(literal_array_id_name);
+        ASSERT(it != program_->literalarray_table.end());
+        os << SerializeLiteralArray(it->second, id);
+    } else {
+        UNREACHABLE();
     }
 }
 

@@ -40,7 +40,6 @@ public:
 
     std::string GetStringById(const panda_file::File::EntityId &entity_id) const;
     std::string GetFullRecordNameById(const panda_file::File::EntityId &class_id);
-    std::string GetFullMethodNameById(uint32_t method_id);
     std::string GetFullMethodNameById(const panda_file::File::EntityId &method_id);
     void AddProgramString(const std::string &str) const;
 
@@ -49,11 +48,10 @@ public:
     const std::unordered_set<uint32_t> &GetUnnestedLiteralArrayIdSet() const;
     std::unordered_set<uint32_t> &GetUnprocessedNestedLiteralArrayIdSet();
     void AddModuleLiteralArrayId(uint32_t module_literal_array_id);
-    void AddUnnestedLiteralArrayId(const panda_file::File::EntityId &literal_array_id);
+    void AddUnnestedLiteralArrayId(uint32_t literal_array_id);
     void AddProcessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     void TryAddUnprocessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     std::string GetLiteralArrayIdName(uint32_t literal_array_id);
-    std::string GetLiteralArrayIdName(const panda_file::File::EntityId &literal_array_id);
     std::string GetAbcFileAbsolutePath() const;
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
 
