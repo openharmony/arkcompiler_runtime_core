@@ -101,6 +101,18 @@ group("ark_host_mac_tools_packages") {
   }
 }
 
+if (!ark_standalone_build) {
+  group("ark_host_ohos_tools_packages") {
+    deps = []
+    if (host_os != "mac") {
+      deps += [ "$ark_root/disassembler:ark_disasm($build_root/toolchain/ohos:ohos_clang_arm64)" ]
+    }
+    foreach(plugin, enabled_plugins) {
+      deps += [ "$ark_root/plugins/$plugin:ark_host_ohos_tools_packages" ]
+    }
+  }
+}
+
 # Common config for ark source
 config("ark_config") {
   visibility = [
@@ -150,11 +162,20 @@ config("ark_config") {
       "PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS",
     ]
   } else if (is_ohos) {
-    defines += [
-      "PANDA_TARGET_OHOS",
-      "PANDA_TARGET_UNIX",
-      "PANDA_USE_FUTEX",
-    ]
+    if (is_build_sdk) {
+      defines += [
+        "PANDA_TARGET_OHOS",
+        "PANDA_TARGET_UNIX",
+        "PANDA_WITH_BYTECODE_OPTIMIZER",
+        "PANDA_USE_FUTEX",
+      ]
+    } else {
+      defines += [
+        "PANDA_TARGET_OHOS",
+        "PANDA_TARGET_UNIX",
+        "PANDA_USE_FUTEX",
+      ]
+    }
   } else {
     defines += [
       "PANDA_TARGET_UNIX",
