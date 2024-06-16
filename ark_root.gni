@@ -28,3 +28,8 @@ if (!ark_standalone_build) {
 }
 
 ark_root = "//arkcompiler/runtime_core"
+
+is_build_sdk = false
+if (device_name == "sdk") {
+  is_build_sdk = true
+}
