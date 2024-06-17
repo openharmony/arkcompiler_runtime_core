@@ -16,6 +16,7 @@
 #ifndef COMPILER_OPTIMIZER_ANALYSIS_BOUNDSRANGE_ANALYSIS_H
 #define COMPILER_OPTIMIZER_ANALYSIS_BOUNDSRANGE_ANALYSIS_H
 
+#include "optimizer/analysis/countable_loop_parser.h"
 #include "optimizer/ir/graph_visitor.h"
 #include "optimizer/ir/datatype.h"
 #include "optimizer/ir/inst.h"
@@ -79,6 +80,8 @@ public:
     BoundsRange AShr(const BoundsRange &range, DataType::Type type = DataType::INT64);
 
     BoundsRange Shl(const BoundsRange &range, DataType::Type type = DataType::INT64);
+
+    BoundsRange Diff(const BoundsRange &range) const;
 
     bool IsConst() const;
 
@@ -177,6 +180,9 @@ private:
     ArenaDoubleUnorderedMap<const BasicBlock *, const Inst *, BoundsRange> boundsRangeInfo_;
 };
 
+// index phi, iterations
+using LoopIterationsInfo = std::pair<CountableLoopInfo, uint64_t>;
+
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class BoundsAnalysis : public Analysis, public GraphVisitor {
 public:
@@ -226,7 +232,6 @@ public:
 
 #include "optimizer/ir/visitor.inc"
 private:
-    static bool ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri);
     static bool CheckTriangleCase(const BasicBlock *block, const BasicBlock *tgtBlock);
     static void ProcessNullCheck(GraphVisitor *v, const Inst *checkInst, const Inst *refInput);
 
@@ -248,9 +253,22 @@ private:
     static BoundsRange CalcNewBoundsRangeShl(const BoundsRangeInfo *bri, const Inst *inst);
     static BoundsRange CalcNewBoundsRangeAnd(const BoundsRangeInfo *bri, const Inst *inst);
     static bool CheckBoundsRange(const BoundsRangeInfo *bri, const Inst *inst);
+    template <bool CHECK_TYPE = false>
+    static bool MergePhiPredecessors(PhiInst *phi, BoundsRangeInfo *bri);
+    bool ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri);
+    std::optional<uint64_t> GetNestedLoopIterations(Loop *loop, CountableLoopInfo &loopInfo);
+    std::optional<LoopIterationsInfo> GetSimpleLoopIterationsInfo(Loop *loop);
+    std::optional<LoopIterationsInfo> GetNestedLoopIterationsInfo(Loop *loop);
+    Inst *TryFindCorrespondingInitPhi(PhiInst *updatePhi, BasicBlock *header);
+    bool ProcessIndexPhi(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfo);
+    bool ProcessInitPhi(PhiInst *initPhi, BoundsRangeInfo *bri);
+    bool ProcessUpdatePhi(PhiInst *updatePhi, BoundsRangeInfo *bri, uint64_t iterations);
+    void VisitLoop(BasicBlock *header, BasicBlock *updatePhiBlock);
 
 private:
+    bool loopsRevisiting_ {false};
     BoundsRangeInfo boundsRangeInfo_;
+    ArenaUnorderedMap<Loop *, std::optional<LoopIterationsInfo>> loopsInfoTable_;
 };
 }  // namespace ark::compiler
 
