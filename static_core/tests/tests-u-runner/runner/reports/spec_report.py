@@ -19,7 +19,7 @@ import re
 from datetime import date
 from os import path
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 import yaml
 
 from runner.test_base import Test
@@ -47,36 +47,45 @@ class SpecReport:
     EXCLUDED_DIVIDER = "-------|"
 
     def __init__(
-        self, results: List[Test], test_suite: str, report_path: Path, report_file: Optional[Path], spec_file: Path
+        self,
+        results: List[Test],
+        test_suite: str,
+        report_path: Path,
+        md_report: Optional[Path],
+        yaml_report: Optional[Path],
+        spec_file: Path,
     ):
         self.tests = results
         self.test_suite = test_suite
-        if report_file is None:
-            self.report_file = path.join(report_path, f"{test_suite}_spec-report.md")
-        else:
-            self.report_file = str(report_file)
+        self.report_file_md = (
+            str(md_report) if md_report else path.join(report_path, f"{test_suite}_spec-report.md")
+        )
+        self.report_file_yaml = (
+            str(yaml_report) if yaml_report else path.join(report_path, f"{test_suite}_spec-report.yaml")
+        )
         self.spec_file = spec_file
         self.has_excluded = False
-
-        # get spec data
-        pdf_loader = PdfLoader(spec_file).parse()
-        self.spec: SpecNode = pdf_loader.get_root_node()
-        self.spec_creation_date: str = pdf_loader.get_creation_date()
 
         # get config data
         fpath = Path(path.dirname(path.abspath(__file__)), self.SPEC_CONFIG_FILE)
         data = Path.read_text(fpath)
         self.config: Dict = yaml.safe_load(data)
 
+        # get spec data
+        pdf_loader = PdfLoader(spec_file, self.config).parse()
+        self.spec: SpecNode = pdf_loader.get_root_node()
+        self.spec_creation_date: str = pdf_loader.get_creation_date()
+
         # process test results
         self.__calculate()
 
     def __calculate_one_test(self, test: Test) -> None:
         node = self.spec
-        self.__update_summary(test, node)
+        self.__update_counters(test, node)
 
         dir_parts = test.test_id.split("/")
         out_dir = ""
+        last_node = node
         for dir_part in dir_parts:
             matches = _DIR_PATTERN.match(dir_part)
             if matches is None or len(matches.groups()) != 2:
@@ -84,12 +93,28 @@ class SpecReport:
             num = int(matches.group(1))
             out_dir = dir_part if out_dir == "" else out_dir + "/" + dir_part
             for _ in range(len(node.children), num):
-                SpecNode("?", "", node)
+                SpecNode("?", "", "", node)
             node = node.children[num - 1]
             node.dir = out_dir
-            self.__update_summary(test, node)
+            self.__update_counters(test, node)
+            last_node = node
+        self.__update_last_node_counters(test, last_node)
 
-    def __update_summary(self, test: Test, node: SpecNode) -> None:
+    def __update_counters(self, test: Test, node: SpecNode) -> None:
+        node.total_acc += 1
+        if test.excluded:
+            node.excluded_after_acc += 1
+            self.has_excluded = True
+        elif test.passed and not test.ignored:
+            node.passed_acc += 1
+        elif not test.passed and not test.ignored:
+            node.failed_acc += 1
+        elif test.passed and test.ignored:
+            node.ignored_but_passed_acc += 1
+        elif not test.passed and test.ignored:
+            node.ignored_acc += 1
+
+    def __update_last_node_counters(self, test: Test, node: SpecNode) -> None:
         node.total += 1
         if test.excluded:
             node.excluded_after += 1
@@ -138,14 +163,13 @@ class SpecReport:
     def __report_node(self, node: SpecNode) -> str:
         title = self.__fmt_str(node.prefix + " " + node.title)
         dirs = self.__fmt_str(node.dir.replace("/", "\u200B/\u200B"))
-        node_config = self.config.get(node.prefix)
-        status = node_config.get("status", "") if node_config is not None else ""
-        total = self.__fmt_num(node.total)
-        passed = self.__fmt_num(node.passed)
-        failed = self.__fmt_num(node.failed)
-        ign_pas = self.__fmt_num(node.ignored_but_passed)
-        ignored = self.__fmt_num(node.ignored)
-        excluded = (" " + self.__fmt_num(node.excluded_after) + " |") if self.has_excluded else ""
+        status = self.__fmt_str(node.status)
+        total = self.__fmt_num(node.total_acc)
+        passed = self.__fmt_num(node.passed_acc)
+        failed = self.__fmt_num(node.failed_acc)
+        ign_pas = self.__fmt_num(node.ignored_but_passed_acc)
+        ignored = self.__fmt_num(node.ignored_acc)
+        excluded = (" " + self.__fmt_num(node.excluded_after_acc) + " |") if self.has_excluded else ""
         return f"| {title} | {dirs} | {status} | {total} | {passed} | {failed} | {ign_pas} | {ignored} |{excluded}"
 
     def __report_nodes(self, nodes: List[SpecNode], lines: List[str]) -> None:
@@ -154,9 +178,13 @@ class SpecReport:
             self.__report_nodes(node.children, lines)
 
     def populate_report(self) -> None:
+        self.populate_report_md()
+        self.populate_report_yaml()
+
+    def populate_report_md(self) -> None:
         template_path = path.join(path.dirname(path.abspath(__file__)), self.TEMPLATE)
-        with open(template_path, "r", encoding="utf-8") as file_pointer:
-            report = file_pointer.read()
+        with open(template_path, "r", encoding="utf-8") as file:
+            report = file.read()
         report = report.replace(self.REPORT_DATE, str(date.today()))
         report = report.replace(self.REPORT_TEST_SUITE, self.test_suite)
         report = report.replace(self.REPORT_SPEC_FILE, self.__fmt_str(str(self.spec_file)))
@@ -174,5 +202,22 @@ class SpecReport:
         lines.append(self.__report_node(self.spec))  # root node - summary line at the bottom
         result = "\n".join(lines)
         report = report.replace(self.REPORT_RESULT, result)
-        Log.default(_LOGGER, f"Spec coverage report is saved to '{self.report_file}'")
-        write_2_file(self.report_file, report)
+        Log.default(_LOGGER, f"Spec coverage report is saved to '{self.report_file_md}'")
+        write_2_file(self.report_file_md, report)
+
+    def populate_report_yaml(self) -> None:
+        res: dict = {
+            'report_title': 'ArkTS Specification Coverage Report',
+            'report_date': str(date.today()),
+            'spec_file': str(self.spec_file),
+            'spec_date': self.spec_creation_date,
+            'test_suite': self.test_suite,
+            'data': self.spec.to_dict()
+        }
+        yaml.SafeDumper.add_representer(SpecNode, SpecReport.obj_to_dict)
+        with open(self.report_file_yaml, mode="wt", encoding="utf-8") as file:
+            yaml.safe_dump(res, file, default_flow_style=False, sort_keys=False)
+
+    @staticmethod
+    def obj_to_dict(dumper: yaml.SafeDumper, data: SpecNode) -> Any:
+        return  dumper.represent_dict(data.to_dict())

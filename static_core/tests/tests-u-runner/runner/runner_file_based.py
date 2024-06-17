@@ -280,6 +280,7 @@ class RunnerFileBased(Runner):
                 self.name,
                 self.work_dir.report,
                 self.config.report.spec_report_file,
+                self.config.report.spec_report_yaml,
                 self.config.report.spec_file)
             spec_report.populate_report()
 

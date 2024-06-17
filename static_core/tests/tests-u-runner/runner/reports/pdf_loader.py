@@ -17,18 +17,18 @@
 
 from __future__ import annotations
 from pathlib import Path
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Dict
 from datetime import datetime
 from PyPDF2 import PdfReader, DocumentInformation
 from PyPDF2.generic import Destination
 from PyPDF2.types import OutlineType
 from runner.reports.spec_node import SpecNode
 
-
 class PdfLoader:
-    def __init__(self, fpath: Path):
+    def __init__(self, fpath: Path, config: Optional[Dict]):
         self.spec_file = fpath
-        self.spec: SpecNode = SpecNode("SUMMARY", "", None)  # root node
+        self.config: Optional[Dict] = config
+        self.spec: SpecNode = SpecNode("SUMMARY", "", "", None)  # root node
         self.creation_date: Optional[datetime] = None
 
     @staticmethod
@@ -37,8 +37,10 @@ class PdfLoader:
 
     def __read_dest(self, item: Destination, counter: int, parent: SpecNode) -> SpecNode:
         new_prefix: str = str(counter) if parent.prefix == "" else f"{parent.prefix}.{counter}"
-        title: str = item.title if item and item.title else ""
-        node = SpecNode(title, new_prefix, parent)
+        title: str = str(item.title) if item and item.title else ""
+        node_config = self.config.get(new_prefix) if self.config is not None else None
+        status: str = node_config.get("status", "") if node_config is not None else ""
+        node = SpecNode(title, new_prefix, status, parent)
         return node
 
     def __read_list(self, items: List, parent: SpecNode) -> None:

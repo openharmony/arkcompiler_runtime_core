@@ -265,13 +265,18 @@ def add_general_report_args(parser: argparse.ArgumentParser) -> None:
              'where $WorkDir is the folder specified by the option --work-dir')
     parser.add_argument(
         '--spec-report', action='store_true', dest='spec_report', default=None,
-        help='creates additional specification coverage report with counting tests for each chapter/section. '
-             'By default the report is $WorkDir/report/<suite name>_spec-report.md '
+        help='creates specification coverage report in two formats: markdown and YAML. '
+             'By default the report files are written into $WorkDir/report/ directory, '
              'where $WorkDir is the folder specified by the option --work-dir')
     parser.add_argument(
         '--spec-report-file', action='store', dest='spec_report_file', default=None,
-        help='specifies custom file name for the specification coverage report. '
+        help='specifies custom file name for the specification coverage report in markdown format. '
              'By default the report is $WorkDir/report/<suite name>_spec-report.md '
+             'where $WorkDir is the folder specified by the option --work-dir')
+    parser.add_argument(
+        '--spec-report-yaml', action='store', dest='spec_report_yaml', default=None,
+        help='specifies custom file name for the specification coverage report in YAML format. '
+             'By default the report is $WorkDir/report/<suite name>_spec-report.yaml '
              'where $WorkDir is the folder specified by the option --work-dir')
     parser.add_argument(
         '--spec-file', action='store', dest='spec_file', default=None, type=is_file,
