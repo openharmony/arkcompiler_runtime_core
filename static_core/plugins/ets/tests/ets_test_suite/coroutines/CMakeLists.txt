@@ -211,26 +211,23 @@ if (NOT PANDA_TARGET_ARM32)
                             MODE "INT" "JIT"
     )
 
-    # AddressSanitizer: stack-buffer-overflow #12611
-    if (NOT PANDA_ENABLE_ADDRESS_SANITIZER)
-        add_ets_coroutines_test(FILE launch_oom.ets
-                                SKIP_ARM32_COMPILER
-                                OPTIONS "--gc-type=epsilon"
-                                IMPL "STACKFUL"
-                                OPTION_SETS_STACKFUL "JS_POOL"
-                                WORKERS "ONE"
-                                MODE "INT" "JIT" "AOT"
-        )
+    add_ets_coroutines_test(FILE launch_oom.ets
+                            SKIP_ARM32_COMPILER
+                            OPTIONS "--gc-type=epsilon"
+                            IMPL "STACKFUL"
+                            OPTION_SETS_STACKFUL "JS_POOL"
+                            WORKERS "ONE"
+                            MODE "INT" "JIT" "AOT"
+    )
 
-        add_ets_coroutines_test(FILE launch_oom.ets
-                                SKIP_ARM32_COMPILER
-                                OPTIONS "--gc-type=epsilon"
-                                IMPL "STACKFUL"
-                                OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL"
-                                WORKERS "ONE"
-                                MODE "INT" "JIT"
-        )
-    endif()
+    add_ets_coroutines_test(FILE launch_oom.ets
+                            SKIP_ARM32_COMPILER
+                            OPTIONS "--gc-type=epsilon"
+                            IMPL "STACKFUL"
+                            OPTION_SETS_STACKFUL "DEFAULT" "JS" "POOL"
+                            WORKERS "ONE"
+                            MODE "INT" "JIT"
+    )
 
     # Depends on issue 12886
     add_ets_coroutines_test(FILE multiple_launch.ets

@@ -104,10 +104,7 @@ add_ets_gc_test(FILE finalization_registry_test.ets OPTIONS "--gc-type=g1-gc" "-
 add_ets_gc_test(FILE scheduled_gc.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" "--gc-use-nth-alloc-trigger=true" MODE "INT")
 add_ets_gc_test(FILE scheduled_gc_trigger_exception.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never" MODE "INT")
 
-if (NOT PANDA_ENABLE_THREAD_SANITIZER)
-    #flaky fail: ThreadSanitizer: data race #12611
-    add_ets_gc_test(FILE postpone_gc_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" MODE "INT")
-endif()
+add_ets_gc_test(FILE postpone_gc_test.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" MODE "INT")
 
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "INT")
 add_ets_gc_test(FILE run_gc_every_safepoint.ets OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--run-gc-every-safepoint" MODE "JIT")
