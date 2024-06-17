@@ -203,13 +203,11 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_all_raw
     LAUNCHER_ARGS "testPromiseAllRawValues"
 )
 
-# NOTE(audovichenko, #15523): enable this test when vpukhov fixes IMT
-# Array.iterator() returns AbstractMethodStub
-#panda_ets_interop_js_test(ets_interop_js_test_promise_all_iterable
-#    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-#    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#    LAUNCHER_ARGS "testPromiseAllIterable"
-#)
+panda_ets_interop_js_test(ets_interop_js_test_promise_all_iterable
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAllIterable"
+)
 
 panda_ets_interop_js_test(ets_interop_js_test_promise_allsettled_empty
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
@@ -247,13 +245,11 @@ panda_ets_interop_js_test(ets_interop_js_test_promise_any_raw
     LAUNCHER_ARGS "testPromiseAnyRawValues"
 )
 
-# NOTE(audovichenko, #15523): enable this test when vpukhov fixes IMT
-# Array.iterator() returns AbstractMethodStub
-#panda_ets_interop_js_test(ets_interop_js_test_promise_any_iterable
-#    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
-#    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
-#    LAUNCHER_ARGS "testPromiseAnyRejected"
-#)
+panda_ets_interop_js_test(ets_interop_js_test_promise_any_iterable
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
+    LAUNCHER_ARGS "testPromiseAnyRejected"
+)
 
 panda_ets_interop_js_test(ets_interop_js_test_promise_race_resolved
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.ets
