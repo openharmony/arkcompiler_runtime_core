@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ using SharedReferencePool = ItemsPool<SharedReference, SharedReference::MAX_MARK
 
 class SharedReferenceStorage : private SharedReferencePool {
 public:
-    static std::unique_ptr<SharedReferenceStorage> Create();
+    PANDA_PUBLIC_API static std::unique_ptr<SharedReferenceStorage> Create();
     ~SharedReferenceStorage() = default;
 
     static bool HasReference(EtsObject *etsObject)
@@ -44,12 +44,12 @@ public:
         return SharedReference::HasReference(etsObject);
     }
 
-    SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+    PANDA_PUBLIC_API SharedReference *CreateETSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
     SharedReference *CreateJSObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
     SharedReference *CreateHybridObjectRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
 
-    SharedReference *GetReference(napi_env env, napi_value jsObject);
-    SharedReference *GetReference(EtsObject *etsObject);
+    PANDA_PUBLIC_API SharedReference *GetReference(napi_env env, napi_value jsObject);
+    PANDA_PUBLIC_API SharedReference *GetReference(EtsObject *etsObject);
 
     SharedReference *GetNextAlloc() const
     {
@@ -64,12 +64,13 @@ private:
     NO_MOVE_SEMANTIC(SharedReferenceStorage);
 
     template <SharedReference::InitFn REF_INIT>
-    inline SharedReference *CreateReference(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject);
+    PANDA_PUBLIC_API inline SharedReference *CreateReference(InteropCtx *ctx, EtsObject *etsObject,
+                                                             napi_value jsObject);
 
-    SharedReference *GetReference(void *data);
-    void RemoveReference(SharedReference *sharedRef);
+    PANDA_PUBLIC_API SharedReference *GetReference(void *data);
+    PANDA_PUBLIC_API void RemoveReference(SharedReference *sharedRef);
 
-    bool CheckAlive(void *data);
+    PANDA_PUBLIC_API bool CheckAlive(void *data);
     friend class SharedReference;
     friend class testing::SharedReferenceStorage1GTest;
 };

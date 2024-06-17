@@ -25,6 +25,7 @@
 #include "generated/base_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
+#include "interop_js/napi_impl/napi_impl.h"
 
 namespace ark::ets::interop::js {
 
@@ -342,6 +343,9 @@ static napi_value Init(napi_env env, napi_value exports)
     };
 
     NAPI_CHECK_FATAL(napi_define_properties(env, exports, desc.size(), desc.data()));
+
+    NapiImpl::InitNapi();
+
     return exports;
 }
 

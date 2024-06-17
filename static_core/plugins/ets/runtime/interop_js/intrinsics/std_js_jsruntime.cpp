@@ -14,231 +14,130 @@
  */
 
 #include "intrinsics.h"
-#include "plugins/ets/runtime/interop_js/intrinsics_api.h"
+#include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "interop_js/call/call.h"
 
-namespace ark::ets::interop::js {
-
-namespace notimpl {
-
-[[noreturn]] static void NotImplementedHook()
-{
-    LOG(FATAL, ETS) << "NotImplementedHook called for JSRuntime intrinsic";
-    UNREACHABLE();
-}
-
-template <typename R, typename... Args>
-static R NotImplementedAdapter([[maybe_unused]] Args... args)
-{
-    NotImplementedHook();
-}
-
-static const IntrinsicsAPI S_INTRINSICS_API = {
-    // clang-format off
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    NotImplementedAdapter,
-    // clang-format on
-};
-
-}  // namespace notimpl
-
-static const IntrinsicsAPI *S_INTRINSICS_API = &notimpl::S_INTRINSICS_API;
-
-PANDA_PUBLIC_API void JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAPI *intrinsicsApi)
-{
-    S_INTRINSICS_API = intrinsicsApi;
-}
-
-namespace intrinsics {
+namespace ark::ets::interop::js::intrinsics {
 
 void JSRuntimeFinalizationRegistryCallbackIntrinsic(EtsObject *obj)
 {
-    S_INTRINSICS_API->JSRuntimeFinalizationRegistryCallback(obj);
+    JSRuntimeFinalizationRegistryCallback(obj);
 }
 
 JSValue *JSRuntimeNewJSValueDoubleIntrinsic(double v)
 {
-    return S_INTRINSICS_API->JSRuntimeNewJSValueDouble(v);
+    return JSRuntimeNewJSValueDouble(v);
 }
 
 JSValue *JSRuntimeNewJSValueBooleanIntrinsic(uint8_t v)
 {
-    return S_INTRINSICS_API->JSRuntimeNewJSValueBoolean(v);
+    return JSRuntimeNewJSValueBoolean(v);
 }
 
 JSValue *JSRuntimeNewJSValueStringIntrinsic(EtsString *v)
 {
-    return S_INTRINSICS_API->JSRuntimeNewJSValueString(v);
+    return JSRuntimeNewJSValueString(v);
 }
 
 JSValue *JSRuntimeNewJSValueObjectIntrinsic(EtsObject *v)
 {
-    return S_INTRINSICS_API->JSRuntimeNewJSValueObject(v);
+    return JSRuntimeNewJSValueObject(v);
 }
 
 double JSRuntimeGetValueDoubleIntrinsic(JSValue *etsJsValue)
 {
-    return S_INTRINSICS_API->JSRuntimeGetValueDouble(etsJsValue);
+    return JSRuntimeGetValueDouble(etsJsValue);
 }
 
 uint8_t JSRuntimeGetValueBooleanIntrinsic(JSValue *etsJsValue)
 {
-    return S_INTRINSICS_API->JSRuntimeGetValueBoolean(etsJsValue);
+    return JSRuntimeGetValueBoolean(etsJsValue);
 }
 
 EtsString *JSRuntimeGetValueStringIntrinsic(JSValue *etsJsValue)
 {
-    return S_INTRINSICS_API->JSRuntimeGetValueString(etsJsValue);
+    return JSRuntimeGetValueString(etsJsValue);
 }
 
 EtsObject *JSRuntimeGetValueObjectIntrinsic(JSValue *etsJsValue, EtsObject *cls)
 {
-    return S_INTRINSICS_API->JSRuntimeGetValueObject(etsJsValue, cls);
+    return JSRuntimeGetValueObject(etsJsValue, cls);
 }
 
 JSValue *JSRuntimeGetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
 {
-    return S_INTRINSICS_API->JSRuntimeGetPropertyJSValue(etsJsValue, etsPropName);
+    return JSValueNamedGetter<JSConvertJSValue>(etsJsValue, etsPropName);
 }
 
 double JSRuntimeGetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
 {
-    return S_INTRINSICS_API->JSRuntimeGetPropertyDouble(etsJsValue, etsPropName);
+    return JSValueNamedGetter<JSConvertF64>(etsJsValue, etsPropName);
 }
 
 EtsString *JSRuntimeGetPropertyStringIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
 {
-    return S_INTRINSICS_API->JSRuntimeGetPropertyString(etsJsValue, etsPropName);
+    return JSValueNamedGetter<JSConvertString>(etsJsValue, etsPropName);
 }
 
 uint8_t JSRuntimeGetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName)
 {
-    return static_cast<uint8_t>(S_INTRINSICS_API->JSRuntimeGetPropertyBoolean(etsJsValue, etsPropName));
+    return static_cast<uint8_t>(JSValueNamedGetter<JSConvertU1>(etsJsValue, etsPropName));
 }
 
 void JSRuntimeSetPropertyJSValueIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, JSValue *value)
 {
-    S_INTRINSICS_API->JSRuntimeSetPropertyJSValue(etsJsValue, etsPropName, value);
+    JSValueNamedSetter<JSConvertJSValue>(etsJsValue, etsPropName, value);
 }
 
 void JSRuntimeSetPropertyDoubleIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, double value)
 {
-    S_INTRINSICS_API->JSRuntimeSetPropertyDouble(etsJsValue, etsPropName, value);
+    JSValueNamedSetter<JSConvertF64>(etsJsValue, etsPropName, value);
 }
 
 void JSRuntimeSetPropertyStringIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, EtsString *value)
 {
-    S_INTRINSICS_API->JSRuntimeSetPropertyString(etsJsValue, etsPropName, value);
+    JSValueNamedSetter<JSConvertString>(etsJsValue, etsPropName, value);
 }
 
 void JSRuntimeSetPropertyBooleanIntrinsic(JSValue *etsJsValue, EtsString *etsPropName, uint8_t value)
 {
-    S_INTRINSICS_API->JSRuntimeSetPropertyBoolean(etsJsValue, etsPropName, static_cast<bool>(value));
+    JSValueNamedSetter<JSConvertU1>(etsJsValue, etsPropName, static_cast<bool>(value));
 }
 
 JSValue *JSRuntimeGetElementJSValueIntrinsic(JSValue *etsJsValue, int32_t index)
 {
-    return S_INTRINSICS_API->JSRuntimeGetElementJSValue(etsJsValue, index);
+    return JSValueIndexedGetter<JSConvertJSValue>(etsJsValue, index);
 }
 
 double JSRuntimeGetElementDoubleIntrinsic(JSValue *etsJsValue, int32_t index)
 {
-    return S_INTRINSICS_API->JSRuntimeGetElementDouble(etsJsValue, index);
+    return JSValueIndexedGetter<JSConvertF64>(etsJsValue, index);
 }
 
 JSValue *JSRuntimeGetUndefinedIntrinsic()
 {
-    return S_INTRINSICS_API->JSRuntimeGetUndefined();
+    return JSRuntimeGetUndefined();
 }
 
 JSValue *JSRuntimeGetNullIntrinsic()
 {
-    return S_INTRINSICS_API->JSRuntimeGetNull();
+    return JSRuntimeGetNull();
 }
 
 JSValue *JSRuntimeGetGlobalIntrinsic()
 {
-    return S_INTRINSICS_API->JSRuntimeGetGlobal();
+    return JSRuntimeGetGlobal();
 }
 
 JSValue *JSRuntimeCreateObjectIntrinsic()
 {
-    return S_INTRINSICS_API->JSRuntimeCreateObject();
+    return JSRuntimeCreateObject();
 }
 
 uint8_t JSRuntimeInstanceOfDynamicIntrinsic(JSValue *object, JSValue *ctor)
 {
-    return S_INTRINSICS_API->JSRuntimeInstanceOfDynamic(object, ctor);
+    return JSRuntimeInstanceOfDynamic(object, ctor);
 }
 
 uint8_t JSRuntimeInstanceOfStaticIntrinsic(JSValue *object, EtsObject *cls)
@@ -246,90 +145,90 @@ uint8_t JSRuntimeInstanceOfStaticIntrinsic(JSValue *object, EtsObject *cls)
     // NOTE(v.cherkashin):
     //  Delete cast and use 'EtsClass *cls' instead of 'EtsObject *cls' when issue #15273 was resolved
     ASSERT(cls->GetClass()->IsClassClass());
-    return S_INTRINSICS_API->JSRuntimeInstanceOfStatic(object, reinterpret_cast<EtsClass *>(cls));
+    return JSRuntimeInstanceOfStatic(object, reinterpret_cast<EtsClass *>(cls));
 }
 
 uint8_t JSRuntimeInitJSCallClassIntrinsic(EtsString *clsName)
 {
-    return S_INTRINSICS_API->JSRuntimeInitJSCallClass(clsName);
+    return JSRuntimeInitJSCallClass(clsName);
 }
 
 uint8_t JSRuntimeInitJSNewClassIntrinsic(EtsString *clsName)
 {
-    return S_INTRINSICS_API->JSRuntimeInitJSNewClass(clsName);
+    return JSRuntimeInitJSNewClass(clsName);
 }
 
 JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)
 {
-    return S_INTRINSICS_API->JSRuntimeLoadModule(module);
+    return JSRuntimeLoadModule(module);
 }
 
 uint8_t JSRuntimeStrictEqualIntrinsic(JSValue *lhs, JSValue *rhs)
 {
-    return S_INTRINSICS_API->JSRuntimeStrictEqual(lhs, rhs);
+    return JSRuntimeStrictEqual(lhs, rhs);
 }
 
 EtsString *JSValueToStringIntrinsic(JSValue *object)
 {
-    return S_INTRINSICS_API->JSValueToString(object);
+    return JSValueToString(object);
 }
 
 EtsString *JSONStringifyIntrinsic(JSValue *obj)
 {
-    return S_INTRINSICS_API->JSONStringify(obj);
+    return JSONStringify(obj);
 }
 
 // Compiler intrinsics for fast interop
 void *CompilerGetJSNamedPropertyIntrinsic(void *val, void *propName)
 {
-    return S_INTRINSICS_API->CompilerGetJSNamedProperty(val, reinterpret_cast<char *>(propName));
+    return CompilerGetJSNamedProperty(val, reinterpret_cast<char *>(propName));
 }
 
 void *CompilerGetJSPropertyIntrinsic(void *val, void *prop)
 {
-    return S_INTRINSICS_API->CompilerGetJSProperty(val, prop);
+    return CompilerGetJSProperty(val, prop);
 }
 
 void *CompilerGetJSElementIntrinsic(void *val, int32_t index)
 {
-    return S_INTRINSICS_API->CompilerGetJSElement(val, index);
+    return CompilerGetJSElement(val, index);
 }
 
 void *CompilerJSCallCheckIntrinsic(void *fn)
 {
-    return S_INTRINSICS_API->CompilerJSCallCheck(fn);
+    return CompilerJSCallCheck(fn);
 }
 
 void *CompilerJSCallFunctionIntrinsic(void *obj, void *fn, uint32_t argc, void *args)
 {
-    return S_INTRINSICS_API->CompilerJSCallFunction(obj, fn, argc, args);
+    return CompilerJSCallFunction<true>(obj, fn, argc, args);
 }
 
 void CompilerJSCallVoidFunctionIntrinsic(void *obj, void *fn, uint32_t argc, void *args)
 {
-    S_INTRINSICS_API->CompilerJSCallVoidFunction(obj, fn, argc, args);
+    CompilerJSCallFunction<false>(obj, fn, argc, args);
 }
 
 void *CompilerJSNewInstanceIntrinsic(void *fn, uint32_t argc, void *args)
 {
-    return S_INTRINSICS_API->CompilerJSNewInstance(fn, argc, args);
+    return CompilerJSNewInstance(fn, argc, args);
 }
 
 void *CompilerConvertVoidToLocalIntrinsic()
 {
-    return S_INTRINSICS_API->CompilerConvertVoidToLocal();
+    return CompilerConvertVoidToLocal();
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CONVERT_LOCAL_VALUE(type, cpptype)                               \
-    void *CompilerConvert##type##ToLocalIntrinsic(cpptype etsVal)        \
-    {                                                                    \
-        return S_INTRINSICS_API->CompilerConvert##type##ToLocal(etsVal); \
-    }                                                                    \
-                                                                         \
-    cpptype CompilerConvertLocalTo##type##Intrinsic(void *val)           \
-    {                                                                    \
-        return S_INTRINSICS_API->CompilerConvertLocalTo##type(val);      \
+#define CONVERT_LOCAL_VALUE(type, cpptype)                        \
+    void *CompilerConvert##type##ToLocalIntrinsic(cpptype etsVal) \
+    {                                                             \
+        return ConvertToLocal<JSConvert##type>(etsVal);           \
+    }                                                             \
+                                                                  \
+    cpptype CompilerConvertLocalTo##type##Intrinsic(void *val)    \
+    {                                                             \
+        return ConvertFromLocal<JSConvert##type>(val);            \
     }
 
 CONVERT_LOCAL_VALUE(U1, uint8_t)
@@ -349,47 +248,46 @@ CONVERT_LOCAL_VALUE(JSValue, JSValue *)
 
 void *CompilerConvertRefTypeToLocalIntrinsic(EtsObject *etsVal)
 {
-    return S_INTRINSICS_API->CompilerConvertRefTypeToLocal(etsVal);
+    return CompilerConvertRefTypeToLocal(etsVal);
 }
 EtsString *CompilerConvertLocalToStringIntrinsic(void *val)
 {
-    return S_INTRINSICS_API->CompilerConvertLocalToString(val);
+    return CompilerConvertLocalToString(val);
 }
 
 EtsObject *CompilerConvertLocalToRefTypeIntrinsic(void *klassPtr, void *val)
 {
-    return S_INTRINSICS_API->CompilerConvertLocalToRefType(klassPtr, val);
+    return CompilerConvertLocalToRefType(klassPtr, val);
 }
 
 void CompilerCreateLocalScopeIntrinsic()
 {
-    S_INTRINSICS_API->CreateLocalScope();
+    CreateLocalScope();
 }
 
 void CompilerDestroyLocalScopeIntrinsic()
 {
-    S_INTRINSICS_API->CompilerDestroyLocalScope();
+    CompilerDestroyLocalScope();
 }
 
 void *CompilerLoadJSConstantPoolIntrinsic()
 {
-    return S_INTRINSICS_API->CompilerLoadJSConstantPool();
+    return CompilerLoadJSConstantPool();
 }
 
 void CompilerInitJSCallClassForCtxIntrinsic(void *klass)
 {
-    return S_INTRINSICS_API->CompilerInitJSCallClassForCtx(klass);
+    return CompilerInitJSCallClassForCtx(klass);
 }
 
 void PromiseInteropResolveIntrinsic(EtsObject *value, EtsLong deferred)
 {
-    S_INTRINSICS_API->PromiseInteropResolve(value, deferred);
+    PromiseInteropResolve(value, deferred);
 }
 
 void PromiseInteropRejectIntrinsic(EtsObject *value, EtsLong deferred)
 {
-    S_INTRINSICS_API->PromiseInteropReject(value, deferred);
+    PromiseInteropReject(value, deferred);
 }
 
-}  // namespace intrinsics
-}  // namespace ark::ets::interop::js
+}  // namespace ark::ets::interop::js::intrinsics

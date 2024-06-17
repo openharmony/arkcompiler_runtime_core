@@ -16,38 +16,48 @@ enable_language(ASM)
 set(ETS_INTEROP_ARCH_SOURCES)
 
 if(PANDA_TARGET_ARM32_ABI_SOFT OR PANDA_TARGET_ARM32_ABI_SOFTFP)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm32/call_bridge_arm32.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES ${ETS_EXT_SOURCES}/interop_js/arch/arm32/call_bridge_arm32.S)
 elseif(PANDA_TARGET_ARM32_ABI_HARD)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm32/call_bridge_arm32hf.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES ${ETS_EXT_SOURCES}/interop_js/arch/arm32/call_bridge_arm32hf.S)
 elseif(PANDA_TARGET_ARM64)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/arm64/call_bridge_aarch64.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES ${ETS_EXT_SOURCES}/interop_js/arch/arm64/call_bridge_aarch64.S)
 elseif(PANDA_TARGET_AMD64)
-    list(APPEND ETS_INTEROP_ARCH_SOURCES arch/amd64/call_bridge_amd64.S)
+    list(APPEND ETS_INTEROP_ARCH_SOURCES ${ETS_EXT_SOURCES}/interop_js/arch/amd64/call_bridge_amd64.S)
 endif()
 
 panda_ets_interop_js_plugin(ets_interop_js_napi
     SOURCES
-        interop_context.cpp
         ets_vm_plugin.cpp
-        intrinsics_api_impl.cpp
-        call/call_js.cpp
-        call/call_ets.cpp
-        js_proxy/js_proxy.cpp
-        ets_proxy/ets_class_wrapper.cpp
-        ets_proxy/ets_field_wrapper.cpp
-        ets_proxy/ets_method_set.cpp
-        ets_proxy/ets_method_wrapper.cpp
-        ets_proxy/shared_reference.cpp
-        ets_proxy/shared_reference_storage.cpp
-        ets_proxy/ets_proxy.cpp
-        js_value.cpp
-        js_refconvert.cpp
-        js_refconvert_builtin.cpp
-        js_refconvert_function.cpp
-        interop_common.cpp
-        ts2ets_copy.cpp
-        js_job_queue.cpp
-        ${ETS_INTEROP_ARCH_SOURCES}
     LIBRARIES
         arkruntime
 )
+
+panda_target_sources(arkruntime_obj PRIVATE
+        ${ETS_EXT_SOURCES}/interop_js/intrinsics/std_js_jsruntime.cpp
+        ${ETS_EXT_SOURCES}/interop_js/interop_context.cpp
+        ${ETS_EXT_SOURCES}/interop_js/intrinsics_api_impl.cpp
+        ${ETS_EXT_SOURCES}/interop_js/call/call_js.cpp
+        ${ETS_EXT_SOURCES}/interop_js/call/call_ets.cpp
+        ${ETS_EXT_SOURCES}/interop_js/js_proxy/js_proxy.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_class_wrapper.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_field_wrapper.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_method_wrapper.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_method_set.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/shared_reference_storage.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ets_proxy/ets_proxy.cpp
+        ${ETS_EXT_SOURCES}/interop_js/js_value.cpp
+        ${ETS_EXT_SOURCES}/interop_js/js_refconvert.cpp
+        ${ETS_EXT_SOURCES}/interop_js/js_refconvert_builtin.cpp
+        ${ETS_EXT_SOURCES}/interop_js/js_refconvert_function.cpp
+        ${ETS_EXT_SOURCES}/interop_js/napi_impl/napi_impl.cpp
+        ${ETS_EXT_SOURCES}/interop_js/interop_common.cpp
+        ${ETS_EXT_SOURCES}/interop_js/ts2ets_copy.cpp
+        ${ETS_EXT_SOURCES}/interop_js/js_job_queue.cpp
+        ${ETS_INTEROP_ARCH_SOURCES}
+)
+if(PANDA_TARGET_OHOS)
+    panda_target_link_libraries(arkruntime_obj ace_napi.z  -Wl,--no-undefined)
+else()
+    panda_target_include_directories(arkruntime_obj SYSTEM INTERFACE ${NAPI_HEADERS_PATH})
+endif()

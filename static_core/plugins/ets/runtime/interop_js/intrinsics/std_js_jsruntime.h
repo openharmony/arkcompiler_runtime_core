@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,5 @@
 
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTRINSICS_STD_JS_JSRUNTIME_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTRINSICS_STD_JS_JSRUNTIME_H_
-
-namespace ark::ets::interop::js {
-
-struct IntrinsicsAPI;
-
-void JSRuntimeIntrinsicsSetIntrinsicsAPI(const IntrinsicsAPI *intrinsicsApi);
-
-}  // namespace ark::ets::interop::js
 
 #endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_INTRINSICS_STD_JS_JSRUNTIME_H_

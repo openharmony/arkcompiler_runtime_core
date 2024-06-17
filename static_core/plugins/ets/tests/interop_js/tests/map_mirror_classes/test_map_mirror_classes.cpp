@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,12 +35,13 @@ static void CheckOffsetOfFields(const char *className, const std::vector<MemberI
     EtsClassLinker *etsClassLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
     EtsClass *klass = etsClassLinker->GetClass(className);
     ASSERT_NE(klass, nullptr);
-    ASSERT_EQ(klass->GetInstanceFieldsNumber(), membersList.size());
 
-    for (const auto &memberInfo : membersList) {
-        EtsField *field = klass->GetFieldIDByOffset(memberInfo.offset);
-        ASSERT_NE(field, nullptr);
-        EXPECT_STREQ(field->GetName(), memberInfo.name);
+    auto fields = klass->GetFields();
+    ASSERT_EQ(fields.size(), membersList.size());
+
+    for (size_t i = 0; i < fields.size(); i++) {
+        ASSERT_NE(fields[i], nullptr);
+        EXPECT_STREQ(fields[i]->GetNameString()->GetMutf8().data(), membersList[i].name);
     }
 }
 

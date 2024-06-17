@@ -16,7 +16,6 @@
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
-#include "plugins/ets/runtime/interop_js/intrinsics_api.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/logger.h"
@@ -26,7 +25,7 @@
 
 namespace ark::ets::interop::js {
 
-static void JSRuntimeFinalizationRegistryCallback(EtsObject *cbarg)
+void JSRuntimeFinalizationRegistryCallback(EtsObject *cbarg)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -36,21 +35,21 @@ static void JSRuntimeFinalizationRegistryCallback(EtsObject *cbarg)
     return ets_proxy::SharedReference::FinalizeETSWeak(ctx, cbarg);
 }
 
-static JSValue *JSRuntimeNewJSValueDouble(double v)
+JSValue *JSRuntimeNewJSValueDouble(double v)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     return JSValue::CreateNumber(coro, ctx, v);
 }
 
-static JSValue *JSRuntimeNewJSValueBoolean(uint8_t v)
+JSValue *JSRuntimeNewJSValueBoolean(uint8_t v)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     return JSValue::CreateBoolean(coro, ctx, static_cast<bool>(v));
 }
 
-static JSValue *JSRuntimeNewJSValueString(EtsString *v)
+JSValue *JSRuntimeNewJSValueString(EtsString *v)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -63,7 +62,7 @@ static JSValue *JSRuntimeNewJSValueString(EtsString *v)
     return JSValue::CreateString(coro, ctx, std::move(str));
 }
 
-static JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
+JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
 {
     if (v == nullptr) {
         return nullptr;
@@ -87,17 +86,17 @@ static JSValue *JSRuntimeNewJSValueObject(EtsObject *v)
     return res.value();
 }
 
-static double JSRuntimeGetValueDouble(JSValue *etsJsValue)
+double JSRuntimeGetValueDouble(JSValue *etsJsValue)
 {
     return etsJsValue->GetNumber();
 }
 
-static uint8_t JSRuntimeGetValueBoolean(JSValue *etsJsValue)
+uint8_t JSRuntimeGetValueBoolean(JSValue *etsJsValue)
 {
     return static_cast<uint8_t>(etsJsValue->GetBoolean());
 }
 
-static EtsString *JSRuntimeGetValueString(JSValue *etsJsValue)
+EtsString *JSRuntimeGetValueString(JSValue *etsJsValue)
 {
     ASSERT(etsJsValue != nullptr);
 
@@ -120,7 +119,7 @@ static EtsString *JSRuntimeGetValueString(JSValue *etsJsValue)
     return res.value();
 }
 
-static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj)
+EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -156,81 +155,21 @@ static EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj
     return refconv->Unwrap(ctx, jsVal);
 }
 
-template <typename T>
-static typename T::cpptype JSValueNamedGetter(JSValue *etsJsValue, EtsString *etsPropName)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    PandaString propName = etsPropName->GetMutf8();
-    auto res = JSValueGetByName<T>(ctx, etsJsValue, propName.c_str());
-    if (UNLIKELY(!res)) {
-        ctx->ForwardJSException(coro);
-        return {};
-    }
-    return res.value();
-}
-
-template <typename T>
-static void JSValueNamedSetter(JSValue *etsJsValue, EtsString *etsPropName, typename T::cpptype etsPropVal)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    PandaString propName = etsPropName->GetMutf8();
-    bool res = JSValueSetByName<T>(ctx, etsJsValue, propName.c_str(), etsPropVal);
-    if (UNLIKELY(!res)) {
-        ctx->ForwardJSException(coro);
-    }
-}
-
-template <typename T>
-static typename T::cpptype JSValueIndexedGetter(JSValue *etsJsValue, int32_t index)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    auto env = ctx->GetJSEnv();
-    NapiScope jsHandleScope(env);
-
-    napi_value result;
-    napi_value jsVal = etsJsValue->GetNapiValue(env);
-    auto rc = napi_get_element(env, jsVal, index, &result);
-    if (UNLIKELY(NapiThrownGeneric(rc))) {
-        ctx->ForwardJSException(coro);
-        return {};
-    }
-
-    auto res = T::UnwrapWithNullCheck(ctx, env, result);
-    if (!res) {
-        ctx->ForwardJSException(coro);
-        return {};
-    }
-
-    return res.value();
-}
-
-static JSValue *JSRuntimeGetUndefined()
+JSValue *JSRuntimeGetUndefined()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     return JSValue::CreateUndefined(coro, ctx);
 }
 
-static JSValue *JSRuntimeGetNull()
+JSValue *JSRuntimeGetNull()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     return JSValue::CreateNull(coro, ctx);
 }
 
-static JSValue *JSRuntimeGetGlobal()
+JSValue *JSRuntimeGetGlobal()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -241,7 +180,7 @@ static JSValue *JSRuntimeGetGlobal()
     return JSValue::CreateRefValue(coro, ctx, GetGlobal(env), napi_object);
 }
 
-static JSValue *JSRuntimeCreateObject()
+JSValue *JSRuntimeCreateObject()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -254,7 +193,7 @@ static JSValue *JSRuntimeCreateObject()
     return JSValue::CreateRefValue(coro, ctx, obj, napi_object);
 }
 
-static uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
+uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -273,7 +212,7 @@ static uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
     return static_cast<uint8_t>(res);
 }
 
-static uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass)
+uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass)
 {
     ASSERT(etsClass != nullptr);
 
@@ -311,7 +250,7 @@ static uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass
     return 0;
 }
 
-static std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module)
+std::pair<std::string_view, std::string_view> ResolveModuleName(std::string_view module)
 {
     static const std::unordered_set<std::string_view> NATIVE_MODULE_LIST = {
         "@system.app",  "@ohos.app",       "@system.router", "@system.curves",
@@ -338,7 +277,7 @@ static std::pair<std::string_view, std::string_view> ResolveModuleName(std::stri
     return {module, REQUIRE};
 }
 
-static JSValue *JSRuntimeLoadModule(EtsString *module)
+JSValue *JSRuntimeLoadModule(EtsString *module)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -379,7 +318,7 @@ static JSValue *JSRuntimeLoadModule(EtsString *module)
     return JSValue::CreateRefValue(coro, ctx, modObj, napi_object);
 }
 
-static uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs)
+uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unused]] JSValue *rhs)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
@@ -392,7 +331,7 @@ static uint8_t JSRuntimeStrictEqual([[maybe_unused]] JSValue *lhs, [[maybe_unuse
     return static_cast<uint8_t>(result);
 }
 
-static EtsString *JSValueToString(JSValue *object)
+EtsString *JSValueToString(JSValue *object)
 {
     ASSERT(object != nullptr);
 
@@ -425,7 +364,7 @@ static EtsString *JSValueToString(JSValue *object)
     return res.value();
 }
 
-static inline napi_value ToLocal(void *value)
+napi_value ToLocal(void *value)
 {
     return reinterpret_cast<napi_value>(value);
 }
@@ -487,48 +426,12 @@ void *CompilerJSCallCheck(void *fn)
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
-
     if (UNLIKELY(GetValueType(env, jsFn) != napi_function)) {
         ctx->ThrowJSTypeError(env, "call target is not a function");
         ctx->ForwardJSException(coro);
         return nullptr;
     }
     return fn;
-}
-
-template <bool USE_RET>
-std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void *fn, uint32_t argc, void *args)
-{
-    auto jsThis = ToLocal(obj);
-    auto jsFn = ToLocal(fn);
-    auto jsArgs = reinterpret_cast<napi_value *>(args);
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    napi_env env = ctx->GetJSEnv();
-
-    [[maybe_unused]] napi_value jsRet;
-    napi_status jsStatus;
-    {
-        ScopedNativeCodeThread nativeScope(coro);
-        if constexpr (USE_RET) {
-            jsStatus = napi_call_function(env, jsThis, jsFn, argc, jsArgs, &jsRet);
-        } else {
-            jsStatus = napi_call_function(env, jsThis, jsFn, argc, jsArgs, nullptr);
-        }
-    }
-
-    if (UNLIKELY(jsStatus != napi_ok)) {
-        INTEROP_FATAL_IF(jsStatus != napi_pending_exception);
-        ctx->ForwardJSException(coro);
-        INTEROP_LOG(DEBUG) << "JSValueJSCall: exit with pending exception";
-        if constexpr (USE_RET) {
-            return nullptr;
-        }
-    }
-    if constexpr (USE_RET) {
-        return jsRet;
-    }
 }
 
 void *CompilerJSNewInstance(void *fn, uint32_t argc, void *args)
@@ -592,75 +495,12 @@ void CompilerInitJSCallClassForCtx(void *klassPtr)
     ctx->GetConstStringStorage()->LoadDynamicCallClass(klass);
 }
 
-template <typename CONVERTOR>
-typename CONVERTOR::cpptype ConvertFromLocal(void *value)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    napi_env env = ctx->GetJSEnv();
-    auto jsVal = ToLocal(value);
-    auto res = CONVERTOR::Unwrap(ctx, env, jsVal);
-    if (UNLIKELY(!res.has_value())) {
-        if (NapiIsExceptionPending(env)) {
-            ctx->ForwardJSException(coro);
-        }
-        ASSERT(ctx->SanityETSExceptionPending());
-        if constexpr (!std::is_pointer_v<typename CONVERTOR::cpptype>) {
-            return 0;
-        } else {
-            return nullptr;
-        }
-    }
-    return res.value();
-}
-
-template <>
-JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
-{
-    auto jsVal = ToLocal(value);
-
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    napi_env env = ctx->GetJSEnv();
-
-    if (UNLIKELY(IsNull(env, jsVal))) {
-        return nullptr;
-    }
-
-    auto res = JSConvertJSValue::Unwrap(ctx, env, jsVal);
-    if (UNLIKELY(!res.has_value())) {
-        if (NapiIsExceptionPending(env)) {
-            ctx->ForwardJSException(coro);
-        }
-        ASSERT(ctx->SanityETSExceptionPending());
-        return nullptr;
-    }
-    return res.value();
-}
-
 void *CompilerConvertVoidToLocal()
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
     return GetUndefined(env);
-}
-
-template <typename T>
-void *ConvertToLocal(typename T::cpptype etsValue)
-{
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    napi_env env = ctx->GetJSEnv();
-    napi_value localJsValue = T::Wrap(env, etsValue);
-    if (UNLIKELY(localJsValue == nullptr)) {
-        ctx->ForwardJSException(coro);
-        return nullptr;
-    }
-    return localJsValue;
 }
 
 void *CompilerConvertRefTypeToLocal(EtsObject *etsValue)
@@ -735,7 +575,6 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
-
     if (UNLIKELY(IsNull(env, jsVal))) {
         return nullptr;
     }
@@ -799,7 +638,7 @@ EtsString *JSONStringify(JSValue *jsvalue)
     return res.value_or(nullptr);
 }
 
-static void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
+void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
 {
     auto *main = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
     auto *mainCoro = static_cast<EtsCoroutine *>(main);
@@ -831,94 +670,14 @@ static void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt sta
     }
 }
 
-static void PromiseInteropResolve(EtsObject *value, EtsLong deferred)
+void PromiseInteropResolve(EtsObject *value, EtsLong deferred)
 {
     SettleJsPromise(value, reinterpret_cast<napi_deferred>(deferred), EtsPromise::STATE_RESOLVED);
 }
 
-static void PromiseInteropReject(EtsObject *value, EtsLong deferred)
+void PromiseInteropReject(EtsObject *value, EtsLong deferred)
 {
     SettleJsPromise(value, reinterpret_cast<napi_deferred>(deferred), EtsPromise::STATE_REJECTED);
-}
-
-const IntrinsicsAPI G_INTRINSICS_API = {
-    JSRuntimeFinalizationRegistryCallback,
-    JSRuntimeNewJSValueDouble,
-    JSRuntimeNewJSValueBoolean,
-    JSRuntimeNewJSValueString,
-    JSRuntimeNewJSValueObject,
-    JSRuntimeGetValueDouble,
-    JSRuntimeGetValueBoolean,
-    JSRuntimeGetValueString,
-    JSRuntimeGetValueObject,
-    JSValueNamedGetter<JSConvertJSValue>,
-    JSValueNamedGetter<JSConvertF64>,
-    JSValueNamedGetter<JSConvertU1>,
-    JSValueNamedGetter<JSConvertString>,
-    JSValueNamedSetter<JSConvertJSValue>,
-    JSValueNamedSetter<JSConvertF64>,
-    JSValueNamedSetter<JSConvertU1>,
-    JSValueNamedSetter<JSConvertString>,
-    JSValueIndexedGetter<JSConvertJSValue>,
-    JSValueIndexedGetter<JSConvertF64>,
-    JSRuntimeGetUndefined,
-    JSRuntimeGetNull,
-    JSRuntimeGetGlobal,
-    JSRuntimeCreateObject,
-    JSRuntimeInstanceOfDynamic,
-    JSRuntimeInstanceOfStatic,
-    JSRuntimeInitJSCallClass,
-    JSRuntimeInitJSNewClass,
-    JSRuntimeLoadModule,
-    JSRuntimeStrictEqual,
-    JSValueToString,
-    JSONStringify,
-    CompilerGetJSNamedProperty,
-    CompilerGetJSProperty,
-    CompilerGetJSElement,
-    CompilerJSCallCheck,
-    CompilerJSCallFunction<true>,
-    CompilerJSCallFunction<false>,
-    CompilerJSNewInstance,
-    CreateLocalScope,
-    CompilerDestroyLocalScope,
-    CompilerLoadJSConstantPool,
-    CompilerInitJSCallClassForCtx,
-    CompilerConvertVoidToLocal,
-    ConvertToLocal<JSConvertU1>,
-    ConvertToLocal<JSConvertU8>,
-    ConvertToLocal<JSConvertI8>,
-    ConvertToLocal<JSConvertU16>,
-    ConvertToLocal<JSConvertI16>,
-    ConvertToLocal<JSConvertU32>,
-    ConvertToLocal<JSConvertI32>,
-    ConvertToLocal<JSConvertU64>,
-    ConvertToLocal<JSConvertI64>,
-    ConvertToLocal<JSConvertF32>,
-    ConvertToLocal<JSConvertF64>,
-    ConvertToLocal<JSConvertJSValue>,
-    CompilerConvertRefTypeToLocal,
-    ConvertFromLocal<JSConvertU1>,
-    ConvertFromLocal<JSConvertU8>,
-    ConvertFromLocal<JSConvertI8>,
-    ConvertFromLocal<JSConvertU16>,
-    ConvertFromLocal<JSConvertI16>,
-    ConvertFromLocal<JSConvertU32>,
-    ConvertFromLocal<JSConvertI32>,
-    ConvertFromLocal<JSConvertU64>,
-    ConvertFromLocal<JSConvertI64>,
-    ConvertFromLocal<JSConvertF32>,
-    ConvertFromLocal<JSConvertF64>,
-    ConvertFromLocal<JSConvertJSValue>,
-    ConvertFromLocal<JSConvertString>,
-    CompilerConvertLocalToRefType,
-    PromiseInteropResolve,
-    PromiseInteropReject,
-};
-
-const IntrinsicsAPI *GetIntrinsicsAPI()
-{
-    return &G_INTRINSICS_API;
 }
 
 }  // namespace ark::ets::interop::js

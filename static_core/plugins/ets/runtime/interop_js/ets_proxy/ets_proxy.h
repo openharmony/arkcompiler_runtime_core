@@ -19,10 +19,12 @@
 #include <string_view>
 #include <node_api.h>
 
+#include "macros.h"
+
 namespace ark::ets::interop::js::ets_proxy {
 
-napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName);
-napi_value GetETSClass(napi_env env, std::string_view classDescriptor);
+PANDA_PUBLIC_API napi_value GetETSFunction(napi_env env, std::string_view packageName, std::string_view methodName);
+PANDA_PUBLIC_API napi_value GetETSClass(napi_env env, std::string_view classDescriptor);
 
 }  // namespace ark::ets::interop::js::ets_proxy
 

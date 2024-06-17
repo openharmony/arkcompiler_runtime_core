@@ -753,7 +753,7 @@ void InteropIntrinsicOptimization::TryRemoveUnwrapAndWrap(Inst *inst, Inst *inpu
 void InteropIntrinsicOptimization::TryRemoveUnwrapToJSValue(Inst *inst)
 {
     auto commonId = RuntimeInterface::IntrinsicId::INVALID;
-    DataType::Type userType;
+    DataType::Type userType = DataType::Type::NO_TYPE;
     for (auto &user : inst->GetUsers()) {
         auto *userInst = user.GetInst();
         if (userInst->IsSaveState()) {
