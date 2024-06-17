@@ -123,7 +123,7 @@ An *interface declaration* specifies a new named reference type:
 The *identifier* in an interface declaration specifies the interface name.
 
 An interface declaration with ``typeParameters`` introduces a new generic
-interface in :ref:`Generic Declarations`.
+interface (see :ref:`Generics`).
 
 The scope of an interface declaration is defined in :ref:`Scopes`.
 
@@ -163,7 +163,7 @@ the declared interface also implements all the interfaces that the interface
    implementation
    declared interface
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  ``typeReference`` in the ``extends`` clause of an interface declaration
    names an interface type that is not accessible (see :ref:`Accessible`).
@@ -177,7 +177,7 @@ A compile-time error occurs if:
 
 Each ``typeReference`` in the ``extends`` clause of an interface declaration
 must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
-compile-time error occurs.
+:index:`compile-time error` occurs.
 
 .. index::
    compile-time error
@@ -243,13 +243,13 @@ The interface *K* is a superinterface of the interface *I* if:
 There is no single interface to which all interfaces are extensions (unlike
 class ``Object`` to which every class is an extension).
 
-A compile-time error occurs if an interface depends on itself.
+A :index:`compile-time error` occurs if an interface depends on itself.
 
 If superinterfaces have default implementations (see
-:ref:`Default Method Declarations`) for some method ``m`` then the current interface which
-extends these interfaces should have method ``m`` declared with the
-override-compatible signature (see :ref:`Override-Compatible Signatures`) or
-all these methods refer to the same implementation and this default
+:ref:`Default Method Declarations`) for some method ``m`` then the current
+interface which extends these interfaces should have method ``m`` declared with
+the override-compatible signature (see :ref:`Override-Compatible Signatures`)
+or all these methods refer to the same implementation and this default
 implementation will be the current class method.
 Otherwise a :index:`compile-time error` occurs.
 
@@ -326,7 +326,7 @@ Interface type members are as follows:
 -  Members inherited from a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
 
-A compile-time error occurs if the names of the method explicitly declared
+A :index:`compile-time error` occurs if the names of the method explicitly declared
 by the interface, and of the ``Object``’s ``public`` method are the same,
 but their signatures are different.
 
@@ -459,8 +459,8 @@ and be ``static`` (see :ref:`Static Method Declarations`) as experimental featur
 
 The methods declared within interface bodies are implicitly ``public``.
 
-A compile-time error occurs if the body of an interface declares a method
-with a name that is already used for a property in this declaration.
+A :index:`compile-time error` occurs if the body of an interface declares a
+method with a name that is already used for a property in this declaration.
 
 .. index::
    compile-time error
@@ -482,7 +482,7 @@ Interface Method Overloading
 
 |LANG| allows specifying several interface methods with a single name.
 
-A compile-time error occurs if signatures of these methods are
+A :index:`compile-time error` occurs if signatures of these methods are
 overload-equivalent (see :ref:`Overload-Equivalent Signatures`).
 
 A class that implements such interface can use :ref:`Class Method Overloading`
@@ -560,7 +560,7 @@ Private methods defined in superinterfaces are not accessible (see
 .. index::
    inheritance
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  Interface *I* declares a ``private`` method *m*;
 -  Signature of *m* is compatible with the ``public`` instance method

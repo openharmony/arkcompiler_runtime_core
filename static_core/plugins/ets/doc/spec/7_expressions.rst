@@ -95,10 +95,10 @@ There are three options the ``objectReference`` refers to:
   is altered by the chaining operator '?.' (see :ref:`Chaining Operator`).
 
 If the form of *primaryExpression* is *thisExpression*, then the pattern
-"this?." is handled as a compile-time error.
+"this?." is handled as a :index:`compile-time error`.
 
 If the form of *primaryExpression* is *super*, then the pattern "super?."
-is handled as a compile-time error.
+is handled as a :index:`compile-time error`.
 
 .. code-block:: abnf
 
@@ -728,7 +728,7 @@ of an assignment, call parameter type, or type of a cast expression:
 
 All valid conversions are applied to the initializer expression, i.e., each
 initializer expression type must be compatible (see :ref:`Type Compatibility`)
-with the array element type. Otherwise, a compile-time error occurs.
+with the array element type. Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    conversion
@@ -789,7 +789,7 @@ used to infer it from the initialization expressions:
 #. If there is no expression (*N == 0*), then the type is ``Object[]``.
 
 #. If the type of the expression cannot be determined, then the type of the
-   array literal cannot be inferred, and a compile-time error occurs.
+   array literal cannot be inferred, and a :index:`compile-time error` occurs.
 
 #. If each initialization expression is of some numeric type, then the
    type is ``number[]``.
@@ -887,7 +887,7 @@ the context. A type inferred from the context can be either a named class (see
 :ref:`Object Literal of Class Type`), or an anonymous class created for the
 inferred interface type (see :ref:`Object Literal of Interface Type`).
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  The type of an object literal cannot be inferred from the context; or
 -  The inferred type is not a class or an interface type.
@@ -944,8 +944,8 @@ literal is *C*:
 An identifier in each *name-value pair* must name a field of the class *C*,
 or a field of any superclass of class *C*.
 
-A compile-time error occurs if the identifier does not name an *accessible
-member field* (see :ref:`Accessible`) in the type *C*:
+A :index:`compile-time error` occurs if the identifier does not name an
+*accessible member field* (see :ref:`Accessible`) in the type *C*:
 
 .. index::
    identifier
@@ -968,8 +968,9 @@ member field* (see :ref:`Accessible`) in the type *C*:
     // compile-time error, nick is private:
     let f: Friend = {name: "aa", age: 55, nick: "bb"}
 
-A compile-time error occurs if the type of an expression in a *name-value
-pair* is not compatible (see :ref:`Type Compatibility`) with the field type:
+A :index:`compile-time error` occurs if the type of an expression in a
+*name-value pair* is not compatible (see :ref:`Type Compatibility`) with the
+field type:
 
 .. code-block:: typescript
    :linenos:
@@ -981,7 +982,7 @@ If class *C* is to be used in an object literal, then it must have a
 *parameterless* constructor (explicit or default) that is *accessible*
 (see :ref:`Accessible`) in the class composite context.
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  *C* does not contain a parameterless constructor; or
 -  No constructor is accessible (see :ref:`Accessible`).
@@ -1047,8 +1048,8 @@ object literal is an anonymous class implicitly created for interface *I*:
 In this example, the type of *b* is an anonymous class that contains the
 same fields as the interface *I*.
 
-The interface type *I* must contain fields only. A compile-time error occurs
-if the interface type *I* contains a method:
+The interface type *I* must contain fields only. A :index:`compile-time error`
+occurs if the interface type *I* contains a method:
 
 .. index::
    object literal
@@ -1060,7 +1061,7 @@ if the interface type *I* contains a method:
    anonymous class
    field
    method
-   compile-time error occurs
+   compile-time error
 
 .. code-block:: typescript
    :linenos:
@@ -1141,7 +1142,7 @@ the second expression denotes a value, and must be of type ``Value``:
     }
 
 If a key is a union type consisting of literals, then all variants must be
-listed in the object literal. Otherwise, a compile-time error occurs:
+listed in the object literal. Otherwise, a :index:`compile-time error` occurs:
 
 .. index::
    key
@@ -1234,7 +1235,8 @@ Spread Expression
 
 A *spread expression* can be used only within the array literal (see
 :ref:`Array Literal`) or argument passing. The *expression* must be of
-array type (see :ref:`Array Types`). Otherwise, a compile-time error occurs.
+array type (see :ref:`Array Types`). Otherwise, a :index:`compile-time error`
+occurs.
 
 A *spread expression* for arrays can be evaluated as follows:
 
@@ -1268,8 +1270,8 @@ It can be an assignment, a call of a function, or a method.
 
 
 **Note**: If an array is spread while calling a function, an appropriate
-parameter must be of spread array kind. A compile-time error occurs if an
-array is spread into a sequence of ordinary parameters:
+parameter must be of spread array kind. A :index:`compile-time error` occurs if
+an array is spread into a sequence of ordinary parameters:
 
 .. code-block:: typescript
    :linenos:
@@ -1328,7 +1330,7 @@ context the lambda expression appears in.
 The keyword ``this`` in a direct call expression *this(...)* can only
 be used in the explicit constructor call statement.
 
-A compile-time error occurs if the keyword ``this`` appears elsewhere.
+A :index:`compile-time error` occurs if the keyword ``this`` appears elsewhere.
 
 .. index::
    compile-time error
@@ -1405,11 +1407,11 @@ If object reference evaluation completes abruptly, then so does the entire
 field access expression.
 
 An object reference used for Field Access must be a non-nullish reference
-type *T*. Otherwise, a compile-time error occurs.
+type *T*. Otherwise, a :index:`compile-time error` occurs.
 
 Field access expression is valid if the identifier refers to an accessible
-(see :ref:`Accessible`) member field in type *T*. A compile-time error occurs
-otherwise.
+(see :ref:`Accessible`) member field in type *T*. A :index:`compile-time error`
+occurs otherwise.
 
 .. index::
    access
@@ -1524,7 +1526,7 @@ The forms that use the keyword ``super`` are valid only in:
    instance initializer
    initializer
 
-A compile-time error occurs if forms with the keyword ``super`` occur:
+A :index:`compile-time error` occurs if forms with the keyword ``super`` occur:
 
 -  Elsewhere;
 -  In the declaration of class ``Object`` (since ``Object`` has no superclass).
@@ -1538,8 +1540,8 @@ class *C* while:
 -  The direct superclass of the class denoted by *T* is a class with *S*
    as its fully qualified name.
 
-A compile-time error occurs otherwise (particularly if the current class
-is not *T*).
+A :index:`compile-time error` occurs otherwise (particularly if the current
+class is not *T*).
 
 .. index::
    compile-time error
@@ -1581,8 +1583,8 @@ an interface.
 The syntax form that has a block associated with the method call is a special
 form called *trailing lambda call* (see :ref:`Trailing Lambda` for details.
 
-A compile-time error occurs if ``typeArguments`` is present, and any of type
-arguments is a wildcard (see :ref:`Type Arguments`).
+A :index:`compile-time error` occurs if ``typeArguments`` is present, and any
+of type arguments is a wildcard (see :ref:`Type Arguments`).
 
 A method call with '``?.``' (see :ref:`Chaining Operator`) is called a
 *safe method call* because it handles nullish values safely.
@@ -1630,8 +1632,8 @@ Three forms of *object reference* are available:
 | ``expression`` of type *T*   | *T* if *T* is a class, interface, or union;   |
 |                              | *T*’s constraint                              |
 |                              | (:ref:`Type Parameter Constraint`) if *T* is  |
-|                              | a type parameter. A compile-time error occurs |
-|                              | otherwise.                                    |
+|                              | a type parameter.A :index:`compile-time error`|
+|                              | occurs otherwise.                             |
 +------------------------------+-----------------------------------------------+
 | ``super``                    | The superclass of the class that contains     |
 |                              | the method call.                              |
@@ -1664,8 +1666,8 @@ After the type to use is known, the method to call must be determined. As
 |LANG| supports overloading, the method selection process (see
 :ref:`Function or Method Selection`) results in a set of applicable methods. If
 this set has only one element then the method to call is identified, otherwise
-it is a compile-time error (no method to call or ambuguity as more than two
-applicable methods avaialble).
+it is a :index:`compile-time error` (no method to call or ambuguity as more
+than two applicable methods avaialble).
 
 .. index::
    method selection
@@ -1687,14 +1689,16 @@ In this step, the single method to call is known, and the following set of
 semantic checks must be performed:
 
 -  If the method call has the form ``typeReference.identifier``, then the
-   method must be declared ``static``. Otherwise, a compile-time error occurs.
+   method must be declared ``static``. Otherwise, a :index:`compile-time error`
+   occurs.
 
 -  If the method call has the form ``expression.identifier``, then the method
-   must not be declared ``static``. Otherwise, a compile-time error occurs.
+   must not be declared ``static``. Otherwise, a :index:`compile-time error`
+   occurs.
 
 -  If the method call has the form ``super.identifier``, then the method must
-   not be declared ``abstract`` or ``static``. Otherwise, a compile-time error
-   occurs.
+   not be declared ``abstract`` or ``static``. Otherwise, a
+   :index:`compile-time error` occurs.
 
 -  If the last argument of a method call has the spread operator '``...``',
    then ``objectReference`` that follows that argument must refer to an array
@@ -1756,7 +1760,7 @@ is described below:
     - If there is a rest parameter with the ordinal number *m* that is less
       then *n*, then *ta*:sub:`m`, ... *ta*:sub:`n` are deleted from *TA*
       list. The type of the rest parameter is added to the *TA* list as
-      *ta*:sub:`m`. A compile-time error occurs if any element of
+      *ta*:sub:`m`. A :index:`compile-time error` occurs if any element of
       *ta*:sub:`m`, ... *ta*:sub:`n` is not compatible with the element type
       of the rest parameter.
 
@@ -2131,7 +2135,7 @@ A *function call expression* is used to call a function (see
 A special syntactic form that contains a block associated with the function
 call is called *trailing lambda call* (see :ref:`Trailing Lambda` for details).
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  Clause ``typeArguments`` is present, and any of type arguments is a
    wildcard (see :ref:`Type Arguments`);
@@ -2185,8 +2189,8 @@ Step 1: Selection of Function
 As |LANG| supports overloading, the function selection process (see
 :ref:`Function or Method Selection`) results in a set of applicable functions.
 If this set has only one element then the function to call is identified,
-otherwise it is a compile-time error (no function to call or ambiguity as more
-than two applicable functions avaialble).
+otherwise it is a :index:`compile-time error` (no function to call or ambiguity
+as more than two applicable functions avaialble).
 
 .. index::
    function selection
@@ -2265,7 +2269,7 @@ If the operator '``?.``' (see :ref:`Chaining Operator`) is present in an
 indexing expression, then:
 
 -  The type of the object reference expression must be a nullish type based
-   on array type or ``Record`` type. Otherwise, a compile-time error
+   on array type or ``Record`` type. Otherwise, a :index:`compile-time error`
    occurs.
 -  Object reference expression must be checked to evaluate to nullish
    value. If it does, then the entire *indexingExpression* equals ``undefined``.
@@ -2273,7 +2277,7 @@ indexing expression, then:
 
 If no '``?.``' is present in an indexing expression, then object reference
 expression must be an array type or the ``Record`` type. Otherwise, a
-compile-time error occurs.
+:index:`compile-time error` occurs.
 
 .. index::
    chaining operator
@@ -2302,13 +2306,15 @@ For array indexing, the *index expression* must be of a numeric type.
 If *index expression* is of type ``number`` or other floating-point type,
 and its fractional part is different from 0, then errors occur as follows:
 
--  Runtime error, if the situation is identified during program execution; and
--  Compile-time error, if the situation is detected during compilation.
+-  a runtime error, if the situation is identified during program execution;
+   and
+-  a :index:`compile-time error`, if the situation is detected during
+   compilation.
 
 
 A numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on *index expression* to ensure that the resultant type is ``int``.
-Otherwise, a compile-time error occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 If the type of *object reference expression*, after applying of the chaining
 operator '``?.``' (see :ref:`Chaining Operator`) if it is present, is an array
@@ -2429,7 +2435,8 @@ The result of an indexing expression is of type ``Value``.
     let y = x['key2'] // y value is 2
 
 
-A compile-time error occurs if an index expression is not a valid literal:
+A :index:`compile-time error` occurs if an index expression is not a valid
+literal:
 
 .. code-block:: typescript
    :linenos:
@@ -2546,12 +2553,13 @@ The result of the entire primary expression is then ``undefined``.
     bob.spouse = new Person("Alice")
     console.log(bob.spouse?.name) // prints "Alice"
 
-A compile-time error occurs if an expression is not of a nullish type.
+If an expression is not of a nullish type chaining operator has no effect.
 
-A compile-time error occurs if a chaining operator is placed in the context
-where a variable is expected, e.g., in the left-hand-side expression of an
-assignment (see :ref:`Assignment`) or expression (see :ref:`Postfix Increment`,
-:ref:`Postfix Decrement`, :ref:`Prefix Increment` or :ref:`Prefix Decrement`).
+A :index:`compile-time error` occurs if a chaining operator is placed in the
+context where a variable is expected, e.g., in the left-hand-side expression of
+an assignment (see :ref:`Assignment`) or expression
+(see :ref:`Postfix Increment`, :ref:`Postfix Decrement`,
+:ref:`Prefix Increment` or :ref:`Prefix Decrement`).
 
 .. index::
    expression
@@ -2621,7 +2629,7 @@ The validity of the constructor call is similar to the validity of the method
 call as discussed in :ref:`Step 3 Semantic Correctness Check`, except the cases
 discussed in the :ref:`Constructor Body` section.
 
-A compile-time error occurs if ``typeReference`` is a type parameter.
+A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
 
 .. index::
    class instance creation expression
@@ -2694,8 +2702,8 @@ The casting conversion (see :ref:`Casting Contexts and Conversions`) converts
 the operand value at runtime to the target type specified by the cast operator
 (if needed).
 
-A compile-time error occurs if the casting conversion cannot convert the
-compile-time type of the operand to the target type specified by the cast
+A :index:`compile-time error` occurs if the casting conversion cannot convert
+the compile-time type of the operand to the target type specified by the cast
 operator.
 
 If the ``as`` cast cannot be performed during program execution, then
@@ -2734,10 +2742,10 @@ If the ``as`` cast cannot be performed during program execution, then
 Any ``instanceof`` expression is of type ``boolean``.
 
 The expression operand of the operator ``instanceof`` must be of a reference
-type. Otherwise, a compile-time error occurs.
+type. Otherwise, a :index:`compile-time error` occurs.
 
-A compile-time error occurs if ``type`` operand of the operator ``instanceof``
-is one of the following:
+A :index:`compile-time error` occurs if ``type`` operand of the operator
+``instanceof`` is one of the following:
 
    - Type parameter (see :ref:`Type Parameters`),
    - Primitive type (see :ref:`Primitive Types`),
@@ -2930,13 +2938,13 @@ An *ensure-not-nullish expression* is a postfix expression with the operator
 whether *e* of a nullish type (see :ref:`Nullish Types`) evaluates to a
 nullish value.
 
+If *e* expression is not of a nullish type then operator '``!``' has no effect.
+
 If the result of the evaluation of *e* is not equal to ``null`` or ``undefined``,
 then the result of *e!* is the outcome of the evaluation of *e*.
 
 If the result of the evaluation of *e* is equal to ``null`` or ``undefined``,
 then ``NullPointerError`` is thrown.
-
-A compile-time error occurs if *e* is not a ``nullish`` type.
 
 The type of *ensure-not-nullish* expression is the non-nullish variant of the
 type of *e*.
@@ -2991,7 +2999,7 @@ equals the *nullish* value:
    nullish value
    lazy operator
 
-A compile-time error occurs if the left-hand-side expression is not a
+A :index:`compile-time error` occurs if the left-hand-side expression is not a
 reference type.
 
 The type of a nullish-coalescing expression is *union type* (see
@@ -3012,8 +3020,8 @@ following example:
     // Type of x is NonNullishType(expression1)|Type(expression2)
 
 
-A compile-time error occurs if the nullish-coalescing operator is mixed
-with conditional-and or conditional-or operators without parentheses.
+A :index:`compile-time error` occurs if the nullish-coalescing operator is
+mixed with conditional-and or conditional-or operators without parentheses.
 
 .. index::
    compile-time error
@@ -3074,9 +3082,9 @@ Postfix Increment
 A *postfix increment expression* is an expression followed by the increment
 operator '``++``'.
 
-A compile-time error occurs if the type of the variable resultant from the
-*expression* is not convertible (see :ref:`Implicit Conversions`) to a numeric
-type.
+A :index:`compile-time error` occurs if the type of the variable resultant from
+the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
+numeric type.
 
 The type of a postfix increment expression is the type of the variable. The
 result of a postfix increment expression is a value, not a variable.
@@ -3133,9 +3141,9 @@ Postfix Decrement
 A *postfix decrement expression* is an expression followed by the decrement
 operator '``--``'.
 
-A compile-time error occurs if the type of the variable resultant from the
-*expression* is not convertible (see :ref:`Implicit Conversions`) to a numeric
-type.
+A :index:`compile-time error` occurs if the type of the variable resultant from
+the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
+numeric type.
 
 The type of a postfix decrement expression is the type of the variable. The
 result of a postfix decrement expression is a value, not a variable.
@@ -3193,9 +3201,9 @@ Prefix Increment
 A *prefix increment expression* is an expression preceded by the operator
 '``++``'.
 
-A compile-time error occurs if the type of the variable resultant from the
-*expression* is not convertible (see :ref:`Implicit Conversions`) to a numeric
-type.
+A :index:`compile-time error` occurs if the type of the variable resultant from
+the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
+numeric type.
 
 The type of a prefix increment expression is the type of the variable. The
 result of a prefix increment expression is a value, not a variable.
@@ -3250,9 +3258,9 @@ Prefix Decrement
 A *prefix decrement expression* is an expression preceded by the operator
 '``--``'.
 
-A compile-time error occurs if the type of the variable resultant from the
-*expression* is not convertible (see :ref:`Implicit Conversions`) to a numeric
-type.
+A :index:`compile-time error` occurs if the type of the variable resultant from
+the *expression* is not convertible (see :ref:`Implicit Conversions`) to a
+numeric type.
 
 The type of a prefix decrement expression is the type of the variable. The
 result of a prefix decrement expression is a value, not a variable.
@@ -3309,7 +3317,7 @@ A *unary plus expression* is an expression preceded by the operator '``+``'.
 
 The type of the operand *expression* with the unary operator '``+``' must
 be convertible  (see :ref:`Implicit Conversions`) to a numeric type. Otherwise,
-a compile-time error occurs.
+a :index:`compile-time error` occurs.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on the operand to ensure that the resultant type is that of the
@@ -3348,7 +3356,7 @@ A *unary minus expression* is an expression preceded by the operator '``-``'.
 
 The type of the operand *expression* with the unary operator '``-``' must
 be convertible (see :ref:`Implicit Conversions`) to a numeric type. Otherwise,
-a compile-time error occurs.
+a :index:`compile-time error` occurs.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operand to ensure that the resultant type is that of the
@@ -3439,7 +3447,7 @@ A *bitwise complement expression* is an expression preceded by the operator '``~
 
 The type of the operand *expression* with the unary operator '``~``' must be
 convertible (see :ref:`Implicit Conversions`) to a primitive integer type.
-Otherwise, a compile-time error occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on the operand to ensure that the resultant type is that of the
@@ -3480,7 +3488,7 @@ A *logical complement expression* is an expression preceded by the operator
 '``!``'.
 
 The type of the operand *expression* with the unary '``!``' operator must be
-``boolean`` or ``Boolean``. Otherwise, a compile-time error occurs.
+``boolean`` or ``Boolean``. Otherwise, a :index:`compile-time error` occurs.
 
 The unary logical complement expression’s type is ``boolean``.
 
@@ -3530,8 +3538,8 @@ and '``%``':
 The multiplicative operators group left-to-right.
 
 The type of each operand in a multiplicative operator must be convertible (see
-:ref:`Contexts and Conversions`) to a numeric type. Otherwise, a compile-time
-error occurs.
+:ref:`Contexts and Conversions`) to a numeric type. Otherwise, a
+:index:`compile-time error` occurs.
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
 is performed on both operands to ensure that the resultant type is the type of
@@ -3941,11 +3949,11 @@ If either operand of the operator is '``+``' of type ``string``, then the
 operation is a string concatenation (see :ref:`String Concatenation`). In all
 other cases, the type of each operand of the operator '``+``' must be
 convertible (see :ref:`Primitive Types Conversions`) to a numeric type.
-Otherwise, a compile-time error occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 The type of each operand of the binary operator '``-``' in all cases must be
 convertible (see :ref:`Primitive Types Conversions`) to a numeric type.
-Otherwise, a compile-time error occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
    additive expression
@@ -4005,7 +4013,7 @@ Additive Operators for Numeric Types
 
 The primitive types conversion (see :ref:`Primitive Types Conversions`)
 performed on a pair of operands ensures that both operands are of a numeric
-type. If the conversion fails, then a compile-time error occurs.
+type. If the conversion fails, then a :index:`compile-time error` occurs.
 
 The binary operator '``+``' performs addition and produces the sum of such
 operands.
@@ -4178,8 +4186,8 @@ integer type.
 integer type. If both operands are of type *bigint*, then shift operator
 is applied to bigint operands.
 
-A compile-time error occurs if either operand in a shift operator (after unary
-numeric promotion) is not a primitive integer type or bigint.
+A :index:`compile-time error` occurs if either operand in a shift operator
+(after unary numeric promotion) is not a primitive integer type or bigint.
 
 .. index::
    shift expression
@@ -4281,8 +4289,9 @@ The relational operators group left-to-right.
 A relational expression is always of type ``boolean``.
 
 Two kinds of relational expressions are described below. The kind of a
-relational expression depends on the types of operands. It is a compile-time
-error if at least one type of operands is different from types described below.
+relational expression depends on the types of operands. It is a
+:index:`compile-time error` if at least one type of operands is different from
+types described below.
 
 .. index::
    numerical relational operator
@@ -4301,8 +4310,8 @@ Numerical Relational Operators
     frontend_status: Done
 
 The type of each operand in a numerical relational operator must be convertible
-(see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a compile-time
-error occurs.
+(see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a
+:index:`compile-time error` occurs.
 
 Numeric types conversions (see :ref:`Primitive Types Conversions`) are
 performed on each operand as follows:
@@ -4380,7 +4389,7 @@ String Relational Operators
 ===========================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 Results of all string comparisons are defined as follows:
 
@@ -4411,7 +4420,7 @@ Bigint Relational Operators
     frontend_status: Done
 
 The type of each operand in a bigint relational operator must be ``bigint``. 
-Otherwise, a compile-time error occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 All bigint relational operators compare bigint values.
 
@@ -4451,7 +4460,7 @@ then :ref:`Numerical Relational Operators` or :ref:`String Relational Operators`
 are used depending on the kind of enumeration constant value
 ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 
-Otherwise, a compile-time error occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 |
 
@@ -4531,7 +4540,7 @@ Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
   ``undefined``.
 
 
-- Otherwise, a compile-time error occurs.
+- Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -4560,8 +4569,8 @@ Numerical Equality Operators
 and ``char`` type and their correspondong boxed types.
 
 The type of each operand in a numerical equality operator must be convertible
-(see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a compile-time
-error occurs.
+(see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a
+:index:`compile-time error` occurs.
 
 If the converted type of the operands is ``int`` or ``long``, then an
 integer equality test is performed.
@@ -4668,7 +4677,7 @@ Bigint Equality Operators
 ==========================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 *Value equality* is used for operands of ``bigint`` type.
 Two bigibnts are equal if they have the same value:
@@ -4729,7 +4738,7 @@ then :ref:`Numerical Equality Operators` or :ref:`String Equality Operators`
 are used depending on the kind of enumeration constant value
 ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 
-Otherwise, a compile-time error occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 |
 
@@ -4812,10 +4821,11 @@ Union Equality Operators
 ------------------------
 
 Assume that one operand is of type *T*:sub:`1` and other is of type *T*:sub:`2`
-and at least one of *T*:sub:`1` and *T*:sub:`2` is a union type. A compile-time
-error occurs if there is no overlap between *T*:sub:`1` and *T*:sub:`2`,
-meaning that there is no value that belongs to both *T*:sub:`1` and
-*T*:sub:`2`. Note, that any union type has overlap with value of ``Object`` type.
+and at least one of *T*:sub:`1` and *T*:sub:`2` is a union type. A
+:index:`compile-time error` occurs if there is no overlap between *T*:sub:`1`
+and *T*:sub:`2`, meaning that there is no value that belongs to both
+*T*:sub:`1` and *T*:sub:`2`. Note, that any union type has overlap with value
+of ``Object`` type.
 
 The following example illustrates equality with values of two union types:
 
@@ -4890,7 +4900,7 @@ except types string, bigint, Object, union types and type parameters.
 See also :ref:`Extended Equality with null or undefined`
 for extended semantics.
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  Any operand is not of a reference type.
 
@@ -5024,8 +5034,8 @@ The operators group left-to-right. Each operator is commutative, if the
 operand expressions have no side effects, and associative.
 
 The bitwise and logical operators can compare two operands of a numeric
-type, or two operands of the ``boolean`` type. Otherwise, a compile-time error
-occurs.
+type, or two operands of the ``boolean`` type. Otherwise, a
+:index:`compile-time error` occurs.
 
 .. index::
    bitwise operator
@@ -5096,8 +5106,8 @@ Boolean Logical Operators
 
 The type of the bitwise operator expression is ``boolean`` if both operands of a
 '``&``', '``^``', or '``|``' operator are of type ``boolean`` or ``Boolean``.
-In any case, the unboxing conversion (see :ref:`Primitive Types Conversions`)
-is performed on the operands if required.
+In any case, the unboxing conversion (see :ref:`Unboxing Conversions`) is
+performed on the operands if required.
 
 If both operand values are ``true``, then the resultant value of '``&``' is
 ``true``. Otherwise, the result is ``false``.
@@ -5162,11 +5172,11 @@ result, and the same side effects occur in the same order for any *a*, *b*, and
 A *conditional-and* expression is always of type ``boolean``.
 
 Each operand of the *conditional-and* operator must be of type ``boolean``, or
-``Boolean``. Otherwise, a compile-time error occurs.
+``Boolean``. Otherwise, a :index:`compile-time error` occurs.
 
 The left-hand operand expression is first evaluated at runtime. If the result
 is of type ``Boolean``, then the unboxing conversion (see
-:ref:`Primitive Types Conversions`) is performed as follows:
+:ref:`Unboxing Conversions`) is performed as follows:
 
 -  If the resultant value is ``false``, then the value of the *conditional-and*
    expression is ``false``; the evaluation of the right-hand operand expression
@@ -5174,9 +5184,9 @@ is of type ``Boolean``, then the unboxing conversion (see
 
 -  If the value of the left-hand operand is ``true``, then the right-hand
    expression is evaluated. If the result of the evaluation is of type
-   ``Boolean``, then the unboxing conversion (see
-   :ref:`Primitive Types Conversions`) is performed. The resultant value is the
-   value of the *conditional-and* expression.
+   ``Boolean``, then the unboxing conversion (see :ref:`Unboxing Conversions`)
+   is performed. The resultant value is the value of the *conditional-and*
+   expression.
 
 .. index::
    conditional-and expression
@@ -5228,7 +5238,7 @@ A *conditional-or* expression is always of type ``boolean``.
    evaluation
 
 Each operand of the *conditional-or* operator must be of type ``boolean`` or
-``Boolean``. Otherwise, a compile-time error occurs.
+``Boolean``. Otherwise, a :index:`compile-time error` occurs.
 
 The left-hand operand expression is first evaluated at runtime. If the result
 is of type ``Boolean``, then the *unboxing conversion ()* is performed as
@@ -5312,10 +5322,11 @@ expression1) must be one of the following:
    indexing expression
    record component access
 
-A compile-time error occurs if *expression1* contains the chaining
+A :index:`compile-time error` occurs if *expression1* contains the chaining
 operator '``?.``' (see :ref:`Chaining Operator`).
 
-A compile-time error occurs if the result of *expression1* is not a variable.
+A :index:`compile-time error` occurs if the result of *expression1* is not a
+variable.
 
 The type of the variable is the type of the assignment expression.
 
@@ -5340,7 +5351,7 @@ Simple Assignment Operator
 .. meta:
     frontend_status: Done
 
-A compile-time error occurs if the type of the right-hand operand
+A :index:`compile-time error` occurs if the type of the right-hand operand
 (*expression2*) is not compatible (see :ref:`Type Compatibility`) with
 the type of the variable (see :ref:`Type Parameters`). Otherwise,
 the expression is evaluated at runtime in one of the following ways:
@@ -5499,9 +5510,9 @@ If none of the above is true, then the following three steps are required:
 #. If that evaluation completes normally, then the value of the right-hand
    operand is converted to the type of the left-hand variable.
    In that case, the result of the conversion is stored into the variable.
-   A compile-time error occurs if the type of the left-hand variable is
-   a ``readonly`` array, while the converted type of the right-hand operand is
-   a non-``readonly`` array.
+   A :index:`compile-time error` occurs if the type of the left-hand variable
+   is    a ``readonly`` array, while the converted type of the right-hand
+   operand is a non-``readonly`` array.
 
 .. index::
    evaluation
@@ -5730,7 +5741,7 @@ The conditional operator '``? :``' consists of three operand expressions
 with the separators '``?``' between the first and the second, and
 '``:``' between the second and the third expression.
 
-A compile-time error occurs if the first expression is not of type
+A :index:`compile-time error` occurs if the first expression is not of type
 ``boolean`` or ``Boolean``.
 
 Type of the conditional expression is determined as the union of types of the
@@ -5743,9 +5754,9 @@ The following steps are performed as the evaluation of a conditional expression
 occurs at runtime:
 
 #. The operand expression of a conditional expression is evaluated first.
-   The unboxing conversion is performed on the result if necessary.
-   If the unboxing conversion fails, then so does the evaluation
-   of the conditional expression.
+   The unboxing conversion (see :ref:`Unboxing Conversions`) is performed on
+   the result if necessary. If the unboxing conversion fails, then so does the
+   evaluation of the conditional expression.
 
 #. If the value of the first operand is ``true``, then the second operand
    expression is evaluated. Otherwise, the third operand expression is
@@ -5911,7 +5922,7 @@ See :ref:`Scopes` for the specification of the scope, and
 :ref:`Shadowing by Parameter` for the shadowing details of formal parameter
 declarations.
 
-A compile-time error occurs if a lambda expression declares two formal
+A :index:`compile-time error` occurs if a lambda expression declares two formal
 parameters with the same name.
 
 As a lambda expression is evaluated, the values of actual argument expressions
@@ -5969,8 +5980,8 @@ parameter is *captured* by the lambda.
 If an instance member of the surrounding type is used in the lambda body
 defined in a method, then ``this`` is *captured* by the lambda.
 
-A compile-time error occurs if a local variable is used in a lambda body but
-is neither declared in nor assigned before it.
+A :index:`compile-time error` occurs if a local variable is used in a lambda
+body but is neither declared in nor assigned before it.
 
 .. index::
    lambda body

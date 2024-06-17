@@ -521,8 +521,10 @@ if **all** of the following conditions are met:
 1. Number of parameters of both methods is the same, i.e., ``n = m``.
 2. Each type ``T``:sub:`i` is override-compatible with type ``U``:sub:`i`
    for ``i`` in ``1..n+1``. Type override compatibility is defined below.
-3. Number of type parameters of either method is the same, i.e.,
-   ``k = l``.
+3. Number of type parameters of either method is the same, i.e., ``k = l``.
+4. Constraints of ``W``:sub:`1`, ... ``W``:sub:`l` are to be contravariant
+   (see :ref:`Contravariance`) to the appropriate constraints of ``V``:sub:`1`,
+   ... ``V``:sub:`k`.
 
 There are two cases of type override-compatibility, as types are used as either
 parameter types, or return types. For each case there are five kinds of types:
@@ -531,7 +533,8 @@ parameter types, or return types. For each case there are five kinds of types:
 - Function type;
 - Primitive type;
 - Array type; and
-- Tuple type.
+- Tuple type; and
+- Type parameter.
 
 Every type is override-compatible with itself, and that is a case of invariance
 (see :ref:`Invariance`).
@@ -539,6 +542,28 @@ Every type is override-compatible with itself, and that is a case of invariance
 Mixed override-compatibility between types of different kinds is always false,
 except the compatibility with class type ``Object`` as any type is a subtype of
 ``Object``.
+
+In case of generics the following rule work:
+   - derived class should have type parameter constraints to be type compatible
+     (see :ref:`Type Compatibility`) with the respective type parameter
+     constraint in the base type
+   - otherwise it is a :index:`compile-time error`.
+
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {}
+   class Derived extends Base {}
+   class A1 <CovariantTypeParameter extends Base> {}
+   class B1 <CovariantTypeParameter extends Derived> extends A1<CovariantTypeParameter> {}
+       // OK, derived class may have type compatible constraint of type parameters
+
+   class A2 <ContravariantTypeParameter extends Derived> {}
+   class B2 <ContravariantTypeParameter extends Base> extends A2<ContravariantTypeParameter> {}
+       // Compile-time error, derived class cannot have non-compatible constraints of type parameters
+
+
 
 Variances to be used for types that can be override-compatible in different
 positions are represented in the following table:
@@ -558,6 +583,9 @@ positions are represented in the following table:
 +-+-----------------------+---------------------+-------------------+
 |5| Tuple types           | Covariance <:       | Covariance <:     |
 +-+-----------------------+---------------------+-------------------+
+|6| Type parameter        | Contravariance >:   | Contravariance >: |
+| | constraint            |                     |                   |
++-+-----------------------+---------------------+-------------------+
 
 The semantics is illustrated by the example below:
 
@@ -565,9 +593,9 @@ The semantics is illustrated by the example below:
    :linenos:
 
     class Base {
-       kinds_of_parameters(
+       kinds_of_parameters <T extends Derived, U extends Base>(
           p1: Derived, p2: (q: Base)=>Derived, p3: number,
-          p4: Number, p5: Base[], p6: [Base, Base]
+          p4: Number, p5: Base[], p6: [Base, Base], p7: T, p8: U
        )
        kinds_of_return_type1(): Base
        kinds_of_return_type2(): (q: Derived)=> Base
@@ -575,16 +603,19 @@ The semantics is illustrated by the example below:
        kinds_of_return_type4(): Number 
        kinds_of_return_type5(): Base[] 
        kinds_of_return_type6(): [Base, Base]
+       kinds_of_return_type7 <T extends Derived>(): T
     }
     class Derived extends Base {
        // Overriding kinds for parameters
-       override kinds_of_parameters(
+       override kinds_of_parameters <T extends Base, U extends Object>(
           p1: Base, // contravaraint parameter type
           p2: (q: Derived)=>Base, // Covariant parameter type, contravariant return type
           p3: Number, // Compile-time error: parameter type is not override-compatible
           p4: number, // Compile-time error: parameter type is not override-compatible
           p5: Derived[], // Covariant array element type
-          p6: [Derived, Derived] // Covariant tuple type elements
+          p6: [Derived, Derived], // Covariant tuple type elements
+          p7: T, // Contravariance for constraints of type parameters
+          p8: U  // Contravariance for constraints of type parameters
        )
        // Overriding kinds for return type
        override kinds_of_return_type1(): Derived // Covariant return type
@@ -593,6 +624,7 @@ The semantics is illustrated by the example below:
        override kinds_of_return_type4(): number // Compile-time error: return type is not override-compatible
        override kinds_of_return_type5(): Derived[] // Covariant array element type
        override kinds_of_return_type6(): [Derived, Derived] // Covariant tuple type elements
+       override kinds_of_return_type7 <T extends Base> (): T // OK, contravariance for constraints of the return type
     }
 
 The example below illustrates override-compatibility with ``Object``:
@@ -649,7 +681,7 @@ functions with the same name are accessible (see :ref:`Accessible`) in a scope
 Semantic check for such two functions is as follows:
 
 - If signatures of such functions are *overload-equivalent*, then
-  a compile-time error occurs.
+  a :index:`compile-time error` occurs.
 
 -  Otherwise, *overloading* is valid.
 
@@ -672,7 +704,7 @@ nor overloading is considered.
 
 Overriding member may keep or extend the access modifer (see
 :ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a 
-compile-time error occurs.
+:index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -706,8 +738,8 @@ table:
 | **Context**                         | **Semantic Check**                       |
 +=====================================+==========================================+
 | Two *instance methods*,             | If signatures are *overload-equivalent*, |
-| two *static methods* with the same  | then a compile-time error occurs.        |
-| name or, two *constructors* are     | Otherwise, *overloading* is used.        |
+| two *static methods* with the same  | then a :index:`compile-time error`       |
+| name or, two *constructors* are     | occurs. Otherwise, *overloading* is used.|
 | defined in the same class.          |                                          |
 +-------------------------------------+------------------------------------------+
 
@@ -848,8 +880,8 @@ Overloading and Overriding in Interfaces
 
 +-------------------------------------+------------------------------------------+
 | Two *instance methods* or           | If signatures are *overload-equivalent*, |
-| two *static methods* with the same  | then a compile-time error occurs.        |
-| name are defined in the same        | Otherwise, *overloading* is used.        |
+| two *static methods* with the same  | then a :index:`compile-time error`       |
+| name are defined in the same        | occurs. Otherwise, *overloading* is used.|
 | interface.                          |                                          |
 +-------------------------------------+------------------------------------------+
 
@@ -897,7 +929,7 @@ Overload Signature Correctness Check
 If a function, method, or constructor has several *overload signatures*
 that share the same body, then all first signatures without bodies must
 *fit* into the *implementation signature* that has the body. Otherwise,
-a compile-time error occurs.
+a :index:`compile-time error` occurs.
 
 Signature *S*:sub:`i` with *n* parameters *fits* into implementation signature
 *IS* if **all** of the following conditions are met:

@@ -89,8 +89,10 @@ Generic and function types peculiarities
 
 Current compiler and runtime implementations use type erasure and thus affects
 how generics and function types behave. This is expected to be changed in the
-future. Particular example can be found here :ref:`InstanceOf Expression` the
-last bullet of the compile-time errors list.
+future. Compiler applies boxing (see :ref:`Boxing Conversions`) to any
+parameters and return types of primitive types in case of dealing with
+variables of function types. Particular example can be found here 
+:ref:`InstanceOf Expression` the last bullet of the compile-time errors list.
 
 .. raw:: pdf
 

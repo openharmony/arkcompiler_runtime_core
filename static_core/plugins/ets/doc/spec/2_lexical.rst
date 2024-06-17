@@ -312,8 +312,10 @@ not otherwise restricted:
 | ``char``      | ``long``      | ``void``      |
 +---------------+---------------+---------------+
 
+See also :ref:`Reserved Names of TS Types`.
+
 4. The following identifiers are also treated as *soft keywords* reserved for
-the future use (or used in TS):
+the future use (or used in |TS|):
 
 .. index::
    identifier
@@ -555,7 +557,7 @@ last symbol of an integer literal.
 A floating-point literal is of type ``float`` if *float type suffix* is present.
 Otherwise, it is of type ``double`` (type ``number`` is an alias to ``double``).
 
-A compile-time error occurs if a non-zero floating-point literal is
+A :index:`compile-time error` occurs if a non-zero floating-point literal is
 too large for its type.
 
 A floating-point literal in variable and constant declarations can be implicitly
@@ -901,11 +903,25 @@ the source code. Comments are insignificant for the syntactic grammar.
 last line separator character. Any character or sequence of characters
 between them is allowed but ignored.
 
+.. code-block:: typescript
+   :linenos:
+
+    // This is a line comment
+
+
 *Multi-line comments* begin with the sequence of  characters '``\*``' and end
 with the first subsequent sequence of characters '``*/``'. Any character or
 sequence of characters between them is allowed but ignored.
 
 Comments cannot be nested.
+
+.. code-block:: typescript
+   :linenos:
+
+    /* 
+        This is a multi-line comment
+    */
+
 
 .. index::
    comment

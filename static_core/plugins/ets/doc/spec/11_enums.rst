@@ -67,8 +67,8 @@ of type ``string``, or implicitly by omitting the constant expression. If
 the constant expression is omitted, then the value of the enum constant
 is set implicitly to a numeric value (see :ref:`Enumeration Integer Values`).
 
-A compile-time error occurs if ``integer`` and ``string`` type enumeration
-constants are combined in one enumeration.
+A :index:`compile-time error` occurs if ``integer`` and ``string`` type
+enumeration constants are combined in one enumeration.
 
 Any enumeration constant is of type ``enumeration``. The implicit conversion
 (see :ref:`Enumeration to Int Conversions`, :ref:`Enumeration to String Conversions`)
@@ -76,7 +76,7 @@ of the enumeration constant to integer types or type *string* depends on the
 type of enumeration.
 
 In addition, all enumeration constant names must be unique. Otherwise,
-a compile-time error occurs.
+a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:

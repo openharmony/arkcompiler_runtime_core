@@ -177,39 +177,31 @@ Types by Category
 All |LANG| types are summarized in the following table:
 
 
-+----------------------------------+-----------------------------------------+
-| **Predefined Types**             | **User-Defined Types**                  |
-+===================+==============+=======================+=================+
-| *Value Types*     | *Reference*  |   *Value Types*       | *Reference*     |
-|                   |              |                       |                 |
-| (Primitive Types) | *Types*      |                       | *Types*         |
-+-------------------+--------------+-----------------------+-----------------+
-| ``number``,       | ``Number``,  | enum        types     | class types,    |
-| ``byte``,         | ``Byte``,    |                       |                 |
-|                   | ``Short``,   |                       | interface types,|
-|                   |              |                       |                 |
-| ``short``,        | ``Int``,     |                       | array types,    |
-| ``int``,          | ``Long``,    |                       |                 |
-|                   | ``Float``,   |                       | function types, |
-|                   |              |                       |                 |
-| ``long``,         | ``Double``,  |                       | tuple types,    |
-| ``float``,        | ``Char``,    |                       |                 |
-|                   | ``Boolean``, |                       | union types,    |
-|                   |              |                       |                 |
-| ``double``,       | ``Object``,  |                       | type parameters |
-| ``char``,         | ``object``,  |                       |                 |
-|                   |              |                       |                 |
-| ``boolean``,      | ``void``,    |                       |                 |
-|                   | ``null``,    |                       |                 |
-| ``string``,       |              |                       |                 |
-|                   | ``String``,  |                       |                 |
-| ``bigint``        | ``string``,  |                       |                 |
-|                   |              |                       |                 |
-|                   | ``BigInt``,  |                       |                 |
-|                   | ``bigint``,  |                       |                 |
-|                   |              |                       |                 |
-|                   | ``never``    |                       |                 |
-+-------------------+--------------+-----------------------+-----------------+
++----------------------------------+---------------------------------+
+| **Predefined Types**             | **User-Defined Types**          |
++===================+==============+===============+=================+
+| *Value Types*     | *Reference*  | *Value Types* | *Reference*     |
+| (Primitive Types) | *Types*      |               | *Types*         |
++-------------------+--------------+---------------+-----------------+
+| ``number``,       | ``Number``,  | enumeration   | class types,    |
+| ``byte``,         | ``Byte``,    |               | interface types,|
+| ``short``,        | ``Short``,   | types         | array types,    |
+| ``int``,          | ``Int``,     |               | function types, |
+| ``long``,         | ``Long``,    |               | tuple types,    |
+| ``float``,        | ``Float``,   |               | union types,    |
+| ``double``,       | ``Double``,  |               | type parameters |
+| ``char``,         | ``Char``,    |               |                 |
+| ``boolean``,      | ``Boolean``, |               |                 |
+| ``string``,       | ``String``,  |               |                 |
+|                   | ``string``,  |               |                 |
+| ``bigint``        | ``BigInt``,  |               |                 |
+|                   | ``bigint``,  |               |                 |
+|                   | ``Object``,  |               |                 |
+|                   | ``object``,  |               |                 |
+|                   | ``void``,    |               |                 |
+|                   | ``null``,    |               |                 |
+|                   | ``never``    |               |                 |
++-------------------+--------------+---------------+-----------------+
 
 
 .. index::
@@ -322,17 +314,19 @@ Named Types
 .. meta:
     frontend_status: Done
 
-Classes, interfaces, enumerations, and unions are named types. Respective
+Classes, interfaces, enumerations, aliases and type parameters are named types,
+while other types are anonymous (array, function, and union types). Respective
 named types are introduced by the following:
 
 -  Class declarations (see :ref:`Classes`),
 -  Interface declarations (see :ref:`Interfaces`),
--  Enumeration declarations (see :ref:`Enumerations`), and
--  Union declarations (see :ref:`Union Types`).
+-  Enumeration declarations (see :ref:`Enumerations`), 
+-  Type alias declarations (see :ref:`Type Alias Declaration`), and
+-  Type parameter declarations (see :ref:`Type Parameters`).
 
-
-Classes and interfaces with type parameters are *generic types* (see
-:ref:`Generics`). Named types without type parameters are *non-generic types*.
+Classes, interfaces and type aliases with type parameters are *generic types*
+(see :ref:`Generics`). Named types without type parameters are
+*non-generic types*.
 
 *Type references* (see :ref:`Type References`) refer to named types by
 specifying their type names, and (where applicable) by type arguments to be
@@ -833,11 +827,12 @@ Numeric Types Hierarchy
 
 Integer and floating-point types are numeric types.
 
-Larger types include smaller types or their values:
+Larger type values include all values of the smaller types:
 
 -  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
 
-A value of a smaller type can be assigned to a variable of a larger type.
+And thus, a value of a smaller type can be assigned to a variable of a larger
+type.
 
 Type ``bigint`` does not belong to this hierarchy. There is no implicit
 conversion from a numeric type to ``bigint``. Standard library (see
@@ -1204,7 +1199,7 @@ return type if a function or a method returns no value:
         bar(): void {}
     }
 
-A compile-time occurs if:
+A :index:`compile-time error` occurs if:
 
 -  Type ``void`` is used as type annotation;
 -  An expression of type ``void`` is used as a value.
@@ -1283,9 +1278,9 @@ The number of elements in an array can be obtained by accessing the field
 ``length``. Setting a new value of this field allows shrinking the array by
 reducing the number of its elements.
 
-Attempting to increase the length of the array causes a compile-time error
-(if the compiler has the information sufficient to determine this), or to
-a run-time error.
+Attempting to increase the length of the array causes a
+:index:`compile-time error` (if the compiler has the information sufficient to
+determine this), or to a run-time error.
 
 An example of syntax for the built-in array type is presented below:
 
@@ -1580,12 +1575,12 @@ A *union* type is a reference type created as a combination of other
 types or values. Valid values of all types and literals the union is created
 from are the values of a union type.
 
-A compile-time error occurs if the type in the right-hand side of a union
-type declaration leads to a circular reference.
+A :index:`compile-time error` occurs if the type in the right-hand side of a
+union type declaration leads to a circular reference.
 
 If a *union* uses a primitive type (see *Primitive types* in
-:ref:`Types by Category`), then automatic boxing occurs to keep the reference
-nature of the type.
+:ref:`Types by Category`), then automatic boxing (see
+:ref:`Boxing Conversions`) occurs to keep the reference nature of the type.
 
 The reduced form of *union* types allows defining a type which has only 
 one value:
@@ -1678,8 +1673,8 @@ The following example is for values:
        // pension :-)
     }
 
-**Note**: A compile-time error occurs if an expression of union type is
-compared to a literal value that does not belong to the values of that union
+**Note**: A :index:`compile-time error` occurs if an expression of union type
+is compared to a literal value that does not belong to the values of that union
 type:
 
 .. code-block:: typescript
@@ -1784,7 +1779,7 @@ is presented in the examples below:
     number | number => number                    // Identical types elimination
 
     number | Number => Number                    // The same after boxing
-    Int | float => Int | Float                   // Boxing for numeric value type
+    Int | float => Int | Float => Float          // Boxing for numeric value type + heaviest left
     Int | 3.14  => Int | 3.14                    // No changes
 
     int|short|float|2 => float                   // The largest numeric type stays
@@ -1792,7 +1787,7 @@ is presented in the examples below:
     1 | number | number => number                
     int | double | short => double 
 
-    Byte | Int | Long => Byte | Int | Long      // No changes
+    Byte | Int | Long => Long                   // The haviest type left
     Int | 3.14 | Float => Int | Float           // 3.14 belongs to unboxed Float
 
 
@@ -1841,7 +1836,7 @@ conditions are met:
     - Method or accessor with an equal signature; or
     - Field with the same type.
 
-A compile-time error occurs otherwise:
+A :index:`compile-time error` occurs otherwise:
 
 
 .. code-block:: typescript
@@ -1889,8 +1884,9 @@ names of all members of the class or interface type.
         'keyof' typeReference
         ;
 
-A compile-time error occurs if ``typeReference`` is not a class or interface
-type. The semantics of type ``keyof`` is presented in the example below:
+A :index:`compile-time error` occurs if ``typeReference`` is not a class or
+interface type. The semantics of type ``keyof`` is presented in the example
+below:
 
 
 .. code-block-meta:

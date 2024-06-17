@@ -18,53 +18,32 @@ Generics
 .. meta:
     frontend_status: Partly
 
-Class, interface, method, constructor, and function are program entities
-that can be generalized in the |LANG| language. Generalization is
-parameterizing an entity by one or several types. A generalized
-entity is introduced by a *generic declaration* (called *generic*
-for brevity).
+Class, interface, type alias, method, constructor, and function are program
+entities that can be parameterized in the |LANG| language by one or several
+types.  Such parameterized entity introduces a *generic declaration* (called
+*generic* for brevity).
 
-.. index::
-   entity
-   generalization
-   parameterization
-   generic declaration
-   generic
-
-|
-
-.. _Generic Declarations:
-
-Generic Declarations
-********************
-
-.. meta:
-    frontend_status: Done
-
-Types used as generic parameters in a generic are called *type parameters*.
+Types used as generic parameters in a generic are called *type parameters*
+(see :ref:`Type Parameters`).
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
 is the action that converts a *generic* into a real program entity: ordinary
-class, interface, function, etc.
+class, interface, type, function, etc.
 Instantiation can be performed either explicitly or implicitly.
+More details are here (see :ref:`Generic Instantiations`)
 
-*Explicit* generic instantiation is the language construct that specifies
-real types, which substitute type parameters of a *generic*. Real types
-specified in the instantiation are called *type arguments*.
 
 .. index::
+   entity
+   parameterization
+   generic declaration
    generic
    explicit instantiation
    instantiation
-   conversion
    program entity
-   generic declaration
    generic parameter
    type parameter
    generic instantiation
-   conversion
-   construct
-   type argument
 
 |
 
@@ -76,9 +55,8 @@ Type Parameters
 .. meta:
     frontend_status: Done
 
-A class, an interface, or a function must be parameterized by at least one
-*type parameter* to be a *generic*. The type parameter is declared in the type
-parameter section. It can be used as an ordinary type inside a *generic*.
+The type parameter is declared in the type parameter section. It can be used as
+an ordinary type inside a *generic*.
 
 Syntactically, a type parameter is an unqualified identifier with a proper
 scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
@@ -114,17 +92,18 @@ parameter can have a default type (see :ref:`Type Parameter Default`).
         ;
 
     constraint:
-        'extends' typeReference | keyofType
+        'extends' typeReference | keyofType | unionType
         ;
 
     typeParameterDefault:
         '=' typeReference
         ;
 
-A generic class, interface, method, constructor, or function defines a set
-of parameterized classes, interfaces, methods, constructors, or functions
-respectively (see :ref:`Generic Instantiations`). One type argument can define
-only one set for each possible parameterization of the type parameter section.
+A generic class, interface, type alias, method, constructor, or function
+defines a set of parameterized classes, interfaces, types, methods,
+constructors, or functions respectively (see :ref:`Generic Instantiations`).
+One type argument can define only one set for each possible parameterization of
+the type parameter section.
 
 .. index::
    generic declaration
@@ -156,8 +135,8 @@ Type Parameter Constraint
     frontend_status: Partly
     todo: support keyof constraint #17436
 
-If a type parameter has restrictions, or *constraints*, then such constraints
-must be followed by the corresponding type argument in a generic instantiation.
+If there is a need to constraint possible instantiations then for every type
+parameter its own *constraint* can be set.
 
 In every type parameter, a constraint can follow the keyword ``extends``. The
 constraint is denoted as a single type parameter *T*. If no constraint is
@@ -212,7 +191,7 @@ on the type parameter *S*, while *T* directly depends on the following:
 -  *S*; or
 -  Type parameter *U* that depends on *S*.
 
-A compile-time error occurs if a type parameter in the type parameter
+A :index:`compile-time error` occurs if a type parameter in the type parameter
 section depends on itself.
 
 .. index::
@@ -266,7 +245,7 @@ Type Parameter Default
 
 Type parameters of generic types can have defaults. This situation allows
 dropping a type argument when a particular type of instantiation is used.
-However, a compile-time error occurs if a type parameter without a
+However, a :index:`compile-time error` occurs if a type parameter without a
 default type follows a type parameter with a default type in the
 declaration of a generic type.
 
@@ -320,11 +299,29 @@ Generic Instantiations
 .. meta:
     frontend_status: Done
 
-As mentioned before, a generic class, interface, or function declaration
-defines a set of corresponding non-generic entities. A generic entity
+As mentioned before, a generic class, interface, type alias, or function
+declaration defines a set of corresponding non-generic entities. A generic entity
 must be *instantiated* in order to get a non-generic entity out of it.
+
+The result of instantiation is a *real*, non-parameterized program entity:
+class, interface, type, method, constructor, or function. The entity is handled
+exactly as an ordinary class, interface, type, method, constructor, or function.
+
+Conceptually, a generic class, an interface, a type alias, a method,
+a constructor, or a function defines a set of classes, interfaces, types,
+methods, constructors, or functions respectively.
+
 The explicit instantiation is specified by providing a list of *type arguments*
 that substitute corresponding type parameters of the generic:
+*Explicit* generic instantiation is the language construct that specifies
+real types, which substitute type parameters of a *generic*. Real types
+specified in the instantiation are called *type arguments*.
+
+.. code-block:: typescript
+   :linenos:
+
+    class G<T> {}    // Generic declaration
+    let x: G<number> // Explicit generic instantiation, type argument provided
 
 .. index::
    instantiation
@@ -367,7 +364,7 @@ A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 -  All type arguments are subtypes (see :ref:`Subtyping`) of a corresponding
    type parameter constraint.
 
-A compile-time error occurs if an instantiation is not well-formed.
+A :index:`compile-time error` occurs if an instantiation is not well-formed.
 
 Unless explicitly stated otherwise in appropriate sections, this specification
 discusses generic versions of class type, interface type, or function.
@@ -403,19 +400,19 @@ Implicit Generic Instantiations
 ===============================
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
-They are inferred from the context the generic is referred in. Implicit
-instantiation is possible only for functions and methods.
+They are inferred (see :ref:`Type Inference`) from the context the generic is
+referred in. Implicit instantiation is possible only for functions and methods.
 
-The result of instantiation is a *real*, non-parameterized program entity:
-class, interface, method, constructor, or function. The entity is handled
-exactly as an ordinary class, interface, method, constructor, or function.
+.. code-block:: typescript
+   :linenos:
 
-Conceptually, a generic class, an interface, a method, a constructor, or a
-function defines a set of classes, interfaces, methods, constructors, or
-functions respectively (see :ref:`Generic Instantiations`).
+    function foo <G> (x: G, y: G) {} // Generic declaration
+    foo (new Object, new Object)     // Implicit generic instantiation
+      // based on argument types the type argument is inferred
+
 
 .. index::
    implicit instantiation
@@ -450,8 +447,8 @@ then the boxing conversion applies to the type (see :ref:`Boxing Conversions`).
         '<' typeArgumentList '>'
         ;
 
-A compile-time error occurs if type arguments are omitted in a parameterized
-function.
+A :index:`compile-time error` occurs if type arguments are omitted in a
+parameterized function.
 
 .. index::
    type argument
@@ -535,7 +532,7 @@ a wildcard with a lower bound (*T* is a ``typeReference``) is as follows:
 The unbounded wildcard ``out``, and the wildcard ``out Object | null`` are
 equivalent.
 
-A compile-time error occurs if:
+A :index:`compile-time error` occurs if:
 
 -  A wildcard is used in a parameterization of a function; or
 -  A *covariant* :ref:`Covariance` wildcard is specified for a *contravariant*
@@ -723,8 +720,8 @@ to values (of type *V*).
 The type *K* is restricted to ``number`` types, type ``string``, union types
 constructed from these types, and literals of these types.
 
-A compile-time error occurs if any other type, or literal of any other type
-is used in place of this type:
+A :index:`compile-time error` occurs if any other type, or literal of any other
+type is used in place of this type:
 
 .. index::
    record utility type

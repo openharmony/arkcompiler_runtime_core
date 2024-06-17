@@ -22,6 +22,65 @@ This section discusses all issues related to different compatibility aspects
 between |LANG| and |TS|.
 
 
+.. _Reserved Names of TS Types:
+
+Reserved Names of |TS| Types
+****************************
+
+The following tables list words that are reserved
+and cannot be used as user-defined type names but are
+not otherwise restricted.
+
+.. index::
+   reserved names of |TS| types
+
+1. Names of |TS| utility types that are not supported by |LANG|:
+
++---------------------------+-----------------------+-----------------------+
+|                           |                       |                       |
++===========================+=======================+=======================+
+| ``Awaited``               | ``NoInfer``           | ``Pick``              |
++---------------------------+-----------------------+-----------------------+
+| ``ConstructorParameters`` | ``NonNullable``       | ``ReturnType``        |
++---------------------------+-----------------------+-----------------------+
+| ``Exclude``               | ``Omit``              | ``ThisParameterType`` |
++---------------------------+-----------------------+-----------------------+
+| ``Extract``               | ``OmitThisParameter`` | ``ThisType``          |
++---------------------------+-----------------------+-----------------------+
+| ``InstanceType``          | ``Parameters``        |                       |
++---------------------------+-----------------------+-----------------------+
+
+2. Names of |TS| utility string types that are not supported by |LANG|:
+
++----------------+-------------------+
+|                |                   |
++================+===================+
+| ``Capitalize`` | ``Uncapitalize``  |
++----------------+-------------------+
+| ``Lowercase``  | ``Uppercase``     |
++----------------+-------------------+
+
+3. Class names from |TS| standard library that are not supported by |LANG| standard library:
+
++---------------------------+-------------------------+-----------------------------+
+|                           |                         |                             |
++===========================+=========================+=============================+
+| ``ArrayBufferTypes``      | ``Function``            | ``Proxy``                   |
++---------------------------+-------------------------+-----------------------------+
+| ``AsyncGenerator``        | ``Generator``           | ``ProxyHandler``            |
++---------------------------+-------------------------+-----------------------------+
+| ``AsyncGeneratorFunction``| ``GeneratorFunction``   | ``Symbol``                  |
++---------------------------+-------------------------+-----------------------------+
+| ``AsyncIterable``         | ``IArguments``          | ``TemplateStringsArray``    |
++---------------------------+-------------------------+-----------------------------+
+| ``AsyncIterableIterator`` | ``IteratorYieldResult`` | ``TypedPropertyDescriptor`` |
++---------------------------+-------------------------+-----------------------------+
+| ``AsyncIterator``         | ``NewableFunction``     |                             |
++---------------------------+-------------------------+-----------------------------+
+| ``CallableFunction``      | ``PropertyDescriptor``  |                             |
++---------------------------+-------------------------+-----------------------------+
+
+|
 
 .. _No undefined as universal value:
 
@@ -42,9 +101,9 @@ Undefined is Not a Universal Value
 
     let array = new Array<number>
     let x = array [1234]
-       // |TS|: x will be assigned with undefined value !!!
-       // |LANG|: compile-time error if analysis may detect array out of bounds
-       //         violation or runtime error ArrayOutOfBounds
+       // Typescript: x will be assigned with undefined value !!!
+       // ArkTS: compile-time error if analysis may detect array out of bounds
+       //        violation or runtime error ArrayOutOfBounds
     console.log(x)
 
 
@@ -68,12 +127,12 @@ on the context and can produce different results:
    :linenos:
 
     let n = 1
-       // |TS|: treats 'n' as having type number
-       // |LANG|: treats 'n' as having type int to reach max code performance
+       // Typescript: treats 'n' as having type number
+       // ArkTS: treats 'n' as having type int to reach max code performance
 
     console.log(n / 2)
-       // |TS|: will print 0.5 - floating-point division is used
-       // |LANG|: will print 0 - integer division is used
+       // Typescript: will print 0.5 - floating-point division is used
+       // ArkTS: will print 0 - integer division is used
 
 
 .. _Covariant overriding:
@@ -134,14 +193,14 @@ causes a compile-time error in |TS|):
 
 .. code-block:: typescript
    :linenos:
-   
+
     function foo(): void
     function foo(x: string): void
     function foo(x?: string): void {
         /*body*/
     }
 
-    foo(undefined) // compile-time error in TS
+    foo(undefined) // compile-time error in Typescript
 
 |LANG| supports calling function or method only with the number of arguments
 that corresponds to the number of the parameters. |TS|, in some cases, allows

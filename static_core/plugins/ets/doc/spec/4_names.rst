@@ -156,7 +156,8 @@ The examples below are declarations distinguishable by names:
         static field: number = PI + pi
     }
 
-If a declaration is indistinguishable by name, then a compile-time error occurs:
+If a declaration is indistinguishable by name, then a :index:`compile-time error`
+occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -532,7 +533,7 @@ if it is one of the following:
     type D = string | Array<D> // ok
 
 
-Any other use causes a compile-time error, because the compiler
+Any other use causes a :index:`compile-time error`, because the compiler
 does not have enough information about the defined alias:
 
 .. code-block:: typescript
@@ -557,7 +558,7 @@ The same rules apply to a generic type alias defined as
     type A<T> = A<T> // compile-time error
 
 
-A compile-time error occurs if a generic type alias is used without
+A :index:`compile-time error` occurs if a generic type alias is used without
 a type argument:
 
 .. code-block-meta:
@@ -843,7 +844,7 @@ is inferred from the initializer as follows:
    is that of the initializer expression.
 
 If the type of the initializer cannot be inferred from the expression itself,
-then a compile-time error occurs (see :ref:`Object Literal`):
+then a :index:`compile-time error` occurs (see :ref:`Object Literal`):
 
 .. index::
    type
@@ -903,7 +904,7 @@ parameters must be specified.
 
 The ``native`` modifier indicates that the function is 
 a *native function* (see :ref:`Native Functions` in Experimental Features).
-A compile-time error occurs if a *native function* has a body.
+A :index:`compile-time error` occurs if a *native function* has a body.
 
 Functions must be declared on the top level (see :ref:`Top-Level Statements`).
 
@@ -1048,11 +1049,11 @@ Readonly Parameters
     frontend_status: None
 
 If the parameter type is prefixed with ``readonly``, then the type must be of
-array type ``T[]``. Otherwise, a compile-time error occurs.
+array type ``T[]``. Otherwise, a :index:`compile-time error` occurs.
 
 The *readonly* parameter indicates that the array content cannot be modified
-by a function or by a method body. A compile-time error if the array content
-is modified by an operation:
+by a function or by a method body. A :index:`compile-time error` if the array
+content is modified by an operation:
 
 .. code-block:: typescript
    :linenos:
@@ -1116,8 +1117,9 @@ The second form is a short notation for a parameter of union type
 ``T | undefined`` with the default value ``undefined``. It means that
 ``identifier '?' ':' type`` is equivalent to
 ``identifier ':' type | undefined = undefined``.
-If a type is of the value type kind, then implicit boxing must be applied
-(as in :ref:`Union Types`) as follows:
+If a type is of the value type kind, then implicit boxing (see
+:ref:`Boxing Conversions`) must be applied (as in :ref:`Union Types`) as
+follows:
 ``identifier '?' ':' valueType`` is equivalent to
 ``identifier ':' referenceTypeForValueType | undefined = undefined``.
 

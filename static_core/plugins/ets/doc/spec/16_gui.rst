@@ -261,7 +261,7 @@ The return type of an overridden method in a subclass must also be ``this``:
     let x = new C().foo() // type of 'x' is 'C'
     let y = new D().foo() // type of 'y' is 'D'
 
-Otherwise, compile-time error occurs.
+Otherwise, :index:`compile-time error` occurs.
 
 |
 

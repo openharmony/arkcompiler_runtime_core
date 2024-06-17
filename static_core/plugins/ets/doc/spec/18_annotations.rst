@@ -48,9 +48,9 @@ Spaces and line separators between the symbol ``@`` and the name are not allowed
     ClassAuthor({authorName: "Bob"}) // compile-time error, no '@'
     @ ClassAuthor({authorName: "Bob"}) // compile-time error, space is forbidden
 
-A compile-time error occurs if the annotation
-name is not accessible at the place of usage. An annotation declaration can be
-exported and used in other compilation units.
+A :index:`compile-time error` occurs if the annotation name is not accessible
+at the place of usage. An annotation declaration can be exported and used in
+other compilation units.
 
 Multiple annotations can be applied to one declaration:
 
@@ -94,11 +94,11 @@ As any other declarated entity, an annotation can be exported, using ``export`` 
 A ``TypeNode`` in the annotation field is restricted (see :ref:`Types of Annotation Fields`).
 
 The default value of an *annotation field* can be specified 
-using *initializer* as *constant expression*. A compile-time occurs in the value
-of this expression cannot be evaluated in compile-time.
+using *initializer* as *constant expression*. A :index:`compile-time error`
+occurs if the value of this expression cannot be evaluated in compile-time.
 
 An *user-defined annotation* must be defined at top-level,
-otherwise a compile-time error occurs.
+otherwise a :index:`compile-time error` occurs.
 
 An *user-defined annotation* cannot be extended (inheritance is not supported). 
 
@@ -137,8 +137,8 @@ The choice of types for annotation fields is limited to the types listed below:
 - Enumeration types (``const enum`` only);
 - Array of above types, e.g., ``string[]``.
 
-A compile-time error occurs if any other type is used as type of an *annotation
-field*.
+A :index:`compile-time error` occurs if any other type is used as type of an
+*annotation field*.
 
 .. _Using of User-Defined Annotation:
 
@@ -174,7 +174,7 @@ An annotation declaration is presented in the example below:
 
 
 All values in an *object literal expression* must be constant expressions, 
-otherwise a compile-time error occurs.
+otherwise a :index:`compile-time error` occurs.
 
 Annotation usage is presented in the example below:
 
@@ -193,7 +193,7 @@ Annotation usage is presented in the example below:
 The current version of the language allows to use annotations only
 for non-abstract class declarations
 and method declarations in non-abstract classes.
-Otherwise, a compile-time error occurs:
+Otherwise, a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -226,7 +226,7 @@ The order of properties does not matter in an annotation usage:
     
 
 When using an annotation, all fields without default values must be listed.
-Otherwise, a compile-time error occurs:
+Otherwise, a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
