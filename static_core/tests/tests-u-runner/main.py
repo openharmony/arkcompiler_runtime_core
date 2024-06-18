@@ -50,7 +50,7 @@ def main() -> None:
                             "or use special value `all` to use all available cores.")
     start = datetime.now()
     for test_suite in config.test_suites:
-        plugin = "ets" if test_suite.startswith("ets") else test_suite
+        plugin = "ets" if test_suite.startswith("ets") or test_suite.startswith("sts") else test_suite
         runner_class = registry.get_runner(plugin)
         if runner_class is not None:
             runners.append(runner_class(config))

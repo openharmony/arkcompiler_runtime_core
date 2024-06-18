@@ -49,6 +49,10 @@ class EtsTestDir:
     def ets_es_checked(self) -> Path:
         return self.tests / "ets_es_checked"
 
+    @property
+    def sts_ts_subset(self) -> Path:
+        return self.tests / "sts_ts_subset"
+
     @cached_property
     def root(self) -> Path:
         return Path(self.__root) if self.__root else self.__static_core_root / "plugins" / "ets"

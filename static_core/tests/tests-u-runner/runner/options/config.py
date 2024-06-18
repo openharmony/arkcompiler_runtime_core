@@ -54,7 +54,8 @@ class Config:
     @value(
         yaml_path="test-suites",
         cli_name=["test_suites", "test262", "parser", "declgenparser", "hermes", "system", "astchecker",
-                  "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom"],
+                  "ets_func_tests", "ets_runtime", "ets_cts", "ets_gc_stress", "ets_es_checked", "ets_custom",
+                  "sts_ts_subset"],
         cast_to_type=_to_test_suites,
         required=True
     )

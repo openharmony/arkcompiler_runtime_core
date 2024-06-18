@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional, List, Sequence
+from typing import Dict, Optional, List
 
 from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
@@ -62,14 +62,17 @@ class Test:
         # In such case the test will be counted as `excluded by other reasons`
         self.excluded = False
         # Collect all executable commands
-        self.reproduce = ""
+        self.reproduce: List[str] = []
         # Time to execute in seconds
         self.time: Optional[float] = None
         # Reports if generated. Key is ReportFormat.XXX. Value is a path to the generated report
         self.reports: Dict[ReportFormat, str] = {}
 
-    def log_cmd(self, cmd: Sequence[str]) -> None:
-        self.reproduce += "\n" + ' '.join(cmd)
+    def steps_to_reproduce(self) -> str:
+        return "\n".join(self.reproduce)
+
+    def log_cmd(self, cmd: str) -> None:
+        self.reproduce.append(cmd)
 
     def run(self) -> Test:
         start = datetime.now()
@@ -86,8 +89,8 @@ class Test:
         if self.is_output_status():
             Log.default(_LOGGER, f"Finished {self.test_id} - {round(self.time, 2)} sec - {self.status().value}")
         if self.is_output_log():
-            self.reproduce += f"\nTo reproduce with URunner run:\n{self.get_command_line()}"
-            Log.default(_LOGGER, f"{self.test_id}: steps: {self.reproduce}")
+            self.reproduce.append(f"\nTo reproduce with URunner run:\n{self.get_command_line()}")
+            Log.default(_LOGGER, f"{self.test_id}: steps: {self.steps_to_reproduce()}")
             if self.report:
                 Log.default(_LOGGER, f"{self.test_id}: expected output: {self.expected}")
                 Log.default(_LOGGER, f"{self.test_id}: actual output: {self.report.output}")

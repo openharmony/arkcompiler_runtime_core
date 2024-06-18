@@ -25,7 +25,6 @@ from typing import List, Callable, Tuple, Optional
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv, Params, TestReport
-from runner.logger import Log
 from runner.options.options_jit import JitOptions
 from runner.test_base import Test
 
@@ -69,8 +68,8 @@ class TestFileBased(Test):
         cmd = self.test_env.cmd_prefix + [params.executor]
         cmd.extend(params.flags)
 
-        self.log_cmd(cmd)
-        Log.all(_LOGGER, f"Run {name}: {' '.join(cmd)}")
+        logged_cmd = ' '.join(cmd)
+        self.log_cmd(f"Run {name}: {logged_cmd}")
 
         passed = False
         output = ""
@@ -104,10 +103,14 @@ class TestFileBased(Test):
             self.test_env.coverage.merge_and_delete_prowraw_files(profraw_file, profdata_file)
 
         report = TestReport(
-            output=output,
-            error=error,
+            output=output.strip(),
+            error=error.strip(),
             return_code=return_code
         )
+
+        self.log_cmd(f"Output: '{report.output}'")
+        self.log_cmd(f"Error: '{report.error}'")
+        self.log_cmd(f"Return code: {report.return_code}")
 
         return passed, report, fail_kind
 
