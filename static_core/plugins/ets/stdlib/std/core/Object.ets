@@ -28,11 +28,7 @@ export const OBJECT_TO_STRING_MEMBER_NAME: string          = "toString"
 export const OBJECT_TO_LOCALE_STRING_MEMBER_NAME: string   = "toLocaleString"
 export const OBJECT_HAS_OWN_PROPERTY_MEMBER_NAME: string   = "hasOwnProperty"
 
-
-// Temporary aliases
 type EntryType = [PropertyKey, NullishType]
-type __Record<K, V> = Map<K, V>
-type RecordForObject = Map<PropertyKey, NullishType>
 
 /**
  * `object` is an alias for type `Object`
@@ -178,8 +174,7 @@ export class Object {
     *
     * @returns an array containing the given object's own string-keyed field values
     */
-    // NOTE(shumilov-petr): Need to rename into `values`. Blocked by Object's childs
-    public static values__(o: Object): NullishType[] {
+    public static values(o: Object): NullishType[] {
         if (o instanceof Char ||
             o instanceof Boolean ||
             o instanceof Byte ||
@@ -447,14 +442,26 @@ export class Object {
     /**
     * Transforms key-value pairs into a Record.
     *
-    * @param entries a map containing key-value pairs
+    * @param entries an Iterable object that contains key-value pairs
     *
-    * @returns new Record whose properties are given by the entries of the map
+    * @returns new Record whose properties are given by the elements of the Iterable
     */
-    public static fromEntries<T>(entries: Map<PropertyKey, T>): __Record<PropertyKey, T> {
-        // NOTE(shumilov-petr): Currently, semantics of this function is silly
-        // However, it changes when Record type will be supported by front-end
-        return entries
+    public static fromEntries<T = NullishType>(entries: Iterable<[PropertyKey, T]>): Record<PropertyKey, T> {
+        const result = new Record<PropertyKey, T>()
+
+        const entriesIter = entries.$_iterator()
+
+        let entriesIterResult = entriesIter.next()
+        while (!entriesIterResult.done) {
+            const entry: [PropertyKey, T] | undefined = entriesIterResult.value
+            if (entry != undefined) {
+                result[entry[0]] = entry[1]
+            }
+
+            entriesIterResult = entriesIter.next()
+        }
+
+        return result
     }
 
     /**
@@ -466,8 +473,7 @@ export class Object {
     *
     * @returns the modified target Record
     */
-    // NOTE(shumilov-petr): `RecordForObject` have to replaced into `Record<PropertyKey, NullishType>` (front-end will support it soon)
-    public static assign(target: RecordForObject,  ...source: Object[]): RecordForObject {
+    public static assign(target: Record<PropertyKey, NullishType>,  ...source: Object[]): Record<PropertyKey, NullishType> {
         for (const s of source) {
             const entries = Object.entries(s)
             for (const e of entries) {
