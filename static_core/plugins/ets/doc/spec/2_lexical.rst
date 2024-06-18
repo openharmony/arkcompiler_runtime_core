@@ -901,9 +901,9 @@ Comments
 *Comment*  is a piece of text added in the stream to document and compliment
 the source code. Comments are insignificant for the syntactic grammar.
 
-*Line comments* begin with the sequence of characters '``//``' and end with the
-last line separator character. Any character or sequence of characters
-between them is allowed but ignored.
+*Line comments* begin with the sequence of characters '``//``' (as seen in the
+example below) and end with the line separator character. Any character
+or sequence of characters between them is allowed but ignored.
 
 .. code-block:: typescript
    :linenos:
@@ -911,11 +911,10 @@ between them is allowed but ignored.
     // This is a line comment
 
 
-*Multi-line comments* begin with the sequence of  characters '``\*``' and end
-with the first subsequent sequence of characters '``*/``'. Any character or
-sequence of characters between them is allowed but ignored.
-
-Comments cannot be nested.
+*Multi-line comments* begin with the sequence of  characters '``\*``' (as seen
+in the example below) and end with the first subsequent sequence of characters
+'``*/``'. Any character or sequence of characters between them is allowed but
+ignored.
 
 .. code-block:: typescript
    :linenos:
@@ -924,6 +923,7 @@ Comments cannot be nested.
         This is a multi-line comment
     */
 
+Comments cannot be nested.
 
 .. index::
    comment

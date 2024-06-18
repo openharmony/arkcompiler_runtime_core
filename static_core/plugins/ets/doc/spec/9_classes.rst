@@ -261,8 +261,8 @@ Class Extension Clause
 
 All classes except class ``Object`` can contain the ``extends`` clause that
 specifies the *base class*, or the *direct superclass* of the current class.
-Then the current class is the *derived class*, or the *direct subclass*.
-A class that has no *extends* clause, and is not ``Object``, is assumed to have
+In this situation, the current class is a *derived class*, or a *direct subclass*.
+A class that has no ``extends`` clause and is not ``Object`` is assumed to have
 the ``extends`` ``Object`` clause.
 
 .. index::
@@ -562,8 +562,8 @@ a field is not necessary:
       }
     }
 
-If a property is defined in the form that requires a setter, then the
-implementation of the property in the form of a readonly field triggers
+If a property is defined in a form that requires a setter, then the
+implementation of the property in the form of a ``readonly`` field causes
 a :index:`compile-time error`:
 
 .. code-block-meta:
@@ -590,8 +590,9 @@ a :index:`compile-time error`:
     write_into_read_only (new StyleClassTwo)
 
 
-If a property is defined in the readonly form, then the implementation of the
-property can keep readonly form or extend it to the writable one as well:
+If a property is defined in the ``readonly`` form, then the implementation of
+the property can either keep the ``readonly`` form or extend it to the writable
+form as follows:
 
 .. code-block:: typescript
    :linenos:
@@ -1349,7 +1350,7 @@ A :index:`compile-time error` occurs if:
 
 -  An abstract method is declared private.
 -  The method declaration contains another modifier (``static``, ``final``,
-   ``native`` or ``async``) along with the modifier ``abstract``.
+   ``native``, or ``async``) along with the modifier ``abstract``.
 -  The declaration of an abstract method *m* does not appear directly within an
    abstract class *A*.
 -  Any non-abstract subclass of *A* (see :ref:`Abstract Classes`) does not
@@ -1400,7 +1401,9 @@ Async Methods
     frontend_status: Done
 
 Async methods are described in the chapter Experimental Features (see
-:ref:`Async Methods Experimental`)
+:ref:`Experimental Async Methods`).
+
+|
 
 .. _Override Methods:
 

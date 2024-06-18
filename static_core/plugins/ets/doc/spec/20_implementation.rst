@@ -71,9 +71,9 @@ be any valid type.
     interface SomeInterface {}
     let type_of_interface: Type = Type.for<SomeInterface>()
 
-.. _Methods for T[] types:
+.. _Methods for T[] Types:
 
-Methods for ``T[]`` types
+Methods for ``T[]`` Types
 *************************
 
 Some methods defined for ``Array<T>`` can be used for ``T[]`` (e.g., ``at``).
@@ -82,17 +82,17 @@ must use appropriate lowering to implement such methods by using library
 function calls.
 
 
-.. _Generic and function types peculiarities:
+.. _Generic and Function Types Peculiarities:
 
-Generic and function types peculiarities
+Generic and Function Types Peculiarities
 ****************************************
 
-Current compiler and runtime implementations use type erasure and thus affects
-how generics and function types behave. This is expected to be changed in the
-future. Compiler applies boxing (see :ref:`Boxing Conversions`) to any
-parameters and return types of primitive types in case of dealing with
-variables of function types. Particular example can be found here 
-:ref:`InstanceOf Expression` the last bullet of the compile-time errors list.
+Current compiler and runtime implementations use type erasure, and thus affect
+the manner of behavior of generics and function types. It is expected to change
+in the future. The compiler applies boxing (see :ref:`Boxing Conversions`) to
+any parameter and return type of primitive types when dealing with variables
+of function types. A particular example can be found under the last bullet of
+the compile-time errors list in :ref:`InstanceOf Expression`.
 
 .. raw:: pdf
 

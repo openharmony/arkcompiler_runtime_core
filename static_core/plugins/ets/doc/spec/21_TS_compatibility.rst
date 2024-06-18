@@ -27,9 +27,8 @@ between |LANG| and |TS|.
 Reserved Names of |TS| Types
 ****************************
 
-The following tables list words that are reserved
-and cannot be used as user-defined type names but are
-not otherwise restricted.
+The following tables list words that are reserved and cannot be used as
+user-defined type names, but are not otherwise restricted.
 
 .. index::
    reserved names of |TS| types
@@ -60,7 +59,8 @@ not otherwise restricted.
 | ``Lowercase``  | ``Uppercase``     |
 +----------------+-------------------+
 
-3. Class names from |TS| standard library that are not supported by |LANG| standard library:
+3. Class names from |TS| standard library that are not supported by |LANG|
+standard library:
 
 +---------------------------+-------------------------+-----------------------------+
 |                           |                         |                             |
@@ -101,7 +101,7 @@ Undefined is Not a Universal Value
 
     let array = new Array<number>
     let x = array [1234]
-       // Typescript: x will be assigned with undefined value !!!
+       // TypeScript: x will be assigned with undefined value !!!
        // ArkTS: compile-time error if analysis may detect array out of bounds
        //        violation or runtime error ArrayOutOfBounds
     console.log(x)
@@ -127,11 +127,11 @@ on the context and can produce different results:
    :linenos:
 
     let n = 1
-       // Typescript: treats 'n' as having type number
+       // TypeScript: treats 'n' as having type number
        // ArkTS: treats 'n' as having type int to reach max code performance
 
     console.log(n / 2)
-       // Typescript: will print 0.5 - floating-point division is used
+       // TypeScript: will print 0.5 - floating-point division is used
        // ArkTS: will print 0 - integer division is used
 
 
@@ -175,6 +175,26 @@ by compiler-generated compile-time errors:
 
     let base: Base = new Derived
     base.foo (new Base)
+
+
+.. _Subtyping for utility types:
+
+Subtyping for utility types
+===========================
+
+.. meta:
+    frontend_status: None
+
+In |LANG|, utility type ``Partial<T>`` is not a supertype for ``T`` and thus,
+variables of this type are to be initialized with object literals only.
+
+.. code-block:: typescript
+   :linenos:
+    
+    function <T> foo(t: T, part_t: Partial<T>) {
+        part_t = t // compile-time error in ArkTS
+    }
+
 
 .. _Difference in Overload Signatures:
 
@@ -287,6 +307,31 @@ These situation is illustrated by the example below:
    class Derived extends Base {
      foo(): number { return 5 } // Such overriding is prohibited
    }
+
+
+.. _Excessive arguments:
+
+Excessive arguments
+*******************
+
+.. meta:
+    frontend_status: None
+
+|TS| allows calling function type variables with more arguments. 
+|LANG| does not allow such calls.
+
+
+.. code-block:: typescript
+   :linenos:
+
+
+    let foo: (x?: number, y?: string) => void = ():void => {}
+        /* compile-time error in ArkTS as call with more than zero arguments
+           will be invalid while OK for the Typescript */
+
+    foo = (p?: number):void => {} 
+        /* compile-time error in ArkTS as call with two arguments will be
+           invalid while OK for the Typescript */
 
 
 

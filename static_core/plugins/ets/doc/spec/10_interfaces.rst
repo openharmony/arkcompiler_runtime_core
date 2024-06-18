@@ -390,8 +390,8 @@ the following:
 -  A getter, if a property is marked as ``readonly``;
 -  Otherwise, both a getter and a setter with the same name.
 
-If '``?``' is used after the name of the property, then it is semantically 
-equivalent to the property type ``type | undefined``.
+If '``?``' is used after the name of the property, then the property type is semantically 
+equivalent to ``type | undefined``.
 
 
 .. index::
