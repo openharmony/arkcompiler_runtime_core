@@ -184,6 +184,110 @@ void RegAccAlloc::SetNeedLda(compiler::Inst *inst, bool need)
     inst->SetSrcReg(AccReadIndex(inst), reg);
 }
 
+void RegAccAlloc::InitializeSourceRegisters()
+{
+    for (auto block : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : block->Insts()) {
+            if (inst->IsSaveState() || inst->IsCatchPhi()) {
+                continue;
+            }
+            if (inst->IsConst()) {
+                inst->SetFlag(compiler::inst_flags::ACC_WRITE);
+            }
+            for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
+                inst->SetSrcReg(i, compiler::INVALID_REG);
+            }
+            if (inst->IsConst()) {
+                inst->SetDstReg(compiler::INVALID_REG);
+            }
+        }
+    }
+}
+
+void RegAccAlloc::MarkAccForPhiInstructions()
+{
+    for (auto block : GetGraph()->GetBlocksRPO()) {
+        for (auto phi : block->PhiInsts()) {
+            if (IsPhiAccReady(phi)) {
+                phi->SetMarker(acc_marker_);
+            }
+        }
+    }
+}
+
+void RegAccAlloc::MarkAccForInstructions(compiler::BasicBlock *block)
+{
+    for (auto inst : block->AllInsts()) {
+        if (inst->NoDest() || !IsAccWrite(inst)) {
+            continue;
+        }
+
+        bool use_acc_dst_reg = true;
+
+        for (auto &user : inst->GetUsers()) {
+            compiler::Inst *uinst = user.GetInst();
+            if (uinst->IsSaveState()) {
+                continue;
+            }
+            if (CanUserReadAcc(inst, uinst)) {
+                SetNeedLda(uinst, false);
+            } else {
+                use_acc_dst_reg = false;
+            }
+        }
+
+        if (use_acc_dst_reg) {
+            inst->SetDstReg(compiler::ACC_REG_ID);
+            continue;
+        }
+
+        if (!inst->IsConst()) {
+            continue;
+        }
+
+        inst->ClearFlag(compiler::inst_flags::ACC_WRITE);
+
+        for (auto &user : inst->GetUsers()) {
+            compiler::Inst *uinst = user.GetInst();
+
+            if (uinst->IsSaveState()) {
+                continue;
+            }
+
+            SetNeedLda(uinst, true);
+        }
+    }
+}
+
+void RegAccAlloc::UpdateInstructionsAfterMark(compiler::BasicBlock *block)
+{
+    for (auto inst : block->Insts()) {
+        if (inst->GetInputsCount() == 0) {
+            continue;
+        }
+
+        if (inst->IsCall()) {
+            continue;
+        }
+
+        compiler::Inst *input = inst->GetInput(AccReadIndex(inst)).GetInst();
+        if (!IsAccWriteBetween(input, inst)) {
+            continue;
+        }
+
+        input->SetDstReg(compiler::INVALID_REG);
+        SetNeedLda(inst, true);
+
+        if (input->IsConst()) {
+            input->ClearFlag(compiler::inst_flags::ACC_WRITE);
+            for (auto &user : input->GetUsers()) {
+                compiler::Inst *uinst = user.GetInst();
+                SetNeedLda(uinst, true);
+            }
+        }
+    }
+}
+
 /**
  * Determine the accumulator usage between instructions.
  * Eliminate unnecessary register allocations by applying
@@ -196,91 +300,13 @@ bool RegAccAlloc::RunImpl()
 {
     GetGraph()->InitDefaultLocations();
     // Initialize all source register of all instructions.
-    for (auto block : GetGraph()->GetBlocksRPO()) {
-        for (auto inst : block->Insts()) {
-            if (inst->IsSaveState() || inst->IsCatchPhi()) {
-                continue;
-            }
-            if (inst->IsConst()) {
-                inst->SetFlag(compiler::inst_flags::ACC_WRITE);
-            }
-            for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-                inst->SetSrcReg(i, compiler::INVALID_REG);
-                if (inst->IsConst()) {
-                    inst->SetDstReg(compiler::INVALID_REG);
-                }
-            }
-        }
-    }
-
+    InitializeSourceRegisters();
     // Mark Phi instructions if they can be optimized for acc.
-    for (auto block : GetGraph()->GetBlocksRPO()) {
-        for (auto phi : block->PhiInsts()) {
-            if (IsPhiAccReady(phi)) {
-                phi->SetMarker(acc_marker_);
-            }
-        }
-    }
-
+    MarkAccForPhiInstructions();
     // Mark instructions if they can be optimized for acc.
     for (auto block : GetGraph()->GetBlocksRPO()) {
-        for (auto inst : block->AllInsts()) {
-            if (inst->NoDest() || !IsAccWrite(inst)) {
-                continue;
-            }
-
-            bool use_acc_dst_reg = true;
-
-            for (auto &user : inst->GetUsers()) {
-                compiler::Inst *uinst = user.GetInst();
-                if (uinst->IsSaveState()) {
-                    continue;
-                }
-                if (CanUserReadAcc(inst, uinst)) {
-                    SetNeedLda(uinst, false);
-                } else {
-                    use_acc_dst_reg = false;
-                }
-            }
-
-            if (use_acc_dst_reg) {
-                inst->SetDstReg(compiler::ACC_REG_ID);
-            } else if (inst->IsConst()) {
-                inst->ClearFlag(compiler::inst_flags::ACC_WRITE);
-                for (auto &user : inst->GetUsers()) {
-                    compiler::Inst *uinst = user.GetInst();
-                    if (uinst->IsSaveState()) {
-                        continue;
-                    }
-                    SetNeedLda(uinst, true);
-                }
-            }
-        }
-
-        for (auto inst : block->Insts()) {
-            if (inst->GetInputsCount() == 0) {
-                continue;
-            }
-
-            if (inst->IsCall()) {
-                continue;
-            }
-
-            compiler::Inst *input = inst->GetInput(AccReadIndex(inst)).GetInst();
-
-            if (IsAccWriteBetween(input, inst)) {
-                input->SetDstReg(compiler::INVALID_REG);
-                SetNeedLda(inst, true);
-
-                if (input->IsConst()) {
-                    input->ClearFlag(compiler::inst_flags::ACC_WRITE);
-                    for (auto &user : input->GetUsers()) {
-                        compiler::Inst *uinst = user.GetInst();
-                        SetNeedLda(uinst, true);
-                    }
-                }
-            }
-        }
+        MarkAccForInstructions(block);
+        UpdateInstructionsAfterMark(block);
     }
 
 #ifndef NDEBUG

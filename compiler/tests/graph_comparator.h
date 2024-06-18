@@ -82,37 +82,15 @@ public:
 
         if (inst1->GetOpcode() != inst2->GetOpcode() || inst1->GetType() != inst2->GetType() ||
             inst1->GetInputsCount() != inst2->GetInputsCount()) {
+                inst_compare_map_.erase(inst1);
+                return false;
+        }
+
+        bool result = (inst1->GetOpcode() != Opcode::Phi) ?
+                      CompareNonPhiInputs(inst1, inst2) : ComparePhiInputs(inst1, inst2);
+        if (!result) {
             inst_compare_map_.erase(inst1);
             return false;
-        }
-        if (inst1->GetOpcode() != Opcode::Phi) {
-            auto inst1_begin = inst1->GetInputs().begin();
-            auto inst1_end = inst1->GetInputs().end();
-            auto inst2_begin = inst2->GetInputs().begin();
-            auto eq_lambda = [this](Input input1, Input input2) { return Compare(input1.GetInst(), input2.GetInst()); };
-            if (!std::equal(inst1_begin, inst1_end, inst2_begin, eq_lambda)) {
-                inst_compare_map_.erase(inst1);
-                return false;
-            }
-        } else {
-            if (inst1->GetInputsCount() != inst2->GetInputsCount()) {
-                inst_compare_map_.erase(inst1);
-                return false;
-            }
-            for (size_t index1 = 0; index1 < inst1->GetInputsCount(); index1++) {
-                auto input1 = inst1->GetInput(index1).GetInst();
-                auto bb1 = inst1->CastToPhi()->GetPhiInputBb(index1);
-                if (bb_map_.count(bb1) == 0) {
-                    inst_compare_map_.erase(inst1);
-                    return false;
-                }
-                auto bb2 = bb_map_.at(bb1);
-                auto input2 = inst2->CastToPhi()->GetPhiInput(bb2);
-                if (!Compare(input1, input2)) {
-                    inst_compare_map_.erase(inst1);
-                    return false;
-                }
-            }
         }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
@@ -218,24 +196,14 @@ public:
         // CHECK(LoadType, GetTypeId)
 #undef CHECK
 #undef CAST
+
         if (inst1->GetOpcode() == Opcode::Constant) {
-            auto c1 = inst1->CastToConstant();
-            auto c2 = inst2->CastToConstant();
-            bool same = false;
-            switch (inst1->GetType()) {
-                case DataType::FLOAT32:
-                case DataType::INT32:
-                    same = static_cast<uint32_t>(c1->GetRawValue()) == static_cast<uint32_t>(c2->GetRawValue());
-                    break;
-                default:
-                    same = c1->GetRawValue() == c2->GetRawValue();
-                    break;
-            }
-            if (!same) {
+            if (!CompareConstantInst(inst1, inst2)) {
                 inst_compare_map_.erase(inst1);
                 return false;
             }
         }
+
         if (inst1->GetOpcode() == Opcode::Cmp && IsFloatType(inst1->GetInput(0).GetInst()->GetType())) {
             auto cmp1 = static_cast<CmpInst *>(inst1);
             auto cmp2 = static_cast<CmpInst *>(inst2);
@@ -244,51 +212,113 @@ public:
                 return false;
             }
         }
-        for (size_t i = 0; i < inst2->GetInputsCount(); i++) {
-            if (inst1->GetInputType(i) != inst2->GetInputType(i)) {
-                inst_compare_map_.erase(inst1);
-                return false;
-            }
-        }
-        if (inst1->IsSaveState()) {
-            auto *sv_st1 = static_cast<SaveStateInst *>(inst1);
-            auto *sv_st2 = static_cast<SaveStateInst *>(inst2);
-            if (sv_st1->GetImmediatesCount() != sv_st2->GetImmediatesCount()) {
-                inst_compare_map_.erase(inst1);
-                return false;
-            }
 
-            std::vector<VirtualRegister::ValueType> regs1;
-            std::vector<VirtualRegister::ValueType> regs2;
-            regs1.reserve(sv_st1->GetInputsCount());
-            regs2.reserve(sv_st2->GetInputsCount());
-            for (size_t i {0}; i < sv_st1->GetInputsCount(); ++i) {
-                regs1.emplace_back(sv_st1->GetVirtualRegister(i).Value());
-                regs2.emplace_back(sv_st2->GetVirtualRegister(i).Value());
-            }
-            std::sort(regs1.begin(), regs1.end());
-            std::sort(regs2.begin(), regs2.end());
-            if (regs1 != regs2) {
+        if (!CompareInputTypes(inst1, inst2) || !CompareSaveStateInst(inst1, inst2)) {
                 inst_compare_map_.erase(inst1);
                 return false;
+        }
+
+        return true;
+    }
+private:
+    std::unordered_map<Inst *, Inst *> inst_compare_map_;
+    std::unordered_map<BasicBlock *, BasicBlock *> bb_map_;
+
+    bool CompareNonPhiInputs(Inst *inst1, Inst *inst2)
+    {
+        auto inst1_begin = inst1->GetInputs().begin();
+        auto inst1_end = inst1->GetInputs().end();
+        auto inst2_begin = inst2->GetInputs().begin();
+        auto eq_lambda = [this](Input input1, Input input2) {
+            return Compare(input1.GetInst(), input2.GetInst());
+        };
+        return std::equal(inst1_begin, inst1_end, inst2_begin, eq_lambda);
+    }
+
+    bool ComparePhiInputs(Inst *inst1, Inst *inst2)
+    {
+        if (inst1->GetInputsCount() != inst2->GetInputsCount()) {
+            return false;
+        }
+
+        for (size_t index1 = 0; index1 < inst1->GetInputsCount(); index1++) {
+            auto input1 = inst1->GetInput(index1).GetInst();
+            auto bb1 = inst1->CastToPhi()->GetPhiInputBb(index1);
+            if (bb_map_.count(bb1) == 0) {
+                return false;
             }
-            if (sv_st1->GetImmediatesCount() != 0) {
-                auto eq_lambda = [](SaveStateImm i1, SaveStateImm i2) {
-                    return i1.value == i2.value && i1.vreg == i2.vreg && i1.is_acc == i2.is_acc;
-                };
-                if (!std::equal(sv_st1->GetImmediates()->begin(), sv_st1->GetImmediates()->end(),
-                                sv_st2->GetImmediates()->begin(), eq_lambda)) {
-                    inst_compare_map_.erase(inst1);
-                    return false;
-                }
+            auto bb2 = bb_map_.at(bb1);
+            auto input2 = inst2->CastToPhi()->GetPhiInput(bb2);
+            if (!Compare(input1, input2)) {
+                return false;
             }
         }
         return true;
     }
 
-private:
-    std::unordered_map<Inst *, Inst *> inst_compare_map_;
-    std::unordered_map<BasicBlock *, BasicBlock *> bb_map_;
+    bool CompareConstantInst(Inst *inst1, Inst *inst2)
+    {
+        auto c1 = inst1->CastToConstant();
+        auto c2 = inst2->CastToConstant();
+        bool same = false;
+        switch (inst1->GetType()) {
+            case DataType::FLOAT32:
+            case DataType::INT32:
+                same = static_cast<uint32_t>(c1->GetRawValue()) == static_cast<uint32_t>(c2->GetRawValue());
+                break;
+            default:
+                same = c1->GetRawValue() == c2->GetRawValue();
+                break;
+        }
+        return same;
+    }
+
+    bool CompareInputTypes(Inst *inst1, Inst *inst2)
+    {
+        for (size_t i = 0; i < inst2->GetInputsCount(); i++) {
+            if (inst1->GetInputType(i) != inst2->GetInputType(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool CompareSaveStateInst(Inst *inst1, Inst *inst2)
+    {
+        if (!inst1->IsSaveState()) {
+            return true;
+        }
+
+        auto *sv_st1 = static_cast<SaveStateInst *>(inst1);
+        auto *sv_st2 = static_cast<SaveStateInst *>(inst2);
+        if (sv_st1->GetImmediatesCount() != sv_st2->GetImmediatesCount()) {
+            return false;
+        }
+
+        std::vector<VirtualRegister::ValueType> regs1;
+        std::vector<VirtualRegister::ValueType> regs2;
+        regs1.reserve(sv_st1->GetInputsCount());
+        regs2.reserve(sv_st2->GetInputsCount());
+        for (size_t i {0}; i < sv_st1->GetInputsCount(); ++i) {
+            regs1.emplace_back(sv_st1->GetVirtualRegister(i).Value());
+            regs2.emplace_back(sv_st2->GetVirtualRegister(i).Value());
+        }
+        std::sort(regs1.begin(), regs1.end());
+        std::sort(regs2.begin(), regs2.end());
+        if (regs1 != regs2) {
+            return false;
+        }
+        if (sv_st1->GetImmediatesCount() != 0) {
+            auto eq_lambda = [](SaveStateImm i1, SaveStateImm i2) {
+                return i1.value == i2.value && i1.vreg == i2.vreg && i1.is_acc == i2.is_acc;
+            };
+            if (!std::equal(sv_st1->GetImmediates()->begin(), sv_st1->GetImmediates()->end(),
+                            sv_st2->GetImmediates()->begin(), eq_lambda)) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 }  // namespace panda::compiler
 
