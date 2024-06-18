@@ -409,23 +409,43 @@ std::vector<std::string> Disassembler::GetModuleLiteralArray(panda_file::File::E
     panda_file::ModuleDataAccessor mda(*file_, module_id);
     const std::vector<uint32_t> &request_modules_offset = mda.getRequestModules();
     std::vector<std::string> module_literal_array;
+    std::stringstream module_requests_stringstream;
+    module_requests_stringstream << "\tMODULE_REQUEST_ARRAY: {\n";
+    for (size_t index = 0; index < request_modules_offset.size(); ++index) {
+        module_requests_stringstream << "\t\t" << index <<
+            " : " << GetStringByOffset(request_modules_offset[index]) << ",\n";
+    }
+    module_requests_stringstream << "\t}";
+    module_literal_array.push_back(module_requests_stringstream.str());
     mda.EnumerateModuleRecord([&](panda_file::ModuleTag tag, uint32_t export_name_offset,
                                   uint32_t request_module_idx, uint32_t import_name_offset,
                                   uint32_t local_name_offset) {
         std::stringstream ss;
-        ss << "ModuleTag: " << ModuleTagToString(tag);
-        if (IsValidOffset(local_name_offset)) {
+        ss << "\tModuleTag: " << ModuleTagToString(tag);
+        if (tag == panda_file::ModuleTag::REGULAR_IMPORT ||
+            tag == panda_file::ModuleTag::NAMESPACE_IMPORT || tag == panda_file::ModuleTag::LOCAL_EXPORT) {
+            if (!IsValidOffset(local_name_offset)) {
+                LOG(FATAL, DISASSEMBLER) << "Get invalid local name offset!" << std::endl;
+            }
             ss << ", local_name: " << GetStringByOffset(local_name_offset);
         }
-        if (IsValidOffset(export_name_offset)) {
+        if (tag == panda_file::ModuleTag::LOCAL_EXPORT || tag == panda_file::ModuleTag::INDIRECT_EXPORT) {
+            if (!IsValidOffset(export_name_offset)) {
+                LOG(FATAL, DISASSEMBLER) << "Get invalid export name offset!" << std::endl;
+            }
             ss << ", export_name: " << GetStringByOffset(export_name_offset);
         }
-        if (IsValidOffset(import_name_offset)) {
+        if (tag == panda_file::ModuleTag::REGULAR_IMPORT || tag == panda_file::ModuleTag::INDIRECT_EXPORT) {
+            if (!IsValidOffset(import_name_offset)) {
+                LOG(FATAL, DISASSEMBLER) << "Get invalid import name offset!" << std::endl;
+            }
             ss << ", import_name: " << GetStringByOffset(import_name_offset);
         }
-        if (request_module_idx < request_modules_offset.size()) {
-            auto request_module_offset = request_modules_offset[request_module_idx];
-            ASSERT(IsValidOffset(request_module_offset));
+        auto request_module_offset = request_modules_offset[request_module_idx];
+        if (tag != panda_file::ModuleTag::LOCAL_EXPORT) {
+            if (request_module_idx >= request_modules_offset.size() || !IsValidOffset(request_module_offset)) {
+                LOG(FATAL, DISASSEMBLER) << "Get invalid request module offset!" << std::endl;
+            }
             ss << ", module_request: " << GetStringByOffset(request_module_offset);
         }
         module_literal_array.push_back(ss.str());
@@ -1275,10 +1295,10 @@ std::string Disassembler::SerializeModuleLiteralArray(const std::vector<std::str
 
     std::stringstream ss;
     ss << "{ ";
-    ss << module_array.size();
-    ss << " [ ";
+    ss << (module_array.size() - 1); // Only needs to show the count of module tag, exclude module request array
+    ss << " [\n";
     for (size_t index = 0; index < module_array.size(); index++) {
-        ss << module_array[index] << "; ";
+        ss << module_array[index] << ";\n";
     }
     ss << "]}";
     return ss.str();

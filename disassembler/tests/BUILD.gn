@@ -72,6 +72,7 @@ disasm_module_test_js_files = [
   "module-local-export",
   "module-indirect-export",
   "module-start-export",
+  "module-regular-import-local-export",
 ]
 
 module_test_js_path = "//arkcompiler/runtime_core/disassembler/tests/module/"
