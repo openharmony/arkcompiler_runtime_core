@@ -174,7 +174,7 @@ cases:
 
   - doc: For loop with Int type in init.
     decl: |-
-      let a:Int;
+      let a:Int = 0;
       for(let i: Int = 0 ; i<10 ; i += 1 ) {
         a = i;
       }
@@ -182,7 +182,7 @@ cases:
 
   - doc: For loop with Number type in init.
     decl: |-
-      let a:Number;
+      let a:Number = 0;
       for(let i: Number = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
@@ -190,7 +190,7 @@ cases:
 
   - doc: For loop with Double type in init.
     decl: |-
-      let a:Double;
+      let a:Double = 0.0;
       for(let i: Double = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }
@@ -198,7 +198,7 @@ cases:
 
   - doc: For loop with Float type in init.
     decl: |-
-      let a:Float;
+      let a:Float = 0.0;
       for(let i: Float = 0 ; i<10 ; i += 1.01 ) {
         a = i;
       }

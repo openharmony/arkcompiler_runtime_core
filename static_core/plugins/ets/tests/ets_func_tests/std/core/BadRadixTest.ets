@@ -54,7 +54,7 @@ function test(result: int, message: String ): int {
 
 function checkBadRadix(val: Double, radix: int):int {
 
-    let sv: String;
+    let sv: String = "";
     try {
         sv = val.toString(radix);
     } catch(aoe: ArgumentOutOfRangeException) {

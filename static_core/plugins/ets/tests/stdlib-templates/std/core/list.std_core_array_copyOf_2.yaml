@@ -16,6 +16,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "boolean[]",
+    init_value: "[]",
     method_signature: { arr: "boolean[]", startIndex: int },
     method_throws: "true",
 
@@ -74,6 +75,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "byte[]",
+    init_value: "[]",
     method_signature: { arr: "byte[]", startIndex: int },
     method_throws: "true",
 
@@ -126,6 +128,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "short[]",
+    init_value: "[]",
     method_signature: { arr: "short[]", startIndex: int },
     method_throws: "true",
 
@@ -178,6 +181,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "int[]",
+    init_value: "[]",
     method_signature: { arr: "int[]", startIndex: int },
     method_throws: "true",
 
@@ -230,6 +234,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "long[]",
+    init_value: "[]",
     method_signature: { arr: "long[]", startIndex: int },
     method_throws: "true",
 
@@ -282,6 +287,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "float[]",
+    init_value: "[]",
     method_signature: { arr: "float[]", startIndex: int },
     method_throws: "true",
 
@@ -341,6 +347,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "double[]",
+    init_value: "[]",
     method_signature: { arr: "double[]", startIndex: int },
     method_throws: "true",
 
@@ -399,6 +406,7 @@
     method_nature: function,
     result_nature: array,
     result_type: "char[]",
+    init_value: "[]",
     method_signature: { arr: "char[]", startIndex: int },
     method_throws: "true",
 

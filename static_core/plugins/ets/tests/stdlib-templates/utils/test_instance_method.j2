@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ function main(): int {
         actual = obj{{.item.object_type}}.{{.item.result_retrieve_function}};
     {%- endif %}
   {% else %}
-      let actual: {{.item.method_return_type}};
+      let actual: {{.item.method_return_type}}{%- if item.init_object_init_value is defined %} = {{.item.init_object_init_value}}{%- endif %};
       {% if item.method_throws == true %} try { {%- endif %}
       actual = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
       {% if item.method_throws == true %} } catch (e) { console.println("Unexpected exception in positive test"); } {%- endif %}
