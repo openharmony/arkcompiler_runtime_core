@@ -241,3 +241,4 @@ panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/move_nullcheck_out_of_lo
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/check_verifier.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/xor_to_compare_to_xor.pa)
 panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
+panda_add_checked_test(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inline-external-constructor.pa EXT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/memory-barrier.pa)
