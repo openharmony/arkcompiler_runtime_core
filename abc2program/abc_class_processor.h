@@ -17,6 +17,7 @@
 #define ABC2PROGRAM_ABC_CLASS_PROCESSOR_H
 
 #include "abc_file_entity_processor.h"
+#include "abc_module_array_processor.h"
 #include "class_data_accessor-inl.h"
 
 namespace panda::abc2program {
@@ -36,7 +37,16 @@ private:
     void FillRecordAnnotations();
     void FillFields();
     void FillFunctions();
+
+    void FillLiteralArrayTable();
+    void FillModuleLiteralArrays();
+    void FillUnnestedLiteralArrays();
+    void FillNestedLiteralArrays();
+    void FillModuleLiteralArrayById(uint32_t module_literal_array_id);
+    void FillLiteralArrayById(uint32_t literal_array_id);
+
     std::unique_ptr<panda_file::ClassDataAccessor> class_data_accessor_;
+    std::unique_ptr<panda_file::LiteralDataAccessor> literal_data_accessor_;
     pandasm::Record record_;
 };
 

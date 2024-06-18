@@ -69,13 +69,13 @@ pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeI
 
         if (bc_ins.HasId(format, 0)) {
             auto idx = bc_ins.GetId().AsIndex();
-            id = file_->ResolveMethodIndex(method_id, idx);
+            id = file_.ResolveMethodIndex(method_id, idx);
         } else {
             id = method_id;
         }
         
-        panda_file::MethodDataAccessor mda(*file_, id);
-        panda_file::ProtoDataAccessor pda(*file_, mda.GetProtoId());
+        panda_file::MethodDataAccessor mda(file_, id);
+        panda_file::ProtoDataAccessor pda(file_, mda.GetProtoId());
 
         int overhead;
 

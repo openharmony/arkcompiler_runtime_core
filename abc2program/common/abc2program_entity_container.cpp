@@ -14,21 +14,17 @@
  */
 
 #include "abc2program_entity_container.h"
-#include "os/file.h"
 #include "abc_file_utils.h"
+#include "file-inl.h"
 #include "method_data_accessor-inl.h"
 #include "mangling.h"
+#include "os/file.h"
 
 namespace panda::abc2program {
 
 const panda_file::File &Abc2ProgramEntityContainer::GetAbcFile() const
 {
     return file_;
-}
-
-AbcStringTable &Abc2ProgramEntityContainer::GetAbcStringTable() const
-{
-    return string_table_;
 }
 
 pandasm::Program &Abc2ProgramEntityContainer::GetProgram() const
@@ -41,6 +37,12 @@ const panda_file::DebugInfoExtractor &Abc2ProgramEntityContainer::GetDebugInfoEx
     return debug_info_extractor_;
 }
 
+std::string Abc2ProgramEntityContainer::GetStringById(const panda_file::File::EntityId &entity_id) const
+{
+    panda_file::File::StringData sd = file_.GetStringData(entity_id);
+    return (reinterpret_cast<const char *>(sd.data));
+}
+
 std::string Abc2ProgramEntityContainer::GetFullRecordNameById(const panda_file::File::EntityId &class_id)
 {
     uint32_t class_id_offset = class_id.GetOffset();
@@ -48,7 +50,7 @@ std::string Abc2ProgramEntityContainer::GetFullRecordNameById(const panda_file::
     if (it != record_full_name_map_.end()) {
         return it->second;
     }
-    std::string name = string_table_.GetStringById(class_id);
+    std::string name = GetStringById(class_id);
     pandasm::Type type = pandasm::Type::FromDescriptor(name);
     std::string record_full_name = type.GetName();
     record_full_name_map_.emplace(class_id_offset, record_full_name);
@@ -74,7 +76,7 @@ std::string Abc2ProgramEntityContainer::GetFullMethodNameById(const panda_file::
 std::string Abc2ProgramEntityContainer::ConcatFullMethodNameById(const panda_file::File::EntityId &method_id)
 {
     panda::panda_file::MethodDataAccessor method_data_accessor(file_, method_id);
-    std::string method_name_raw = string_table_.GetStringById(method_data_accessor.GetNameId());
+    std::string method_name_raw = GetStringById(method_data_accessor.GetNameId());
     std::string record_name = GetFullRecordNameById(method_data_accessor.GetClassId());
     std::stringstream ss;
     if (AbcFileUtils::IsSystemTypeName(record_name)) {
@@ -158,19 +160,6 @@ void Abc2ProgramEntityContainer::AddProgramString(const std::string &str) const
 std::string Abc2ProgramEntityContainer::GetAbcFileAbsolutePath() const
 {
     return os::file::File::GetAbsolutePath(file_.GetFilename()).Value();
-}
-
-void Abc2ProgramEntityContainer::SetCurrentClassId(uint32_t class_id)
-{
-    current_class_id_ = class_id;
-}
-
-void Abc2ProgramEntityContainer::ClearLiteralArrayIdSet()
-{
-    module_literal_array_id_set_.clear();
-    unnested_literal_array_id_set_.clear();
-    processed_nested_literal_array_id_set_.clear();
-    unprocessed_nested_literal_array_id_set_.clear();
 }
 
 }  // namespace panda::abc2program

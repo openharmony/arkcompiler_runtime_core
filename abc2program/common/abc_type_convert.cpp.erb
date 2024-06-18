@@ -27,7 +27,7 @@ pandasm::Type AbcTypeConverter::PandaFileTypeToPandasmType(const panda_file::Typ
 % PandaFile::types.each do |type|
     case panda_file::Type::TypeId::<%= type.name.upcase %>:
 % if (type.name == "reference")
-        pandasm_type = pandasm::Type::FromDescriptor(string_table_.GetStringById(pda.GetReferenceType(ref_idx++)));
+        pandasm_type = pandasm::Type::FromDescriptor(entity_container_.GetStringById(pda.GetReferenceType(ref_idx++)));
 % elsif (type.name == "tagged")
         pandasm_type = pandasm::Type("any", 0);
 % else
@@ -58,7 +58,7 @@ pandasm::Type AbcTypeConverter::FieldTypeToPandasmType(const uint32_t& type) con
         break;
     default:
         panda_file::File::EntityId field_id(type);
-        std::string type_name = string_table_.GetStringById(field_id);
+        std::string type_name = entity_container_.GetStringById(field_id);
 
         field_type = pandasm::Type::FromDescriptor(type_name);
         break;

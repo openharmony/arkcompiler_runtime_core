@@ -94,7 +94,7 @@ void AbcLiteralArrayProcessor::FillLiteralArrayData(pandasm::LiteralArray *lit_a
         auto str_id = panda_file::helpers::Read<sizeof(T)>(&sp);
         pandasm::LiteralArray::Literal lit;
         lit.tag_ = tag;
-        lit.value_ = string_table_->GetStringById(str_id);
+        lit.value_ = GetStringById(panda_file::File::EntityId{str_id});
         lit_array->literals_.emplace_back(lit);
     }
 }
@@ -126,7 +126,7 @@ void AbcLiteralArrayProcessor::FillLiteralData(pandasm::LiteralArray *lit_array,
             value_lit.value_ = std::get<double>(value);
             break;
         case panda_file::LiteralTag::STRING:
-            value_lit.value_ = string_table_->GetStringById(std::get<uint32_t>(value));
+            value_lit.value_ = GetStringById(panda_file::File::EntityId{std::get<uint32_t>(value)});
             break;
         case panda_file::LiteralTag::METHOD:
         case panda_file::LiteralTag::GETTER:

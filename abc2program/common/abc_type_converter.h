@@ -17,20 +17,20 @@
 #define ABC2PROGRAM_COMMON_ABC_TYPE_CONVERTER_H
 
 #include <assembly-type.h>
+#include "abc2program_entity_container.h"
 #include "proto_data_accessor-inl.h"
-#include "abc_string_table.h"
 
 namespace panda::abc2program {
 
 class AbcTypeConverter {
 public:
-    explicit AbcTypeConverter(AbcStringTable &string_table) : string_table_(string_table) {}
+    explicit AbcTypeConverter(Abc2ProgramEntityContainer &entity_container) : entity_container_(entity_container) {}
     pandasm::Type PandaFileTypeToPandasmType(const panda_file::Type &type, panda_file::ProtoDataAccessor &pda,
                                              size_t &ref_idx) const;
     pandasm::Type FieldTypeToPandasmType(const uint32_t &type) const;
 
 private:
-    AbcStringTable &string_table_;
+    Abc2ProgramEntityContainer &entity_container_;
 };  // class AbcTypeConverter
 
 }  // namespace panda::abc2program

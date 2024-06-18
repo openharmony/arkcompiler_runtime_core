@@ -14,7 +14,7 @@
  */
 
 #include "abc2program_compiler.h"
-#include "abc_file_processor.h"
+#include "abc_class_processor.h"
 #include "file_format_version.h"
 
 namespace panda::abc2program {
@@ -25,7 +25,6 @@ bool Abc2ProgramCompiler::OpenAbcFile(const std::string &file_path)
     if (file_ == nullptr) {
         return false;
     }
-    string_table_ = std::make_unique<AbcStringTable>(*file_);
     debug_info_extractor_ = std::make_unique<panda_file::DebugInfoExtractor>(file_.get());
     return true;
 }
@@ -54,25 +53,35 @@ bool Abc2ProgramCompiler::CheckFileVersionIsSupported(uint8_t min_api_version, u
         IsVersionLessEqual(file_version, target_version.value());
 }
 
-bool Abc2ProgramCompiler::FillProgramData(pandasm::Program &program)
-{
-    entity_container_ = std::make_unique<Abc2ProgramEntityContainer>(*file_,
-                                                                     *string_table_,
-                                                                     program,
-                                                                     *debug_info_extractor_);
-    AbcFileProcessor file_processor(*entity_container_);
-    bool success = file_processor.FillProgramData();
-    return success;
-}
-
 const panda_file::File &Abc2ProgramCompiler::GetAbcFile() const
 {
     return *file_;
 }
 
-AbcStringTable &Abc2ProgramCompiler::GetAbcStringTable() const
+const panda_file::DebugInfoExtractor &Abc2ProgramCompiler::GetDebugInfoExtractor() const
 {
-    return *string_table_;
+    return *debug_info_extractor_;
+}
+
+void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &record_id,
+                                          pandasm::Program &program)
+{
+    ASSERT(!file_->IsExternal(record_id));
+    Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset());
+    AbcClassProcessor class_processor(record_id, entity_container);
+    class_processor.FillProgramData();
+}
+
+bool Abc2ProgramCompiler::CheckClassId(uint32_t class_id, size_t offset) const
+{
+    auto *header = file_->GetHeader();
+    auto class_off = header->class_idx_off + sizeof(uint32_t) * offset;
+    if (class_id > header->file_size) {
+        LOG(FATAL, ABC2PROGRAM) << "> error encountered in record at " << class_off << " (0x" << std::hex
+                                << class_off << "). binary file corrupted. record offset (0x" << class_id
+                                << ") out of bounds (0x" << header->file_size << ")!";
+    }
+    return !file_->IsExternal(panda_file::File::EntityId(class_id));
 }
 
 } // namespace panda::abc2program

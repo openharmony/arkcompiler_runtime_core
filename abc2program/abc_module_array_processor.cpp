@@ -81,7 +81,7 @@ void AbcModuleArrayProcessor::FillModuleRequests(std::vector<panda::pandasm::Lit
     for (auto &request : request_modules_offset) {
         panda::pandasm::LiteralArray::Literal module_request = {
             .tag_ = panda::panda_file::LiteralTag::STRING,
-            .value_ = string_table_->GetStringById(request)
+            .value_ = GetStringById(panda_file::File::EntityId{request})
         };
         literal_vec.emplace_back(module_request);
     }
@@ -92,12 +92,12 @@ void AbcModuleArrayProcessor::FillRegularImportEntry(std::vector<panda::pandasm:
 {
     panda::pandasm::LiteralArray::Literal local_name = {
         .tag_ = panda::panda_file::LiteralTag::STRING,
-        .value_ = string_table_->GetStringById(local_name_offset)
+        .value_ = GetStringById(panda_file::File::EntityId{local_name_offset})
     };
     literal_vec.emplace_back(local_name);
     panda::pandasm::LiteralArray::Literal import_name = {
         .tag_ = panda::panda_file::LiteralTag::STRING,
-        .value_ = string_table_->GetStringById(import_name_offset)
+        .value_ = GetStringById(panda_file::File::EntityId{import_name_offset})
     };
     literal_vec.emplace_back(import_name);
     panda::pandasm::LiteralArray::Literal module_request = {
@@ -113,7 +113,7 @@ void AbcModuleArrayProcessor::FillNamespaceImportEntry(
 {
     panda::pandasm::LiteralArray::Literal local_name = {
         .tag_ = panda::panda_file::LiteralTag::STRING,
-        .value_ = string_table_->GetStringById(local_name_offset)
+        .value_ = GetStringById(panda_file::File::EntityId{local_name_offset})
     };
     literal_vec.emplace_back(local_name);
     panda::pandasm::LiteralArray::Literal module_request = {
@@ -128,12 +128,12 @@ void AbcModuleArrayProcessor::FillLocalExportEntry(std::vector<panda::pandasm::L
 {
     panda::pandasm::LiteralArray::Literal local_name = {
         .tag_ = panda::panda_file::LiteralTag::STRING,
-        .value_ = string_table_->GetStringById(local_name_offset)
+        .value_ = GetStringById(panda_file::File::EntityId{local_name_offset})
     };
     literal_vec.emplace_back(local_name);
     panda::pandasm::LiteralArray::Literal export_name = {
         .tag_ = panda::panda_file::LiteralTag::STRING,
-        .value_ = string_table_->GetStringById(export_name_offset)
+        .value_ = GetStringById(panda_file::File::EntityId{export_name_offset})
     };
     literal_vec.emplace_back(export_name);
 }
@@ -143,12 +143,12 @@ void AbcModuleArrayProcessor::FillIndirectExportEntry(std::vector<panda::pandasm
 {
     panda::pandasm::LiteralArray::Literal export_name = {
         .tag_ = panda::panda_file::LiteralTag::STRING,
-        .value_ = string_table_->GetStringById(export_name_offset)
+        .value_ = GetStringById(panda_file::File::EntityId{export_name_offset})
     };
     literal_vec.emplace_back(export_name);
     panda::pandasm::LiteralArray::Literal import_name = {
         .tag_ = panda::panda_file::LiteralTag::STRING,
-        .value_ = string_table_->GetStringById(import_name_offset)
+        .value_ = GetStringById(panda_file::File::EntityId{import_name_offset})
     };
     literal_vec.emplace_back(import_name);
     panda::pandasm::LiteralArray::Literal module_request = {
