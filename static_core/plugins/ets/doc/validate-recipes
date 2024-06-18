@@ -18,6 +18,9 @@ use 5.010;
 use strict;
 use warnings;
 
+use constant false => 0;
+use constant true  => 1;
+
 my %skip_list_snippets = (
     54 => { # JSX, no reasonable example
         code_ok  => 1,
@@ -209,6 +212,8 @@ sub assert_recipes
     my $current_recipe;
     my $current_section = 'intro';
 
+    my $in_comment = false;
+
     my %skip_list = (
         151 => { code_bad => 'skip' },
     );
@@ -229,7 +234,11 @@ sub assert_recipes
         die 'Line cannot contain FIXME' if $line =~ /\bFIXME\b/i;
         die 'Line cannot contain TBD' if $line =~ /\bTBD\b/i;
 
-        if ($line =~ /^\s*(=+)$/) {
+        if ($line =~ /^\.\. :comment-begin:/) {
+            $in_comment = true;
+        } elsif ($line =~ /^\.\. :comment-end:/) {
+            $in_comment = false;
+        } elsif ($line =~ /^\s*(=+)$/) {
             # $current_section should not change
             my $payload = $1;
             die 'Garbage found in what looks like a header'
@@ -372,7 +381,7 @@ sub assert_recipes
 
             my $ref = 0+ $1;
             recipe_add_see_also_ref($current_recipe, $ref);
-        } else {
+        } elsif (!$in_comment) {
             # $current_section should not change
             # Content line (including empty lines):
 

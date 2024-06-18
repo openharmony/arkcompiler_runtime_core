@@ -1111,6 +1111,11 @@ specifically not supported in the following contexts:
 * Initialization of classes which declare a ``constructor`` with parameters
 * Initialization of classes with ``readonly`` fields
 
+Additionally, |LANG| supports usage of object literals to initialize the
+value of special type ``Record<K, V>``. The type ``K`` denotes an object key
+and is restricted to type ``number``, type ``string``, union types constructed
+from these types, and literals of these types.
+
 |CB_BAD|
 ~~~~~~~~
 
@@ -1163,6 +1168,8 @@ specifically not supported in the following contexts:
 
     // A literal can be contextually (i.e., implicitly) typed as Point:
     id_x_y({x: 5, y: 10})
+
+    let rec: Record<string, number> = { a: 1, b: 2 }
 
 |CB_OK|
 ~~~~~~~
@@ -1229,6 +1236,8 @@ specifically not supported in the following contexts:
     // id_x_y expects Point explicitly
     // New instance of Point is initialized with the literal
     id_x_y({x: 5, y: 10})
+
+    let rec: Record<string, number> = { "a": 1, "b": 2 }
 
 |CB_SEE|
 ~~~~~~~~
