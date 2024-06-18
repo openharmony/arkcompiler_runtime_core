@@ -146,7 +146,7 @@ if (is_mingw) {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
   }
 
-  if (is_mac) {
+  if (is_mac && !is_arkui_x) {
     libarkbase_sources += [ "$ark_root/libpandabase/os/filesystem.cpp" ]
   }
 }
