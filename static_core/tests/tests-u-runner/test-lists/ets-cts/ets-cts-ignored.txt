@@ -1039,11 +1039,6 @@
 03.types/08.reference_types/08.null_type/null12.sts
 03.types/08.reference_types/08.null_type/null13.sts
 
-# 17733 No CTE in bigint equality operations with incompatible operands
-07.expressions/25.equality_expressions/03.bigint_equality_operators/eq_n_0.sts
-07.expressions/25.equality_expressions/03.bigint_equality_operators/eq_n_10.sts
-07.expressions/25.equality_expressions/03.bigint_equality_operators/eq_n_14.sts
-
 # 17736 Incorrect relational operation result with negative bigint
 07.expressions/24.relational_expressions/03.bigint_relational_operators/ge_0.sts
 07.expressions/24.relational_expressions/03.bigint_relational_operators/gt_0.sts

@@ -1,0 +1,61 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+    - { ltype: 'BigInt', lval: '1n', op: '==', rtype: 'Boolean', rval: 'true' }
+    - { ltype: 'BigInt', lval: '1003n"', op: '==', rtype: 'Byte' , rval: '0' }
+    - { ltype: 'BigInt', lval: '14930n', op: '==', rtype: 'Int' , rval: '-134242' }
+    - { ltype: 'BigInt', lval: '495059n', op: '==', rtype: 'Short' , rval: '43000' }
+    - { ltype: 'BigInt', lval: '-234352n', op: '==', rtype: 'Long' , rval: '147483647' }
+
+    - { rtype: 'BigInt', rval: '-2344350531n', op: '==', ltype: 'Float', lval: '0.1' }
+    - { rtype: 'BigInt', rval: '13433553955n', op: '==', ltype: 'Double', lval: '4E10' }
+    - { rtype: 'BigInt', rval: '90009113640n', op: '==', ltype: 'String', lval: '"test"' }
+    - { rtype: 'BigInt', rval: '12001201300n', op: '==', ltype: 'BigInt[]', lval: '[6666666n]' }
+    - { rtype: 'BigInt', rval: '-5001359991n', op: '==', ltype: 'TestClass', lval: 'new TestClass()' }
+
+    - { ltype: 'BigInt', lval: '0n', op: '!=', rtype: 'Boolean', rval: 'false' }
+    - { ltype: 'BigInt', lval: '11n', op: '!=', rtype: 'Byte' , rval: '10' }
+    - { ltype: 'BigInt', lval: '-343443509244234310n', op: '!=', rtype: 'Int' , rval: '10000' }
+    - { ltype: 'BigInt', lval: '1350000000090344414n"', op: '!=', rtype: 'Short' , rval: '-134242' }
+    - { ltype: 'BigInt', lval: '-234434239439000139n', op: '!=', rtype: 'Long' , rval: '147483647' }
+
+    - { rtype: 'BigInt', rval: '-742340234n', op: '!=', ltype: 'Double', lval: '1E19' }
+    - { rtype: 'BigInt', rval: '9000000000n', op: '!=', ltype: 'Float', lval: '0.0001' }
+    - { rtype: 'BigInt', rval: '1031031030n', op: '!=', ltype: 'String', lval: '"stststrstr"' }
+    - { rtype: 'BigInt', rval: '-190003456n', op: '!=', ltype: 'BigInt[]', lval: '[909090n]' }
+    - { rtype: 'BigInt', rval: '-111111111n', op: '!=', ltype: 'TestClass', lval: 'new TestClass()' }
+
+    - { ltype: 'BigInt', lval: '908111101999991344149943n', op: '===', rtype: 'Boolean', rval: 'false' }
+    - { ltype: 'BigInt', lval: '-10000009013144341434000n', op: '===', rtype: 'Byte' , rval: '100' }
+    - { ltype: 'BigInt', lval: '-99000000123456789010234n', op: '===', rtype: 'Int' , rval: '-100000' }
+    - { ltype: 'BigInt', lval: '134059443443413400045551n', op: '===', rtype: 'Short' , rval: '-242' }
+    - { ltype: 'BigInt', lval: '600000000000000000000001n', op: '===', rtype: 'Long' , rval: '-147483647' }
+
+    - { rtype: 'BigInt', rval: '2443090434349n', op: '===', ltype: 'Double', lval: '-0.7543221' }
+    - { rtype: 'BigInt', rval: '1330392582584n', op: '===', ltype: 'Rloat', lval: '1.111111' }
+    - { rtype: 'BigInt', rval: '-234390000000n', op: '===', ltype: 'String', lval: '"hello world!"' }
+    - { rtype: 'BigInt', rval: '-190090009000n', op: '===', ltype: 'BigInt[]', lval: '[900000009n]' }
+    - { rtype: 'BigInt', rval: '9999999999999n', op: '===', ltype: 'TestClass', lval: 'new TestClass()' }
+
+    - { ltype: 'BigInt', lval: '777777777777777777777777777777777n"', op: '!==', rtype: 'Boolean', rval: 'false' }
+    - { ltype: 'BigInt', lval: '123123123123123123123123123123123n', op: '!==', rtype: 'Byte' , rval: '55' }
+    - { ltype: 'BigInt', lval: '100000100001000010001000100010000n', op: '!==', rtype: 'Int' , rval: '2000000' }
+    - { ltype: 'BigInt', lval: '900999912342434999900013435311323n', op: '!==', rtype: 'Short' , rval: '13001' }
+    - { ltype: 'BigInt', lval: '-64243000349321410834014983948348n', op: '!==', rtype: 'Long' , rval: '1413131317' }
+
+    - { rtype: 'BigInt', rval: '0n', op: '!==', ltype: 'Double', lval: 'Infinity' }
+    - { rtype: 'BigInt', rval: '-1n', op: '!==', ltype: 'float', lval: '12345.0' }
+    - { rtype: 'BigInt', rval: '424231348n', op: '!==', ltype: 'String', lval: '"test1"' }
+    - { rtype: 'BigInt', rval: '924212343n', op: '!==', ltype: 'BigInt[]', lval: '[13440003143n]' }
+    - { rtype: 'BigInt', rval: '-10000000n', op: '!==', ltype: 'TestClass', lval: 'new TestClass()' }

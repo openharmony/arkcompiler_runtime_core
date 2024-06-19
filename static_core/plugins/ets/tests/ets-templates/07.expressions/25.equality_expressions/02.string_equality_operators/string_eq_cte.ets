@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,19 @@
  * limitations under the License.
  */
 
-function main(): int {
-    let str = "abc";
-    let null_str: String | null = null;
-    assert str != null_str: "String must not be equal to null";
-    assert null_str != str: "Null string must not be equal to non-null one";
-    assert null_str == null_str: "Null values of type String must be equal";
-    return 0;
+{% for case in cases %}
+
+/*---
+desc: Compile-time error test for String equality
+tags: [negative, compile-only]
+---*/
+
+class TestClass {}
+
+function main(): void {
+    let x: {{case.ltype}} = {{case.lval}}
+    let y: {{case.rtype}} = {{case.rval}}
+    x {{case.op}} y
 }
+
+{% endfor %}
