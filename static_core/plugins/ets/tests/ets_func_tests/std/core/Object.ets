@@ -183,25 +183,25 @@ function objectValues(): int {
 
     let emptyArr: NullishType[] = []
 
-    result += objArraysAreEqual(Object.values__(c), emptyArr) ? 0 : 1
-    result += objArraysAreEqual(Object.values__(bo), emptyArr) ? 0 : 1
-    result += objArraysAreEqual(Object.values__(bt), emptyArr) ? 0 : 1
-    result += objArraysAreEqual(Object.values__(sh), emptyArr) ? 0 : 1
-    result += objArraysAreEqual(Object.values__(i), emptyArr) ? 0 : 1
-    result += objArraysAreEqual(Object.values__(lo), emptyArr) ? 0 : 1
-    result += objArraysAreEqual(Object.values__(fl), emptyArr) ? 0 : 1
-    result += objArraysAreEqual(Object.values__(dou), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(c), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(bo), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(bt), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(sh), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(i), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(lo), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(fl), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(dou), emptyArr) ? 0 : 1
 
     let arrVal: NullishType[] = [new Number(10), new Number(20), new Number(30)]
-    result += objArraysAreEqual(Object.values__(arr), arrVal) ? 0 : 1
+    result += objArraysAreEqual(Object.values(arr), arrVal) ? 0 : 1
 
     let strVal: NullishType[] = ["a" as string, "b" as string, "c" as string]
-    result += objArraysAreEqual(Object.values__(str), strVal) ? 0 : 1
+    result += objArraysAreEqual(Object.values(str), strVal) ? 0 : 1
 
     let clVal: NullishType[] = [new Number(10), new Number(20), undefined]
-    result += objArraysAreEqual(Object.values__(cl), clVal) ? 0 : 1
+    result += objArraysAreEqual(Object.values(cl), clVal) ? 0 : 1
 
-    result += objArraysAreEqual(Object.values__(lambda), emptyArr) ? 0 : 1
+    result += objArraysAreEqual(Object.values(lambda), emptyArr) ? 0 : 1
 
     return result
 }
@@ -355,22 +355,32 @@ function objectHasOwn(): int {
     return result
 }
 
+type Rec = Record<PropertyKey, NullishType>
+
 function objectFromEntries(): int {
     let result: int = 0
 
-    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
-    let entries = new Map<PropertyKey, NullishType>()
-    entries.set("x", new Number(10))
-    entries.set("y", new Number(20))
-    entries.set("z", new Number(30))
+    const entries: Rec = {
+        "x": new Number(10),
+        "y": new Number(20),
+        "z": new Number(30)
+    }
 
-    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
-    let expected = new Map<PropertyKey, NullishType>()
-    expected.set("x", new Number(10))
-    expected.set("y", new Number(20))
-    expected.set("z", new Number(30))
+    const expected: Rec = {
+        "x": new Number(10),
+        "y": new Number(20),
+        "z": new Number(30)
+    }
 
-    result += mapAreEqual(Object.fromEntries(entries), expected) ? 0 : 1
+    result += mapAreEqual(Object.fromEntries<NullishType>(entries), expected) ? 0 : 1
+
+    const entriesIterable: Iterable<[PropertyKey, NullishType]> = entries
+    result += mapAreEqual(Object.fromEntries<NullishType>(entriesIterable), expected) ? 0 : 1
+
+    const emptyObj: Rec = {}
+
+    const emptyEntries = new Array<[PropertyKey, NullishType]>()
+    result += mapAreEqual(Object.fromEntries<NullishType>(emptyEntries), emptyObj) ? 0 : 1
 
     return result
 }
@@ -378,20 +388,20 @@ function objectFromEntries(): int {
 function objectAssign(): int {
     let result: int = 0
 
-    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
-    let target = new Map<PropertyKey, NullishType>()
+    const target: Rec = {}
 
-    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
-    let expected1 = new Map<PropertyKey, NullishType>()
-    expected1.set("x", new Number(10))
-    expected1.set("y", new Number(20))
+    const expected1: Rec = {
+        "x": new Number(10),
+        "y": new Number(20)
+    }
 
-    // NOTE(shumilov-petr): Must be replaced into appropriate literals of Record type
-    let expected2 = new Map<PropertyKey, NullishType>()
-    expected2.set("x", new Number(100))
-    expected2.set("y", new Number(200))
-    expected2.set("z", new Number(300))
+    const expected2: Rec = {
+        "x": new Number(100),
+        "y": new Number(200),
+        "z": new Number(300)
+    }
 
+    result += mapAreEqual(Object.assign(target), target) ? 0 : 1
     result += mapAreEqual(Object.assign(target, new Point2D(10, 20)), expected1) ? 0 : 1
     result += mapAreEqual(Object.assign(target, new Point2D(10, 20), new Point3D(100, 200, 300)), expected2) ? 0 : 1
 
