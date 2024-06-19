@@ -462,6 +462,12 @@
 09.classes/04.access_modifiers/access_modifiers_4.ets
 09.classes/04.access_modifiers/access_modifiers_9.ets
 # end of es2panda fails
+
+# 17743 Inconsistent behavior when bigint created from number
+03.types/08.reference_types/13.type_bigint/bint_n_0.ets
+03.types/08.reference_types/13.type_bigint/bint_n_4.ets
+03.types/08.reference_types/13.type_bigint/bint_n_8.ets
+
 #FailKind.ES2PANDA_FAIL not implemented yet
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_0.ets
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_1.ets
@@ -2076,7 +2082,7 @@
 07.expressions/05.object_literal/03.object_literal_of_record_type/re_n_5.ets
 
 # es2panda: #16408 Cannot declare ambient constant variable
-14.ambient_declarations/ambient_declarations_1.ets 
+14.ambient_declarations/ambient_declarations_1.ets
 14.ambient_declarations/ambient_declarations_3.ets
 
 # es2panda: #16262 Declare leads to RTE
@@ -2114,8 +2120,8 @@
 # es2panda: #16410 Cannot declare function with optional parameters (ambient declarations)
 14.ambient_declarations/ambient_declarations_7.ets
 
-# es2panda: #16411 Cannot declare final class 
-14.ambient_declarations/ambient_declarations_15.ets 
+# es2panda: #16411 Cannot declare final class
+14.ambient_declarations/ambient_declarations_15.ets
 14.ambient_declarations/ambient_declarations_57.ets
 14.ambient_declarations/bad_ambient_declarations_9.ets
 
