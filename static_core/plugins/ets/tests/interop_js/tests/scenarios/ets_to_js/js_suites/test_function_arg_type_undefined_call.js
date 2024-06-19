@@ -22,3 +22,5 @@ const functionArgTypeUndefinedEts = etsMod.getFunction('function_arg_type_undefi
   let ret = functionArgTypeUndefinedEts(1);
   ASSERT_EQ(ret, 1);
 }
+
+GCJSRuntimeCleanup();

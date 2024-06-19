@@ -23,3 +23,5 @@ const getLambdaFunctionEts = etsMod.getFunction('get_lambda_function_ets');
   let ret = lambdaFunctionEts();
   ASSERT_EQ(ret, 1);
 }
+
+GCJSRuntimeCleanup();

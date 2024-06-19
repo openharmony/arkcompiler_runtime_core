@@ -22,3 +22,5 @@ const functionReturnTypePrimitiveEts = etsMod.getFunction('function_return_type_
   let ret = functionReturnTypePrimitiveEts();
   ASSERT_EQ(typeof ret, 'number');
 }
+
+GCJSRuntimeCleanup();

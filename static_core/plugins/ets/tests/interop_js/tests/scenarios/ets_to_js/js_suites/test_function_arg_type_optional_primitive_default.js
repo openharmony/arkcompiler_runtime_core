@@ -22,3 +22,5 @@ const functionArgTypeOptionalPrimitiveEts = etsMod.getFunction('function_arg_typ
   let ret = functionArgTypeOptionalPrimitiveEts();
   ASSERT_EQ(ret, undefined);
 }
+
+GCJSRuntimeCleanup();

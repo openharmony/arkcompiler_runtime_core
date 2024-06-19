@@ -22,3 +22,5 @@ const functionArgTypeAnyEts = etsMod.getFunction('function_arg_type_any_ets');
   let ret = functionArgTypeAnyEts(1);
   ASSERT_EQ(ret, 1);
 }
+
+GCJSRuntimeCleanup();

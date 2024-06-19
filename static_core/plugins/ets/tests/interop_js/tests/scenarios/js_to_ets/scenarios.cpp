@@ -174,4 +174,46 @@ TEST_F(EtsInteropScenariosJsToEts, Test_rest_params)
     ASSERT_EQ(ret, true);
 }
 
+TEST_F(EtsInteropScenariosJsToEts, Test_function_arg_type_union)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_arg_type_union");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_function_return_type_union)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_return_type_union");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_class_method_arg_type_union)
+{
+    auto ret = CallEtsMethod<bool>("Test_class_method_arg_type_union");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_class_method_return_type_union)
+{
+    auto ret = CallEtsMethod<bool>("Test_class_method_return_type_union");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_interface_method_call_return_type_union)
+{
+    auto ret = CallEtsMethod<bool>("Test_interface_method_call_return_type_union");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_static_method_call)
+{
+    auto ret = CallEtsMethod<bool>("Test_static_method_call");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_static_method_call_return_type_union)
+{
+    auto ret = CallEtsMethod<bool>("Test_static_method_call_return_type_union");
+    ASSERT_EQ(ret, true);
+}
+
 }  // namespace ark::ets::interop::js::testing

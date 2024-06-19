@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,15 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypeCallableEts = etsMod.getFunction('function_arg_type_callable_ets');
+const function_rest_params_union = etsMod.getFunction('function_rest_params_union');
+const function_spread_params_union = etsMod.getFunction('function_spread_params_union');
 
 {
-  let functionToCall = () => 1;
-  let ret = functionArgTypeCallableEts(functionToCall);
-  ASSERT_EQ(ret, 1);
+  ASSERT_EQ(function_spread_params_union(), '10 abc 30');
+}
+{
+  const arr = ['ab', 20, 'cd'];
+  ASSERT_EQ(function_rest_params_union(...arr), 'ab 20 cd');
 }
 
 GCJSRuntimeCleanup();

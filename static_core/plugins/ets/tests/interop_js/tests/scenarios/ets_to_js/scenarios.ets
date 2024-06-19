@@ -60,7 +60,7 @@ class ClassWithGetterSetterEts {
 }
 
 let lambda_function_ets: () => int = () => {
-  return 1;
+    return 1;
 }
 
 function get_lambda_function_ets(): () => int {
@@ -102,24 +102,24 @@ function generic_type_parameter_ets<T>(arg: T): String {
 }
 
 function generic_type_return_value_ets<T>(arg: int, value: T): T {
-   let arr: T[] = [value, value, value];
-   return arr[arg];
+    let arr: T[] = [value, value, value];
+    return arr[arg];
 }
 
 class ClassWithDefaultParameterMethods {
     public int_parameter_method(arg: int = 1): int {
         return arg;
     }
-    
+
     public static int_parameter_static_method(arg: int = 1): int {
         return arg;
     }
-    
-    public undefined_parameter_method(arg: JSValue|undefined = undefined): JSValue|undefined {
+
+    public undefined_parameter_method(arg: JSValue | undefined = undefined): JSValue | undefined {
         return arg;
     }
-    
-    public static undefined_parameter_static_method(arg: JSValue|undefined = undefined): JSValue|undefined {
+
+    public static undefined_parameter_static_method(arg: JSValue | undefined = undefined): JSValue | undefined {
         return arg;
     }
 
@@ -158,7 +158,7 @@ function default_int_parameter_function(arg: int = 1): int {
     return arg;
 }
 
-function default_undefined_parameter_function(arg: JSValue|undefined = undefined): JSValue|undefined {
+function default_undefined_parameter_function(arg: JSValue | undefined = undefined): JSValue | undefined {
     return arg;
 }
 
@@ -293,3 +293,84 @@ function unpack_value<T>(arg: Unpackable<T>): T {
     return result;
 }
 
+interface InterfaceWithUnionEts {
+    methodWithUnion(arg: string | int): string | int;
+}
+
+class ImplInterfaceWithUnionEts implements InterfaceWithUnionEts {
+    public override methodWithUnion(arg: string | int): string | int {
+        return arg;
+    }
+}
+
+function newInterfaceWithUnionEts(): InterfaceWithUnionEts {
+    return new ImplInterfaceWithUnionEts();
+}
+
+class ClassWithUnionGetterSetterEts {
+    private _value: string | int = 1;
+
+    get value() {
+        return this._value;
+    }
+
+    set value(theValue: string | int) {
+        this._value = theValue;
+    }
+}
+
+function function_arg_type_primitive_union(arg: number | string): number | string {
+    return arg;
+}
+
+function generic_function_with_union_ets<T extends string | number>(arg: T): T {
+    return arg;
+}
+
+function function_rest_params(...numbers: number[]): string {
+    return numbers.toString();
+}
+
+function function_spread_params(arr: number[]): string {
+    return function_rest_params(...arr)
+}
+
+function function_rest_params_union(...restParams: (number | string)[]): string {
+    return restParams.toString();
+}
+
+function function_arg_type_optional_primitive_union(arg?: int | boolean): int | boolean | undefined {
+    return arg;
+}
+
+async function async_function_literal(): Promise<int> {
+    return 1;
+}
+
+async function async_function_any(arg: JSValue): Promise<JSValue> {
+    return arg;
+}
+
+async function async_function_extra_set(tuple: [number, string]): Promise<number> {
+    return tuple[0];
+}
+
+async function async_function_subset_by_ref(func: () => JSValue): Promise<JSValue> {
+    return func;
+}
+
+async function async_function_subset_by_value(num: Number): Promise<Number> {
+    return num;
+}
+
+async function async_function_user_class(obj: ClassWithMethodEts): Promise<ClassWithMethodEts> {
+    return obj;
+}
+
+async function async_newInterfaceWithMethodEts(): Promise<InterfaceWithMethodEts> {
+    return newInterfaceWithMethodEts();
+}
+
+async function async_function_user_interface(obj: InterfaceWithMethodEts): Promise<int> {
+    return obj.methodInInterface();
+}

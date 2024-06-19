@@ -23,3 +23,5 @@ const genericFunctionEts = etsMod.getFunction('generic_function_ets');
   ASSERT_EQ(typeof ret, 'number');
   ASSERT_EQ(ret, 1);
 }
+
+GCJSRuntimeCleanup();

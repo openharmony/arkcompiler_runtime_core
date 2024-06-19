@@ -28,3 +28,5 @@ const defaultIntValueFunctionEts = etsMod.getFunction('default_int_parameter_fun
   ret = defaultIntValueFunctionEts(INT_VALUE);
   ASSERT_EQ(ret, INT_VALUE);
 }
+
+GCJSRuntimeCleanup();

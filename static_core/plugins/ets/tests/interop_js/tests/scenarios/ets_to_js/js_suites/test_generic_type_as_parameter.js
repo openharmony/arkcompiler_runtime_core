@@ -32,3 +32,5 @@ const genericTypeParameterEts = etsMod.getFunction('generic_type_parameter_ets')
   ASSERT_EQ(typeof ret, 'string');
   ASSERT_EQ(ret, STRING_TRUE_VALUE);
 }
+
+GCJSRuntimeCleanup();
