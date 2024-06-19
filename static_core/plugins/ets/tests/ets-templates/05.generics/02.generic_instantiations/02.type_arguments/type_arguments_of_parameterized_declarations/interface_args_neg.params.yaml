@@ -102,6 +102,3 @@ cases:
   # not a reference type
   - use: |-
       let v: J<Color> = new A<Color>(Color.Red)
-
-  - use: |-
-      let v: J<int> = new A<int>(1)

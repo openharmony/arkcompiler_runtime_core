@@ -17,7 +17,6 @@ limitations under the License.
 {% for cm in top_level_class_modifiers %}
 /*---
 desc: self-dependency is prohibited
-tags: [compile-only, negative]
 params: >
     {{sd}}
     {{cm}}

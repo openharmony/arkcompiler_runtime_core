@@ -120,3 +120,7 @@ cases:
       let v: A<A<B>[]> = new A<A<B>[]>([new A<B>([new X()])])
     decl: |-
       type B = X[]
+
+  # Boxed to Reference type
+  - use: |-
+      let v: A<int> = new A<int>(1)
