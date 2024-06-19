@@ -195,14 +195,14 @@ function testPromiseChain(): int {
         resolve(new Object());
     });
     // NOTE(audovichenko): Remove p1 and p2 variables #17359
-    let p1: PromiseLike<void> = p.then<void>((): void => {
+    let p1: Promise<void> = p.then<void>((): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
         } else {
             globalTest!.fail();
         }
     });
-    let p2: PromiseLike<void> = p1.then<void>((): void => {
+    let p2: Promise<void> = p1.then<void>((): void => {
         if (fixture.state == 1) {
             fixture.state = 2;
         } else {
@@ -226,7 +226,7 @@ function testPromiseCatchFinallyChain(): int {
     // NOTE(audovichenko): Remove p1 and p2 variables #17359
     let p1: Promise<void> = p.then<void>((v: Object): void => {
         globalTest!.fail();
-    }) as Promise<void>; // NOTE(audovichenko): Remove cast to Promise. The return type should be Promise. #15523
+    });
     let p2: Promise<void> = p1.catch<void>((value: NullishType): void => {
         if (fixture.state == 0) {
             fixture.state = 1;
@@ -257,7 +257,7 @@ function testResolvePromiseThenFinally(): int {
         }
     }, (error: NullishType): void => {
         globalTest!.fail();
-    }) as Promise<void>; // NOTE(audovichenko): Remove cast to Promise. The return type should be Promise. #15523
+    });
     p1.finally((): void => {
         if (fixture.state == 1) {
             globalTest!.success();
@@ -281,7 +281,7 @@ function testRejectPromiseThenFinally(): int {
         } else {
             globalTest!.fail();
         }
-    }) as Promise<void>; // NOTE(audovichenko): Remove cast to Promise. The return type should be Promise. #15523
+    });
     p1.finally((): void => {
         if (fixture.state == 1) {
             globalTest!.success();

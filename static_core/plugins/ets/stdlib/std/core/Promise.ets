@@ -69,8 +69,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         }
     }
 
-    // NOTE(audovichenko): Change return type to Promise<U>. Issue #15523
-    then<U>(onFulfilled: () => U|PromiseLike<U> throws): PromiseLike<U> {
+    then<U>(onFulfilled: () => U|PromiseLike<U> throws): Promise<U> {
         let promise = new Promise<U>();
         let fn: () => void = (): void => {
             try {
@@ -91,8 +90,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
-    // NOTE(audovichenko): Change return type to Promise<U>. Issue #15523
-    then<U>(onFulfilled: (value: T) => U|PromiseLike<U> throws): PromiseLike<U> {
+    then<U>(onFulfilled: (value: T) => U|PromiseLike<U> throws): Promise<U> {
         let promise = new Promise<U>();
         let fn: () => void = (): void => {
             try {
@@ -113,10 +111,9 @@ export final class Promise<out T> implements PromiseLike<T> {
         return promise;
     }
 
-    // NOTE(audovichenko): Change return type to Promise<U>. Issue #15523
     // NOTE(audovichenko): Mark parameters by '?' instead of add '|undefined'. Issue #17204
     then<U, E = never>(onFulfilled: ((value: T) => U|PromiseLike<U> throws)|undefined,
-            onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): PromiseLike<U|E> {
+            onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): Promise<U|E> {
         let promise = new Promise<U|E>();
         let fn: () => void = (): void => {
             try {
