@@ -14,14 +14,6 @@
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//build/ohos.gni")
 
-declare_args() {
-  if (is_ohos && is_standard_system) {
-    ark_ets_interop_js = true
-  } else {
-    ark_ets_interop_js = false
-  }
-}
-
 # NB! Standard library is built only if the front-end is available.
 with_stdlib = false
 foreach(plugin, ark_enabled_plugins) {
@@ -33,7 +25,11 @@ foreach(plugin, ark_enabled_plugins) {
 group("ark_packages") {
   deps = [ "runtime/napi/etsnative:etsnative" ]
 
-  external_deps = [ "ets_frontend:es2panda" ]
+  if (ark_standalone_build) {
+    deps += [ "$ark_es2panda_root/aot:es2panda" ]
+  } else {
+    external_deps = [ "ets_frontend:es2panda" ]
+  }
 
   if (with_stdlib) {
     deps += [ ":etsstdlib" ]
@@ -55,10 +51,11 @@ group("ark_host_mac_tools_packages") {
 }
 
 config("ark_config") {
-  defines = [
-    "PANDA_WITH_ETS",
-    "PANDA_ETS_INTEROP_JS",
-  ]
+  defines = [ "PANDA_WITH_ETS" ]
+
+  if (ark_ets_interop_js) {
+    defines += [ "PANDA_ETS_INTEROP_JS" ]
+  }
 }
 
 # TODO(nsizov): Fix and clean after PR480 is merged

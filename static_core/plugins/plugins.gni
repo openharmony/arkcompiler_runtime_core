@@ -193,12 +193,12 @@ foreach(plugin, ark_enabled_plugins) {
   }
 
   if (defined(_plugin_vars.create_pipeline)) {
-    create_pipeline_paths +=
-        [ rebase_path(plugin_vars.create_pipeline, "", _plugin_dir) ]
+    plugin_create_pipeline_paths +=
+        [ rebase_path(_plugin_vars.create_pipeline, "", _plugin_dir) ]
   }
   if (defined(_plugin_vars.read_profile)) {
     plugin_read_profile_paths +=
-        [ rebase_path(plugin_vars.read_profile, "", _plugin_dir) ]
+        [ rebase_path(_plugin_vars.read_profile, "", _plugin_dir) ]
   }
   if (defined(_plugin_vars.destroy_profile)) {
     plugin_destroy_profile_paths +=

@@ -61,7 +61,7 @@ libarkassembler_configs = [
 ]
 libarkassembler_configs += plugin_libarkassembler_configs
 
-source_set("libarkassembler_static") {
+ohos_source_set("libarktsassembler_static") {
   sources = libarkassembler_sources
 
   public_configs = libarkassembler_configs
@@ -84,10 +84,13 @@ source_set("libarkassembler_static") {
   deps += plugin_assembler_deps
 
   external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_shared_library("libarktsassembler") {
-  deps = [ ":libarkassembler_static" ]
+  deps = [ ":libarktsassembler_static" ]
 
   output_extension = "so"
   if (is_mingw) {
@@ -97,7 +100,7 @@ ohos_shared_library("libarktsassembler") {
   subsystem_name = "$ark_subsystem_name"
 }
 
-source_set("libarkassembler_frontend_set_static") {
+ohos_source_set("libarktsassembler_frontend_set_static") {
   sources = libarkassembler_sources
 
   public_configs = libarkassembler_configs
@@ -118,15 +121,18 @@ source_set("libarkassembler_frontend_set_static") {
   deps += plugin_assembler_deps
 
   external_deps = [ sdk_libc_secshared_dep ]
-}
 
-ohos_static_library("libarktsassembler_frontend_static") {
-  deps = [ ":libarkassembler_frontend_set_static" ]
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }
 
-source_set("ark_asm_static") {
+ohos_static_library("libarktsassembler_frontend_static") {
+  deps = [ ":libarktsassembler_frontend_set_static" ]
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
+}
+
+ohos_source_set("arkts_asm_static") {
   sources = [ "pandasm.cpp" ]
 
   include_dirs = [ "$target_gen_dir" ]
@@ -146,10 +152,13 @@ source_set("ark_asm_static") {
     "$ark_root/libpandabase:libarktsbase_frontend_static",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
   ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_executable("arkts_asm") {
-  deps = [ ":ark_asm_static" ]
+  deps = [ ":arkts_asm_static" ]
 
   libs = platform_libs
   ldflags = platform_ldflags
