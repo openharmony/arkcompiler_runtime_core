@@ -167,12 +167,13 @@ class TestFileBased(Test):
 
         return self.run_one_step("ark", params, result_validator)
 
-    def run_aot(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
+    def run_aot(self, test_an: str, test_abcs: List[str], result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         aot_flags = []
         aot_flags.extend(self.test_env.aot_args)
         aot_flags = [flag.strip("'\"") for flag in aot_flags]
-        aot_flags.extend(['--paoc-panda-files', test_abc])
+        for test_abc in test_abcs:
+            aot_flags.extend(['--paoc-panda-files', test_abc])
         aot_flags.extend(['--paoc-output', test_an])
 
         if path.isfile(test_an):

@@ -148,7 +148,7 @@ class TestETS(TestFileBased):
         if self.test_env.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             self.passed, self.report, self.fail_kind = self.run_aot(
                 self.test_an,
-                self.test_abc,
+                [test.test_abc for test in list(self.dependent_files) + [self]],
                 lambda o, e, rc: rc == 0 and path.exists(self.test_an) and path.getsize(self.test_an) > 0
             )
 

@@ -1,22 +1,8 @@
-### Issue 14647
-spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_01.ets
-spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_02.ets
-spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_03.ets
-spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_04.ets
-### end of Issue 14647
-
-### tools-testing-and-benchmarking Issue: 1643
-spec/13.Compilation_Units_Packages_and_Modules/import_export/issue14991_01.ets
-### Issue 1643 end
-
 ### Issue 16465
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15182/issue_15182_01.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15182/issue_15182_02.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15182/issue_15182_03.ets
-spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15182/issue_15182_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15173/src/issue_15173_01.ets
-spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15173/src/issue_15173_02.ets
-spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15173/src/issue_15173_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15182/src/issue_15173_01.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15182/src/issue_15173_02.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.3.Import.Directives/issue15182/src/issue_15173_03.ets
