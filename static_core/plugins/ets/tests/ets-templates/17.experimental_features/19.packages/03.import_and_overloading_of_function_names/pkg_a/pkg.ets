@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+{%- for c in cases %}
 
 /*---
-desc: >-
-    Shadowing is the compile-time error that occurs if an imported function is identical to the function declared in the
-    current compilation unit (the same names and override-equivalent signatures), i.e., the declarations are duplicated.
-tags: [compile-only, negative]
+tags: [not-a-test, compile-only]
 ---*/
 
-import {max as mymax} from "std/math";
+package pkg_a
 
-function mymax(v: double, u: double): double {
-    assert false
-    return v > u ? v : u;
-}
+{{c.decl}}
 
-function main(): void {
-    mymax(1.0, 1.0)
+export function foo({{c.sig2}}): int {
+    return 2
 }
+{%- endfor %}
