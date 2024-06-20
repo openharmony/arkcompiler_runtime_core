@@ -21,9 +21,9 @@
 04.names_declarations_and_scopes/05.scopes/interface_level2.ets
 07.expressions/09.field_access_expressions/safe_field_access_0.ets
 07.expressions/09.field_access_expressions/safe_field_access_1.ets
-18.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f1_1.ets
-18.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f2_1.ets
-18.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/if_f2_1.ets
+15.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f1_1.ets
+15.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/cond_f2_1.ets
+15.semantic_rules/07.compatibility_features/01.extended_conditional_expressions/if_f2_1.ets
 
 # fails in JIT mode with --opt-level=2
 04.names_declarations_and_scopes/05.scopes/interface_level1.ets
