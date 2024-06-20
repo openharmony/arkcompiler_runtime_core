@@ -246,7 +246,7 @@ function testStringifyObjectOfDerivedClass(): int {
     return result
 }
 
-class Node {
+class TestNode {
     value: string
     next: NullishType
 
@@ -257,8 +257,8 @@ class Node {
 }
 
 function testStringifyObjectWithReferenceCycle(): int {
-    const nodeA = new Node("A")
-    const nodeB = new Node("B", nodeA)
+    const nodeA = new TestNode("A")
+    const nodeB = new TestNode("B", nodeA)
 
     nodeA.next = nodeB
 

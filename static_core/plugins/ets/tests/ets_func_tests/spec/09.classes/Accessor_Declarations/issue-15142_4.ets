@@ -19,15 +19,15 @@
  tags: []
  ---*/
 
- interface Get {
+ interface TestGet {
     get value(): int
  }
 
- interface Set {
+ interface TestSet {
     set value(value: int);
  }
 
- interface Common extends Get, Set {
+ interface Common extends TestGet, TestSet {
  }
 
 

@@ -35,7 +35,7 @@ class B extends A {
     }
 }
 
-class Iterator<out T> {
+class TestIterator<out T> {
     private array: T[];
     constructor(array: T[]) {
         this.array = array;
@@ -52,13 +52,13 @@ class Iterator<out T> {
 
 function main(): void {
     let a_array = [new A(), new A()];
-    let iteratorA = new Iterator<A>(a_array);
+    let iteratorA = new TestIterator<A>(a_array);
     let firstElementA: A = iteratorA.getFirstElement();
     assert(firstElementA instanceof A);
     assert(firstElementA.returnHello1() == "hello 1");
 
     let b_array = [new B(), new B()];
-    let iteratorB = new Iterator<B>(b_array);
+    let iteratorB = new TestIterator<B>(b_array);
     let firstElementB: B = iteratorB.getFirstElement();
     assert(firstElementB instanceof B);
     assert(firstElementB.returnHello1() == "hello 1");

@@ -40,7 +40,6 @@ function comparePrimitiveValue(actual : {{.item.result_type}}, expected : {{.ite
 
 {%- if item.method_return_type == "float" or item.method_return_type == "double" or item.method_return_type == "Float" or item.method_return_type == "Double" %}
 const DBL_EPSILON : double = 1.0e-6;
-const doubleEpsilon: double = 2.22045e-16
 function compareFloatPointValue(left : double, right : double) : boolean {
     if (left == right) {
       return true;

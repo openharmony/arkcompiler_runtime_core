@@ -19,4 +19,4 @@
  tags: [compile-only, not-a-test]
  ---*/
 
-export type NullishType = Object | null | undefined
+export type TestNullishType = Object | null | undefined

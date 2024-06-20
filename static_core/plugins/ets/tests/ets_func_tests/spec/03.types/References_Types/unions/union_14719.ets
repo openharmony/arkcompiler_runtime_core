@@ -20,8 +20,8 @@ name: union_14719.ets
 tags: [compile-only]
 ---*/
 
-class Node {
-  protected onChildInserted: ((node: Node) => void) | undefined;
+class TestNode {
+  protected onChildInserted: ((node: TestNode) => void) | undefined;
   readonly kind: int;
 
   constructor() {}
@@ -32,6 +32,6 @@ class Node {
 }
 
 function main(): void {
-  let node: Node = new Node()
+  let node: TestNode = new TestNode()
   node.check()
 }
