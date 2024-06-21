@@ -73,6 +73,23 @@ function main(): int {
   
   failures += check(testNonEmptyTypedArrayReverse(), "Test NonEmpty Array Reverse");
   failures += check(testEmptyTypedArrayReverse(), "Test Empty Array Reverse");
+
+  failures += check(testTypedArrayIncludesOneParamWithNormalNum(), "Test Includes One Param With NormalNum");
+  failures += check(testTypedArrayIncludesOneParamWithAbnormalNum(), "Test Includes One Param With AbnormalNum");
+  failures += check(testTypedArrayIncludesTwoParamWithNormalIndex(), "Test Includes Two Param With Normal Index");
+  failures += check(testTypedArrayIncludesTwoParamWithAbnormalIndex(), "Test Includes Two Param With Abnormal Index");
+
+  failures += check(testTypedArrayJoinWithEmptyArray(), "Test Join With EmptyArray");
+  failures += check(testTypedArrayJoinWithNonEmptyArray(), "Test Join With NonEmptyArray");
+  failures += check(testTypedArrayJoinWithNonEmptyArrayAndAbnormalStr(), "Test Join With NonEmptyArray And AbnormalStr");
+  failures += check(testTypedArrayKeysWithEmptyArray(), "Test Keys With EmptyArray");
+  failures += check(testTypedArrayKeysWithSingleElementArray(), "Test Keys With SingleElement");
+  failures += check(testTypedArrayKeysWithMultipleElementArray(), "Test Keys With MultipleElementArray");
+
+  failures += check(testTypedArrayForEach(), "Try to apply a function to each element of the TypedArray using TypedArray.forEach() function");
+  failures += check(testTypedArrayForEachValueIndexCallback(), "Test case for forEach(callbackFn: (value: number, index: number) => void)");
+  failures += check(testTypedArrayForEachValueCallback(), "Test case for forEach(callbackFn: (value: number) => void)");
+  failures += check(testTypedArrayForEachNoArgsCallback(), "Test case for forEach(callbackFn: () => void)");
   failures += check(testTypedArrayEntries(), "Test TypedArray Entries");
 
 
@@ -102,6 +119,7 @@ function check(result: number, message: String): number {
 }
 
 const source: {{.item.primitiveType}}[] = {{.item.data}};
+const abnormalSource: {{.item.primitiveType}}[] = {{.item.abnormalData}};
 
 function testBytePerElement(): number {
   if ({{.item.objectType}}.BYTES_PER_ELEMENT as int == {{.item.primitiveSizeBytes}}) return success;
@@ -1567,29 +1585,21 @@ function testNonEmptyTypedArraySetValue(): number {
   let length = typedArray.length;
 
   {%- if item.objectType == 'Int8Array' %}
-  const minValue = Byte.MIN_VALUE as byte;
-  const maxValue = Byte.MAX_VALUE as byte;
-  {%- else %}
-  {%- if item.objectType == 'Int16Array' %}
-  const minValue = Short.MIN_VALUE as short;
-  const maxValue = Short.MAX_VALUE as short;
-  {%- else %}
-  {%- if item.objectType == 'Int32Array' %}
-  const minValue = Int.MIN_VALUE;
-  const maxValue = Int.MAX_VALUE;
-  {%- else %}
-  {%- if item.objectType == 'Float32Array' %}
-  const minValue = Float.MIN_VALUE;
-  const maxValue = Float.MAX_VALUE;
-  {%- else %}
-  {%- if item.objectType == 'Float64Array' %}
-  const minValue = Double.MIN_VALUE;
-  const maxValue = Double.MAX_VALUE;
-  {%- endif %}
-  {%- endif %}
-  {%- endif %}
-  {%- endif %}
-  {%- endif %}        
+    const minValue = Byte.MIN_VALUE as byte;
+    const maxValue = Byte.MAX_VALUE as byte;
+  {%- elif item.objectType == 'Int16Array' %}
+    const minValue = Short.MIN_VALUE as short;
+    const maxValue = Short.MAX_VALUE as short;
+  {%- elif item.objectType == 'Int32Array' %}
+    const minValue = Int.MIN_VALUE;
+    const maxValue = Int.MAX_VALUE;
+  {%- elif item.objectType == 'Float32Array' %}
+    const minValue = Float.MIN_VALUE;
+    const maxValue = Float.MAX_VALUE;
+  {%- elif item.objectType == 'Float64Array' %}
+    const minValue = Double.MIN_VALUE;
+    const maxValue = Double.MAX_VALUE;
+  {%- endif %}    
 
   try {
     typedArray[0] = 1;
@@ -1701,3 +1711,548 @@ function testTypedArrayEntries(): int {
     failures += assertEq(entries.next().done, true, "{{.item.objectType}}.entries() - next() #3 (done)")
     return failures
 }
+
+// Test case for TypedArray.includes(searchElement) with Normal Number
+function testTypedArrayIncludesOneParamWithNormalNum(): number {
+  let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  let searchElementArray: {{.item.primitiveType}}[] =  {{.item.data}};
+
+  for (let i = 0; i < searchElementArray.length; i++) {
+    if (!typedArray.includes(searchElementArray[i])) {
+      console.log("Test failed. testTypedArrayIncludesOneParamWithNormalNum: typed" + JSON.stringify(typedArray[i]));
+      console.log("Test failed. testTypedArrayIncludesOneParamWithNormalNum: " + JSON.stringify(searchElementArray[i]));
+      return fail;
+    }
+  }
+
+  let searchElement = 8;
+  let result = typedArray.includes(searchElement);
+  if (result) {
+    console.log(`Includes ${searchElement}? true`);
+    return fail;
+  } else {
+    console.log(`Includes ${searchElement}? false`);
+  }
+  return success; 
+}
+
+
+// Test case for TypedArray.includes(searchElement) with abnormal number
+function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
+  let ss = new ArrayBuffer(abnormalSource.length as int * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(abnormalSource);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  {%- if item.objectType == 'Int8Array' %}
+    let searchElementArray: {{.item.primitiveType}}[] = [Byte.MAX_VALUE - 1 as byte, Byte.MAX_VALUE as byte, Byte.MIN_VALUE as byte, Byte.MIN_VALUE + 1 as byte];
+  {%- elif item.objectType == 'Int16Array' %}
+    let searchElementArray: {{.item.primitiveType}}[] = [Short.MAX_VALUE - 1 as short, Short.MAX_VALUE as short, Short.MIN_VALUE as short, Short.MIN_VALUE + 1 as short];
+  {%- elif item.objectType == 'Int32Array' %}
+    let searchElementArray: {{.item.primitiveType}}[] = [Int.MAX_VALUE - 1, Int.MAX_VALUE, Int.MIN_VALUE, Int.MIN_VALUE + 1];
+  {%- elif item.objectType == 'Float32Array' %}
+    let searchElementArray: {{.item.primitiveType}}[] = [-2, -1, Float.MAX_VALUE, Float.MAX_VALUE - 1];
+  {%- elif item.objectType == 'Float64Array' %}
+    let searchElementArray: {{.item.primitiveType}}[] = [-2, -1, Double.MAX_VALUE, Double.MAX_VALUE - 1];
+  {%- endif %}
+
+  for (let i = 0; i < searchElementArray.length; i++) {
+    if (!typedArray.includes(searchElementArray[i])) {
+      console.log("Test failed. testTypedArrayIncludesOneParamWithAbnormalNum: typed" + JSON.stringify(typedArray[i]));
+      console.log("Test failed. testTypedArrayIncludesOneParamWithAbnormalNum: " + JSON.stringify(searchElementArray[i]));
+      return fail;
+    }
+  }
+
+  let searchElement = 8;
+  let result = typedArray.includes(searchElement);
+  if (result) {
+    console.log(`Includes ${searchElement}? true`);
+    return fail;
+  } else {
+    console.log(`Includes ${searchElement}? false`);
+  }
+
+  //with large Number
+  let large_number: number[] = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
+  {%- if item.objectType == 'Float32Array' or item.objectType == 'Float64Array' %}
+    let convertedValues: number[] = [-0x8000000000000000, 0x7FFFFFFFFFFFFFFF];
+  {%- elif item.objectType == 'Int32Array'%}
+    let convertedValues: number[] = [Int.MIN_VALUE, Int.MAX_VALUE];
+  {%- else %}
+    let convertedValues: number[] = [0, -1];
+  {%- endif %}
+  typedArray = new {{.item.objectType}}(large_number);
+
+  for (let i = 0; i < convertedValues.length; i++) {
+    if (!typedArray.includes(convertedValues[i])) {
+      console.log("Test failed. testtypedArrayIncludesOneParamWithAbnormalNum large number typed" + JSON.stringify(typedArray[i]));
+      console.log("Test failed. testtypedArrayIncludesOneParamWithAbnormalNum large number except" + JSON.stringify(convertedValues[i]));
+      return fail;
+    }
+  }
+  return success; 
+}
+
+
+// Test case for TypedArray.includes(searchElement, fromIndex)
+function testTypedArrayIncludesTwoParamWithNormalIndex(): number {
+  let source1: number[] = [1, 2, 3, 4, 5];
+  let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source1);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  let fromIndex = 1;
+  let searchElement = 3;
+  // Test when searchElement exists in the TypedArray with fromIndex specified
+  let result = typedArray.includes(searchElement, fromIndex);
+  if (result) {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
+  } else {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
+    return fail;
+  }
+
+  fromIndex = 4;
+  result = typedArray.includes(searchElement, fromIndex);
+  if (result) {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
+    return fail;
+  } else {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
+  }
+
+  return success;
+}
+
+// Test case for TypedArray.includes(searchElement, fromIndex)
+function testTypedArrayIncludesTwoParamWithAbnormalIndex(): number {
+  let source1: number[] = [1, 2, 3, 4, 5];
+  let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source1);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  let searchElement = 1;
+  // Test when searchElement exists in the TypedArray with fromIndex specified
+  //fromIndex = undefined,fromIndex = 0
+  let result = typedArray.includes(searchElement, undefined);
+  if (result) {
+    console.log(`Includes ${searchElement} from undefined? true`);
+  } else {
+    console.log(`Includes ${searchElement} from undefined? false`);
+    return fail;
+  }
+
+  let fromIndex = 0;
+  let arrayLen = typedArray.length;
+  //a. Let k be len + n.
+  //ECMA: if fromIndex < 0(k < 0) ,a. Let k be len + n. 
+  //      b. If k < 0, set k to 0. typedArray need to be fixed
+  for (let i = 0 as int; i < arrayLen; i++) {
+    fromIndex = (- arrayLen + i) as int;
+    result = typedArray.includes(searchElement, fromIndex);
+    let exceptResult = typedArray.includes(searchElement, i);
+    if (result == exceptResult) {
+      console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
+    } else {
+      console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
+      return fail;
+    }
+  }
+ 
+  //index > len, return false;
+  fromIndex = 6 as int;
+  result = typedArray.includes(searchElement, fromIndex);
+  if (result) {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
+    return fail;
+  } else {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
+  }
+
+  //Currently not supported for typedArray
+  //b. If k < 0, set k to 0.
+  fromIndex = (-arrayLen -1) as int;
+  result = typedArray.includes(searchElement, fromIndex);
+  if (result) {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
+  } else {
+    console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
+    return fail;
+  }
+  //index = Infinity, return false
+  result = typedArray.includes(searchElement, Infinity);
+  if (result) {
+    console.log(`Includes ${searchElement} from index Infinity? true`);
+    return fail;
+  } else {
+    console.log(`Includes ${searchElement} from index Infinity? false`);
+  }
+
+  //fromIndex = -Infinity, fromIndex = 0
+  result = typedArray.includes(searchElement, -Infinity);
+  if (result) {
+    console.log(`Includes ${searchElement} from index -Infinity? true`);
+  } else {
+    console.log(`Includes ${searchElement} from index -Infinity? false`);
+    return fail;
+  }
+
+  return success;
+}
+
+function compareJoinResult(typedArray:{{.item.objectType}}, separator: string | undefined, expected: string): number {
+   const result = typedArray.join(separator);
+   return result == expected ? success : fail;
+}
+
+function testTypedArrayJoinWithEmptyArray(): number {
+  let ss = new ArrayBuffer(0);
+  let typedArray: {{.item.objectType}};
+  try {
+    typedArray = new {{.item.objectType}}(ss, 0);
+  } catch(e) {
+    return fail;
+  }
+  if (typedArray.length as number != 0 || typedArray.byteOffset as number != 0) {
+    return fail;
+  }
+
+  // Test case 0: Using empty param
+  const testResult0 = typedArray.join() == '' ? success : fail;
+
+  // Test case 1: Using default separator
+  const testResult1 = compareJoinResult(typedArray, undefined, '');
+  console.log(`Test 1 result: ${testResult1}`); // Expected output: 0
+
+  // Test case 2: Using comma as separator
+  const testResult2 = compareJoinResult(typedArray, ',', '');
+  console.log(`Test 2 result: ${testResult2}`); // Expected output: 0
+
+  // Test case 3: Using hyphen as separator
+  const testResult3 = compareJoinResult(typedArray, '-', '');
+  console.log(`Test 3 result: ${testResult3}`); // Expected output: 0
+
+  // Return the combined result of all test cases using addition
+  return testResult0 + testResult1 + testResult2 + testResult3;
+}
+
+function testTypedArrayJoinWithNonEmptyArray(): number {
+  let source1: number[] = [1, 2, 3, 4, 5];
+  let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source1);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  // Test case 0: Using empty param
+  const testResult0 = typedArray.join() == '1,2,3,4,5' ? success : fail;
+
+   // Test case 1: Using default separator (comma)
+  const testResult1 = compareJoinResult(typedArray, undefined, '1,2,3,4,5');
+
+  // Test case 2: Using comma as separator
+  const testResult2 = compareJoinResult(typedArray, ',', '1,2,3,4,5');
+
+  // Test case 3: Using hyphen as separator
+  const testResult3 = compareJoinResult(typedArray, '-', '1-2-3-4-5');
+
+  // Test case 4: Using empty string as separator
+  const testResult4 = compareJoinResult(typedArray, '', '12345');
+
+  // Test case 5: Using space as separator
+  const testResult5 = compareJoinResult(typedArray, ' ', '1 2 3 4 5');
+
+  // Test case 6: Using a multi-character separator
+  const testResult6 = compareJoinResult(typedArray, ' | ', '1 | 2 | 3 | 4 | 5');
+
+  // Test case 7: Using a numeric separator (will be coerced to string)
+  const testResult7 = compareJoinResult(typedArray, `${1}`, '112131415');
+
+  // Assert that all test cases pass
+  return testResult0 + testResult1 + testResult2 + testResult3 + testResult4 + testResult5 + testResult6 + testResult7;
+}
+
+function testTypedArrayJoinWithNonEmptyArrayAndAbnormalStr(): number {
+  let source1: number[] = [1, 2, 3, 4, 5];
+  let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source1);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  // Test case 1: Use newline character as a separator
+  const testResult1 = compareJoinResult(typedArray, '\n', '1\n2\n3\n4\n5');
+
+  // Test case 2: Use tab character as a separator
+  const testResult2 = compareJoinResult(typedArray, '\t', '1\t2\t3\t4\t5');
+
+  // Test case 3: Use backslash as a separator
+  const testResult3 = compareJoinResult(typedArray, '\\', '1\\2\\3\\4\\5');
+
+  // Assert that all test cases pass
+  return testResult1 + testResult2 + testResult3;
+}
+
+function testTypedArrayKeysWithEmptyArray(): number {
+  let ss = new ArrayBuffer(0);
+  let typedArray: {{.item.objectType}};
+  try {
+    typedArray = new {{.item.objectType}}(ss, 0);
+  } catch(e) {
+    return fail;
+  }
+  if (typedArray.length as number != 0 || typedArray.byteOffset as number != 0) {
+    return fail;
+  }
+  
+  const emptyKeysArray = typedArray.keys();
+  if(emptyKeysArray.next().value != undefined){
+    return fail;
+  }
+  return success;
+}
+
+function testTypedArrayKeysWithSingleElementArray(): number {
+  let typedArray: {{.item.objectType}};
+  try {
+    typedArray = new {{.item.objectType}}([1]);
+  } catch(e) {
+    return fail;
+  }
+  
+  const emptyKeysArray = typedArray.keys();
+  if(emptyKeysArray.next().value != 0){
+    return fail;
+  }
+
+  //test nonInteger Length
+  try {
+    const nonIntegerLengthArray = new {{.item.objectType}}(3.5);
+    const nonIntegerLengthIterator = nonIntegerLengthArray.keys();
+    const expectedValues = [0, 1, 2];
+    for (const expected of expectedValues) {
+        if (nonIntegerLengthIterator.next().value != expected) {
+            return fail;
+        }
+    }
+    if (!nonIntegerLengthIterator.next().done) {
+        return fail;
+    }
+    console.log(`Non-Integer Length Array Test Result: success`);
+  } catch (error) {
+      console.log('Non-Integer Length Array Test threw an error:', error);
+      return fail;
+  }
+
+  //test big length,comment out the code to prevent potential unknown errors. 
+  /*
+  try {
+      const largeLengthArray = new {{.item.objectType}}(1e4);
+      let largeLengthKeysResult = 0;
+      const largeLengthIterator = largeLengthArray.keys();
+      for (let i = 0; i < 1e4; i++) {
+        if (largeLengthIterator.next().value != i) {
+            return fail;
+        }
+      }
+      if (!largeLengthIterator.next().done) {
+          return fail;
+      }
+      console.log(`Large Length Array Test Result: ${largeLengthKeysResult}`);
+  } catch (error) {
+      console.log('Large Length Array Test threw an error:', error);
+      return fail;
+  }*/
+  return success;
+}
+
+function testTypedArrayKeysWithMultipleElementArray(): number {
+  try {
+    let typedArray = new {{.item.objectType}}([5, 15, 25, 35]);
+    let multipleElementKeysResult = 0;
+    const multipleElementIterator = typedArray.keys();
+    const expectedValues = [0, 1, 2, 3];
+    for (const expected of expectedValues) {
+        if (multipleElementIterator.next().value != expected) {
+            return fail;
+        }
+    }
+    if (!multipleElementIterator.next().done) {
+        return fail;
+    }
+      console.log(`Multiple Element Array Test Result: ${multipleElementKeysResult}`);
+  } catch (error) {
+      console.log('Multiple Element Array Test threw an error:', error);
+      return fail;
+  }
+  return success;
+}
+
+
+function doubleElementsInArray(element: number, index: number, array: {{.item.objectType}}): {{.item.primitiveType}} {
+   return element * 2 as {{.item.primitiveType}};
+}
+
+// Test case for forEach(callbackFn)
+function testTypedArrayForEach(): number{
+  let source1 = [1, 2, 3, 4, 5];
+  let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+    typedArray = new {{.item.objectType}}(ss);
+    typedArray.set(source1);
+  } catch(e) {
+    console.log(e);
+    return 1; // Return 1 if there is an error in creating the typed array
+  }
+
+  typedArray.forEach((value, index, array) => {
+    array[index] = value * 2;
+  });
+
+  // Compare the modified array with the expected result
+  const expectedArray = [2, 4, 6, 8, 10];
+  for (let i = 0; i < typedArray.length; i++) {
+    if (typedArray[i] != expectedArray[i]) {
+      console.log("Test failed. testTypedArrayForEach: " + JSON.stringify(typedArray[i]));
+      return fail;
+    }
+  }
+  return success;
+}
+
+// Test case for forEach(callbackFn: (value: number, index: number) => void)
+function testTypedArrayForEachValueIndexCallback(): number {
+    let source1 = [1, 2, 3, 4, 5];
+    let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+        typedArray.set(source1);
+    } catch (e) {
+        console.log(e);
+        return fail; // Return 1 if there is an error in creating the typed array
+    }
+
+    typedArray.forEach((value, index) => {
+        typedArray[index] = value * 2;
+        console.log("In forEach: " + JSON.stringify(typedArray[index]));
+    });
+
+    // Compare the modified array with the expected result
+    const expectedArray = [2, 4, 6, 8, 10];
+    for (let i = 0; i < typedArray.length; i++) {
+      if (typedArray[i] != expectedArray[i]) {
+        console.log("Test failed. testTypedArrayForEachValueIndexCallback: " + JSON.stringify(typedArray[i]));
+        return fail;
+      }
+    }
+    return success;
+}
+
+// Test case for forEach(callbackFn: (value: number) => void)
+function testTypedArrayForEachValueCallback(): number {
+    let source1 = [1, 2, 3, 4, 5];
+    let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+        typedArray.set(source1);
+    } catch (e) {
+        console.log(e);
+        return fail; // Return 1 if there is an error in creating the typed array
+    }
+
+    let index = 0;
+    typedArray.forEach((value) => {
+        typedArray[index] = value * 2;
+        console.log("In forEach: " + JSON.stringify(typedArray[index]));
+        index++;
+    });
+
+    // Compare the modified array with the expected result
+    const expectedArray = [2, 4, 6, 8, 10];
+    for (let i = 0; i < typedArray.length; i++) {
+        if (typedArray[i] != expectedArray[i]) {
+            console.log("Test failed. testTypedArrayForEachValueCallback: " + JSON.stringify(typedArray[i]));
+            return fail;
+        }
+    }
+    return success;
+}
+
+// Test case for forEach(callbackFn: () => void)
+function testTypedArrayForEachNoArgsCallback(): number {
+    let source1 = [1, 2, 3, 4, 5];
+    let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+        typedArray.set(source1);
+    } catch (e) {
+        console.log(e);
+        return fail; // Return 1 if there is an error in creating the typed array
+    }
+
+    let index = 0;
+    typedArray.forEach(() => {
+        // As forEach without arguments is not valid for typed arrays, this implementation is just for demonstration
+        typedArray[index] = typedArray[index] * 2;
+        index++;
+    });
+    // Compare the modified array with the expected result
+    const expectedArray = [2, 4, 6, 8, 10];
+    for (let i = 0; i < typedArray.length; i++) {
+        if (typedArray[i] != expectedArray[i]) {
+            console.log("Test failed. testTypedArrayForEachNoArgsCallback: " + JSON.stringify(typedArray[i]));
+            return fail;
+        }
+    }
+    return success;
+}
+

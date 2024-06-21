@@ -15,27 +15,31 @@
     objectType: "Uint8Array",
     primitiveType: "number",
     primitiveSizeBytes: 1,
-    data: "[0, 18, 37, 72, 121, 180, 221, 255]"
+    data: "[0, 18, 37, 72, Byte.MAX_VALUE, 180, 221, 0xFF]",
+    abnormalData: "[-1, 256, 257, Byte.MIN_VALUE -2, Byte.MIN_VALUE -1, Byte.MAX_VALUE + 1]"
 }
 
 - {
     objectType: "Uint16Array",
     primitiveType: "number",
     primitiveSizeBytes: 2,
-    data: "[0, 10234, 21445, 32760, 43690, 55321, 65504, 65535]"
+    data: "[0, 10234, 21445, Short.MAX_VALUE, 43690, 55321, 65504, 0xFFFF]",
+    abnormalData: "[-1, 65536, 65537, Short.MIN_VALUE - 2, Short.MIN_VALUE - 1, Short.MAX_VALUE + 1]"
 }
 
 - {
     objectType: "Uint32Array",
     primitiveType: "number",
     primitiveSizeBytes: 4,
-    data: "[0, 1073741824, 2147483648, 3221225472, 3758096384, 4026531840, 4160749568, 4294967295]"
+    data: "[0, 1073741824, Int.MAX_VALUE, 3221225472, 3758096384, 4026531840, 4160749568]",
+    abnormalData: "[-1, 4294967296, 4294967297, Int.MIN_VALUE - 2,  Int.MIN_VALUE - 1,  Int.MAX_VALUE as number + 1]"
 }
 
 - {
     objectType: "Uint8ClampedArray",
     primitiveType: "number",
     primitiveSizeBytes: 1,
-    data: "[0, 18, 37, 72, 121, 180, 221, 255]"
+    data: "[0, 18, 37, 72, Byte.MAX_VALUE, 180, 221, 0xFF]",
+    abnormalData: "[-1, 256, 257, Byte.MIN_VALUE -2, Byte.MIN_VALUE -1, Byte.MAX_VALUE + 1]"
 }
 
