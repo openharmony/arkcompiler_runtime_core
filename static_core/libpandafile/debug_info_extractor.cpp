@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "debug_helpers.h"
 #include "debug_info_extractor.h"
 #include "line_number_program.h"
 #include "class_data_accessor-inl.h"
@@ -21,11 +22,6 @@
 #include "utils/utf.h"
 
 namespace ark::panda_file {
-static const char *GetStringFromConstantPool(const File &pf, uint32_t offset)
-{
-    return utf::Mutf8AsCString(pf.GetStringData(File::EntityId(offset)).data);
-}
-
 DebugInfoExtractor::DebugInfoExtractor(const File *pf)
 {
     Extract(pf);
@@ -90,17 +86,17 @@ public:
 
     bool HandleStartLocal(int32_t regNumber, uint32_t nameId, uint32_t typeId)
     {
-        const char *name = GetStringFromConstantPool(state_->GetPandaFile(), nameId);
-        const char *type = GetStringFromConstantPool(state_->GetPandaFile(), typeId);
+        const char *name = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), nameId);
+        const char *type = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeId);
         lvt_.push_back({name, type, type, regNumber, state_->GetAddress(), 0});
         return true;
     }
 
     bool HandleStartLocalExtended(int32_t regNumber, uint32_t nameId, uint32_t typeId, uint32_t typeSignatureId)
     {
-        const char *name = GetStringFromConstantPool(state_->GetPandaFile(), nameId);
-        const char *type = GetStringFromConstantPool(state_->GetPandaFile(), typeId);
-        const char *typeSign = GetStringFromConstantPool(state_->GetPandaFile(), typeSignatureId);
+        const char *name = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), nameId);
+        const char *type = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeId);
+        const char *typeSign = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeSignatureId);
         lvt_.push_back({name, type, typeSign, regNumber, state_->GetAddress(), 0});
         return true;
     }
@@ -118,6 +114,12 @@ public:
         if (!found) {
             LOG(FATAL, PANDAFILE) << "Unknown variable";
         }
+        return true;
+    }
+
+    bool HandleRestartLocal([[maybe_unused]] int32_t regNumber) const
+    {
+        LOG(FATAL, PANDAFILE) << "Opcode RESTART_LOCAL is not supported";
         return true;
     }
 

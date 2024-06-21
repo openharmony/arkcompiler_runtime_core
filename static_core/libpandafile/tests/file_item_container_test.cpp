@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -556,11 +556,11 @@ TEST(ItemContainer, TestDebugInfo)
     debugInfoItem->SetLineNumber(5);
     lineNumberProgramItem->EmitSetSourceCode(constantPool, sourceCodeItem);
     lineNumberProgramItem->EmitSetFile(constantPool, sourceFileItem);
-    lineNumberProgramItem->EmitPrologEnd();
+    lineNumberProgramItem->EmitPrologueEnd();
     // NOLINTNEXTLINE(readability-magic-numbers)
     lineNumberProgramItem->EmitAdvancePc(constantPool, 10);
     lineNumberProgramItem->EmitAdvanceLine(constantPool, -5);
-    lineNumberProgramItem->EmitEpilogBegin();
+    lineNumberProgramItem->EmitEpilogueBegin();
     lineNumberProgramItem->EmitEnd();
 
     debugInfoItem->AddParameter(paramStringItem);

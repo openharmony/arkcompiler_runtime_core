@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1108,7 +1108,7 @@ void FileReader::UpdateDebugInfoDependecies(File::EntityId debugInfoId)
 void FileReader::UpdateDebugInfo(DebugInfoItem *debugInfoItem, File::EntityId debugInfoId)
 {
     auto updater = FileReaderDebugInfoUpdater(file_.get(), &container_);
-    updater.Emit(debugInfoItem, debugInfoId);
+    updater.Emit(debugInfoItem->GetLineNumberProgram(), debugInfoItem->GetConstantPool(), debugInfoId);
 }
 
 void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverseDone)

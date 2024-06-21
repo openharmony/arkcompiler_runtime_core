@@ -80,8 +80,8 @@ set(test_asm_files
 add_custom_target(static_linker_tests_gen_abc DEPENDS ${test_asm_files})
 add_dependencies(static_linker_tests static_linker_tests_gen_abc arkruntime)
 
-# internal issue #15674
 if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSCOMPILING)
+    # internal issue #15674
     add_custom_target(static_linker_tests_field_value
         COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/a.abc" --ets-module "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.ets"
         COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/b.abc" --ets-module "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/b.ets"
@@ -89,5 +89,22 @@ if (TARGET es2panda AND TARGET etsstdlib AND PANDA_WITH_ETS AND NOT CMAKE_CROSSC
         COMMAND $<TARGET_FILE:ark> --load-runtimes ets --boot-panda-files $<TARGET_PROPERTY:etsstdlib,FILE> "${CMAKE_CURRENT_BINARY_DIR}/l.abc" b/ETSGLOBAL::main
         DEPENDS  es2panda ark ark_link etsstdlib "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/a.ets" "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/field_value/b.ets"
     )
-    add_dependencies(static_linker_tests static_linker_tests_field_value)
+
+    # internal issue #17770
+    add_custom_target(static_linker_tests_debug_info
+        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/CustomInt.abc"
+            --ets-module --debug-info "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomInt.ets"
+        COMMAND $<TARGET_FILE:es2panda> --output "${CMAKE_CURRENT_BINARY_DIR}/CustomLong.abc"
+            --ets-module --debug-info "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomLong.ets"
+        COMMAND $<TARGET_FILE:ark_link> --output "${CMAKE_CURRENT_BINARY_DIR}/CustomIntLongLinked.abc"
+            -- "${CMAKE_CURRENT_BINARY_DIR}/CustomInt.abc" "${CMAKE_CURRENT_BINARY_DIR}/CustomLong.abc"
+        COMMAND $<TARGET_FILE:ark> --load-runtimes ets --boot-panda-files $<TARGET_PROPERTY:etsstdlib,FILE>
+            "${CMAKE_CURRENT_BINARY_DIR}/CustomIntLongLinked.abc" CustomLong/CustomLong::main   # Test execution
+        COMMAND $<TARGET_FILE:ark_disasm> --verbose "${CMAKE_CURRENT_BINARY_DIR}/CustomIntLongLinked.abc"
+            "${CMAKE_CURRENT_BINARY_DIR}/CustomIntLongLinked.disasm.pa"                         # Test disasm with debug info reading
+        DEPENDS es2panda ark ark_disasm ark_link etsstdlib
+            "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomInt.ets"
+            "${CMAKE_CURRENT_SOURCE_DIR}/data/multi/dedup_debug_info/CustomLong.ets"
+    )
+    add_dependencies(static_linker_tests static_linker_tests_field_value static_linker_tests_debug_info)
 endif()
