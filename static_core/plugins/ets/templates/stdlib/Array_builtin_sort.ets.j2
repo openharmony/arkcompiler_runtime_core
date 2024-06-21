@@ -46,7 +46,7 @@ function insertionSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): voi
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ({{prec % ('tmp', 'arr[pos - 1]')}}) {
+            while ((pos > startIndex) && {{prec % ('tmp', 'arr[pos - 1]')}}) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -63,7 +63,7 @@ function insertionSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): voi
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ({{prec % ('tmp', 'arr[pos - 1]')}}) {
+            while ((pos > startIndex) && {{prec % ('tmp', 'arr[pos - 1]')}}) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -224,16 +224,6 @@ function quickSortImpl{{quickUpTo}}(arr: {{T}}[], startIndex: int, endIndex: int
         }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2{{fwdArg}})
-        {%- if arg == '' %}
-        if (startIndex > 0 && !{{prec % ('arr[startIndex - 1]', 'arr[startIndex]')}}) {
-            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
-            // after that only the right part needs to be sorted
-            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
-            // with many occurencies of the smallest element
-            startIndex = quickSortSplitLeft(arr, startIndex, endIndex{{fwdArg}}) + 1
-            continue
-        }
-        {%- endif %}
         let p = quickSortSplit(arr, startIndex, endIndex{{fwdArg}})
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {

@@ -46,7 +46,7 @@ const FROM_BUFFER = new FromBuffer()
 /**
  * Represents JS API-compatible Array
  */
-export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
+export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: NullishType[]
     internal actualLength: int
 
@@ -71,7 +71,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     public $_get(idx: int): T {
-        if (idx >= this.actualLength) {
+        if (idx >= this.actualLength || idx < 0) {
             throw new RangeError("Out of bounds")
         }
         return this.buffer[idx] as T
@@ -95,9 +95,13 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Creates a new instance of Array
      */
+    public constructor(arrayLen: int) {
+        this.buffer = new NullishType[arrayLen];
+        this.actualLength = arrayLen
+    }
+
     public constructor(arrayLen: number) {
-        this.buffer = new NullishType[arrayLen as int];
-        this.actualLength = arrayLen as int // TODO(kprokopenko): this is incorrect! null-safety
+        this(arrayLen as int);
     }
 
     internal constructor(_tag: FromBuffer, buf: NullishType[]) {
@@ -532,7 +536,7 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
      */
-    public /* override */ filter(fn: (v: T, k: number) => boolean): Array<T> {
+    public override filter(fn: (v: T, k: number) => boolean): Array<T> {
         const res = new Array<T>()
 
         for (let i: int = 0; i < this.actualLength; i++) {
@@ -632,7 +636,8 @@ export final class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 % ctx.array_len_int = Proc.new { |v| "#{v}.actualLength" }
 % ctx.access_public = 'public'
 % ctx.access_private = 'private'
-% ctx.override = '' # 'override'
+% ctx.override = 'override'
+% ctx.override_expected_here = '' # hide 'override' when it cannot be implemented
 % ctx.get_unsafe = Proc.new { |t, i| "#{t}.$_get_unsafe(#{i})" }
 % ctx.set_unsafe = Proc.new { |t, i, v| "#{t}.$_set_unsafe(#{i}, #{v})" }
 % ctx.el_type = 'T'

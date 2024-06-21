@@ -15,10 +15,15 @@
 set -eu -o pipefail
 
 readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-readonly GENPATH="${SCRIPT_DIR}/../../stdlib/std/core"
+readonly GENPATH="${1:-"${SCRIPT_DIR}/../../stdlib"}/std/core"
+readonly ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../../../.."}
 
+source "${ROOT_DIR}/scripts/python/venv-utils.sh"
+activate_venv
 mkdir -p "${GENPATH}"
 
 readonly FUNC="$GENPATH/Function.ets"
 echo "Generating ${FUNC}"
 jinja2 "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"
+
+deactivate_venv
