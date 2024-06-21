@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <regex>
 #include <gtest/gtest.h>
 #include <node_api.h>
 
@@ -59,6 +60,13 @@ public:
         status = napi_set_named_property(jsEnv_, jsGlobalObject, "gtest_env", jsObject);
 
         return status == napi_ok;
+    }
+
+    template <typename R, typename... Args>
+    [[nodiscard]] std::optional<R> CallJsMethod(std::string_view fnName, std::string fileName)
+    {
+        LoadModuleAs(fileName, fileName);
+        return DoCallJsMethod<R>(fnName, {fileName}, jsEnv_);
     }
 
     [[nodiscard]] static bool RunJsScript(const std::string &script)
@@ -380,7 +388,31 @@ private:
         ASSERT(status == napi_ok);
         return GetRetValue<R>(env, jsRetValue);
     }
+    template <typename R, typename... Args>
+    [[nodiscard]] static std::optional<R> DoCallJsMethod(std::string_view fnName, std::string_view modName,
+                                                         napi_env env)
+    {
+        napi_value calledFn;
+        napi_value arg;
+        napi_value jsUndefined;
+        napi_value jsGtestEnvObject = GetJsGtestEnvObject(jsEnv_);
 
+        napi_value jsModule;
+        [[maybe_unused]] napi_status status = napi_get_named_property(env, jsGtestEnvObject, modName.data(), &jsModule);
+        ASSERT(status == napi_ok);
+        status = napi_get_named_property(env, jsModule, fnName.data(), &calledFn);
+        ASSERT(status == napi_ok);
+
+        status = napi_get_undefined(env, &jsUndefined);
+        ASSERT(status == napi_ok);
+        napi_value *argv = &arg;
+        size_t argc = 0;
+
+        napi_value returnVal;
+        status = napi_call_function(env, jsUndefined, calledFn, argc, argv, &returnVal);
+        ASSERT(status == napi_ok);
+        return GetRetValue<R>(env, returnVal);
+    }
     friend class JsEnvAccessor;
     static napi_env jsEnv_;
 
