@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,27 +14,22 @@
  */
 
 /*---
-desc: 9.6.9 Inheritance
-name: 09.classes/09.06.method_declarations/09.06.9.inheritance/subtypingWithFunctionsRequiresExplicitType_01
+desc: >-
+    7.24. Equality expressions
 tags: []
 ---*/
 
-class A {}
-
-type regularLambdaA = () => A
-
-let global_a: int = 0
-
-function foo(f: () => A): void {
-    let a = f();
+class A {
+  test(obj: Object): boolean {
+    if(obj === this) {
+      return true
+    }
+    return false
+  }
 }
 
 function main(): void {
-    let fooLambdaA: regularLambdaA = (): A => {
-        global_a = 1
-        return new A()
-    };
-    global_a = 0
-    foo(fooLambdaA);
-    assert global_a == 1
+  let a: A = new A()
+  // compare a with itself
+  assert a.test(a)
 }

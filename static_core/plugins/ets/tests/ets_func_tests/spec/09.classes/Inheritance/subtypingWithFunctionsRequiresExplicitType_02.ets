@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,28 @@
  */
 
 /*---
-desc: 7.6.2 Object literals of interface type
-name: issue14687.ets
+desc: 9.6.9 Inheritance
+name: 09.classes/09.06.method_declarations/09.06.9.inheritance/subtypingWithFunctionsRequiresExplicitType_02
 tags: []
 ---*/
 
-interface Person {
-    name: string = ""
-    age: number = 0;
+class A {}
+class B extends A {}
+
+type regularLambdaB = () => B
+
+let global_a: int = 0
+
+function foo(f: () => A): void {
+    let a = f();
 }
 
 function main(): void {
-    let p: Person = {name: "Bob", age: 42}
+    let fooLambdaB: regularLambdaB = (): B => {
+        global_a = 2
+        return new B()
+    };
+    global_a = 0
+    foo(fooLambdaB);
+    assert global_a == 2
 }
