@@ -29,23 +29,12 @@ cases:
           type int = Int;
 
     - defs: |-
-          type Matrix<T> = (p: Matrix<Long>) => T;
-
-    - defs: |-
-          class A<T, U> {}
-          class B {}
-          type Stuff<T, U> = A<T, Stuff<B, U>>;
-
-    - defs: |-
           interface Weight {}
           class Body implements Weight {}
           type Weight = Double;
 
     - defs: |-
           type self = this;
-
-    - defs: |-
-          type Func = (p: int, q: Func) => int;
 
     - defs: |-
           class A<T, V> {}

@@ -16,7 +16,7 @@
 /*---
 desc: 03.8.10 Tuple Types
 name: recursive0.sts
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
-type TEmpty = [TEmpty]; // CTE: TypeError: Circular type alias reference
+type TEmpty = [TEmpty]; // Ok

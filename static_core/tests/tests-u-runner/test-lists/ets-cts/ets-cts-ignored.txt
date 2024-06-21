@@ -41,17 +41,6 @@
 17.experimental_features/02.array_creation_expressions/expr_n_11.sts
 # end of es2panda fails
 
-# Recursive Type Alias Declaration (4.6.1) is not implemented
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_19.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_20.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_22.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_23.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_24.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_25.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_26.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/spec3.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/spec4.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/spec5.sts
 
 # not implemented
 03.types/01.predefined_types/class_types_declaration_2.sts
