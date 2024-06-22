@@ -84,6 +84,7 @@ srcs_runtime = [
   "runtime/ets_native_library_provider.cpp",
   "runtime/ets_runtime_interface.cpp",
   "runtime/ets_stubs.cpp",
+  "runtime/ets_taskpool.cpp",
   "runtime/ets_vm.cpp",
   "runtime/ets_vm_api.cpp",  # TODO(nsizov): Take into account PR640, if needed
   "runtime/ets_vtable_builder.cpp",
@@ -91,6 +92,7 @@ srcs_runtime = [
   "runtime/intrinsics/compiler_intrinsics.cpp",
   "runtime/intrinsics/escompat_Date.cpp",
   "runtime/intrinsics/escompat_RegExp.cpp",
+  "runtime/intrinsics/escompat_taskpool.cpp",
   "runtime/intrinsics/escompat_JSON.cpp",
   "runtime/intrinsics/std_core.cpp",
   "runtime/intrinsics/std_core_Char.cpp",

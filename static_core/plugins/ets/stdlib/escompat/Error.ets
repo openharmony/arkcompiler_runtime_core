@@ -70,7 +70,7 @@ export class Error {
     */
     override toString(): String {
         if (this.message != "") {
-            return this.name + ": " + this.message + "\n";
+            return this.name + ": " + this.message;
         }
         return this.name;
     }
