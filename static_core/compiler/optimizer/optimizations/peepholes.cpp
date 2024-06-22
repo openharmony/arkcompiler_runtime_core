@@ -2131,6 +2131,60 @@ bool Peepholes::TrySimplifyCompareWithBoolInput(Inst *inst, bool *isOsrBlocked)
     return false;
 }
 
+// Checks if float const is really an integer const and replace it
+static bool TryReplaceFloatConstToIntConst([[maybe_unused]] Inst **castInput, Inst **constInst)
+{
+    ASSERT(*constInst != nullptr);
+    ASSERT(*castInput != nullptr);
+    auto type = (*constInst)->CastToConstant()->GetType();
+    if (type == DataType::FLOAT32) {
+        static constexpr auto MAX_SAFE_FLOAT32 =
+            static_cast<float>(static_cast<uint32_t>(1U) << static_cast<uint32_t>(std::numeric_limits<float>::digits));
+        float value = (*constInst)->CastToConstant()->GetFloatValue();
+        if (value < -MAX_SAFE_FLOAT32 || value > MAX_SAFE_FLOAT32) {
+            // Not applicable to numbers out of unchangeable f32->i32 range
+            return false;
+        }
+        if (std::trunc(value) != value) {
+            return false;
+        }
+        auto *graph = (*constInst)->GetBasicBlock()->GetGraph();
+        auto *newCnst = graph->FindOrCreateConstant(static_cast<int32_t>(value));
+        *constInst = newCnst;
+        *castInput = (*castInput)->GetInput(0).GetInst();
+        return true;
+    }
+    if (type == DataType::FLOAT64) {
+        static constexpr auto MAX_SAFE_FLOAT64 = static_cast<double>(
+            static_cast<uint64_t>(1U) << static_cast<uint64_t>(std::numeric_limits<double>::digits));
+        double value = (*constInst)->CastToConstant()->GetDoubleValue();
+        if (value < -MAX_SAFE_FLOAT64 || value > MAX_SAFE_FLOAT64) {
+            // Not applicable to numbers out of unchangeable f64->i64 range
+            return false;
+        }
+        if (std::trunc(value) != value) {
+            return false;
+        }
+        auto *graph = (*constInst)->GetBasicBlock()->GetGraph();
+        auto *newCnst = graph->FindOrCreateConstant(static_cast<int64_t>(value));
+        *constInst = newCnst;
+        auto *candidateInput = (*castInput)->GetInput(0).GetInst();
+        if ((value < static_cast<double>(INT32_MIN) || value > static_cast<double>(INT32_MAX)) &&
+            candidateInput->GetType() != DataType::INT64) {
+            // In i32 comparison constant will be truncated to i32
+            // If it is more than INT32 range, it is necessary to insert cast i32 -> i64
+            auto *newCast =
+                graph->CreateInstCast(DataType::INT64, INVALID_PC, candidateInput, candidateInput->GetType());
+            (*castInput)->InsertAfter(newCast);
+            *castInput = newCast;
+        } else {
+            *castInput = candidateInput;
+        }
+        return true;
+    }
+    return false;
+}
+
 // 6.i32  Cmp        v5, v1
 // 7.b    Compare    v6, 0
 // 9.     IfImm NE b v7, 0x0
@@ -2159,25 +2213,41 @@ bool Peepholes::TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked)
     }
     auto input0 = input->GetInput(0).GetInst();
     auto input1 = input->GetInput(1).GetInst();
+    if (SkipThisPeepholeInOSR(compare, input0) || SkipThisPeepholeInOSR(compare, input1)) {
+        *isOsrBlocked = true;
+        return true;
+    }
     auto cmpOpType = input->CastToCmp()->GetOperandsType();
     if (IsFloatType(cmpOpType)) {
         ASSERT(compare->GetOperandsType() == DataType::INT32);
-        if (!CheckFcmpInputs(input0, input1)) {
+        if (CheckFcmpInputs(input0, input1)) {
+            input0 = input0->GetInput(0).GetInst();
+            input1 = input1->GetInput(0).GetInst();
+            cmpOpType = DataType::INT32;
+        } else if (CheckFcmpWithConstInput(input0, input1)) {
+            bool cmpSwap = false;
+            Inst *cmpCastInput = nullptr;
+            ConstantInst *cmpConstInput = nullptr;
+            if (!GetInputsOfCompareWithConst(input, &cmpCastInput, &cmpConstInput, &swap)) {
+                return false;
+            }
+            Inst *cmpConstInst = static_cast<Inst *>(cmpConstInput);
+            if (!TryReplaceFloatConstToIntConst(&cmpCastInput, &cmpConstInst)) {
+                return false;
+            }
+            input0 = cmpCastInput;
+            input1 = cmpConstInst;
+            cmpOpType = input0->GetType();
+            swap = swap ^ cmpSwap;
+        } else {
             return false;
         }
-        input0 = input0->GetInput(0).GetInst();
-        input1 = input1->GetInput(0).GetInst();
-        cmpOpType = DataType::INT32;
     }
     ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
     if (!IsTypeSigned(cmpOpType)) {
         ASSERT(cc == ConditionCode::CC_EQ || cc == ConditionCode::CC_NE || IsSignedConditionCode(cc));
         // If Cmp operands are unsigned then Compare.CC must be converted to unsigned.
         cc = InverseSignednessConditionCode(cc);
-    }
-    if (SkipThisPeepholeInOSR(compare, input0) || SkipThisPeepholeInOSR(compare, input1)) {
-        *isOsrBlocked = true;
-        return true;
     }
     compare->SetInput(0, input0);
     compare->SetInput(1, input1);

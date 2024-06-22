@@ -35,6 +35,7 @@ bool HasTryBlockBetween(Inst *dominateInst, Inst *inst);
 bool IsSuitableForImplicitNullCheck(const Inst *inst);
 bool IsInstNotNull(const Inst *inst);
 bool CheckFcmpInputs(Inst *input0, Inst *input1);
+bool CheckFcmpWithConstInput(Inst *input0, Inst *input1);
 int64_t GetPowerOfTwo(uint64_t n);
 bool CanRemoveOverflowCheck(Inst *inst, Marker marker);
 bool IsCastAllowedInBytecode(const Inst *inst);
