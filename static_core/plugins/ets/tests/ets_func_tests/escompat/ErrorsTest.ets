@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+const success = 0;
+const fail = 1;
+
 class ErrorCause {
     reason: String;
 }
@@ -37,15 +40,18 @@ function main(): int {
 
 function testCreateError(): int {
     let err = new Error("Test error");
-    if (err.message == "Test error") return 0;
-    return 1;
+    let errSc = Error("Test error");
+    if (errSc.message == err.message && err.message == "Test error") {
+        return success;
+    }
+    return fail;
 }
 
 function testThrowError(): int {
     try {
         throw new Error("Test throw");
     } catch (err: Error) {
-        return 0;
+        return success;
     }
 }
 
@@ -53,71 +59,108 @@ function testErrorMessage(): int {
     try {
         throw new Error("Error message test");
     } catch (err: Error) {
-        if (err.message == "Error message test") return 0;
-        return 1;
+        if (err.message == "Error message test") return success;
+        return fail;
     }
 }
 
 function testErrorWithCause(): int {
     let cause: ErrorCause = { reason: "Test cause" };
     let err = new Error("Test error with cause", new ErrorOptions(cause));
-    if (err.cause == cause) return 0;
-    return 1;
+    let errSc = Error("Test error with cause", new ErrorOptions(cause));
+    if (errSc.cause == err.cause && err.cause == cause) {
+        return success;
+    }
+    return fail;
 }
 
 function testCreateAggregateError(): int {
     let errors = [new Error("Error 1"), new Error("Error 2")];
     let aggErr = new AggregateError(errors, "Aggregate error message");
-    if (aggErr.errors.length == 2 && aggErr.message == "Aggregate error message") return 0;
-    return 1;
+    if (aggErr.errors.length == 2 && aggErr.message == "Aggregate error message") {
+        return success;
+    }
+    return fail;
 }
 
 function testAggregateErrorMessage(): int {
     let aggErr = new AggregateError([] as Error[], "Test aggregate error message");
-    if (aggErr.message == "Test aggregate error message") return 0;
-    return 1;
+    if (aggErr.message == "Test aggregate error message") {
+        return success;
+    }
+    return fail;
+}
+
+function checkMessageAndName(
+    err: Error,
+    errSc: Error,
+    expected_message: string,
+    expected_name: string
+): boolean {
+    return errSc.message == err.message &&
+        err.message == expected_message &&
+        errSc.name == err.name &&
+        err.name == expected_name;
 }
 
 function testEvalError(): int {
     let err = new EvalError("Test EvalError", new ErrorOptions("Eval cause"));
-    if (err.message == "Test EvalError" && err.name == "EvalError") return 0;
-    return 1;
+    let errSc = EvalError("Test EvalError", new ErrorOptions("Eval cause"));
+    if (checkMessageAndName(err, errSc, "Test EvalError", "EvalError")) {
+        return success;
+    }
+    return fail;
 }
 
 function testRangeError(): int {
     let err = new RangeError("Test RangeError", new ErrorOptions("Range cause"));
-    if (err.message == "Test RangeError" && err.name == "RangeError") return 0;
-    return 1;
+    let errSc = RangeError("Test RangeError", new ErrorOptions("Range cause"));
+    if (checkMessageAndName(err, errSc, "Test RangeError", "RangeError")) {
+        return success;
+    }
+    return fail;
 }
 
 function testReferenceError(): int {
     let err = new ReferenceError("Test ReferenceError", new ErrorOptions("Reference cause"));
-    if (err.message == "Test ReferenceError" && err.name == "ReferenceError") return 0;
-    return 1;
+    let errSc = ReferenceError("Test ReferenceError", new ErrorOptions("Reference cause"));
+    if (checkMessageAndName(err, errSc, "Test ReferenceError", "ReferenceError")) {
+        return success;
+    }
+    return fail;
 }
 
 function testSyntaxError(): int {
     let err = new SyntaxError("Test SyntaxError", new ErrorOptions("Syntax cause"));
-    if (err.message == "Test SyntaxError" && err.name == "SyntaxError") return 0;
-    return 1;
+    let errSc = SyntaxError("Test SyntaxError", new ErrorOptions("Reference cause"));
+    if (checkMessageAndName(err, errSc, "Test SyntaxError", "SyntaxError")) {
+        return success;
+    }
+    return fail;
 }
 
 function testTypeError(): int {
     let err = new TypeError("Test TypeError", new ErrorOptions("Type cause"));
-    if (err.message == "Test TypeError" && err.name == "TypeError") return 0;
-    return 1;
+    let errSc = TypeError("Test TypeError", new ErrorOptions("Reference cause"));
+    if (checkMessageAndName(err, errSc, "Test TypeError", "TypeError")) {
+        return success;
+    }
+    return fail;
 }
 
 function testURIError(): int {
     let err = new URIError("Test URIError", new ErrorOptions("URI cause"));
-    if (err.message == "Test URIError" && err.name == "URIError") return 0;
-    return 1;
+    let errSc = URIError("Test URIError", new ErrorOptions("Reference cause"));
+    if (checkMessageAndName(err, errSc, "Test URIError", "URIError")) {
+        return success;
+    }
+    return fail;
 }
 
 function test(result: int, message: String): int {
     if (result == 0) {
-      return 0;
+      return success;
     }
     console.println("FAILED: " + message);
-    return 1;
+    return fail;
 }
