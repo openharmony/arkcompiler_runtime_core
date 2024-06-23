@@ -14,16 +14,9 @@
  */
 
 /*---
-<<<<<<<< HEAD:static_core/plugins/ets/tests/ets_func_tests/spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partialType_main.sts
- desc: Partial type import test
- name: partialType_main
- tags: []
- files: [./partialType_lib.sts]
-========
  desc: 05.06.01.Partial Utility Type
  name: 05.Generics/05.06.utility_types/05.06.01.partial_utility_type/partial_utility_type_0012.ets
- files: [./partial_utility_type_0013.ets]
->>>>>>>> 2e07c728d (Moving misplaced 'Partial type' test files):static_core/plugins/ets/tests/ets_func_tests/spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0012.ets
+ files: [./partial_utility_type_0013.sts]
  ---*/
 
 import { ClassToBePartial } from './partial_utility_type_0013'
