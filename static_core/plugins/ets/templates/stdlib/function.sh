@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eu -o pipefail
+set -e -o pipefail
 
 readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 readonly GENPATH="${1:-"${SCRIPT_DIR}/../../stdlib"}/std/core"
-readonly ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../../../.."}
+readonly VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
+JINJA_PATH="${VENV_DIR}/bin/jinja2"
+if ! [[ -f "${JINJA_PATH}" ]]; then
+    JINJA_PATH="jinja2"
+fi
 
-source "${ROOT_DIR}/scripts/python/venv-utils.sh"
-activate_venv
 mkdir -p "${GENPATH}"
 
 readonly FUNC="$GENPATH/Function.ets"
 echo "Generating ${FUNC}"
-jinja2 "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"
 
-deactivate_venv
+exit 0
