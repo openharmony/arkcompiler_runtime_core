@@ -17,10 +17,13 @@
 #include "libpandabase/os/error.h"
 
 namespace OHOS {
-    void ErrorConstructAndCopyFuzzTest([[maybe_unused]] const uint8_t* data, size_t size)
+    void ErrorConstructAndCopyFuzzTest(const uint8_t* data, size_t size)
     {
+        if (data == nullptr || size < sizeof(int)) {
+            return;
+        }
         // init error with int
-        int err = static_cast<int>(size);
+        int err = *(reinterpret_cast<const int*>(data));
         panda::os::Error error_(err);
         panda::os::Error error_copy(error_);
     }
