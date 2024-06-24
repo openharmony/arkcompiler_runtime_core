@@ -658,6 +658,7 @@ intrinsics:
     codegen_func: CreateStringGetCharsTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringGetCharsTlab
+    need_param_locations: true
     clear_flags: [ ]
     set_flags: [ ]
 
@@ -873,6 +874,7 @@ intrinsics:
     codegen_func: CreateStringSubstringTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStdStringSubstring
+    need_param_locations: true
     peephole_func: PeepholeStringSubstring
 
   - name: StdCoreStringCodePointToChar
@@ -923,6 +925,7 @@ intrinsics:
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringConcat2
+    need_param_locations: true
     clear_flags: [ ]
 
   - name: StdCoreStringConcat3
@@ -937,6 +940,7 @@ intrinsics:
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringConcat3
+    need_param_locations: true
 
   - name: StdCoreStringConcat4
     space: ets
@@ -950,6 +954,7 @@ intrinsics:
     codegen_func: CreateStringConcat
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringConcat4
+    need_param_locations: true
 
   - name: StdCoreStringCompareTo
     space: ets
@@ -963,6 +968,7 @@ intrinsics:
     llvm_codegen_func: EmitStringCompareTo
     codegen_arch: [arm64, amd64]
     impl: ark::ets::intrinsics::StdCoreStringCompareTo
+    need_param_locations: true
     safe_intrinsic: true
 
 ##########################
@@ -1509,6 +1515,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
   - name: StdCoreCharCopyTo
     space: ets
@@ -1527,6 +1534,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
   - name: StdCoreByteCopyTo
     space: ets
@@ -1545,6 +1553,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
   - name: StdCoreShortCopyTo
     space: ets
@@ -1563,6 +1572,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
   - name: StdCoreIntCopyTo
     space: ets
@@ -1581,6 +1591,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
   - name: StdCoreLongCopyTo
     space: ets
@@ -1599,6 +1610,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
   - name: StdCoreFloatCopyTo
     space: ets
@@ -1617,6 +1629,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
   - name: StdCoreDoubleCopyTo
     space: ets
@@ -1635,6 +1648,7 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateArrayCopyTo
     llvm_codegen_func: EmitArrayCopyTo
+    need_param_locations: true
 
 ############
 # std.core #
