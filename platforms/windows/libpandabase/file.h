@@ -128,7 +128,7 @@ public:
         constexpr size_t MAX_PATH_LEN = 2048;
         std::array<char, MAX_PATH_LEN> buffer = {0};
         auto fp = _fullpath(buffer.data(), relative_path.data(), buffer.size() - 1);
-        if (fp == nullptr) {
+        if (fp == nullptr || _access(buffer.data(), 0) == -1) {
             return Unexpected(Error(errno));
         }
 
