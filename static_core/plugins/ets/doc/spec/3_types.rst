@@ -43,7 +43,7 @@ The types integral to |LANG| are called *predefined types* (see
 
 The types introduced, declared, and defined by a developer are called
 *user-defined types*.
-All *user-defined types* must always have a complete type definition
+All *user-defined types* must always have complete type definitions
 presented as source code in |LANG|.
 
 .. index::
@@ -177,31 +177,31 @@ Types by Category
 All |LANG| types are summarized in the following table:
 
 
-+----------------------------------+---------------------------------+
-| **Predefined Types**             | **User-Defined Types**          |
-+===================+==============+===============+=================+
-| *Value Types*     | *Reference*  | *Value Types* | *Reference*     |
-| (Primitive Types) | *Types*      |               | *Types*         |
-+-------------------+--------------+---------------+-----------------+
-| ``number``,       | ``Number``,  | enumeration   | class types,    |
-| ``byte``,         | ``Byte``,    |               | interface types,|
-| ``short``,        | ``Short``,   | types         | array types,    |
-| ``int``,          | ``Int``,     |               | function types, |
-| ``long``,         | ``Long``,    |               | tuple types,    |
-| ``float``,        | ``Float``,   |               | union types,    |
-| ``double``,       | ``Double``,  |               | type parameters |
-| ``char``,         | ``Char``,    |               |                 |
-| ``boolean``,      | ``Boolean``, |               |                 |
-| ``string``,       | ``String``,  |               |                 |
-|                   | ``string``,  |               |                 |
-| ``bigint``        | ``BigInt``,  |               |                 |
-|                   | ``bigint``,  |               |                 |
-|                   | ``Object``,  |               |                 |
-|                   | ``object``,  |               |                 |
-|                   | ``void``,    |               |                 |
-|                   | ``null``,    |               |                 |
-|                   | ``never``    |               |                 |
-+-------------------+--------------+---------------+-----------------+
++----------------------------------+-------------------------------------+
+|      **Predefined Types**        |        **User-Defined Types**       |
++===================+==============+===================+=================+
+| *Value Types*     | *Reference*  | *Value Types*     | *Reference*     |
+| (Primitive Types) | *Types*      |                   | *Types*         |
++-------------------+--------------+-------------------+-----------------+
+| ``number``,       | ``Number``,  | enumeration types | class types,    |
+| ``byte``,         | ``Byte``,    |                   | interface types,|
+| ``short``,        | ``Short``,   |                   | array types,    |
+| ``int``,          | ``Int``,     |                   | function types, |
+| ``long``,         | ``Long``,    |                   | tuple types,    |
+| ``float``,        | ``Float``,   |                   | union types,    |
+| ``double``,       | ``Double``,  |                   | type parameters |
+| ``char``,         | ``Char``,    |                   |                 |
+| ``boolean``,      | ``Boolean``, |                   |                 |
+| ``string``,       | ``String``,  |                   |                 |
+| ``bigint``        | ``string``,  |                   |                 |
+|                   | ``BigInt``,  |                   |                 |
+|                   | ``bigint``,  |                   |                 |
+|                   | ``Object``,  |                   |                 |
+|                   | ``object``,  |                   |                 |
+|                   | ``void``,    |                   |                 |
+|                   | ``null``,    |                   |                 |
+|                   | ``never``    |                   |                 |
++-------------------+--------------+-------------------+-----------------+
 
 
 .. index::
@@ -227,12 +227,12 @@ Using Types
 
 A type can be referred to in source code by the following:
 
--  A reserved name for a primitive type;
--  A type reference for a named type (see :ref:`Named Types`), or a type alias
+-  Reserved name for a primitive type;
+-  Type reference for a named type (see :ref:`Named Types`), or type alias
    (see :ref:`Type Alias Declaration`);
--  An in-place type definition for an array type (see :ref:`Array Types`), a
-   function type (see :ref:`Function Types`), a tuple type (see :ref:`Tuple Types`),
-   or a union type (see :ref:`Union Types`).
+-  In-place type definition for an array type (see :ref:`Array Types`),
+   function type (see :ref:`Function Types`), tuple type (see :ref:`Tuple Types`),
+   or union type (see :ref:`Union Types`).
 
 .. index::
    reserved name
@@ -314,17 +314,17 @@ Named Types
 .. meta:
     frontend_status: Done
 
-Classes, interfaces, enumerations, aliases and type parameters are named types,
-while other types are anonymous (array, function, and union types). Respective
+Classes, interfaces, enumerations, aliases, and type parameters are named types.
+Other types (array, function, and union types) are anonymous. Respective
 named types are introduced by the following:
 
 -  Class declarations (see :ref:`Classes`),
 -  Interface declarations (see :ref:`Interfaces`),
--  Enumeration declarations (see :ref:`Enumerations`), 
+-  Enumeration declarations (see :ref:`Enumerations`),
 -  Type alias declarations (see :ref:`Type Alias Declaration`), and
 -  Type parameter declarations (see :ref:`Type Parameters`).
 
-Classes, interfaces and type aliases with type parameters are *generic types*
+Classes, interfaces, and type aliases with type parameters are *generic types*
 (see :ref:`Generics`). Named types without type parameters are
 *non-generic types*.
 
@@ -361,7 +361,7 @@ A type reference refers to a type by one of the following:
 
 -  *Simple* or *qualified* type name (see :ref:`Names`),
 -  Type alias (see :ref:`Type Alias Declaration`), or
--  Type parameter (see :ref:`Type Parameters`) name with '``!``' sign
+-  Type parameter (see :ref:`Type Parameters`) name with the '``!``' sign
    (see :ref:`NonNullish Type Parameter`).
 
 
@@ -827,7 +827,7 @@ Numeric Types Hierarchy
 
 Integer and floating-point types are numeric types.
 
-Larger type values include all values of the smaller types:
+Larger type values include all values of smaller types:
 
 -  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
 
@@ -1101,7 +1101,7 @@ Type ``string`` has dual semantics:
 -  If a string is created, assigned or passed as an argument, then it behaves
    like a reference type (see :ref:`Reference Types`).
 -  All ``string`` operations (see :ref:`String Concatenation`,
-   :ref:`String Equality Operators` and
+   :ref:`String Equality Operators`, and
    :ref:`String Relational Operators`) handle strings as values (see
    :ref:`Value Types`).
 
@@ -1215,7 +1215,7 @@ A :index:`compile-time error` occurs if:
     let x: void // compile-time error - void used as type annotation
 
     function foo (): void
-    let y = foo()  // void used as a value
+    let y = foo()  // compile-time error - void used as a value
 
 
 Type ``void`` can be used as type argument that instantiates a generic type
@@ -1737,7 +1737,7 @@ another:
    :ref:`Boxed Types`) in a union, then the largest boxed numeric type
    (Byte->Short->Int->Long->Float->Double) is to stay in the union, while
    others are removed.
-#. If a primitive type after boxing (see :ref:`Boxing Conversions`) is equal to
+#. If after boxing (see :ref:`Boxing Conversions`) a primitive type equals
    another union type, then the initial type is removed.
 #. If a literal of union type belongs to the values of a type that is part
    of the union, then the literal is removed.
@@ -1787,7 +1787,7 @@ is presented in the examples below:
     1 | number | number => number                
     int | double | short => double 
 
-    Byte | Int | Long => Long                   // The haviest type left
+    Byte | Int | Long => Long                   // The heaviest type left
     Int | 3.14 | Float => Int | Float           // 3.14 belongs to unboxed Float
 
 
@@ -2115,7 +2115,7 @@ Default values of primitive types are as follows:
 +--------------+--------------------+
 
 
-The default values of nullish union types are as follows:
+Default values of nullish union types are as follows:
 
 +----------------------+--------------------+
 |    Data Type         |   Default Value    |

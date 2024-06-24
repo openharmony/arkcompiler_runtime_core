@@ -94,7 +94,7 @@ The following major aspects characterize the |LANG| language as a whole:
 
    A classical illustration is the notion of a list that represents the
    ‘idea’ of an abstract data structure. This abstract notion can be turned
-   into a concrete list by providing additional information (the type of
+   into a concrete list by providing additional information (i.e., the type of
    list elements).
 
    Supported by many programming languages, a similar feature (*generics*
@@ -115,11 +115,11 @@ The following major aspects characterize the |LANG| language as a whole:
 -  Multi-targeting
 
    |LANG| provides an efficient application development solution for a wide
-   range of devices. The language ecosystem is a developer-friendly, uniform
-   programming environment for a range of popular platforms (*cross-platform
-   development*). It can generate optimized applications capable of operating
-   under the limitations of lightweight devices, or realizing the full
-   potential of any specific target hardware.
+   range of devices. The language ecosystem is a developer-friendly and uniform
+   programming environment for a range of popular platforms (called
+   *cross-platform development*). It can generate optimized applications
+   capable of operating under the limitations of lightweight devices, or
+   realizing the full potential of any specific target hardware.
 
 .. index::
    multi-targeting
@@ -127,11 +127,9 @@ The following major aspects characterize the |LANG| language as a whole:
 |LANG| is designed as a part of the modern language manifold. To provide an
 efficient and safely executable code, the language takes flexibility and
 power from |TS| and its predecessor JavaScript, and the static
-typing principle from Java and Kotlin.
-
-The overall design keeps the |LANG|’ syntax style similar to that of those
-languages, and some of its important constructs are almost identical to theirs
-on purpose.
+typing principle from Java and Kotlin. The overall design keeps the |LANG|’
+syntax style similar to that of those languages, and some of its important
+constructs are almost identical to theirs on purpose.
 
 In other words, there is a significant *common subset* of features of |LANG|
 on the one hand, and of |TS|, JavaScript, Java, and Kotlin on the other.
@@ -139,14 +137,14 @@ Consequently, the |LANG|’ style and constructs are no puzzle for the |TS| and
 Java users who can sense the meaning of most constructs of the new language
 even if not understand them completely.
 
-This stylistic and semantic similarity permits migrating the applications
-originally written in |TS|, Java, or Kotlin smoothly to |LANG|.
+This stylistic and semantic similarity permits smoothly migrating the
+applications originally written in |TS|, Java, or Kotlin to |LANG|.
 
 Like its predecessors, |LANG| is a relatively high-level language. It means
 that the language provides no access to low-level machine representations.
 As a high-level language, |LANG| supports automatic storage management. It
 means that dynamically created objects are deallocated automatically soon
-after they are no longer available, and explicitly deallocating them is not
+after they are no longer available, and deallocating them explicitly is not
 required.
 
 |LANG| is not merely a language, but rather a comprehensive software
@@ -200,8 +198,8 @@ numbers/numeric literals, operator signs, delimiters), special characters
    white space
    comment
 
-The tokens defined by the lexical grammar are terminal symbols of the syntactic
-notation. The syntactic notation defines a set of productions starting from the
+The tokens defined by the lexical grammar are terminal symbols of syntactic
+notation. Syntactic notation defines a set of productions starting from the
 goal symbol *compilationUnit* (see :ref:`Modules and Compilation Units`). It is
 a sentence that consists of a single distinguished nonterminal, and describes
 how sequences of tokens can form syntactically correct programs.
@@ -252,7 +250,7 @@ with terminal and nonterminal symbols:
 
 -  Vertical line '``|``' to specify alternatives.
 
--  Question mark '``?``' to specify the optional (zero- or one-time) occurrence
+-  Question mark '``?``' to specify an optional (zero- or one-time) occurrence
    of the preceding terminal or nonterminal.
 
 -  Asterisk '``*``' to mark a *terminal* or *nonterminal* that can occur zero
@@ -282,10 +280,10 @@ The production below is an example that specifies a list of expressions:
       ;
 
 This production introduces the following structure defined by the
-nonterminal *expressionList*. The expression list must consist of the
-sequence of *expression*\ s separated by the terminal symbol ‘``,``’. The
+nonterminal *expressionList*. The expression list must consist of a
+sequence of *expression*\ s separated by the terminal ‘``,``’ symbol. The
 sequence must have at least one *expression*. The list is optionally
-terminated by the terminal symbol ‘``,``’.
+terminated by the terminal ‘``,``’ symbol.
 
 All grammar rules are presented in the Grammar section of this specification.
 
@@ -316,15 +314,15 @@ as used in other languages, application areas, or industries.
      -- the term can have several meanings.
 
      (1) token that denotes the action to be performed on a value (addition,
-     subtraction, comparisons, etc.).
+     subtraction, comparison, etc.).
      
      (2) a syntactic construct that denotes an elementary calculation within
      an expression. Normally, an operator consists of an operator sign and
      one or more operands.
 
      In unary operators that have a single operand, the operator sign can be
-     placed either in front of an operand (*prefix* unary operator), or after
-     the operand (*postfix* unary operator).
+     placed either in front of (*prefix* unary operator) or after an operand
+     (*postfix* unary operator).
 
      If both operands are available, then the operator sign can be placed
      between the two (*infix* binary operator). A conditional operator with
@@ -342,7 +340,7 @@ as used in other languages, application areas, or industries.
 
    operation sign
      -- a language token that signifies an operator and conventionally
-     denotes a usual mathematical operator, for example, '``+``' for additional
+     denotes a usual mathematical operator, for example, '``+``' for addition
      operator, '``/``' for division etc. However, some languages allow using
      identifiers to denote operators, and/or arbitrarily combining characters
      that are not tokens in the alphabet of that language, i.e., operator
@@ -375,9 +373,9 @@ as used in other languages, application areas, or industries.
      of the language's syntactic grammar.
 
    tokenization
-     -- the establishing of tokens in the process of codebase reading by
-     a machine. The process of tokenization presumes finding the longest
-     sequence of characters that form a valid token.
+     -- finding the longest sequence of characters that form a valid token,
+     (i.e., the establishing of tokens) in the process of codebase reading
+     by the machine.
 
    punctuator
      -- token that serves for separating, completing, or otherwise organizing
@@ -409,7 +407,7 @@ as used in other languages, application areas, or industries.
 
    type reference
      -- references that refer to named types by specifying their type names,
-     and (where applicable) type arguments to be substituted for the type
+     and type arguments, where applicable, to be substituted for type
      parameters of the named type.
 
    nullable type 
@@ -462,8 +460,8 @@ as used in other languages, application areas, or industries.
      -- see *variable declaration*.
 
    variable declaration
-     -- declaration that introduces a new named variable to which a
-     modifiable initial value can be assigned.
+     -- declaration that introduces a new named variable a modifiable
+     initial value can be assigned to.
 
    constant
      -- see *constant declaration*.
@@ -521,7 +519,7 @@ as used in other languages, application areas, or industries.
 
    truthiness
      -- concept that extends the Boolean logic to operands and results
-     of non-Boolean types, and allows treating the value of any valid
+     of non-Boolean types, and allows handling the value of a valid
      expression of a non-void type as ``Truthy`` or ``Falsy``, depending on
      the kind of the value type.
 
@@ -538,7 +536,7 @@ as used in other languages, application areas, or industries.
 
    package level scope
       -- name that is declared on the package level, and accessible throughout
-      the entire package and in other packages if exported.
+      the entire package, and in other packages if exported.
 
    module level scope
      -- name that is applicable for separate modules only. It is accessible

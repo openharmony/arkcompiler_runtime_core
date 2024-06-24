@@ -334,7 +334,7 @@ will not require unnecesary ``as`` conversions (see :ref:`Cast Expressions`).
 
 There are tricky cases related to overloading (see
 :ref:`Function and Method Overloading`) when a smart type may lead to the call
-of the function or method (see :ref:`Function or Method Selection`) which suits
+of the function or method (see :ref:`Overload Resolution`) which suits
 the smart type of an argument rather than the static one.
 
 .. code-block:: typescript
@@ -349,10 +349,6 @@ the smart type of an argument rather than the static one.
 
 Particular cases supported by the compiler are determined by the compiler
 implementation.
-
-
-
-
 
 |
 
@@ -902,6 +898,425 @@ Overloading and Overriding in Interfaces
       static static_method_2(p: string) {} // Valid overloading
 
    }
+
+|
+
+.. _Overload Resolution:
+
+Overload Resolution
+*******************
+
+.. meta:
+    frontend_status: Done
+
+The *overload resolution* is used where 
+there are several *potentially applicable candidates*
+in a function, method or constructor call.
+The overload resolution is performed in two steps:
+
+- selecting *applicable candidates* from *potentially applcable candidates*;
+
+- selecting the best candidate.
+
+.. _Selection of Applicable Candidates:
+
+Selection of Applicable Candidates
+==================================
+
+.. meta:
+    frontend_status: Partly
+    todo: adapt the implementation to the latest specification (handle rest, union, functional types properly)
+    todo: make the ISA/assembler/runtime handle union types without collision - eg foo(arg: A|B) and foo(arg: C|D)
+
+Function or method selection is the process of choosing functions or methods
+that are applicable for a function or a method call. The choosing algorithm
+is described below:
+
+1. An empty list *A* of applicable candidates is created.
+
+2. The argument types are taken from the call to compose the list
+   *TA* = (*ta*:sub:`1`, *ta*:sub:`2`, ... *ta*:sub:`n`), where *ta*:sub:`i`
+   is the type of the *i*’th argument, and `n` is the number of function
+   or method call arguments.
+
+3. Suppose *M* is a set of candidates (functions or methods with the same name)
+   that are accessible (see :ref:`Accessible`) at the point of call. The
+   following actions are performed for every candidate:
+
+  3.1 If the signature of *j*’th candidate has optional parameters or a rest
+  parameter, then the *TA* list for this candidate is rebuilt according to the
+  following rules:
+
+    - Until there is an optional parameter with the ordinal number *n+1* (i.e.,
+      that has no argument in *TA*), the type of the optional parameter keeps
+      being added to the *TA* list as *ta*:sub:`n+1`;
+
+    - If there is a rest parameter with the ordinal number *n+1*, then the
+      type of the rest parameter is added to the *TA* list as *ta*:sub:`n+1`;
+
+    - If there is a rest parameter with the ordinal number *m* that is less
+      then *n*, then *ta*:sub:`m`, ... *ta*:sub:`n` are deleted from *TA*
+      list. The type of the rest parameter is added to the *TA* list as
+      *ta*:sub:`m`. A :index:`compile-time error` occurs if any element of
+      *ta*:sub:`m`, ... *ta*:sub:`n` is not compatible with the element type
+      of the rest parameter.
+
+  If the number of parameters of the *j*’th candidate is not equal to the
+  length of the *TA* list, then the candidate is not added to the set *A*.
+
+  The examples are presented below:
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (p: A | B) { ... }                      // #1
+    function foo (p: A | C) { ... }                      // #2
+    function foo (p1: int, p2: SomeOtherType ) { ... }   // #3
+    function foo (p1: int, p2?: int ) { ... }            // #4
+
+    foo(new A) // three applicable candidates for this call: #1,#2,#4
+
+    function goo (p1: Base)                // #1
+    function goo (p2: Base|SomeOtherType)  // #2
+    function goo (...p3: Base[])           // #3
+
+    goo (new Base) // three applicable candidates for this call: #1, #2, #3
+
+|
+
+  3.2 The following check is performed for each candidate from the set *M*.
+  Each type *ta*:sub:`i` from the list *TA* is compared to the type of the
+  *i*’th candidate parameter. When performing the comparison, the rules of
+  type compatibility (see :ref:`Type Compatibility`) are used with no
+  consideration for the following:
+
+  - Possible boxing conversion (see :ref:`Boxing Conversions`);
+  - Possible unboxing conversion (see :ref:`Unboxing Conversions`);
+
+  A candidate that meets the requirements of the check is added to the *A*
+  list of applicable candidates.
+
+  The examples are presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base { }
+   class Derived extends Base { }
+
+   function foo(p: Base) { ... }
+   function foo(p: Derived) { ... }
+
+   foo(new Derived) // two applicable candidates for this call:
+                    // the argument of type Derived can be
+                    // implicitly converted to Base
+   foo(new Base)    // one applicable candidate
+
+   function boo (p: T1) { ... }
+   function boo (p: T1|T2) { ... }
+
+   boo (new T1 ) // two applicable candidates for this call
+   boo (new T2)  // one applicable candidate
+
+   type T1 = A | B
+   type T2 = A | C
+ 
+   function goo (p: T1) { ... }  // #1
+   function goo (p: T2) { ... }  // #2
+ 
+   goo (new A)       // Two applicable candidates: #1, #2
+   goo (new A as T1) // One applicable candidate: #1
+   goo (new A as T2) // One applicable candidate: #2
+
+|
+
+  3.3 If after the check the list of applicable candidates is still empty, then
+  step 3.2 of this algorithm is performed again. Each type *ta*:sub:`i`, to
+  which type compatibility rules are not applied successfully in the previous
+  step, is compared again to the type of the *i*’th candidate parameter.
+  This time the rules of type compatibility consider possible boxing and
+  unboxing conversions. A candidate that meets the requirements of the
+  check is added to the *A* list of applicable candidates.
+
+The examples are presented below:
+
+.. code-block-meta:
+
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(p: SomeOtherType) { ... }
+   function foo(p: Int) { ... }
+
+   foo(1) // After step 3.1: two applicable candidates for this call
+          // After step 3.2: still two applicable candidates
+          // After step 3.3: apply boxing conversion – one applicable candidate
+   
+   function goo (p: (p: T) => T) { ... }   // #1
+   function goo (p: (p: T) => U) { ... }   // #2
+
+ 
+   // Return types of call arguments are taken into account here
+   
+   goo ((p: T) => T {}) // After steps 3.1, 3.2: two candidates
+                        // After step 3.3: the single candidate #1
+                        
+   goo ((p: T) => U {}) // After steps 3.1, 3.2: two candidates
+                        // After step 3.3: the single candidate #2
+
+
+|
+
+  3.4 If the list of applicable candidates has two or more candidates the best
+  match candidate is to be identified if possible. This process depends on
+  types of arguments being passed and types of parameter sets of
+  candidates and it should be applied to different pairs of argument and
+  parameter types. The following cases are to be considered:
+
+     - candidates has only one argument-parameter type difference
+     - candidates has only several argument-parameter type difference
+   
+  In addition the following kinds of types are to be inspected: 
+
+     - types are related with inheritance
+     - optional and rest parameter types
+     - union types
+
+  3.4.1 Inheritance: the type of an argument is compatible (see
+  :ref:`Type Compatibility`) with one of parameter types which is the nearest
+  (least lower bound of the set) in the inheritance graph to it.
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {
+      foo(p: Base)    {} // Version #1
+      foo(p: Derived) {} // Version #2
+      // parameter types set: {p: {Base, Deived}}
+   }
+   class Derived extends Base {}
+   class NextDerived extends Derived {}
+
+   let b: Base = new Derived
+   b.foo(b) // Best match is Version #1:
+            // static type of the argument is equal to the type of parameter
+            // Base => {Base, Derived}
+     
+   b.foo(new Derived) // Best match is Version #2:
+            // static type of the argument is equal to the type of parameter
+            // Derived => {Base, Derived}
+
+   b.foo(new NextDerived) // Best match is Version #2:
+            // static type of the argument is compatible with Derived as it is nearest
+            // NextDerived => {Base, Derived}
+
+   function bar (p: (p: Base) => void)    {} // Version #1
+   function bar (p: (p: Derived) => void) {} // Version #2
+      // parameter types set: {p: {(p: Base) => void), (p: Derived) => void}}
+
+   let fun_arg1: (p: Base) => void = (p: Base):void => {}
+   bar (fun_arg1) // Version #1 to be called as (p: Base) => void fits it
+
+   let fun_arg2: (p: Derived) => void = (p: Derived):void => {}
+   bar (fun_arg2) // Version #2 to be called as (p: Derived):void fits it
+
+   interface T1 {}
+   interface T2 {}
+   class T3 implements T1, T2 {}
+   class T4 implements T1, T2 {}
+   function foo (p: T1) {} // Version #1
+   function foo (p: T2) {} // Version #2
+      // parameter types set: {p: {T1, T2}}
+
+   foo (new T3) // No best match! 
+     // T3 => {T1, T2} - T3 is compatible with both types
+
+   foo (new T4) // No best match! 
+     // T4 => {T1, T2} - T4 is compatible with both types
+
+
+|
+
+  3.4.2 Optional and rest parameter types: simpler types win over more
+  complicated ones, less parameters wins over more parameters.
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(p: number)  {} // Version #1
+   function foo(p?: number) {} // Version #2
+      // parameter types set: {p: {number, number|undefined}}
+   foo (5) // Version #1 to be called
+      // number => {number, number|undefined} non-union type is the best match
+
+   function foo(p: number)             {} // Version #1
+   function foo(p: number, s?: string) {} // Version #2
+      // parameter types set: {p: {number, number}, s: {_, string|undefined}}
+   foo (5) // Version #1 to be called
+      // number => {number, number} such ambiguity is resolved to a version with less parameters
+
+   function foo (p: number)      {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+      // parameter types set: {p: {number, number[]}}
+   foo(5) // Version #1 to be called
+      // number => {number, number[]} simple type wins over array
+
+   function foo (p?: number)     {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+      // parameter types set: {p: {number|undefined, number[]}}
+   foo() // Version #1 to be called
+      // _ => {number|undefined, number[]} union wins over array
+
+   function foo ()               {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+      // parameter types set: {p: {_, number[]}}
+   foo() // Version #1 to be called
+      // _ => {_, number[]} no type wins over array
+
+   function foo (p: number)      {} // Version #1
+   function foo (...p: number[]) {} // Version #2
+   function foo (p?: number)     {} // Version #3
+      // parameter types set: {p: {number, number[], number|undefined}}
+   foo(5) // Version #1 to be called
+      // number => {number, number[], number|undefined} simple type wins over array and union
+
+|
+
+
+  3.4.3 Union types: no best match if domains of two union types intersect and
+  argument type fits the intersection. 
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo (p: string|number)  {} // Version #1
+   function foo (p: string|boolean) {} // Version #2
+      // parameter types set: {p: {string|number, string|boolean}}
+   foo ("some string") // No best match! 
+      // string => {string|number, string|boolean} string fits both union types
+
+   function bar (p: string)         {} // Version #1
+   function bar (p: string|boolean) {} // Version #2
+      // parameter types set: {p: {string, string|boolean}}
+   foo ("some string") // Version #1 to be called
+      // string => {string, string|boolean} non-union type is the best match
+
+|
+
+
+  3.4.4 Several arguments: if several arguments match different versions then
+  there is no best match occurs. To have a best match all arguments should fit
+  the same version.
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base {}
+   class Derived extends Base {}
+
+   function foo(p1: Base,    p2: Derived) {} // Version #1
+   function foo(p1: Derived, p2: Base)    {} // Version #2
+      // parameter types set: {p1: {Base, Derived}, p2: {Derived, Base}}
+   foo (new Derived, new Derived) // No best match!
+      // {Derived, Derived} => {p1: {Base, Derived}, p2: {Base, Derived}} 
+      // 1st Derived matches Version #2, but 2nd Derived matches Version #1 - no best match
+
+   function bar(p1: Base,    p2: Derived) {} // Version #1
+   function bar(p1: Derived, p2: Base)    {} // Version #2
+   function bar(p1: Derived, p2: Derived) {} // Version #3
+   function bar(p1: Base,    p2: Base)    {} // Version #4
+      // parameter types set: {p1: {Base, Derived, Derived, Base}, p2: {Derived, Base, Derived, Base}}
+   foo (new Derived, new Base) // // Version #2 to be called
+      // {Derived, Base} => {{Base, Derived, Derived, Base}, {Derived, Base, Derived, Base}} 
+      // Derived matches Version #2 and #3, Base matches Version #2 and #4 -
+      // intersection gives Version #2 as the best match
+
+|
+
+  3.4.5 Best match identification general algorithm.
+
+  For the call: 
+
+    foo(``expr``:sub:`1`, ``expr``:sub:`2`, .. , ``expr``:sub:`i`,  .. ``expr``:sub:`n`) 
+
+    It implies that there is a vector of argument expression types
+    corresponding to each argument expression type
+
+    ``T``:sub:`1`, ``T``:sub:`2`, .. , ``T``:sub:`i`, .. ``T``:sub:`n`
+ 
+  There is a list of ``m`` applicable candidates with the following signatures
+  (only parameter type involved) (matrix of types): 
+
+    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1n1`)
+
+    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2n2`)
+
+    ...
+
+    foo (``T``:sub:`m1`, ``T``:sub:`m2`, .. ``T``:sub:`mnm`)
+
+    where ``T``:sub:`ij` is the type of ``j-th`` parameter of the ``i-th``
+    candidate and ``j`` in ``1`` .. ``n``:sub:`i` and ``i`` in ``1`` .. ``m``
+
+  [TBD]
+
+  - define a subset of applicable candidates with min (``n``:sub:`1`, ... ``n``:sub:`m`)
+  - if only one candidate left then it is the best match candidate
+  - otherwise the list of applcable candidates will look like 
+
+    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1k`)
+
+    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2k`)
+
+    ...
+
+    foo (``T``:sub:`l1`, ``T``:sub:`l2`, .. ``T``:sub:`lk`)
+
+    where l <= m and k = min (``n``:sub:`1`, ... ``n``:sub:`m`) and k >= n
+
+  - start from the last parameter j = k
+
+  - ``j-th`` column types to be grouped into class/interface types group and
+    all other types group. 
+
+  - if class/interface types group is not empty then
+     
+     + all candidates from the other group are to be removed from the
+       applicable candidates list.
+     + if only one candidate left then goto 4.
+     + otherwise for all pairs of candidates (x, y) the following check is to
+       be performed until no removales occur
+
+       - if parameter types of (x) are compatible to parameter types of (y) then
+          - if not (parameter types of (y) are compatible to parameter types of (x)) then x is removed
+       - else if not (parameter types of (y) are compatible to parameter types of (x)) then y is removed
+
+     + goto 4.
+
+  - if class/interface types group is empty then
+    
+    + if there are union types then then goto 4.
+    + if there are optional parameters then goto 4. 
+    + if there are rest parameters then goto 4.
+  
+  - select the next parameter to the left (j = j - 1) and repeat the same
+    checks except for the rest parameters till j == 0
+
+4. List *A* of applicable candidates is now ready. If it has only 1 element
+   then it is the best match candidate.
+
+|
+
+.. _Selection of Best Candidate:
+
+Selection of Best Candidate
+===========================
+
+.. meta:
+    frontend_status: Partly
 
 |
 
