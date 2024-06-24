@@ -961,7 +961,7 @@ bool Inlining::DoInline(CallInst *callInst, InlineContext *ctx)
 void Inlining::ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *callContBb, bool hasRuntimeCalls,
                                              bool needBarriers)
 {
-    if (hasRuntimeCalls) {
+    if (hasRuntimeCalls || needBarriers) {
         // In case if inlined graph contains call to runtime we need to preserve call instruction with special `Inlined`
         // flag and create new `ReturnInlined` instruction, hereby codegen can properly handle method frames.
         callInst->SetInlined(true);
@@ -1001,7 +1001,6 @@ void Inlining::ProcessCallReturnInstructions(CallInst *callInst, BasicBlock *cal
             }
         }
     } else {
-        ASSERT(!needBarriers);
         // Otherwise we remove call instruction
         auto saveState = callInst->GetSaveState();
         // Remove SaveState if it has only Call instruction in the users
