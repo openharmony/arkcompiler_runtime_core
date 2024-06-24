@@ -145,17 +145,12 @@ CompilationResult Function::CompileByLLVM()
         return CompilationResult::ARK_BECAUSE_SKIP;
     }
     ASSERT(llvmCompiler_ != nullptr);
-    auto can = llvmCompiler_->CanCompile(GetGraph());
-    if (!can.HasValue()) {
-        LOG(FATAL, IRTOC) << can.Error() << "\n";
+    auto result = llvmCompiler_->TryAddGraph(GetGraph());
+    if (!result.HasValue()) {
+        LOG(FATAL, IRTOC) << "LLVM IRTOC compilation failed for function '" << GetName() << "', error: '"
+                          << result.Error() << "'";
     }
-    if (!can.Value()) {
-        return CompilationResult::ARK_BECAUSE_FALLBACK;
-    }
-    if (!llvmCompiler_->AddGraph(GetGraph())) {
-        LOG(FATAL, IRTOC) << "LLVM compilation failed on compilable code graph for " << GetName() << " unit";
-    }
-    return CompilationResult::LLVM;
+    return result.Value() ? CompilationResult::LLVM : CompilationResult::ARK_BECAUSE_FALLBACK;
 #endif  // ifndef PANDA_LLVM_IRTOC
 }
 

@@ -57,6 +57,7 @@ if (is_llvmbackend) {
     "transforms/builtins.cpp",
     "transforms/gc_utils.cpp",
     "transforms/llvm_optimizer.cpp",
+    "transforms/passes/aarch64_fixup_sdiv.cpp",
     "transforms/passes/ark_frame_lowering/frame_builder.cpp",
     "transforms/passes/ark_frame_lowering/frame_lowering.cpp",
     "transforms/passes/ark_gvn.cpp",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,6 +108,7 @@ protected:
                     .SetFlag(compiler::inst_flags::NO_CSE)
                     .SetFlag(compiler::inst_flags::BARRIER)
                     .ClearFlag(compiler::inst_flags::REQUIRE_STATE)
+                    .ClearFlag(compiler::inst_flags::CAN_THROW)
                     .ClearFlag(compiler::inst_flags::RUNTIME_CALL);
             }
 
@@ -389,6 +390,7 @@ TEST_F(LoopIdiomsTest, FillLargeArrayWithConstantIterationsCount)
                 .SetFlag(compiler::inst_flags::NO_CSE)
                 .SetFlag(compiler::inst_flags::BARRIER)
                 .ClearFlag(compiler::inst_flags::REQUIRE_STATE)
+                .ClearFlag(compiler::inst_flags::CAN_THROW)
                 .ClearFlag(compiler::inst_flags::RUNTIME_CALL);
         }
 

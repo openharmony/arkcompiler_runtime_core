@@ -111,7 +111,8 @@ exit:
 #! RUN          entry: "_GLOBAL::main"
 
 #! CHECKER      Check inlined float array at LLVM AOT
-#! RUN_LLVM     options: "--compiler-regex='(_GLOBAL::main|_GLOBAL::farray)' --llvm-dump-before --llvm-dump-after"
+#! RUN_LLVM     options: "--compiler-regex='(_GLOBAL::main|_GLOBAL::farray)' --llvm-dump-before --llvm-dump-after \
+#!                       --llvm-pre-opt=0"
 #! READ_FILE    "console.out"
 #! INST         "LLVM IR module BEFORE LLVM optimizations"
 #! INST_NEXT    /define protected.*_GLOBAL::main/
@@ -156,7 +157,8 @@ exit:
 #! RUN          entry: "_GLOBAL::main1"
 
 #! CHECKER      Inline function with dead loop at LLVM AOT
-#! RUN_LLVM     options: "--compiler-regex='(_GLOBAL::main1|_GLOBAL::foo1)' --llvm-dump-before --llvm-dump-after"
+#! RUN_LLVM     options: "--compiler-regex='(_GLOBAL::main1|_GLOBAL::foo1)' --llvm-dump-before --llvm-dump-after \
+#!                        --llvm-pre-opt=0"
 #! READ_FILE    "console.out"
 #! INST         "LLVM IR module BEFORE LLVM optimizations"
 #! INST_NEXT    /define protected.*_GLOBAL::main/
@@ -195,7 +197,8 @@ lbl:
 #! RUN          entry: "Test2::main"
 
 #! CHECKER      Change to CallStatic by instructions limit at LLVM AOT
-#! RUN_LLVM     options: "--compiler-regex=Test2.* --compiler-inlining-max-insts=12 --compiler-inlining-always-inline-bc-size=0"
+#! RUN_LLVM     options: "--compiler-regex=Test2.* --compiler-inlining-max-insts=12 --compiler-inlining-always-inline-bc-size=0 \
+#!                        --llvm-pre-opt=0"
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,DEVIRTUALIZED/
 #! RUN          entry: "Test2::main"
@@ -214,7 +217,8 @@ lbl:
 #! RUN          entry: "Test2::main"
 
 #! CHECKER      Change to CallStatic by instructions size at LLVM AOT
-#! RUN_LLVM     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0"
+#! RUN_LLVM     options: "--compiler-regex=Test2::main --compiler-inlining-max-insts=8 --compiler-inlining-always-inline-bc-size=0 \
+#!                        --llvm-pre-opt=0"
 #! EVENT_NEXT   /Inline,Test2::main,Test2::func,.*VIRTUAL,DEVIRTUALIZED/
 #! EVENT_NEXT   /Inline,Test2::main,Test2::small_func,.*VIRTUAL,DEVIRTUALIZED/
 #! RUN          entry: "Test2::main"
@@ -261,7 +265,8 @@ lbl:
 #! RUN          entry: "Test3::main"
 
 #! CHECKER      Do not inline infinite loop at LLVM AOT
-#! RUN_LLVM     options: "--compiler-regex='(Test3::main|Test3::foo1|_GLOBAL::foo_inf_loop)' --llvm-dump-before --llvm-dump-after"
+#! RUN_LLVM     options: "--compiler-regex='(Test3::main|Test3::foo1|_GLOBAL::foo_inf_loop)' --llvm-dump-before --llvm-dump-after \
+#!                        --llvm-pre-opt=0"
 #! READ_FILE    "console.out"
 #! INST         "LLVM IR module BEFORE LLVM optimizations"
 #! INST_NEXT    /define protected.*Test3::main/

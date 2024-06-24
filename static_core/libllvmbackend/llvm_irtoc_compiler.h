@@ -37,12 +37,10 @@ namespace ark::llvmbackend {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LLVMIrtocCompiler final : public LLVMCompiler, public IrtocCompilerInterface {
 public:
-    Expected<bool, std::string> CanCompile(ark::compiler::Graph *graph) override;
-
     explicit LLVMIrtocCompiler(ark::compiler::RuntimeInterface *runtime, ark::ArenaAllocator *allocator, ark::Arch arch,
                                std::string filename);
 
-    bool AddGraph(ark::compiler::Graph *graph) override;
+    Expected<bool, std::string> TryAddGraph(ark::compiler::Graph *graph) override;
 
     void FinishCompile() override;
 
@@ -58,7 +56,7 @@ public:
 
     bool IsIrFailed() override
     {
-        return irFailed_;
+        return false;
     }
     void WriteObjectFile(std::string_view output) override;
 
@@ -85,7 +83,6 @@ private:
     std::string filename_;
 
     LLVMArkInterface arkInterface_;
-    bool irFailed_ {false};
     std::unique_ptr<ark::llvmbackend::MIRCompiler> mirCompiler_;
     std::unique_ptr<ark::llvmbackend::LLVMOptimizer> optimizer_;
     std::unique_ptr<llvm::TargetMachine> targetMachine_ {nullptr};

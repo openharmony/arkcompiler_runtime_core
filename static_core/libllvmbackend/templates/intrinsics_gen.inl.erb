@@ -37,6 +37,24 @@ llvm::FunctionType *GetIntrinsicDeclaration(llvm::LLVMContext &ctx, ark::compile
         case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEM_SET:
             return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
                 {llvm::PointerType::get(ctx, 0), llvm::Type::getInt8Ty(ctx), llvm::Type::getInt64Ty(ctx)}, false);
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_8:
+            return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
+                {llvm::PointerType::get(ctx, GC_SPACE), llvm::Type::getInt8Ty(ctx), llvm::Type::getInt32Ty(ctx), llvm::Type::getInt32Ty(ctx)}, false);
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_16:
+            return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
+                {llvm::PointerType::get(ctx, GC_SPACE), llvm::Type::getInt16Ty(ctx), llvm::Type::getInt32Ty(ctx), llvm::Type::getInt32Ty(ctx)}, false);
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_32:
+            return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
+                {llvm::PointerType::get(ctx, GC_SPACE), llvm::Type::getInt32Ty(ctx), llvm::Type::getInt32Ty(ctx), llvm::Type::getInt32Ty(ctx)}, false);
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_64:
+            return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
+                {llvm::PointerType::get(ctx, GC_SPACE), llvm::Type::getInt64Ty(ctx), llvm::Type::getInt32Ty(ctx), llvm::Type::getInt32Ty(ctx)}, false);
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F32:
+            return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
+                {llvm::PointerType::get(ctx, GC_SPACE), llvm::Type::getFloatTy(ctx), llvm::Type::getInt32Ty(ctx), llvm::Type::getInt32Ty(ctx)}, false);
+        case ark::compiler::RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F64:
+            return llvm::FunctionType::get(llvm::Type::getVoidTy(ctx),
+                {llvm::PointerType::get(ctx, GC_SPACE), llvm::Type::getDoubleTy(ctx), llvm::Type::getInt32Ty(ctx), llvm::Type::getInt32Ty(ctx)}, false);
 % Runtime::intrinsics.each do |intrinsic|
 %   next unless intrinsic.respond_to?(:impl)
         case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.enum_name %>:

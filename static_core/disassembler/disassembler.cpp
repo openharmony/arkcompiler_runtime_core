@@ -1439,7 +1439,7 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
             }
         }
 
-        if (printInformation) {
+        if (printInformation && fieldIdx < recInf.fieldsInfo.size()) {
             os << std::setw(INFO_OFFSET) << std::left << ss.str() << " # " << recInf.fieldsInfo.at(fieldIdx) << "\n";
         } else {
             os << ss.str() << "\n";

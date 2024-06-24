@@ -15,17 +15,32 @@
 
 #include "compiler/aot/compiled_method.h"
 #include "compiler/code_info/code_info.h"
+#include "compiler/generated/pipeline_includes.h"
 #include "events/events.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
 #include "optimizer/ir_builder/ir_builder.h"
+#include "optimizer/optimizations/balance_expressions.h"
 #include "optimizer/optimizations/branch_elimination.h"
 #include "optimizer/optimizations/checks_elimination.h"
+#include "optimizer/optimizations/code_sink.h"
+#include "optimizer/optimizations/escape.h"
 #include "optimizer/optimizations/if_merging.h"
 #include "optimizer/optimizations/inlining.h"
+#include "optimizer/optimizations/licm.h"
+#include "optimizer/optimizations/licm_conditions.h"
+#include "optimizer/optimizations/lowering.h"
+#include "optimizer/optimizations/loop_idioms.h"
+#include "optimizer/optimizations/loop_peeling.h"
+#include "optimizer/optimizations/loop_unroll.h"
+#include "optimizer/optimizations/loop_unswitch.h"
+#include "optimizer/optimizations/lse.h"
 #include "optimizer/optimizations/memory_barriers.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
 #include "optimizer/optimizations/peepholes.h"
+#include "optimizer/optimizations/redundant_loop_elimination.h"
+#include "optimizer/optimizations/reserve_string_builder_buffer.h"
+#include "optimizer/optimizations/savestate_optimization.h"
 #include "optimizer/optimizations/simplify_string_builder.h"
 #include "optimizer/optimizations/try_catch_resolving.h"
 #include "optimizer/optimizations/vn.h"
@@ -62,9 +77,38 @@ static constexpr unsigned LIMIT_MULTIPLIER = 2U;
 
 static constexpr int32_t MAX_DEPTH = 32;
 
-using ark::compiler::LLVMIrConstructor;
-
 namespace {
+
+class ScopedCompilerThread {
+public:
+    ScopedCompilerThread(ark::compiler::RuntimeInterface::ThreadPtr parent,
+                         ark::compiler::RuntimeInterface *runtimeInterface)
+        : runtimeInterface_ {runtimeInterface}
+    {
+        ASSERT(parent != nullptr);
+        old_ = runtimeInterface->GetCurrentThread();
+        runtimeInterface->SetCurrentThread(parent);
+        compiler_ = runtimeInterface->CreateCompilerThread();
+        runtimeInterface->SetCurrentThread(compiler_);
+    }
+
+    ScopedCompilerThread(ScopedCompilerThread &) = delete;
+    ScopedCompilerThread &operator=(ScopedCompilerThread &) = delete;
+    ScopedCompilerThread(ScopedCompilerThread &&) = delete;
+    ScopedCompilerThread &operator=(ScopedCompilerThread &&) = delete;
+
+    ~ScopedCompilerThread()
+    {
+        ASSERT(runtimeInterface_->GetCurrentThread() == compiler_);
+        runtimeInterface_->DestroyCompilerThread(compiler_);
+        runtimeInterface_->SetCurrentThread(old_);
+    }
+
+private:
+    ark::compiler::RuntimeInterface::ThreadPtr old_ {nullptr};
+    ark::compiler::RuntimeInterface::ThreadPtr compiler_ {nullptr};
+    ark::compiler::RuntimeInterface *runtimeInterface_;
+};
 
 void MarkAsInlineObject(llvm::GlobalObject *globalObject)
 {
@@ -85,6 +129,18 @@ constexpr unsigned GetFrameSlotSize(ark::Arch arch)
     constexpr size_t SPILLS = 0;
     ark::CFrameLayout layout {arch, SPILLS};
     return layout.GetSlotSize();
+}
+
+bool MonitorsCorrect(ark::compiler::Graph *graph, bool nonCatchOnly)
+{
+    if (!nonCatchOnly) {
+        return graph->RunPass<ark::compiler::MonitorAnalysis>();
+    }
+    graph->GetAnalysis<ark::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(true);
+    bool ok = graph->RunPass<ark::compiler::MonitorAnalysis>();
+    graph->InvalidateAnalysis<ark::compiler::MonitorAnalysis>();
+    graph->GetAnalysis<ark::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(false);
+    return ok;
 }
 
 }  // namespace
@@ -120,8 +176,7 @@ public:
                 LLVM_LOG(DEBUG, INFRA) << "Creating new module, since "
                                        << (sizeExceeds ? "the module's size would exceed HardLimit" : "class changed")
                                        << ", class of current method = '" << runtime_->GetClassNameFromMethod(method)
-                                       << "'"
-                                       << ", lastClass_ = '"
+                                       << "', lastClass_ = '"
                                        << (lastClass_ == nullptr ? "nullptr" : runtime_->GetClassName(lastClass_))
                                        << "', limit_ = " << limit_ << ", HardLimit = " << HardLimit()
                                        << ", currentModuleSize_ = " << currentModuleSize_;
@@ -183,13 +238,15 @@ private:
     std::unordered_map<compiler::RuntimeInterface::MethodPtr, std::shared_ptr<WrappedModule>> modules_;
 };
 
-bool LLVMAotCompiler::AddGraph(compiler::Graph *graph)
+Expected<bool, std::string> LLVMAotCompiler::TryAddGraph(compiler::Graph *graph)
 {
-    ASSERT(graph != nullptr);
-    ASSERT(graph->GetArch() == GetArch());
-    ASSERT(graph->GetAotData()->GetUseCha());
-    ASSERT(graph->GetRuntime()->IsCompressedStringsEnabled());
-    ASSERT(graph->SupportManagedCode());
+    ASSERT(graph != nullptr && graph->GetArch() == GetArch() && graph->GetAotData()->GetUseCha());
+    ASSERT(graph->GetRuntime()->IsCompressedStringsEnabled() && graph->SupportManagedCode());
+
+    if (graph->IsDynamicMethod()) {
+        return false;
+    }
+
     auto method = static_cast<Method *>(graph->GetMethod());
     auto module = spreader_->GetModuleForMethod(method);
     if (currentModule_ == nullptr) {
@@ -204,10 +261,8 @@ bool LLVMAotCompiler::AddGraph(compiler::Graph *graph)
         auto thread = runtime_->GetCurrentThread();
         threadPool_->async(
             [this, thread](auto it) -> void {
-                auto oldThread = runtime_->GetCurrentThread();
-                runtime_->SetCurrentThread(thread);
+                ScopedCompilerThread scopedCompilerThread {thread, runtime_};
                 CompileModule(*it);
-                runtime_->SetCurrentThread(oldThread);
                 {
                     std::lock_guard<decltype(mutex_)> lock {mutex_};
                     semaphore_++;
@@ -225,43 +280,101 @@ bool LLVMAotCompiler::AddGraph(compiler::Graph *graph)
     currentModule_ = module;
 
     // Proceed with the Graph
-    bool result = AddGraphToModule(graph, *module, AddGraphMode::PRIMARY_FUNCTION);
-    module->AddMethod(method);
-    methods_.push_back(method);
-    if (result) {
-        AddInlineFunctionsByDepth(*module, graph, 0);
+    auto result = AddGraphToModule(graph, *module, AddGraphMode::PRIMARY_FUNCTION);
+    if (result.HasValue() && result.Value()) {
+        module->AddMethod(method);
+        methods_.push_back(method);
+        if (!compiler::g_options.IsCompilerNonOptimizing()) {
+            AddInlineFunctionsByDepth(*module, graph, 0);
+        }
     }
     return result;
 }
 
-void LLVMAotCompiler::RunArkPasses(ark::compiler::Graph *graph)
+bool LLVMAotCompiler::RunArkPasses(compiler::Graph *graph)
 {
+    auto llvmPreOpt = g_options.GetLlvmPreOpt();
+    ASSERT(llvmPreOpt <= 2U);
     graph->RunPass<compiler::Cleanup>(false);
-    // ==== Partial Ark Compiler Pipeline =======
-    graph->RunPass<compiler::Peepholes>();
-    graph->RunPass<compiler::BranchElimination>();
-    graph->RunPass<compiler::SimplifyStringBuilder>();
-    graph->RunPass<compiler::Cleanup>();
-    graph->RunPass<compiler::CatchInputs>();
-    graph->RunPass<compiler::TryCatchResolving>();
-    graph->RunPass<compiler::Peepholes>();
-    graph->RunPass<compiler::BranchElimination>();
-    graph->RunPass<compiler::ValNum>();
-    graph->RunPass<compiler::IfMerging>();
-    graph->RunPass<compiler::Cleanup>(false);
-    graph->RunPass<compiler::Peepholes>();
-    // ==========================================
-    graph->RunPass<compiler::ChecksElimination>();
-    graph->RunPass<compiler::Inlining>(true);
-    graph->RunPass<compiler::Cleanup>(false);
+    if (!compiler::g_options.IsCompilerNonOptimizing()) {
+        // Same logic as in ark::compiler::Pipeline::RunOptimizations
+        if (!compiler::g_options.IsCompilerLoopUnroll()) {
+            graph->SetUnrollComplete();
+        }
+        graph->RunPass<compiler::Peepholes>();
+        graph->RunPass<compiler::BranchElimination>();
+        graph->RunPass<compiler::SimplifyStringBuilder>();
+        graph->RunPass<compiler::Inlining>(llvmPreOpt == 0);
+        graph->RunPass<compiler::Cleanup>();
+        graph->RunPass<compiler::CatchInputs>();
+        graph->RunPass<compiler::TryCatchResolving>();
+        if (!MonitorsCorrect(graph, false)) {
+            return false;
+        }
+        graph->RunPass<compiler::Peepholes>();
+        graph->RunPass<compiler::BranchElimination>();
+        graph->RunPass<compiler::ValNum>();
+        graph->RunPass<compiler::IfMerging>();
+        graph->RunPass<compiler::Cleanup>(false);
+        graph->RunPass<compiler::Peepholes>();
+        graph->RunPass<compiler::ChecksElimination>();
+        if (llvmPreOpt == 2U) {
+            PreOpt2(graph);
+        }
+    }
 #ifndef NDEBUG
-    if (ark::compiler::g_options.IsCompilerCheckGraph() && ark::compiler::g_options.IsCompilerCheckFinal()) {
-        ark::compiler::GraphChecker(graph, "LLVM").Check();
+    if (compiler::g_options.IsCompilerCheckGraph() && compiler::g_options.IsCompilerCheckFinal()) {
+        compiler::GraphChecker(graph, "LLVM").Check();
     }
 #endif
+
+    return !compiler::g_options.IsCompilerNonOptimizing() || MonitorsCorrect(graph, true);
 }
 
-bool LLVMAotCompiler::AddGraphToModule(ark::compiler::Graph *graph, WrappedModule &module, AddGraphMode addGraphMode)
+void LLVMAotCompiler::PreOpt2(compiler::Graph *graph)
+{
+    graph->RunPass<compiler::Licm>(compiler::g_options.GetCompilerLicmHoistLimit());
+    graph->RunPass<compiler::LicmConditions>();
+    graph->RunPass<compiler::RedundantLoopElimination>();
+    graph->RunPass<compiler::LoopPeeling>();
+    graph->RunPass<compiler::LoopUnswitch>(compiler::g_options.GetCompilerLoopUnswitchMaxLevel(),
+                                           compiler::g_options.GetCompilerLoopUnswitchMaxInsts());
+    graph->RunPass<compiler::Lse>();
+    graph->RunPass<compiler::ValNum>();
+    if (graph->RunPass<compiler::Peepholes>() && graph->RunPass<compiler::BranchElimination>()) {
+        graph->RunPass<compiler::Peepholes>();
+        graph->RunPass<compiler::ValNum>();
+    }
+    graph->RunPass<compiler::Cleanup>();
+
+    graph->RunPass<compiler::LoopIdioms>();
+    graph->RunPass<compiler::ChecksElimination>();
+    if (graph->RunPass<compiler::DeoptimizeElimination>()) {
+        graph->RunPass<compiler::Peepholes>();
+    }
+    graph->RunPass<compiler::LoopUnroll>(compiler::g_options.GetCompilerLoopUnrollInstLimit(),
+                                         compiler::g_options.GetCompilerLoopUnrollFactor());
+    compiler::OptimizationsAfterUnroll(graph);
+    graph->RunPass<compiler::EscapeAnalysis>();
+    graph->RunPass<compiler::ReserveStringBuilderBuffer>();
+    ASSERT(graph->IsUnrollComplete());
+
+    graph->RunPass<compiler::Peepholes>();
+    graph->RunPass<compiler::BranchElimination>();
+    graph->RunPass<compiler::BalanceExpressions>();
+    graph->RunPass<compiler::ValNum>();
+    graph->RunPass<compiler::SaveStateOptimization>();
+    graph->RunPass<compiler::Peepholes>();
+#ifndef NDEBUG
+    graph->SetLowLevelInstructionsEnabled();
+#endif  // NDEBUG
+    graph->RunPass<compiler::Cleanup>(false);
+    graph->RunPass<compiler::CodeSink>();
+    graph->RunPass<compiler::Cleanup>(false);
+}
+
+Expected<bool, std::string> LLVMAotCompiler::AddGraphToModule(compiler::Graph *graph, WrappedModule &module,
+                                                              AddGraphMode addGraphMode)
 {
     auto method = graph->GetMethod();
     if (module.HasFunctionDefinition(method) && addGraphMode == AddGraphMode::PRIMARY_FUNCTION) {
@@ -270,12 +383,20 @@ bool LLVMAotCompiler::AddGraphToModule(ark::compiler::Graph *graph, WrappedModul
         return true;
     }
     LLVM_LOG(DEBUG, INFRA) << "Adding graph for method = '" << runtime_->GetMethodFullName(graph->GetMethod()) << "'";
-    RunArkPasses(graph);
-    LLVMIrConstructor ctor(graph, module.GetModule().get(), module.GetLLVMContext().get(),
-                           module.GetLLVMArkInterface().get(), module.GetDebugData());
+    if (!RunArkPasses(graph)) {
+        LLVM_LOG(WARNING, INFRA) << "Monitors are unbalanced for method = '"
+                                 << runtime_->GetMethodFullName(graph->GetMethod()) << "'";
+        return false;
+    }
+    std::string graphError = compiler::LLVMIrConstructor::CheckGraph(graph);
+    if (!graphError.empty()) {
+        return Unexpected(graphError);
+    }
+
+    compiler::LLVMIrConstructor ctor(graph, module.GetModule().get(), module.GetLLVMContext().get(),
+                                     module.GetLLVMArkInterface().get(), module.GetDebugData());
     auto llvmFunction = ctor.GetFunc();
     bool noInline = IsInliningDisabled(graph);
-
     bool builtIr = ctor.BuildIr(noInline);
     if (!builtIr) {
         if (addGraphMode == AddGraphMode::PRIMARY_FUNCTION) {
@@ -288,7 +409,7 @@ bool LLVMAotCompiler::AddGraphToModule(ark::compiler::Graph *graph, WrappedModul
                                      << module.GetLLVMArkInterface()->GetUniqMethodName(method) << "'";
         }
         llvmFunction->deleteBody();
-        return false;
+        return Unexpected(std::string("LLVM AOT failed to build IR"));
     }
 
     LLVM_LOG(DEBUG, INFRA) << "LLVM AOT built LLVM IR for method  "
@@ -316,7 +437,7 @@ WrappedModule LLVMAotCompiler::CreateModule(uint32_t moduleId)
     auto module = std::make_unique<llvm::Module>("panda-llvmaot-module", *llvmContext);
     auto options = InitializeLLVMCompilerOptions();
     // clang-format off
-    auto targetMachine = cantFail(ark::llvmbackend::TargetMachineBuilder {}
+    auto targetMachine = cantFail(TargetMachineBuilder {}
                                 .SetCPU(GetCPUForArch(GetArch()))
                                 .SetOptLevel(static_cast<llvm::CodeGenOpt::Level>(options.optlevel))
                                 .SetFeatures(GetFeaturesForArch(GetArch()))
@@ -329,8 +450,8 @@ WrappedModule LLVMAotCompiler::CreateModule(uint32_t moduleId)
     auto debugData = std::make_unique<DebugDataBuilder>(module.get(), filename_);
     auto arkInterface = std::make_unique<LLVMArkInterface>(runtime_, ttriple, aotBuilder_, &lock_);
     arkInterface.get()->CreateRequiredIntrinsicFunctionTypes(*llvmContext.get());
-    LLVMIrConstructor::InsertArkFrameInfo(module.get(), GetArch());
-    LLVMIrConstructor::ProvideSafepointPoll(module.get(), arkInterface.get(), GetArch());
+    compiler::LLVMIrConstructor::InsertArkFrameInfo(module.get(), GetArch());
+    compiler::LLVMIrConstructor::ProvideSafepointPoll(module.get(), arkInterface.get(), GetArch());
     WrappedModule wrappedModule {
         std::move(llvmContext),    //
         std::move(module),         //
@@ -344,23 +465,15 @@ WrappedModule LLVMAotCompiler::CreateModule(uint32_t moduleId)
     return wrappedModule;
 }
 
-Expected<bool, std::string> LLVMAotCompiler::CanCompile(ark::compiler::Graph *graph)
-{
-    LLVM_LOG(DEBUG, INFRA) << "LLVM AOT checking graph for method " << runtime_->GetMethodFullName(graph->GetMethod());
-    return LLVMIrConstructor::CanCompile(graph);
-}
-
-std::unique_ptr<ark::llvmbackend::CompilerInterface> CreateLLVMAotCompiler(ark::compiler::RuntimeInterface *runtime,
-                                                                           ark::ArenaAllocator *allocator,
-                                                                           ark::compiler::LLVMAotBuilder *aotBuilder,
-                                                                           const std::string &cmdline,
-                                                                           const std::string &filename)
+std::unique_ptr<CompilerInterface> CreateLLVMAotCompiler(compiler::RuntimeInterface *runtime, ArenaAllocator *allocator,
+                                                         compiler::LLVMAotBuilder *aotBuilder,
+                                                         const std::string &cmdline, const std::string &filename)
 {
     return std::make_unique<LLVMAotCompiler>(runtime, allocator, aotBuilder, cmdline, filename);
 }
 
-LLVMAotCompiler::LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::ArenaAllocator *allocator,
-                                 ark::compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename)
+LLVMAotCompiler::LLVMAotCompiler(compiler::RuntimeInterface *runtime, ArenaAllocator *allocator,
+                                 compiler::LLVMAotBuilder *aotBuilder, std::string cmdline, std::string filename)
     : LLVMCompiler(aotBuilder->GetArch()),
       methods_(allocator->Adapter()),
       aotBuilder_(aotBuilder),
@@ -376,12 +489,17 @@ LLVMAotCompiler::LLVMAotCompiler(ark::compiler::RuntimeInterface *runtime, ark::
     SetLLVMOption("spp-no-entry", true);
     SetLLVMOption("spp-no-call", true);
     // Set limit to skip Safepoints on entry for small functions
-    SetLLVMOption("isp-on-entry-limit", ark::compiler::g_options.GetCompilerSafepointEliminationLimit());
-    SetLLVMOption("enable-implicit-null-checks", ark::compiler::g_options.IsCompilerImplicitNullCheck());
+    SetLLVMOption("isp-on-entry-limit", compiler::g_options.GetCompilerSafepointEliminationLimit());
+    SetLLVMOption("enable-implicit-null-checks", compiler::g_options.IsCompilerImplicitNullCheck());
     SetLLVMOption("imp-null-check-page-size", static_cast<int>(runtime->GetProtectedMemorySize()));
     if (arch == Arch::AARCH64) {
         SetLLVMOption("aarch64-enable-ptr32", true);
     }
+    if (static_cast<mem::GCType>(aotBuilder->GetGcType()) != mem::GCType::G1_GC) {
+        // NOTE(zdenis): workaround to prevent vector stores of adjacent references
+        SetLLVMOption("vectorize-slp", false);
+    }
+
     spreader_ = std::make_unique<FixedCountSpreader>(
         runtime_, g_options.GetLlvmaotMethodsPerModule(),
         [this](uint32_t moduleId) { return std::make_shared<WrappedModule>(CreateModule(moduleId)); });
@@ -403,15 +521,15 @@ std::vector<std::string> LLVMAotCompiler::GetFeaturesForArch(Arch arch)
     features.reserve(2U);
     switch (arch) {
         case Arch::AARCH64: {
-            features.emplace_back(std::string("+reserve-x") + std::to_string(ark::GetThreadReg(arch)));
-            if (ark::compiler::g_options.IsCpuFeatureEnabled(compiler::CRC32)) {
+            features.emplace_back(std::string("+reserve-x") + std::to_string(GetThreadReg(arch)));
+            if (compiler::g_options.IsCpuFeatureEnabled(compiler::CRC32)) {
                 features.emplace_back(std::string("+crc"));
             }
             return features;
         }
         case Arch::X86_64:
-            features.emplace_back(std::string("+fixed-r") + std::to_string(ark::GetThreadReg(arch)));
-            if (ark::compiler::g_options.IsCpuFeatureEnabled(compiler::SSE42)) {
+            features.emplace_back(std::string("+fixed-r") + std::to_string(GetThreadReg(arch)));
+            if (compiler::g_options.IsCpuFeatureEnabled(compiler::SSE42)) {
                 features.emplace_back("+sse4.2");
             }
             return features;
@@ -423,8 +541,6 @@ std::vector<std::string> LLVMAotCompiler::GetFeaturesForArch(Arch arch)
 AotBuilderOffsets LLVMAotCompiler::CollectAotBuilderOffsets(
     const std::unordered_set<std::shared_ptr<WrappedModule>> &modules)
 {
-    using StackMapSymbol = ark::llvmbackend::CreatedObjectFile::StackMapSymbol;
-
     const auto &methodPtrs = aotBuilder_->GetMethods();
     const auto &headers = aotBuilder_->GetMethodHeaders();
     auto methodsIt = std::begin(methods_);
@@ -435,7 +551,7 @@ AotBuilderOffsets LLVMAotCompiler::CollectAotBuilderOffsets(
 
         auto module = spreader_->GetModuleForMethod(*methodsIt);
         auto fullMethodName = module->GetLLVMArkInterface()->GetUniqMethodName(*methodsIt);
-        std::unordered_map<std::string, StackMapSymbol> stackmapInfo;
+        std::unordered_map<std::string, CreatedObjectFile::StackMapSymbol> stackmapInfo;
 
         auto section = module->GetObjectFile()->GetSectionByFunctionName(fullMethodName);
         auto compiledMethod = AdaptCode(*methodsIt, {section.GetMemory(), section.GetSize()});
@@ -445,11 +561,11 @@ AotBuilderOffsets LLVMAotCompiler::CollectAotBuilderOffsets(
     }
     ASSERT(methodsIt == std::end(methods_));
 
-    std::vector<ark::compiler::RoData> roDatas;
+    std::vector<compiler::RoData> roDatas;
     for (auto &module : modules) {
         auto roDataSections = module->GetObjectFile()->GetRoDataSections();
         for (auto &item : roDataSections) {
-            roDatas.push_back(ark::compiler::RoData {
+            roDatas.push_back(compiler::RoData {
                 item.ContentToVector(), item.GetName() + std::to_string(module->GetModuleId()), item.GetAlignment()});
         }
     }
@@ -475,7 +591,7 @@ AotBuilderOffsets LLVMAotCompiler::CollectAotBuilderOffsets(
     return AotBuilderOffsets {std::move(sectionAddresses), std::move(methodOffsets)};
 }
 
-ark::compiler::CompiledMethod LLVMAotCompiler::AdaptCode(ark::Method *method, Span<const uint8_t> machineCode)
+compiler::CompiledMethod LLVMAotCompiler::AdaptCode(Method *method, Span<const uint8_t> machineCode)
 {
     ASSERT(method != nullptr);
     ASSERT(!machineCode.empty());
@@ -485,10 +601,10 @@ ark::compiler::CompiledMethod LLVMAotCompiler::AdaptCode(ark::Method *method, Sp
     ArenaVector<uint8_t> code(allocator.Adapter());
     code.insert(code.begin(), machineCode.cbegin(), machineCode.cend());
 
-    auto compiledMethod = ark::compiler::CompiledMethod(GetArch(), method, 0);
+    auto compiledMethod = compiler::CompiledMethod(GetArch(), method, 0);
     compiledMethod.SetCode(Span<const uint8_t>(code));
 
-    ark::compiler::CodeInfoBuilder codeInfoBuilder(GetArch(), &allocator);
+    compiler::CodeInfoBuilder codeInfoBuilder(GetArch(), &allocator);
     spreader_->GetModuleForMethod(method)->GetCodeInfoProducer()->Produce(method, &codeInfoBuilder);
 
     ArenaVector<uint8_t> codeInfo(allocator.Adapter());
@@ -547,10 +663,8 @@ void LLVMAotCompiler::FinishCompile()
         auto thread = runtime_->GetCurrentThread();
         threadPool_->async(
             [this, thread](auto it) -> void {
-                auto oldThread = runtime_->GetCurrentThread();
-                runtime_->SetCurrentThread(thread);
+                ScopedCompilerThread scopedCompilerThread {thread, runtime_};
                 CompileModule(*it);
-                runtime_->SetCurrentThread(oldThread);
             },
             currentModule_);
 
@@ -562,16 +676,16 @@ void LLVMAotCompiler::FinishCompile()
     }
 
     auto modules = spreader_->GetModules();
-    std::vector<ark::compiler::RoData> roDatas;
+    std::vector<compiler::RoData> roDatas;
     auto offsets = CollectAotBuilderOffsets(modules);
     for (auto &wrappedModule : modules) {
         size_t functionHeaderSize = compiler::CodeInfo::GetCodeOffset(GetArch());
         ArkAotLinker linker {functionHeaderSize};
         auto newRodatas = LinkModule(wrappedModule.get(), &linker, &offsets);
         for (auto &item : newRodatas) {
-            roDatas.push_back(ark::compiler::RoData {item.ContentToVector(),
-                                                     item.GetName() + std::to_string(wrappedModule->GetModuleId()),
-                                                     item.GetAlignment()});
+            roDatas.push_back(compiler::RoData {item.ContentToVector(),
+                                                item.GetName() + std::to_string(wrappedModule->GetModuleId()),
+                                                item.GetAlignment()});
         }
     }
     compiled_ = true;
@@ -581,7 +695,7 @@ void LLVMAotCompiler::FinishCompile()
     aotBuilder_->SetRoDataSections(std::move(roDatas));
 }
 
-void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, ark::compiler::Graph *caller,
+void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, compiler::Graph *caller,
                                              compiler::RuntimeInterface::MethodPtr method, int32_t depth)
 {
     if (!runtime_->IsMethodCanBeInlined(method) || IsInliningDisabled(runtime_, method) ||
@@ -600,7 +714,7 @@ void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, ark::compile
     ArenaAllocator allocator {SpaceType::SPACE_TYPE_COMPILER};
     ArenaAllocator localAllocator {SpaceType::SPACE_TYPE_COMPILER};
 
-    auto graph = CreateGraph(allocator, localAllocator, *static_cast<ark::Method *>(method));
+    auto graph = CreateGraph(allocator, localAllocator, *static_cast<Method *>(method));
     if (!graph) {
         [[maybe_unused]] auto message = llvm::toString(graph.takeError());
         LLVM_LOG(WARNING, INFRA) << "Could not add inline function = '" << runtime_->GetMethodFullName(method)
@@ -609,10 +723,10 @@ void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, ark::compile
         return;
     }
     auto callee = llvm::cantFail(std::move(graph));
-    if (!AddGraphToModule(callee, module, AddGraphMode::INLINE_FUNCTION)) {
+    auto result = AddGraphToModule(callee, module, AddGraphMode::INLINE_FUNCTION);
+    if (!result.HasValue() || !result.Value()) {
         LLVM_LOG(WARNING, INFRA) << "Could not add inline function = '" << runtime_->GetMethodFullName(method)
-                                 << "' for caller = '" << runtime_->GetMethodFullName(caller->GetMethod())
-                                 << "' because AddGraphToModule failed";
+                                 << "' for caller = '" << runtime_->GetMethodFullName(caller->GetMethod()) << "'";
         return;
     }
     MarkAsInlineObject(module.GetFunctionByMethodPtr(method));
@@ -622,7 +736,7 @@ void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, ark::compile
     AddInlineFunctionsByDepth(module, callee, depth + 1);
 }
 
-void LLVMAotCompiler::AddInlineFunctionsByDepth(WrappedModule &module, ark::compiler::Graph *caller, int32_t depth)
+void LLVMAotCompiler::AddInlineFunctionsByDepth(WrappedModule &module, compiler::Graph *caller, int32_t depth)
 {
     ASSERT(depth >= 0);
     LLVM_LOG(DEBUG, INFRA) << "Adding inline functions, depth = " << depth << ", caller = '"
@@ -648,15 +762,15 @@ void LLVMAotCompiler::AddInlineFunctionsByDepth(WrappedModule &module, ark::comp
     }
 }
 
-llvm::Expected<ark::compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAllocator &allocator,
-                                                                    ArenaAllocator &localAllocator, Method &method)
+llvm::Expected<compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAllocator &allocator,
+                                                               ArenaAllocator &localAllocator, Method &method)
 {
     // Part of Paoc::CompileAot
     auto sourceLang = method.GetClass()->GetSourceLang();
-    bool isDynamic = ark::panda_file::IsDynamicLanguage(sourceLang);
+    bool isDynamic = panda_file::IsDynamicLanguage(sourceLang);
 
-    auto graph = allocator.New<ark::compiler::Graph>(&allocator, &localAllocator, aotBuilder_->GetArch(), &method,
-                                                     runtime_, false, nullptr, isDynamic);
+    auto graph = allocator.New<compiler::Graph>(&allocator, &localAllocator, aotBuilder_->GetArch(), &method, runtime_,
+                                                false, nullptr, isDynamic);
     if (graph == nullptr) {
         return llvm::createStringError(llvm::inconvertibleErrorCode(), "Couldn't create graph");
     }
@@ -671,24 +785,8 @@ llvm::Expected<ark::compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAllocat
     aotData->SetUseCha(true);
     graph->SetAotData(aotData);
 
-    if (!graph->RunPass<ark::compiler::IrBuilder>()) {
+    if (!graph->RunPass<compiler::IrBuilder>()) {
         return llvm::createStringError(llvm::inconvertibleErrorCode(), "IrBuilder failed");
-    }
-    graph->GetAnalysis<ark::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(true);
-    bool monitorsCorrect = graph->RunPass<ark::compiler::MonitorAnalysis>();
-    graph->InvalidateAnalysis<ark::compiler::MonitorAnalysis>();
-    graph->GetAnalysis<ark::compiler::MonitorAnalysis>().SetCheckNonCatchOnly(false);
-    if (!monitorsCorrect) {
-        return llvm::createStringError(llvm::inconvertibleErrorCode(), "Monitors incorrect");
-    }
-    auto canCompile = CanCompile(graph);
-    if (!canCompile.HasValue()) {
-        return llvm::createStringError(llvm::inconvertibleErrorCode(),
-                                       "CanCompile returned Unexpected with message = '" + canCompile.Error() + "'");
-    }
-    if (!canCompile.Value() && g_options.IsLlvmSafemode()) {
-        return llvm::createStringError(llvm::inconvertibleErrorCode(),
-                                       "CanCompile returned false and --llvm-safemode enabled");
     }
     return graph;
 }
@@ -758,7 +856,7 @@ void LLVMAotCompiler::CompileModule(WrappedModule &module)
     }
 
     if (g_options.IsLlvmDumpObj()) {
-        int32_t moduleNumber = compiledModules_++;
+        uint32_t moduleNumber = compiledModules_++;
         std::string fileName = "llvm-output-" + std::to_string(moduleNumber) + ".o";
         file->WriteTo(fileName);
     }

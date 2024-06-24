@@ -574,6 +574,10 @@ public:
 
     bool IsGcValidForFastPath(SourceLanguage lang) const;
 
+    ThreadPtr CreateCompilerThread() override;
+
+    void DestroyCompilerThread([[maybe_unused]] ThreadPtr thread) override;
+
     void SetCurrentThread(ThreadPtr thread) const override
     {
         ASSERT(thread != Thread::GetCurrent());

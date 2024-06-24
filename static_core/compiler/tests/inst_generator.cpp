@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -246,6 +246,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
     } else if (opc == Opcode::ReturnInlined) {
         ASSERT(n == -1L);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         block->AppendInst(saveState);
 
         auto callInst = static_cast<CallInst *>(graph->CreateInstCallStatic());
@@ -261,6 +262,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         ASSERT(n >= 0);
         auto callInst = static_cast<CallInst *>(inst);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         block->PrependInst(saveState);
         callInst->AllocateInputTypes(&allocator_, n + 1);
         for (int32_t i = 0; i < n; ++i) {
@@ -316,6 +318,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto param0 = CreateParamInst(graph, type, 0U);
         inst->SetInput(1U, param0);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         saveState->AppendInput(param0);
         saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
         auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
@@ -327,6 +330,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::LoadStatic) {
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
                                                           inst->CastToLoadStatic()->GetTypeId(), nullptr, nullptr);
         inst->SetInput(0U, initInst);
@@ -338,6 +342,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
         inst->SetInput(0U, param0);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         saveState->AppendInput(param0);
         saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
         inst->SetInput(1U, saveState);
@@ -346,6 +351,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
     } else if (opc == Opcode::LoadType || opc == Opcode::LoadString) {
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         inst->SetInput(0U, saveState);
         block->PrependInst(saveState);
         SetNumVRegsArgs(0U, saveState->GetInputsCount());
@@ -353,6 +359,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
     } else if (opc == Opcode::IsInstance) {
         auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         saveState->AppendInput(param0);
         saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
         auto loadClass = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, saveState, 0, nullptr,
@@ -372,6 +379,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto param0 = CreateParamInst(graph, DataType::INT32, 0U);
         inst->SetInput(NewArrayInst::INDEX_SIZE, param0);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         saveState->AppendInput(param0);
         saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
 
@@ -386,6 +394,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
     } else if (opc == Opcode::NewObject) {
         ASSERT(n == -1L);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
                                                           inst->CastToNewObject()->GetTypeId(), nullptr, nullptr);
         inst->SetInput(0U, initInst);
@@ -475,6 +484,7 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
     auto param1 = CreateParamInst(graph, type, 0U);
     auto param2 = CreateParamInst(graph, DataType::UINT32, 1U);
     auto saveState = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
     saveState->AppendInput(param1);
     for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
         saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
@@ -545,6 +555,7 @@ Graph *GraphCreator::GenerateSSOperation(Inst *inst)
     auto block = graph->GetVectorBlocks()[2U];
     auto param1 = CreateParamInst(graph, type, 0U);
     auto saveState = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
     saveState->AppendInput(param1);
     for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
         saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
@@ -574,6 +585,7 @@ Graph *GraphCreator::GenerateBoundaryCheckOperation(Inst *inst)
     auto param2 = CreateParamInst(graph, DataType::UINT32, 1U);
 
     auto saveState = static_cast<SaveStateInst *>(graph->CreateInstSaveState());
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
     saveState->AppendInput(param1);
     saveState->AppendInput(param2);
     for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
@@ -618,6 +630,7 @@ Graph *GraphCreator::GenerateMultiArrayOperation(Inst *inst)
     auto param2 = CreateParamInst(graph, DataType::INT32, 1U);
 
     auto saveState = graph->CreateInstSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
     block->AppendInst(saveState);
 
     auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState, 0U, nullptr, nullptr);
@@ -645,6 +658,7 @@ Graph *GraphCreator::GenerateThrowOperation(Inst *inst)
     auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);
 
     auto saveState = graph->CreateInstSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
     saveState->AppendInput(param1);
     for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
         saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));

@@ -122,7 +122,7 @@ public:
     void RememberFunctionCall(const llvm::Function *caller, const llvm::Function *callee, MethodId methodId);
 
     int32_t GetPltSlotId(const llvm::Function *caller, const llvm::Function *callee) const;
-    int32_t GetClassIndexInAotGot(const llvm::Function *caller, uint32_t klassId, bool initialized);
+    int32_t GetClassIndexInAotGot(ark::compiler::AotData *aotData, uint32_t klassId, bool initialized);
     int32_t GetStringSlotId(ark::compiler::AotData *aotData, uint32_t typeId);
     uint64_t GetMethodStackSize(MethodPtr method) const;
     void PutMethodStackSize(const llvm::Function *method, size_t size);
@@ -151,6 +151,7 @@ public:
     static constexpr std::string_view FUNCTION_MD_CLASS_ID = "class_id";
     static constexpr std::string_view FUNCTION_MD_INLINE_MODULE = "inline_module";
     static constexpr std::string_view PATCH_STACK_ADJUSTMENT_COMMENT = " ${:comment} patch-stack-adjustment";
+    static constexpr std::string_view AARCH64_SDIV_INST = "aarch64_sdiv";
 
     ark::compiler::RuntimeInterface *GetRuntime()
     {

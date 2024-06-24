@@ -34,33 +34,18 @@ void PaocLLVM::Clear(ark::mem::InternalAllocatorPtr allocator)
 
 Paoc::LLVMCompilerStatus PaocLLVM::TryLLVM(CompilingContext *ctx)
 {
-    // Check monitors balance
-    ctx->graph->GetAnalysis<MonitorAnalysis>().SetCheckNonCatchOnly(true);
-    bool monitorsCorrect = ctx->graph->RunPass<MonitorAnalysis>();
-    ctx->graph->InvalidateAnalysis<MonitorAnalysis>();
-    ctx->graph->GetAnalysis<MonitorAnalysis>().SetCheckNonCatchOnly(false);
-
-    auto can = llvmAotCompiler_->CanCompile(ctx->graph);
-    if (can.HasValue()) {
-        bool canCompile = can.Value() && monitorsCorrect;
-
-        // In normal workflow LLVM is not chosen only when monitors are unbalanced
-        // In safe mode - LLVM is used only for CanCompile graphs
-        bool useLlvm = llvmbackend::g_options.IsLlvmSafemode() ? canCompile : monitorsCorrect;
-        if (useLlvm) {
-            if (AddGraphToLLVM(ctx)) {
-                return LLVMCompilerStatus::COMPILED;
-            }
-            // No fallback for case "LLVM was chosen, but add graph failed"
-            return LLVMCompilerStatus::SKIP;
-        }
-        ASSERT(!canCompile);
+    auto result = llvmAotCompiler_->TryAddGraph(ctx->graph);
+    if (result.HasValue()) {
+        if (result.Value()) {
+            GetAotBuilder()->AddMethodHeader(ctx->method, ctx->index);
+            return LLVMCompilerStatus::COMPILED;
+        }  // In result.Value() == false case (e.g. unbalanced monitors), fallthrough to possible fallback below
     } else if (!llvmbackend::g_options.IsLlvmAllowBreakage() || !ShouldIgnoreFailures()) {
-        LOG_PAOC(ERROR) << can.Error() << "\n";
+        LOG_PAOC(ERROR) << result.Error();
         return LLVMCompilerStatus::ERROR;
     }
 
-    // Check if fallback allowed
+    // Check if fallback is actually allowed
     if (llvmbackend::g_options.IsLlvmFallback()) {
         return LLVMCompilerStatus::FALLBACK;
     }
@@ -95,18 +80,6 @@ void PaocLLVM::PrepareLLVM(const ark::Span<const char *> &args)
     }
     llvmAotCompiler_ =
         llvmbackend::CreateLLVMAotCompiler(GetRuntime(), GetCodeAllocator(), GetAotBuilder(), cmdline, outputFile);
-}
-
-bool PaocLLVM::AddGraphToLLVM(CompilingContext *ctx)
-{
-    if (llvmAotCompiler_->AddGraph(ctx->graph)) {
-        GetAotBuilder()->AddMethodHeader(ctx->method, ctx->index);
-        return true;
-    }
-    if (!llvmbackend::g_options.IsLlvmAllowBreakage() || !ShouldIgnoreFailures()) {
-        LOG_PAOC(FATAL) << "LLVM function creation was broken!\n";
-    }
-    return false;
 }
 
 void PaocLLVM::ValidateExtraOptions()

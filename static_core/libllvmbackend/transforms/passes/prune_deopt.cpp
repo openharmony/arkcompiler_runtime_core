@@ -160,7 +160,7 @@ std::string PruneDeopt::GetInlineInfo(ArrayRef<Use> inputs) const
 {
     constexpr auto METHOD_ID_IDX = 1;
     std::string inlineInfo;
-    for (uint32_t i = 0; i < inputs.size(); ++i) {
+    for (uint32_t i = 0; i < inputs.size(); i++) {
         if (llvm::isa<Function>(inputs[i])) {
             ASSERT((i + METHOD_ID_IDX) < inputs.size());
             if (!inlineInfo.empty()) {

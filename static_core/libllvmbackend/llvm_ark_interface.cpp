@@ -597,17 +597,11 @@ int32_t LLVMArkInterface::GetPltSlotId(const llvm::Function *caller, const llvm:
     return GetAotDataFromBuilder(callerOriginFile, aotBuilder_).GetPltSlotId(GetMethodId(caller, callee));
 }
 
-int32_t LLVMArkInterface::GetClassIndexInAotGot(const llvm::Function *caller, uint32_t klassId, bool initialized)
+int32_t LLVMArkInterface::GetClassIndexInAotGot(ark::compiler::AotData *aotData, uint32_t klassId, bool initialized)
 {
-    ASSERT(caller != nullptr);
-
+    ASSERT(aotData != nullptr);
     llvm::sys::ScopedLock scopedLock {*lock_};
-    auto callerOriginFile = functionOrigins_.lookup(caller);
-    ASSERT_PRINT(callerOriginFile != nullptr,
-                 std::string("No origin for function = '") + caller->getName().str() +
-                     "'. Use RememberFunctionOrigin to store the origin before calling GetClassIndexInAotGot");
-
-    auto index = GetAotDataFromBuilder(callerOriginFile, aotBuilder_).GetClassSlotId(klassId);
+    auto index = aotData->GetClassSlotId(klassId);
     if (initialized) {
         return index - 1;
     }

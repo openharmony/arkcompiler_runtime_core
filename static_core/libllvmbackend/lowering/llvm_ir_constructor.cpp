@@ -1036,7 +1036,7 @@ void LLVMIrConstructor::FillPhiInputs(BasicBlock *block, Marker normal)
     for (auto inst : block->PhiInsts()) {
         auto phi = llvm::cast<llvm::PHINode>(GetMappedValue(inst, inst->GetType()));
         for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-            auto inputBlock = block->GetPredBlockByIndex(i);
+            auto inputBlock = inst->CastToPhi()->GetPhiInputBb(i);
             if (!inputBlock->IsMarked(normal)) {
                 continue;
             }
@@ -1071,7 +1071,7 @@ llvm::CallInst *LLVMIrConstructor::CreateEntrypointCall(RuntimeInterface::Entryp
             &builder_, threadReg, arkInterface_, static_cast<llvmbackend::runtime_calls::EntrypointId>(eid), args);
     }
     if (inst->RequireState()) {
-        debugData_->SetLocation(call, inst->GetPc());
+        WrapArkCall(inst, call);
     }
     return call;
 }
@@ -1107,7 +1107,7 @@ llvm::CallInst *LLVMIrConstructor::CreateIntrinsicCall(Inst *inst, RuntimeInterf
     SetIntrinsicParamAttrs(result, inst->CastToIntrinsic(), arguments);
 
     if (inst->RequireState()) {
-        debugData_->SetLocation(result, inst->GetPc());
+        WrapArkCall(inst, result);
     }
     if (NeedSafePointAfterIntrinsic(entryId) && g_options.IsCompilerUseSafepoint()) {
         result->addFnAttr(llvm::Attribute::get(result->getContext(), "needs-extra-safepoint"));
@@ -1468,12 +1468,10 @@ void LLVMIrConstructor::CreateInterpreterReturnRestoreRegs(RegMask &regMask, siz
     }
 }
 
-llvm::Value *LLVMIrConstructor::CreateLoadClassById(Inst *inst, uint32_t typeId, bool forceInitialization)
+llvm::Value *LLVMIrConstructor::CreateLoadClassById(Inst *inst, uint32_t typeId, bool init)
 {
-    auto builtin = forceInitialization ? LoadInitClass(func_->getParent()) : LoadClass(func_->getParent());
-
-    auto typeIdVal = builder_.getInt32(typeId);
-    auto slotIdVal = builder_.getInt32(arkInterface_->GetClassIndexInAotGot(func_, typeId, forceInitialization));
+    auto builtin = init ? LoadInitClass(func_->getParent()) : LoadClass(func_->getParent());
+    auto slotIdVal = builder_.getInt32(arkInterface_->GetClassIndexInAotGot(GetGraph()->GetAotData(), typeId, init));
 
     // remember two functions, later we will use it in panda_runtime_lowering pass
     arkInterface_->GetOrCreateRuntimeFunctionType(
@@ -1483,9 +1481,8 @@ llvm::Value *LLVMIrConstructor::CreateLoadClassById(Inst *inst, uint32_t typeId,
         func_->getContext(), func_->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
         static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::CLASS_INIT_RESOLVER));
 
-    auto callInst = builder_.CreateCall(builtin, {typeIdVal, slotIdVal}, CreateSaveStateBundle(inst));
-    debugData_->SetLocation(callInst, inst->GetPc());
-
+    auto callInst = builder_.CreateCall(builtin, {builder_.getInt32(typeId), slotIdVal}, CreateSaveStateBundle(inst));
+    WrapArkCall(inst, callInst);
     return callInst;
 }
 
@@ -1553,17 +1550,23 @@ llvm::Value *LLVMIrConstructor::CreateSignDivMod(Inst *inst, llvm::Instruction::
     ASSERT(opcode == llvm::Instruction::SDiv || opcode == llvm::Instruction::SRem);
     llvm::Value *x = GetInputValue(inst, 0);
     llvm::Value *y = GetInputValue(inst, 1);
+    auto &ctx = func_->getContext();
     auto eqM1 = builder_.CreateICmpEQ(y, llvm::ConstantInt::get(y->getType(), -1));
     auto m1Result = opcode == llvm::Instruction::SDiv ? builder_.CreateNeg(x) : llvm::ConstantInt::get(y->getType(), 0);
 
     // Select for AArch64, as 'sdiv' correctly handles the INT_MIN / -1 case
     if (GetGraph()->GetArch() == Arch::AARCH64) {
         auto result = builder_.CreateBinOp(opcode, x, y);
-        return builder_.CreateSelect(eqM1, m1Result, result);
+        auto selectVal = builder_.CreateSelect(eqM1, m1Result, result);
+        if (auto selectInst = llvm::dyn_cast<llvm::SelectInst>(selectVal)) {
+            auto *metadata = llvm::MDNode::get(ctx, {});
+            auto sdiv = ark::llvmbackend::LLVMArkInterface::AARCH64_SDIV_INST;
+            selectInst->setMetadata(sdiv, metadata);
+        }
+        return selectVal;
     }
 
     // X86_64 solution with control flow
-    auto &ctx = func_->getContext();
     auto currBb = GetCurrentBasicBlock();
     auto notM1Bb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "divmod_normal"), func_);
     auto contBb = llvm::BasicBlock::Create(ctx, CreateBasicBlockName(inst, "divmod_cont"), func_);
@@ -2013,32 +2016,64 @@ ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Ins
     if (!arkInterface_->DeoptsEnabled()) {
         return bundle;
     }
-    SaveStateInst *ss = inst->GetSaveState();
     ArenaVector<llvm::Value *> vals(GetGraph()->GetLocalAllocator()->Adapter());
+    ArenaVector<SaveStateInst *> saveStates(GetGraph()->GetLocalAllocator()->Adapter());
 
-    // Put a function as a delimiter in inlining chain
-    vals.push_back(func_);
-    // Put methodId needed for inline info
-    vals.push_back(builder_.getInt32(GetGraph()->GetRuntime()->GetMethodId(GetGraph()->GetMethod())));
-    // Put bytecode pc for inlining chain as well
-    vals.push_back(builder_.getInt32(ss->GetPc()));
-    // Put a marker if catch has been met
-    uint32_t flags = (inst->RequireRegMap() ? 1U : 0U) | (noReturn ? 2U : 0U);
-    vals.push_back(builder_.getInt32(flags));
-    // Put a number of interpreter registers for the method
-    auto vregCount = arkInterface_->GetVirtualRegistersCount(GetGraph()->GetMethod());
-    vals.push_back(builder_.getInt32(vregCount));
+    auto saveState = inst->GetSaveState();
+    while (saveState != nullptr) {
+        saveStates.push_back(saveState);
+        auto caller = saveState->GetCallerInst();
+        saveState = caller == nullptr ? nullptr : caller->GetSaveState();
+    }
 
+    std::reverse(saveStates.begin(), saveStates.end());
+    for (auto ss : saveStates) {
+        auto method = ss->GetMethod();
+        auto caller = ss->GetCallerInst();
+        if (caller != nullptr) {
+            method = caller->GetCallMethod();
+        }
+        ASSERT(method != nullptr);
+        // Put a function as a delimiter in inlining chain
+        auto function = arkInterface_->GetFunctionByMethodPtr(method);
+        if (function == nullptr) {
+            auto methodName = arkInterface_->GetUniqMethodName(method);
+            auto functionProto = GetFunctionTypeForCall(caller);
+            function = CreateFunctionDeclaration(functionProto, methodName, func_->getParent());
+            function->addFnAttr("frame-pointer", "all");
+            arkInterface_->PutFunction(method, function);
+        }
+        ASSERT(function != nullptr);
+        vals.push_back(function);
+        // Put methodId needed for inline info
+        vals.push_back(builder_.getInt32(GetGraph()->GetRuntime()->GetMethodId(method)));
+        // Put bytecode pc for inlining chain as well
+        vals.push_back(builder_.getInt32(ss->GetPc()));
+        // Put a marker if catch has been met
+        uint32_t flags = (inst->RequireRegMap() ? 1U : 0U) | (noReturn ? 2U : 0U);
+        vals.push_back(builder_.getInt32(flags));
+        // Put a number of interpreter registers for the method
+        auto vregCount = arkInterface_->GetVirtualRegistersCount(method);
+        vals.push_back(builder_.getInt32(vregCount));
+
+        EncodeSaveStateInputs(&vals, ss);
+    }
+    bundle.assign({llvm::OperandBundleDef {"deopt", vals}});
+    return bundle;
+}
+
+void LLVMIrConstructor::EncodeSaveStateInputs(ArenaVector<llvm::Value *> *vals, SaveStateInst *ss)
+{
     for (size_t i = 0; i < ss->GetInputsCount(); ++i) {
         if (ss->GetVirtualRegister(i).Value() == VirtualRegister::BRIDGE) {
             continue;
         }
         // Put a virtual register index
-        vals.push_back(builder_.getInt32(ss->GetVirtualRegister(i).Value()));
+        vals->push_back(builder_.getInt32(ss->GetVirtualRegister(i).Value()));
         // Put a virtual register type
         auto metatype = IrTypeToMetainfoType(ss->GetInputType(i));
         uint32_t undertype = static_cast<std::underlying_type_t<VRegInfo::Type>>(metatype);
-        vals.push_back(builder_.getInt32(undertype));
+        vals->push_back(builder_.getInt32(undertype));
         // Put a virtual register value
         auto value = GetInputValue(ss, i);
         if (!value->getType()->isPointerTy()) {
@@ -2047,13 +2082,44 @@ ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Ins
             if (metatype == VRegInfo::Type::INT32) {
                 intVal = CoerceValue(intVal, ss->GetInputType(i), DataType::INT32);
             }
-            vals.push_back(builder_.CreateZExt(intVal, builder_.getInt64Ty()));
+            vals->push_back(builder_.CreateZExt(intVal, builder_.getInt64Ty()));
         } else {
-            vals.push_back(value);
+            vals->push_back(value);
         }
     }
-    bundle.assign({llvm::OperandBundleDef {"deopt", vals}});
-    return bundle;
+}
+
+void LLVMIrConstructor::EncodeInlineInfo(Inst *inst, llvm::Instruction *instruction)
+{
+    SaveStateInst *saveState = inst->GetSaveState();
+    llvm::SmallVector<SaveStateInst *> saveStates;
+    bool first = true;
+    while (saveState != nullptr) {
+        if (!first) {
+            saveStates.push_back(saveState);
+        }
+        first = false;
+        saveState = saveState->GetCallerInst() == nullptr ? nullptr : saveState->GetCallerInst()->GetSaveState();
+    }
+    llvm::reverse(saveStates);
+    for (auto ss : saveStates) {
+        auto method = ss->GetMethod();
+        auto function = arkInterface_->GetFunctionByMethodPtr(method);
+        auto caller = ss->GetCallerInst();
+        if (caller != nullptr) {
+            method = ss->GetCallerInst()->GetCallMethod();
+            if (function == nullptr) {
+                auto methodName = arkInterface_->GetUniqMethodName(method);
+                auto functionProto = GetFunctionTypeForCall(caller);
+                function = CreateFunctionDeclaration(functionProto, methodName, func_->getParent());
+                function->addFnAttr("frame-pointer", "all");
+
+                arkInterface_->PutFunction(method, function);
+            }
+        }
+        ASSERT(function != nullptr);
+        debugData_->AppendInlinedAt(instruction, function, ss->GetPc());
+    }
 }
 
 void LLVMIrConstructor::CreatePreWRB(Inst *inst, llvm::Value *mem)
@@ -2423,7 +2489,7 @@ llvm::FunctionType *LLVMIrConstructor::GetFunctionTypeForCall(CallInst *call)
     if (methodPtr == nullptr) {
         retType = call->GetType();
     }
-    ASSERT(call->GetType() == retType);
+    ASSERT(call->IsInlined() || call->GetType() == retType);
     return llvm::FunctionType::get(GetType(retType), argTypes, false);
 }
 
@@ -2766,6 +2832,13 @@ void LLVMIrConstructor::FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, l
     }
 }
 
+void LLVMIrConstructor::WrapArkCall(Inst *orig, llvm::CallInst *call)
+{
+    // Ark calls may call GC inside, so add statepoint
+    debugData_->SetLocation(call, orig->GetPc());
+    EncodeInlineInfo(orig, call);
+}
+
 void LLVMIrConstructor::InitializeEntryBlock(bool noInline)
 {
     if (noInline) {
@@ -2852,6 +2925,30 @@ void LLVMIrConstructor::VisitReturn(GraphVisitor *v, Inst *inst)
     auto type = inst->GetType();
     if (DataType::IsLessInt32(type)) {
         ret = ctor->CoerceValue(ret, type, DataType::INT32);
+    }
+
+    ctor->builder_.CreateRet(ret);
+}
+
+void LLVMIrConstructor::VisitReturnInlined(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+
+    if (inst->GetFlag(inst_flags::MEM_BARRIER)) {
+        auto builtin = BarrierReturnVoid(ctor->func_->getParent());
+        auto builtinCall = ctor->builder_.CreateCall(builtin);
+        builtinCall->addFnAttr(llvm::Attribute::get(builtinCall->getContext(), "needs-mem-barrier"));
+    }
+}
+
+void LLVMIrConstructor::VisitReturnI(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    llvm::Value *ret = ctor->builder_.getInt64(inst->CastToReturnI()->GetImm());
+
+    auto type = inst->GetType();
+    if (DataType::IsInt32Bit(type)) {
+        ret = ctor->CoerceValue(ret, DataType::INT64, DataType::INT32);
     }
 
     ctor->builder_.CreateRet(ret);
@@ -3071,7 +3168,7 @@ void LLVMIrConstructor::VisitLoadString(GraphVisitor *v, Inst *inst)
 
         auto builtin = LoadString(ctor->func_->getParent());
         auto call = ctor->builder_.CreateCall(builtin, {typeVal, slotVal}, ctor->CreateSaveStateBundle(inst));
-        ctor->debugData_->SetLocation(call, inst->GetPc());
+        ctor->WrapArkCall(inst, call);
         result = call;
     } else {
         auto stringType = ctor->builder_.getInt32(inst->CastToLoadString()->GetTypeId());
@@ -3201,7 +3298,7 @@ void LLVMIrConstructor::VisitStoreArray(GraphVisitor *v, Inst *inst)
     ASSERT_TYPE(array, ctor->builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
     auto value = ctor->GetInputValue(inst, 2U);
 
-    auto dtype = DataType::IsReference(inst->GetType()) ? DataType::UINT32 : inst->GetType();
+    auto dtype = inst->GetType();
     auto arch = ctor->GetGraph()->GetArch();
     auto ltype = ctor->GetExactType(dtype);
     auto dataOff = ctor->GetGraph()->GetRuntime()->GetArrayDataOffset(arch);
@@ -3819,7 +3916,6 @@ void LLVMIrConstructor::VisitIfImm(GraphVisitor *v, Inst *inst)
 void LLVMIrConstructor::VisitIf(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
-    ASSERT(!ctor->GetGraph()->SupportManagedCode());
     auto x = ctor->GetInputValue(inst, 0);
     auto y = ctor->GetInputValue(inst, 1);
     ASSERT(x->getType()->isIntOrPtrTy());
@@ -4059,7 +4155,9 @@ void LLVMIrConstructor::VisitNewObject(GraphVisitor *v, Inst *inst)
 void LLVMIrConstructor::VisitCallStatic(GraphVisitor *v, Inst *inst)
 {
     auto call = inst->CastToCallStatic();
-    ASSERT(!call->IsInlined());
+    if (call->IsInlined()) {
+        return;
+    }
 
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto methodPtr = ctor->GetGraph()->GetMethod();
@@ -4086,7 +4184,7 @@ void LLVMIrConstructor::VisitCallStatic(GraphVisitor *v, Inst *inst)
     // Replaced to real callee in the PandaRuntimeLowering
     auto args = ctor->GetArgumentsForCall(ctor->GetMethodArgument(), call);
     auto result = ctor->builder_.CreateCall(func, args, ctor->CreateSaveStateBundle(inst));
-    ctor->debugData_->SetLocation(result, inst->GetPc());
+    ctor->WrapArkCall(inst, result);
 
     if (inst->GetType() != DataType::VOID) {
         ctor->ValueMapAdd(inst, result);
@@ -4115,6 +4213,9 @@ void LLVMIrConstructor::VisitCallResolvedStatic(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto call = inst->CastToCallResolvedStatic();
+    if (call->IsInlined()) {
+        return;
+    }
 
     auto method = ctor->GetInputValue(inst, 0);
 
@@ -4138,6 +4239,9 @@ void LLVMIrConstructor::VisitCallVirtual(GraphVisitor *v, Inst *inst)
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto graph = ctor->GetGraph();
     auto call = inst->CastToCallVirtual();
+    if (call->IsInlined()) {
+        return;
+    }
     auto runtime = ctor->GetGraph()->GetRuntime();
     ASSERT_PRINT(graph->GetAotData()->GetUseCha(),
                  std::string("GetUseCha must be 'true' but was 'false' for method = '") +
@@ -4183,6 +4287,9 @@ void LLVMIrConstructor::VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto call = inst->CastToCallResolvedVirtual();
+    if (call->IsInlined()) {
+        return;
+    }
 
     auto method = ctor->GetInputValue(inst, 0);
     // Since we are creating call through raw pointer, we need clear type, without frame.
@@ -4610,7 +4717,7 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
             cc_.assign({X86_64_PC, X86_64_ACC, X86_64_ACC_TAG, X86_64_FP, X86_64_DISPATCH, GetThreadReg(Arch::X86_64),
                         X86_64_REAL_FP});
         } else {
-            LLVM_LOG(FATAL, ENTRY) << "Unsupported architecture for arkintcc";
+            LLVM_LOG(FATAL, IR) << "Unsupported architecture for arkintcc";
         }
     } else if (graph->GetMode().IsFastPath()) {
         ASSERT(graph->GetArch() == Arch::AARCH64);
@@ -4803,12 +4910,9 @@ void LLVMIrConstructor::ProvideSafepointPoll(llvm::Module *module, LLVMArkInterf
     spCall->addFnAttr(llvm::Attribute::get(ctx, "safepoint"));
 }
 
-Expected<bool, std::string> LLVMIrConstructor::CanCompile(Graph *graph)
+std::string LLVMIrConstructor::CheckGraph(Graph *graph)
 {
-    if (graph->IsDynamicMethod()) {
-        return false;
-    }
-    bool can = true;
+    ASSERT(!graph->IsDynamicMethod());
     for (auto basicBlock : graph->GetBlocksRPO()) {
         for (auto inst : basicBlock->AllInsts()) {
             bool canCompile = LLVMIrConstructor::CanCompile(inst);
@@ -4817,22 +4921,16 @@ Expected<bool, std::string> LLVMIrConstructor::CanCompile(Graph *graph)
                 // * meet some brand-new opcode in Ark Compiler IR
                 // * dynamic intrinsic call (in non-dynamic method!)
                 // * not yet patched SLOW_PATH_ENTRY call in Irtoc code
-                LLVM_LOG(ERROR, ENTRY) << GetOpcodeString(inst->GetOpcode())
-                                       << " unexpected in LLVM lowering. Method = "
-                                       << graph->GetRuntime()->GetMethodFullName(graph->GetMethod());
-                return Unexpected(std::string("Unexpected opcode in CanCompile"));
-            }
-            if (graph->GetMode().IsInterpreter()) {
-                continue;
-            }
-
-            auto opcode = inst->GetOpcode();
-            if (opcode == Opcode::SaveState || opcode == Opcode::SaveStateDeoptimize) {
-                can = false;  // no immediate return here - to check CanCompile for other instructions
+                std::stringstream sstream;
+                sstream << GetOpcodeString(inst->GetOpcode()) << " unexpected in LLVM lowering. Method = "
+                        << graph->GetRuntime()->GetMethodFullName(graph->GetMethod());
+                std::string error = sstream.str();
+                LLVM_LOG(ERROR, IR) << error;
+                return error;
             }
         }
     }
-    return can;
+    return "";
 }
 
 bool LLVMIrConstructor::CanCompile(Inst *inst)

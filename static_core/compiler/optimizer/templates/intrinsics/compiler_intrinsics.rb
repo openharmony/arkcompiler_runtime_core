@@ -27,6 +27,7 @@ class Intrinsic < SimpleDelegator
     "u64" => "UINT64",
     "f32"  => "FLOAT32",
     "f64"  => "FLOAT64",
+    "method"  => "POINTER",
     "void" => "VOID"
   }
 

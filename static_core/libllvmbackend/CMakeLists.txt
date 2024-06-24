@@ -34,6 +34,7 @@ set(SOURCES
         object_code/code_info_producer.cpp
         object_code/created_object_file.cpp
         object_code/dump.cpp
+        transforms/passes/aarch64_fixup_sdiv.cpp
         transforms/passes/ark_gvn.cpp
         transforms/passes/ark_inlining.cpp
         transforms/passes/ark_frame_lowering/frame_lowering.cpp
