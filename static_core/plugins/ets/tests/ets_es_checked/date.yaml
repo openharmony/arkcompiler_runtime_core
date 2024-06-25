@@ -174,4 +174,4 @@ sub:
               i++;
             } while ((d2 == d1) && (i < TIMEOUT))
             let now_result = ((d2 > d1) && (i < TIMEOUT))
-
+        - expr: typeof Date() == "string"

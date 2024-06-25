@@ -138,3 +138,12 @@ sub:
       - method: at
         params:
           - paramOf(*inds)
+  - self: null
+    vars:
+        val: ["null", "undefined", 123,  "[1, 4, 6]", "true", "'some_string'", new Object()]
+    sub:
+      - expr: String(pars)
+        params:
+          - paramOf(*val)
+        ret_type: string
+        mandatory: 0
