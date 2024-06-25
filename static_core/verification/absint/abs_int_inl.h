@@ -17,7 +17,6 @@
 #define PANDA_VERIFICATION_ABSINT_ABS_INT_INL_H
 
 #include "abs_int_inl_compat_checks.h"
-#include "bytecode_instruction-inl.h"
 #include "file_items.h"
 #include "include/mem/panda_containers.h"
 #include "include/method.h"
@@ -26,27 +25,14 @@
 #include "macros.h"
 #include "runtime/include/class.h"
 #include "runtime/include/thread_scopes.h"
-#include "runtime/interpreter/runtime_interface.h"
 #include "type/type_system.h"
-#include "util/lazy.h"
 #include "utils/logger.h"
 #include "util/str.h"
 #include "verification/config/debug_breakpoint/breakpoint.h"
 #include "verification_context.h"
-#include "verification/public_internal.h"
 #include "verification/type/type_system.h"
 #include "verification_status.h"
 #include "verifier_messages.h"
-
-#include <array>
-#include <cmath>
-#include <cstdint>
-#include <functional>
-#include <iomanip>
-#include <limits>
-#include <memory>
-#include <type_traits>
-#include <unordered_map>
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_INST()                                             \
@@ -2568,41 +2554,196 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleReturnDyn();
 
+#ifdef PANDA_WITH_ETS
+    template <BytecodeInstructionSafe::Format FORMAT>
+    bool CheckLaunch(Method const *method, Span<int> regs)
+    {
+        if (method == nullptr) {
+            SET_STATUS_FOR_MSG(CannotResolveMethodId, OK);
+            return false;
+        }
+
+        auto *plugin = job_->JobPlugin();
+        auto const *jobMethod = job_->JobMethod();
+        auto result = plugin->CheckMethodAccessViolation(method, jobMethod, GetTypeSystem());
+        if (!result.IsOk()) {
+            const auto &verifOpts = config->opts;
+            if (verifOpts.debug.allow.methodAccessViolation && result.IsError()) {
+                result.status = VerificationStatus::WARNING;
+            }
+            LogInnerMessage(result);
+            LOG_VERIFIER_DEBUG_CALL_FROM_TO(job_->JobMethod()->GetFullName(), method->GetFullName());
+            status_ = result.status;
+            if (status_ == VerificationStatus::ERROR) {
+                return false;
+            }
+        }
+
+        auto methodNameGetter = [method]() { return method->GetFullName(); };
+        if (!debugCtx->SkipVerificationOfCall(method->GetUniqId()) &&
+            !CheckMethodArgs(methodNameGetter, method, regs)) {
+            return false;
+        }
+
+        ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
+        ClassLinkerExtension *cle = classLinker->GetExtension(method->GetClass()->GetSourceLang());
+
+        auto mutf8Name = reinterpret_cast<const uint8_t *>("Lstd/core/Promise;");
+        auto klass = cle->GetClass(mutf8Name);
+        if (klass == nullptr) {
+            LOG(ERROR, RUNTIME) << "Cannot find class '" << mutf8Name << "'";
+            return false;
+        }
+
+        SetAcc(Type(klass));
+        MoveToNextInst<FORMAT>();
+        return true;
+    }
+
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsLaunchShort()
     {
-        return true;
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+
+        if (method != nullptr && method->IsAbstract()) {
+            LOG_VERIFIER_BAD_CALL_STATICALLY_ABSTRACT_METHOD(method->GetFullName());
+            SET_STATUS_FOR_MSG(BadCallStaticallyAbstractMethod, WARNING);
+            return false;
+        }
+
+        Sync();
+        std::array<int, 2UL> regs {vs1, vs2};
+        return CheckLaunch<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsLaunch()
     {
-        return true;
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        uint16_t vs3 = inst_.GetVReg<FORMAT, 0x02>();
+        uint16_t vs4 = inst_.GetVReg<FORMAT, 0x03>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+
+        if (method != nullptr && method->IsAbstract()) {
+            LOG_VERIFIER_BAD_CALL_STATICALLY_ABSTRACT_METHOD(method->GetFullName());
+            SET_STATUS_FOR_MSG(BadCallStaticallyAbstractMethod, WARNING);
+            return false;
+        }
+
+        Sync();
+        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
+        return CheckLaunch<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsLaunchRange()
     {
-        return true;
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+
+        if (method != nullptr && method->IsAbstract()) {
+            LOG_VERIFIER_BAD_CALL_STATICALLY_ABSTRACT_METHOD(method->GetFullName());
+            SET_STATUS_FOR_MSG(BadCallStaticallyAbstractMethod, WARNING);
+            return false;
+        }
+
+        Sync();
+        std::vector<int> regs;
+        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
+            regs.push_back(regIdx);
+        }
+        return CheckLaunch<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsLaunchVirtShort()
     {
-        return true;
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+        if (method != nullptr && method->IsStatic()) {
+            LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetFullName());
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
+            return false;
+        }
+
+        Sync();
+        std::array<int, 2UL> regs {vs1, vs2};
+        return CheckLaunch<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsLaunchVirt()
     {
-        return true;
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs1 = inst_.GetVReg<FORMAT, 0x00>();
+        uint16_t vs2 = inst_.GetVReg<FORMAT, 0x01>();
+        uint16_t vs3 = inst_.GetVReg<FORMAT, 0x02>();
+        uint16_t vs4 = inst_.GetVReg<FORMAT, 0x03>();
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+        if (method != nullptr && method->IsStatic()) {
+            LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetFullName());
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
+            return false;
+        }
+
+        Sync();
+        std::array<int, 4UL> regs {vs1, vs2, vs3, vs4};
+        return CheckLaunch<FORMAT>(method, Span {regs});
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
     bool HandleEtsLaunchVirtRange()
     {
-        return true;
+        LOG_INST();
+        DBGBRK();
+        uint16_t vs = inst_.GetVReg<FORMAT, 0x00>();
+
+        Method const *method = GetCachedMethod();
+        if (method != nullptr) {
+            LOG_VERIFIER_DEBUG_METHOD(method->GetFullName());
+        }
+        if (method != nullptr && method->IsStatic()) {
+            LOG_VERIFIER_BAD_CALL_STATIC_METHOD_AS_VIRTUAL(method->GetFullName());
+            SET_STATUS_FOR_MSG(BadCallStaticMethodAsVirtual, WARNING);
+            return false;
+        }
+
+        Sync();
+        std::vector<int> regs;
+        for (auto regIdx = vs; ExecCtx().CurrentRegContext().IsRegDefined(regIdx); regIdx++) {
+            regs.push_back(regIdx);
+        }
+        return CheckLaunch<FORMAT>(method, Span {regs});
     }
+#endif  // PANDA_WITH_ETS
 
     template <bool IS_LOAD>
     bool CheckFieldAccessByName(int regIdx, Type expectedFieldType)

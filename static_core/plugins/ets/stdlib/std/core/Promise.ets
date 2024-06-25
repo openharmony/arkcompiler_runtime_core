@@ -33,7 +33,7 @@ export class PromiseRejectedResult {
     reason: NullishType;
 }
 
-export type PromiseSettledResult<T> = PromiseFulfilledResult<T>|PromiseRejectedResult
+export type PromiseSettledResult<T> = PromiseFulfilledResult<T>|PromiseRejectedResult|undefined
 
 /**
  * Class represents a result of an asynchronous operation in the future.

@@ -25,7 +25,7 @@ function _$init$_(): void { return {} as any; };
 _$init$_();
 
 class Fields {
-    public readonlyBoolean_: boolean = {} as any;
+    public readonly readonlyBoolean_: boolean = {} as any;
     public static staticFloat_: number = {} as any;
     public number_: number = {} as any;
     public Number_: number = {} as any;
