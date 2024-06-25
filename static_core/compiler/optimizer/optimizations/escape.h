@@ -280,8 +280,14 @@ private:
     void MaterializeDeoptSaveState(Inst *inst);
 
     void Initialize();
+    void PropagateLoadObjectsUpwards();
+    void CreateTemporaryLoads(Inst *phi);
     bool FindVirtualizableAllocations();
     bool AllPredecessorsVisited(const BasicBlock *block);
+#ifndef NDEBUG
+    Marker removableLoads_ {UNDEF_MARKER};
+    bool EnsureLoadsRemoval();
+#endif
 
     bool IsRefField(FieldPtr field) const
     {

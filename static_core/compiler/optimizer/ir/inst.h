@@ -368,6 +368,11 @@ public:
         return class_ == other.class_;
     }
 
+    bool operator!=(const ObjectTypeInfo &other) const
+    {
+        return class_ != other.class_;
+    }
+
     // NOLINTNEXTLINE(*-explicit-constructor)
     operator bool() const
     {
