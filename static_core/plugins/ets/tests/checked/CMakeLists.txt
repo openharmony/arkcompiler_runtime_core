@@ -208,5 +208,6 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_pea_loads_upward_propagation.ets)
 endif()
 
+panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/escape_analysis_casted.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/load_array.ets)
 panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_negation.ets)

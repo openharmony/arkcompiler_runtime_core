@@ -1792,9 +1792,8 @@ void ScalarReplacement::ReplaceAliases()
         }
 
         bool replaced = false;
-        auto instTypeSize = DataType::GetTypeSize(inst->GetType(), graph_->GetArch());
         if (replacement != nullptr && inst->GetOpcode() == Opcode::LoadObject &&
-            instTypeSize < DataType::GetTypeSize(replacement->GetType(), graph_->GetArch())) {
+            DataType::NeedCastForTypes(graph_->GetArch(), replacement->GetType(), inst->GetType())) {
             // In case of loads/stores explicit casts could be eliminated before scalar replacement.
             // To use correct values after load's replacement with a value stored into a field we
             // need to insert some casts back.
