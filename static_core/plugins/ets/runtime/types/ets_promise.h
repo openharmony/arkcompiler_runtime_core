@@ -16,6 +16,8 @@
 #ifndef PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_PROMISE_H_
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_PROMISE_H_
 
+#include "libpandabase/macros.h"
+#include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
@@ -49,9 +51,9 @@ public:
         return reinterpret_cast<EtsPromise *>(promise);
     }
 
-    ObjectHeader *GetCoreType()
+    ObjectHeader *GetCoreType() const
     {
-        return reinterpret_cast<ObjectHeader *>(this);
+        return static_cast<ObjectHeader *>(const_cast<EtsPromise *>(this));
     }
 
     EtsObject *AsObject()
@@ -69,34 +71,21 @@ public:
         return reinterpret_cast<EtsPromise *>(promise);
     }
 
-    EtsObjectArray *GetThenQueue(EtsCoroutine *coro)
+    EtsObjectArray *GetCallbackQueue(EtsCoroutine *coro)
     {
         return EtsObjectArray::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, thenQueue_)));
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_)));
     }
 
-    EtsInt GetThenQueueSize()
+    EtsLongArray *GetCoroPtrQueue(EtsCoroutine *coro)
     {
-        return thenQueueSize_;
+        return reinterpret_cast<EtsLongArray *>(
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, coroPtrQueue_)));
     }
 
-    EtsObjectArray *GetCatchQueue(EtsCoroutine *coro)
+    EtsInt GetQueueSize()
     {
-        return EtsObjectArray::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, catchQueue_)));
-    }
-
-    EtsInt GetCatchQueueSize()
-    {
-        return catchQueueSize_;
-    }
-
-    void ClearQueues(EtsCoroutine *coro)
-    {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, thenQueue_), nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, catchQueue_), nullptr);
-        thenQueueSize_ = 0;
-        catchQueueSize_ = 0;
+        return queueSize_;
     }
 
     CoroutineEvent *GetEventPtr()
@@ -159,6 +148,7 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
         state_ = STATE_RESOLVED;
         SetEventPtr(nullptr);
+        OnPromiseCompletion(coro);
     }
 
     void Reject(EtsCoroutine *coro, EtsObject *error)
@@ -168,6 +158,17 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
         SetEventPtr(nullptr);
+        OnPromiseCompletion(coro);
+    }
+
+    void SubmitCallback(EtsCoroutine *coro, const EtsHandle<EtsObject> &hcallback)
+    {
+        EnsureCapacity(coro);
+        auto *cbQueue = GetCallbackQueue(coro);
+        auto *coroQueue = GetCoroPtrQueue(coro);
+        coroQueue->Set(queueSize_, ToUintPtr(coro));
+        cbQueue->Set(queueSize_, hcallback.GetPtr());
+        queueSize_++;
     }
 
     EtsObject *GetValue(EtsCoroutine *coro)
@@ -240,16 +241,24 @@ public:
     }
 
 private:
+    void EnsureCapacity(EtsCoroutine *coro);
+    void OnPromiseCompletion(EtsCoroutine *coro);
+
+    void ClearQueues(EtsCoroutine *coro)
+    {
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), nullptr);
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, coroPtrQueue_), nullptr);
+        queueSize_ = 0;
+    }
+
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
     ObjectPointer<EtsObjectArray>
-        thenQueue_;  // the queue of 'then' calbacks which will be called when the Promise gets resolved
-    ObjectPointer<EtsObjectArray>
-        catchQueue_;  // the queue of 'catch' callback which will be called when the Promise gets rejected
-    ObjectPointer<EtsObject> interopObject_;  // internal object used in js interop
-    ObjectPointer<EtsObject> linkedPromise_;  // linked JS promise as JSValue (if exists)
-    EtsInt thenQueueSize_;
+        callbackQueue_;  // the queue of 'then and catch' calbacks which will be called when the Promise gets fulfilled
+    ObjectPointer<EtsLongArray> coroPtrQueue_;  // the queue of Coroutine pointers associated with callbacks
+    ObjectPointer<EtsObject> interopObject_;    // internal object used in js interop
+    ObjectPointer<EtsObject> linkedPromise_;    // linked JS promise as JSValue (if exists)
+    EtsInt queueSize_;
     EtsLong event_;
-    EtsInt catchQueueSize_;
     uint32_t state_;  // the Promise's state
 
     friend class test::EtsPromiseTest;

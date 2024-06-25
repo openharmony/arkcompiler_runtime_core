@@ -26,8 +26,8 @@
 namespace ark::ets {
 
 EtsCoroutine::EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
-    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo))
+                           CoroutineContext *context, CallbackQueue *queue, std::optional<EntrypointInfo> &&epInfo)
+    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, queue, std::move(epInfo))
 {
     ASSERT(vm != nullptr);
 }

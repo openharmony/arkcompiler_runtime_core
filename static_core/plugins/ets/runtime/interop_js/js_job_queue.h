@@ -22,9 +22,9 @@
 namespace ark::ets::interop::js {
 
 class JSValue;
-class JsJobQueue : public JobQueue {
+class JsJobQueue final : public JobQueue {
 public:
-    void AddJob(EtsObject *callback) override;
+    void Post(PandaUniquePtr<Callback> callback) override;
     void CreateLink(EtsObject *source, EtsObject *target) override;
 
 private:

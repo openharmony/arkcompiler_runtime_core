@@ -112,7 +112,6 @@ bool ThreadedCoroutineManager::TerminateCoroutine(Coroutine *co)
     os::memory::LockHolder l(coroSwitchLock_);
     if (co->HasManagedEntrypoint()) {
         // entrypointless coros should be destroyed manually
-        UnblockWaiters(co->GetCompletionEvent());
         if (RunnableCoroutinesExist()) {
             ScheduleNextCoroutine();
         } else {
@@ -202,6 +201,12 @@ void ThreadedCoroutineManager::Await(CoroutineEvent *awaitee)
 }
 
 void ThreadedCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
+{
+    os::memory::LockHolder lh(coroSwitchLock_);
+    UnblockWaitersImpl(blocker);
+}
+
+void ThreadedCoroutineManager::UnblockWaitersImpl(CoroutineEvent *blocker)
 {
     os::memory::LockHolder l(waitersLock_);
     ASSERT(blocker != nullptr);

@@ -15,9 +15,12 @@
 #ifndef PANDA_RUNTIME_COROUTINES_COROUTINE_H
 #define PANDA_RUNTIME_COROUTINES_COROUTINE_H
 
+#include <atomic>
 #include <optional>
+#include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/callback_queue.h"
 
 namespace ark {
 
@@ -244,17 +247,62 @@ public:
         return startSuspended_;
     }
 
+    /**
+     * Add callback to the callback queue.
+     * This method should be called for the current coroutine.
+     * Otherwise, see the method AcceptAnnouncedCallbacks.
+     */
+    void AddCallback(PandaUniquePtr<Callback> callback)
+    {
+        ASSERT(this == Coroutine::GetCurrent());
+        ASSERT(callbackQueue_ != nullptr);
+        callbackQueue_->Post(std::move(callback));
+    }
+
+    /// Process callbacks of the callback queue
+    void ProcessPresentCallbacks()
+    {
+        ASSERT(callbackQueue_ != nullptr);
+        callbackQueue_->Process();
+    }
+
+    /// Announce an event that the callback will be added to the queue in the future
+    void AnnounceCallbackAddition()
+    {
+        ASSERT(this == Coroutine::GetCurrent());
+        // Atomic with relaxed order reason: data race with counter with no synchronization or ordering
+        // constraints
+        preparingCallbacks_.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    /// Accept announced callbacks and unblock the blocked coroutine
+    void AcceptAnnouncedCallbacks(PandaList<PandaUniquePtr<Callback>> callbacks);
+
+    /// Process the current callbacks and wait until the announced callbacks are ready
+    void ProcessPresentAndAnnouncedCallbacks();
+
+    /// Destroy the current callback queue and set a new one
+    void SetCallbackQueue(CallbackQueue *queue)
+    {
+        if (callbackQueue_ != nullptr) {
+            callbackQueue_->Destroy();
+        }
+        callbackQueue_ = queue;
+    }
+
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                        ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
-                       std::optional<EntrypointInfo> &&epInfo);
+                       CallbackQueue *queue, std::optional<EntrypointInfo> &&epInfo);
 
     void SetCoroutineStatus(Status newStatus);
 
 private:
     /// a converter function that stores the data from EntrypointInfo in the member variables
     void SetEntrypointData(std::optional<EntrypointInfo> &&epInfo);
+
+    void WaitTillAnnouncedCallbacksAreDelivered();
 
     PandaString name_;
     uint32_t coroutineId_ = 0;
@@ -299,6 +347,11 @@ private:
     CoroutineContext *context_ = nullptr;
     // NOTE(konstanting, #I67QXC): check if we still need this functionality
     bool startSuspended_ = false;
+
+    CallbackQueue *callbackQueue_ = nullptr;
+    os::memory::Mutex preparingCallbacksLock_;
+    GenericEvent callbacksEvent_;
+    std::atomic<uint32_t> preparingCallbacks_ = 0;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

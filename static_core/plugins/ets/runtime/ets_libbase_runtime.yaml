@@ -2016,15 +2016,15 @@ intrinsics:
       args: [std.core.Object]
     impl: ark::ets::intrinsics::EtsPromiseReject
 
-  - name: StdPromiseAddToJobQueue
+  - name: StdPromiseSubmitCallback
     space: ets
     class_name: std.core.Promise
-    method_name: addToJobQueue
-    static: true
+    method_name: submitCallback
+    static: false
     signature:
       ret: void
       args: [std.core.Object]
-    impl: ark::ets::intrinsics::EtsPromiseAddToJobQueue
+    impl: ark::ets::intrinsics::EtsPromiseSubmitCallback
 
   - name: StdPromiseAwait
     space: ets
@@ -2862,6 +2862,16 @@ intrinsics:
       ret: void
       args: [i32]
     impl: ark::ets::intrinsics::StdSystemSetCoroutineSchedulingPolicy
+
+  - name: StdCoroutineGetCoroutineId
+    space: ets
+    class_name: std.debug.concurrency.CoroutineExtras
+    method_name: getCoroutineId
+    static: true
+    signature:
+      ret: i32
+      args: []
+    impl: ark::ets::intrinsics::StdSystemGetCoroutineId
 
   - name: StdAtomicFlagSet
     space: ets

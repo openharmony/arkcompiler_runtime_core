@@ -82,11 +82,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 promise.rejectImpl(error);
             }
         }
-        if (this.state != Promise.STATE_PENDING) {
-            Promise.addToJobQueue(fn as Object);
-        } else {
-            this.pushToThenQueue(fn as Object);
-        }
+        this.submitCallback(fn as Object);
         return promise;
     }
 
@@ -103,11 +99,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 promise.rejectImpl(e);
             }
         }
-        if (this.state != Promise.STATE_PENDING) {
-            Promise.addToJobQueue(fn as Object);
-        } else {
-            this.pushToThenQueue(fn as Object);
-        }
+        this.submitCallback(fn as Object);
         return promise;
     }
 
@@ -134,12 +126,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 promise.rejectImpl(e);
             }
         }
-        if (this.state != Promise.STATE_PENDING) {
-            Promise.addToJobQueue(fn as Object);
-        } else {
-            this.pushToThenQueue(fn as Object);
-            this.pushToCatchQueue(fn as Object);
-        }
+        this.submitCallback(fn as Object);
         return promise;
     }
 
@@ -147,21 +134,21 @@ export final class Promise<out T> implements PromiseLike<T> {
         let promise = new Promise<T|U>();
         let fn: () => void = (): void => {
             try {
-                if (onRejected) {
-                    let res: U|PromiseLike<U> = onRejected(this.value);
-                    promise.doResolve<U>(res);
+                if (this.state == Promise.STATE_REJECTED) {
+                    if (onRejected) {
+                        let res: U|PromiseLike<U> = onRejected(this.value);
+                        promise.doResolve<U>(res);
+                    } else {
+                        promise.rejectImpl(this.value!);
+                    }
                 } else {
-                    promise.rejectImpl(this.value!);
+                    promise.doResolve<T>(this.value!);
                 }
             } catch (e) {
                 promise.rejectImpl(e);
             }
         }
-        if (this.state == Promise.STATE_REJECTED) {
-            Promise.addToJobQueue(fn as Object);
-        } else if (this.state == Promise.STATE_PENDING) {
-            this.pushToCatchQueue(fn as Object);
-        }
+        this.submitCallback(fn as Object);
         return promise;
     }
 
@@ -185,12 +172,7 @@ export final class Promise<out T> implements PromiseLike<T> {
                 promise.rejectImpl(e);
             }
         }
-        if (this.state != Promise.STATE_PENDING) {
-            Promise.addToJobQueue(fn as Object);
-        } else {
-            this.pushToThenQueue(fn as Object);
-            this.pushToCatchQueue(fn as Object);
-        }
+        this.submitCallback(fn as Object);
         return promise;
     }
 
@@ -304,26 +286,6 @@ export final class Promise<out T> implements PromiseLike<T> {
         return newQueue;
     }
 
-    private pushToThenQueue(job: Object): void {
-        // length property of thenQueue Objet array represents its capacity, thenQueueSize represents its current size
-        if (this.thenQueue == null) {
-            this.thenQueue = Promise.EMPTY_QUEUE;
-        }
-        this.thenQueue = Promise.ensureCapacity(this.thenQueue!, this.thenQueueSize + 1);
-        this.thenQueue![this.thenQueueSize] = job;
-        ++this.thenQueueSize;
-    }
-
-    private pushToCatchQueue(job: Object): void {
-        // length property of catchQueue Objet array represents its capacity, catchQueueSize represents its current size
-        if (this.catchQueue == null) {
-            this.catchQueue = Promise.EMPTY_QUEUE;
-        }
-        this.catchQueue = Promise.ensureCapacity(this.catchQueue!, this.catchQueueSize + 1);
-        this.catchQueue![this.catchQueueSize] = job;
-        ++this.catchQueueSize;
-    }
-
     private subscribeOnAnotherPromise<U>(internalPromise: PromiseLike<U>): void {
         let thisPromise = this;
         internalPromise.then<void, void>((value: U): void => {
@@ -345,7 +307,7 @@ export final class Promise<out T> implements PromiseLike<T> {
 
     private native resolveImpl<U>(value: U): void;
     private native rejectImpl(error: NullishType): void;
-    private static native addToJobQueue(job: Object): void;
+    private native submitCallback(callback: Object): void;
 
     private static STATE_PENDING = 0;
     private static STATE_RESOLVED = 1;
@@ -357,13 +319,12 @@ export final class Promise<out T> implements PromiseLike<T> {
     // 2. Primitive fields in mostly size decreasing order
     // filling alignment holes
     private value: T | null = null;
-    private thenQueue: Object[]|null = null;
-    private catchQueue: Object[]|null = null;
+    private callbackQueue: Object[] | null = null;
+    private coroPtrQueue: long[] | null = null;
     private interopObject: Object|null = null;
     private linkedPromise: Object | null = null;
+    private queueSize: int = 0;
     private eventPtr: long;
-    private thenQueueSize: int = 0;
-    private catchQueueSize: int = 0;
     private state: int = Promise.STATE_PENDING;
 }
 

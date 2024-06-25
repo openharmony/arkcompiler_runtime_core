@@ -640,33 +640,21 @@ EtsString *JSONStringify(JSValue *jsvalue)
 
 void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
 {
-    auto *main = EtsCoroutine::GetCurrent()->GetPandaVM()->GetCoroutineManager()->GetMainThread();
-    auto *mainCoro = static_cast<EtsCoroutine *>(main);
     auto *coro = EtsCoroutine::GetCurrent();
-
-    auto proc = [&]() {
-        auto *ctx = InteropCtx::Current(coro);
-        napi_env env = ctx->GetJSEnv();
-        napi_value completionValue;
-        if (value == nullptr) {
-            napi_get_null(env, &completionValue);
-        } else {
-            auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
-            completionValue = refconv->Wrap(ctx, value);
-        }
-        napi_status status = state == EtsPromise::STATE_RESOLVED ? napi_resolve_deferred(env, deferred, completionValue)
-                                                                 : napi_reject_deferred(env, deferred, completionValue);
-        if (status != napi_ok) {
-            napi_throw_error(env, nullptr, "Cannot resolve promise");
-        }
-    };
-
-    if (coro != mainCoro) {
-        // NOTE(konstanting, #I67QXC): figure out if we need to ExecuteOnThisContext() for OHOS
-        auto *curCtx = EtsCoroutine::GetCurrent()->GetContext<StackfulCoroutineContext>();
-        mainCoro->GetContext<StackfulCoroutineContext>()->ExecuteOnThisContext(&proc, curCtx);
+    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
+    auto *ctx = InteropCtx::Current(coro);
+    napi_env env = ctx->GetJSEnv();
+    napi_value completionValue;
+    if (value == nullptr) {
+        napi_get_null(env, &completionValue);
     } else {
-        proc();
+        auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
+        completionValue = refconv->Wrap(ctx, value);
+    }
+    napi_status status = state == EtsPromise::STATE_RESOLVED ? napi_resolve_deferred(env, deferred, completionValue)
+                                                             : napi_reject_deferred(env, deferred, completionValue);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Cannot resolve promise");
     }
 }
 

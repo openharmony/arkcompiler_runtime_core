@@ -93,6 +93,7 @@ bool ThreadedCoroutineContext::RetrieveStackInfo(void *&stackAddr, size_t &stack
 /*static*/ void ThreadedCoroutineContext::ThreadProc(ThreadedCoroutineContext *ctx)
 {
     auto *co = ctx->GetCoroutine();
+    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
     Coroutine::SetCurrent(co);
     UpdateId(os::thread::GetCurrentThreadId(), co);
     os::thread::SetThreadName(os::thread::GetNativeHandle(), co->GetName().c_str());
@@ -112,10 +113,11 @@ bool ThreadedCoroutineContext::RetrieveStackInfo(void *&stackAddr, size_t &stack
         Value res = co->GetManagedEntrypoint()->Invoke(co, args.data());
         LOG(DEBUG, COROUTINES) << "ThreadProc: invoke() finished for the EP of coro " << co->GetName();
         co->RequestCompletion(res);
+        threadManager->UnblockWaiters(co->GetCompletionEvent());
+        co->ProcessPresentAndAnnouncedCallbacks();
     }
     ctx->SetStatus(Coroutine::Status::TERMINATING);
 
-    auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());
     if (threadManager->TerminateCoroutine(co)) {
         Coroutine::SetCurrent(nullptr);
     }
