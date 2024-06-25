@@ -161,5 +161,7 @@ sub:
           - paramOf(*default_search)
           - paramOf(*default_inds_undef)
         mandatory: 1
+      - method: "valueOf"
+        params: []
 
 

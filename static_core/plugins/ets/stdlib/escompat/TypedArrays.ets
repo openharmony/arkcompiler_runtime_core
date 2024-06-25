@@ -2450,6 +2450,15 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         this.forEach((value: number, index: number, array: Int8Array): void => callbackfn())
     }
 
+    /**
+     * Returns the object itself
+     *
+     * @returns Int8Array
+     */
+    public valueOf(): Int8Array {
+        return this
+    }
+
     internal getUnsafe(index: int): byte {
         let byteIndex = index * Int8Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res : byte = 0
@@ -4974,6 +4983,15 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         this.forEach((value: number, index: number, array: Int16Array): void => callbackfn())
     }
 
+    /**
+     * Returns the object itself
+     *
+     * @returns Int16Array
+     */
+    public valueOf(): Int16Array {
+        return this
+    }
+
     internal getUnsafe(index: int): short {
         let byteIndex = index * Int16Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res : short = 0
@@ -7475,6 +7493,15 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         this.forEach((value: number, index: number, array: Int32Array): void => callbackfn())
     }
 
+    /**
+     * Returns the object itself
+     *
+     * @returns Int32Array
+     */
+    public valueOf(): Int32Array {
+        return this
+    }
+
     internal getUnsafe(index: int): int {
         let byteIndex = index * Int32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res : int = 0
@@ -9927,6 +9954,15 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      */
     public forEach(callbackfn: () => void): void {
         this.forEach((value: BigInt, index: number, array: BigInt64Array): void => callbackfn())
+    }
+
+    /**
+     * Returns the object itself
+     *
+     * @returns BigInt64Array
+     */
+    public valueOf(): BigInt64Array {
+        return this
     }
 
     internal getUnsafe(index: int): long {
@@ -12438,6 +12474,15 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         this.forEach((value: number, index: number, array: Float32Array): void => callbackfn())
     }
 
+    /**
+     * Returns the object itself
+     *
+     * @returns Float32Array
+     */
+    public valueOf(): Float32Array {
+        return this
+    }
+
     internal getUnsafe(index: int): float {
         let byteIndex = index * Float32Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         let res : int = 0
@@ -14824,6 +14869,15 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: () => void): void {
         this.forEach((value: number, index: number, array: Float64Array): void => callbackfn())
+    }
+
+    /**
+     * Returns the object itself
+     *
+     * @returns Float64Array
+     */
+    public valueOf(): Float64Array {
+        return this
     }
 
     internal getUnsafe(index: int): double {

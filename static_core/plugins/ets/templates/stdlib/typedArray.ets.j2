@@ -2654,6 +2654,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
 
     {%- endfor %}
 
+    /**
+     * Returns the object itself
+     *
+     * @returns {{N}}Array
+     */
+    public valueOf(): {{N}}Array {
+        return this
+    }
+
     internal getUnsafe(index: int): {{T}} {
         let byteIndex = index * {{N}}Array.BYTES_PER_ELEMENT as int + this.byteOffset as int
         {%- if T == "float" %}

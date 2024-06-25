@@ -2410,6 +2410,15 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         this.forEach((value: number, index: number, array: Uint8ClampedArray): void => callbackfn())
     }
 
+    /**
+     * Returns the object itself
+     *
+     * @returns Uint8ClampedArray
+     */
+    public valueOf(): Uint8ClampedArray {
+        return this
+    }
+
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -4927,6 +4936,15 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: () => void): void {
         this.forEach((value: number, index: number, array: Uint8Array): void => callbackfn())
+    }
+
+    /**
+     * Returns the object itself
+     *
+     * @returns Uint8Array
+     */
+    public valueOf(): Uint8Array {
+        return this
     }
 
     /** Byte offset within the underlying Buffer */
@@ -7447,6 +7465,15 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public forEach(callbackfn: () => void): void {
         this.forEach((value: number, index: number, array: Uint16Array): void => callbackfn())
+    }
+
+    /**
+     * Returns the object itself
+     *
+     * @returns Uint16Array
+     */
+    public valueOf(): Uint16Array {
+        return this
     }
 
     /** Byte offset within the underlying Buffer */
@@ -9996,6 +10023,15 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         this.forEach((value: number, index: number, array: Uint32Array): void => callbackfn())
     }
 
+    /**
+     * Returns the object itself
+     *
+     * @returns Uint32Array
+     */
+    public valueOf(): Uint32Array {
+        return this
+    }
+
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
@@ -12470,6 +12506,15 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      */
     public forEach(callbackfn: () => void): void {
         this.forEach((value: BigInt, index: number, array: BigUint64Array): void => callbackfn())
+    }
+
+    /**
+     * Returns the object itself
+     *
+     * @returns BigUint64Array
+     */
+    public valueOf(): BigUint64Array {
+        return this
     }
 
     /** Byte offset within the underlying Buffer */
