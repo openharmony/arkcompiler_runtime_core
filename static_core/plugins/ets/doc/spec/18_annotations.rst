@@ -83,7 +83,7 @@ keyword ``interface`` is prefixed with the symbol ``@``:
         '=' constantExpression
         ;
 
-As any other declarated entity, an annotation can be exported by using the
+As any other declared entity, an annotation can be exported by using the
 keyword ``export``.
 
 A *type* in the annotation field is restricted (see :ref:`Types of Annotation Fields`).
@@ -431,7 +431,7 @@ Standard Annotations
 ********************
 
 *Standard annotation* is an annotation that is defined in :ref:`Standard Library`,
-or implictly defined in the compiler (*built-in annotation*).
+or implicitly defined in the compiler (*built-in annotation*).
 A *standard annotation* is usually known to the compiler. A *standard annotation*
 modifies semantics of the declaration it is applied to.
 

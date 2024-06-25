@@ -1045,11 +1045,12 @@ can be seen in the reference of the other variable.
 .. meta:
     frontend_status: Done
 
-The class ``Object`` is a supertype of all other classes, interfaces, string,
-arrays, unions, function types, and enum types. Thus all of them inherit (see
-:ref:`Inheritance`) the methods of the class ``Object``. Full description of
-all methods of class *Object* is given in the standard library
-(see :ref:`Standard Library`) description.
+All classes, interfaces, string types, arrays, unions, function types, and enum
+types are compatible (see :ref:`Type Compatibility`) with class ``Object``.
+
+Thus all of them inherit (see :ref:`Inheritance`) the methods of the class
+``Object``. Full description of all methods of class *Object* is given in the
+standard library (see :ref:`Standard Library`) description.
 
 The method ``toString`` as used in the examples in this document returns a
 string representation of the object.
@@ -1070,7 +1071,6 @@ refers to type ``Object``).
    object class type
    call expression
    instanceof operator
-   supertype
    interface
    array
    inheritance
@@ -1132,7 +1132,7 @@ Type ``never``
 .. meta:
     frontend_status: Done
 
-Type ``never`` is a subtype (see :ref:`Subtyping`) of any other type.
+Type ``never`` is compatible (see :ref:`Type Compatibility`) with any other type.
 
 Type ``never`` has no instances. It is used as one of the following:
 
@@ -1161,7 +1161,6 @@ Type ``never`` has no instances. It is used as one of the following:
 
 
 .. index::
-   subtyping
    class
    instance
    error
@@ -1198,11 +1197,14 @@ return type if a function or a method returns no value:
         bar(): void {}
     }
 
+    type FunctionWithNoParametersType = () => void
+
+    let funcTypeVariable: FunctionWithNoParametersType = (): void => {}
+
 A :index:`compile-time error` occurs if:
 
 -  Type ``void`` is used as type annotation;
 -  An expression of type ``void`` is used as a value.
-
 
 
 .. code-block-meta:
@@ -1431,25 +1433,29 @@ A type alias can set a name for a *function type* (see
     type BinaryOp = (x: number, y: number) => number
     let op: BinaryOp
 
-If the function type contains the ``throws`` mark (see
-:ref:`Throwing Functions`), then it is the *throwing function type*.
+A function type that contains the ``throws`` mark (see :ref:`Throwing Functions`)
+is the *throwing function type*.
 
 If the function type contains the ``?`` mark for the parameter name then
 it means that this parameter is optional and all parameters after this one (if
-any) are optional. Otherwise a :index:`compile-time error` occurs.
+any) are optional. Otherwise, a :index:`compile-time error` occurs.
 The actual type of the parameter is the union of the parameter declared type
-and ``undefined``.
+and ``undefined``. Note that this parameter has no default value.
 
+A function type that contains the ``?`` mark in the parameter name, then the
+parameter and all parameters that follow (if any) are optional. Otherwise,
+a :index:`compile-time error` occurs. The actual type of the parameter is then
+a union of the declared parameter type and ``undefined``.
 
 .. code-block:: typescript
    :linenos:
 
     type FuncTypeWithOptionalParameters = (x?: number, y?: string) => void
     let foo: FuncTypeWithOptionalParameters
-        = ():void => {}          // CTE as call with more than zero arguments will be invalid
-    foo = (p: number):void => {} // CTE as call with zero arguments will be invalid
-    foo = (p?: number):void => {} // CTE as call with two arguments will be invalid
-    foo = (p1: number, p2?: string):void => {} // CTE as call with zero arguments will be invalid
+        = ():void => {}          // CTE as call with more than zero arguments is invalid
+    foo = (p: number):void => {} // CTE as call with zero arguments is invalid
+    foo = (p?: number):void => {} // CTE as call with two arguments is invalid
+    foo = (p1: number, p2?: string):void => {} // CTE as call with zero arguments is invalid
     foo = (p1?: number, p2?: string):void => {} // OK
 
     foo()
@@ -1460,7 +1466,7 @@ and ``undefined``.
     foo(666, "a string")
 
     type IncorrectFuncTypeWithOptionalParameters = (x?: number, y: string) => void
-       // compile-time error: mandatory parameter may not follow the optional one
+       // compile-time error: no mandatory parameter can follow an optional parameter
 
     function bar (
        p1?: number,
@@ -1581,7 +1587,8 @@ the access to tuple elements.
    tuple[0] = 666
    console.log (tuple[0], tuple[4]) // `666 666` be printed
 
-``Object`` (see :ref:`Object Class Type`) is the supertype for any tuple type.
+Any tuple type is compatible (see :ref:`Type Compatibility`) with class
+``Object`` (see :ref:`Object Class Type`).
 
 An empty tuple is a corner case. It is only added to support compatibility
 with |TS|:
@@ -1740,7 +1747,7 @@ Union Types Normalization
 
 .. meta:
    frontend_status: Partly
-   todo: depends on literal types, maybe issues can occure for now
+   todo: depends on literal types, maybe issues can occur for now
 
 Union types normalization allows minimizing the number of types and literals
 within a union type, while keeping the type's safety. Some types or literals
@@ -1883,14 +1890,14 @@ A :index:`compile-time error` occurs otherwise:
     class A { 
         n = 1
         s = "aa"
-        foo(): void {}
+        foo() {}
         goo(n: number) {}
     }
     class B { 
         n = 2
         s = 3.14
-        foo(): void {}
-        goo(): void {}
+        foo() {}
+        goo() {}
     }
 
     let u: A | B = new A
@@ -2113,9 +2120,9 @@ initialization (see :ref:`Variable Declarations`), including the following:
 
 .. -  Nullable reference types with the default value *null* (see :ref:`Literals`).
 
-All other types, including reference types and enumeration types, have no
-default values. Variables of such types must be initialized explicitly with
-a value before the first use of a type.
+All other types, including reference types, enumeration types, and type
+parameters have no default values. Variables of such types must be initialized
+explicitly with a value before the first use of a type.
 
 .. Default values of primitive types are as follows:
 

@@ -32,7 +32,7 @@ is called a *standalone expression*:
 
     let a = expr // no target type is expected
     
-    function foo(): void {
+    function foo() {
         expr // no target type is expected
     }
 
@@ -376,6 +376,9 @@ occurs.
 Numeric Casting Conversions
 ===========================
 
+.. meta:
+    frontend_status: Done
+
 A *numeric casting conversion* occurs if the *target type* and the expression
 type are both ``numeric`` or ``char``:
 
@@ -444,7 +447,8 @@ Narrowing Reference Casting Conversions
     frontend_status: Done
 
 A *narrowing reference casting conversion* converts an expression of a
-supertype (superclass or superinterface) to a subclass or subinterface:
+supertype (superclass or superinterface) (see :ref:`Supertyping`) to a
+subclass or subinterface:
 
 .. index::
    casting conversion
@@ -472,7 +476,7 @@ supertype (superclass or superinterface) to a subclass or subinterface:
 Compile-time errors for this conversion are the same as in
 :ref:`InstanceOf Expression`.
 
-A runtime error (``ClassCastError``) occurs during these conversion if the
+A runtime error (``ClassCastError``) occurs during this conversion if the
 type of a converted expression cannot be converted to the *target type*:
 
 .. code-block:: typescript
@@ -571,7 +575,7 @@ Implicit Conversions
    todo: String Conversion - note: Implemented in a different but compatible way: spec - toString(), implementation: StringBuilder
    todo: Forbidden Conversion - note: Not exhaustively tested, should work
 
-This section describes all implicit conversions that are  allowed. Each
+This section describes all implicit conversions that are allowed. Each
 conversion is allowed in a particular context (for example, if an expression
 that initializes a local variable is subject to :ref:`Assignment-like Contexts`,
 then the rules of this context define what specific conversion is implicitly
@@ -879,8 +883,8 @@ Widening Reference Conversions
     frontend_status: Done
 
 A *widening reference conversion* handles any subtype (see :ref:`Subtyping`) as
-a supertype. It requires no special action at runtime, and never causes an
-error.
+a supertype (see :ref:`Supertyping`). It requires no special action at runtime,
+and never causes an error.
 
 .. index::
    widening reference conversion
@@ -898,9 +902,8 @@ error.
          {}
      function foo (di: DerivedInterface) {
        let bi: BaseInterface = new DerivedClass() /* DerivedClass
-           is a subtype of BaseInterface */
-       bi = di /* DerivedInterface is a subtype of BaseInterface
-           */
+           is compatible with BaseInterface */
+       bi = di // DerivedInterface is compatible with BaseInterface 
     }
 
 The only exception is the cast to type *never* that is forbidden. This cast is
@@ -915,7 +918,7 @@ a :index:`compile-time error` as it can cause type-safety violations:
     // to a variable of the never type
 
     class B { b_method() {} }
-    let b: B = n // OK as never is a subtype of any type
+    let b: B = n // OK as never is compatible with any type
     b.b_method() // this breaks type-safety if 'as' cast to never is allowed  
 
 The conversion of array types (see :ref:`Array Types`) also works in accordance
@@ -1013,12 +1016,10 @@ Function Types Conversions
 *Function types conversion* is the conversion of one function type to another.
 A *function types conversion* is valid if the following conditions are met:
 
-- Parameter types are converted by using *contravariance* :ref:`Contravariance`
-
-  - Non-optional parameter type can be converted to the type of an optional
-    parameter. 
-
-- Return types are converted by using *covariance* :ref:`Covariance`.
+- Parameter types are converted by using *contravariance* (:ref:`Contravariance`);
+- Non-optional parameter types can be converted to the type of an optional
+  parameter;
+- Return types are converted by using *covariance* (:ref:`Covariance`).
 
 See :ref:`Type Compatibility` for details.
 
@@ -1124,7 +1125,7 @@ Enumeration to Int Conversions
 ==============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 A value of an *enumeration* type is converted to type ``int``
 if enumeration constants of this type are of type ``int``.

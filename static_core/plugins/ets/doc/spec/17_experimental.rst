@@ -302,12 +302,16 @@ provide some initial values (see :ref:`Array Literal`).
    :linenos:
 
       newArrayInstance:
-          'new' typeReference dimensionExpression+
+          'new' typeReference dimensionExpression+ (arrayElement)?
           ;
 
       dimensionExpression:
           '[' expression ']'
           ;
+
+      arrayElement:
+          '(' expression ')'
+
 
 .. code-block:: typescript
    :linenos:
@@ -333,10 +337,19 @@ If the type of any ``dimensionExpression`` is number or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
 
-- a runtime error, if the situation is identified during program execution; and
-- a :index:`compile-time error`, if the situation is detected during
+- A runtime error, if the situation is identified during program execution; and
+- A :index:`compile-time error`, if the situation is detected during
   compilation.
 
+If ``arrayElement`` is provided, then the type of the ``expression`` can be
+as follows:
+
+- Type of array element denoted by ``typeReference``, or
+- Lambda function with the return type equal to the type of array element
+  denoted by ``typeReference`` and the parameters of type ``int``, and the
+  number of parameters equal to the number of array dimensions.
+
+Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -382,6 +395,29 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter:
          }
       }
 
+Creating array with known number of elements:
+
+.. code-block:: typescript
+   :linenos:
+
+      class A {} 
+         // It has no default value or parametereless constructor defined
+
+      let array_size = 5
+
+      let array1 = new A[array_size] (new A) 
+         /* Create array of 'array_size' elements and all of them will have
+            initial value equal to an object created by new A expression */
+
+      let array2 = new A[array_size] ((index): A => { return new A }) 
+         /* Create array of `array_size` elements and all of them will have
+            initial value equal to the result of lambda function execution with
+            different indices */
+     
+      let array2 = new A[2][3] ((index1, index2): A => { return new A }) 
+         /* Create two-dimensional array of 6 elements total and all of them will
+            have initial value equal to the result of lambda function execution with
+            different indices */
 
 .. index::
    array creation expression
@@ -980,58 +1016,6 @@ are propagated to the surrounding scope if no ``catch`` clause is found.
 
 |
 
-.. _Assert Statements Experimental:
-
-``Assert`` Statements
-=====================
-
-.. meta:
-    frontend_status: Done
-
-An ``assert`` statement can have one or two expressions. The first expression
-is of type ``boolean``; the optional second expression is of type ``string``. A
-:index:`compile-time error` occurs if the types of the expressions fail to match.
-
-.. code-block:: abnf
-
-      assertStatement:
-          'assert' expression (':' expression)?
-          ;
-
-*Assertions* control mechanisms that are not part of |LANG|, yet the
-language allows having assertions either *enabled* or *disabled*.
-
-.. index::
-   assert statement
-   assertion
-   expression
-   boolean
-   string
-
-The execution of the *enabled* assertion starts from the evaluation of the
-``boolean`` expression. An error is thrown if the expression evaluates to
-``false``. The second expression is then evaluated (if provided). Its
-value passes as the ``error`` argument.
-
-The execution of the *disabled* assertion has no effect whatsoever.
-
-.. index::
-   assertion
-   execution
-   boolean
-   evaluation
-   argument
-   value
-
-.. code-block:: typescript
-   :linenos:
-
-      assert p != null
-      assert f.IsOpened() : "file must be opened" + filename
-      assert f.IsOpened() : makeReportMessage()
-
-|
-
 .. _Function and Method Overloading:
 
 Function and Method Overloading
@@ -1046,7 +1030,7 @@ Most other languages support a different form of overloading that specifies
 a separate body for each overloaded header.
 
 Both approaches have their advantages and disadvantages. The latter approach
-supoprted by |LANG| can deliver better performance because no extra checks
+supported by |LANG| can deliver better performance because no extra checks
 are performed during execution of a specific body at runtime.
 
 .. index::
@@ -1128,7 +1112,7 @@ method in the instantiated class or interface:
      let instantiation: Template<number> 
        // Leads to two *overload-equivalent* methods
 
-     intrface ITemplate<T> {
+     interface ITemplate<T> {
         foo (p: number)
         foo (p: T)
      }
@@ -1374,20 +1358,10 @@ A :index:`compile-time error` occurs if:
 
 |
 
-.. _Default and Static Interface Methods:
+.. _Default Interface Method Declarations:
 
-Default and Static Interface Methods
-************************************
-
-.. meta:
-    frontend_status: Done
-
-|
-
-.. _Default Method Declarations:
-
-Default Method Declarations
-============================
+Default Interface Method Declarations
+*************************************
 
 .. meta:
     frontend_status: Done
@@ -1413,57 +1387,6 @@ the method that implements the interface.
    interface body
    default implementation
    overriding
-
-|
-
-.. _Static Method Declarations:
-
-*Static* Method Declarations
-============================
-
-.. meta:
-    frontend_status: Done
-
-.. code-block:: abnf
-
-    interfaceStaticMethodDeclaration:
-        'static' 'private'? identifier signature block
-        | 'private'? 'static' identifier signature block
-        ;
-
-A ``static`` method in an interface body can be explicitly declared ``private``.
-
-``Static`` interface method calls refer to no particular object.
-
-In contrast to default methods, ``static`` interface methods are not instance
-methods.
-
-.. index::
-   static method declaration
-   static method
-   interface body
-   private
-   static interface method
-   default method
-   instance method
-   
-A :index:`compile-time error` occurs if:
-
--  The body of a ``static`` method attempts to use the keywords ``this`` or
-   ``super``.
-
--  The header or the body of a ``static`` method of an interface contains the
-   name of any surrounding declaration’s type parameter.
-
-.. index::
-   static method body
-   keyword this
-   keyword super
-   static method header
-   static method body
-   interface
-   type parameter
-   surrounding declaration
 
 |
 
@@ -1809,17 +1732,18 @@ argument (see :ref:`Optional Parameters`).
 
 |
 
-.. _Enumeration SuperType:
+.. _Enumeration Types Conversions:
 
-Enumeration Super Type
-**********************
+Enumeration Types Conversions
+*****************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
 
-Any ``enum`` type has class type ``Object`` as its supertype. This allows
-polymorphic assignments into ``Object`` type variables. The ``instanceof`` check
-can be used to get enumeration variable back by applying the ``as`` conversion:
+Every *enum* type is compatible with type ``Object`` (see
+:ref:`Type Compatibility`). Every variable of type ``enum`` can thus be
+assigned into a variable of type ``Object``. The ``instanceof`` check can
+be used to get an enumeration variable back by applying the ``as`` conversion:
 
 .. code-block-meta:
 
@@ -1838,34 +1762,10 @@ can be used to get enumeration variable back by applying the ``as`` conversion:
    enum type
    class type
    Object
-   supertype
    polymorphic assignment
    type variable
-   enumeration variable
    conversion
-
-|
-
-.. _Enumeration Types Conversions:
-
-Enumeration Types Conversions
-=============================
-
-.. meta:
-    frontend_status: Partly
-
-Every *enum* type is compatible (see :ref:`Type Compatibility`) with type
-``Object`` (see :ref:`Enumeration SuperType`). Every variable of ``enum`` type
-can thus be assigned into a variable of type ``Object``.
-
-.. index::
-   enum type
    compatibility
-   Object
-   variable
-   assignment
-   mutable variable
-
 
 |
 
@@ -2381,7 +2281,7 @@ coroutine finishes and returns a value:
 
 .. code-block:: abnf
 
-      awaitExpresson:
+      awaitExpression:
         'await' expression
         ;
 
@@ -2833,7 +2733,7 @@ The result of a cast expression is an instance of type *T*.
    :linenos:
 
    interface I {
-      bar(): void
+      bar()
    }
 
    function foo(d: DynamicObject) {

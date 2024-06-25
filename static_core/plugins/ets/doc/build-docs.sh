@@ -29,6 +29,7 @@ BUILD_COOKBOOK=no
 BUILD_SPEC=no
 BUILD_STDLIB=no
 BUILD_TUTORIAL=no
+BUILD_SYSTEM_ARKTS=no
 
 function print_help()
 {
@@ -67,10 +68,11 @@ TARGETS
     * spec
     * stdlib
     * tutorial
+    * system ArkTS
 
     Following aliases are supported:
 
-    * guides: cookbook stdlib tutorial
+    * guides: cookbook stdlib tutorial system_arkts
     * all: Build all documents
 
     If no target is specified on the command line, 'all' is built.
@@ -173,6 +175,11 @@ for i in "$@"; do
 
         BUILD_TUTORIAL=yes
         ;;
+    system_arkts)
+        BUILD_SOMETHING=yes
+
+        BUILD_SYSTEM_ARKTS=yes
+        ;;
 
     # Alias build targets:
 
@@ -183,6 +190,7 @@ for i in "$@"; do
         BUILD_SPEC=yes
         BUILD_STDLIB=yes
         BUILD_TUTORIAL=yes
+        BUILD_SYSTEM_ARKTS=yes
         ;;
     guides)
         BUILD_SOMETHING=yes
@@ -190,6 +198,7 @@ for i in "$@"; do
         BUILD_COOKBOOK=yes
         BUILD_STDLIB=yes
         BUILD_TUTORIAL=yes
+        BUILD_SYSTEM_ARKTS=yes
         ;;
 
     *)
@@ -206,6 +215,7 @@ if [[ "${BUILD_SOMETHING}" == "no" ]] ; then
     BUILD_SPEC=yes
     BUILD_STDLIB=yes
     BUILD_TUTORIAL=yes
+    BUILD_SYSTEM_ARKTS=yes
 fi
 
 check_ubuntu_version
@@ -238,6 +248,10 @@ fi
 
 if [[ "${BUILD_TUTORIAL}" == "yes" ]]; then
     build_sphinx_document tutorial "${SCRIPT_DIR}/tutorial"
+fi
+
+if [[ "${BUILD_SYSTEM_ARKTS}" == "yes" ]]; then
+    build_sphinx_document system_arkts "${SCRIPT_DIR}/system_arkts"
 fi
 
 echo "Build succeeded, please find documents in ${BUILD_DIR}"

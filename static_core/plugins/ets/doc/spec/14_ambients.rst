@@ -95,7 +95,7 @@ Ambient Constant Declarations
         identifier (':' type)? initializer
         ;
 
-The initializer expression for an ambinet constant
+The initializer expression for an ambient constant
 must be a numeric or a string literal.
 
 .. index::
@@ -425,7 +425,7 @@ Namespace nesting is allowed:
     }
 
 A namespace is not an object but just a scope for entities that can only be
-accessed by using quilified names.
+accessed by using qualified names.
 
 .. _Implementing Ambient Namespace Declaration:
 

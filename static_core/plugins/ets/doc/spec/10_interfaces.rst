@@ -41,7 +41,7 @@ type that:
 
 Creating an instance of interface type is not possible.
 
-Interfaces can be *top-level* and local (see :ref:`Local Classes And Interfaces`).
+Interfaces can be *top-level* and local (see :ref:`Local Classes and Interfaces`).
 
 An interface can be declared a *direct extension* of one or more other
 interfaces. In that case the interface inherits all members from the interfaces
@@ -74,9 +74,10 @@ interface. The class or one of its superclasses must be actually
 declared to implement the interface. Otherwise such class is not
 considered to implement the interface.
 
-Interfaces without ``interfaceExtendsClause`` have class ``Object`` as their
-supertype (see :ref:`Object Class Type`). It enables assignments on the basis
-of reference types conversions (see :ref:`Widening Reference Conversions`).
+Interfaces without ``interfaceExtendsClause`` are compatible with the class
+``Object`` (see :ref:`Type Compatibility`). The compatibility allows assignments
+on the basis of reference types conversions (see
+:ref:`Widening Reference Conversions`).
 
 .. index::
    variable
@@ -86,7 +87,6 @@ of reference types conversions (see :ref:`Widening Reference Conversions`).
    implementation
    assignment
    reference types conversion
-   supertype
    superclass
 
 |
@@ -246,11 +246,15 @@ class ``Object`` to which every class is an extension).
 A :index:`compile-time error` occurs if an interface depends on itself.
 
 If superinterfaces have default implementations (see
-:ref:`Default Method Declarations`) for some method ``m`` then the current
-interface which extends these interfaces should have method ``m`` declared with
-the override-compatible signature (see :ref:`Override-Compatible Signatures`)
-or all these methods refer to the same implementation and this default
-implementation will be the current class method.
+:ref:`Default Interface Method Declarations`) for some method ``m``, then
+
+- The current interface that extends these interfaces must have method ``m``
+  declared with an override-compatible signature (see
+  :ref:`Override-Compatible Signatures`); or
+- all these methods refer to the same implementation, and this default
+  implementation is the current class method.
+
+
 Otherwise a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -439,22 +443,20 @@ Interface Method Declarations
 An ordinary interface method declaration that specifies the method's name and
 signature is called *abstract*.
 
-An interface method can have a body (see :ref:`Default Method Declarations`)
-and be ``static`` (see :ref:`Static Method Declarations`) as experimental features.
+An interface method can have a body (see :ref:`Default Interface Method Declarations`)
+as an experimental feature.
 
 .. index::
    interface method declaration
    default method declaration
    abstract signature
    interface method
-   static method
 
 .. code-block:: abnf
 
     interfaceMethodDeclaration:
         identifier signature
         | interfaceDefaultMethodDeclaration
-        | interfaceStaticMethodDeclaration
         ;
 
 The methods declared within interface bodies are implicitly ``public``.
@@ -496,12 +498,12 @@ In the example below, overloading methods are used in a class:
    :linenos:
 
     interface I {
-        foo(): void           // 1st method
-        foo(x: string): void  // 2st method
+        foo()           // 1st method
+        foo(x: string)  // 2st method
     }
     class C implements I {
-        foo(): void {/*1st method body*/}
-        foo(x: string): void  {/*2nd method body*/}
+        foo()           {/*1st method body*/}
+        foo(x: string)  {/*2nd method body*/}
     }
 
     function demo(i: I) {
@@ -518,8 +520,8 @@ In the example below, overload signatures are used:
    :linenos:
 
     interface I {
-        foo(): void           // 1st method
-        foo(x: string): void  // 2st method
+        foo()           // 1st method
+        foo(x: string)  // 2st method
     }
     class C implements I {
         foo(): void;

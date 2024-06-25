@@ -30,7 +30,7 @@ well-known programming languages, where these tools have already proven
 helpful and powerful.
 
 |LANG| supports imperative, object-oriented, functional, and generic
-programming paradigms, and combines  them safely and consistently.
+programming paradigms, and combines them safely and consistently.
 
 At the same time, |LANG| does not support features that allow software
 developers to write dangerous, unsafe, or inefficient code. In particular,
@@ -151,7 +151,7 @@ required.
 development ecosystem that facilitates the creation of software solutions
 in various application domains.
 
-The |LANG| ecosystem includes the language  along with its compiler,
+The |LANG| ecosystem includes the language along with its compiler,
 accompanying documents, guidelines, tutorials, the standard library
 (see :ref:`Standard Library`), and a set of additional tools that perform
 automatic or semi-automatic transition from other languages (currently,
@@ -220,7 +220,7 @@ production:
 - Is comprised of an abstract symbol (*nonterminal*) as its left-hand side,
   and a sequence of one or more *nonterminal* and *terminal* symbols as its
   *right-hand side*.
-- Includes the '``:``' character as a separator between the left-hand and the
+- Includes the '``:``' character as a separator between the left- and 
   right-hand sides, and the '``;``' character as the end marker.
 
 .. index::
@@ -478,7 +478,7 @@ as used in other languages, application areas, or industries.
      abstract symbol (nonterminal) as its left-hand side, and a sequence
      of nonterminal and terminal symbols as its right-hand side.
      Each production has the character ‘``:``’ as a separator between the
-     left-hand and right-hand sides, and the character ‘``;``’ as the end
+     left- and right-hand sides, and the character ‘``;``’ as the end
      marker.
 
    production

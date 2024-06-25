@@ -21,7 +21,7 @@ Classes
 Class declarations introduce new reference types and describe the manner
 of their implementation.
 
-Classes can be *top-level* and local (see :ref:`Local Classes And Interfaces`).
+Classes can be *top-level* and local (see :ref:`Local Classes and Interfaces`).
 
 A class body contains declarations and class initializers.
 
@@ -204,7 +204,7 @@ an abstract method:
    :linenos:
 
    class Y {
-     abstract method (p: string): void
+     abstract method (p: string)
      /* Compile-time error: Abstract methods can only
         be within an abstract class. */
    }
@@ -261,9 +261,9 @@ Class Extension Clause
 
 All classes except class ``Object`` can contain the ``extends`` clause that
 specifies the *base class*, or the *direct superclass* of the current class.
-In this situation, the current class is a *derived class*, or a *direct subclass*.
-A class that has no ``extends`` clause and is not ``Object`` is assumed to have
-the ``extends`` ``Object`` clause.
+In this situation, the current class is a *derived class*, or a
+*direct subclass*. Any class, except class ``Object`` that has no ``extends``
+clause, is assumed to have the ``extends Object`` clause.
 
 .. index::
    class
@@ -443,8 +443,8 @@ following:
 
 A class *implements* all its superinterfaces.
 
-A :index:`compile-time error` occurs if a class is at the same time a
-subtype (see :ref:`Subtyping`) of:
+A :index:`compile-time error` occurs if a class is at the same time
+compatible (see :ref:`Type Compatibility`) with the following:
 
 -  Two interface types that represent different instantiations of the same
    generic interface (see :ref:`Generics`); or
@@ -458,7 +458,6 @@ subtype (see :ref:`Subtyping`) of:
    interface
    superclass
    class
-   subtype
    interface type
    instantiation
    generic interface
@@ -472,12 +471,15 @@ If a class is not declared *abstract*, then:
    or a direct superinterface.
 
 If superinterfaces have default implementations (see
-:ref:`Default Method Declarations`) for some method ``m`` then the class which
-implements these interfaces should have method ``m`` declared with the
-override-compatible signature (see :ref:`Override-Compatible Signatures`) or
-all these methods refer to the same implementation and this default
-implementation will be the current class method.
-Otherwise a :index:`compile-time error` occurs.
+:ref:`Default Interface Method Declarations`) for some method ``m``, then:
+
+- The class that implements these interfaces must have method ``m`` declared
+  with an override-compatible signature (see :ref:`Override-Compatible Signatures`); or
+- All these methods refer to the same implementation, and this default
+  implementation is the current class method.
+
+
+Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -1124,7 +1126,7 @@ result of evaluation of the following:
 If none of the above is applicable, then a :index:`compile-time error` occurs.
 
 *Field initializer* is an expression that is evaluated at compile time or
-runtime. The result of succseful evalution is assigned into the field. The
+runtime. The result of successful evaluation is assigned into the field. The
 semantics of field initializers is therefore similar to that of assignments
 (see :ref:`Assignment`).
 
@@ -1165,7 +1167,7 @@ class instances as shown in the following examples:
         f1 = this.foo() // Compile-time error as 'this' is used as an argument
         f2 = "a string field"
         foo (): string {
-           console.log (this.f1, this.f2) // Both fields are not yet initizlized
+           console.log (this.f1, this.f2) // Fields are not yet initialized
            return this.f2
         }
 
@@ -1424,7 +1426,7 @@ A :index:`compile-time error` occurs if:
 
 -  A method marked with the modifier ``override`` does not override a method
    from a superclass.
--  A method declaration contains contains modifiers ``abstract`` or ``static``
+-  A method declaration contains modifiers ``abstract`` or ``static``
    along with the modifier ``override``.
 
 
@@ -1953,7 +1955,7 @@ Constructors have two variations:
 
 - *Primary constructor* that initializes its instance [1]_ own fields directly;
 
-- *Secondary constuctor* that uses another same-class constructor to initialize
+- *Secondary constructor* that uses another same-class constructor to initialize
   its instance fields.
 
 The syntax of both variations is the same:
@@ -1993,7 +1995,7 @@ The high-level sequence of a *primary constructor* body includes the following:
 
 5. Optional arbitrary code.
 
-The example below shows *primary constuctors*:
+The example below shows *primary constructors*:
 
 .. code-block:: typescript
    :linenos:
@@ -2032,7 +2034,7 @@ The high-level sequence of a *secondary constructor* body includes the following
 
 3. Optional arbitrary code.
 
-The example below shows *primary* and *secondary* constuctors:
+The example below shows *primary* and *secondary* constructors:
 
 .. code-block-meta:
 
@@ -2287,7 +2289,7 @@ the superclass:
    // During compilation of B
    class B extends A { constructor () { super () } } // Default constructor added
    // And it leads to compile-time error as default constructor is not marked as throws
-   // but it call super() which throws
+   // but it calls super() which throws
 
 
 .. index::
@@ -2342,8 +2344,8 @@ hides the inherited field.
    :linenos:
 
    interface Interface {
-      foo(): void
-      static foo(): void { /* some method body */ }
+      foo()
+      static foo() { /* some method body */ }
    }
    class Base {
       foo() { /* Base class method body */ }
@@ -2354,14 +2356,14 @@ hides the inherited field.
    class Derived extends Base implements Interface {
       override foo() { /* Derived class method body */ }
       // foo() is both 
-      //   - overriden in class Derived, and
+      //   - overridden in class Derived, and
       //   - implements foo() from the Interface
 
       // static foo() inherited from Base hides static foo() from Interface
    }
 
    let target: Interface = new Derived
-   target.foo()  // this is a call to an instance method foo() overriden in class Derived
+   target.foo()  // this is a call to an instance method foo() overridden in class Derived
 
    Interface.foo()  // this is a call to a static method foo() declared in Interface
    Base.foo()  // this is a call to a static method foo() declared in Base
@@ -2416,8 +2418,8 @@ The example below shows local classes and interfaces in a top-level function:
     function foo (parameter: number) {
       let local: string = "function local"
       interface LocalInterface { // Local interface in a top-level function
-        method (): void // It has a method
-        field: string   // and a property
+        method ()     // It has a method
+        field: string // and a property
       }
       class LocalClass implements LocalInterface { // Class implements interface
         // Local class in a top-level function
@@ -2446,7 +2448,7 @@ classes:
       method (parameter: number) {
         let local: string = "instance local"
         interface LocalInterface {
-           method (): void
+           method ()
            field: string
         }
         class LocalClass implements LocalInterface {
@@ -2462,7 +2464,7 @@ classes:
       static method (parameter: number) {
         let local: string = "class/static local"
         interface LocalInterface {
-           method (): void
+           method ()
            field: string
         }
         class LocalClass implements LocalInterface {

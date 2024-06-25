@@ -124,7 +124,7 @@ provided below:
         catch (error) {
           if (error instanceof ArrayIndexOutOfBoundsError) // invalid index detected
              return null
-          throw new UnknownError (error as Error) // Unknown error occured
+          throw new UnknownError (error as Error) // Unknown error occurred
         }
     }
 

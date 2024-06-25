@@ -1068,7 +1068,7 @@ occurs if the interface type *I* contains a method:
 
     interface I {
       name: string = ""
-      foo(): void
+      foo()
     }
     let i : I = {name: "Bob"} // compile-time error, interface has methods
 
@@ -1181,7 +1181,7 @@ is to be performed by the following steps:
 
    -  Evaluation of the expression; and
    -  Assigning the value of the expression to the corresponding field
-      of *x* as its initial value. It works for *readonly* fields too.
+      of *x* as its initial value. This rule also applies to *readonly* fields.
 
 .. index::
    object literal
@@ -1224,8 +1224,7 @@ Spread Expression
 *****************
 
 .. meta:
-    frontend_status: None
-    todo: implement this new feature - #14107
+    frontend_status: Done
 
 .. code-block:: abnf
 
@@ -1356,7 +1355,8 @@ The value denoted by ``this`` in a lambda body and in the surrounding context
 is the same.
 
 The class of the actual object referred to at runtime can be *T* if *T*
-is a class type, or a class that is a subtype (see :ref:`Subtyping`) of *T*.
+is a class type, or a class that is compatible (see :ref:`Type Compatibility`)
+with *T*.
 
 .. index::
    keyword this
@@ -1369,7 +1369,6 @@ is a class type, or a class that is a subtype (see :ref:`Subtyping`) of *T*.
    surrounding context
    class
    runtime
-   subtype
    class type
    class
 
@@ -1661,22 +1660,19 @@ Step 2: Selection of Method
     frontend_status: Done
 
 After the type to use is known, the method to call must be determined. As
-|LANG| supports overloading, more then one method may be accessible
+|LANG| supports overloading, more than one method can be accessible
 under the method name used in the call.
 
-All accessible methods are called
-*potentially applicable candidates* and
-:ref:`Overload Resolution` is used to select the method to call.
-If *overload resolution* can definitely select just one method,
-this method will be called,
-otherwise it is a :index:`compile-time error`
-(no method to call or ambiguity
-as more than one applicable methods avaialble).
+All accessible methods are called *potentially applicable candidates*, and
+:ref:`Overload Resolution` is used to select the method to call. If *overload
+resolution* can definitely select a single method, then this method is called.
+Otherwise, a :index:`compile-time error` occurs as more than one applicable
+method is available (no method to call, or ambiguity).
 
 .. index::
    overload resolution
    method to call
-   potentially applicable candidat
+   potentially applicable candidate
 
 |
 
@@ -1720,9 +1716,9 @@ Function Call Expression
     frontend_status: Partly
     todo: Adapt recent spec changes in "Overload Resolution" section to the es2panda implementation
 
-A *function call expression* is used to call a function (see :ref:`Function Declarations`),
-a variable of a function type (:ref:`Function Types`)
-or a lambda expression (see :ref:`Lambda Expressions`):
+A *function call expression* is used to call a function (see
+:ref:`Function Declarations`), a variable of a function type
+(:ref:`Function Types`), or a lambda expression (see :ref:`Lambda Expressions`):
 
 .. code-block:: abnf
 
@@ -1771,33 +1767,33 @@ The function call is *safe* because it handles nullish values properly.
    undefined
    function call
 
-Depending on the form of the expression in the call,
-there are two important cases, that requires different semantic checks:
+The following important situations depend on the form of expression in a call,
+and require different semantic checks:
 
-- The expression in the call is in the form of *qualifiedName* and 
-  this *qualifiedName* refers to an accesible function (:ref:`Function Declarations`)
-  or to a set of accesible overloaded functions;
-  
-- All other forms of expression.   
+- The form of expression in the call is *qualifiedName*, and *qualifiedName*
+  refers to an accessible function (:ref:`Function Declarations`), or to a set
+  of accessible overloaded functions.
 
-In the first case, all accessible functions are called
-*potentially applicable candidates* and
-:ref:`Overload Resolution` is used to select the function to call.
-If *overload resolution* can definitely select just one function,
-this function will be called,
-otherwise it is a :index:`compile-time error`
-(no function to call or ambiguity
-as more than one applicable functions avaialble).
+  In this case, all accessible functions are *potentially applicable candidates*,
+  and :ref:`Overload Resolution` is used to select the function to call.
+  If *overload resolution* can definitely select a single function, then this
+  function is called.
+  Otherwise (i.e., if there is no function to call, or if ambiguity is caused
+  by more than one applicable functions available), a :index:`compile-time error`
+  occurs.
+
+- All other forms of expression.
+
+  In this case, *overload resolution* is not required as the expression
+  determines the entity to call unambiguously. See
+  :ref:`Compatibility of Call Arguments` for the semantic checks to be performed.
 
 .. index::
    overload resolution
    function to call
    potentially applicable candidate
 
-In the second case, there is no need for *overload resolution*, as the entity to call 
-is unambiguously determined by the expression. See :ref:`Compatibility of Call Arguments` for the semantic checks that must
-be performed.
-
+|
 
 .. _Indexing Expressions:
 
@@ -1838,7 +1834,7 @@ Any indexing expression has two subexpressions:
 If the operator '``?.``' (see :ref:`Chaining Operator`) is present in an
 indexing expression, then:
 
--  The type of the object reference expression must be a nullish type based
+-  Type of the object reference expression must be a nullish type based
    on array type or ``Record`` type. Otherwise, a :index:`compile-time error`
    occurs.
 -  Object reference expression must be checked to evaluate to nullish
@@ -1874,11 +1870,11 @@ Array Indexing Expression
 For array indexing, the *index expression* must be of a numeric type.
 
 If *index expression* is of type ``number`` or other floating-point type,
-and its fractional part is different from 0, then errors occur as follows:
+and the fractional part differs from 0, then errors occur as follows:
 
--  a runtime error, if the situation is identified during program execution;
+-  Runtime error, if the situation is identified during program execution;
    and
--  a :index:`compile-time error`, if the situation is detected during
+-  :index:`Compile-time error`, if the situation is detected during
    compilation.
 
 
@@ -1886,9 +1882,9 @@ A numeric types conversion (see :ref:`Primitive Types Conversions`) is
 performed on *index expression* to ensure that the resultant type is ``int``.
 Otherwise, a :index:`compile-time error` occurs.
 
-If the type of *object reference expression*, after applying of the chaining
-operator '``?.``' (see :ref:`Chaining Operator`) if it is present, is an array
-type ``T[]`` then it will be a valid *array reference expression*, and the type
+If the chaining operator '``?.``' (see :ref:`Chaining Operator`) is present,
+and after its application the type of *object reference expression* is an array
+type ``T[]``, then it makes a valid *array reference expression*, and the type
 of the array indexing expression is *T*.
 
 The result of an array indexing expression is a variable of type *T* (i.e., an
@@ -2123,7 +2119,8 @@ The result of the entire primary expression is then ``undefined``.
     bob.spouse = new Person("Alice")
     console.log(bob.spouse?.name) // prints "Alice"
 
-If an expression is not of a nullish type chaining operator has no effect.
+If an expression is not of a nullish type, then the chaining operator has
+no effect.
 
 A :index:`compile-time error` occurs if a chaining operator is placed in the
 context where a variable is expected, e.g., in the left-hand-side expression of
@@ -2411,14 +2408,6 @@ evaluation:
 |                                 |                         |  let a: Object[]            |
 |                                 |                         |  typeof a                   |
 +---------------------------------+-------------------------+-----------------------------+
-
-|
-
-(table cont'd)
-
-+---------------------------------+-------------------------+-----------------------------+
-|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
-+=================================+=========================+=============================+
 | any function type               | "function"              | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let f: () => void =        |
@@ -2444,6 +2433,12 @@ evaluation:
 |                                 |                         |  let c: C                   |
 |                                 |                         |  typeof c                   |
 +---------------------------------+-------------------------+-----------------------------+
+
+(table cont'd)
+
++---------------------------------+-------------------------+-----------------------------+
+|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
++=================================+=========================+=============================+
 | All high-performance numeric    | "number"                | .. code-block:: typescript  |
 | value types and their boxed     |                         |                             |
 | versions:                       |                         |  let x: byte                |
@@ -2508,7 +2503,8 @@ An *ensure-not-nullish expression* is a postfix expression with the operator
 whether *e* of a nullish type (see :ref:`Nullish Types`) evaluates to a
 nullish value.
 
-If *e* expression is not of a nullish type then operator '``!``' has no effect.
+If the expression *e* is not of a nullish type, then the operator '``!``'
+has no effect.
 
 If the result of the evaluation of *e* is not equal to ``null`` or ``undefined``,
 then the result of *e!* is the outcome of the evaluation of *e*.
@@ -4067,29 +4063,27 @@ In all cases, ``a != b`` produces the same result as ``!(a == b)``, and
 ``a !== b`` produces the same result as ``!(a === b)``.
 
 The result of operators '``==``' and '``===``' is the same in all cases,
-except the comparison of ``null`` and ``undefined`` values
-(see :ref:`Reference Equality`).
+except when comparing the values ``null`` and ``undefined`` (see
+:ref:`Reference Equality`).
 
-Depending on the the types of operands used, one of the following
-variants of equality evaluation is used:
+The variant of equality evaluation to be used depends on the types of the
+operands used as follows:
 
 -  *Value equality* is applied to entities of primitive types
    (see :ref:`Value Types`), their boxed versions (see :ref:`Boxed Types`),
-   type ``string`` (see :ref:`Type string`),
-   type ``bigint`` (see :ref:`BigInt Type`)
-   and enumeration types (see :ref:`Enumerations`).
+   type ``string`` (see :ref:`Type string`), type ``bigint`` (see
+   :ref:`BigInt Type`), and enumeration types (see :ref:`Enumerations`).
 -  *Reference Equality based on actual (dynamic) type* is applied to values of
-   type ``Object`` (:ref:`Object Class Type`),
-   values of union types (:ref:`Union Types`),
-   and type parameters (:ref:`Type Parameters`).
--  *Reference equality* is applied to entities of all reference types
-   (see :ref:`Reference Types`) that are not mentioned in the
-   previous items.
+   type ``Object`` (:ref:`Object Class Type`), values of union types
+   (:ref:`Union Types`), and type parameters (:ref:`Type Parameters`).
+-  *Reference equality* is applied to entities of all other reference types
+   (see :ref:`Reference Types`).
+
 
 Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
 - :ref:`Numerical Equality Operators` if operands are of numeric types,
-  or type ``char`` or boxed version of numeric types;
+  type ``char``, or the boxed version of numeric types;
 
 - :ref:`String Equality Operators` if both operands are of type ``string``;
 
@@ -4100,15 +4094,15 @@ Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
 - :ref:`Enumeration Equality Operators` if both operands are of enumeration type;
 
-- :ref:`Reference Equality based on actual type` if at least one operand is of ``Object`` type
-  or union type or is a type parameter;
+- :ref:`Reference Equality based on actual type` if at least one operand is of
+  ``Object`` type or union type, or is a type parameter;
 
-- :ref:`Reference Equality` if both operands are of compatible reference types
-  except types ``string``, ``bigint``, ``Object``, union types and type parameters;
+- :ref:`Reference Equality` if both operands are of compatible reference types,
+  except types ``string``, ``bigint``, ``Object``, union types, and type
+  parameters;
 
 - :ref:`Extended Equality with null or undefined` if one operand is ``null`` or
   ``undefined``.
-
 
 - Otherwise, a :index:`compile-time error` occurs.
 
@@ -4134,9 +4128,9 @@ Numerical Equality Operators
 .. meta:
     frontend_status: Done
 
-*Value equality* is used for operands of numeric types:
-``number``, ``byte``, ``short``, ``int``, ``long``, ``float``, ``double``
-and ``char`` type and their correspondong boxed types.
+*Value equality* is used for operands of numeric types (i.e., ``number``,
+``byte``, ``short``, ``int``, ``long``, ``float``, ``double``) and ``char``
+type, and for their corresponding boxed types.
 
 The type of each operand in a numerical equality operator must be convertible
 (see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a
@@ -4250,7 +4244,7 @@ Bigint Equality Operators
     frontend_status: Done
 
 *Value equality* is used for operands of ``bigint`` type.
-Two bigibnts are equal if they have the same value:
+Two ``bigints`` are equal if they have the same value:
 
 .. code-block:: typescript
    :linenos:
@@ -4271,7 +4265,7 @@ Boolean Equality Operators
 .. meta:
     frontend_status: Done
 
-*Value equality* is used for operands of `of type ``boolean`` or
+*Value equality* is used for operands of types ``boolean`` or
 ``Boolean``.
 
 If an operand is of type ``Boolean``, then the unboxing conversion must be
@@ -4303,10 +4297,10 @@ Enumeration Equality Operators
 .. meta:
     frontend_status: Done
 
-If both operands are of the same Enumeration type (see :ref:`Enumerations`),
+If both operands are of the same enumeration type (see :ref:`Enumerations`),
 then :ref:`Numerical Equality Operators` or :ref:`String Equality Operators`
 are used depending on the kind of enumeration constant value
-( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
+(:ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -4320,14 +4314,18 @@ Reference Equality Based on Actual Type
 .. meta:
     frontend_status: Done
 
-If an operand of an equality operator is of ``Object`` type or an union type or
-of a type parameter, the evaluation of the operator
-is based on the actual type of this operand.
-If another operand is of other types, its static type is used for evaluation.
+If an operand of an equality operator is of type ``Object``, or a union type,
+or is a type parameter, then the evaluation of the operator is based on the
+actual type of this operand.
 
-If the actual types of objects are compatible, the corresponding evaluation of
-equality operator is used, otherwise, the result of ``==`` and ``===``
-operators is ``false``.
+If the other operand is of another type, then the static type of the first
+operand is used for evaluation.
+
+If actual types of objects are compatible, then the corresponding evaluation of
+equality operator is used. Otherwise, the result of the operators ``==`` and
+``===`` is ``false``.
+
+|
 
 .. _Object Type Equality Operators:
 
@@ -4337,16 +4335,16 @@ Object Type Equality Operators
 .. meta:
     frontend_status: Done
 
-The value of ``Object`` type can be compared to a value of any reference type.
+A value of type ``Object`` can be compared to a value of any reference type.
 
-The following example illustrates equality with a value of ``Object`` type:
+The following example illustrates an equality with a value of type ``Object``:
 
 .. code-block:: typescript
    :linenos:
 
-	function equToString(a: Object, b: string): boolean {
+    function equToString(a: Object, b: string): boolean {
         return a == b
-	}
+    }
 
     equToString("aa", "aa") // true, string equality
     equToString(1,  "aa") // false, not compatible types
@@ -4363,13 +4361,13 @@ The following example illustrates equality with a value of ``Object`` type:
     equ(1, "aa") // false, not compatible types
 
 
-**Note**, that actual type of ``Object`` value cannot be of
+**Note**: The actual type of an ``Object`` value can be none of the following:
 
-- an union type, as only the current value of an union type variable can be assigned
-  to the ``Object`` variable;
+- Union type, as only the current value of a union type variable can be assigned
+  to an ``Object`` variable;
 
-- a type parameter, if it does not have type constraint
-  (see :ref:`Type Parameter Constraint`), see example below:
+- Type parameter, if it has no type constraint (see
+  :ref:`Type Parameter Constraint`) as in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -4390,14 +4388,14 @@ The following example illustrates equality with a value of ``Object`` type:
 Union Equality Operators
 ------------------------
 
-Assume that one operand is of type *T*:sub:`1` and other is of type *T*:sub:`2`
-and at least one of *T*:sub:`1` and *T*:sub:`2` is a union type. A
-:index:`compile-time error` occurs if there is no overlap between *T*:sub:`1`
-and *T*:sub:`2`, meaning that there is no value that belongs to both
-*T*:sub:`1` and *T*:sub:`2`. Note, that any union type has overlap with value
-of ``Object`` type.
+Where one operand is of type *T*:sub:`1`, and the other operand is of type
+*T*:sub:`2`, while *T*:sub:`1`, *T*:sub:`2`, or both are a union type, then a
+:index:`compile-time error` occurs if *T*:sub:`1` and *T*:sub:`2` have no
+overlap (i.e., if no value belongs to both *T*:sub:`1` and *T*:sub:`2`).
 
-The following example illustrates equality with values of two union types:
+**Note**: Any union type has an overlap with a value of type ``Object``.
+
+The following example illustrates an equality with values of two union types:
 
 .. code-block:: typescript
    :linenos:
@@ -4411,9 +4409,9 @@ The following example illustrates equality with values of two union types:
     }
 
 
-If the actual types of values are compatible, the corresponding evaluation of
-equality operator is used, otherwise, the result of ``==`` and ``===``
-operators is ``false``:
+If actual types of values are compatible, then the corresponding evaluation of
+an equality operator is used. Otherwise, the result of the operators ``==`` and
+``===`` is ``false``:
 
 .. code-block:: typescript
    :linenos:
@@ -4436,13 +4434,12 @@ Type Parameter Equality Operators
 .. meta:
     frontend_status: Done
 
-If one operand is of a type parameter,
-for the second operand can be of any reference type,
-inclduing a type parameter.
+If one operand is a type parameter, then the other operand can be of any
+reference type, including type parameter.
 
-If the actual types of objects are compatible, the corresponding evaluation of
-equality operator is used, otherwise, the result of ``==`` and ``===``
-operators is ``false``:
+If actual object types are compatible, then the corresponding evaluation of an
+equality operator is used. Otherwise, the result of the operators ``==`` and
+``===`` is ``false``:
 
 .. code-block:: typescript
    :linenos:
@@ -4465,14 +4462,13 @@ Reference Equality
     frontend_status: Partly
     todo: adapt latest specification changes
 
-The reference equality compares operands of two reference types
-except types string, bigint, Object, union types and type parameters.
-See also :ref:`Extended Equality with null or undefined`
-for extended semantics.
+Reference equality compares operands of two reference types except types
+``string``, ``bigint``, ``Object``, union types, and type parameters. See
+:ref:`Extended Equality with null or undefined` for extended semantics.
 
 A :index:`compile-time error` occurs if:
 
--  Any operand is not of a reference type.
+-  Any operand is not of a reference type;
 
 -  There is no implicit conversion (see :ref:`Implicit Conversions`) that
    can convert the type of either operand to the type of the other.
@@ -4483,10 +4479,9 @@ The result of '``==``' or '``===``' is ``true`` if both operand values:
 -  Are ``undefined``; or
 -  Refer to the same object, array, or function.
 
-For the '``==``' operator the result is additionally ``true`` if one operand value
-is ``null`` and other is ``undefined``.
-
-Otherwise, the result is ``false``.
+In addition, the result of the '``==``' operator is ``true`` if one operand
+value is ``null``, and the other operand value is ``undefined``. Otherwise,
+the result is ``false``. This semantics is illustrated by the example below:
 
 .. index::
    reference equality
@@ -4497,7 +4492,6 @@ Otherwise, the result is ``false``.
    compile-time error
    reference type
 
-This semantics is illustrated by the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -4527,17 +4521,17 @@ Extended Equality with ``null`` or ``undefined``
     frontend_status: None
     todo: adapt latest specification changes
 
-|LANG| provides extended semantics for equality with ``null`` and ``undefined``
-to ensure better alignment with TypeScript.
+|LANG| provides extended semantics for equalities with ``null`` and ``undefined``
+to ensure better alignment with |TS|.
 
 Any entity can be compared to ``null`` by using the operators ``==`` and ``!=``.
 This comparison can return ``true`` only for the entities of *nullable* types
 if they actually have the ``null`` value during the program execution.
-In all other cases the comparison with ``null`` returns ``false`` and this is
-known in compile-time.
+In all other cases the comparison to ``null`` returns ``false``. This
+situation is to be known at compile time.
 
-Similarly, a comparison to ``undefined`` produces ``false`` unless the variable
-being compared is of type ``undefined``, or of a union type that has ``undefined``
+Similarly, a comparison to ``undefined`` returns ``false`` if the variable
+being compared is neither type ``undefined`` nor a union type with ``undefined``
 as one of its types.
 
 .. index::
@@ -5199,7 +5193,7 @@ of the following ways:
       - If *T* is a reference type, then it must be *string*.
 
         *S* must also be a *string* because the class *string* is the *final*
-        class. The saved value of the array element and the value of the
+        class. The saved value of the array element, and the value of the
         right-hand operand are used to perform the binary operation (string
         concatenation) of the compound assignment operator '``+=``'. If
         this operation completes abruptly, then so does the assignment
@@ -5778,8 +5772,8 @@ Constant Expressions
 .. meta:
     frontend_status: Done
 
-*Constant expressions* are the expressions
-with values that can be evaluated at compile time.
+*Constant expressions* are expressions with values that can be evaluated at
+compile time.
 
 .. code-block:: abnf
 
@@ -5823,7 +5817,8 @@ of the following:
 -  Parenthesized expressions (see :ref:`Parenthesized Expression`) that contain
    constant expressions;
 
--  Simple names or qualified names that refer to constant variables with compile-time expressions as initializers.
+-  Simple names or qualified names that refer to constant variables with
+   compile-time expressions as initializers.
 
 .. index::
    constant expression

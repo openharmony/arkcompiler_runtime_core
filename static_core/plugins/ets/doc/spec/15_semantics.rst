@@ -34,11 +34,10 @@ Subtyping
 .. meta:
     frontend_status: Done
 
-The *subtype* relationship between two types *S* and *T*, where *S* is a subtype
-of *T* (recorded as ``S<:T``), means that any object of type *S* can be safely
-used in any context in place of an object of type *T*.
-
-The opposite relation is called *supertype* relationship (recorded as ``T:>S``).
+The *subtype* relationship between the two types *S* and *T*, where *S* is a
+subtype of *T* (recorded as ``S<:T``), means that any object of type *S* can
+be safely used in any context to replace an object of type *T*. The opposite
+is called *supertype* relationship (see :ref:`Supertyping`).
 
 By the definition of ``S<:T``, type *T* belongs to the set of *supertypes*
 of type *S*. The set of *supertypes* includes all *direct supertypes* (see
@@ -112,6 +111,16 @@ constraint of that type parameter.
    superinterface
    bound
    Object
+
+.. _Supertyping:
+
+Supertyping
+***********
+
+The *supertype* relationship between the two types *T* and *S*, where *T* is a
+supertype of *T* (recorded as ``T>:S``) is opposite to subtyping (see
+:ref:`Subtyping`). *Supertyping* means that any object of type *S* can be
+safely used in any context to replace an object of type *T*.
 
 |
 
@@ -321,10 +330,10 @@ Smart Types
 As every data entity - variable (see :ref:`Variable and Constant Declarations`),
 class variable (see :ref:`Field Declarations`), or local variable (see
 :ref:`Parameter List` and :ref:`Local Declarations`) of some function or method
-has its static type, the type which was expliclty specified or inferred at the
+has its static type, the type which was explicitly specified or inferred at the
 point of its declaration. This type defines the set of operations which can
 be applied to such entity. Namely what methods can be called and which other
-entities can be accessed having this entity as a reciever of the operation.
+entities can be accessed having this entity as a receiver of the operation.
 
 .. code-block:: typescript
    :linenos:
@@ -369,8 +378,8 @@ Other examples are explicit calls to instanceof (see
         }
     }
 
-So, for such cases the smart compiler can deduce smart type of an entity and
-will not require unnecesary ``as`` conversions (see :ref:`Cast Expressions`).
+In cases like this the smart compiler can deduce the smart type of an entity
+without requiring unnecessary ``as`` conversions (see :ref:`Cast Expressions`).
 
 There are tricky cases related to overloading (see
 :ref:`Function and Method Overloading`) when a smart type may lead to the call
@@ -645,7 +654,7 @@ The semantics is illustrated by the example below:
     class Derived extends Base {
        // Overriding kinds for parameters
        override kinds_of_parameters <T extends Base, U extends Object>(
-          p1: Base, // contravaraint parameter type
+          p1: Base, // contravariant parameter type
           p2: (q: Derived)=>Base, // Covariant parameter type, contravariant return type
           p3: Number, // Compile-time error: parameter type is not override-compatible
           p4: number, // Compile-time error: parameter type is not override-compatible
@@ -708,25 +717,25 @@ The example below illustrates override-compatibility with ``Object``:
 Overloading for Functions
 =========================
 
-Only *overloading* must be considered for functions because inheritance for
+*Overloading* must only be considered for functions because inheritance for
 functions is not defined.
 
 The correctness check for functions overloading is performed if two or more
 functions with the same name are accessible (see :ref:`Accessible`) in a scope
 (see :ref:`Scopes`). 
 
-A function can be declared in or imported to the scope. 
-It is not allowed to mix functions declared and imported, 
-or imported from different compilation units to 
-prevent uncontrolled overloading. To be more precise,
-a :index:`compile-time error` occurs for functions with the same name, if
+A function can be declared in, or imported to a scope. Mixing functions that
+are declared and imported, or imported from different compilation units, is not
+allowed as to prevent uncontrolled overloading. In particular, a
+:index:`compile-time error` occurs to same-name functions in the following
+situations:
 
--  Functions are imported from different compilation units;
+-  If functions are imported from different compilation units;
 
--  Some functions are imported and others are declared.
+-  If some functions are imported, while others are declared.
 
-It means that only functions that are declared in the scope
-can be overloaded. Semantic check for such functions is as follows:
+It means that only the functions declared in the scope can be overloaded.
+The semantic check for these functions is as follows:
 
 -  If signatures of functions are *overload-equivalent*, then
    a :index:`compile-time error` occurs.
@@ -750,7 +759,7 @@ nor overloading is considered.
 
 **Note**: Accessors are considered methods here.
 
-Overriding member may keep or extend the access modifer (see
+Overriding member may keep or extend the access modifier (see
 :ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a
 :index:`compile-time error` occurs.
 
@@ -770,11 +779,11 @@ Overriding member may keep or extend the access modifer (see
 
    class Derived extends Base implements Interface {
       public override public_member() {}
-         // Public member can be overriden and/or implemented by the public one
+         // Public member can be overridden and/or implemented by the public one
       public override protected_member() {}
-         // Protected member can be overriden by the protected or public one
+         // Protected member can be overridden by the protected or public one
       internal internal_member() {}
-         // Internal member can be overriden by the internal one only
+         // Internal member can be overridden by the internal one only
       override private_member() {}
          // A compile-time error occurs if an attempt is made to override private member
    }
@@ -887,9 +896,9 @@ Overloading and Overriding in Interfaces
 +-------------------------------------+------------------------------------------+
 | **Context**                         | **Semantic Check**                       |
 +=====================================+==========================================+
-| An *instance method* is defined     | If signatures are *override-compatible*, |
+| A method is defined                 | If signatures are *override-compatible*, |
 | in a subinterface with the same     | then *overriding* is used. Otherwise,    |
-| name as the *instance method* in    | *overloading* is used.                   |
+| name as the method in               | *overloading* is used.                   |
 | the superinterface.                 |                                          |
 +-------------------------------------+------------------------------------------+
 
@@ -906,29 +915,7 @@ Overloading and Overriding in Interfaces
    }
 
 +-------------------------------------+------------------------------------------+
-| A *static method* is defined        | If signatures are *overload-equivalent*, |
-| in a subinterface with the same     | then the static method in the subclass   |
-| name as the *static method* in a    | *hides* the previous static method.      |
-| superinterface.                     | Otherwise, *overloading* is used.        |
-|                                     |                                          |
-+-------------------------------------+------------------------------------------+
-
-.. code-block:: typescript
-   :linenos:
-
-   interface Base {
-      static method_1() {}
-      static method_2(p: number) {}
-   }
-   interface Derived extends Base {
-      static method_1() {} // hiding
-      static method_2(p: string) {} // overloading
-   }
-
-
-+-------------------------------------+------------------------------------------+
-| Two *instance methods* or           | If signatures are *overload-equivalent*, |
-| two *static methods* with the same  | then a :index:`compile-time error`       |
+| Two methods with the same           | then a :index:`compile-time error`       |
 | name are defined in the same        | occurs. Otherwise, *overloading* is used.|
 | interface.                          |                                          |
 +-------------------------------------+------------------------------------------+
@@ -940,15 +927,8 @@ Overloading and Overriding in Interfaces
       instance_method_1()
       instance_method_1()  // Compile-time error: instance method duplication
 
-      static static_method_1() {}
-      static static_method_1() {} // Compile-time error: static method duplication
-
       instance_method_2()
       instance_method_2(p: number)  // Valid overloading
-
-      static static_method_2() {}
-      static static_method_2(p: string) {} // Valid overloading
-
    }
 
 |
@@ -968,7 +948,7 @@ The overload resolution is performed in two steps as follows:
 
 #. Select *applicable candidates* from *potentially applicable candidates*;
 
-#. If there is more than one *applicable candidates*, then select the best
+#. If there is more than one *applicable candidate*, then select the best
    candidate.
 
 **Note**: The first step is performed in all cases, even if there is
@@ -1221,10 +1201,12 @@ Signature *S*:sub:`i` with *n* parameters *fits* into implementation signature
    -  All *IS* parameters in positions from ``n + 1`` up to ``m`` are optional
       (see :ref:`Optional Parameters`) if ``n < m``.
 
-- *IS* return type is ``void``, then *S*:sub:`i` return type must also be ``void``.
+- *IS* return type is ``void`` (see :ref:`Type void`), then *S*:sub:`i` return
+  type must also be ``void``.
 
-- *IS* return type is not ``void``, then *S*:sub:`i` return type must be ``void``
-  or compatible with the return type of *IS* (see :ref:`Type Compatibility`).
+- *IS* return type is not ``void``, then *S*:sub:`i` return type must be
+  ``void`` (see :ref:`Type void`) or compatible with the return type of *IS*
+  (see :ref:`Type Compatibility`).
 
 
 The examples below represent valid overload signatures:
@@ -1278,7 +1260,7 @@ Compatibility Features
 **********************
 
 Some features are added to |LANG| in order to support smooth |TS| compatibility.
-Using this features while doing the |LANG| programming is not recommended in
+Using these features while doing the |LANG| programming is not recommended in
 most cases.
 
 .. index::

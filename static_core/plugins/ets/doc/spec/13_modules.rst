@@ -134,7 +134,7 @@ If used for import, a *separate module* is initialized only once with the
 details listed in :ref:`Compilation Unit Initialization`. The initialization process
 is performed in the following steps:
 
-- If the separate module has variable or constant declaraions (see
+- If the separate module has variable or constant declarations (see
   :ref:`Variable and Constant Declarations`), then their initializers are
   executed to ensure that they all have valid initial values;
 - If the separate module has top-level statements (see :ref:`Top-Level Statements`),
@@ -144,7 +144,7 @@ is performed in the following steps:
    initializer
    separate module
    initialization
-   variable declration
+   variable declaration
    constant declaration
 
 |
@@ -199,7 +199,7 @@ Import Directives
     frontend_status: Done
 
 Import directives make entities exported from other compilation units (see
-also :ref:`Declaration Modules`) avaialble for use in the current compilation
+also :ref:`Declaration Modules`) available for use in the current compilation
 unit by using different binding forms.
 
 An import declaration has the following two parts:
@@ -302,7 +302,7 @@ by the *import path*.
 +---------------------------------+--+-------------------------------+
 
 This form of import is recommended because it simplifies the reading and
-understanding of the source code, when all exported entites are prefixed with
+understanding of the source code, when all exported entities are prefixed with
 the name of the imported compilation unit.
 
 .. index::
@@ -950,7 +950,7 @@ The *export directive* allows the following:
 
 -  Specifying a selective list of exported declarations with optional
    renaming; or
--  Specifying a name of one declarartion; or
+-  Specifying a name of one declaration; or
 -  Re-exporting declarations from other compilation units; or
 -  Exporting a type.
 
@@ -1091,8 +1091,7 @@ Re-Export Directive
 ===================
 
 .. meta:
-    frontend_status: Partly
-    todo: export with alias isn't work properly
+    frontend_status: Done
 
 In addition to exporting what is declared in the module, it is possible to
 re-export declarations that are part of other modules' export. Only
@@ -1249,8 +1248,8 @@ Thus, a separate module may have:
 
 The top-level ``main`` function must have either no parameters, or one
 parameter of string  type ``[]`` that provides access to the arguments of
-program command-line. Its return type is either ``void`` or ``int``.
-No overloading is allowed for an entry point function.
+program command-line. Its return type is either ``void`` (see :ref:`Type void`)
+or ``int``. No overloading is allowed for an entry point function.
 
 Different forms of valid and invalid entry points are shown in the example
 below:
