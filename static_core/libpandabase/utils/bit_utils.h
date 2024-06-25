@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -277,7 +277,7 @@ inline constexpr T ExtractBits(T value, size_t offset, size_t count)
     static_assert(std::is_integral<T>::value, "T must be integral");
     static_assert(std::is_unsigned<T>::value, "T must be unsigned");
     ASSERT(sizeof(value) * ark::BITS_PER_BYTE >= offset + count);
-    return (value >> offset) & ((1U << count) - 1);
+    return (value >> offset) & ((1ULL << count) - 1);
 }
 
 template <typename T>
@@ -299,6 +299,10 @@ template <class To, class From>
 inline To bit_cast(const From &src) noexcept  // NOLINT(readability-identifier-naming)
 {
     static_assert(sizeof(To) == sizeof(From), "size of the types must be equal");
+    static_assert(std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>,
+                  "source and destination types must be trivially copyable");
+    static_assert(std::is_trivially_constructible_v<To>, "destination type must be default constructible");
+
     To dst;
     memcpy_s(&dst, sizeof(To), &src, sizeof(To));
     return dst;
