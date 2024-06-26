@@ -387,28 +387,6 @@ bool EtsClass::IsInSamePackage(EtsClass *that)
     return IsInSamePackage(klass1->GetDescriptor(), klass2->GetDescriptor());
 }
 
-/* static */
-bool EtsClass::IsClassFinalizable(EtsClass *klass)
-{
-    Method *method = klass->GetRuntimeClass()->GetClassMethod(reinterpret_cast<const uint8_t *>("finalize"));
-    if (method != nullptr) {
-        uint32_t numArgs = method->GetNumArgs();
-        const panda_file::Type &returnType = method->GetReturnType();
-        auto codeSize = method->GetCodeSize();
-        // in empty method code_size = 1 (return.Void)
-        if (numArgs == 1 && returnType.GetId() == panda_file::Type::TypeId::VOID && codeSize > 1 &&
-            !method->IsStatic()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void EtsClass::SetSoftReference()
-{
-    flags_ = flags_ | IS_SOFT_REFERENCE;
-    ASSERT(IsSoftReference() && IsReference());
-}
 void EtsClass::SetWeakReference()
 {
     flags_ = flags_ | IS_WEAK_REFERENCE;
@@ -419,26 +397,11 @@ void EtsClass::SetFinalizeReference()
     flags_ = flags_ | IS_FINALIZE_REFERENCE;
     ASSERT(IsFinalizerReference() && IsReference());
 }
-void EtsClass::SetPhantomReference()
-{
-    flags_ = flags_ | IS_PHANTOM_REFERENCE;
-    ASSERT(IsPhantomReference() && IsReference());
-}
 
-void EtsClass::SetFinalizable()
-{
-    flags_ = flags_ | IS_CLASS_FINALIZABLE;
-    ASSERT(IsFinalizable() && IsReference());
-}
 void EtsClass::SetValueTyped()
 {
     flags_ = flags_ | IS_VALUE_TYPED;
     ASSERT(IsValueTyped());
-}
-
-bool EtsClass::IsSoftReference() const
-{
-    return (flags_ & IS_SOFT_REFERENCE) != 0;
 }
 
 bool EtsClass::IsWeakReference() const
@@ -451,19 +414,9 @@ bool EtsClass::IsFinalizerReference() const
     return (flags_ & IS_FINALIZE_REFERENCE) != 0;
 }
 
-bool EtsClass::IsPhantomReference() const
-{
-    return (flags_ & IS_PHANTOM_REFERENCE) != 0;
-}
-
 bool EtsClass::IsReference() const
 {
     return (flags_ & IS_REFERENCE) != 0;
-}
-
-bool EtsClass::IsFinalizable() const
-{
-    return (flags_ & IS_CLASS_FINALIZABLE) != 0;
 }
 
 void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType)
@@ -479,14 +432,8 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     }
 
     if (superClass != nullptr) {
-        static constexpr uint32_t COPIED_MASK =
-            IS_SOFT_REFERENCE | IS_WEAK_REFERENCE | IS_PHANTOM_REFERENCE | IS_FINALIZE_REFERENCE | IS_CLASS_FINALIZABLE;
+        static constexpr uint32_t COPIED_MASK = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
         flags |= superClass->GetFlags() & COPIED_MASK;
-    }
-    if ((flags & IS_CLASS_FINALIZABLE) == 0) {
-        if (IsClassFinalizable(this)) {
-            flags |= IS_CLASS_FINALIZABLE;
-        }
     }
     SetFlags(flags);
 }

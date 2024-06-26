@@ -199,6 +199,11 @@ public:
         return boxDoubleClass_;
     }
 
+    Class *GetFinalizableWeakRefClass()
+    {
+        return finalizableWeakClass_;
+    }
+
     Method *GetSubscribeOnAnotherPromiseMethod()
     {
         return subscribeOnAnotherPromiseMethod_;
@@ -266,6 +271,7 @@ private:
     Class *stringBuilderClass_ = nullptr;
     Class *arrayAsListIntClass_ = nullptr;
     Class *jsvalueClass_ = nullptr;
+    Class *finalizableWeakClass_ = nullptr;
     // Cached type API classes
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;

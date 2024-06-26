@@ -102,6 +102,9 @@ public:
 
     /// Return size of the queue of references.
     virtual size_t GetReferenceQueueSize() const = 0;
+
+    /// Process finalizers of references.
+    virtual void ProcessFinalizers() {}
 };
 
 }  // namespace ark::mem

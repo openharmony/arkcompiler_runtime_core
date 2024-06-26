@@ -379,21 +379,12 @@ public:
         return GetObjectHeader()->GetFieldPrimitive<uint32_t>(GetFlagsOffset());
     }
 
-    /// Return true if given class has .finalize() method, false otherwise
-    static bool IsClassFinalizable(EtsClass *klass);
-
-    void SetSoftReference();
     void SetWeakReference();
     void SetFinalizeReference();
-    void SetPhantomReference();
-    void SetFinalizable();
     void SetValueTyped();
 
-    [[nodiscard]] bool IsSoftReference() const;
     [[nodiscard]] bool IsWeakReference() const;
     [[nodiscard]] bool IsFinalizerReference() const;
-    [[nodiscard]] bool IsPhantomReference() const;
-    [[nodiscard]] bool IsFinalizable() const;
 
     [[nodiscard]] bool IsValueTyped() const
     {
@@ -445,21 +436,13 @@ private:
     }
 
     constexpr static uint32_t ETS_ACC_PRIMITIVE = 1U << 16U;
-    /// Class is a SoftReference or successor of this class
-    constexpr static uint32_t IS_SOFT_REFERENCE = 1U << 18U;
     /// Class is a WeakReference or successor of this class
-    constexpr static uint32_t IS_WEAK_REFERENCE = 1U << 19U;
+    constexpr static uint32_t IS_WEAK_REFERENCE = 1U << 17U;
     /// Class is a FinalizerReference or successor of this class
-    constexpr static uint32_t IS_FINALIZE_REFERENCE = 1U << 20U;
-    /// Class is a PhantomReference or successor of this class
-    constexpr static uint32_t IS_PHANTOM_REFERENCE = 1U << 21U;
-    /// Class is a Reference or successor of this class
-    constexpr static uint32_t IS_REFERENCE =
-        IS_SOFT_REFERENCE | IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE | IS_PHANTOM_REFERENCE;
-    /// Class override Object.finalize() or any of his ancestors, and implementation is not trivial.
-    constexpr static uint32_t IS_CLASS_FINALIZABLE = 1U << 22U;
+    constexpr static uint32_t IS_FINALIZE_REFERENCE = 1U << 18U;
+    constexpr static uint32_t IS_REFERENCE = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
 
-    constexpr static uint32_t IS_VALUE_TYPED = 1U << 23U;
+    constexpr static uint32_t IS_VALUE_TYPED = 1U << 19U;
 
     ark::ObjectHeader header_;  // EtsObject
 

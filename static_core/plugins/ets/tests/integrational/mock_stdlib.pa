@@ -21,6 +21,7 @@
 .record std.core.DoubleToStringCacheElement
 .record std.core.FloatToStringCacheElement
 .record std.core.LongToStringCacheElement
+.record std.core.FinalizableWeakRef
 
 .record std.core.OutOfMemoryError {
     std.core.String message

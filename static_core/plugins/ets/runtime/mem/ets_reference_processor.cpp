@@ -20,7 +20,9 @@
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
+#include "plugins/ets/runtime/types/ets_finalizable_weak_ref.h"
 #include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
 
 namespace ark::mem::ets {
 
@@ -44,29 +46,31 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
 
     const auto *objEtsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(baseCls));
 
-    if (objEtsClass->IsWeakReference()) {
-        const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
-
-        auto *referent = etsRef->GetReferent();
-        if (referent == nullptr || referent == undefinedObject_) {
-            LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
-                                 << " as normal object, because referent is nullish";
-            return false;
-        }
-
-        ASSERT(IsMarking(gc_->GetGCPhase()));
-        bool referentIsMarked = false;
-        if (pred(referent->GetCoreType())) {
-            referentIsMarked = gc_->IsMarked(referent->GetCoreType());
-        } else {
-            LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref) << " as normal object, because referent "
-                                 << std::hex << GetDebugInfoAboutObject(referent->GetCoreType())
-                                 << " doesn't suit predicate";
-            referentIsMarked = true;
-        }
-        return !referentIsMarked;
+    if (!objEtsClass->IsReference()) {
+        return false;
     }
-    return false;
+    ASSERT(objEtsClass->IsWeakReference() || objEtsClass->IsFinalizerReference());
+
+    const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
+
+    auto *referent = etsRef->GetReferent();
+    if (referent == nullptr || referent == undefinedObject_) {
+        LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
+                             << " as normal object, because referent is nullish";
+        return false;
+    }
+
+    ASSERT(IsMarking(gc_->GetGCPhase()));
+    bool referentIsMarked = false;
+    if (pred(referent->GetCoreType())) {
+        referentIsMarked = gc_->IsMarked(referent->GetCoreType());
+    } else {
+        LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref) << " as normal object, because referent "
+                             << std::hex << GetDebugInfoAboutObject(referent->GetCoreType())
+                             << " doesn't suit predicate";
+        referentIsMarked = true;
+    }
+    return !referentIsMarked;
 }
 
 bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHeader *ref) const
@@ -77,9 +81,10 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
 
     const auto *objEtsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(baseCls));
 
-    if (!objEtsClass->IsWeakReference()) {
+    if (!objEtsClass->IsReference()) {
         return false;
     }
+    ASSERT(objEtsClass->IsWeakReference() || objEtsClass->IsFinalizerReference());
 
     const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
 
@@ -98,22 +103,52 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
     return referentObj->AtomicGetMark().GetState() != MarkWord::ObjectState::STATE_GC;
 }
 
-void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, [[maybe_unused]] GCMarkingStackType *objectsStack,
-                                            [[maybe_unused]] const BaseClass *cls, const ObjectHeader *object,
+void EtsReferenceProcessor::HandleReference(GC *gc, GCMarkingStackType *objectsStack, const BaseClass *cls,
+                                            const ObjectHeader *object,
                                             [[maybe_unused]] const ReferenceProcessPredicateT &pred)
 {
     os::memory::LockHolder lock(weakRefLock_);
     LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
     weakReferences_.insert(const_cast<ObjectHeader *>(object));
+    HandleOtherFields(cls, object, [gc, objectsStack, object](void *reference) {
+        auto *refObject = reinterpret_cast<ObjectHeader *>(reference);
+        if (gc->MarkObjectIfNotMarked(refObject)) {
+            objectsStack->PushToStack(object, refObject);
+        }
+    });
 }
 
-void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, [[maybe_unused]] const BaseClass *cls,
-                                            const ObjectHeader *object,
-                                            [[maybe_unused]] const ReferenceProcessorT &processor)
+void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, const BaseClass *cls, const ObjectHeader *object,
+                                            const ReferenceProcessorT &processor)
 {
     os::memory::LockHolder lock(weakRefLock_);
     LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
     weakReferences_.insert(const_cast<ObjectHeader *>(object));
+    HandleOtherFields(cls, object, processor);
+}
+
+void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const ObjectHeader *object,
+                                              const ReferenceProcessorT &processor)
+{
+    auto *etsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(cls));
+    if (etsClass->IsFinalizerReference()) {
+        ASSERT(etsClass->IsWeakReference());
+        auto *coro = ark::ets::EtsCoroutine::GetCurrent();
+        auto *finalizableWeakRef = ark::ets::EtsFinalizableWeakRef::FromCoreType(object);
+        auto refHandler = [this, coro, processor](auto *ref) {
+            if (ref == nullptr) {
+                return;
+            }
+            ASSERT(ref->GetReferent() != nullptr);
+            if (ref->GetReferent() == undefinedObject_) {
+                coro->GetPandaVM()->UnlinkFinalizableReference(coro, ref);
+                return;
+            }
+            processor(ref->GetCoreType());
+        };
+        refHandler(finalizableWeakRef->GetPrev(coro));
+        refHandler(finalizableWeakRef->GetNext(coro));
+    }
 }
 
 void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
@@ -130,13 +165,14 @@ void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
         LOG(DEBUG, REF_PROC) << "In " << GetDebugInfoAboutObject(weakRefObj) << " clear referent";
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         weakRef->ClearReferent();
+        EnqueueFinalizer(weakRef);
     });
 }
 
 void EtsReferenceProcessor::ProcessReferencesAfterCompaction([[maybe_unused]] bool clearSoftReferences,
                                                              const mem::GC::ReferenceClearPredicateT &pred)
 {
-    ProcessReferences(pred, [](auto *weakRefObj, auto *referentObj) {
+    ProcessReferences(pred, [this](auto *weakRefObj, auto *referentObj) {
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         auto markword = referentObj->GetMark();
         auto forwarded = markword.GetState() == MarkWord::ObjectState::STATE_GC;
@@ -149,6 +185,7 @@ void EtsReferenceProcessor::ProcessReferencesAfterCompaction([[maybe_unused]] bo
         }
         LOG(DEBUG, REF_PROC) << "In " << GetDebugInfoAboutObject(weakRefObj) << " clear referent";
         weakRef->ClearReferent();
+        EnqueueFinalizer(weakRef);
     });
 }
 
@@ -156,6 +193,27 @@ size_t EtsReferenceProcessor::GetReferenceQueueSize() const
 {
     os::memory::LockHolder lock(weakRefLock_);
     return weakReferences_.size();
+}
+
+void EtsReferenceProcessor::ProcessFinalizers()
+{
+    auto finalizerIt = finalizerQueue_.begin();
+    while (finalizerIt != finalizerQueue_.end()) {
+        finalizerIt->Run();
+        finalizerIt = finalizerQueue_.erase(finalizerIt);
+    }
+}
+
+void EtsReferenceProcessor::EnqueueFinalizer(ark::ets::EtsWeakReference *weakRef)
+{
+    auto *weakRefClass = weakRef->GetClass();
+    if (weakRefClass->IsFinalizerReference()) {
+        auto *finalizableWeakRef = ark::ets::EtsFinalizableWeakRef::FromEtsObject(weakRef);
+        auto finalizer = finalizableWeakRef->ReleaseFinalizer();
+        if (!finalizer.IsEmpty()) {
+            finalizerQueue_.push_back(finalizer);
+        }
+    }
 }
 
 }  // namespace ark::mem::ets

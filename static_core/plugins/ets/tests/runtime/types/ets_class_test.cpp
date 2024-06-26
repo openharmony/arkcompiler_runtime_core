@@ -800,16 +800,13 @@ TEST_F(EtsClassTest, SetAndGetFlags)
     EtsClass *klass = GetTestClass(source, "LTest;");
     ASSERT_NE(klass, nullptr);
 
-    uint32_t flags = 0U | 1U << 18U | 1U << 19U | 1U << 20U | 1U << 21U | 1U << 22U;
+    uint32_t flags = 0U | 1U << 17U | 1U << 18U;
 
     klass->SetFlags(flags);
     ASSERT_EQ(klass->GetFlags(), flags);
     ASSERT_TRUE(klass->IsReference());
-    ASSERT_TRUE(klass->IsSoftReference());
     ASSERT_TRUE(klass->IsWeakReference());
     ASSERT_TRUE(klass->IsFinalizerReference());
-    ASSERT_TRUE(klass->IsPhantomReference());
-    ASSERT_TRUE(klass->IsFinalizable());
 }
 
 TEST_F(EtsClassTest, SetAndGetComponentType)
