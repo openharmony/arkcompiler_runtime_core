@@ -211,6 +211,8 @@ config("ark_config") {
     "-Wno-unused-but-set-variable",
   ]
 
+  cflags_c = []
+
   if (!is_mac && use_pbqp) {
     cflags_cc += [
       # PBQP regalloc
@@ -219,7 +221,20 @@ config("ark_config") {
     ]
   }
 
-  if (is_debug) {
+  if (is_fastverify) {
+    cflags_cc += [
+      "-O3",
+      "-ggdb3",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+    cflags_c += [
+      "-O3",
+      "-ggdb3",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+  } else if (is_debug) {
     cflags_cc += [
       "-Og",
       "-ggdb3",
