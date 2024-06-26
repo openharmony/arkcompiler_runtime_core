@@ -26,7 +26,8 @@ namespace panda::abc2program {
 class Abc2ProgramCompiler {
 public:
     bool OpenAbcFile(const std::string &file_path);
-    bool CheckFileVersionIsSupported(uint8_t min_api_version, uint8_t target_api_version) const;
+    bool CheckFileVersionIsSupported(std::array<uint8_t, panda_file::File::VERSION_SIZE> min_version,
+                                     uint8_t target_api_version) const;
     const panda_file::File &GetAbcFile() const;
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
     void CompileAbcClass(const panda_file::File::EntityId &record_id, pandasm::Program &program);
