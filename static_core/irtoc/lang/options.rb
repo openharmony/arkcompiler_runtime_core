@@ -29,7 +29,7 @@ class << Options
       opts.on("--ark_source_dir=PATH", "Path to panda source code") { |v| self.ark_source_dir = v }
       opts.on("--output=PATH", "Output file") { |v| self.output_files = v.split(':') }
       opts.on("--input=PATH", "Input files, separated by ':' symbol") { |v| self.input_files = v.split(':') }
-      opts.on("--definitions=LIST", "C++ definitions that will be used for compiling output file") { |v| self.definitions = v }
+      opts.on('-D=STR', 'C++ definitions that will be used for compiling output file') { |v| (self.definitions ||= []) << v }
       opts.on("--arch=ARCH", "Target architecture") { |v| self.arch = v }
       opts.on('--ir-api=API', 'API to emit during C++ code generation') { |v| self.ir_api = v }
       opts.on('--isa=PATH', 'ISA YAML file') { |v| self.isa = v }
@@ -48,9 +48,8 @@ class << Options
 
     # Collect compiler definitions
     if self.definitions
-      defines = self.definitions.split(':')
       new_definitions = OpenStruct.new
-      defines.each do |define|
+      self.definitions.each do |define|
         vals = define.split('=')
         new_definitions[vals[0]] = vals.size > 1 ? vals[1] : true
       end

@@ -11,15 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_llvm_major_version = "15"
-_llvm_middle_version = "0"
-_llvm_minor_version = "4"
-
-llvm_version = "$_llvm_major_version.$_llvm_middle_version.$_llvm_minor_version"
+llvm_version = "15.0.4-ark18"
+llvm_lib_file_suffix = "lib/libLLVM-15.so"
 
 declare_args() {
-  llvm_dir = "../../../../prebuilts/clang/ohos/linux-x86_64/llvm"
+  llvm_host_dir = "/opt/llvm-15-release-x86_64"
+  llvm_target_dir = "/opt/llvm-15-release-ohos-gn"
 }
-
-llvm_include_dir = "$llvm_dir/include"
-llvm_lib_file = "$llvm_dir/lib/libLLVM-$_llvm_major_version.so"

@@ -48,6 +48,9 @@ ohos_static_library("aotbuilder") {
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
   ]
+
+  external_deps = [ sdk_libc_secshared_dep ]
+
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }

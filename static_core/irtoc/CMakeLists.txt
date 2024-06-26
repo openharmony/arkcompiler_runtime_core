@@ -104,14 +104,15 @@ function(irtoc_generate)
     set(multiValueArgs INPUT_FILES OUTPUT_FILES)
     cmake_parse_arguments(ARG "${noValues}" "${singleValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    get_directory_property(irtoc_definitions_ DIRECTORY ${IRTOC_SOURCE_DIR} COMPILE_DEFINITIONS)
+    get_directory_property(IRTOC_DEFINITIONS DIRECTORY ${IRTOC_SOURCE_DIR} COMPILE_DEFINITIONS)
 
     if (CMAKE_BUILD_TYPE STREQUAL "Release"
             OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"
             OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        list(APPEND irtoc_definitions_ NDEBUG)
+        list(APPEND IRTOC_DEFINITIONS NDEBUG)
     endif()
-    string(REGEX REPLACE ";" ":" IRTOC_DEFINITIONS "${irtoc_definitions_}")
+
+    list(TRANSFORM IRTOC_DEFINITIONS PREPEND "-D")
 
     string(REPLACE ";" ":" IRTOC_INPUT "${ARG_INPUT_FILES}")
     string(REPLACE ";" ":" IRTOC_OUTPUT "${ARG_OUTPUT_FILES}")
@@ -135,7 +136,7 @@ function(irtoc_generate)
                                 --ir-api ${ARG_IR_API}
                                 --ark_source_dir ${PANDA_ROOT}
                                 --isa ${ISA}
-                                --definitions ${IRTOC_DEFINITIONS}
+                                ${IRTOC_DEFINITIONS}
                                 --arch ${IRTOC_TARGET}
                                 --plugins ${IRTOC_PLUGINS_FILE}
         WORKING_DIRECTORY   ${ARG_WORKING_DIRECTORY}

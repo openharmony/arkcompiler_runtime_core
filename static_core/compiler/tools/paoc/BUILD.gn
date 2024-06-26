@@ -67,6 +67,8 @@ ohos_executable("ark_aot") {
     deps += [ "$ark_root/libllvmbackend:libllvmbackend" ]
   }
 
+  external_deps = [ sdk_libc_secshared_dep ]
+
   install_enable = true
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"

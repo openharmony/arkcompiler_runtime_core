@@ -59,6 +59,9 @@ if (enable_irtoc) {
     ]
 
     sources = irtoc_scripts + [ irtoc_plugins_file ]
+
+    configs = [ "$ark_root:ark_config" ]
+
     irt_args = rebase_path(irtoc_scripts, root_build_dir)
     irt_outputs = rebase_path(outputs, root_build_dir)
 
@@ -71,16 +74,7 @@ if (enable_irtoc) {
       rebase_path("$ark_root", root_build_dir),
       "--isa",
       rebase_path("$ark_isa_yaml", root_build_dir),
-    ]
-
-    if (!is_debug) {
-      args += [
-        "--definitions",
-        "NDEBUG",
-      ]
-    }
-
-    args += [
+      "{{defines}}",
       "--arch",
       target_cpu,
       "--ir-api",
