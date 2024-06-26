@@ -34,9 +34,9 @@ def get_chapters(source_dir, target, build_dir):
     return result
 
 def merge_chapters(chapters, dest_path):
-    with open(dest_path, "w") as dest_file:
+    with open(dest_path, "w", encoding="utf-8") as dest_file:
         for chapter in chapters:
-            with open(chapter, "r") as chapter_file:
+            with open(chapter, "r", encoding="utf-8") as chapter_file:
                 for line in chapter_file:
                     # Hacks to mitigate Markdown builder bugs
                     line = line.replace("`a | b`", "`a \| b`")
@@ -57,10 +57,10 @@ def merge_chapters(chapters, dest_path):
                         next(chapter_file)
                         continue
 
-                    # A hack to cut off keyword comments
+                    # A hack to cut off any comments
                     if (line.startswith("<!--")):
-                        next(chapter_file)
-                        next(chapter_file)
+                        while (not line.endswith("-->\n")):
+                            line = next(chapter_file)
                         continue
 
                     # A hack to make recipe links a simple text

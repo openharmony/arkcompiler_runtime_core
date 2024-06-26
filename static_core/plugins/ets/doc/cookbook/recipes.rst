@@ -1111,9 +1111,9 @@ specifically not supported in the following contexts:
 * Initialization of classes which declare a ``constructor`` with parameters
 * Initialization of classes with ``readonly`` fields
 
-Additionally, |LANG| supports usage of object literals to initialize the
-value of special type ``Record<K, V>``. The type ``K`` denotes an object key
-and is restricted to type ``number``, type ``string``, union types constructed
+In addition, |LANG| supports the usage of object literals to initialize the
+value of special type ``Record<K, V>``. The type ``K`` denotes an object key,
+and is restricted to types ``number`` and ``string``, union types constructed
 from these types, and literals of these types.
 
 |CB_BAD|
@@ -1481,7 +1481,7 @@ types languages, the layout of objects is fixed and all instances of the same
 object must share the same code of each method.
 
 If you need to add specific behavior for certain objects, you can create
-separate wrapper functions or use inheritance.
+separate wrapper functions, or use inheritance.
 
 |CB_BAD|
 ~~~~~~~~
@@ -4433,15 +4433,15 @@ The ``Sendable data`` is data whose type belongs to one of the following
 category:
 
 * Primitive types: ``boolean``, ``number``, ``string``, ``bigint``,
-  ``null``, ``undefined``
+  ``null``, ``undefined``;
 
-* ``Sendable`` class or interface
+* ``Sendable`` class or interface;
 
-* Type parameter of generic ``Sendable`` type
+* Type parameter of generic type ``Sendable``;
 
-* Const enum type
+* ``Const enum`` type;
 
-* Union type, whose elements are ``Sendable`` data types
+* Union type with elements that are ``Sendable`` data types.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4509,7 +4509,7 @@ category:
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-|LANG| doesn't allow using definite assignment assertions on properties of
+|LANG| does not allow using definite assignment assertions on properties of
 ``Sendable`` classes.
 
 |CB_NON_COMPLIANT_CODE|
@@ -4622,10 +4622,10 @@ generic ``Sendable`` type.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-|LANG| doesn't support sharing closures at runtime. Therefore, ``Sendable``
+|LANG| does not support sharing closures at runtime. Therefore, ``Sendable``
 classes are not allowed to capture local variable, or use a function or class
 from the same module, as it would create a closure. Only imported variables,
-classes and functions can be used inside a ``Sendable`` class body.
+classes, and functions can be used inside a ``Sendable`` class body.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4704,9 +4704,9 @@ classes and functions can be used inside a ``Sendable`` class body.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-In |LANG|, only ``@Sendable`` decorator is allowed on ``Sendable`` class.
-Additionally, decorators can't be applied to fields, methods, accessors
-or constructor/method parameters of ``Sendable`` class.
+Only ``@Sendable`` decorator is allowed in |LANG| on a ``Sendable`` class.
+In addition, decorators cannot be applied to fields, methods, accessors,
+or constructor/method parameters of a ``Sendable`` class.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4733,8 +4733,8 @@ or constructor/method parameters of ``Sendable`` class.
 
 .. _R159:
 
-|CB_R| Objects of ``Sendable`` type can't be initialized using object literal or array literal
-----------------------------------------------------------------------------------------------
+|CB_R| Objects of ``Sendable`` type cannot be initialized using object literal or array literal
+-----------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-sendable-obj-init``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4746,7 +4746,7 @@ or constructor/method parameters of ``Sendable`` class.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-|LANG| doesn't support initializing objects of ``Sendable`` type with
+|LANG| does not support initializing objects of type ``Sendable`` with
 object literal or array literal.
 
 |CB_NON_COMPLIANT_CODE|
@@ -4806,7 +4806,7 @@ object literal or array literal.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-|LANG| doesn't allow declaring properties in ``Sendable`` classes using
+|LANG| does not allow declaring properties in ``Sendable`` classes by using
 computed values.
 
 |CB_NON_COMPLIANT_CODE|
@@ -4856,7 +4856,7 @@ computed values.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-|LANG| doesn't allow casting ``Non-sendable`` data to ``Sendable`` type.
+|LANG| does not allow casting *non-sendable* data to ``Sendable`` type.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4903,7 +4903,7 @@ computed values.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-|LANG| doesn't support importing a module for side-effects only in a shared
+|LANG| does not support importing a module for side-effects only in a shared
 module.
 
 |CB_NON_COMPLIANT_CODE|
@@ -4943,7 +4943,7 @@ module.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-In |LANG|, only ``Sendable`` entities can be exported in a shared module.
+Only ``Sendable`` entities can be exported in a shared module in |LANG|.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -5017,7 +5017,7 @@ In |LANG|, only ``Sendable`` entities can be exported in a shared module.
 
 **Note: This rule describes restrictions for ArkTS-specific feature**
 
-|LANG| doesn't allow using wildcard exports in shared modules. All exported
+|LANG| does not allow using wildcard exports in shared modules. All exported
 entities must be explicitly specified.
 
 |CB_NON_COMPLIANT_CODE|
@@ -5053,3 +5053,15 @@ entities must be explicitly specified.
 
 * :ref:`R162`
 * :ref:`R163`
+
+.. :comment-begin:
+    The following IDs are RESERVED for special rules working only in
+    the 'interop' mode (undocumented feature), and used internally
+    in ArkTS linter. Therefore, they should NOT be used for regular
+    cookbook recipes:
+
+    R165, R166, R167, R168, R169, R170
+
+    See https://gitee.com/openharmony/arkcompiler_ets_frontend/pulls/2397
+
+.. :comment-end:

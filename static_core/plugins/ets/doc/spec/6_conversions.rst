@@ -99,13 +99,13 @@ into a form that is appropriate for the new type *T*.
 Contexts can be of the following kinds:
 
 -  :ref:`Assignment-like Contexts` where the expression value is bound to a
-   variable.
+   variable;
 
--  :ref:`String Operator Contexts` with ``string`` concatenation (operator ``+``).
+-  :ref:`String Operator Contexts` with ``string`` concatenation (operator ``+``);
 
--  :ref:`Numeric Operator Contexts` with all numeric operators (``+``, ``-``, etc.).
+-  :ref:`Numeric Operator Contexts` with all numeric operators (``+``, ``-``, etc.);
 
--  :ref:`Casting Contexts and Conversions`. i.e., the conversion of an
+-  :ref:`Casting Contexts and Conversions`, i.e., the conversion of an
    expression value to a type explicitly specified by a cast expression (see
    :ref:`Cast Expressions`).
 
