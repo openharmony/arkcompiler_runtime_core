@@ -976,73 +976,66 @@ export final class BigInt {
             throw new Error("BigInt.parseFromString(): provided string is invalid")
         }
 
-        let negative: boolean = (s.charAt(0) == c'-');
-        if (negative) {
-            this.sign = false;
-        } else {
-            this.sign = true;
-        }
+        let firstChar = s.charAt(0)
+        this.sign = firstChar != c'-';
 
-        let len = s.length;
         let start = 0;
-        if (this.negative()) {
+        if (firstChar == c'-' || firstChar == c'+') {
             start = 1;
         }
 
-        let digits = new Vec(0);
-        let isScientific = (s.indexOf(c'e') > 0);
-        let dotPosition: int = s.indexOf(c'.');
-        let decimalsCount: int = 0;
-        for (let i = start; i < len; i++) {
-            if ((s.charAt(i) == c'_')) {
-                continue;
-            }
-            if ((s.charAt(i) == c'.')) {
-                if (!isScientific) {
-                    throw new Error("Can't convert number " + s + " to BigInt because it's not an integer");
-                }
-                continue;
-            }
-            if ((s.charAt(i) == c'e')) {
-                start = i + 1;
-                break;
-            }
-            if (isScientific && (dotPosition > 0) && (i > dotPosition)) {
-                decimalsCount++;
-            }
-
-            digits.pushBack(s.charAt(i) - c'0');
+        let len: int = s.length as int;
+        let shift: int = 0;
+        let expPosition: int = s.indexOf(c'e');
+        if (expPosition > 0) {
+            shift = BigInt.parseInt(s, expPosition + 1, len);
+            len = expPosition;
         }
 
-        if (isScientific) {
-            digits = this.parseSciNotation(s, digits, start, decimalsCount);
+        let digits = new Vec(0);
+        for (let i = start; i < len; i++) {
+            if (s.charAt(i) == c'_') {
+                continue;
+            }
+
+            if (s.charAt(i) == c'.') {
+                shift -= len - i - 1; // Length of fraction part.
+                continue;
+            }
+
+            if (i >= len + shift) { // Check the rest is zeros for negative shift.
+                if (s.charAt(i) != c'0') {
+                    throw new Error("Can't convert number " + s + " to BigInt because it's not an integer");
+                }
+            } else {
+                digits.pushBack(s.charAt(i) - c'0');
+            }
+        }
+
+        // In case of unnormalized float, e.g. 0e-3, append at least one 0.
+        for (let i = 0; i < shift || digits.size() == 0; i++) {
+            digits.pushBack(0);
         }
 
         this.toBytes(digits);
     }
 
-    private parseSciNotation(s: string, digits: Vec, start: int, decimalsCount: int) : Vec {
-        let stringExponent = new String("");
-
-        if (s.charAt(start) == c'-') {
-            digits = new Vec(1, 0);
-            return digits;
-        }
-        // String representation of scientific notation may include exponent sign, e.g. 1e+23, 1e-23
-        if (s.charAt(start) == c'+') {
-            start = start + 1;
-        }
-
-        let intExponent = new Int(0);
-        for (let i = start; i < s.length; ++i) {
-            stringExponent += s.charAt(i);
-            intExponent = intExponent * 10 + (s.charAt(i) - c'0');
+    private static parseInt(s: string, start: int, end: int): int {
+        let value: int = 0;
+        let sign: int = 1;
+        let firstChar = s.charAt(start);
+        if (firstChar == c'-' || firstChar == c'+') {
+            start += 1;
+            if (firstChar == c'-') {
+                sign = -1;
+            }
         }
 
-        for (let i = 0; i < (intExponent - decimalsCount); ++i) {
-            digits.pushBack(0);
+        for (let i = start; i < end; ++i) {
+            value = value * 10 + (s.charAt(i) - c'0');
         }
-        return digits;
+
+        return sign * value;
     }
 
     private toBytes(digits: Vec) {
@@ -1076,23 +1069,21 @@ export final class BigInt {
     }
 
     private validate(s: string): boolean {
-        let negative = false;
-        let isScientific = false;
+        let expPosition = -1;
         let isDouble = false;
         for (let i = 0; i < s.length; i++) {
             let c = s.charAt(i);
             if (Char.isDecDigit(c)) {
             } else if ((c == c'_') && (i > 0) && (i < s.length - 1)) {
                 // Underscore, allowed only between digits
-            } else if ((c == c'-') && (i == 0) && (!negative)) {
-                // Minus sign, allowed at the beginning of the string
-                negative = true;
-            } else if (((c == c'-') || (c == c'+')) && (isScientific)) {
-                // Minus or plus sign, allowed in scientific notation
-            } else if ((c == c'.') && !isDouble) {
+            } else if ((i == 0 || i == expPosition) && (c == c'-' || c == c'+')) {
+                // Minus or plus sign, allowed at the beginning of the string
+                // or at the beggining of the scientific notation
+            } else if (c == c'.' && !isDouble && expPosition < 0) {
+                // Fraction is not allowed in exponential part
                 isDouble = true;
-            } else if ((c == c'e') && !isScientific) {
-                isScientific = true;                 
+            } else if ((c == c'e') && expPosition < 0) {
+                expPosition = i + 1;
             } else {
                 // Invalid character
                 return false;
