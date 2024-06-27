@@ -51,7 +51,8 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_001, Te
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "module-regular-import.abc";
     std::vector<std::string> expected_module_literals = {
-        "ModuleTag: REGULAR_IMPORT, local_name: a, import_name: a, module_request: ./module-export-file.js"
+        "\tMODULE_REQUEST_ARRAY: {\n\t\t0 : ./module-export-file.js,\n\t}",
+        "\tModuleTag: REGULAR_IMPORT, local_name: a, import_name: a, module_request: ./module-export-file.js"
     };
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(file_name, false, false);
@@ -70,7 +71,8 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_002, Te
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "module-namespace-import.abc";
     std::vector<std::string> expected_module_literals = {
-        "ModuleTag: NAMESPACE_IMPORT, local_name: ns, module_request: ./module-export-file.js"
+        "\tMODULE_REQUEST_ARRAY: {\n\t\t0 : ./module-export-file.js,\n\t}",
+        "\tModuleTag: NAMESPACE_IMPORT, local_name: ns, module_request: ./module-export-file.js"
     };
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(file_name, false, false);
@@ -89,7 +91,8 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_003, Te
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "module-local-export.abc";
     std::vector<std::string> expected_module_literals = {
-        "ModuleTag: LOCAL_EXPORT, local_name: c, export_name: c"
+        "\tMODULE_REQUEST_ARRAY: {\n\t}",
+        "\tModuleTag: LOCAL_EXPORT, local_name: c, export_name: c"
     };
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(file_name, false, false);
@@ -108,7 +111,8 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_004, Te
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "module-indirect-export.abc";
     std::vector<std::string> expected_module_literals = {
-        "ModuleTag: INDIRECT_EXPORT, export_name: a, import_name: a, module_request: ./module-import-file.js"
+        "\tMODULE_REQUEST_ARRAY: {\n\t\t0 : ./module-import-file.js,\n\t}",
+        "\tModuleTag: INDIRECT_EXPORT, export_name: a, import_name: a, module_request: ./module-import-file.js"
     };
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(file_name, false, false);
@@ -127,7 +131,29 @@ HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_005, Te
 {
     const std::string file_name = GRAPH_TEST_ABC_DIR "module-start-export.abc";
     std::vector<std::string> expected_module_literals = {
-        "ModuleTag: STAR_EXPORT, module_request: ./module-import-file.js"
+        "\tMODULE_REQUEST_ARRAY: {\n\t\t0 : ./module-import-file.js,\n\t}",
+        "\tModuleTag: STAR_EXPORT, module_request: ./module-import-file.js"
+    };
+    panda::disasm::Disassembler disasm {};
+    disasm.Disassemble(file_name, false, false);
+    std::vector<std::string> module_literals = disasm.GetModuleLiterals();
+    bool has_module_literal = ValidateModuleLiteral(module_literals, expected_module_literals);
+    EXPECT_TRUE(has_module_literal);
+}
+
+/**
+* @tc.name: disassembler_module_literal_test_005
+* @tc.desc: get module literal of abc file.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(DisassemblerModuleLiteralTest, disassembler_module_literal_test_006, TestSize.Level1)
+{
+    const std::string file_name = GRAPH_TEST_ABC_DIR "module-regular-import-local-export.abc";
+    std::vector<std::string> expected_module_literals = {
+        "\tMODULE_REQUEST_ARRAY: {\n\t\t0 : ./module-indirect-export.js,\n\t}",
+        "\tModuleTag: REGULAR_IMPORT, local_name: a, import_name: a, module_request: ./module-indirect-export.js",
+        "\tModuleTag: LOCAL_EXPORT, local_name: b, export_name: b"
     };
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(file_name, false, false);
