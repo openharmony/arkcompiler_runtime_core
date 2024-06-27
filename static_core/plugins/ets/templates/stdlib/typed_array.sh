@@ -12,23 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -xeo pipefail
+set -e -o pipefail
 
 readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 readonly GENPATH="${1:-"${SCRIPT_DIR}/../../stdlib"}/escompat"
-readonly ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../../../.."}
+readonly VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
+JINJA_PATH="${VENV_DIR}/bin/jinja2"
+if ! [[ -f "${JINJA_PATH}" ]]; then
+    JINJA_PATH="jinja2"
+fi
 
-source "${ROOT_DIR}/scripts/python/venv-utils.sh"
-activate_venv
 mkdir -p "${GENPATH}"
 
 echo "Generating $GENPATH/DataView.ets"
-jinja2 "${SCRIPT_DIR}/DataView.ets.j2" -o "$GENPATH/DataView.ets"
+"${JINJA_PATH}" "${SCRIPT_DIR}/DataView.ets.j2" -o "$GENPATH/DataView.ets"
 
 echo "Generating $GENPATH/TypedArrays.ets"
-jinja2 "${SCRIPT_DIR}/typedArray.ets.j2" -o "$GENPATH/TypedArrays.ets"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedArray.ets.j2" -o "$GENPATH/TypedArrays.ets"
 
 echo "Generating $GENPATH/TypedUArrays.ets"
-jinja2 "${SCRIPT_DIR}/typedUArray.ets.j2" -o "$GENPATH/TypedUArrays.ets"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedUArray.ets.j2" -o "$GENPATH/TypedUArrays.ets"
 
-deactivate_venv
+exit 0
