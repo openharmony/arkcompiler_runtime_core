@@ -86,19 +86,6 @@ bool Parser::ParseFieldName()
     if (PrefixedValidName()) {
         std::string fieldName = std::string(context_.GiveToken().data(), context_.GiveToken().length());
 
-        auto matchNames = [&fieldName](const pandasm::Field &f) { return fieldName == f.name; };
-        const auto iter = std::find_if(currRecord_->fieldList.begin(), currRecord_->fieldList.end(), matchNames);
-        if (iter != currRecord_->fieldList.end()) {
-            if (iter->isDefined) {
-                context_.err =
-                    GetError("Repeating field names in the same record.", Error::ErrorType::ERR_REPEATING_FIELD_NAME);
-
-                return false;
-            }
-
-            currRecord_->fieldList.erase(iter);
-        }
-
         currFld_ = &(currRecord_->fieldList[currRecord_->fieldList.size() - 1]);
 
         currFld_->name = fieldName;
@@ -162,6 +149,16 @@ bool Parser::ParseFieldType()
     return true;
 }
 
+bool IsSameField(const pandasm::Field &field, std::string_view fieldName, bool isStatic)
+{
+    return field.IsStatic() == isStatic && field.name == fieldName;
+}
+
+bool IsSameField(const pandasm::Field &field1, const pandasm::Field &field2)
+{
+    return field1.IsStatic() == field2.IsStatic() && field1.name == field2.name;
+}
+
 bool Parser::ParseRecordField()
 {
     if (!ParseFieldType()) {
@@ -186,6 +183,20 @@ bool Parser::ParseRecordField()
 
     metadata_ = currFld_->metadata.get();
     ParseMetaDef();
+
+    auto matchNames = [currFld = currFld_](const pandasm::Field &f) { return IsSameField(f, *currFld); };
+    auto identicalField = currRecord_->fieldList.end() - 1;
+    const auto iter = std::find_if(currRecord_->fieldList.begin(), identicalField, matchNames);
+    if (iter != identicalField) {
+        if (iter->isDefined) {
+            context_.err =
+                GetError("Repeating field names in the same record.", Error::ErrorType::ERR_REPEATING_FIELD_NAME);
+
+            return false;
+        }
+
+        currRecord_->fieldList.erase(iter);
+    }
 
     return context_.Mask();
 }
@@ -1862,8 +1873,11 @@ bool Parser::ParseOperandField()
         AddObjectInTable(false, program_.recordTable);
         itRecord = program_.recordTable.find(recordName);
     }
-    auto itField = std::find_if(itRecord->second.fieldList.begin(), itRecord->second.fieldList.end(),
-                                [&fieldName](pandasm::Field &field) { return fieldName == field.name; });
+
+    auto isStatic = currIns_->HasFlag(InstFlags::STATIC_FIELD_ID);
+    auto itField = std::find_if(
+        itRecord->second.fieldList.begin(), itRecord->second.fieldList.end(),
+        [&fieldName, &isStatic](const pandasm::Field &field) { return IsSameField(field, fieldName, isStatic); });
     if (!fieldName.empty() && itField == itRecord->second.fieldList.end()) {
         itRecord->second.fieldList.emplace_back(program_.lang);
         auto &field = itRecord->second.fieldList.back();
@@ -1873,6 +1887,9 @@ bool Parser::ParseOperandField()
         field.boundLeft = context_.tokens[context_.number - 1].boundLeft + recordName.length() + 1;
         field.boundRight = context_.tokens[context_.number - 1].boundRight;
         field.isDefined = false;
+        if (isStatic) {
+            field.metadata->SetAccessFlags(ACC_STATIC);
+        }
     }
 
     currIns_->ids.emplace_back(p.data(), p.length());

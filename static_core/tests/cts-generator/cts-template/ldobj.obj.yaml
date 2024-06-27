@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -190,15 +190,11 @@ tests:
           # resolves to a static object field
           - values:
             - W.static_field
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: [compile-failure]
           # resolves to a static object array
           - values:
             - W.static_array
-            tags: [verifier]
-            runner-options: ['verifier-failure', 'verifier-config']
-            bugid: ['1324', '1828']
+            runner-options: [compile-failure]
           # resolves to a non-existing object field
           - values:
             - W.field_not_exists

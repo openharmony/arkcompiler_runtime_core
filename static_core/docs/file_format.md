@@ -266,6 +266,7 @@ Format:
 | `class_idx`        | `uint16_t`      | Index of the declaring class in a [`ClassRegionIndex`](#classregionindex) structure. Corresponding index entry must be an offset to a [Class](#class) or a [ForeignClass](#foreignclass). |
 | `type_idx`         | `uint16_t`      | Index of the field's type in a [`ClassRegionIndex`](#classregionindex) structure. Corresponding index entry must be in [FieldType](#fieldtype) format. |
 | `name_off`         | `uint32_t`      | Offset to the name of the field. The offset must point to a [String](#string) |
+| `access_flags`     | `uleb128`       | Access flags of the field. The value must be a combination of the [Field access flags](#field-access-flags). For foreign fields, only `ACC_STATIC` flag is used, other flags should be ignored. |
 
 Note: Proper region index to resolve `class_idx` and `type_idx` can be found by foreign field's offset.
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,11 @@ struct Field {
     size_t boundLeft = 0;
     size_t boundRight = 0;
     bool isDefined = true;
+
+    bool IsStatic() const
+    {
+        return (metadata->GetAccessFlags() & ACC_STATIC) != 0;
+    }
 
     explicit Field(ark::panda_file::SourceLang lang)
         : metadata(extensions::MetadataExtension::CreateFieldMetadata(lang))

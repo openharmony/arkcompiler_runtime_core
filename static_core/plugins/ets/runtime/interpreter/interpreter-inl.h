@@ -114,7 +114,7 @@ public:
             auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()), false);
             InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
@@ -151,7 +151,7 @@ public:
             auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()), false);
             InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
@@ -188,7 +188,7 @@ public:
             auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()), false);
             InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
             Field *field = GetFieldByName<true>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                 this->GetInst().GetAddress(), klass);
@@ -227,7 +227,7 @@ public:
             auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()), false);
             InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
@@ -264,7 +264,7 @@ public:
             auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()), false);
             InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);
@@ -301,7 +301,7 @@ public:
             auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
             auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
             auto caller = this->GetFrame()->GetMethod();
-            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()));
+            auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id.AsIndex()), false);
             InterpreterCache *cache = this->GetThread()->GetInterpreterCache();
             Field *field = GetFieldByName<false>(cache->GetEntry(this->GetInst().GetAddress()), caller, rawField,
                                                  this->GetInst().GetAddress(), klass);

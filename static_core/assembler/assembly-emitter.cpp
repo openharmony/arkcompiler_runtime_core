@@ -796,6 +796,11 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Function &fun
             continue;
         }
 
+        if (insn.HasFlag(InstFlags::STATIC_FIELD_ID)) {
+            AddBytecodeIndexDependencies(method, insn, entities.staticFieldItems);
+            continue;
+        }
+
         if (insn.HasFlag(InstFlags::TYPE_ID)) {
             AddBytecodeIndexDependencies(method, insn, entities.classItems);
             continue;
@@ -1001,8 +1006,9 @@ bool AsmEmitter::HandleRecordAsForeign(
             SetLastError("Field " + fullFieldName + " has undefined type");
             return false;
         }
-        auto *field = items->CreateItem<ForeignFieldItem>(foreignRecord, fieldName, typeItem);
-        entities.fieldItems.insert({fullFieldName, field});
+        auto *field =
+            items->CreateItem<ForeignFieldItem>(foreignRecord, fieldName, typeItem, f.metadata->GetAccessFlags());
+        UpdateFieldList(entities, fullFieldName, field);
     }
     return true;
 }
@@ -1054,6 +1060,17 @@ bool AsmEmitter::HandleInterfaces(ItemContainer *items, const Program &program, 
 }
 
 /* static */
+void AsmEmitter::UpdateFieldList(AsmEmitter::AsmEntityCollections &entities, const std::string &fullFieldName,
+                                 panda_file::BaseFieldItem *field)
+{
+    if (field->IsStatic()) {
+        entities.staticFieldItems.emplace(fullFieldName, field);
+    } else {
+        entities.fieldItems.emplace(fullFieldName, field);
+    }
+}
+
+/* static */
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
                               const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
@@ -1069,11 +1086,11 @@ bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmE
         }
         BaseFieldItem *field;
         if (f.metadata->IsForeign()) {
-            field = items->CreateItem<ForeignFieldItem>(record, fieldName, typeItem);
+            field = items->CreateItem<ForeignFieldItem>(record, fieldName, typeItem, f.metadata->GetAccessFlags());
         } else {
             field = record->AddField(fieldName, typeItem, f.metadata->GetAccessFlags());
         }
-        entities.fieldItems.insert({fullFieldName, field});
+        UpdateFieldList(entities, fullFieldName, field);
     }
     return true;
 }
@@ -1340,7 +1357,8 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
 
         for (const auto &field : record.fieldList) {
             std::string fieldName = record.name + '.' + field.name;
-            auto *fieldItem = static_cast<FieldItem *>(Find(entities.fieldItems, fieldName));
+            auto *fieldItem = !field.IsStatic() ? static_cast<FieldItem *>(Find(entities.fieldItems, fieldName))
+                                                : static_cast<FieldItem *>(Find(entities.staticFieldItems, fieldName));
             if (!AddAnnotations(fieldItem, items, *field.metadata, program, entities)) {
                 SetLastError("Cannot emit annotations for field " + fieldName + ": " + GetLastError());
                 return false;
@@ -1475,6 +1493,10 @@ void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCol
         maps->fields.insert({field->GetFileId().GetOffset(), std::string(name)});
     }
 
+    for (const auto &[name, field] : entities.staticFieldItems) {
+        maps->fields.insert({field->GetFileId().GetOffset(), std::string(name)});
+    }
+
     for (const auto &[name, cls] : entities.classItems) {
         maps->classes.insert({cls->GetFileId().GetOffset(), std::string(name)});
     }
@@ -1535,8 +1557,8 @@ bool AsmEmitter::EmitFunctions(ItemContainer *items, const Program &program,
 
         auto emitter = BytecodeEmitter {};
         auto *method = static_cast<MethodItem *>(Find(entities.methodItems, name));
-        if (!func.Emit(emitter, method, entities.methodItems, entities.fieldItems, entities.classItems,
-                       entities.stringItems, entities.literalarrayItems)) {
+        if (!func.Emit(emitter, method, entities.methodItems, entities.fieldItems, entities.staticFieldItems,
+                       entities.classItems, entities.stringItems, entities.literalarrayItems)) {
             SetLastError("Internal error during emitting function: " + func.name);
             return false;
         }
@@ -1725,6 +1747,7 @@ TypeItem *AsmEmitter::GetTypeItem(
 bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
                     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
                     const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
+                    const std::unordered_map<std::string, panda_file::BaseFieldItem *> &staticFields,
                     const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
                     const std::unordered_map<std::string_view, panda_file::StringItem *> &strings,
                     const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays) const
@@ -1745,7 +1768,7 @@ bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
         }
 
         if (insn.opcode != Opcode::INVALID) {
-            if (!insn.Emit(emitter, method, methods, fields, classes, strings, literalarrays, labels)) {
+            if (!insn.Emit(emitter, method, methods, fields, staticFields, classes, strings, literalarrays, labels)) {
                 return false;
             }
         }

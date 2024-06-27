@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -307,8 +307,8 @@ public:
         return ark::panda_file::IsArrayDescriptor(abcFile_.GetStringData(cid).data);
     }
 
-    FieldPtr ResolveField([[maybe_unused]] MethodPtr method, size_t id, [[maybe_unused]] bool allowExternal,
-                          uint32_t * /* class_id */) override
+    FieldPtr ResolveField([[maybe_unused]] MethodPtr method, size_t id, [[maybe_unused]] bool isStatic,
+                          [[maybe_unused]] bool allowExternal, uint32_t * /* class_id */) override
     {
         return reinterpret_cast<FieldPtr>(id);
     }

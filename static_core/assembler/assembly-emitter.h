@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@ public:
     struct AsmEntityCollections {
         std::unordered_map<std::string, panda_file::BaseMethodItem *> methodItems;
         std::unordered_map<std::string, panda_file::BaseFieldItem *> fieldItems;
+        std::unordered_map<std::string, panda_file::BaseFieldItem *> staticFieldItems;
         std::unordered_map<std::string, panda_file::BaseClassItem *> classItems;
         std::unordered_map<std::string_view, panda_file::StringItem *> stringItems;
         std::unordered_map<std::string, panda_file::LiteralArrayItem *> literalarrayItems;
@@ -92,6 +93,8 @@ private:
                                  const Record &rec, panda_file::ClassItem *record);
     static bool HandleInterfaces(panda_file::ItemContainer *items, const Program &program, const std::string &name,
                                  const Record &rec, panda_file::ClassItem *record);
+    static void UpdateFieldList(AsmEmitter::AsmEntityCollections &entities, const std::string &fullFieldName,
+                                panda_file::BaseFieldItem *field);
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool HandleFields(
         panda_file::ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,

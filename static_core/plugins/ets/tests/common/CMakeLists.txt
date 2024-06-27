@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,7 @@ add_subdirectory(default_import)
 add_subdirectory(export)
 add_subdirectory(export_with_alias)
 add_subdirectory(import_static_member)
+add_subdirectory(import_same_name_fields)
 add_subdirectory(re_export)
 add_subdirectory(recursive_import)
 add_subdirectory(import_external_overload)

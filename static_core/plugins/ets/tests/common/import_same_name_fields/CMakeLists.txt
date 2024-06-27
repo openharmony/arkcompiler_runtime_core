@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,18 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.record W {
-  i32   static_field  <static>
-}
-.function void W.ctor(W a0) <ctor> {
-  return.void            
-}
+if (PANDA_TARGET_ARM32)
+    return()
+endif()
 
-.function i32 main() {
-  initobj.short W.ctor
-  sta.obj v0
-  ldai 1
-  stobj v0, W.static_field
-  ldai 0
-  return
-}
+run_int_ets_code(import_same_name_fields ${CMAKE_CURRENT_BINARY_DIR}/import_same_name_fields SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/import.sts;
+	${CMAKE_CURRENT_SOURCE_DIR}/class_module.sts)

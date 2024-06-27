@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,8 @@
 %           result += "array_0"
 %       elsif properties.include?("field_id")
 %           result += "A.fld"
+%       elsif properties.include?("static_field_id")
+%           result += "A.static_fld"
 %       else
 %       end
 %   end
@@ -78,6 +80,7 @@ TEST(InstructionsTest, TestInsIsa)
     auto program = ark::pandasm::Parser().Parse(R"(
 .record A {
     u1 fld
+    u1 static_fld <static>
 }
 
 .function A A.init() {

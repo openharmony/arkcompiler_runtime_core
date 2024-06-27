@@ -160,7 +160,7 @@ extern "C" Field *LookupFieldByNameEntrypoint(InterpreterCache::Entry *entry, Ob
 {
     auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
     if (UNLIKELY(metaField == nullptr)) {
         HandlePendingException();
         return nullptr;
@@ -174,7 +174,7 @@ Method *LookupGetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeade
 {
     auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
     if (UNLIKELY(metaField == nullptr)) {
         HandlePendingException();
         return nullptr;
@@ -188,7 +188,7 @@ Method *LookupSetterByNameEntrypoint(InterpreterCache::Entry *entry, ObjectHeade
 {
     auto current = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    Field *metaField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
     if (UNLIKELY(metaField == nullptr)) {
         HandlePendingException();
         return nullptr;
@@ -236,7 +236,7 @@ extern "C" void ThrowEtsExceptionNoSuchGetterEntrypoint(ObjectHeader *obj, uint3
 {
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
     LookUpException<true>(klass, rawField);
 }
 
@@ -244,7 +244,7 @@ extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint3
 {
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
-    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id));
+    auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
     LookUpException<false>(klass, rawField);
 }
 

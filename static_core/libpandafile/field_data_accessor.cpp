@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,14 +32,13 @@ FieldDataAccessor::FieldDataAccessor(const File &pandaFile, File::EntityId field
     typeOff_ = pandaFile.ResolveClassIndex(fieldId, typeIdx).GetOffset();
 
     nameOff_ = helpers::Read<ID_SIZE>(&sp);
+    accessFlags_ = helpers::ReadULeb128(&sp);
 
     isExternal_ = pandaFile_.IsExternal(fieldId_);
     if (!isExternal_) {
-        accessFlags_ = helpers::ReadULeb128(&sp);
         taggedValuesSp_ = sp;
         size_ = 0;
     } else {
-        accessFlags_ = 0;
         size_ = pandaFile_.GetIdFromPointer(sp.data()).GetOffset() - fieldId_.GetOffset();
     }
 }
