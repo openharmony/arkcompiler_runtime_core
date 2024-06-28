@@ -1766,6 +1766,17 @@
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-lmbd.ets
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/call-meth.ets
 
+# 11978 casting from Double.MIN_VALUE
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_121.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_122.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_162.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_163.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_202.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_203.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_284.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_40.ets
+06.contexts_and_conversions/04.casting_contexts_and_conversions/01.numeric_casting_conversions/num_cc_81.ets
+
 # 17110 failed while merging 05.09 dev branch shuttle
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_6.ets
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-clss_6.ets

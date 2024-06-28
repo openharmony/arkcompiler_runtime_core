@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,19 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+{%- for c in cases %}
+{%- for v in c['values'] %}
 
-{% for c in cases %}
 /*---
-desc: Casting contexts allow the use of the widening primitive conversion.
+desc: A numeric casting conversion occurs if the target type and the expression type are both numeric or char.
+params: from {{c.from_type}} to {{c.to_type}}
 ---*/
+let s{{loop.index}}: {{c.from_type}} = {{v.sval}}
+let d{{loop.index}}: {{c.to_type}} = {{v.dval}}
 
 function main(): int {
-  {%- for t in c['types'] %}
-  let v{{loop.index}}: {{t.src_type}} = {{t.src_val|safe}};
-  if (v{{loop.index}} as {{t.dst_type}} != {{t.dst_val}} as {{t.dst_type}}) {
-      return 1;
-  }
-  {%- endfor %}
-  return 0;
+    let d: {{c.to_type}}
+    d = s{{loop.index}} as {{c.to_type}}
+    if (d != d{{loop.index}}) {
+        return 1
+    }
+    return 0
 }
-{% endfor %}
+{%- endfor %}
+{%- endfor %}
