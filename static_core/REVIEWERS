@@ -11,6 +11,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+* @ctw-ian
+/abc2program/ @ctw-ian
+/assembler/ @ctw-ian
+/bytecode_optimizer/ @ctw-ian
+/compiler/ @ctw-ian
+/disassembler/ @ctw-ian
+/isa/ @ctw-ian
+/ldscripts/ @gitee-dakeQI
+/libark_defect_scan_aux/ @gitee-dakeQI
+/libpandabase/ @gitee-dakeQI
+/libpandafile/ @gitee-dakeQI
+/libziparchive/ @gitee-dakeQI
+/panda/ @gitee-dakeQI
+/pandastdlib/ @ctw-ian
+/platforms/ @gitee-dakeQI
+/templates/ @ctw-ian
+/verifier/ @ctw-ian
+
 static_core/ @dmitriitr @Prof1983 @igelhaus @ragnvald
 
 static_core/assembler/                @igelhaus
