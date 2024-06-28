@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 #include "debug_info_extractor.h"
 #include "optimizer/ir_builder/inst_builder.h"
 #include "tooling/pt_location.h"
+
+#include "libpandabase/utils/bit_utils.h"
 
 namespace ark::tooling::inspector {
 void DebugInfoCache::AddPandaFile(const panda_file::File &file)
@@ -197,23 +199,23 @@ static TypedValue CreateTypedValueFromReg(uint64_t reg, panda_file::Type::TypeId
         case panda_file::Type::TypeId::VOID:
             return TypedValue::Void();
         case panda_file::Type::TypeId::U1:
-            return TypedValue::U1((reg & 0x1ULL) != 0);
+            return TypedValue::U1(static_cast<bool>(ExtractBits(reg, 0U, 1U)));
         case panda_file::Type::TypeId::I8:
-            return TypedValue::I8(reg & 0xffULL);
+            return TypedValue::I8(static_cast<int8_t>(ExtractBits(reg, 0U, 8U)));
         case panda_file::Type::TypeId::U8:
-            return TypedValue::U8(reg & 0xffULL);
+            return TypedValue::U8(static_cast<uint8_t>(ExtractBits(reg, 0U, 8U)));
         case panda_file::Type::TypeId::I16:
-            return TypedValue::I16(reg & 0xffffULL);
+            return TypedValue::I16(static_cast<int16_t>(ExtractBits(reg, 0U, 16U)));
         case panda_file::Type::TypeId::U16:
-            return TypedValue::U16(reg & 0xffffULL);
+            return TypedValue::U16(static_cast<uint16_t>(ExtractBits(reg, 0U, 16U)));
         case panda_file::Type::TypeId::I32:
-            return TypedValue::I32(reg & 0xffffffffULL);
+            return TypedValue::I32(static_cast<int32_t>(ExtractBits(reg, 0U, 32U)));
         case panda_file::Type::TypeId::U32:
-            return TypedValue::U32(reg & 0xffffffffULL);
+            return TypedValue::U32(static_cast<uint32_t>(ExtractBits(reg, 0U, 32U)));
         case panda_file::Type::TypeId::F32:
-            return TypedValue::F32(bit_cast<float>(static_cast<int32_t>(reg & 0xffffffffULL)));
+            return TypedValue::F32(bit_cast<float>(static_cast<int32_t>(ExtractBits(reg, 0U, 32U))));
         case panda_file::Type::TypeId::F64:
-            return TypedValue::F64(bit_cast<double>(reg & 0xffffffffULL));
+            return TypedValue::F64(bit_cast<double>(reg));
         case panda_file::Type::TypeId::I64:
             return TypedValue::I64(reg);
         case panda_file::Type::TypeId::U64:
