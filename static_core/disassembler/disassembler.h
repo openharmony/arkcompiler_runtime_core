@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,7 +85,7 @@ private:
     void DisassembleImpl(const bool quiet = false, const bool skipStrings = false);
     static inline bool IsSystemType(const std::string &typeName);
 
-    void GetRecord(pandasm::Record *record, const panda_file::File::EntityId &recordId);
+    void GetRecord(pandasm::Record &record, const panda_file::File::EntityId &recordId);
     void AddMethodToTables(const panda_file::File::EntityId &methodId);
     void GetLiteralArray(pandasm::LiteralArray *litArray, size_t index);
     template <typename T>
@@ -97,10 +97,11 @@ private:
     static inline bool IsPandasmFriendly(char c);
     void GetLiteralArrays();
     void GetRecords();
-    void GetFields(pandasm::Record *record, const panda_file::File::EntityId &recordId);
+    void GetFields(pandasm::Record &record, const panda_file::File::EntityId &recordId);
 
     void GetField(pandasm::Field &field, const panda_file::FieldDataAccessor &fieldAccessor);
     void AddExternalFieldsToRecords();
+    void AddExternalFieldsInfoToRecords();
 
     void GetMethods(const panda_file::File::EntityId &recordId);
     void GetParams(pandasm::Function *method, const panda_file::File::EntityId &protoId) const;
@@ -242,6 +243,7 @@ private:
     std::map<std::string, panda_file::File::EntityId> methodNameToId_ {};
 
     std::map<std::string, std::vector<pandasm::Field>> externalFieldTable_ {};
+    std::map<std::string, std::vector<std::string>> externalFieldsInfoTable_ {};
 
     ProgAnnotations progAnn_ {};
 

@@ -170,6 +170,8 @@ void Disassembler::CollectInfo()
     for (const auto &pair : methodNameToId_) {
         GetMethodInfo(pair.second, &progInfo_.methodsInfo[pair.first]);
     }
+
+    AddExternalFieldsInfoToRecords();
 }
 
 void Disassembler::Serialize(std::ostream &os, bool addSeparators, bool printInformation) const
@@ -305,21 +307,15 @@ inline bool Disassembler::IsSystemType(const std::string &typeName)
     return isArrayType || isGlobal;
 }
 
-void Disassembler::GetRecord(pandasm::Record *record, const panda_file::File::EntityId &recordId)
+void Disassembler::GetRecord(pandasm::Record &record, const panda_file::File::EntityId &recordId)
 {
     LOG(DEBUG, DISASSEMBLER) << "\n[getting record]\nid: " << recordId << " (0x" << std::hex << recordId << ")";
 
-    if (record == nullptr) {
-        LOG(ERROR, DISASSEMBLER) << "> nullptr recieved, but record ptr expected!";
+    record.name = GetFullRecordName(recordId);
 
-        return;
-    }
+    LOG(DEBUG, DISASSEMBLER) << "name: " << record.name;
 
-    record->name = GetFullRecordName(recordId);
-
-    LOG(DEBUG, DISASSEMBLER) << "name: " << record->name;
-
-    GetMetaData(record, recordId);
+    GetMetaData(&record, recordId);
 
     if (!file_->IsExternal(recordId)) {
         GetMethods(recordId);
@@ -561,7 +557,7 @@ void Disassembler::GetRecords()
         }
 
         pandasm::Record record("", fileLanguage_);
-        GetRecord(&record, recordId);
+        GetRecord(record, recordId);
 
         if (prog_.recordTable.find(record.name) == prog_.recordTable.end()) {
             recordNameToId_.emplace(record.name, recordId);
@@ -581,7 +577,7 @@ void Disassembler::GetField(pandasm::Field &field, const panda_file::FieldDataAc
     GetMetaData(&field, fieldAccessor.GetFieldId());
 }
 
-void Disassembler::GetFields(pandasm::Record *record, const panda_file::File::EntityId &recordId)
+void Disassembler::GetFields(pandasm::Record &record, const panda_file::File::EntityId &recordId)
 {
     panda_file::ClassDataAccessor classAccessor {*file_, recordId};
 
@@ -590,24 +586,35 @@ void Disassembler::GetFields(pandasm::Record *record, const panda_file::File::En
 
         GetField(field, fieldAccessor);
 
-        record->fieldList.push_back(std::move(field));
+        record.fieldList.push_back(std::move(field));
     });
 }
 
 void Disassembler::AddExternalFieldsToRecords()
 {
-    for (auto &[record_name, record] : prog_.recordTable) {
-        auto &[unused, field_list] = *(externalFieldTable_.find(record_name));
-        (void)unused;
-        if (field_list.empty()) {
+    for (auto &[recordName, record] : prog_.recordTable) {
+        auto iter = externalFieldTable_.find(recordName);
+        if (iter == externalFieldTable_.end() || iter->second.empty()) {
             continue;
         }
-        for (auto &fieldIter : field_list) {
-            if (!fieldIter.name.empty()) {
-                record.fieldList.push_back(std::move(fieldIter));
-            }
+        for (auto &fieldIter : iter->second) {
+            record.fieldList.push_back(std::move(fieldIter));
         }
-        externalFieldTable_.erase(record_name);
+        externalFieldTable_.erase(recordName);
+    }
+}
+
+void Disassembler::AddExternalFieldsInfoToRecords()
+{
+    for (auto &[recordName, recordInfo] : progInfo_.recordsInfo) {
+        auto iter = externalFieldsInfoTable_.find(recordName);
+        if (iter == externalFieldsInfoTable_.end() || iter->second.empty()) {
+            continue;
+        }
+        for (auto &info : iter->second) {
+            recordInfo.fieldsInfo.push_back(std::move(info));
+        }
+        externalFieldsInfoTable_.erase(recordName);
     }
 }
 
@@ -1159,10 +1166,24 @@ std::string Disassembler::GetFullRecordName(const panda_file::File::EntityId &cl
     return type.GetPandasmName();
 }
 
+static constexpr size_t DEFAULT_OFFSET_WIDTH = 4;
+
+static void GetFieldInfo(const panda_file::FieldDataAccessor &fieldAccessor, std::stringstream &ss)
+{
+    ss << "offset: 0x" << std::setfill('0') << std::setw(DEFAULT_OFFSET_WIDTH) << std::hex << fieldAccessor.GetFieldId()
+       << ", type: 0x" << fieldAccessor.GetType();
+}
+
+static std::string GetFieldInfo(const panda_file::FieldDataAccessor &fieldAccessor)
+{
+    std::stringstream ss;
+    ss << "offset: 0x" << std::setfill('0') << std::setw(DEFAULT_OFFSET_WIDTH) << std::hex << fieldAccessor.GetFieldId()
+       << ", type: 0x" << fieldAccessor.GetType();
+    return ss.str();
+}
+
 void Disassembler::GetRecordInfo(const panda_file::File::EntityId &recordId, RecordInfo *recordInfo) const
 {
-    constexpr size_t DEFAULT_OFFSET_WIDTH = 4;
-
     if (file_->IsExternal(recordId)) {
         return;
     }
@@ -1178,8 +1199,7 @@ void Disassembler::GetRecordInfo(const panda_file::File::EntityId &recordId, Rec
     ss.str(std::string());
 
     classAccessor.EnumerateFields([&](panda_file::FieldDataAccessor &fieldAccessor) -> void {
-        ss << "offset: 0x" << std::setfill('0') << std::setw(DEFAULT_OFFSET_WIDTH) << std::hex
-           << fieldAccessor.GetFieldId() << ", type: 0x" << fieldAccessor.GetType();
+        GetFieldInfo(fieldAccessor, ss);
 
         recordInfo->fieldsInfo.push_back(ss.str());
 
@@ -1189,8 +1209,6 @@ void Disassembler::GetRecordInfo(const panda_file::File::EntityId &recordId, Rec
 
 void Disassembler::GetMethodInfo(const panda_file::File::EntityId &methodId, MethodInfo *methodInfo) const
 {
-    constexpr size_t DEFAULT_OFFSET_WIDTH = 4;
-
     panda_file::MethodDataAccessor methodAccessor {*file_, methodId};
     std::stringstream ss;
 
@@ -1743,12 +1761,17 @@ void Disassembler::CollectExternalFields(const panda_file::FieldDataAccessor &fi
 
     pandasm::Field field(fileLanguage_);
     GetField(field, fieldAccessor);
+    if (field.name.empty()) {
+        return;
+    }
 
     auto &fieldList = externalFieldTable_[recordName];
     auto retField = std::find_if(fieldList.begin(), fieldList.end(),
                                  [&field](pandasm::Field &fieldFromList) { return field.name == fieldFromList.name; });
     if (retField == fieldList.end()) {
-        fieldList.push_back(std::move(field));
+        fieldList.emplace_back(std::move(field));
+
+        externalFieldsInfoTable_[recordName].emplace_back(GetFieldInfo(fieldAccessor));
     }
 }
 
