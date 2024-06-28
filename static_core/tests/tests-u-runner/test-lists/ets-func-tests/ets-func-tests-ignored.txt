@@ -1,3 +1,15 @@
+### Issue 17069
+escompat/ArrayTest2.ets
+### Issue 17070
+escompat/escompat_Array_Test_escompat_Array.ets
+### Issue 17598
+escompat/escompat_Array_Test_escompat_Array_001.ets
+### Issue 1788
+escompat/escompat_Array_Test_escompat_Array_002.ets
+### Issue 17071
+escompat/escompat_Array_Test_escompat_Array_003.ets
+### Issue 16444
+std/core/Object.ets
 std/core/std_core_string_String_fromCharCode_005.ets
 std/core/std_core_string_String_localeCompare_string_001.ets
 ### Issue 16242
@@ -26,8 +38,22 @@ std/core/std_core_typeduarrays__Uint8Array.ets
 std/core/std_core_typeduarrays__Uint16Array.ets
 std/core/std_core_typeduarrays__Uint32Array.ets
 ### Issue I8PRJS end
+# #16400
+std/core/std_core_typeduarrays_function1__Uint32Array.ets
+# #17897
+std/core/std_core_typeduarrays_function1__Uint8ClampedArray.ets
+# #17894
+std/core/std_core_typeduarrays_function1__Uint16Array.ets
 # #14724
 std/core/std_core_typedarrays__BigInt64Array.ets
+# #16217
+std/core/std_core_typedarrays__Int16Array.ets
+# #17892
+std/core/std_core_typedarrays_function1__Int32Array.ets
+# #17863
+std/core/std_core_typedarrays_function1__Int8Array.ets
+# #17854
+std/core/std_core_typedarrays_function1__Float64Array.ets
 ### Issue 11474 ###
 ### Issue 11544 begin
 std/math/std_math_tan_double.ets
