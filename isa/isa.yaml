@@ -107,10 +107,10 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 12.0.6.0
+version: 13.0.0.0
 
 # 0 is default value, alaways reflects to the newest version
-api_version_map: [[0, 12.0.6.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.6.0]]
+api_version_map: [[0, 13.0.0.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.6.0], [13, 13.0.0.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.
@@ -265,7 +265,7 @@ isa_information:
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x18
+      last_callruntime_prefixed_opcode_idx: 0x19
 
 prefixes:
   - name: throw
@@ -915,6 +915,11 @@ groups:
         acc: out:top
         opcode_idx: [0x18]
         format: [pref_op_imm_16]
+        prefix: callruntime
+      - sig: callruntime.supercallforwardallargs v:in:top
+        acc: out:top
+        opcode_idx: [0x19]
+        format: [pref_op_v_8]
         prefix: callruntime
 
   - title: throw instructions
