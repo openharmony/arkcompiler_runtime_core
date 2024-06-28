@@ -17,6 +17,7 @@ package std.core;
 
 export type NullishType = Object | null | undefined
 export type NullableType = Object | null
+export type Nullish<T> = T | null | undefined
 
 export type PropertyKey = string
 

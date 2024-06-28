@@ -444,64 +444,24 @@ export class JSON {
         return JSON.checkType(typ, new Array<TypeColor>())
     }
 
-    public static parse<T>(str: String, typ: Type): NullishType {
-        if (!JSON.checkType(typ, new Array<TypeColor>())) {
-            throw new Error("Incorrect type: " + typ.toString())
-        }
-        let value = JSONParser.parse(str)
-        return JSON.parse(value, typ)
+    public static parse<T>(text: String, type: Type): Nullish<T> {
+        return JSON.parse<T>(text, undefined, type)
     }
 
-    private static parseObject(jVal: JSONObject, cType: ClassType): Object {
-        let object = cType.make()
-        let cVal = Value.of(object) as ClassValue
-        let unboxString : (v: JSONString) => String =
-            (v: JSONString): String => { return v.value }
-        let fieldArray = jVal.keys_.map<String>(unboxString)
-        for (let field_num = 0; field_num < cType.getFieldsNum(); field_num++) {
-            let field : Field = cType.getField(field_num)
-            let indexInJSON = fieldArray.indexOf(field.getName())
-            if (indexInJSON == -1) {
-                throw new Error("Cannot find " + field.getName() + " in keys of " + cType.getName())
-            } else {
-                let fObject = JSON.parse(jVal.values.at(indexInJSON) as JSONValue, field.getType())
-                cVal.setFieldByName(field.getName(), Value.of(fObject))
-            }
+    public static parse<T>(text: string, reviver: ((key: string, value: NullishType) => NullishType) | undefined, type: Type): Nullish<T> {
+        if (!JSON.checkType(type, new Array<TypeColor>())) {
+            throw new Error("Incorrect type: " + type.toString())
         }
-        return object
-    }
 
-    private static parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
-        let len = jVal.values.length
-        let arr = aType.make(len as int)
-        let arrVal = Value.of(arr) as ArrayValue
-        for (let i = 0; i < len; i++) {
-            let elem = JSON.parse(jVal.values.at(i) as JSONValue, aType.getElementType())
-            arrVal.setElement(i, Value.of(elem))
-        }
-        return arr
-    }
+        let jsonValue = JSONParser.parse(text)
+        const parsingResult = new JSONValueParser(reviver).parse(jsonValue, type) as T
 
-    private static parse(value: JSONValue, typ: Type): Object | null {
-        if (value instanceof JSONObject && typ instanceof ClassType) {
-            return JSON.parseObject(value as JSONObject, typ as ClassType)
-        } else if (value instanceof JSONArray && typ instanceof ArrayType) {
-            return JSON.parseArray(value as JSONArray, typ as ArrayType)
-        } else if (value instanceof JSONNumber && typ instanceof DoubleType) {
-            return new Double((value as JSONNumber).value)
-        } else if (value instanceof JSONString && typ instanceof StringType) {
-            return (value as JSONString).value
-        } else if (value instanceof JSONTrue && typ instanceof BooleanType) {
-            return new Boolean(true)
-        } else if (value instanceof JSONFalse && typ instanceof BooleanType) {
-            return new Boolean(false)
-        } else if (value instanceof JSONNull && typ instanceof NullType) {
-            return null
+        if (reviver !== undefined) {
+            return reviver("", parsingResult) as T
         } else {
-            throw new Error(typ + " is expected, but get " + value)
+            return parsingResult
         }
     }
-
 }
 
 class JSONWriter {
@@ -1106,6 +1066,97 @@ export class JSONParser {
     }
 }
 
+class JSONValueParser {
+    private reviver: ((key: string, value: NullishType) => NullishType) | undefined
+
+    constructor(reviver: ((key: string, value: NullishType) => NullishType) | undefined) {
+        this.reviver = reviver
+    }
+
+    parse(value: JSONValue, typ: Type): NullishType {
+        if (value instanceof JSONObject && typ instanceof ClassType) {
+            return this.parseObject(value as JSONObject, typ as ClassType)
+        } else if (value instanceof JSONArray && typ instanceof ArrayType) {
+            return this.parseArray(value as JSONArray, typ as ArrayType)
+        } else if (value instanceof JSONNumber && typ instanceof DoubleType) {
+            return new Double((value as JSONNumber).value)
+        } else if (value instanceof JSONString && typ instanceof StringType) {
+            return (value as JSONString).value
+        } else if (value instanceof JSONTrue && typ instanceof BooleanType) {
+            return new Boolean(true)
+        } else if (value instanceof JSONFalse && typ instanceof BooleanType) {
+            return new Boolean(false)
+        } else if (value instanceof JSONNull && typ instanceof NullType) {
+            return null
+        } else {
+            throw new Error(typ + " is expected, but get " + value)
+        }
+    }
+
+    private revivingClassFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: NullishType): void {
+        const revivedVal = this.reviver!(fieldName, fieldVal)
+
+        // setFieldByName doesn't allow null/undefined values
+        if (revivedVal != null) {
+            classVal.setFieldByName(fieldName, Value.of(revivedVal))
+        }
+    }
+
+    private classFieldSetter(classVal: ClassValue, fieldName: string, fieldVal: NullishType): void {
+        classVal.setFieldByName(fieldName, Value.of(fieldVal))
+    }
+
+    private parseObject(jsonObj: JSONObject, classType: ClassType): Object {
+        let setClassFieldFn = (cv: ClassValue, fn: string, fv: NullishType) => { cv.setFieldByName(fn, Value.of(fv)) }
+
+        if (this.reviver != undefined) { 
+            setClassFieldFn = this.revivingClassFieldSetter 
+        }
+
+        let object = classType.make()
+        let classVal = Value.of(object) as ClassValue
+        const jsonObjFields = jsonObj.getFields()
+        for (let field_num = 0; field_num < classType.getFieldsNum(); field_num++) {
+            let classField = classType.getField(field_num)
+            if (classField.isStatic()) {
+                continue
+            }
+
+            const jsonFieldVal = jsonObjFields.get(classField.getName())
+            if (jsonFieldVal === undefined) {
+                throw new Error("Cannot find " + classField.getName() + " in keys of " + classType.getName())
+            }
+
+            const classFieldVal = this.parse(jsonFieldVal, classField.getType())
+            setClassFieldFn(classVal, classField.getName(), classFieldVal)
+        }
+
+        return object
+    }
+
+    private revivingArrayElementSetter(array: NullishType[], index: int, elemVal: NullishType): void {
+        const revivedVal = this.reviver!(`${index}`, elemVal)
+        array[index] = revivedVal !== undefined ? revivedVal : null
+    }
+
+    private parseArray(jVal: JSONArray, aType: ArrayType): Object | null {
+        let len = jVal.values.length
+        let arr = aType.make(len as int) as NullishType[]
+
+        let setArrayElementFn = (a: NullishType[], i: int, v: NullishType) => { a[i] = v }
+
+        if (this.reviver !== undefined) {
+            setArrayElementFn = this.revivingArrayElementSetter
+        }
+
+        for (let i = 0; i < len; i++) {
+            let elem = this.parse(jVal.values.at(i) as JSONValue, aType.getElementType())
+            setArrayElementFn(arr, i, elem)
+        }
+        return arr
+    }
+}
+
 export class JSONValue extends Object {}
 
 export class JSONObject extends JSONValue {
@@ -1115,6 +1166,21 @@ export class JSONObject extends JSONValue {
     readonly static END_CHAR = c'}'
     readonly static SEPARATOR = c':'
     readonly static DELIMETER = c','
+
+    getFields(): Map<String, JSONValue> {
+        const propsCount = this.keys_.length
+
+        const result = new Map<String, JSONValue>()
+
+        for (let i = 0; i < propsCount; i++) {
+            const key = this.keys_[i]
+            const val = this.values[i]
+
+            result.set(key.value, val)
+        }
+
+        return result
+    }
 
     public override toString(): String {
         let res = new StringBuilder([JSONObject.START_CHAR])
