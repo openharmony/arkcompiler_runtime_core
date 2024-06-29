@@ -73,13 +73,14 @@ function TaskpoolFuncTestArraySum() {
     assert(result[1] == 6);
 }
 
+class A {
+    constructor(a: int, b: int) { this.a = a; this.b = b; }
+    constructor() { this(0, 0); }
+    a: int;
+    b: int;
+}
+
 function TaskpoolFuncTestClassFieldsSum() {
-    class A {
-        constructor(a: int, b: int) { this.a = a; this.b = b; }
-        constructor() { this(0, 0); }
-        a: int;
-        b: int;
-    }
     let Sum = (value1: A, value2: A): A => {
         let result = new A();
         result.a = value1.a + value2.a;

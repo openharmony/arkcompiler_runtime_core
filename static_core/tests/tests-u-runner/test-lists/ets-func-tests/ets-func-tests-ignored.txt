@@ -181,7 +181,6 @@ spec/lambda/issue15579_2.ets
 spec/lambda/issue15579_3.ets
 spec/lambda/issue15579_4.ets
 ### Issue 14054
-spec/lambda/callAsyncMethodFromAsyncLambda1.ets
 spec/lambda/callMethodFromAsyncLambda1.ets
 ### Issue 14131
 spec/lambda/callRegularLambdaWithAsyncOverload.ets
@@ -458,11 +457,6 @@ spec/03.types/References_Types/Tuples_type/recursive3.ets
 spec/03.types/References_Types/Tuples_type/func_tuple_1.ets
 ### Issue 15184
 spec/03.types/References_Types/Tuples_type/tuple_as_generic_7.ets
-### Issue 15192
-spec/03.types/References_Types/Tuples_type/tuple_as_param_default_0.ets
-### Issue 15191
-spec/tuples/tuple_as_param_3.ets
-spec/03.types/References_Types/Tuples_type/tuple_as_param_3.ets
 ### Issue 15207
 spec/03.types/Tuples_type/tuple_union_0.ets
 spec/03.types/Tuples_type/tuple_union_1.ets
@@ -528,11 +522,6 @@ regression/12581_box_type_array_Long_array.ets
 # undefined|number assigned to number
 std/core/std_core_string_String_codePointAt_number.ets
 ###
-
-## Tuples overloading issue(s)
-### Issue (gitee) I909BB
-spec/03.types/References_Types/Tuples_type/tuple_as_param_default_1.ets
-### Issue I909BB end
 
 ### VariableHasEnclosingScopeForAll, VariableHasScopeForAll
 spec/05.Generics/callFromAsyncLambda.ets

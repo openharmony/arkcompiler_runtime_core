@@ -35,7 +35,6 @@ exports.AsyncIdentity$asyncimpl = AsyncIdentity$asyncimpl;
 class PromiseWrapper {
     public promise_: Promise<string> = {} as any;
     constructor() {};
-    public static lambda$invoke$0: any;
 };
 (PromiseWrapper as any) = (globalThis as any).Panda.getClass('LPromiseWrapper;');
 export {PromiseWrapper};

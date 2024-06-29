@@ -83,34 +83,35 @@ cases:
   - defs: |-
       class X {}
       class Y extends X {}
-      class Box<T> {}
-    stype: Box<Y>
-    sval: new Box<Y>()
-    dtype: Box<X>
+      class BB<T> {}
+    stype: BB<Y>
+    sval: new BB<Y>()
+    dtype: BB<X>
 
   - defs: |-
       class X {}
       class Y extends X {}
-      class Box<T> {}
-    stype: Box<X>
-    sval: new Box<X>()
-    dtype: Box<Y>
+      class BB<T> {}
+    stype: BB<X>
+    sval: new BB<X>()
+    dtype: BB<Y>
 
-  - defs: |-
-      class X {}
-      class Y extends X {}
-      class Box<in T> {}
-    stype: Box<Y>
-    sval: new Box<Y>()
-    dtype: Box<X>
-
-  - defs: |-
-      class X {}
-      class Y extends X {}
-      class Box<out T> {}
-    stype: Box<X>
-    sval: new Box<X>()
-    dtype: Box<Y>
+#  Should be allowed as narrowing conversion.
+#  - defs: |-
+#      class X {}
+#      class Y extends X {}
+#      class BB<in T> {}
+#    stype: BB<Y>
+#    sval: new BB<Y>()
+#    dtype: BB<X>
+#
+#  - defs: |-
+#      class X {}
+#      class Y extends X {}
+#      class BB<out T> {}
+#    stype: BB<X>
+#    sval: new BB<X>()
+#    dtype: BB<Y>
 
   - defs: |-
       class A {}

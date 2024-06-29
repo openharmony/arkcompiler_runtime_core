@@ -617,9 +617,6 @@
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_n_7.ets
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_n_8.ets
 
-# 17054 Compilation aborts on top-level array of lambdas
-07.expressions/04.array_literal/array_literal_5.ets
-
 # 17021 Verifier hangs on 'launch' expression
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_1.ets
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_2.ets
@@ -1045,9 +1042,6 @@
 # end of es2panda fails
 
 # es2panda fails: panda:#13438 Support type alias with type parameter
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_6.ets
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_7.ets
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_8.ets
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_9.ets
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_4.ets
 # end of es2panda fails
@@ -1076,8 +1070,6 @@
 03.types/08.reference_types/10.tuple_types/tt_7.ets
 03.types/08.reference_types/10.tuple_types/tt_8.ets
 03.types/08.reference_types/10.tuple_types/tt_10.ets
-03.types/08.reference_types/10.tuple_types/tt_13.ets
-
 
 # es2panda fails: panda#15188 es2panda aborts on union in tuple type
 03.types/08.reference_types/10.tuple_types/tt2_31.ets
@@ -1309,7 +1301,6 @@
 
 # 15605 wrong inherited method selected from abstract class
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over2_7.ets
-17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_5.ets
 
 # 15767 Cannot select the right method among overloaded ones
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over3_1.ets
@@ -1394,8 +1385,6 @@
 # end of 16371
 
 # es2panda: 16655 CTE in equality of int literal/lambda with null/undefined
-07.expressions/25.equality_expressions/08.equality_with_null_or_undefined/null_and_undefined_equality_9.ets
-07.expressions/25.equality_expressions/08.equality_with_null_or_undefined/null_and_undefined_equality_10.ets
 07.expressions/25.equality_expressions/08.equality_with_null_or_undefined/null_and_undefined_equality_11.ets
 07.expressions/25.equality_expressions/08.equality_with_null_or_undefined/null_and_undefined_equality_12.ets
 # end of 16655
@@ -1900,15 +1889,6 @@
 
 # 15567 Tuples types values are not recognized while passing arguments to functions without explicit 'as'
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_0.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_1.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_2.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_3.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_4.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_5.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_6.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_7.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_8.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_func/call-func_9.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_0.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_1.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_2.ets
@@ -1920,15 +1900,6 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_8.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_lmbd/call-lmbd_9.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_0.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_1.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_2.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_3.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_4.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_5.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_6.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_7.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_8.ets
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/call_meth/call-meth_9.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_0.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_1.ets
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_4.ets
@@ -2140,3 +2111,9 @@
 02.lexical_elements/07.keywords/types_10.ets
 02.lexical_elements/07.keywords/types_2.ets
 # end of es2panda fails
+
+# es2panda: #17635: Smart cast problem
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_4.ets
+
+# es2panda: #17766 Order of initialization of global const and let
+07.expressions/17.typeof_expression/tof_const_11.ets
