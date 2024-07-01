@@ -23,12 +23,6 @@ desc: Multi-line comments
   block
 */
 
-/*
-  /** /
-    nested block
-  / **/
-*/
-
 /*// nested one-liner
   // nested one-liner
 */
@@ -42,9 +36,7 @@ class/**/C/**/{/***/public/****/foo/*****/
     : /***********************************
       /*
         /*
-            nested comment
-        */
-      */
+          comment
     */
     int
     /* method body with comments: */
@@ -66,9 +58,8 @@ function main(): int {
     :/* separation colon */
 
     /* /*
-        nested comment
-        // */
-        another nested comment
+        comment
+        // another comment
         // */
 
     int/* element type */[ /*array dimension*/ ]=[
