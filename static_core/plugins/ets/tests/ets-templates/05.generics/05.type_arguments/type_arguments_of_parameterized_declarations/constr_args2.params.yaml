@@ -1,0 +1,71 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # classes
+  - use: |-
+      let v: A<X> = new <X> A<X>(new X(), new X())
+
+  - use: |-
+      let v: A<Int> = new <X|null> A<Int>(new Int(), new X())
+
+  - use: |-
+      let v: A<Int|null> = new <X|null> A<Int|null>(null, null)
+
+  - use: |-
+      let v: A<X> = new <X|null> A<X>(new X(), new X())
+    bound: ' extends X|null'
+
+  - use: |-
+      let v: A<Object> = new <X|null> A<Object>(new X(), null)
+    bound: ' extends Object|null'
+
+  # interfaces
+  - use: |-
+      let v: A<I> = new<I>A<I>(new X(), new X())
+
+  - use: |-
+      let v: A<I|null> = new <I|null> A<I|null>(null, new Y())
+
+  - use: |-
+      let v: A<Y> = new <I|null> A<Y>(new Y(), new Y())
+    bound: ' extends I|null'
+
+  # arrays
+  - use: |-
+      let v: A<int[]> = new <X[]> A<int[]>(new int[1], new X[0])
+
+  - use: |-
+      let v: A<int[]|null> = new <X[]|null> A<int[]|null>(null, new X[0])
+
+# aliases
+  - use: |-
+      let v: A<B> = new <B> A<B>([Color.Red], [Color.Blue])
+    decl: type B = Color[]
+
+  - use: |-
+      let v: A<B> = new <B> A<B>(null, new X[1][0])
+    decl: type B = X[][]|null
+
+  - use: |-
+      let v: A<Y> = new <B> A<Y>(new Y(), new Y[0])
+    bound: ' extends X[]'
+    decl: type B = Y[]
+
+  - use: |-
+      let v: A<C|null> = new <B|null> A<C|null>(new Color[0], new Y[0])
+    bound: ' extends X[]|null'
+    decl: |-
+        type B = X[]
+        type C = Color[]

@@ -189,12 +189,12 @@
   status: 'Finished'
 
 '4.4':
-  title: 'Accessible'
-  status: 'No testable assertions'
-
-'4.5':
   title: 'Scopes'
   status: 'Finished'
+
+'4.5':
+  title: 'Accessible'
+  status: 'No testable assertions'
 
 '4.6':
   title: 'Type Declarations'
@@ -261,26 +261,22 @@
   status: 'No testable assertions'
 
 '5.1':
-  title: 'Generic Declarations'
-  status: 'Finished'
-
-'5.2':
   title: 'Type Parameters'
   status: 'Finished'
 
-'5.3':
+'5.2':
   title: 'Type Parameter Constraint'
   status: 'Finished'
 
-'5.4':
+'5.3':
   title: 'Type Parameter Default'
   status: 'Finished'
 
-'5.5':
+'5.4':
   title: 'Generic Instantiations'
   status: 'Finished'
 
-'5.6':
+'5.5':
   title: 'Type Arguments'
   status: 'Finished'
 
@@ -368,6 +364,14 @@
   title: 'Bitwise and Logical Expressions'
   status: 'Finished'
 
+'7.24.2':
+  title: 'String Relational Operators'
+  status: 'Finished'
+
+'7.24.4':
+  title: 'Boolean Relational Operators'
+  status: 'Finished'
+
 '7.26.1':
   title: 'Integer Bitwise Operators'
   status: 'Finished'
@@ -396,7 +400,7 @@
   title: 'Final Methods'  # Tested in 17.9.2 Final Methods
   status: 'No testable assertions'
 
-'9.6.6':
+'9.6.7':
   title: 'Native Methods'  # Tested in 17.8.2 Native Methods
   status: 'No testable assertions'
 

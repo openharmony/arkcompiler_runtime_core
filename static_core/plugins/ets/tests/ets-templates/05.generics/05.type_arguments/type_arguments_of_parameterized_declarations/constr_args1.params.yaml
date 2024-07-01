@@ -1,0 +1,111 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # classes
+  - use: |-
+      let v: A = new <X> A(new X())
+
+  - use: |-
+      let v: A = new <X|null> A(new X())
+
+  - use: |-
+      let v: A = new <X|null> A(null)
+
+  - use: |-
+      let v: A = new <X> A(new X())
+    bound: ' extends X'
+
+  - use: |-
+      let v: A = new <X|null> A(new X())
+    bound: ' extends X|null'
+
+  - use: |-
+      let v: A = new <X|null> A(null)
+    bound: ' extends Object|null'
+
+  # interfaces
+  - use: |-
+      let v: A = new <I> A(new X())
+
+  - use: |-
+      let v: A = new <I|null> A(new Y())
+
+  - use: |-
+      let v: A = new <I|null> A(null)
+
+  - use: |-
+      let v: A = new <I> A(new X())
+    bound: ' extends I'
+
+  - use: |-
+      let v: A = new <I|null> A(new Y())
+    bound: ' extends I|null'
+
+  - use: |-
+      let v: A = new <I|null> A(null)
+    bound: ' extends Object|null'
+
+  # arrays
+  - use: |-
+      let v: A = new <X[]> A(new X[0])
+
+  - use: |-
+      let v: A = new <X[]|null> A(new X[0])
+
+  - use: |-
+      let v: A = new <X[]|null> A(null)
+
+  - use: |-
+      let v: A = new <X[]> A(new X[0])
+    bound: ' extends X[]'
+
+  - use: |-
+      let v: A = new <X[]|null> A(new X[0])
+    bound: ' extends X[]|null'
+
+  - use: |-
+      let v: A = new <X[]|null> A(null)
+    bound: ' extends Object|null'
+
+  - use: |-
+      let v: A = new <X[]> A(new X[0])
+    bound: ' extends Object[]'
+
+  - use: |-
+      let v: A = new <X[]|null> A(new X[0])
+    bound: ' extends Object[]|null'
+
+# aliases
+  - use: |-
+      let v: A = new <B> A(new Color[0])
+    decl: type B = Color[]
+
+  - use: |-
+      let v: A = new <B> A(new X[0][])
+    decl: type B = X[][]|null
+
+  - use: |-
+      let v: A = new <B|null> A(null)
+    decl: type B = I[]|null
+
+  - use: |-
+      let v: A = new <B> A(new Y[0])
+    bound: ' extends X[]'
+    decl: type B = Y[]
+
+  - use: |-
+      let v: A = new <B|null> A(new Y[0])
+    bound: ' extends X[]|null'
+    decl: type B = X[]
