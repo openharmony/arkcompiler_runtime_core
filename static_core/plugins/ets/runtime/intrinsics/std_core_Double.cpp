@@ -76,6 +76,9 @@ EtsString *StdCoreDoubleToLocaleString(ObjectHeader *obj, EtsString *locale)
     }
 
     double objValue = helpers::GetStdDoubleArgument(obj);
+    if (std::isnan(objValue)) {
+        return EtsString::CreateFromMUtf8("NaN");
+    }
 
     icu::number::LocalizedNumberFormatter locNumFmt = icu::number::NumberFormatter::withLocale(loc);
     icu::number::FormattedNumber fmtNum = locNumFmt.formatDouble(objValue, status);
