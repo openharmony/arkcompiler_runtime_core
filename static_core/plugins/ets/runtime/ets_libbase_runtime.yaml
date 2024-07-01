@@ -4216,3 +4216,87 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAdd
+
+################################
+# std.containers.BlockingQueue #
+################################
+
+  - name: BlockingQueueInitMutex
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: initMutex
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::InitializeMutex
+
+  - name: BlockingQueueInitEvent
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: initEvent
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::InitializeEvent
+
+  - name: BlockingQueueDeleteMutex
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: deleteMutex
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::DeleteMutex
+
+  - name: BlockingQueueDeleteEvent
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: deleteEvent
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::DeleteEvent
+
+  - name: BlockingQueueMutexLock
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: lock
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::MutexLock
+
+  - name: BlockingQueueMutexUnlock
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: unlock
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::MutexUnlock
+
+  - name: BlockingQueueAwait
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: await_
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64 ]
+    impl: ark::ets::intrinsics::Await
+
+  - name: BlockingQueueUnblockWaiters
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: unblockWaiters
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64 ]
+    impl: ark::ets::intrinsics::UnblockWaiters

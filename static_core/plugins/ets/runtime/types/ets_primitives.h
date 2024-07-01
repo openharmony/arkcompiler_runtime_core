@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_ETS_TYPES_ETS_PRIMITIVES_H_
-#define PANDA_RUNTIME_ETS_TYPES_ETS_PRIMITIVES_H_
+#ifndef PANDA_RUNTIME_ETS_TYPES_ETS_PRIMITIVES_H
+#define PANDA_RUNTIME_ETS_TYPES_ETS_PRIMITIVES_H
 
 #include <cstdint>
 #include <type_traits>
@@ -39,4 +39,4 @@ constexpr EtsBoolean ToEtsBoolean(bool b)
 
 }  // namespace ark::ets
 
-#endif  // PANDA_RUNTIME_ETS_TYPES_ETS_PRIMITIVES_H_
+#endif  // PANDA_RUNTIME_ETS_TYPES_ETS_PRIMITIVES_H
