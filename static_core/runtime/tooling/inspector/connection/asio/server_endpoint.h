@@ -57,6 +57,8 @@ protected:
         std::atomic_compare_exchange_strong(&connection_, &expected, {});
     }
 
+    bool Close();
+
     Endpoint endpoint_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:

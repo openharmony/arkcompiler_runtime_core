@@ -63,6 +63,8 @@ bool OhosWsServer::Start([[maybe_unused]] uint32_t port)
 
 bool OhosWsServer::Stop()
 {
+    // Stop event loop before closing endpoint server.
+    Kill();
     endpoint_.Close();
     return true;
 }

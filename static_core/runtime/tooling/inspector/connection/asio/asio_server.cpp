@@ -85,6 +85,11 @@ bool AsioServer::Stop()
         return false;
     }
 
+    // Stop accepting new connections.
+    Kill();
+    // Close the current connection.
+    Close();
+
     std::error_code ec;
     endpoint_.stop_listening(ec);
     return !ec;

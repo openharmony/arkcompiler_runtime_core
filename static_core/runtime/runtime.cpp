@@ -441,6 +441,8 @@ bool Runtime::Destroy()
         compiler->JoinWorker();
     }
 
+    instance_->UnloadDebugger();
+
     // Note JIT thread (compiler) may access to thread data,
     // so, it should be stopped before thread destroy
     /* @sync 1
@@ -1214,13 +1216,17 @@ Runtime::DebugSessionHandle Runtime::StartDebugSession()
     return session;
 }
 
+void Runtime::UnloadDebugger()
+{
+    GetPandaVM()->UnloadDebuggerAgent();
+    debugSession_.reset();
+}
+
 bool Runtime::Shutdown()
 {
     if (memAllocDumper_ != nullptr) {
         internalAllocator_->Delete(memAllocDumper_);
     }
-    pandaVm_->UnloadDebuggerAgent();
-    debugSession_.reset();
     ManagedThread::Shutdown();
     return true;
 }

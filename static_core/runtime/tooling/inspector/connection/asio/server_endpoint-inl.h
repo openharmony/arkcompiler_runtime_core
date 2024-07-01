@@ -48,6 +48,20 @@ ServerEndpoint<CONFIG>::ServerEndpoint() noexcept
 
     endpoint_.set_close_handler([this](auto hdl) { Unpin(hdl); });
 }
+
+template <>  // NOLINTNEXTLINE(misc-definitions-in-headers)
+bool ServerEndpoint<CONFIG>::Close()
+{
+    if (auto connection = GetPinnedConnection()) {
+        std::error_code ec;
+        connection->close(websocketpp::close::status::going_away, "", ec);
+        if (ec) {
+            LOG(ERROR, DEBUGGER) << "Error closing websocket connection: " << ec.message();
+            return false;
+        }
+    }
+    return true;
+}
 }  // namespace ark::tooling::inspector
 
 #endif  // PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_SERVER_ENDPOINT_INL_H
