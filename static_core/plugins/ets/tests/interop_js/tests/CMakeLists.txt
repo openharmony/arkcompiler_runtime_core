@@ -38,6 +38,7 @@ file(WRITE ${ETS_CONFIG}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_enum/dynamic_enum.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/perf/code.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_object/dynamic_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/optional_reference_type/optional_reference_type.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/bouncing_pandas/bouncing_pandas.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"convert.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
     "    }\n"
@@ -156,6 +157,12 @@ panda_ets_interop_js_gtest(ets_interop_js_test_dynamic_call
 panda_ets_interop_js_gtest(ets_interop_js_dynamic_enum
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_enum/dynamic_enum.cpp
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_enum/dynamic_enum.sts
+    ETS_CONFIG ${ETS_CONFIG}
+)
+
+panda_ets_interop_js_gtest(ets_interop_js_optional_reference_type
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/optional_reference_type/optional_reference_type.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/optional_reference_type/optional_reference_type.sts
     ETS_CONFIG ${ETS_CONFIG}
 )
 
