@@ -876,23 +876,9 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorMethod = (a: Object): Method => {
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        let m: Method = getIteratorMethod(arrayLike)
-
         // Calc length of items inside arrayLike, save length into i variable
-        let i: long
-        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        let i: long = 0
+        let iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -903,7 +889,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
 
         let res = new Int8Array(i as int)
         i = 0
-        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -926,25 +912,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Int8Array {
         let res = new Int8Array(arrayLike.length)
-        let idx = new int[1]
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx = new int[1]
         idx[0] = 0
-        const verifyCompiles: Iterable<T> = arrayLike
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorFromIterable = (a: Object): Iterator<T> => {
-            if (a instanceof String) {
-                return (a as String).$_iterator() as Iterator<T>
-            }
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m.invoke(a, [])! as Iterator<T>
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as byte)
             idx[0] += 1
         })
@@ -3409,23 +3380,9 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorMethod = (a: Object): Method => {
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        let m: Method = getIteratorMethod(arrayLike)
-
         // Calc length of items inside arrayLike, save length into i variable
-        let i: long
-        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        let i: long = 0
+        let iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -3436,7 +3393,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
 
         let res = new Int16Array(i as int)
         i = 0
-        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -3459,25 +3416,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Int16Array {
         let res = new Int16Array(arrayLike.length)
-        let idx = new int[1]
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx = new int[1]
         idx[0] = 0
-        const verifyCompiles: Iterable<T> = arrayLike
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorFromIterable = (a: Object): Iterator<T> => {
-            if (a instanceof String) {
-                return (a as String).$_iterator() as Iterator<T>
-            }
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m.invoke(a, [])! as Iterator<T>
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as short)
             idx[0] += 1
         })
@@ -5919,23 +5861,9 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorMethod = (a: Object): Method => {
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        let m: Method = getIteratorMethod(arrayLike)
-
         // Calc length of items inside arrayLike, save length into i variable
-        let i: long
-        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        let i: long = 0
+        let iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -5946,7 +5874,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
 
         let res = new Int32Array(i as int)
         i = 0
-        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -5969,25 +5897,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Int32Array {
         let res = new Int32Array(arrayLike.length)
-        let idx = new int[1]
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx = new int[1]
         idx[0] = 0
-        const verifyCompiles: Iterable<T> = arrayLike
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorFromIterable = (a: Object): Iterator<T> => {
-            if (a instanceof String) {
-                return (a as String).$_iterator() as Iterator<T>
-            }
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m.invoke(a, [])! as Iterator<T>
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as int)
             idx[0] += 1
         })
@@ -10894,23 +10807,9 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorMethod = (a: Object): Method => {
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        let m: Method = getIteratorMethod(arrayLike)
-
         // Calc length of items inside arrayLike, save length into i variable
-        let i: long
-        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        let i: long = 0
+        let iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -10921,7 +10820,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
 
         let res = new Float32Array(i as int)
         i = 0
-        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -10944,25 +10843,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Float32Array {
         let res = new Float32Array(arrayLike.length)
-        let idx = new int[1]
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx = new int[1]
         idx[0] = 0
-        const verifyCompiles: Iterable<T> = arrayLike
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorFromIterable = (a: Object): Iterator<T> => {
-            if (a instanceof String) {
-                return (a as String).$_iterator() as Iterator<T>
-            }
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m.invoke(a, [])! as Iterator<T>
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number) as float)
             idx[0] += 1
         })
@@ -13317,23 +13201,9 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorMethod = (a: Object): Method => {
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        let m: Method = getIteratorMethod(arrayLike)
-
         // Calc length of items inside arrayLike, save length into i variable
-        let i: long
-        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        let i: long = 0
+        let iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -13344,7 +13214,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
 
         let res = new Float64Array(i as int)
         i = 0
-        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -13367,25 +13237,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Float64Array {
         let res = new Float64Array(arrayLike.length)
-        let idx = new int[1]
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx = new int[1]
         idx[0] = 0
-        const verifyCompiles: Iterable<T> = arrayLike
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorFromIterable = (a: Object): Iterator<T> => {
-            if (a instanceof String) {
-                return (a as String).$_iterator() as Iterator<T>
-            }
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m.invoke(a, [])! as Iterator<T>
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number) as double)
             idx[0] += 1
         })

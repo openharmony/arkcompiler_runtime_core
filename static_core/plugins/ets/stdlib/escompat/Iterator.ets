@@ -36,11 +36,11 @@ export class IteratorResult<out T> {
 }
 
 export interface Iterator<out T> {
-    next(): IteratorResult<T>;
+    next(): IteratorResult<T>
 }
 
 export interface Iterable<out T> {
-    $_iterator(): Iterator<T>;
+    $_iterator(): Iterator<T>
 }
 
 export interface IterableIterator<out T> extends Iterator<T>, Iterable<T> {
