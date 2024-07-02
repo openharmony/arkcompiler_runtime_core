@@ -36,7 +36,8 @@ SimplifyStringBuilder::SimplifyStringBuilder(Graph *graph)
       inputDescriptors_ {graph->GetLocalAllocator()->Adapter()},
       usages_ {graph->GetLocalAllocator()->Adapter()},
       matches_ {graph->GetLocalAllocator()->Adapter()},
-      stringBuilderCalls_ {graph->GetLocalAllocator()->Adapter()}
+      stringBuilderCalls_ {graph->GetLocalAllocator()->Adapter()},
+      stringBuilderFirstLastCalls_ {graph->GetLocalAllocator()->Adapter()}
 {
 }
 
@@ -66,6 +67,11 @@ bool SimplifyStringBuilder::RunImpl()
             OptimizeStringConcatenation(loop);
         }
     }
+
+    // Cleanup should be done before block optimizations, to erase instruction marked as dead
+    GetGraph()->RunPass<compiler::Cleanup>();
+
+    OptimizeStringBuilderChain();
 
     // Cleanup should be done before block optimizations, to erase instruction marked as dead
     GetGraph()->RunPass<compiler::Cleanup>();
@@ -1905,6 +1911,320 @@ void SimplifyStringBuilder::OptimizeStringBuilderAppendChain(BasicBlock *block)
             ASSERT(from < to);
             from = to;
         }
+    }
+}
+
+// CC-OFFNXT(huge_depth) false positive
+void SimplifyStringBuilder::CollectStringBuilderFirstCalls(BasicBlock *block)
+{
+    Inst *instance = nullptr;
+    auto calls = stringBuilderFirstLastCalls_.end();
+    for (auto inst : block->Insts()) {
+        if (IsStringBuilderInstance(inst)) {
+            instance = inst;
+            calls = stringBuilderFirstLastCalls_.find(instance);
+            if (calls == stringBuilderFirstLastCalls_.end()) {
+                calls = stringBuilderFirstLastCalls_.emplace(instance, InstPair {}).first;
+            }
+        }
+
+        if (IsStringBuilderAppend(inst) && inst->GetDataFlowInput(0) == instance) {
+            auto &firstCall = calls->second.first;
+            if (firstCall == nullptr) {
+                firstCall = inst;
+            }
+        }
+    }
+}
+
+// CC-OFFNXT(huge_depth) false positive
+void SimplifyStringBuilder::CollectStringBuilderLastCalls(BasicBlock *block)
+{
+    for (auto inst : block->InstsReverse()) {
+        if (inst->IsSaveState() || inst->IsCheck()) {
+            continue;
+        }
+
+        if (IsMethodStringBuilderDefaultConstructor(inst) || IsMethodStringBuilderConstructorWithCharArrayArg(inst) ||
+            IsMethodStringBuilderConstructorWithStringArg(inst)) {
+            continue;
+        }
+
+        for (size_t index = 0; index < inst->GetInputsCount(); ++index) {
+            auto inputInst = inst->GetDataFlowInput(index);
+            if (inputInst->IsSaveState()) {
+                continue;
+            }
+
+            auto instance = inputInst;
+            if (!IsStringBuilderInstance(instance)) {
+                continue;
+            }
+
+            auto calls = stringBuilderFirstLastCalls_.find(instance);
+            if (calls == stringBuilderFirstLastCalls_.end()) {
+                calls = stringBuilderFirstLastCalls_.emplace(instance, InstPair {}).first;
+            }
+            auto &lastCall = calls->second.second;
+            if (lastCall == nullptr) {
+                lastCall = inst;
+            }
+        }
+    }
+}
+
+void SimplifyStringBuilder::CollectStringBuilderFirstLastCalls()
+{
+    // For each SB in graph, find its first (append) call and last (toString) call
+    stringBuilderFirstLastCalls_.clear();
+
+    // Traverse CFG in RPO
+    for (auto block : GetGraph()->GetBlocksRPO()) {
+        isApplied_ |= BreakStringBuilderAppendChains(block);
+        CollectStringBuilderFirstCalls(block);
+        CollectStringBuilderLastCalls(block);
+    }
+}
+
+bool SimplifyStringBuilder::CanMergeStringBuilders(Inst *instance, const InstPair &instanceCalls, Inst *inputInstance)
+{
+    if (instance == inputInstance) {
+        return false;  // Skip instance.append(instance.toString()) case
+    }
+
+    auto inputInstanceCalls = stringBuilderFirstLastCalls_.find(inputInstance);
+    if (inputInstanceCalls == stringBuilderFirstLastCalls_.end()) {
+        return false;
+    }
+
+    auto &[inputInstnceFirstAppendCall, inputInstanceLastToStringCall] = inputInstanceCalls->second;
+    if (inputInstnceFirstAppendCall == nullptr || inputInstanceLastToStringCall == nullptr) {
+        return false;  // Unsupported case: doesn't look like concatenation pattern
+    }
+
+    for (auto &user : instance->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (IsMethodStringBuilderConstructorWithCharArrayArg(userInst) ||
+            IsMethodStringBuilderConstructorWithStringArg(userInst)) {
+            // Does not look like string concatenation pattern
+            return false;
+        }
+    }
+
+    auto instanceFirstCall = instanceCalls.first;
+
+    if (instance->GetBasicBlock() != instanceFirstCall->GetBasicBlock()) {
+        // Does not look like string concatenation pattern
+        return false;
+    }
+
+    // Check if all 'inputInstance' calls comes before any 'instance' call
+    return inputInstanceLastToStringCall->IsDominate(instanceFirstCall);
+}
+
+void SimplifyStringBuilder::Cleanup(Inst *instance, Inst *instanceFirstAppendCall, Inst *inputInstanceToStringCall)
+{
+    // Mark 'instance' constructor as dead
+    for (auto &user : instance->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (!IsMethodStringBuilderDefaultConstructor(userInst)) {
+            continue;
+        }
+        userInst->ClearFlag(inst_flags::NO_DCE);
+    }
+
+    // Mark 'instance' append call as dead
+    instanceFirstAppendCall->ClearFlag(inst_flags::NO_DCE);
+
+    // Mark 'inputInstance' toString call as dead
+    inputInstanceToStringCall->ClearFlag(inst_flags::NO_DCE);
+    for (auto &user : inputInstanceToStringCall->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (!IsCheckCastWithoutUsers(userInst)) {
+            continue;
+        }
+        userInst->ClearFlag(inst_flags::NO_DCE);
+    }
+
+    // Mark 'instance' itself as dead
+    instance->ClearFlag(inst_flags::NO_DCE);
+
+    // Remove instructions marked dead from save states
+    RemoveFromSaveStateInputs(instance);
+    RemoveFromSaveStateInputs(instanceFirstAppendCall);
+
+    // Remove inputInstance.toString() call from save states only if it is not used anywhere else
+    if (!HasUser(inputInstanceToStringCall, [instanceFirstAppendCall](auto &user) {
+            auto userInst = user.GetInst();
+            auto isSaveState = userInst->IsSaveState();
+            auto isAppend = userInst == instanceFirstAppendCall;
+            return !isSaveState && !isAppend;
+        })) {
+        RemoveFromSaveStateInputs(inputInstanceToStringCall);
+    }
+}
+
+void SimplifyStringBuilder::FixBrokenSaveStatesForStringBuilderCalls(Inst *instance)
+{
+    for (auto &user : instance->GetUsers()) {
+        auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
+        if (userInst->IsSaveState()) {
+            continue;
+        }
+
+        if (IsStringBuilderAppend(userInst)) {
+            ASSERT(userInst->GetInputsCount() > 1U);
+            auto appendArg = userInst->GetDataFlowInput(1U);
+            FixBrokenSaveStates(appendArg, userInst);
+        }
+
+        FixBrokenSaveStates(instance, userInst);
+    }
+}
+
+void SimplifyStringBuilder::CollectStringBuilderChainCalls(Inst *instance, Inst *inputInstance)
+{
+    ASSERT(stringBuilderCalls_.find(inputInstance) == stringBuilderCalls_.end());
+
+    // Check if 'instance' already in calls map
+    auto calls = stringBuilderCalls_.find(instance);
+    if (calls == stringBuilderCalls_.end()) {
+        // If not, add 'inputInstance' with empty instructions vector to a map
+        calls = stringBuilderCalls_
+                    .insert(std::make_pair(inputInstance, InstVector {GetGraph()->GetAllocator()->Adapter()}))
+                    .first;
+    } else {
+        // If yes, do the following:
+        // 1. Add 'inputInstance' with instructions vector taken from 'instance'
+        // 2. Remove 'instance' from a map
+        calls = stringBuilderCalls_.insert(std::make_pair(inputInstance, std::move(calls->second))).first;
+        stringBuilderCalls_.erase(instance);
+    }
+
+    // Map 'instance' users to 'inputInstance'
+    for (auto &user : instance->GetUsers()) {
+        auto userInst = user.GetInst();
+        // Skip save states
+        if (userInst->IsSaveState()) {
+            continue;
+        }
+
+        // Skip StringBuilder constructors
+        if (IsMethodStringBuilderDefaultConstructor(userInst) ||
+            IsMethodStringBuilderConstructorWithStringArg(userInst) ||
+            IsMethodStringBuilderConstructorWithCharArrayArg(userInst)) {
+            continue;
+        }
+
+        calls->second.push_back(userInst);
+    }
+}
+
+SimplifyStringBuilder::StringBuilderCallsMap &SimplifyStringBuilder::CollectStringBuilderChainCalls()
+{
+    CollectStringBuilderFirstLastCalls();
+    stringBuilderCalls_.clear();
+
+    // Traverse CFG in PO
+    auto &blocksRPO = GetGraph()->GetBlocksRPO();
+    for (auto block = blocksRPO.rbegin(); block != blocksRPO.rend(); ++block) {
+        // Traverse 'block' backwards
+        for (auto instance : (*block)->InstsReverse()) {
+            if (!IsStringBuilderInstance(instance)) {
+                continue;
+            }
+
+            auto instanceCalls = stringBuilderFirstLastCalls_.find(instance);
+            if (instanceCalls == stringBuilderFirstLastCalls_.end()) {
+                continue;
+            }
+
+            auto &instanceFirstLastCalls = instanceCalls->second;
+            auto &[instanceFirstAppendCall, instanceLastToStringCall] = instanceFirstLastCalls;
+            if (instanceFirstAppendCall == nullptr || instanceLastToStringCall == nullptr) {
+                continue;  // Unsupported case: doesn't look like concatenation pattern
+            }
+
+            if (!IsStringBuilderAppend(instanceFirstAppendCall)) {
+                continue;
+            }
+
+            auto inputInstanceToStringCall = instanceFirstAppendCall->GetDataFlowInput(1);
+            if (!IsStringBuilderToString(inputInstanceToStringCall)) {
+                continue;
+            }
+
+            if (instanceFirstAppendCall->GetDataFlowInput(1) != inputInstanceToStringCall) {
+                continue;  // Allow only cases like: instance.append(inputInstace.toString())
+            }
+
+            ASSERT(inputInstanceToStringCall->GetInputsCount() > 1);
+            auto inputInstance = inputInstanceToStringCall->GetDataFlowInput(0);
+            if (!IsStringBuilderInstance(inputInstance)) {
+                continue;
+            }
+
+            if (!CanMergeStringBuilders(instance, instanceFirstLastCalls, inputInstance)) {
+                continue;
+            }
+
+            Cleanup(instance, instanceFirstAppendCall, inputInstanceToStringCall);
+            CollectStringBuilderChainCalls(instance, inputInstance);
+        }
+    }
+
+    return stringBuilderCalls_;
+}
+
+void SimplifyStringBuilder::OptimizeStringBuilderChain()
+{
+    /*
+        Merges consecutive String Builders into one String Builder if possible
+        Example of string concatenation (TS):
+            let a: String = ...
+            a += ...;
+            a += ...;
+            let result = a;
+
+        Frontend generates the following SB-equivalent code for the example above:
+            let inputInstance = new StringBuilder()
+            inputInstance.append(...)                   // append calls for 'inputInstance'
+            ...
+            let instance = new StringBuilder()
+            instance.append(inputInstance.toString())   // first call to append for 'instance'
+                                                        // 'inputInstance' not used beyond this point
+            instance.append(...)                        // append calls for 'instance'
+            ...
+            let result = instance.toString()
+
+        The algorithm transforms it into:
+            let inputInstance = new StringBuilder()
+            inputInstance.append(...)                   // append calls for 'inputInstance'
+            ...
+            inputInstance.append(...)                   // append calls for 'instance' replaced by 'inputInstance'
+            ...
+            let result = inputInstance.toString()
+
+        Note: arbirtary length of String Builder chain supported
+
+        The algorithm works on SBs, but not on strings themselves, thus the following limitations assumed:
+            1) all SBs must be created via default constructor,
+            2) call to append for 'instance' SB with the input of inputInstance.toString() must be the first,
+            3) 'inputInstance' must not be used after instance.append(inputInstance.toString()) call.
+        Those limitations fully match SB patterns of string concatenation.
+    */
+
+    for (auto &instanceCalls : CollectStringBuilderChainCalls()) {
+        auto inputInstance = instanceCalls.first;
+        auto &calls = instanceCalls.second;
+
+        for (auto call : calls) {
+            call->SetInput(0U, inputInstance);
+        }
+
+        FixBrokenSaveStatesForStringBuilderCalls(inputInstance);
+
+        isApplied_ = true;
     }
 }
 

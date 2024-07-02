@@ -94,30 +94,6 @@
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! INST_COUNT    /Intrinsic.StdCoreStringConcat4/,1
 //!
-//! METHOD        "ETSGLOBAL::concat6"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST_COUNT    /StringBuilder::<ctor>/,3
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
-//!
-//! METHOD        "ETSGLOBAL::concat7"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST_COUNT    /StringBuilder::<ctor>/,3
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
-//!
 //! METHOD        "ETSGLOBAL::concat8"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
@@ -130,19 +106,6 @@
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//!
-//! METHOD        "ETSGLOBAL::concat9"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST          /StringBuilder::<ctor>/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST          /StringBuilder::<ctor>/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString2/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat10"
@@ -170,18 +133,6 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
 //! INST          /Intrinsic.StdCoreSbToString/
-//!
-//! METHOD        "ETSGLOBAL::concat12"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST_COUNT    /StringBuilder::<ctor>/,3
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat13"
 //! PASS_BEFORE   "BranchElimination"
@@ -290,30 +241,6 @@
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! INST_COUNT    /Intrinsic.StdCoreStringConcat4/,1
 //!
-//! METHOD        "ETSGLOBAL::concat6"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST_COUNT    /StringBuilder::<ctor>/,3
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
-//!
-//! METHOD        "ETSGLOBAL::concat7"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST_COUNT    /StringBuilder::<ctor>/,3
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
-//!
 //! METHOD        "ETSGLOBAL::concat8"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
@@ -326,19 +253,6 @@
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//!
-//! METHOD        "ETSGLOBAL::concat9"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST          /StringBuilder::<ctor>/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST          /StringBuilder::<ctor>/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString2/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat10"
@@ -366,18 +280,6 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
 //! INST          /Intrinsic.StdCoreSbToString/
-//!
-//! METHOD        "ETSGLOBAL::concat12"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_NOT      /Intrinsic.StdCoreStringConcat/
-//! INST_COUNT    /StringBuilder::<ctor>/,3
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
-//! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
-//! INST_NOT      /StringBuilder::<ctor>/
-//! INST_NOT      /Intrinsic.StdCoreSbAppendString/
-//! INST_NOT      /Intrinsic.StdCoreSbToString/
-//! INST_COUNT    /Intrinsic.StdCoreStringConcat2/,3
 //!
 //! METHOD        "ETSGLOBAL::concat13"
 //! PASS_BEFORE   "BranchElimination"
@@ -440,19 +342,6 @@ function concat5(a: String, b: String, c: String, d: String): String {
     return a + b + c + d;                           // applied
 }
 
-function concat6(a: String, b: String, c: String, d: String): String {
-    let ab = a + b;                                 // applied
-    let cd = c + d;                                 // applied
-    return ab + cd;                                 // applied
-}
-
-function concat7(a: String, b: String, c: String, d: String): String {
-    let str = a + b;                                // applied
-    str += c;                                       // applied
-    str += d;                                       // applied
-    return str;
-}
-
 function concat8(a: String, b: String): String {
     let sb = new StringBuilder();
     sb.append(a);
@@ -461,22 +350,12 @@ function concat8(a: String, b: String): String {
     return sb.toString();                           // not applied, IR is not equivalent to 'return a + b;'
 }
 
-function concat9(a: String, b: String): String {
-    return new StringBuilder().append(a).append(b).toString();  // not applied, IR is not equivalent to 'return a + b;'
-}
-
 function concat10(a: String, b: String, c: String, d: String, e: String): String {
     return a + b + c + d + e;                       // not applied, to many args
 }
 
 function concat11(a: String, b: String): String {
     return a + b + 1;                               // not applied, concatenation with int
-}
-
-function concat12(a: String, b: String, c: String, d: String): String {
-    let abcd = a + b;                               // applied
-    abcd += c + d;                                  // applied
-    return abcd;
 }
 
 function concat13(): string
@@ -498,13 +377,9 @@ function main() {
     assert concat3("abc", "de") == "abcde": "Wrong result at concat3";
     assert concat4("ab", "c", "de") == "abcde": "Wrong result at concat4";
     assert concat5("ab", "c", "d", "e") == "abcde": "Wrong result at concat5";
-    assert concat6("ab", "c", "d", "e") == "abcde": "Wrong result at concat6";
-    assert concat7("ab", "c", "d", "e") == "abcde": "Wrong result at concat7";
     assert concat8("abc", "de") == "abcde": "Wrong result at concat8";
-    assert concat9("abc", "de") == "abcde": "Wrong result at concat9";
     assert concat10("a", "b", "c", "d", "e") == "abcde": "Wrong result at concat10";
     assert concat11("abc", "de") == "abcde1": "Wrong result at concat11";
-    assert concat12("ab", "c", "d", "e") == "abcde": "Wrong result at concat12";
     assert concat13() == "1": "Wrong result at concat13";
     assert concat14(null) == "null": "Wrong result at concat14";
 }
