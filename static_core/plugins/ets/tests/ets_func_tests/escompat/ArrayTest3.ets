@@ -354,7 +354,7 @@ function reduceFuncArg2WithInitialValue(): int {
 }
 
 function check(result: int, message: String): int {
-    if(result == success) {
+    if (result == success) {
         return success;
     }
     console.println("\nFAILED: " + message);
@@ -369,7 +369,7 @@ function check(fn: () => int, message: String): int {
         console.println("FAILED: " + message + " => Exception catched: " + e);
         return 1;
     }
-    if(result == success) {
+    if (result == success) {
         return success;
     }
     console.println("\nFAILED: " + message);
