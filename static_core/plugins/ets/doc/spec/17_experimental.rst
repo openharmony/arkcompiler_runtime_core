@@ -268,7 +268,7 @@ Character Type and Operations
 |LANG| provides a number of operators to act on character values as discussed
 below.
 
-All character operators are identical to the integer operators (see
+All character operators are identical to integer operators (see
 :ref:`Integer Types and Operations`) for they handle character values as
 integers of type *int* (see :ref:`Widening Primitive Conversions`).
 
@@ -574,7 +574,7 @@ can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 A type is *iterable* if it declares a parameterless function with name
 ``$_iterator`` and signature ``(): ITER``, where ``ITER`` is a class that
 implements ``Iterator`` interface defined in the standard library (see
-:ref:`Standard Library`) or interface which extends this interface.
+:ref:`Standard Library`), or interface that extends this interface.
 
 The example below defines *iterable* class *C*:
 
@@ -655,7 +655,7 @@ Callable Types
 
 A type is *callable* if the name of the type can be used in a call expression.
 A call expression that uses the name of a type is called a *type call
-expression*. Only class and struct types can be callable. To make a type
+expression*. Only class type can be callable. To make a type
 callable, a static method with the name ``invoke`` or ``instantiate`` must be
 defined or inherited:
 
@@ -691,8 +691,8 @@ called in a *new expression*:
 The methods ``invoke`` and ``instantiate`` are similar but have differences as
 discussed below.
 
-A :index:`compile-time error` occurs if a callable type contains both the
-``invoke`` and ``instantiate`` methods.
+A :index:`compile-time error` occurs if a callable type contains both methods
+``invoke`` and ``instantiate``.
 
 |
 
@@ -704,9 +704,9 @@ Callable Types with Invoke Method
 .. meta:
     frontend_status: Done
 
-The method ``invoke`` can have an arbitrary signature. It can be used in a
-*type call expression* in either case. If the signature has parameters, then
-the call must contain corresponding arguments.
+The method ``invoke`` can have an arbitrary signature. The method can be used
+in a *type call expression* in either case above. If the signature has
+parameters, then the call must contain corresponding arguments.
 
 .. code-block-meta:
 
@@ -1115,8 +1115,8 @@ If two or more methods within a class have the same name, and their signatures
 are not *overload-equivalent*, then such methods are considered *overloaded*.
 
 Method overloading declarations cause no :index:`compile-time error` on their
-own except the case when there could be instantiation which will cause
-*overload-equivalent* methods in the instantiated class or interface.
+own, except where a possible instantiation causes an *overload-equivalent*
+method in the instantiated class or interface:
 
 .. code-block:: typescript
    :linenos:
@@ -2296,7 +2296,7 @@ Create and Launch a Coroutine
     frontend_status: Done
 
 The following expression is used to create and launch a coroutine based on
-function or method call or lambda expression:
+a function or method call, or on a lambda expression:
 
 .. code-block:: typescript
    :linenos:
@@ -2410,12 +2410,11 @@ If the coroutine result must be ignored, then the expression statement
       let promise = launch foo()
       await promise
 
-The ``await`` cannot return ``Promise<T>`` or union type 
-that contains ``Promise<T>``.
-If the actual type argument of *T* in ``Promise<T>`` contains ``Promise``, 
-the compiler eliminates all such usages.
+The ``await`` cannot return ``Promise<T>`` or union type that contains
+``Promise<T>``. If the actual type argument of *T* in ``Promise<T>`` contains
+``Promise``, then the compiler eliminates any such usage.
 
-The following example shows return types of ``await`` expressions:
+Return types of ``await`` expressions are represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -2544,24 +2543,21 @@ Async Functions and Methods
 .. meta:
     frontend_status: Done
 
-The function ``async`` is an implicit coroutine that can be called as a
-regular function.
-
-The ``async`` function cannot be ``abstract`` or ``native``.
+``Async`` functions are implicit coroutines that can be called as regular
+functions. ``Async`` functions can be neither ``abstract`` nor ``native``.
 
 The return type of an ``async`` function must be ``Promise<T>`` (see
-:ref:`Promise<T> Class`).
-Returning values of types ``Promise<T>`` and *T* from the function ``async``
-is allowed.
+:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and *T* from
+``async`` functions is allowed.
 
 Using return statement without an expression is allowed if the return type
 is ``Promise<void>``.
 *No-argument* return statement can be added implicitly as the last statement
 of the function body if there is no explicit return statement in a function
-with the return type ``Promise<void>``.
+with the return ``Promise<void>``.
 
-**Note**: Using type ``Promise<void>`` is not recommended, it 
-is supported for the sake of backward |TS| compatibility only.
+**Note**: Using type ``Promise<void>`` is not recommended as this type is
+supported for the sake of backward |TS| compatibility only.
 
 .. index::
    function async
@@ -2573,31 +2569,29 @@ is supported for the sake of backward |TS| compatibility only.
 
 |
 
-.. _Async Methods Experimental:
+.. _Experimental Async Methods:
 
-``Async`` Methods
-=================
+Experimental ``Async`` Methods
+==============================
 
 .. meta:
     frontend_status: Done
 
-``Async`` methods are the implicit coroutines which can be called as a regular method. 
-
-The ``async`` method can't be ``abstract`` or ``native``.
+The method ``async`` is an implicit coroutine that can be called as a regular
+method. ``Async`` methods can be neither ``abstract`` nor ``native``.
 
 The return type of an ``async`` method must be ``Promise<T>`` (see
-:ref:`Promise<T> Class`).
-Returning values of types ``Promise<T>`` and *T* from the ``async`` method
-is allowed.
+:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and *T* from
+``async`` methods is allowed.
 
 Using return statement without an expression is allowed if the return type
 is ``Promise<void>``.
 *No-argument* return statement can be added implicitly as the last statement
 of the methods body if there is no explicit return statement in a method
-with the return type ``Promise<void>``.
+with return type ``Promise<void>``.
 
-**Note**: Using this annotation is not recommended because this type of
-methods is only supported for the sake of backward |TS| compatibility.
+**Note**: Using this annotation is not recommended as this type of methods
+is supported for the sake of backward |TS| compatibility only.
 
 .. index::
    async method

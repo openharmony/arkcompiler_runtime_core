@@ -1595,7 +1595,7 @@ because method overloading (see :ref:`Class Method Overloading`) can occur.
 There are several steps that determine and check the method to be called at
 compile time (see :ref:`Step 1 Selection of Type to Use`,
 :ref:`Step 2 Selection of Method`, and
-:ref:`Step 3 Semantic Correctness Check`).
+:ref:`Step 3 Checking Method Modifiers`).
 
 .. index::
    compile-time error
@@ -1624,20 +1624,18 @@ Step 1: Selection of Type to Use
 The *object reference* is used to determine the type in which to search the method.
 Three forms of *object reference* are available:
 
-+------------------------------+-----------------------------------------------+
-| **Form of object reference** | **Type to use**                               |
-+==============================+===============================================+
-| ``typeReference``            | Type denoted by ``typeReference``.            |
-+------------------------------+-----------------------------------------------+
-| ``expression`` of type *T*   | *T* if *T* is a class, interface, or union;   |
-|                              | *T*’s constraint                              |
-|                              | (:ref:`Type Parameter Constraint`) if *T* is  |
-|                              | a type parameter.A :index:`compile-time error`|
-|                              | occurs otherwise.                             |
-+------------------------------+-----------------------------------------------+
-| ``super``                    | The superclass of the class that contains     |
-|                              | the method call.                              |
-+------------------------------+-----------------------------------------------+
+
+.. table::
+   :widths: 40, 60
+
+   ============================== =================================================================
+    **Form of object reference**   **Type to use**
+   ============================== =================================================================
+   ``typeReference``               Type denoted by ``typeReference``.
+   ``expression`` of type *T*      *T* if *T* is a class, interface, or union; *T*’s constraint (:ref:`Type Parameter Constraint`) if *T* is a type parameter. A :index:`compile-time error` occurs otherwise.
+   ``super``                       The superclass of the class that contains the method call.
+   ============================== =================================================================
+
 
 .. index::
    type
@@ -1666,7 +1664,7 @@ After the type to use is known, the method to call must be determined. As
 |LANG| supports overloading, more then one method may be accessible
 under the method name used in the call.
 
-In this case, all accessible methods are called
+All accessible methods are called
 *potentially applicable candidates* and
 :ref:`Overload Resolution` is used to select the method to call.
 If *overload resolution* can definitely select just one method,
@@ -1682,10 +1680,10 @@ as more than one applicable methods avaialble).
 
 |
 
-.. _Step 3 Semantic Correctness Check:
+.. _Step 3 Checking Method Modifiers:
 
-Step 3: Semantic Correctness Check
-==================================
+Step 3: Checking Method Modifiers
+=================================
 
 .. meta:
     frontend_status: Done
@@ -1705,24 +1703,11 @@ semantic checks must be performed:
    not be declared ``abstract`` or ``static``. Otherwise, a
    :index:`compile-time error` occurs.
 
--  If the last argument of a method call has the spread operator '``...``',
-   then ``objectReference`` that follows that argument must refer to an array
-   whose type is compatible (see :ref:`Type Compatibility`) with the type
-   specified in the last parameter of the method declaration.
-
 .. index::
-   semantic correctness check
-   best match
    method call
    static method call
-   compile-time error
    abstract method call
    type argument
-   method declaration
-   argument
-   spread operator
-   compatible type
-   type compatibility
 
 |
 
@@ -1777,11 +1762,6 @@ If the operator '``?.``' (see :ref:`Chaining Operator`) is present, and the
 
 The function call is *safe* because it handles nullish values properly.
 
-There are two steps that determine
-and check the function to be called at compile time
-:ref:`Step 1 Selection of Function`
-and :ref:`Step 2 Semantic Correctness Check`.
-
 .. index::
    chaining operator
    expression
@@ -1791,21 +1771,16 @@ and :ref:`Step 2 Semantic Correctness Check`.
    undefined
    function call
 
-|
+Depending on the form of the expression in the call,
+there are two important cases, that requires different semantic checks:
 
-.. _Step 1 Selection of Function:
+- The expression in the call is in the form of *qualifiedName* and 
+  this *qualifiedName* refers to an accesible function (:ref:`Function Declarations`)
+  or to a set of accesible overloaded functions;
+  
+- All other forms of expression.   
 
-Step 1: Selection of Function
-=============================
-
-.. meta:
-    frontend_status: Done
-
-If the expression in the call is in the form of *qualifiedName*,
-several functions may be accessible under this name, as
-|LANG| supports overloading.
-
-In this case, all accessible functions are called
+In the first case, all accessible functions are called
 *potentially applicable candidates* and
 :ref:`Overload Resolution` is used to select the function to call.
 If *overload resolution* can definitely select just one function,
@@ -1814,44 +1789,15 @@ otherwise it is a :index:`compile-time error`
 (no function to call or ambiguity
 as more than one applicable functions avaialble).
 
-In other case, *overload resolution* is not used.
-
 .. index::
    overload resolution
    function to call
    potentially applicable candidate
 
-|
+In the second case, there is no need for *overload resolution*, as the entity to call 
+is unambiguously determined by the expression. See :ref:`Compatibility of Call Arguments` for the semantic checks that must
+be performed.
 
-.. _Step 2 Semantic Correctness Check:
-
-Step 2: Semantic Correctness Check
-==================================
-
-.. meta:
-    frontend_status: Done
-
-The single function to call is known at this step. The following semantic
-check must be performed:
-
-If the last argument of the function call has the spread operator '``...``',
-then ``objectReference`` that follows the argument must refer to an array
-of a type compatible with that specified in the last parameter of the
-function declaration (see :ref:`Type Compatibility`).
-
-.. index::
-   semantic correctness check
-   function
-   semantic check
-   argument
-   spread operator
-   array
-   compatible type
-   type compatibility
-   function declaration
-   parameter
-
-|
 
 .. _Indexing Expressions:
 
@@ -2250,7 +2196,7 @@ The execution of a class instance creation expression is performed as follows:
    instance.
 
 The validity of the constructor call is similar to the validity of the method
-call as discussed in :ref:`Step 3 Semantic Correctness Check`, except the cases
+call as discussed in :ref:`Step 2 Selection of Method`, except the cases
 discussed in the :ref:`Constructor Body` section.
 
 A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.

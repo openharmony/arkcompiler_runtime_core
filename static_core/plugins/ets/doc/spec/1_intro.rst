@@ -373,8 +373,8 @@ as used in other languages, application areas, or industries.
      of the language's syntactic grammar.
 
    tokenization
-     -- finding the longest sequence of characters that form a valid token,
-     (i.e., the establishing of tokens) in the process of codebase reading
+     -- finding the longest sequence of characters that forms a valid token
+     (i.e., establishing a token) in the process of codebase reading
      by the machine.
 
    punctuator
@@ -532,7 +532,8 @@ as used in other languages, application areas, or industries.
      class or interface have the same name but different signatures.
 
    shadowing
-     -- situation where ... TBD
+     -- situation where a derived class introduces a field with the same name as
+     that of its base class.
 
    package level scope
       -- name that is declared on the package level, and accessible throughout

@@ -52,9 +52,8 @@ Ambient functions, methods, and constructors have no bodies.
         )
         ;
 
-An ambient enumeration type declaration
-can be prefixed by ``const`` keyword for |TS| compatibility.
-It does not have any influence to the declared type.
+An ambient enumeration type declaration can be prefixed by the keyword
+``const`` for |TS| compatibility. It has no influence on the declared type.
 
 A :index:`compile-time error` occurs if the modifier ``declare`` is used in a
 context that is already ambient:
@@ -369,11 +368,9 @@ Ambient Interface Declarations
         | ambientIterableDeclaration
         ;
 
-An ambient interface can contain additional members
-the same as an ambient class, see
-:ref:`Ambient Indexer`,
-:ref:`Ambient Call Signature` and
-:ref:`Ambient Iterable`.
+An ambient interface can contain additional members in the same manner as
+an ambient class (see :ref:`Ambient Indexer`, :ref:`Ambient Call Signature`,
+and :ref:`Ambient Iterable`).
 
 |
 
@@ -388,13 +385,7 @@ Ambient Namespace Declarations
 Namespaces are used to logically group multiple entities. |LANG| supports
 ambient namespaces to provide better compatibility with |TS| that often uses
 them to specify the platform API or a third-party library API.
-    
-    
-Namespaces are used to logically group multiple entities.
-The |LANG| supports ambient namespaces
-to provide better compatibility with TS, where there are often
-used to specify platform API or 3rd library API.
-    
+
 .. code-block:: abnf
 
     ambientNamespaceDeclaration:
@@ -417,8 +408,8 @@ used to specify platform API or 3rd library API.
         )
         ;
 
-An enumeration type declaration can be prefixed by ``const`` keyword for |TS| compatibility.
-It does not have any influence to the declared type.
+An enumeration type declaration can be prefixed by the keyword ``const`` for
+|TS| compatibility. It has no influence on the declared type.
 
 Only exported entities can be accessed outside a namespace.
 
@@ -441,8 +432,8 @@ accessed by using quilified names.
 Implementing Ambient Namespace Declaration
 ==========================================
 
-The :ref:`Annotation namespace` must be applied to classes and functions
-that implement corresponding entities declared in the ambient namespace.
+:ref:`Annotation namespace` must be applied to classes and functions that
+implement the corresponding entities as declared in the ambient namespace.
 
 
 .. raw:: pdf

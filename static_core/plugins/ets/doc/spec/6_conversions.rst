@@ -423,7 +423,7 @@ target types ``long`` or ``int`` is performed by the following rules:
   *round-toward-zero* mode.
 
 
-A numeric casting conversion from an integer type (or char) to smaller integer
+A numeric casting conversion from an integer type (or char) to a smaller integer
 type (or char) *I* discards all bits except the *N* lowest ones, where *N* is
 the number of bits used to represent type *I*. This conversion can lose the
 information on the magnitude of the numeric value. The sign of the resulting
@@ -472,7 +472,7 @@ supertype (superclass or superinterface) to a subclass or subinterface:
 Compile-time errors for this conversion are the same as in
 :ref:`InstanceOf Expression`.
 
-A runtime error occurs (**TBD: name it**) during these conversion if the
+A runtime error (``ClassCastError``) occurs during these conversion if the
 type of a converted expression cannot be converted to the *target type*:
 
 .. code-block:: typescript
@@ -529,7 +529,7 @@ A :index:`compile-time error` occurs if the target type ``TT`` is not one of
     }
 
 
-These conversions can cause a runtime error (**TBD: name it**) if the runtime
+These conversions can cause a runtime error (``ClassCastError``) if the runtime
 type of an expression is not the *target type*.
 
 Another form of *conversion from union* is implicit conversion from union type
@@ -916,7 +916,7 @@ a :index:`compile-time error` as it can cause type-safety violations:
 
     class B { b_method() {} }
     let b: B = n // OK as never is a subtype of any type
-    b.b_method() // this breaks type-safety if as cast to never is allowed  
+    b.b_method() // this breaks type-safety if 'as' cast to never is allowed  
 
 The conversion of array types (see :ref:`Array Types`) also works in accordance
 with the widening style of the type of array elements as shown below:
@@ -947,8 +947,8 @@ runtime checks to ensure type-safety as show below:
     class AnotherDerived extends Base {}
     function foo (da: Derived[]) {
       let ba: Base[] = da // Derived[] is assigned into Base[]
-      ba[0] = new AnotherDerived() /* This assignment of array
-          element will cause  *ArrayStoreError* */
+      ba[0] = new AnotherDerived() /* This assignment of array element will
+         cause *ArrayStoreError* during program execution */
     }
 
 
@@ -989,7 +989,7 @@ Constant String to Character Conversions
 ========================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 *Constant string to character conversion* converts an expression of type
 ``string`` to type ``char``. The initial type ``string`` expression must be a
@@ -1013,7 +1013,11 @@ Function Types Conversions
 *Function types conversion* is the conversion of one function type to another.
 A *function types conversion* is valid if the following conditions are met:
 
-- Parameter types are converted by using *contravariance* :ref:`Contravariance`.
+- Parameter types are converted by using *contravariance* :ref:`Contravariance`
+
+  - Non-optional parameter type can be converted to the type of an optional
+    parameter. 
+
 - Return types are converted by using *covariance* :ref:`Covariance`.
 
 See :ref:`Type Compatibility` for details.
@@ -1041,7 +1045,7 @@ See :ref:`Type Compatibility` for details.
 
     function (
        bb: FuncTypeBaseBase, bd: FuncTypeBaseDerived,
-       db: FuncTypeDerivedBase, dd: FuncTypeDerivedDerived\
+       db: FuncTypeDerivedBase, dd: FuncTypeDerivedDerived
     ) {
        bb = bd
        /* OK: identical (invariant) parameter types, and compatible return type */
@@ -1058,13 +1062,33 @@ See :ref:`Type Compatibility` for details.
     let foo2: (p: Base) => Base = (p: Derived): Derived => new Derived() 
      /* Compile-time error: compatible parameter type(covariance), type unsafe */
 
-    let foo2: (p: Derived) => Base = (p: Base): Derived => new Derived() 
+    let foo3: (p: Derived) => Base = (p: Base): Derived => new Derived() 
      /* OK: contravariant parameter types, and compatible return type */
+
+    let foo4: (p?: Base) => void = (p: Base): void => {}
+     /* OK: Base is compatible with Base|undefined, and identical return type */
+
+    let foo5: (p: Base) => void = (p?: Base): void => {}
+     /* Compile-time error: as Base|undefined is not compatible with Base */
+
 
 A *throwing function* type variable can have a *non-throwing function* value.
 
+.. code-block:: typescript
+   :linenos:
+
+    let foo: () => void throws = (): void => {} // OK
+
+
 A :index:`compile-time error` occurs if a *throwing function* value is assigned
 to a *non-throwing function* type variable.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    let foo: () => void = (): void throws => {} // Compile-time error
+
 
 .. index::
    throwing function
@@ -1146,7 +1170,7 @@ Type Parameter Conversions
 .. meta:
     frontend_status: Done
 
-A value of ``type parameter`` type can be converted only to the same
+A value of the ``type parameter`` type can be converted only to the same
 ``type parameter`` type. This conversion never causes runtime errors.
 
 .. code-block:: typescript

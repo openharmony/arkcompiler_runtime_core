@@ -135,7 +135,7 @@ Type Parameter Constraint
     frontend_status: Partly
     todo: support keyof constraint #17436
 
-If there possible instantiations need to be constrained, then an individual
+If possible instantiations need to be constrained, then an individual
 *constraint* can be set for every type parameter.
 
 In every type parameter, a constraint can follow the keyword ``extends``. The
@@ -245,13 +245,15 @@ Type Parameter Default
 
 Type parameters of generic types can have defaults. This situation allows
 dropping a type argument when a particular type of instantiation is used.
-However, a :index:`compile-time error` occurs if a type parameter without a
-default type follows a type parameter with a default type in the
-declaration of a generic type.
-Also a :index:`compile-time error` occurs if a type parameter default refers to
-a type parameter defined after the current type parameter.
+However, a :index:`compile-time error` occurs if:
 
-The examples below illustrate this for both classes and functions:
+- A type parameter without a default type follows a type parameter with a
+  default type in the declaration of a generic type;
+- Type parameter default refers to a type parameter defined after the current
+  type parameter.
+
+The application of this concept to both classes and functions is presented
+in the examples below:
 
 .. index::
    type parameter
@@ -308,20 +310,18 @@ Generic Instantiations
 
 As mentioned before, a generic class, interface, type alias, function, or method
 declaration defines a set of corresponding non-generic entities. A generic
-entity must be *instantiated* in order to make it a non-generic entity.
-
-The result of instantiation is a *real*, non-parameterized program entity, e.g.,
-class, interface, union, array, method, or function, that is handled in a
+entity must be *instantiated* in order to make it a non-generic entity. The
+result of instantiation is a *real*, non-parameterized program entity, e.g.,
+class, interface, union, array, method, or function that is handled in a
 usual way.
 
 Conceptually, a generic class, an interface, a type alias, a method, or a
 function defines a set of non-generics classes, interfaces, unions, arrays,
 methods, or functions respectively.
 
-An explicit instantiation is specified by providing a list of *type arguments*
-that substitute corresponding type parameters of the generic. An explicit
-generic instantiation is the language construct that specifies real types to substitute type parameters of a *generic*. Real types specified in an
-instantiation are called *type arguments*.
+An explicit generic instantiation is the language construct that provides a
+list of *type arguments* that specify real types to substitute corresponding
+type parameters of a generic:
 
 .. code-block:: typescript
    :linenos:
@@ -351,17 +351,16 @@ instantiation are called *type arguments*.
    type parameter
    generic
 
-*G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>
-
----where <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is the list of type arguments
-for the generic declaration *G*.
+In the explicit generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>,
+*G* is the generic declaration, and  <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
+the list of its type arguments.
 
 ..
    lines 312, 314, 336 - initially the type was *T*:sub:`1`, ``...``, *T*:sub:`n`
    lines 321, 322 - initially *C*:sub:`1`, ``...``, *C*:sub:`n` and *T*:sub:`1`, ``...``, *T*:sub:`n` 
 
-If ``C``:sub:`1`, ``...``, ``C``:sub:`n` is a constraint for the corresponding
-type parameters ``T``:sub:`1`, ``...``, ``T``:sub:`n` of a generic declaration,
+If type parameters ``T``:sub:`1`, ``...``, ``T``:sub:`n` of a generic
+declaration are constrained by the corresponding ``C``:sub:`1`, ``...``, ``C``:sub:`n`,
 then *T*:sub:`i` is a subtype (see :ref:`Subtyping`) of each constraint type
 *C*:sub:`i`. All subtypes of the type listed in the corresponding constraint
 have each type argument *T*:sub:`i` of the parameterized declaration ranging
@@ -423,8 +422,7 @@ Implicit Generic Instantiations
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
 Such type arguments are inferred (see :ref:`Type Inference`) from the context
-the generic is referred in. Implicit instantiation is only possible for
-functions and methods.
+the generic is referred in as in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -433,6 +431,7 @@ functions and methods.
     foo (new Object, new Object)     // Implicit generic instantiation
       // based on argument types the type argument is inferred
 
+Implicit instantiation is only possible for functions and methods.
 
 .. index::
    implicit instantiation
@@ -625,11 +624,11 @@ Partial Utility Type
 ====================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 Type ``Partial<T>`` constructs a type with all properties of *T* set to
-optional. *T* must be a class or an interface type. No methods of *T* are part
-of ``Partial<T>`` type.
+optional. ``T`` must be a class or an interface type. No method of ``T`` is
+part of the ``Partial<T>`` type.
 
 .. code-block:: typescript
    :linenos:
@@ -647,8 +646,8 @@ of ``Partial<T>`` type.
     
     process({title: "aa"}) // description is undefined
 
-In the example above, type ``Partial<Issue>`` is transformed to a distinct
-type that is analogous:
+In the example above, type ``Partial<Issue>`` is transformed to a distinct but
+analogous type:
 
 .. code-block:: typescript
    :linenos:
@@ -658,18 +657,8 @@ type that is analogous:
         description?: string
     }
 
-Type ``T`` is a subtype of ``Partial<T>``, thus allows assignments.
-
-.. code-block:: typescript
-   :linenos:
-
-    class A {
-       f1: string = ""
-       f2: number = 1
-       f3: boolean = true
-    }
-    let x = new A
-    let y: Partial<A> = x // OK
+Type ``T`` is not a subtype of ``Partial<T>``, and variables of ``Partial<T>``
+are to be initialized with valid object literals.
 
 
 |
@@ -680,12 +669,12 @@ Required Utility Type
 =====================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-Type ``Required<T>`` is opposite to ``Partial<T>``.
-It constructs a type with all properties of *T* set to
-be required (not optional). *T* must be a class or an interface type.
-No methods of *T* are part of ``Required<T>`` type.
+Type ``Required<T>`` is opposite to ``Partial<T>``, and constructs a type with
+all properties of ``T`` set to required (i.e., not optional). ``T`` must be a
+class or an interface type. No method of ``T`` is part of the ``Required<T>``
+type.
 
 .. code-block:: typescript
    :linenos:
@@ -698,11 +687,11 @@ No methods of *T* are part of ``Required<T>`` type.
     let c: Required<Issue> = { // CTE: 'description' should be defined
         title: "aa"
     }
-    
 
 
-The type defined in the example above, the type ``Required<Issue>``
-is transformed to a distinct type that is analogous:
+
+In the example above, type ``Required<Issue>`` is transformed to a distinct
+but analogous type:
 
 .. code-block:: typescript
    :linenos:
@@ -712,8 +701,8 @@ is transformed to a distinct type that is analogous:
         description: string
     }
 
-Type ``T`` is not a subtype of ``Required<T>``, and variables of Required<T>
-are to be initialized with the valid object literals.
+Type ``T`` is not a subtype of ``Required<T>``, and variables of ``Required<T>``
+are to be initialized with valid object literals.
 
 
 |
@@ -724,12 +713,12 @@ Readonly Utility Type
 =====================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-Type ``Readonly<T>`` constructs a type with all properties of *T* set to
+Type ``Readonly<T>`` constructs a type with all properties of ``T`` set to
 readonly. It means that the properties of the constructed value cannot be
-reassigned. *T* must be a class or an interface type. No methods of *T* are
-part of ``Readonly<T>`` type.
+reassigned. ``T`` must be a class or an interface type. No method of ``T`` is
+part of the ``Readonly<T>`` type.
 
 
 .. code-block:: typescript
@@ -745,7 +734,7 @@ part of ``Readonly<T>`` type.
 
     myIssue.title = "Two" // compile-time error: readonly property
 
-Type ``T`` is a subtype of ``Readonly<T>``, thus allows assignments.
+Type ``T`` is a subtype of ``Readonly<T>``, and allows assignments as a consequence:
 
 .. code-block:: typescript
    :linenos:
@@ -834,6 +823,40 @@ type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
 In the example above, *K* is a union of literal types. The result of an
 indexing expression is of type *V*. In this case it is ``number``.
 
+|
+
+.. _Utility Type Private Fields:
+
+Utility Type Private Fields
+===========================
+
+.. meta:
+    frontend_status: None
+
+As utility types are built on top of other types private fields of the initial
+type stay in the utility type but they are not acessible and cannot be
+accesssed in any form.
+
+.. code-block:: typescript
+   :linenos:
+   
+   function foo(): string {  // Potentially some side effect 
+      return "private field value"
+   }
+
+   class A {
+      public_field = 444
+      private private_field = foo()
+   }
+
+   function bar (part_a: Readonly<A>) {
+      console.log (part_a)
+   }
+
+   bar ({public_field: 777}) // OK, object literal has no field `private_field`
+   bar ({public_field: 777, private_field: ""}) // compile-time error, incorrect field name
+
+   bar (new A) // OK, object of type Readonly<A> has field `private_field`
 
 .. raw:: pdf
 

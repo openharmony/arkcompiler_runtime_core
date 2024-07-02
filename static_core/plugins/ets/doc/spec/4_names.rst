@@ -623,8 +623,8 @@ variable is determined as follows:
 
 -  *T* is the type specified in a type annotation (if any) of the declaration.
 
-   - If the name of the variable is followed by '``?``', then the variable is
-     semantically equivalent to the variable type ``type | undefined``.
+   - If the name of the variable is followed by the '``?``' sign, then the
+     type of the variable is semantically equivalent to ``type | undefined``.
    - If the declaration also has an initializer, then the initializer expression
      type must be compatible with *T* (see :ref:`Type Compatibility with Initializer`).
 

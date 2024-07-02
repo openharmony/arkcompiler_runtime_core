@@ -190,13 +190,13 @@ Then the code below is valid:
 
    class Derived extends Base {
       // invariance: parameter type and return type are unchanged
-      override method_one(p: Base): Base {}  
+      override method_one(p: Base): Base {}
 
-      // covariance for the return type: Derived is a subtype of Base  
+      // covariance for the return type: Derived is a subtype of Base
       override method_two(p: Derived): Derived {}
 
       // contravariance for parameter types: Base is a super type for Derived
-      override method_three(p: Base): Derived {} 
+      override method_three(p: Base): Derived {}
    }
 
 The following code causes compile-time errors:
@@ -210,7 +210,7 @@ The following code causes compile-time errors:
    class Derived extends Base {
 
       // covariance for parameter types is prohibited
-      override method_one(p: Derived): Base {} 
+      override method_one(p: Derived): Base {}
 
       // contravariance for the return type is prohibited
       override method_tree(p: Derived): Base {}
@@ -244,6 +244,46 @@ compatible with type *T*:sub:`1`.
 
 |
 
+.. _Compatibility of Call Arguments:
+
+Compatibility of Call Arguments
+*******************************
+
+.. meta:
+    frontend_status: Done
+
+The definition of the term *compatible* is found in :ref:`Type Compatibility`.
+
+The following semantic check must be performed for any function, method, or
+constructor call:
+
+- Type of any argument (except arguments of a rest parameter) must be
+  compatible with the type of the corresponding parameter ;
+
+- Type of each argument corresponding to the rest parameter without the spread
+  operator (:ref:`Spread Expression`) must be compatible with the element type
+  of the rest type parameter;
+
+- If a single argument corresponding to the rest parameter has the spread
+  operator (:ref:`Spread Expression`), then ``expression`` that follows the
+  operator must refer to an array of a type compatible with the type of the
+  rest parameter.
+
+
+.. index::
+   function
+   method
+   constructor
+   semantic check
+   argument
+   rest parameter
+   spread operator
+   compatible type
+   type compatibility
+   parameter
+
+|
+
 .. _Type Inference:
 
 Type Inference
@@ -261,9 +301,9 @@ type-safety. There are several contexts where the type inference can be applied
 by the compiler:
 
 - variable and constant declarations (see :ref:`Type Inference from Initializer`)
-- implicit generic instantiations (see :ref:`Implicit Generic Instantiations`) 
+- implicit generic instantiations (see :ref:`Implicit Generic Instantiations`)
 - function or method return type (see :ref:`Return Type Inference`)
-- array literal type inference (see :ref:`Array Type Inference from Context`, 
+- array literal type inference (see :ref:`Array Type Inference from Context`,
   :ref:`Array Type Inference from Types of Elements`)
 - smart types (see :ref:`Smart Types`)
 
@@ -429,7 +469,7 @@ and
 
    (x: number): void
    (y: number): number
-   
+
 and
 
 .. code-block-meta:
@@ -439,7 +479,7 @@ and
 
    class G<T>
    (y: Number): void
-   (x: T): void 
+   (x: T): void
 
 and
 
@@ -450,7 +490,7 @@ and
 
    class G<T>
    (y: G<Number>): void
-   (x: G<T>): void 
+   (x: G<T>): void
 
 and
 
@@ -461,7 +501,7 @@ and
 
    class G<T, S>
    (y: T): void
-   (x: S): void 
+   (x: S): void
 
 The following signatures are not *overload-equivalent*:
 
@@ -523,7 +563,7 @@ if **all** of the following conditions are met:
    ... ``V``:sub:`k`.
 
 There are two cases of type override-compatibility, as types are used as either
-parameter types, or return types. For each case there are five kinds of types:
+parameter types, or return types. There are five kinds of types for each case:
 
 - Class/interface type;
 - Function type;
@@ -539,11 +579,12 @@ Mixed override-compatibility between types of different kinds is always false,
 except the compatibility with class type ``Object`` as any type is a subtype of
 ``Object``.
 
-In case of generics the following rule work:
-   - derived class should have type parameter constraints to be type compatible
+The following rule applies in case of generics:
+
+   - Derived class must have type parameter constraints to be type-compatible
      (see :ref:`Type Compatibility`) with the respective type parameter
-     constraint in the base type
-   - otherwise it is a :index:`compile-time error`.
+     constraint in the base type;
+   - Otherwise, a :index:`compile-time error` occurs.
 
 
 .. code-block:: typescript
@@ -596,8 +637,8 @@ The semantics is illustrated by the example below:
        kinds_of_return_type1(): Base
        kinds_of_return_type2(): (q: Derived)=> Base
        kinds_of_return_type3(): number
-       kinds_of_return_type4(): Number 
-       kinds_of_return_type5(): Base[] 
+       kinds_of_return_type4(): Number
+       kinds_of_return_type5(): Base[]
        kinds_of_return_type6(): [Base, Base]
        kinds_of_return_type7 <T extends Derived>(): T
     }
@@ -627,7 +668,7 @@ The example below illustrates override-compatibility with ``Object``:
 
 .. code-block:: typescript
    :linenos:
-    
+
     class Base {
        kinds_of_parameters( // It represents all possible parameter type kinds
           p1: Derived, p2: (q: Base)=>Derived, p3: number,
@@ -641,7 +682,7 @@ The example below illustrates override-compatibility with ``Object``:
           p3: Object, // Compile-time error: number and Object are not override-compatible
           p4: Object, p5: Object, p6: Object
        )
-    class Derived1 extends Base { 
+    class Derived1 extends Base {
        override kinds_of_return_type(): Base // Valid overriding
     }
     class Derived2 extends Base {
@@ -672,12 +713,23 @@ functions is not defined.
 
 The correctness check for functions overloading is performed if two or more
 functions with the same name are accessible (see :ref:`Accessible`) in a scope
-(see :ref:`Scopes`). A function can be defined in or imported to the scope.
+(see :ref:`Scopes`). 
 
-Semantic check for such two functions is as follows:
+A function can be declared in or imported to the scope. 
+It is not allowed to mix functions declared and imported, 
+or imported from different compilation units to 
+prevent uncontrolled overloading. To be more precise,
+a :index:`compile-time error` occurs for functions with the same name, if
 
-- If signatures of such functions are *overload-equivalent*, then
-  a :index:`compile-time error` occurs.
+-  Functions are imported from different compilation units;
+
+-  Some functions are imported and others are declared.
+
+It means that only functions that are declared in the scope
+can be overloaded. Semantic check for such functions is as follows:
+
+-  If signatures of functions are *overload-equivalent*, then
+   a :index:`compile-time error` occurs.
 
 -  Otherwise, *overloading* is valid.
 
@@ -699,7 +751,7 @@ nor overloading is considered.
 **Note**: Accessors are considered methods here.
 
 Overriding member may keep or extend the access modifer (see
-:ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a 
+:ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a
 :index:`compile-time error` occurs.
 
 .. code-block:: typescript
@@ -721,7 +773,7 @@ Overriding member may keep or extend the access modifer (see
          // Public member can be overriden and/or implemented by the public one
       public override protected_member() {}
          // Protected member can be overriden by the protected or public one
-      internal internal_member() {} 
+      internal internal_member() {}
          // Internal member can be overriden by the internal one only
       override private_member() {}
          // A compile-time error occurs if an attempt is made to override private member
@@ -885,13 +937,13 @@ Overloading and Overriding in Interfaces
    :linenos:
 
    interface anInterface {
-      instance_method_1() 
+      instance_method_1()
       instance_method_1()  // Compile-time error: instance method duplication
 
       static static_method_1() {}
       static static_method_1() {} // Compile-time error: static method duplication
 
-      instance_method_2() 
+      instance_method_2()
       instance_method_2(p: number)  // Valid overloading
 
       static static_method_2() {}
@@ -909,14 +961,20 @@ Overload Resolution
 .. meta:
     frontend_status: Done
 
-The *overload resolution* is used where 
-there are several *potentially applicable candidates*
-in a function, method or constructor call.
-The overload resolution is performed in two steps:
+The *overload resolution* is used to select one entity to call from a set of
+*potentially applicable candidates* in a function, method, or constructor call.
 
-- selecting *applicable candidates* from *potentially applcable candidates*;
+The overload resolution is performed in two steps as follows:
 
-- selecting the best candidate.
+#. Select *applicable candidates* from *potentially applicable candidates*;
+
+#. If there is more than one *applicable candidates*, then select the best
+   candidate.
+
+**Note**: The first step is performed in all cases, even if there is
+only one *applicable candidate* to check *call signature compatibility*.
+
+|
 
 .. _Selection of Applicable Candidates:
 
@@ -928,77 +986,25 @@ Selection of Applicable Candidates
     todo: adapt the implementation to the latest specification (handle rest, union, functional types properly)
     todo: make the ISA/assembler/runtime handle union types without collision - eg foo(arg: A|B) and foo(arg: C|D)
 
-Function or method selection is the process of choosing functions or methods
-that are applicable for a function or a method call. The choosing algorithm
-is described below:
+The selection of *applicable candidates* is the process of checking
+:ref:`Compatibility of Call Arguments` for all entities from the set of
+*potentially applicable candidates*. If any argument is not compatible with
+the corresponding parameter type, then the entity is deleted from the set.
 
-1. An empty list *A* of applicable candidates is created.
+**Note**: Compile-time errors are not reported on this stage.
 
-2. The argument types are taken from the call to compose the list
-   *TA* = (*ta*:sub:`1`, *ta*:sub:`2`, ... *ta*:sub:`n`), where *ta*:sub:`i`
-   is the type of the *i*’th argument, and `n` is the number of function
-   or method call arguments.
+After processing all entities, one of the following results is achieved:
 
-3. Suppose *M* is a set of candidates (functions or methods with the same name)
-   that are accessible (see :ref:`Accessible`) at the point of call. The
-   following actions are performed for every candidate:
+- Set is empty (all entities are deleted). A compile-time error occurs,
+  and the *overload resolution* is completed.
 
-  3.1 If the signature of *j*’th candidate has optional parameters or a rest
-  parameter, then the *TA* list for this candidate is rebuilt according to the
-  following rules:
+- Only one entity is left in the set. This is the entity to call, and
+  the *overload resolution* is completed.
 
-    - Until there is an optional parameter with the ordinal number *n+1* (i.e.,
-      that has no argument in *TA*), the type of the optional parameter keeps
-      being added to the *TA* list as *ta*:sub:`n+1`;
+- More than one entity left in the set. The next step of the
+  *overload resolution* is to be performed.
 
-    - If there is a rest parameter with the ordinal number *n+1*, then the
-      type of the rest parameter is added to the *TA* list as *ta*:sub:`n+1`;
-
-    - If there is a rest parameter with the ordinal number *m* that is less
-      then *n*, then *ta*:sub:`m`, ... *ta*:sub:`n` are deleted from *TA*
-      list. The type of the rest parameter is added to the *TA* list as
-      *ta*:sub:`m`. A :index:`compile-time error` occurs if any element of
-      *ta*:sub:`m`, ... *ta*:sub:`n` is not compatible with the element type
-      of the rest parameter.
-
-  If the number of parameters of the *j*’th candidate is not equal to the
-  length of the *TA* list, then the candidate is not added to the set *A*.
-
-  The examples are presented below:
-
-.. code-block-meta:
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo (p: A | B) { ... }                      // #1
-    function foo (p: A | C) { ... }                      // #2
-    function foo (p1: int, p2: SomeOtherType ) { ... }   // #3
-    function foo (p1: int, p2?: int ) { ... }            // #4
-
-    foo(new A) // three applicable candidates for this call: #1,#2,#4
-
-    function goo (p1: Base)                // #1
-    function goo (p2: Base|SomeOtherType)  // #2
-    function goo (...p3: Base[])           // #3
-
-    goo (new Base) // three applicable candidates for this call: #1, #2, #3
-
-|
-
-  3.2 The following check is performed for each candidate from the set *M*.
-  Each type *ta*:sub:`i` from the list *TA* is compared to the type of the
-  *i*’th candidate parameter. When performing the comparison, the rules of
-  type compatibility (see :ref:`Type Compatibility`) are used with no
-  consideration for the following:
-
-  - Possible boxing conversion (see :ref:`Boxing Conversions`);
-  - Possible unboxing conversion (see :ref:`Unboxing Conversions`);
-
-  A candidate that meets the requirements of the check is added to the *A*
-  list of applicable candidates.
-
-  The examples are presented below:
+Two overloaded functions are considered in the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -1006,307 +1012,17 @@ is described below:
    class Base { }
    class Derived extends Base { }
 
-   function foo(p: Base) { ... }
-   function foo(p: Derived) { ... }
+   function foo(p: Base) { ... }     // #1
+   function foo(p: Derived) { ... }  // #2
 
-   foo(new Derived) // two applicable candidates for this call:
-                    // the argument of type Derived can be
-                    // implicitly converted to Base
+   foo(new Derived) // two applicable candidates for this call
+                    // next step of overload resolution is required
+
    foo(new Base)    // one applicable candidate
+                    // overload resolution is completed
+                    // #1 will be called
 
-   function boo (p: T1) { ... }
-   function boo (p: T1|T2) { ... }
-
-   boo (new T1 ) // two applicable candidates for this call
-   boo (new T2)  // one applicable candidate
-
-   type T1 = A | B
-   type T2 = A | C
- 
-   function goo (p: T1) { ... }  // #1
-   function goo (p: T2) { ... }  // #2
- 
-   goo (new A)       // Two applicable candidates: #1, #2
-   goo (new A as T1) // One applicable candidate: #1
-   goo (new A as T2) // One applicable candidate: #2
-
-|
-
-  3.3 If after the check the list of applicable candidates is still empty, then
-  step 3.2 of this algorithm is performed again. Each type *ta*:sub:`i`, to
-  which type compatibility rules are not applied successfully in the previous
-  step, is compared again to the type of the *i*’th candidate parameter.
-  This time the rules of type compatibility consider possible boxing and
-  unboxing conversions. A candidate that meets the requirements of the
-  check is added to the *A* list of applicable candidates.
-
-The examples are presented below:
-
-.. code-block-meta:
-
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(p: SomeOtherType) { ... }
-   function foo(p: Int) { ... }
-
-   foo(1) // After step 3.1: two applicable candidates for this call
-          // After step 3.2: still two applicable candidates
-          // After step 3.3: apply boxing conversion – one applicable candidate
-   
-   function goo (p: (p: T) => T) { ... }   // #1
-   function goo (p: (p: T) => U) { ... }   // #2
-
- 
-   // Return types of call arguments are taken into account here
-   
-   goo ((p: T) => T {}) // After steps 3.1, 3.2: two candidates
-                        // After step 3.3: the single candidate #1
-                        
-   goo ((p: T) => U {}) // After steps 3.1, 3.2: two candidates
-                        // After step 3.3: the single candidate #2
-
-
-|
-
-  3.4 If the list of applicable candidates has two or more candidates the best
-  match candidate is to be identified if possible. This process depends on
-  types of arguments being passed and types of parameter sets of
-  candidates and it should be applied to different pairs of argument and
-  parameter types. The following cases are to be considered:
-
-     - candidates has only one argument-parameter type difference
-     - candidates has only several argument-parameter type difference
-   
-  In addition the following kinds of types are to be inspected: 
-
-     - types are related with inheritance
-     - optional and rest parameter types
-     - union types
-
-  3.4.1 Inheritance: the type of an argument is compatible (see
-  :ref:`Type Compatibility`) with one of parameter types which is the nearest
-  (least lower bound of the set) in the inheritance graph to it.
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {
-      foo(p: Base)    {} // Version #1
-      foo(p: Derived) {} // Version #2
-      // parameter types set: {p: {Base, Deived}}
-   }
-   class Derived extends Base {}
-   class NextDerived extends Derived {}
-
-   let b: Base = new Derived
-   b.foo(b) // Best match is Version #1:
-            // static type of the argument is equal to the type of parameter
-            // Base => {Base, Derived}
-     
-   b.foo(new Derived) // Best match is Version #2:
-            // static type of the argument is equal to the type of parameter
-            // Derived => {Base, Derived}
-
-   b.foo(new NextDerived) // Best match is Version #2:
-            // static type of the argument is compatible with Derived as it is nearest
-            // NextDerived => {Base, Derived}
-
-   function bar (p: (p: Base) => void)    {} // Version #1
-   function bar (p: (p: Derived) => void) {} // Version #2
-      // parameter types set: {p: {(p: Base) => void), (p: Derived) => void}}
-
-   let fun_arg1: (p: Base) => void = (p: Base):void => {}
-   bar (fun_arg1) // Version #1 to be called as (p: Base) => void fits it
-
-   let fun_arg2: (p: Derived) => void = (p: Derived):void => {}
-   bar (fun_arg2) // Version #2 to be called as (p: Derived):void fits it
-
-   interface T1 {}
-   interface T2 {}
-   class T3 implements T1, T2 {}
-   class T4 implements T1, T2 {}
-   function foo (p: T1) {} // Version #1
-   function foo (p: T2) {} // Version #2
-      // parameter types set: {p: {T1, T2}}
-
-   foo (new T3) // No best match! 
-     // T3 => {T1, T2} - T3 is compatible with both types
-
-   foo (new T4) // No best match! 
-     // T4 => {T1, T2} - T4 is compatible with both types
-
-
-|
-
-  3.4.2 Optional and rest parameter types: simpler types win over more
-  complicated ones, less parameters wins over more parameters.
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(p: number)  {} // Version #1
-   function foo(p?: number) {} // Version #2
-      // parameter types set: {p: {number, number|undefined}}
-   foo (5) // Version #1 to be called
-      // number => {number, number|undefined} non-union type is the best match
-
-   function foo(p: number)             {} // Version #1
-   function foo(p: number, s?: string) {} // Version #2
-      // parameter types set: {p: {number, number}, s: {_, string|undefined}}
-   foo (5) // Version #1 to be called
-      // number => {number, number} such ambiguity is resolved to a version with less parameters
-
-   function foo (p: number)      {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-      // parameter types set: {p: {number, number[]}}
-   foo(5) // Version #1 to be called
-      // number => {number, number[]} simple type wins over array
-
-   function foo (p?: number)     {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-      // parameter types set: {p: {number|undefined, number[]}}
-   foo() // Version #1 to be called
-      // _ => {number|undefined, number[]} union wins over array
-
-   function foo ()               {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-      // parameter types set: {p: {_, number[]}}
-   foo() // Version #1 to be called
-      // _ => {_, number[]} no type wins over array
-
-   function foo (p: number)      {} // Version #1
-   function foo (...p: number[]) {} // Version #2
-   function foo (p?: number)     {} // Version #3
-      // parameter types set: {p: {number, number[], number|undefined}}
-   foo(5) // Version #1 to be called
-      // number => {number, number[], number|undefined} simple type wins over array and union
-
-|
-
-
-  3.4.3 Union types: no best match if domains of two union types intersect and
-  argument type fits the intersection. 
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo (p: string|number)  {} // Version #1
-   function foo (p: string|boolean) {} // Version #2
-      // parameter types set: {p: {string|number, string|boolean}}
-   foo ("some string") // No best match! 
-      // string => {string|number, string|boolean} string fits both union types
-
-   function bar (p: string)         {} // Version #1
-   function bar (p: string|boolean) {} // Version #2
-      // parameter types set: {p: {string, string|boolean}}
-   foo ("some string") // Version #1 to be called
-      // string => {string, string|boolean} non-union type is the best match
-
-|
-
-
-  3.4.4 Several arguments: if several arguments match different versions then
-  there is no best match occurs. To have a best match all arguments should fit
-  the same version.
-
-.. code-block:: typescript
-   :linenos:
-
-   class Base {}
-   class Derived extends Base {}
-
-   function foo(p1: Base,    p2: Derived) {} // Version #1
-   function foo(p1: Derived, p2: Base)    {} // Version #2
-      // parameter types set: {p1: {Base, Derived}, p2: {Derived, Base}}
-   foo (new Derived, new Derived) // No best match!
-      // {Derived, Derived} => {p1: {Base, Derived}, p2: {Base, Derived}} 
-      // 1st Derived matches Version #2, but 2nd Derived matches Version #1 - no best match
-
-   function bar(p1: Base,    p2: Derived) {} // Version #1
-   function bar(p1: Derived, p2: Base)    {} // Version #2
-   function bar(p1: Derived, p2: Derived) {} // Version #3
-   function bar(p1: Base,    p2: Base)    {} // Version #4
-      // parameter types set: {p1: {Base, Derived, Derived, Base}, p2: {Derived, Base, Derived, Base}}
-   foo (new Derived, new Base) // // Version #2 to be called
-      // {Derived, Base} => {{Base, Derived, Derived, Base}, {Derived, Base, Derived, Base}} 
-      // Derived matches Version #2 and #3, Base matches Version #2 and #4 -
-      // intersection gives Version #2 as the best match
-
-|
-
-  3.4.5 Best match identification general algorithm.
-
-  For the call: 
-
-    foo(``expr``:sub:`1`, ``expr``:sub:`2`, .. , ``expr``:sub:`i`,  .. ``expr``:sub:`n`) 
-
-    It implies that there is a vector of argument expression types
-    corresponding to each argument expression type
-
-    ``T``:sub:`1`, ``T``:sub:`2`, .. , ``T``:sub:`i`, .. ``T``:sub:`n`
- 
-  There is a list of ``m`` applicable candidates with the following signatures
-  (only parameter type involved) (matrix of types): 
-
-    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1n1`)
-
-    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2n2`)
-
-    ...
-
-    foo (``T``:sub:`m1`, ``T``:sub:`m2`, .. ``T``:sub:`mnm`)
-
-    where ``T``:sub:`ij` is the type of ``j-th`` parameter of the ``i-th``
-    candidate and ``j`` in ``1`` .. ``n``:sub:`i` and ``i`` in ``1`` .. ``m``
-
-  [TBD]
-
-  - define a subset of applicable candidates with min (``n``:sub:`1`, ... ``n``:sub:`m`)
-  - if only one candidate left then it is the best match candidate
-  - otherwise the list of applcable candidates will look like 
-
-    foo (``T``:sub:`11`, ``T``:sub:`12`, .. ``T``:sub:`1k`)
-
-    foo (``T``:sub:`21`, ``T``:sub:`22`, .. ``T``:sub:`2k`)
-
-    ...
-
-    foo (``T``:sub:`l1`, ``T``:sub:`l2`, .. ``T``:sub:`lk`)
-
-    where l <= m and k = min (``n``:sub:`1`, ... ``n``:sub:`m`) and k >= n
-
-  - start from the last parameter j = k
-
-  - ``j-th`` column types to be grouped into class/interface types group and
-    all other types group. 
-
-  - if class/interface types group is not empty then
-     
-     + all candidates from the other group are to be removed from the
-       applicable candidates list.
-     + if only one candidate left then goto 4.
-     + otherwise for all pairs of candidates (x, y) the following check is to
-       be performed until no removales occur
-
-       - if parameter types of (x) are compatible to parameter types of (y) then
-          - if not (parameter types of (y) are compatible to parameter types of (x)) then x is removed
-       - else if not (parameter types of (y) are compatible to parameter types of (x)) then y is removed
-
-     + goto 4.
-
-  - if class/interface types group is empty then
-    
-    + if there are union types then then goto 4.
-    + if there are optional parameters then goto 4. 
-    + if there are rest parameters then goto 4.
-  
-  - select the next parameter to the left (j = j - 1) and repeat the same
-    checks except for the rest parameters till j == 0
-
-4. List *A* of applicable candidates is now ready. If it has only 1 element
-   then it is the best match candidate.
+   foo(new Base, 5) // no candidates, compile-time error
 
 |
 
@@ -1317,6 +1033,153 @@ Selection of Best Candidate
 
 .. meta:
     frontend_status: Partly
+
+If the set of *applicable candidates* has two or more candidates, then the
+best candidate for the given list of arguments is to be identified, if possible.
+
+The best candidate selection is based on the facts:
+
+- There are no candidates with the same list of parameters, as this situation
+  is already forbidden by the compiler (on declaration or import site);
+
+- If several candidates can be correctly called using the same argument list,
+  then that some implicit argument transformations have to be applied to
+  provide the call.
+
+Possible transformations are listed below:
+
+- :ref:`Implicit Conversions`;
+
+- Passing default values to fill any missing arguments
+  (:ref:`Optional Parameters`);
+
+- Passing the empty array to replace a rest parameter that has no argument;
+
+- Folding several arguments to the array for a rest parameter.
+
+The examples of transformations are presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo1(x: number) {}
+   foo1(1) // implicit conversion int -> double
+
+   function foo2(x: Int) {}
+   foo2(1) // implicit boxing
+
+   function foo3(x?: string) {}
+   foo3() // passing default value -> foo(undefined)
+
+   function foo4(...x: int[]) {}
+   foo4()     // passing empty array -> foo([])
+   foo4(1, 2) // folding to array -> foo(...[1, 2])
+
+The candidate that does not require transformations for all arguments is the
+*best candidate*. Other candidates are not considered.
+
+The examples below represent the selection of the best candidate by the lack
+of transformation:
+
+.. code-block:: typescript
+   :linenos:
+
+   function foo(i: int)    // #1
+   function foo(n: number) // #2
+
+   let x: int = 1
+   foo(x) // #1 - is the best candidate, no transformations
+
+   function goo(s: string)  // #1
+   function goo(s?: string) // #2
+
+   goo("abc") // #1 - is the best candidate, no transformations
+
+   let x: string|undefined = "abc"
+   goo(x) // #2 - is the best candidate, no transformations
+
+
+If there is no such candidate, then each argument transformation of each
+candidate is compared (taking optional and rest parameters into the account)
+by calculating partial *better* relation:
+
+**Case 1**. No transformation is *better* than any transformation.
+
+**Case 2**. If argument type is of numeric type, char, or its boxed counterpart,
+then the candidate with a *shorter* conversion is *better*. E.g., the
+conversion of ``int`` to ``float`` is *better* than ``int`` to ``double``,
+and ``int`` to ``Int`` is *better* than ``int`` to ``Long``.
+
+**Case 3**. In case of optional parameters, no parameter is *better*.
+
+**Case 4**. If the first candidate has several parameters, and the other
+candidate has a rest parameter for the same arguments, then the first one
+is *better*.
+
+**Case 5**. All other variants are considered *not comparable*.
+
+.. code-block:: typescript
+   :linenos:
+
+   // Case 1:
+   function foo(n: number, s: string|null)  // #1
+   function foo(n: number, s: string)       // #2
+
+   goo(1, "abc") // #2 is better, no transformation for 2nd argument
+
+   // Case 2:
+   function foo(i: long)  // #1
+   function foo(n: float) // #2
+
+   let x: int = 1
+   foo(x) //  #1 is better, conversion is shorter
+
+   // Case 3:
+   function foo(n: number, s?: string)  // #1
+   function foo(n: number)              // #2
+
+   foo(1) // #2 is better, less parameters
+
+   // Case 4:
+   function foo(sum: number, a: number, b: number)  // #1
+   function foo(sum: number, ...x: number[])        // #2
+
+   foo(1, 2, 3) // #1 is better, non-rest parameters
+
+   // Case 5:
+   class Base { }
+   class Derived extends Base { }
+
+   function foo(p: Base) { ... }     // #1
+   function foo(p: Derived) { ... }  // #2
+
+   foo(new Derived) // not comparable, no one is better
+
+If there is exactly one candidate that is *better* than others for at least
+one argument and *not comparable* for other arguments, then this one is the
+*best candidate* that is to be called.
+
+If no candidate is the *best candidate*, then a :index:`compile-time error`
+occurs. The examples of error cases are presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+   class Base { }
+   class Derived extends Base { }
+
+   function foo(p: Base) { ... }     // #1
+   function foo(p: Derived) { ... }  // #2
+
+   foo(new Derived) // compile-time error, as
+                    // there is no argument where one candidate is better
+
+   function goo(a: int; b: float)  // #1
+   function goo(a: float, b: int)  // #2
+
+   goo(1, 1) // compile-time error, as
+             // #1 is better for 1st argument,
+             // #2 is better for 2nd argument.
 
 |
 
@@ -1330,9 +1193,9 @@ for functions (:ref:`Function Overload Signatures`),
 static and instance methods (:ref:`Method Overload Signatures`),
 and constructors (:ref:`Constructor Overload Signatures`).
 
-All signatures except the last *implementation signature*
-are considered *syntactic sugar*. The compiler only uses the *implementation
-signature* as it considers overloading, overriding, shadowing, or calls.
+All signatures except the last *implementation signature* are considered
+*syntactic sugar*. The compiler uses the *implementation signature* only
+as it considers overloading, overriding, shadowing, or calls.
 
 |
 
@@ -1360,12 +1223,11 @@ Signature *S*:sub:`i` with *n* parameters *fits* into implementation signature
 
 - *IS* return type is ``void``, then *S*:sub:`i` return type must also be ``void``.
 
-- *IS* return type is not ``void``, then *S*:sub:`i` return type must be
-  ``void`` or compatible with the return type of *IS* (see
-  :ref:`Type Compatibility`).
+- *IS* return type is not ``void``, then *S*:sub:`i` return type must be ``void``
+  or compatible with the return type of *IS* (see :ref:`Type Compatibility`).
 
 
-Valid overload signatures are illustrated by the examples below:
+The examples below represent valid overload signatures:
 
 .. code-block-meta:
    expect-cte:
@@ -1391,7 +1253,7 @@ Valid overload signatures are illustrated by the examples below:
         return 1
     }
 
-Code with compile-time errors is represented in the example below:
+The examples below represent code with compile-time errors:
 
 .. code-block:: typescript
    :linenos:
@@ -1416,8 +1278,8 @@ Compatibility Features
 **********************
 
 Some features are added to |LANG| in order to support smooth |TS| compatibility.
-Using this features is not recommended in most cases while doing the
-|LANG| programming.
+Using this features while doing the |LANG| programming is not recommended in
+most cases.
 
 .. index::
    overload signature compatibility
@@ -1442,7 +1304,7 @@ statements (see :ref:`For Statements`), ``if`` statements (see
 
 This approach is based on the concept of *truthiness* that extends the Boolean
 logic to operands of non-Boolean types, while the result of an operation (see
-:ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`,
+:ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`, and
 :ref:`Logical Complement`) is kept boolean.
 Depending on the kind of the value type, the value of any valid expression can
 be handled as ``true`` or ``false`` as described in the table below:
@@ -1506,7 +1368,7 @@ The example below illustrates the way this approach works in practice. Any
     for (let i = 10; i; i--) {
        console.log (i)
     }
-    /* And the output will be 
+    /* And the output will be
          10
          9
          8

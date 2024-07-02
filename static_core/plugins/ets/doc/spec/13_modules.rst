@@ -57,12 +57,8 @@ system or a database (see :ref:`Compilation Units in Host System`).
    interface
    declaration
    access
-   import
    separate module
    package
-   file system
-   database
-   host system
    
 |
 
@@ -266,6 +262,8 @@ or a package (see :ref:`Scopes`).
 Any declaration added so must be distinguishable in the declaration scope (see
 :ref:`Distinguishable Declarations`). Otherwise, a :index:`compile-time error`
 occurs.
+Also ``importPath`` cannot refer to the file the current module is stored in.
+Otherwise, a :index:`compile-time error` occurs.
 
 It is noteworthy that import directives are handled by the compiler
 during compilation and have no effect during program execution.
@@ -541,9 +539,9 @@ import an entity initially exported as default.
     import {default as DefaultExportedItemNewName} from  ".../someFile"
     function foo () {
       let v1 = new DefaultExportedItemBindedName()
-      // instance of class 'SomeClass' be created here
+      // instance of class 'SomeClass' to be created here
       let v2 = new DefaultExportedItemNewName()
-      // instance of class 'SomeClass' be created here
+      // instance of class 'SomeClass' to be created here
     }
 
 
@@ -785,10 +783,9 @@ The following example shows how ambient functions can be declared and exported:
     export declare function goo()
     export { foo }
 
-Optional usage of the ``export`` keyword has a meaning that the particular
-declaration is used by some other exported declarations but is not exported on
-its own and thus, cannot be used by modules that import this declaration
-module.
+Optional usage of the keyword ``export`` means that a particular declaration
+is used by other exported declarations. However, it is not exported on its own
+and cannot be used by modules that import this declaration module:
 
 .. code-block:: typescript
    :linenos:
@@ -955,7 +952,7 @@ The *export directive* allows the following:
    renaming; or
 -  Specifying a name of one declarartion; or
 -  Re-exporting declarations from other compilation units; or
--  Export type.
+-  Exporting a type.
 
 
 .. code-block:: abnf
@@ -1023,8 +1020,9 @@ Single Export Directive
 .. meta:
     frontend_status: None
 
-Single export directive allows to specifiy the declaration which will be
-exported from the current compilation unit using its name.
+Single export directive allows specifying the declaration that is to be
+exported from the current compilation unit using its own name. The directive
+in the example below exports variable 'v' by its name:
 
 .. code-block:: abnf
 
@@ -1038,8 +1036,6 @@ exported from the current compilation unit using its name.
 
     export v
     let v = 1
-
-The above directive exports variable 'v' by its name.
 
 
 |
@@ -1113,6 +1109,10 @@ The appropriate grammar is presented below:
     reExportDirective:
         'export' ('*' | selectiveBindigns) 'from' importPath
         ;
+
+An ``importPath`` cannot refer to the file the current module is stored in.
+Otherwise, a :index:`compile-time error` occurs.
+
 
 The following examples illustrate the re-exporting in practice:
 

@@ -88,6 +88,7 @@ Predefined types include the following:
 
 -  Class types: ``Object``, ``String``, ``Array<T>``, and ``BigInt``.
 
+|
 
 .. _Primitive Types:
 
@@ -105,6 +106,7 @@ types have no methods. They only have the operations as referred herein (see
 Type ``double`` is an alias to ``number``. Type ``Double`` is an alias to
 ``Number``.
 
+|
 
 .. _Boxed Types:
 
@@ -176,32 +178,29 @@ Types by Category
 
 All |LANG| types are summarized in the following table:
 
+.. table::
+   :widths: 25, 25, 25, 25
 
-+----------------------------------+-------------------------------------+
-|      **Predefined Types**        |        **User-Defined Types**       |
-+===================+==============+===================+=================+
-| *Value Types*     | *Reference*  | *Value Types*     | *Reference*     |
-| (Primitive Types) | *Types*      |                   | *Types*         |
-+-------------------+--------------+-------------------+-----------------+
-| ``number``,       | ``Number``,  | enumeration types | class types,    |
-| ``byte``,         | ``Byte``,    |                   | interface types,|
-| ``short``,        | ``Short``,   |                   | array types,    |
-| ``int``,          | ``Int``,     |                   | function types, |
-| ``long``,         | ``Long``,    |                   | tuple types,    |
-| ``float``,        | ``Float``,   |                   | union types,    |
-| ``double``,       | ``Double``,  |                   | type parameters |
-| ``char``,         | ``Char``,    |                   |                 |
-| ``boolean``,      | ``Boolean``, |                   |                 |
-| ``string``,       | ``String``,  |                   |                 |
-| ``bigint``        | ``string``,  |                   |                 |
-|                   | ``BigInt``,  |                   |                 |
-|                   | ``bigint``,  |                   |                 |
-|                   | ``Object``,  |                   |                 |
-|                   | ``object``,  |                   |                 |
-|                   | ``void``,    |                   |                 |
-|                   | ``null``,    |                   |                 |
-|                   | ``never``    |                   |                 |
-+-------------------+--------------+-------------------+-----------------+
+   ========================= ========================= ========================= =========================
+   **Predefined Types**                                **User-Defined Types**
+   ------------------------- ------------------------- ------------------------- -------------------------
+   *Value Types*             *Reference Types*         *Value Types*             *Reference Types*
+   (Primitive Types)
+   ========================= ========================= ========================= =========================
+   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types         class types,             
+   ``short``, ``int``,       ``Short``, ``Int``,                                 interface types,         
+   ``long``, ``float``,      ``Long``, ``Float``,                                array types,             
+   ``double``, ``char``,     ``Double``, ``Char``,                               function types,          
+   ``boolean``, ``string``,  ``Boolean``,                                        tuple types,             
+   ``bigint``                ``String``, ``string``,                             union types,             
+                                                                                                          
+                             ``BigInt``, ``bigint``,                             type parameters          
+                                                                                                          
+                             ``Object``, ``object``,                                                      
+                                                                                                          
+                             ``void``, ``null``,                                                          
+                             ``never``                                                                    
+   ========================= ========================= ========================= =========================
 
 
 .. index::
@@ -315,7 +314,7 @@ Named Types
     frontend_status: Done
 
 Classes, interfaces, enumerations, aliases, and type parameters are named types.
-Other types (array, function, and union types) are anonymous. Respective
+Other types (i.e., array, function, and union types) are anonymous. Respective
 named types are introduced by the following:
 
 -  Class declarations (see :ref:`Classes`),
@@ -831,8 +830,8 @@ Larger type values include all values of smaller types:
 
 -  ``double`` > ``float`` > ``long`` > ``int`` > ``short`` > ``byte``
 
-And thus, a value of a smaller type can be assigned to a variable of a larger
-type.
+Consequently, a value of a smaller type can be assigned to a variable of a
+larger type.
 
 Type ``bigint`` does not belong to this hierarchy. There is no implicit
 conversion from a numeric type to ``bigint``. Standard library (see
@@ -1397,7 +1396,7 @@ A function type consists of the following:
         ;
 
     ftParameter:
-        identifier ':' type
+        identifier ('?')? ':' type
         ;
 
     restParameter:
@@ -1434,6 +1433,45 @@ A type alias can set a name for a *function type* (see
 
 If the function type contains the ``throws`` mark (see
 :ref:`Throwing Functions`), then it is the *throwing function type*.
+
+If the function type contains the ``?`` mark for the parameter name then
+it means that this parameter is optional and all parameters after this one (if
+any) are optional. Otherwise a :index:`compile-time error` occurs.
+The actual type of the parameter is the union of the parameter declared type
+and ``undefined``.
+
+
+.. code-block:: typescript
+   :linenos:
+
+    type FuncTypeWithOptionalParameters = (x?: number, y?: string) => void
+    let foo: FuncTypeWithOptionalParameters
+        = ():void => {}          // CTE as call with more than zero arguments will be invalid
+    foo = (p: number):void => {} // CTE as call with zero arguments will be invalid
+    foo = (p?: number):void => {} // CTE as call with two arguments will be invalid
+    foo = (p1: number, p2?: string):void => {} // CTE as call with zero arguments will be invalid
+    foo = (p1?: number, p2?: string):void => {} // OK
+
+    foo()
+    foo(undefined)
+    foo(undefined, undefined)
+    foo(666)
+    foo(666, undefined)
+    foo(666, "a string")
+
+    type IncorrectFuncTypeWithOptionalParameters = (x?: number, y: string) => void
+       // compile-time error: mandatory parameter may not follow the optional one
+
+    function bar (
+       p1?: number,
+       p2:  number|undefined
+    ) {
+       p1 = p2 // OK
+       p2 = p1 // OK
+       // Types of p1 and p2 are identical
+    }
+
+
 
 Function types assignability is described in :ref:`Assignment-like Contexts`,
 and conversions in :ref:`Function Types Conversions`.
@@ -2030,8 +2068,8 @@ arbitrary-precision arithmetic. Values of type ``bigint`` can be created from
 the following:
 
 - ``BigInt`` literals (see :ref:`BigInt Literals`); or
-- Numeric type values, by using a call to the standard library (see
-  :ref:`Standard Library`) class ``BigInt`` methods or constructors.
+- Numeric type values, by using a call to the standard library class ``BigInt``
+  methods or constructors (see :ref:`Standard Library`).
 
 Similarly to ``string``, ``bigint`` type has dual semantics.
 
