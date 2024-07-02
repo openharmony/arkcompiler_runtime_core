@@ -54,6 +54,10 @@ sub:
       - expr: valsArr
         setup: |
           let valsArr = Array.of<string>()
+          self.forEach((): void | number => valsArr.push('call'))
+      - expr: valsArr
+        setup: |
+          let valsArr = Array.of<string>()
           self.forEach((v: string, k: number): void => { valsArr.push(v) })
       - expr: valsArr
         setup: |
