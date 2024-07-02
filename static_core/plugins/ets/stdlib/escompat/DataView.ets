@@ -82,17 +82,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getInt8(byteOffset: int): int {
-    //    return this.getInt8Big(byteOffset)
-    //}
+    public getInt8(byteOffset: int): int {
+        return this.getInt8Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setInt8(byteOffset: int, value: int): void {
-    //    this.setInt8Big(byteOffset, value)
-    //}
+    public setInt8(byteOffset: int, value: int): void {
+        this.setInt8Big(byteOffset, value)
+    }
 
     /**
      * Read bytes as they represent given type
@@ -150,17 +150,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getUint8(byteOffset: int): int {
-    //    return this.getUint8Big(byteOffset)
-    //}
+    public getUint8(byteOffset: int): int {
+        return this.getUint8Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setUint8(byteOffset: int, value: int): void {
-    //    this.setUint8Big(byteOffset, value)
-    //}
+    public setUint8(byteOffset: int, value: int): void {
+        this.setUint8Big(byteOffset, value)
+    }
 
     /**
      * Read bytes as they represent given type
@@ -218,17 +218,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getInt16(byteOffset: int): int {
-    //    return this.getInt16Big(byteOffset)
-    //}
+    public getInt16(byteOffset: int): int {
+        return this.getInt16Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setInt16(byteOffset: int, value: int): void {
-    //    this.setInt16Big(byteOffset, value)
-    //}
+    public setInt16(byteOffset: int, value: int): void {
+        this.setInt16Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
@@ -355,17 +355,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getUint16(byteOffset: int): int {
-    //    return this.getUint16Big(byteOffset)
-    //}
+    public getUint16(byteOffset: int): int {
+        return this.getUint16Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setUint16(byteOffset: int, value: int): void {
-    //    this.setUint16Big(byteOffset, value)
-    //}
+    public setUint16(byteOffset: int, value: int): void {
+        this.setUint16Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
@@ -492,17 +492,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getInt32(byteOffset: int): int {
-    //    return this.getInt32Big(byteOffset)
-    //}
+    public getInt32(byteOffset: int): int {
+        return this.getInt32Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setInt32(byteOffset: int, value: int): void {
-    //    this.setInt32Big(byteOffset, value)
-    //}
+    public setInt32(byteOffset: int, value: int): void {
+        this.setInt32Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
@@ -629,17 +629,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getUint32(byteOffset: int): long {
-    //    return this.getUint32Big(byteOffset)
-    //}
+    public getUint32(byteOffset: int): long {
+        return this.getUint32Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setUint32(byteOffset: int, value: long): void {
-    //    this.setUint32Big(byteOffset, value)
-    //}
+    public setUint32(byteOffset: int, value: long): void {
+        this.setUint32Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
@@ -766,17 +766,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getFloat32(byteOffset: int): float {
-    //    return this.getFloat32Big(byteOffset)
-    //}
+    public getFloat32(byteOffset: int): float {
+        return this.getFloat32Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setFloat32(byteOffset: int, value: float): void {
-    //    this.setFloat32Big(byteOffset, value)
-    //}
+    public setFloat32(byteOffset: int, value: float): void {
+        this.setFloat32Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
@@ -903,17 +903,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getBigInt64(byteOffset: int): long {
-    //    return this.getBigInt64Big(byteOffset)
-    //}
+    public getBigInt64(byteOffset: int): long {
+        return this.getBigInt64Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setBigInt64(byteOffset: int, value: long): void {
-    //    this.setBigInt64Big(byteOffset, value)
-    //}
+    public setBigInt64(byteOffset: int, value: long): void {
+        this.setBigInt64Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
@@ -1040,17 +1040,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getBigUint64(byteOffset: int): long {
-    //    return this.getBigUint64Big(byteOffset)
-    //}
+    public getBigUint64(byteOffset: int): long {
+        return this.getBigUint64Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setBigUint64(byteOffset: int, value: long): void {
-    //    this.setBigUint64Big(byteOffset, value)
-    //}
+    public setBigUint64(byteOffset: int, value: long): void {
+        this.setBigUint64Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write
@@ -1177,17 +1177,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public getFloat64(byteOffset: int): number {
-    //    return this.getFloat64Big(byteOffset)
-    //}
+    public getFloat64(byteOffset: int): number {
+        return this.getFloat64Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public setFloat64(byteOffset: int, value: number): void {
-    //    this.setFloat64Big(byteOffset, value)
-    //}
+    public setFloat64(byteOffset: int, value: number): void {
+        this.setFloat64Big(byteOffset, value)
+    }
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write

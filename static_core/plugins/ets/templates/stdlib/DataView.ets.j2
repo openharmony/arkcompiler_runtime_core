@@ -99,17 +99,17 @@ export final class DataView implements ArrayBufferView {
      * @param byteOffset zero index to read
      * @returns read value (big endian)
      */
-    //public get{{methodName}}(byteOffset: int): {{type2name[bit]}} {
-    //    return this.get{{methodName}}Big(byteOffset)
-    //}
+    public get{{methodName}}(byteOffset: int): {{type2name[bit]}} {
+        return this.get{{methodName}}Big(byteOffset)
+    }
 
     /**
      * Sets bytes as they represent given type
      * @param byteOffset zero index to write (big endian)
      */
-    //public set{{methodName}}(byteOffset: int, value: {{type2name[bit]}}): void {
-    //    this.set{{methodName}}Big(byteOffset, value)
-    //}
+    public set{{methodName}}(byteOffset: int, value: {{type2name[bit]}}): void {
+        this.set{{methodName}}Big(byteOffset, value)
+    }
 
     {%- if bit == 8 %}
 
