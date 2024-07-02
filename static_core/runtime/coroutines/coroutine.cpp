@@ -41,7 +41,8 @@ Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *
       name_(std::move(name)),
       context_(context),
       startSuspended_(epInfo.has_value()),
-      callbackQueue_(queue)
+      callbackQueue_(queue),
+      callbacksEvent_(static_cast<CoroutineManager *>(vm->GetThreadManager()))
 {
     ASSERT(vm != nullptr);
     ASSERT(context != nullptr);
@@ -151,7 +152,7 @@ void Coroutine::RequestUnblock()
 void Coroutine::RequestCompletion([[maybe_unused]] Value returnValue)
 {
     auto *e = GetCompletionEvent();
-    e->SetHappened();
+    e->Happen();
 }
 
 void Coroutine::AcceptAnnouncedCallbacks(PandaList<PandaUniquePtr<Callback>> callbacks)
@@ -163,9 +164,9 @@ void Coroutine::AcceptAnnouncedCallbacks(PandaList<PandaUniquePtr<Callback>> cal
     callbackQueue_->PostSequence(std::move(callbacks));
     // Atomic with relaxed order reason: mutex synchronization
     preparingCallbacks_.fetch_sub(readyCallbacks, std::memory_order_relaxed);
-    callbacksEvent_.SetHappened();
-    auto *coroManager = static_cast<CoroutineManager *>(GetVM()->GetThreadManager());
-    coroManager->UnblockWaiters(&callbacksEvent_);
+    auto *event = awaiteeEvent_.exchange(nullptr);
+    event = (event == nullptr) ? &callbacksEvent_ : event;
+    event->Happen();
 }
 
 void Coroutine::WaitTillAnnouncedCallbacksAreDelivered()
@@ -191,6 +192,24 @@ void Coroutine::ProcessPresentAndAnnouncedCallbacks()
         WaitTillAnnouncedCallbacksAreDelivered();
     } while (!callbackQueue_->IsEmpty());
     ASSERT(preparingCallbacks_ == 0);
+}
+
+bool Coroutine::TryEnterAwaitModeAndLockAwaitee(CoroutineEvent *event)
+{
+    ASSERT(this == Coroutine::GetCurrent());
+    ASSERT(awaiteeEvent_ == nullptr);
+    ASSERT(event != nullptr);
+    os::memory::LockHolder lh(preparingCallbacksLock_);
+    if (!callbackQueue_->IsEmpty()) {
+        return false;
+    }
+
+    if (preparingCallbacks_ != 0) {
+        awaiteeEvent_ = event;
+    }
+    event->SetNotHappened();
+    event->Lock();
+    return true;
 }
 
 std::ostream &operator<<(std::ostream &os, Coroutine::Status status)

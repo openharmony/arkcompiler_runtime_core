@@ -290,6 +290,19 @@ public:
         callbackQueue_ = queue;
     }
 
+    /**
+     * Check size of callback queue, return false and don't set awaitee event in case callback queue is not empty.
+     * Otherwise set awaitee event if some of callbacks are not ready yet.
+     */
+    bool TryEnterAwaitModeAndLockAwaitee(CoroutineEvent *event) TRY_ACQUIRE(true, event);
+
+    /// Set awaitee event to nullptr. This method should be called from the current coroutine
+    void LeaveAwaitMode()
+    {
+        ASSERT(this == Coroutine::GetCurrent());
+        awaiteeEvent_ = nullptr;
+    }
+
 protected:
     // We would like everyone to use the factory to create a Coroutine, thus ctor is protected
     explicit Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
@@ -352,6 +365,7 @@ private:
     os::memory::Mutex preparingCallbacksLock_;
     GenericEvent callbacksEvent_;
     std::atomic<uint32_t> preparingCallbacks_ = 0;
+    std::atomic<CoroutineEvent *> awaiteeEvent_ = nullptr;
 
     // Allocator calls our protected ctor
     friend class mem::Allocator;

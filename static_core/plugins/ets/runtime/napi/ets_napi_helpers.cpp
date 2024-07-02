@@ -396,8 +396,9 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         ThrowOutOfMemoryError(currentCoro, "Cannot allocate Promise");
         return 0;
     }
+    auto *coroManager = currentCoro->GetCoroutineManager();
     auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
     promise->SetEventPtr(evt);
 
     auto *cm = currentCoro->GetCoroutineManager();

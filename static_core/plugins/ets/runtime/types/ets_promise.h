@@ -147,7 +147,6 @@ public:
         auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
         state_ = STATE_RESOLVED;
-        SetEventPtr(nullptr);
         OnPromiseCompletion(coro);
     }
 
@@ -157,12 +156,14 @@ public:
         ASSERT(state_ == STATE_PENDING);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
-        SetEventPtr(nullptr);
         OnPromiseCompletion(coro);
     }
 
     void SubmitCallback(EtsCoroutine *coro, const EtsHandle<EtsObject> &hcallback)
     {
+        ASSERT(IsLocked());
+        // We need to promote weak reference to promise to prevent GC from collecting promise
+        PromotePromiseRef(coro);
         EnsureCapacity(coro);
         auto *cbQueue = GetCallbackQueue(coro);
         auto *coroQueue = GetCoroPtrQueue(coro);
@@ -240,9 +241,29 @@ public:
         }
     }
 
+    bool IsLocked()
+    {
+        auto mw = AtomicGetMark();
+        return mw.GetState() == MarkWord::STATE_LIGHT_LOCKED;
+    }
+
+    /**
+     * Precondition: promise is locked.
+     * In case of COMPLETION event just return it.
+     * In case of GENERIC event create it or increment the reference counter and return.
+     */
+    CoroutineEvent *GetOrCreateEventPtr();
+
+    /**
+     * Precondition: event is GENERIC and linked to a promise (obtained using the GetOrCreateEventPtr method).
+     * Decrement the reference counter and in case it reaches zero delete the event.
+     */
+    void RetireEventPtr(CoroutineEvent *event);
+
 private:
     void EnsureCapacity(EtsCoroutine *coro);
     void OnPromiseCompletion(EtsCoroutine *coro);
+    void PromotePromiseRef(EtsCoroutine *coro);
 
     void ClearQueues(EtsCoroutine *coro)
     {
@@ -259,6 +280,7 @@ private:
     ObjectPointer<EtsObject> linkedPromise_;    // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
     EtsLong event_;
+    EtsInt eventRefCounter_;
     uint32_t state_;  // the Promise's state
 
     friend class test::EtsPromiseTest;

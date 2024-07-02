@@ -131,7 +131,7 @@ void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime
     CreateWorkers(targetNumberOfWorkers, runtime, vm);
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): successfully created and activated " << workers_.size()
                            << " coroutine workers";
-    programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>();
+    programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
 }
 
 void StackfulCoroutineManager::Finalize()
@@ -216,8 +216,7 @@ void StackfulCoroutineManager::CheckProgramCompletion()
         LOG(DEBUG, COROUTINES)
             << "StackfulCoroutineManager::CheckProgramCompletion(): all coroutines finished execution!";
         // programCompletionEvent_ acts as a stackful-friendly cond var
-        programCompletionEvent_->SetHappened();
-        UnblockWaiters(programCompletionEvent_);
+        programCompletionEvent_->Happen();
     } else {
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::CheckProgramCompletion(): still "
                                << coroutineCount_ - 1 - activeWorkerCoros << " coroutines exist...";

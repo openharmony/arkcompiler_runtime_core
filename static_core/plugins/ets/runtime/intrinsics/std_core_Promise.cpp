@@ -149,10 +149,11 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      */
     EtsPromiseCreateLink(promiseHandle->GetLinkedPromise(currentCoro), promiseHandle.GetPtr());
 
-    PandaUniquePtr<CoroutineEvent> e = MakePandaUnique<GenericEvent>();
+    auto *coroManager = currentCoro->GetCoroutineManager();
+    PandaUniquePtr<CoroutineEvent> e = MakePandaUnique<GenericEvent>(coroManager);
     e->Lock();
     promiseHandle->SetEventPtr(e.get());
-    currentCoro->GetCoroutineManager()->Await(e.get());
+    coroManager->Await(e.get());
     // will get here after the JS callback is called
     if (promiseHandle->IsResolved()) {
         LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been resolved.";
@@ -212,38 +213,23 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
         }
 
         // the promise is not resolved yet
-        CoroutineEvent *e = promiseHandle->GetEventPtr();
-        if (e != nullptr) {
-            /**
-             * The promise is linked to come coroutine return value.
-             * Further actions:
-             *      STS mode:
-             *          if resolved: return P.value
-             *          if rejected: throw P.value
-             *      JS mode: ??? NOTE
-             */
+        CoroutineEvent *e = promiseHandle->GetOrCreateEventPtr();
+        // it is necessary to check the type of event here under lock,
+        // because otherwise resolvee coro may destroy resources
+        auto isGeneric = e->GetType() == CoroutineEvent::Type::GENERIC;
+        // NOTE(konstanting, #I67QXC): try to make the Promise/Event locking sequence easier for understanding
+        auto noReadyCallbacks = currentCoro->TryEnterAwaitModeAndLockAwaitee(e);
+        promiseHandle->Unlock();
+        if (noReadyCallbacks) {
             LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a pending promise...";
-            // NOTE(konstanting, #I67QXC): try to make the Promise/Event locking sequence easier for understanding
-            e->Lock();
-            promiseHandle->Unlock();
+            ASSERT(!e->Happened());
             currentCoro->GetCoroutineManager()->Await(e);  // will unlock the event
+            currentCoro->LeaveAwaitMode();
             LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
-        } else {
-            promiseHandle->Unlock();
-            break;
+        }
+        if (isGeneric) {
+            promiseHandle->RetireEventPtr(e);
         }
     }
-
-    LOG(DEBUG, COROUTINES) << "Promise::await: promise is not linked to an event (standalone)";
-    /**
-     * This promise is not linked to any coroutine return value (standalone promise).
-     * Further actions:
-     *      STS mode:
-     *          create Event, connect it to promise
-     *          CM::Await(event) // who will resolve P and P.event?
-     *      JS mode: ??? NOTE
-     */
-
-    return nullptr;
 }
 }  // namespace ark::ets::intrinsics

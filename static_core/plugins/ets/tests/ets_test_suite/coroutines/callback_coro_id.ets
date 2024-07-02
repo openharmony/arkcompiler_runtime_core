@@ -47,11 +47,11 @@ function bar(p1: Promise<void>) {
     p1.then<void>((): void => {
         barCoro.CheckIdAndStep();
     });
-    p1.catch<void>((error: NullishType): void => {
+    let pCatch = p1.catch<void>((error: NullishType): void => {
         assert false : 'The callback must not be called because promise is resolved';
     });
     // We need to process all callbacks before checking the callback counter in the main coroutine
-    await p1;
+    await pCatch;
     throw new Error();
 }
 
@@ -67,13 +67,11 @@ function main() {
     p2.then<void>((): void => {
         assert false : 'The callback must not be called because promise is rejected';
     });
-    p2.catch<void>((error: NullishType): void => {
+    let pCatch = p2.catch<void>((error: NullishType): void => {
         mainCoro.CheckIdAndStep();
     });
-    try {
-        await p2;
-    } catch (e: Error) {
-        let counter = mainCoro.GetCallbackCounter() + barCoro.GetCallbackCounter();
-        assert (counter == 4) : Number.toString(4 - counter) + " of the promise callbacks were not called";
-    }
+    // We need to process all callbacks before checking the callback counter
+    await pCatch;
+    let counter = mainCoro.GetCallbackCounter() + barCoro.GetCallbackCounter();
+    assert (counter == 4) : Number.toString(4 - counter) + " of the promise callbacks were not called";
 }

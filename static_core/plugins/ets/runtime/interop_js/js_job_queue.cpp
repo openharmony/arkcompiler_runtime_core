@@ -117,14 +117,10 @@ static napi_value OnJsPromiseResolved(napi_env env, [[maybe_unused]] napi_callba
     EtsHandleScope hScope(coro);
     EtsHandle<EtsPromise> promiseHandle(coro, EtsPromise::FromCoreType(vm->GetGlobalObjectStorage()->Get(promiseRef)));
     vm->GetGlobalObjectStorage()->Remove(promiseRef);
-    CoroutineEvent *event = promiseHandle->GetEventPtr();
-    ASSERT(event != nullptr);
-    event->SetHappened();
 
     auto jsval = JSValue::Create(coro, ctx, value);
     ark::ets::intrinsics::EtsPromiseResolve(promiseHandle.GetPtr(), jsval->AsObject());
 
-    vm->GetCoroutineManager()->UnblockWaiters(event);
     vm->GetCoroutineManager()->Schedule();
 
     napi_value undefined;

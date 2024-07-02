@@ -154,6 +154,7 @@ set(SOURCES
     coroutines/threaded_coroutine_manager.cpp
     coroutines/stackful_coroutine_manager.cpp
     coroutines/stackful_coroutine_worker.cpp
+    coroutines/coroutine_events.cpp
     fibers/fiber_context.cpp
     compiler_thread_pool_worker.cpp
     compiler_task_manager_worker.cpp

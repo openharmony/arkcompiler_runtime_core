@@ -49,8 +49,9 @@ static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHa
 {
     ASSERT(currentCoro != nullptr);
     PandaEtsVM *etsVm = currentCoro->GetPandaVM();
+    auto *coroManager = currentCoro->GetCoroutineManager();
     auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::WEAK);
-    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef);
+    auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
     promiseHandle.GetPtr()->SetEventPtr(evt);
     // create the coro and put it to the ready queue
     auto *coro = currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
