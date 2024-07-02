@@ -2602,6 +2602,15 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
     {% endfor -%}
 
+    /**
+     * Returns the object itself
+     *
+     * @returns {{element['name']}}Array
+     */
+    public valueOf(): {{element['name']}}Array {
+        return this
+    }
+
     /** Byte offset within the underlying Buffer */
     public get byteOffset(): number {
         return this.byteOffsetInt
