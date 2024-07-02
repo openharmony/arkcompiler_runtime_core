@@ -263,7 +263,18 @@ bool EtsRuntimeInterface::IsIntrinsicStringBuilderToString(IntrinsicId id) const
 
 bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppendString(IntrinsicId id) const
 {
-    return id == IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING;
+    switch (id) {
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING2:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING3:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING4:
+            return true;
+        default:
+            return false;
+    }
 }
 
 bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppend(IntrinsicId id) const
@@ -286,6 +297,12 @@ bool EtsRuntimeInterface::IsIntrinsicStringBuilderAppend(IntrinsicId id) const
         case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_BOOL:
             return true;
         case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING2:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING3:
+            return true;
+        case IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING4:
             return true;
         default:
             return false;
@@ -341,9 +358,22 @@ EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringIsCompressedIntri
     return IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_COMPRESSED;
 }
 
-EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderAppendStringIntrinsicId() const
+EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderAppendStringsIntrinsicId(size_t numArgs) const
 {
-    return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING;
+    // NOLINTBEGIN(readability-magic-numbers)
+    switch (numArgs) {
+        case 1U:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING;
+        case 2U:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING2;
+        case 3U:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING3;
+        case 4U:
+            return IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING4;
+        default:
+            UNREACHABLE();
+    }
+    // NOLINTEND(readability-magic-numbers)
 }
 
 EtsRuntimeInterface::IntrinsicId EtsRuntimeInterface::GetStringBuilderToStringIntrinsicId() const

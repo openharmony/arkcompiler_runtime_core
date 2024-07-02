@@ -25,6 +25,10 @@ namespace ark::ets {
 EtsString *StringBuilderToString(ObjectHeader *sb);
 ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb);
 ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str);
+ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1);
+ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2);
+ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2,
+                                         EtsString *str3);
 ObjectHeader *StringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v);
 ObjectHeader *StringBuilderAppendChar(ObjectHeader *sb, EtsChar v);
 ObjectHeader *StringBuilderAppendLong(ObjectHeader *sb, EtsLong v);

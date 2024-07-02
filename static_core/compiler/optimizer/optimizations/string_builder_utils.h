@@ -41,6 +41,7 @@ void ResetInputMarkersRecursively(Inst *inst, Marker visited);
 using FindUserPredicate = std::function<bool(User &user)>;
 bool HasUser(Inst *inst, const FindUserPredicate &predicate);
 bool HasUserPhiRecursively(Inst *inst, Marker visited, const FindUserPredicate &predicate);
+size_t CountUsers(Inst *inst, const FindUserPredicate &predicate);
 void ResetUserMarkersRecursively(Inst *inst, Marker visited);
 Inst *SkipSingleUserCheckInstruction(Inst *inst);
 
@@ -59,6 +60,8 @@ bool IsStringBuilderAppend(Inst *inst)
     }
     return false;
 }
+
+bool IsIntrinsicStringBuilderAppendString(Inst *inst);
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_STRING_BUILDER_UTILS_H

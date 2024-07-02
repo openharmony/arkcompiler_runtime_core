@@ -29,6 +29,7 @@ namespace ark::compiler {
  * 1. Removes unnecessary String Builder instances
  * 2. Replaces String Builder usage with string concatenation whenever optimal
  * 3. Optimizes String Builder concatenation loops
+ * 4. Merges consecutive String Builder append string calls into one appendN call
  *
  * See compiler/docs/simplify_sb_doc.md for complete documentation
  */
@@ -36,6 +37,7 @@ namespace ark::compiler {
 constexpr size_t ARGS_NUM_2 = 2;
 constexpr size_t ARGS_NUM_3 = 3;
 constexpr size_t ARGS_NUM_4 = 4;
+constexpr size_t SB_APPEND_STRING_MAX_ARGS = ARGS_NUM_4;
 
 class SimplifyStringBuilder : public Optimization {
 public:
@@ -76,14 +78,13 @@ private:
     InstIter SkipToStringBuilderDefaultConstructor(InstIter begin, InstIter end);
     IntrinsicInst *CreateConcatIntrinsic(const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics,
                                          size_t appendCount, DataType::Type type, SaveStateInst *saveState);
-    bool IsIntrinsicStringBuilderAppendString(Inst *inst) const;
     bool MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match);
     void FixBrokenSaveStates(Inst *source, Inst *target);
     void Check(const ConcatenationMatch &match);
     void InsertIntrinsicAndFixSaveStates(IntrinsicInst *concatIntrinsic,
                                          const std::array<IntrinsicInst *, ARGS_NUM_4> &appendIntrinsics,
                                          size_t appendCount, Inst *before);
-    void ReplaceWithIntrinsic(const ConcatenationMatch &match);
+    void ReplaceWithConcatIntrinsic(const ConcatenationMatch &match);
     void RemoveStringBuilderInstance(Inst *instance);
     void Cleanup(const ConcatenationMatch &match);
     void OptimizeStringConcatenation(BasicBlock *block);
@@ -244,7 +245,14 @@ private:
     void StringBuilderUsagesDFS(Inst *inst, Loop *loop, Marker visited);
     const ArenaVector<StringBuilderUsage> &GetStringBuilderUsagesPO(Inst *accValue);
 
+    // 4. Merges consecutive String Builder append string calls into one appendN call
     void OptimizeStringConcatenation(Loop *loop);
+    IntrinsicInst *CreateIntrinsicStringBuilderAppendStrings(const ConcatenationMatch &match, SaveStateInst *saveState);
+    void ReplaceWithAppendIntrinsic(const ConcatenationMatch &match);
+    using StringBuilderCallsMap = ArenaMap<Inst *, InstVector>;
+    const StringBuilderCallsMap &CollectStringBuilderCalls(BasicBlock *block);
+    void ReplaceWithAppendIntrinsic(Inst *instance, const InstVector &calls, size_t from, size_t to);
+    void OptimizeStringBuilderAppendChain(BasicBlock *block);
 
 private:
     bool isApplied_ {false};
@@ -254,6 +262,7 @@ private:
     ArenaVector<std::pair<Inst *, size_t>> inputDescriptors_;
     ArenaVector<StringBuilderUsage> usages_;
     ArenaVector<ConcatenationLoopMatch> matches_;
+    StringBuilderCallsMap stringBuilderCalls_;
 };
 
 }  // namespace ark::compiler

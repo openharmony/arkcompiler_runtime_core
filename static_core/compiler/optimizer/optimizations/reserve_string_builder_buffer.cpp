@@ -117,7 +117,7 @@ uint64_t CountStringBuilderAppendCalls(Inst *instance, BasicBlock *block)
         ASSERT(appendInstruction->GetInputsCount() > 0);
         if (appendInstruction->GetDataFlowInput(0) == instance ||
             GetStringBuilderAppendChainInstance(appendInstruction) == instance) {
-            ++count;
+            count += appendInstruction->GetInputsCount() - 2U;  // -2 for sb instance and save state
         }
     }
     return count;
@@ -154,7 +154,7 @@ void ReserveStringBuilderBuffer::ReplaceInitialBufferSizeConstantInlined(Inst *i
         // storeObject instruction is
         //  N.ref  StoreObject std.core.StringBuilder.buf instance, newArray
         ASSERT(storeObject->GetInputsCount() > 1);
-        ASSERT(storeObject->GetInput(0).GetInst() == instance);
+        ASSERT(storeObject->GetDataFlowInput(0) == instance);
 
         // newArray instruction is
         //  M.ref  NewArray objectClass, originalSize, saveState
@@ -628,11 +628,12 @@ bool ReserveStringBuilderBuffer::RunImpl()
                 continue;
             }
 
-            // Skip instance if it used in resolved context
+            // Skip instance if it used in resolved context or in phi instruction
             if (HasUser(instance, [](auto &user) {
                     auto opcode = user.GetInst()->GetOpcode();
                     return opcode == Opcode::CallResolvedStatic || opcode == Opcode::CallResolvedVirtual ||
-                           opcode == Opcode::CallResolvedLaunchStatic || opcode == Opcode::CallResolvedLaunchVirtual;
+                           opcode == Opcode::CallResolvedLaunchStatic || opcode == Opcode::CallResolvedLaunchVirtual ||
+                           opcode == Opcode::Phi || opcode == Opcode::CatchPhi;
                 })) {
                 continue;
             }

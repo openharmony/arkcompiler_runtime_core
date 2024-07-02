@@ -104,6 +104,22 @@ ObjectHeader *StdCoreStringBuilderAppendString(ObjectHeader *sb, EtsString *str)
     return StringBuilderAppendString(sb, str);
 }
 
+ObjectHeader *StdCoreStringBuilderAppendString2(ObjectHeader *sb, EtsString *str0, EtsString *str1)
+{
+    return StringBuilderAppendStrings(sb, str0, str1);
+}
+
+ObjectHeader *StdCoreStringBuilderAppendString3(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2)
+{
+    return StringBuilderAppendStrings(sb, str0, str1, str2);
+}
+
+ObjectHeader *StdCoreStringBuilderAppendString4(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2,
+                                                EtsString *str3)
+{
+    return StringBuilderAppendStrings(sb, str0, str1, str2, str3);
+}
+
 ObjectHeader *StdCoreStringBuilderAppendBool(ObjectHeader *sb, EtsBoolean v)
 {
     return StringBuilderAppendBool(sb, v);

@@ -125,7 +125,7 @@ Inst *CreateInstructionStringBuilderInstance(Graph *graph, uint32_t pc, SaveStat
 IntrinsicInst *CreateStringBuilderAppendStringIntrinsic(Graph *graph, Inst *instance, Inst *arg,
                                                         SaveStateInst *saveState)
 {
-    auto appendIntrinsic = graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringBuilderAppendStringIntrinsicId());
+    auto appendIntrinsic = graph->CreateInstIntrinsic(graph->GetRuntime()->GetStringBuilderAppendStringsIntrinsicId(1));
     ASSERT(appendIntrinsic->RequireState());
 
     appendIntrinsic->SetType(DataType::REFERENCE);

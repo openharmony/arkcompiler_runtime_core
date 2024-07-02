@@ -241,6 +241,171 @@
     - ark::ObjectHeader*  # string builder
     - ark::ObjectHeader*  # string
 
+- name: StringBuilderAppendString2Sync
+  entrypoint: StringBuilderAppendString2Sync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString2Async
+  entrypoint: StringBuilderAppendString2Async
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString2AsyncManual
+  entrypoint: StringBuilderAppendString2AsyncManual
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString2SlowPath
+  entrypoint: StringBuilderAppendString2Entrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString2OddSaved
+  entrypoint: StringBuilderAppendString2Entrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString3Sync
+  entrypoint: StringBuilderAppendString3Sync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString3Async
+  entrypoint: StringBuilderAppendString3Async
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString3AsyncManual
+  entrypoint: StringBuilderAppendString3AsyncManual
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString3SlowPath
+  entrypoint: StringBuilderAppendString3Entrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString3Usual
+  entrypoint: StringBuilderAppendString3Entrypoint
+  bridge: entrypoint
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString4Sync
+  entrypoint: StringBuilderAppendString4Sync
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString4Async
+  entrypoint: StringBuilderAppendString4Async
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString4AsyncManual
+  entrypoint: StringBuilderAppendString4AsyncManual
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString4SlowPath
+  entrypoint: StringBuilderAppendString4Entrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
+- name: StringBuilderAppendString4OddSaved
+  entrypoint: StringBuilderAppendString4Entrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string builder (result)
+    - ark::ObjectHeader*  # string builder
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+    - ark::ObjectHeader*  # string
+
 - name: StringBuilderAppendNullString
   entrypoint: StringBuilderAppendNullStringEntrypoint
   bridge: entrypoint

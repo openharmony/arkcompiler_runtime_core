@@ -17,12 +17,6 @@
 //! SKIP_IF       @architecture == "arm32"
 //! RUN_PAOC      options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true"
 //!
-//! METHOD        "ETSGLOBAL::reserve0"
-//! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      "NewArray (size=2)"
-//! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          "NewArray (size=2)"
-//!
 //! METHOD        "ETSGLOBAL::reserve1"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
 //! INST_NOT      "NewArray (size=1)"
@@ -294,12 +288,6 @@
 //! CHECKER       JIT IR Builder, check StringBuilder internal buffer reserve
 //! SKIP_IF       @architecture == "arm32"
 //! RUN           force_jit: true, options: "--compiler-regex='.*reserve[0-9]*' --compiler-inlining=true", entry: "ETSGLOBAL::main"
-//!
-//! METHOD        "ETSGLOBAL::reserve0"
-//! PASS_BEFORE   "ReserveStringBuilderBuffer"
-//! INST_NOT      "NewArray (size=2)"
-//! PASS_AFTER    "ReserveStringBuilderBuffer"
-//! INST          "NewArray (size=2)"
 //!
 //! METHOD        "ETSGLOBAL::reserve1"
 //! PASS_BEFORE   "ReserveStringBuilderBuffer"
@@ -590,11 +578,13 @@
 //! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main_uber_only"
 //! EVENT_NOT     "SbBufferRealloc"
 
-function reserve0() : string {
-    let sb0 = new StringBuilder()           // not applied, due to no append calls found
-    let sb1 = new StringBuilder()           // not applied, due to no append calls found
-    return sb0.toString() + sb1.toString()  // applied
-}
+//! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=gen-gc)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--gc-type=gen-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main_uber_only"
+
+//! CHECKER       JIT IR Builder, check StringBuilder internal buffer reallocation events not occured (uber_only, --gc-type=g1-gc)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--gc-type=g1-gc --no-async-jit=false --compiler-reserve-string-builder-buffer=true --compiler-inlining=true", entry: "ETSGLOBAL::main_uber_only"
 
 function reserve1() : string {
     let sb = new StringBuilder()            // applied
@@ -1125,7 +1115,6 @@ function store_reserve44() : string
 }
 
 function main_events_check() : int {
-    assert reserve0() == "": "Wrong result at reserve0";
     assert reserve1() == "0": "Wrong result at reserve1";
     assert reserve2() == "01": "Wrong result at reserve2";
     assert loop_reserve3() == "012": "Wrong result at loop_reserve3";

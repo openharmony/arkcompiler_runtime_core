@@ -92,6 +92,10 @@ export final class StringBuilder {
      */
     public native append(s: String): StringBuilder;
 
+    private native append(s0: String, s1: String): StringBuilder;
+    private native append(s0: String, s1: String, s2: String): StringBuilder;
+    private native append(s0: String, s1: String, s2: String, s3: String): StringBuilder;
+
     /**
      * Appends a boolean as string to the builder's internal buffer
      *

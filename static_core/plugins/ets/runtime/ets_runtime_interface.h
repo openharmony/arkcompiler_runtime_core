@@ -60,7 +60,7 @@ public:
     IntrinsicId ConvertTypeToStringBuilderAppendIntrinsicId(compiler::DataType::Type type) const override;
     IntrinsicId GetStringConcatStringsIntrinsicId(size_t numArgs) const override;
     IntrinsicId GetStringIsCompressedIntrinsicId() const override;
-    IntrinsicId GetStringBuilderAppendStringIntrinsicId() const override;
+    IntrinsicId GetStringBuilderAppendStringsIntrinsicId(size_t numArgs) const override;
     IntrinsicId GetStringBuilderToStringIntrinsicId() const override;
     bool IsClassValueTyped(ClassPtr klass) const override;
     void *GetDoubleToStringCache() const override;

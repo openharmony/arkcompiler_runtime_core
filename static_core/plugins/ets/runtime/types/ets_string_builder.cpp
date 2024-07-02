@@ -26,6 +26,7 @@
 #include "plugins/ets/runtime/types/ets_string_builder.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_intrinsics_helpers.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
+#include "utils/math_helpers.h"
 #include <cstdint>
 #include <cmath>
 
@@ -48,18 +49,22 @@ static_assert(std::is_same_v<EtsChar, uint16_t> &&
               std::is_same_v<EtsCharArray, EtsPrimitiveArray<EtsChar, EtsClassRoot::CHAR_ARRAY>>);
 
 // The following implementation is based on ObjectHeader::ShallowCopy
-static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle)
+static EtsObjectArray *ReallocateBuffer(EtsHandle<EtsObjectArray> &bufHandle, uint32_t bufLen)
 {
-    uint32_t bufLen = bufHandle->GetLength();
-    ASSERT(bufLen < (UINT_MAX >> 1U));
     // Allocate the new buffer - may trigger GC
-    auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), 2 * bufLen);
+    auto *newBuf = EtsObjectArray::Create(bufHandle->GetClass(), bufLen);
     ASSERT(newBuf != nullptr);
     // Copy the old buffer data
     bufHandle->CopyDataTo(newBuf);
     EVENT_SB_BUFFER_REALLOC(ManagedThread::GetCurrent()->GetId(), newBuf, newBuf->GetLength(), newBuf->GetElementSize(),
                             newBuf->ObjectSize());
     return newBuf;
+}
+
+// Increase buffer length needed to append `numElements` elements at the end
+static uint32_t GetNewBufferLength(uint32_t currentLength, uint32_t numElements)
+{
+    return helpers::math::GetPowerOfTwoValue32(currentLength + numElements);
 }
 
 // A string representations of nullptr, bool, short, int, long, float and double
@@ -70,26 +75,24 @@ ObjectHeader *AppendCharArrayToBuffer(VMHandle<EtsObject> &sbHandle, EtsCharArra
     auto *sb = sbHandle.GetPtr();
     auto length = sb->GetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET);
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
-    auto *buf = reinterpret_cast<EtsObjectArray *>(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET)->GetCoreType());
 
     // Check the case of the buf overflow
-    uint32_t bufLen = buf->GetLength();
-    if (index >= bufLen) {
+    if (index >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
         EtsHandle<EtsCharArray> arrHandle(coroutine, arr);
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
-        buf = ReallocateBuffer(bufHandle);
+        buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
         // Update sb and arr as corresponding objects might be moved by GC
         sb = sbHandle.GetPtr();
         arr = arrHandle.GetPtr();
         // Remember the new buffer
-        sb->SetFieldObject(SB_BUFFER_OFFSET, reinterpret_cast<EtsObject *>(buf));
+        sb->SetFieldObject(SB_BUFFER_OFFSET, EtsObject::FromCoreType(buf->GetCoreType()));
     }
 
     // Append array to the buf
-    buf->Set(index, reinterpret_cast<EtsObject *>(arr));
+    buf->Set(index, EtsObject::FromCoreType(arr->GetCoreType()));
     // Increment the index
     sb->SetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET, index + 1U);
     // Increase the length
@@ -122,13 +125,13 @@ static void ReconstructStringAsMUtf8(EtsString *dstString, EtsObjectArray *buffe
     for (uint32_t i = 0; i < index; ++i) {
         EtsObject *obj = buffer->Get(i);
         if (obj->IsInstanceOf(stringKlass)) {
-            coretypes::String *srcString = reinterpret_cast<EtsString *>(obj)->GetCoreType();
+            coretypes::String *srcString = EtsString::FromEtsObject(obj)->GetCoreType();
             uint32_t n = srcString->CopyDataRegionMUtf8(dstData, 0, srcString->GetLength(), length);
             dstData += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             length -= n;
         } else {
             // obj is an array of chars
-            coretypes::Array *srcArray = reinterpret_cast<EtsArray *>(obj)->GetCoreType();
+            coretypes::Array *srcArray = coretypes::Array::Cast(obj->GetCoreType());
             uint32_t n = srcArray->GetLength();
             for (uint32_t j = 0; j < n; ++j) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -148,13 +151,13 @@ static void ReconstructStringAsUtf16(EtsString *dstString, EtsObjectArray *buffe
     for (uint32_t i = 0; i < index; ++i) {
         EtsObject *obj = buffer->Get(i);
         if (obj->IsInstanceOf(stringKlass)) {
-            coretypes::String *srcString = reinterpret_cast<EtsString *>(obj)->GetCoreType();
+            coretypes::String *srcString = EtsString::FromEtsObject(obj)->GetCoreType();
             uint32_t n = srcString->CopyDataRegionUtf16(dstData, 0, srcString->GetLength(), length);
             dstData += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             length -= n;
         } else {
             // obj is an array of chars
-            coretypes::Array *srcArray = reinterpret_cast<EtsCharArray *>(obj)->GetCoreType();
+            coretypes::Array *srcArray = coretypes::Array::Cast(obj->GetCoreType());
             auto *srcData = reinterpret_cast<EtsChar *>(srcArray->GetData());
             uint32_t n = srcArray->GetLength();
             ASSERT(IsAligned(ToUintPtr(srcData), sizeof(uint64_t)));
@@ -163,7 +166,7 @@ static void ReconstructStringAsUtf16(EtsString *dstString, EtsObjectArray *buffe
             auto bytesAndAligned = bytes | (ToUintPtr(dstData) & (bytes - 1));
             switch (bytesAndAligned) {
                 case 2U:  // 2 bytes
-                    *dstData = *reinterpret_cast<EtsChar *>(srcData);
+                    *dstData = *srcData;
                     break;
                 case 4U:  // 4 bytes
                     *reinterpret_cast<uint32_t *>(dstData) = *reinterpret_cast<uint32_t *>(srcData);
@@ -183,7 +186,7 @@ static void ReconstructStringAsUtf16(EtsString *dstString, EtsObjectArray *buffe
 static inline EtsCharArray *NullToCharArray()
 {
     EtsCharArray *arr = EtsCharArray::Create(std::char_traits<char>::length("null"));
-    *reinterpret_cast<uint64_t *>(arr->GetData<EtsChar>()) = NULL_CODE;
+    *arr->GetData<uint64_t>() = NULL_CODE;
     return arr;
 }
 
@@ -191,7 +194,7 @@ static inline EtsCharArray *BoolToCharArray(EtsBoolean v)
 {
     auto arrLen = v != 0U ? std::char_traits<char>::length("true") : std::char_traits<char>::length("false");
     EtsCharArray *arr = EtsCharArray::Create(arrLen);
-    auto *data = reinterpret_cast<uint64_t *>(arr->GetData<EtsChar>());
+    auto *data = arr->GetData<uint64_t>();
     if (v != 0U) {
         *data = TRUE_CODE;
     } else {
@@ -205,19 +208,26 @@ static inline EtsCharArray *BoolToCharArray(EtsBoolean v)
 static inline EtsCharArray *CharToCharArray(EtsChar v)
 {
     EtsCharArray *arr = EtsCharArray::Create(1U);
-    *(reinterpret_cast<EtsChar *>(arr->GetData<EtsChar>())) = v;
+    *arr->GetData<EtsChar>() = v;
     return arr;
+}
+
+VMHandle<EtsObject> &StringBuilderAppendNullString(VMHandle<EtsObject> &sbHandle)
+{
+    // May trigger GC
+    EtsCharArray *arr = NullToCharArray();
+    AppendCharArrayToBuffer<false>(sbHandle, arr);
+    return sbHandle;
 }
 
 ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb)
 {
-    ASSERT(sb != nullptr);
     auto *coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
     VMHandle<EtsObject> sbHandle(coroutine, sb);
-    // May trigger GC
-    EtsCharArray *arr = NullToCharArray();
-    return AppendCharArrayToBuffer<false>(sbHandle, arr);
+
+    return StringBuilderAppendNullString(sbHandle)->GetCoreType();
 }
 
 /**
@@ -232,37 +242,38 @@ ObjectHeader *StringBuilderAppendNullString(ObjectHeader *sb)
  * In case of the buf overflow, we create a new buffer of a larger size
  * and copy the data from the old buffer.
  */
-ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str)
+VMHandle<EtsObject> &StringBuilderAppendString(VMHandle<EtsObject> &sbHandle, EtsHandle<EtsString> &strHandle)
 {
-    ASSERT(sb != nullptr);
+    if (strHandle.GetPtr() == nullptr) {
+        return StringBuilderAppendNullString(sbHandle);
+    }
+    if (strHandle->GetLength() == 0) {
+        return sbHandle;
+    }
 
-    if (str == nullptr) {
-        return StringBuilderAppendNullString(sb);
-    }
-    if (str->GetLength() == 0) {
-        return sb;
-    }
+    auto sb = sbHandle->GetCoreType();
+    auto str = strHandle.GetPtr();
+
+    ASSERT(sb != nullptr);
+    ASSERT(str->GetLength() > 0);
 
     auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
-    auto *buf = reinterpret_cast<EtsObjectArray *>(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
     // Check buf overflow
     if (index >= buf->GetLength()) {
         auto *coroutine = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
-        VMHandle<EtsObject> sbHandle(coroutine, sb);
-        EtsHandle<EtsString> strHandle(coroutine, str);
         EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
         // May trigger GC
-        buf = ReallocateBuffer(bufHandle);
+        buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 1U));
         // Update sb and s as corresponding objects might be moved by GC
         sb = sbHandle->GetCoreType();
         str = strHandle.GetPtr();
         // Remember the new buffer
-        sb->SetFieldObject(SB_BUFFER_OFFSET, reinterpret_cast<ObjectHeader *>(buf));
+        sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
     }
     // Append string to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
-    buf->Set(index, reinterpret_cast<EtsObject *>(str));
+    buf->Set(index, EtsObject::FromCoreType(str->GetCoreType()));
     // Increment the index
     sb->SetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET, index + 1U);
     // Increase the length
@@ -273,7 +284,310 @@ ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str)
         sb->SetFieldPrimitive<bool>(SB_COMPRESS_OFFSET, false);
     }
 
-    return sb;
+    return sbHandle;
+}
+
+ObjectHeader *StringBuilderAppendString(ObjectHeader *sb, EtsString *str)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    EtsHandle<EtsString> strHandle(coroutine, str);
+
+    return StringBuilderAppendString(sbHandle, strHandle)->GetCoreType();
+}
+
+VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHandle, EtsHandle<EtsString> &str0Handle,
+                                                       EtsHandle<EtsString> &str1Handle)
+{
+    auto sb = sbHandle->GetCoreType();
+    auto str0 = str0Handle.GetPtr();
+    auto str1 = str1Handle.GetPtr();
+
+    // sb.append(str0, str1)
+    auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
+    auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    // Check buf overflow
+    if (index + 1U >= buf->GetLength()) {
+        auto *coroutine = EtsCoroutine::GetCurrent();
+        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        // May trigger GC
+        buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 2U));
+        // Update sb and strings as corresponding objects might be moved by GC
+        sb = sbHandle->GetCoreType();
+        str0 = str0Handle.GetPtr();
+        str1 = str1Handle.GetPtr();
+        // Remember the new buffer
+        sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
+    }
+    // Append strings to the buf
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
+    buf->Set(index + 0U, EtsObject::FromCoreType(str1->GetCoreType()));
+    // Increment the index
+    sb->SetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET, index + 2U);
+    // Increase the length
+    auto length = sb->GetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET);
+    sb->SetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET, length + str0->GetLength() + str1->GetLength());
+    // Set the compress field to false if strings are not compressable
+    if (sb->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET) && (str0->IsUtf16() || str1->IsUtf16())) {
+        sb->SetFieldPrimitive<bool>(SB_COMPRESS_OFFSET, false);
+    }
+
+    return sbHandle;
+}
+
+VMHandle<EtsObject> &StringBuilderAppendStrings(VMHandle<EtsObject> &sbHandle, EtsHandle<EtsString> &str0Handle,
+                                                EtsHandle<EtsString> &str1Handle)
+{
+    // sb.append(null, ...)
+    if (str0Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendString(StringBuilderAppendNullString(sbHandle), str1Handle);
+    }
+    // sb.append(str0, null)
+    if (str1Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendNullString(StringBuilderAppendString(sbHandle, str0Handle));
+    }
+
+    ASSERT(str0Handle.GetPtr() != nullptr && str1Handle.GetPtr() != nullptr);
+
+    // sb.append("", str1)
+    if (str0Handle.GetPtr()->GetLength() == 0) {
+        return StringBuilderAppendString(sbHandle, str1Handle);
+    }
+    // sb.append(str0, "")
+    if (str1Handle.GetPtr()->GetLength() == 0) {
+        return StringBuilderAppendString(sbHandle, str0Handle);
+    }
+
+    ASSERT(sbHandle.GetPtr() != nullptr);
+    ASSERT(str0Handle->GetLength() > 0 && str1Handle->GetLength() > 0);
+
+    return StringBuilderAppendStringsChecked(sbHandle, str0Handle, str1Handle);
+}
+
+ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    EtsHandle<EtsString> str0Handle(coroutine, str0);
+    EtsHandle<EtsString> str1Handle(coroutine, str1);
+
+    return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle)->GetCoreType();
+}
+
+VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHandle, EtsHandle<EtsString> &str0Handle,
+                                                       EtsHandle<EtsString> &str1Handle,
+                                                       EtsHandle<EtsString> &str2Handle)
+{
+    auto sb = sbHandle->GetCoreType();
+    auto str0 = str0Handle.GetPtr();
+    auto str1 = str1Handle.GetPtr();
+    auto str2 = str2Handle.GetPtr();
+
+    // sb.append(str0, str2, str3)
+    auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
+    auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    // Check buf overflow
+    if (index + 2U >= buf->GetLength()) {
+        auto *coroutine = EtsCoroutine::GetCurrent();
+        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        // May trigger GC
+        buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 3U));
+        // Update sb and strings as corresponding objects might be moved by GC
+        sb = sbHandle->GetCoreType();
+        str0 = str0Handle.GetPtr();
+        str1 = str1Handle.GetPtr();
+        str2 = str2Handle.GetPtr();
+        // Remember the new buffer
+        sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
+    }
+    // Append strings to the buf
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
+    buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
+    buf->Set(index + 2U, EtsObject::FromCoreType(str2->GetCoreType()));
+    // Increment the index
+    sb->SetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET, index + 3U);
+    // Increase the length
+    auto length = sb->GetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET);
+    sb->SetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET,
+                                    length + str0->GetLength() + str1->GetLength() + str2->GetLength());
+    // Set the compress field to false if strings are not compressable
+    if (sb->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET) && (str0->IsUtf16() || str1->IsUtf16() || str2->IsUtf16())) {
+        sb->SetFieldPrimitive<bool>(SB_COMPRESS_OFFSET, false);
+    }
+
+    return sbHandle;
+}
+
+VMHandle<EtsObject> &StringBuilderAppendStrings(VMHandle<EtsObject> &sbHandle, EtsHandle<EtsString> &str0Handle,
+                                                EtsHandle<EtsString> &str1Handle, EtsHandle<EtsString> &str2Handle)
+{
+    // sb.append(null, ..., ...)
+    if (str0Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendStrings(StringBuilderAppendNullString(sbHandle), str1Handle, str2Handle);
+    }
+    // sb.append(str0, null, ...)
+    if (str1Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendString(StringBuilderAppendNullString(StringBuilderAppendString(sbHandle, str0Handle)),
+                                         str2Handle);
+    }
+    // sb.append(str0, str1, null)
+    if (str2Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendNullString(StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle));
+    }
+
+    ASSERT(str0Handle.GetPtr() != nullptr && str1Handle.GetPtr() != nullptr && str2Handle.GetPtr() != nullptr);
+
+    // sb.append("", str1, str2)
+    if (str0Handle->GetLength() == 0) {
+        return StringBuilderAppendStrings(sbHandle, str1Handle, str2Handle);
+    }
+    // sb.append(str0, "", str2)
+    if (str1Handle->GetLength() == 0) {
+        return StringBuilderAppendStrings(sbHandle, str0Handle, str2Handle);
+    }
+    // sb.append(str0, str1, "")
+    if (str2Handle->GetLength() == 0) {
+        return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle);
+    }
+
+    ASSERT(sbHandle.GetPtr() != nullptr);
+    ASSERT(str0Handle->GetLength() > 0 && str1Handle->GetLength() > 0 && str2Handle->GetLength() > 0);
+
+    return StringBuilderAppendStringsChecked(sbHandle, str0Handle, str1Handle, str2Handle);
+}
+
+ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    EtsHandle<EtsString> str0Handle(coroutine, str0);
+    EtsHandle<EtsString> str1Handle(coroutine, str1);
+    EtsHandle<EtsString> str2Handle(coroutine, str2);
+
+    return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle, str2Handle)->GetCoreType();
+}
+
+VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHandle, EtsHandle<EtsString> &str0Handle,
+                                                       EtsHandle<EtsString> &str1Handle,
+                                                       EtsHandle<EtsString> &str2Handle,
+                                                       EtsHandle<EtsString> &str3Handle)
+{
+    auto sb = sbHandle->GetCoreType();
+    auto str0 = str0Handle.GetPtr();
+    auto str1 = str1Handle.GetPtr();
+    auto str2 = str2Handle.GetPtr();
+    auto str3 = str3Handle.GetPtr();
+
+    // sb.append(str0, str2, str3, str4)
+    auto index = sb->GetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET);
+    auto *buf = EtsObjectArray::FromCoreType(sb->GetFieldObject(SB_BUFFER_OFFSET));
+    // Check buf overflow
+    if (index + 3U >= buf->GetLength()) {
+        auto *coroutine = EtsCoroutine::GetCurrent();
+        EtsHandle<EtsObjectArray> bufHandle(coroutine, buf);
+        // May trigger GC
+        buf = ReallocateBuffer(bufHandle, GetNewBufferLength(bufHandle->GetLength(), 4U));
+        // Update sb and strings as corresponding objects might be moved by GC
+        sb = sbHandle->GetCoreType();
+        str0 = str0Handle.GetPtr();
+        str1 = str1Handle.GetPtr();
+        str2 = str2Handle.GetPtr();
+        str3 = str3Handle.GetPtr();
+        // Remember the new buffer
+        sb->SetFieldObject(SB_BUFFER_OFFSET, buf->GetCoreType());
+    }
+    // Append strings to the buf
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
+    buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
+    buf->Set(index + 2U, EtsObject::FromCoreType(str2->GetCoreType()));
+    buf->Set(index + 3U, EtsObject::FromCoreType(str3->GetCoreType()));
+    // Increment the index
+    sb->SetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET, index + 4U);
+    // Increase the length
+    auto length = sb->GetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET);
+    sb->SetFieldPrimitive<uint32_t>(SB_LENGTH_OFFSET, length + str0->GetLength() + str1->GetLength() +
+                                                          str2->GetLength() + str3->GetLength());
+    // Set the compress field to false if strings are not compressable
+    if (sb->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET) &&
+        (str0->IsUtf16() || str1->IsUtf16() || str2->IsUtf16() || str3->IsUtf16())) {
+        sb->SetFieldPrimitive<bool>(SB_COMPRESS_OFFSET, false);
+    }
+
+    return sbHandle;
+}
+
+VMHandle<EtsObject> &StringBuilderAppendStrings(VMHandle<EtsObject> &sbHandle, EtsHandle<EtsString> &str0Handle,
+                                                EtsHandle<EtsString> &str1Handle, EtsHandle<EtsString> &str2Handle,
+                                                EtsHandle<EtsString> &str3Handle)
+{
+    // sb.append(null, ..., ..., ...)
+    if (str0Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendStrings(StringBuilderAppendNullString(sbHandle), str1Handle, str2Handle, str3Handle);
+    }
+    // sb.append(str0, null, ..., ...)
+    if (str1Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendStrings(
+            StringBuilderAppendNullString(StringBuilderAppendString(sbHandle, str0Handle)), str2Handle, str3Handle);
+    }
+    // sb.append(str0, str1, null, ...)
+    if (str2Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendString(
+            StringBuilderAppendNullString(StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle)), str3Handle);
+    }
+    // sb.append(str0, str1, str2, null)
+    if (str3Handle.GetPtr() == nullptr) {
+        return StringBuilderAppendNullString(StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle, str2Handle));
+    }
+
+    ASSERT(str0Handle.GetPtr() != nullptr && str1Handle.GetPtr() != nullptr && str2Handle.GetPtr() != nullptr &&
+           str3Handle.GetPtr() != nullptr);
+
+    // sb.append("", str1, str2, str3)
+    if (str0Handle->GetLength() == 0) {
+        return StringBuilderAppendStrings(sbHandle, str1Handle, str2Handle, str3Handle);
+    }
+    // sb.append(str0, "", str2, str3)
+    if (str1Handle->GetLength() == 0) {
+        return StringBuilderAppendStrings(sbHandle, str0Handle, str2Handle, str3Handle);
+    }
+    // sb.append(str0, str1, "", str3)
+    if (str2Handle->GetLength() == 0) {
+        return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle, str3Handle);
+    }
+    // sb.append(str0, str1, str2, "")
+    if (str3Handle->GetLength() == 0) {
+        return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle, str2Handle);
+    }
+
+    ASSERT(sbHandle.GetPtr() != nullptr);
+    ASSERT(str0Handle->GetLength() > 0 && str1Handle->GetLength() > 0 && str2Handle->GetLength() > 0 &&
+           str3Handle->GetLength() > 0);
+
+    return StringBuilderAppendStringsChecked(sbHandle, str0Handle, str1Handle, str2Handle, str3Handle);
+}
+
+ObjectHeader *StringBuilderAppendStrings(ObjectHeader *sb, EtsString *str0, EtsString *str1, EtsString *str2,
+                                         EtsString *str3)
+{
+    auto *coroutine = EtsCoroutine::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
+
+    VMHandle<EtsObject> sbHandle(coroutine, sb);
+    EtsHandle<EtsString> str0Handle(coroutine, str0);
+    EtsHandle<EtsString> str1Handle(coroutine, str1);
+    EtsHandle<EtsString> str2Handle(coroutine, str2);
+    EtsHandle<EtsString> str3Handle(coroutine, str3);
+
+    return StringBuilderAppendStrings(sbHandle, str0Handle, str1Handle, str2Handle, str3Handle)->GetCoreType();
 }
 
 ObjectHeader *StringBuilderAppendChar(ObjectHeader *sb, EtsChar v)
@@ -322,7 +636,7 @@ static inline EtsCharArray *FloatingPointToCharArray(FpType number)
 {
     return intrinsics::helpers::FpToStringDecimalRadix(number, [](std::string_view str) {
         auto *arr = EtsCharArray::Create(str.length());
-        Span<uint16_t> data(reinterpret_cast<uint16_t *>(arr->GetData<EtsChar>()), str.length());
+        Span<uint16_t> data(arr->GetData<uint16_t>(), str.length());
         for (size_t i = 0; i < str.length(); ++i) {
             ASSERT(ark::coretypes::String::IsASCIICharacter(str[i]));
             data[i] = static_cast<uint16_t>(str[i]);
@@ -376,7 +690,7 @@ EtsString *StringBuilderToString(ObjectHeader *sb)
     auto compress = sbHandle->GetFieldPrimitive<bool>(SB_COMPRESS_OFFSET);
     EtsString *s = EtsString::AllocateNonInitializedString(length, compress);
     EtsClass *sKlass = EtsClass::FromRuntimeClass(s->GetCoreType()->ClassAddr<Class>());
-    auto *buf = reinterpret_cast<EtsObjectArray *>(sbHandle->GetFieldObject(SB_BUFFER_OFFSET));
+    auto *buf = EtsObjectArray::FromCoreType(sbHandle->GetFieldObject(SB_BUFFER_OFFSET)->GetCoreType());
     if (compress) {
         ReconstructStringAsMUtf8(s, buf, index, length, sKlass);
     } else {
