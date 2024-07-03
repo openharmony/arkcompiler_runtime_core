@@ -1292,6 +1292,16 @@ intrinsics:
       args: [i64]
     impl: ark::ets::intrinsics::TaskpoolTaskSubmitted
 
+  - name: TaskpoolGroupSubmitted
+    space: ets
+    class_name: escompat.taskpool
+    method_name: taskGroupSubmitted
+    static: true
+    signature:
+      ret: void
+      args: [i64, i64]
+    impl: ark::ets::intrinsics::TaskpoolGroupSubmitted
+
   - name: TaskpoolTaskStarted
     space: ets
     class_name: escompat.taskpool
@@ -1299,7 +1309,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [i64]
+      args: [i64, i64]
     impl: ark::ets::intrinsics::TaskpoolTaskStarted
 
   - name: TaskpoolTaskFinished
@@ -1309,7 +1319,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [i64]
+      args: [i64, i64]
     impl: ark::ets::intrinsics::TaskpoolTaskFinished
 
   - name: TaskpoolCancelTask
@@ -1322,6 +1332,16 @@ intrinsics:
       args: [i64]
     impl: ark::ets::intrinsics::TaskpoolCancelTask
 
+  - name: TaskpoolCancelGroup
+    space: ets
+    class_name: escompat.taskpool
+    method_name: cancelGroupImpl
+    static: true
+    signature:
+      ret: void
+      args: [i64]
+    impl: ark::ets::intrinsics::TaskpoolCancelGroup
+
   - name: TaskpoolIsTaskCancel
     space: ets
     class_name: escompat.taskpoolTask
@@ -1332,6 +1352,15 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::TaskpoolIsTaskCanceled
 
+  - name: TaskpoolGenerateGroupId
+    space: ets
+    class_name: escompat.taskpoolTaskGroup
+    method_name: generateGroupId
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::GenerateGroupId
 
 ###################
 # std.time.Chrono #

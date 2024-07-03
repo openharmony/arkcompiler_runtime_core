@@ -17,11 +17,16 @@
 
 namespace ark::ets {
 
-Taskpool::Taskpool() : taskId_(1) {}
+Taskpool::Taskpool() : taskId_(1), taskGroupId_(1) {}
 
 EtsLong Taskpool::GenerateTaskId()
 {
     return taskId_++;
+}
+
+EtsLong Taskpool::GenerateTaskGroupId()
+{
+    return taskGroupId_++;
 }
 
 void Taskpool::TaskSubmitted(EtsLong taskId)
@@ -30,9 +35,16 @@ void Taskpool::TaskSubmitted(EtsLong taskId)
     waitingTasks_[taskId]++;
 }
 
-size_t Taskpool::DecrementTaskCounter(EtsLong taskId, PandaUnorderedMap<EtsLong, size_t> &tasks)
+void Taskpool::GroupSubmitted(EtsLong groupId, size_t tasksCount)
 {
-    auto taskIter = tasks.find(taskId);
+    ASSERT(tasksCount != 0);
+    os::memory::LockHolder lh(taskpoolLock_);
+    waitingGroupTasks_[groupId] += tasksCount;
+}
+
+size_t Taskpool::DecrementTaskCounter(EtsLong id, PandaUnorderedMap<EtsLong, size_t> &tasks)
+{
+    auto taskIter = tasks.find(id);
     ASSERT(taskIter != tasks.end());
     auto tasksCount = --(taskIter->second);
     if (tasksCount == 0) {
@@ -41,38 +53,56 @@ size_t Taskpool::DecrementTaskCounter(EtsLong taskId, PandaUnorderedMap<EtsLong,
     return tasksCount;
 }
 
-bool Taskpool::TaskStarted(uint32_t coroutineId, EtsLong taskId)
+bool Taskpool::MoveTaskFromWaitingToRunning(EtsLong id, PandaUnorderedMap<EtsLong, size_t> &waitingTasks,
+                                            PandaUnorderedMap<EtsLong, size_t> &runningTasks,
+                                            PandaUnorderedSet<EtsLong> &idsToBeCanceled)
 {
-    os::memory::LockHolder lh(taskpoolLock_);
-    auto waitingTasksCountWithId = DecrementTaskCounter(taskId, waitingTasks_);
-    if (tasksToBeCanceled_.find(taskId) != tasksToBeCanceled_.end()) {
-        if ((waitingTasksCountWithId == 0) && (runningTasks_.find(taskId) == runningTasks_.end())) {
-            // No tasks with this id in the taskpool
-            tasksToBeCanceled_.erase(taskId);
+    auto waitingTasksAfterDecrementation = DecrementTaskCounter(id, waitingTasks);
+    if (idsToBeCanceled.find(id) != idsToBeCanceled.end()) {
+        if ((waitingTasksAfterDecrementation == 0) && (runningTasks.find(id) == runningTasks.end())) {
+            idsToBeCanceled.erase(id);
         }
-        // escompat.Error will be occurred for the current task
         return false;
     }
-    executingTasks_.insert({coroutineId, taskId});
-    runningTasks_[taskId]++;
+    runningTasks[id]++;
     return true;
 }
 
-bool Taskpool::TaskFinished(uint32_t coroutineId, EtsLong taskId)
+bool Taskpool::TaskStarted(uint32_t coroutineId, EtsLong taskId, EtsLong groupId)
 {
     os::memory::LockHolder lh(taskpoolLock_);
-    ASSERT(executingTasks_[coroutineId] == taskId);
-    executingTasks_.erase(coroutineId);
-    auto runningTasksCountWithId = DecrementTaskCounter(taskId, runningTasks_);
-    if (tasksToBeCanceled_.find(taskId) != tasksToBeCanceled_.end()) {
-        if ((runningTasksCountWithId == 0) && (waitingTasks_.find(taskId) == waitingTasks_.end())) {
-            // No tasks with this id in the taskpool
-            tasksToBeCanceled_.erase(taskId);
+    auto isNotCanceled =
+        (groupId == 0)  // 0 means task is not group task
+            ? MoveTaskFromWaitingToRunning(taskId, waitingTasks_, runningTasks_, tasksToBeCanceled_)
+            : MoveTaskFromWaitingToRunning(groupId, waitingGroupTasks_, runningGroupTasks_, groupsToBeCanceled_);
+    if (isNotCanceled) {
+        executingTasks_.insert({coroutineId, {taskId, groupId}});
+        return true;
+    }
+    return false;
+}
+
+bool Taskpool::RemoveTaskFromRunning(EtsLong id, PandaUnorderedMap<EtsLong, size_t> &runningTasks,
+                                     const PandaUnorderedMap<EtsLong, size_t> &waitingTasks,
+                                     PandaUnorderedSet<EtsLong> &idsToBeCanceled)
+{
+    auto runningTasksAfterDecrementation = DecrementTaskCounter(id, runningTasks);
+    if (idsToBeCanceled.find(id) != idsToBeCanceled.end()) {
+        if ((runningTasksAfterDecrementation == 0) && (waitingTasks.find(id) == waitingTasks.end())) {
+            idsToBeCanceled.erase(id);
         }
-        // escompat.Error will be occurred for the current task
         return false;
     }
     return true;
+}
+
+bool Taskpool::TaskFinished(uint32_t coroutineId, EtsLong taskId, EtsLong groupId)
+{
+    os::memory::LockHolder lh(taskpoolLock_);
+    ASSERT(executingTasks_[coroutineId].taskId == taskId);
+    executingTasks_.erase(coroutineId);
+    return (groupId == 0) ? RemoveTaskFromRunning(taskId, runningTasks_, waitingTasks_, tasksToBeCanceled_)
+                          : RemoveTaskFromRunning(groupId, runningGroupTasks_, waitingGroupTasks_, groupsToBeCanceled_);
 }
 
 bool Taskpool::CancelTask(EtsLong taskId)
@@ -86,6 +116,18 @@ bool Taskpool::CancelTask(EtsLong taskId)
     return true;
 }
 
+bool Taskpool::CancelGroup(EtsLong groupId)
+{
+    os::memory::LockHolder lh(taskpoolLock_);
+    if ((waitingGroupTasks_.find(groupId) == waitingGroupTasks_.end()) &&
+        (runningGroupTasks_.find(groupId) == runningTasks_.end())) {
+        // No tasks of the group with this id in the taskpool
+        return false;
+    }
+    groupsToBeCanceled_.insert(groupId);
+    return true;
+}
+
 bool Taskpool::IsTaskCanceled(uint32_t coroutineId) const
 {
     os::memory::LockHolder lh(taskpoolLock_);
@@ -94,8 +136,12 @@ bool Taskpool::IsTaskCanceled(uint32_t coroutineId) const
         // Current coroutine is not executing a task
         return false;
     }
-    auto taskId = it->second;
-    return tasksToBeCanceled_.find(taskId) != tasksToBeCanceled_.end();
+    // 0 means non-group tasks
+    if (it->second.groupId == 0) {
+        return tasksToBeCanceled_.find(it->second.taskId) != tasksToBeCanceled_.end();
+    }
+    // The executing task is group task, so check the group status
+    return groupsToBeCanceled_.find(it->second.groupId) != groupsToBeCanceled_.end();
 }
 
 }  // namespace ark::ets

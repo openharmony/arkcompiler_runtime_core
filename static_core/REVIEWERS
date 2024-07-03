@@ -79,6 +79,7 @@ static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  @Prof1983 @romanzhuykov
 static_core/plugins/ets/runtime/                         @semenovaleksandr
 static_core/plugins/ets/runtime/*coroutine*              @dmitriitr @konstanting
+static_core/plugins/ets/runtime/*taskpool*               @dmitriitr @konstanting @ipetrov
 static_core/plugins/ets/runtime/ets_entrypoints*         @Prof1983 @mbolshov
 static_core/plugins/ets/runtime/ets_handle*              @dmitriitr @udav
 static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof1983
@@ -92,6 +93,7 @@ static_core/runtime/tests/tooling/                       @ragnvald
 static_core/plugins/ets/runtime/interop_js/*promise*                          @dmitriitr @konstanting
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof1983
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         @ivan-tyulyandin
+static_core/plugins/ets/runtime/intrinsics/escompat_taskpool.cpp              @dmitriitr @konstanting @ipetrov
 static_core/plugins/ets/runtime/intrinsics/std_*                              @ivan-tyulyandin
 static_core/plugins/ets/runtime/intrinsics/std_containers_BlockingQueue.cpp   @konstanting
 static_core/plugins/ets/runtime/intrinsics/std_core_Method.cpp                @shumilov-petr
@@ -129,6 +131,7 @@ static_core/plugins/ets/tests/ets_test_suite/atomics/                         @k
 static_core/plugins/ets/tests/ets_test_suite/containers/blocking_queue.sts    @konstanting
 static_core/plugins/ets/tests/ets_test_suite/coroutines/                      @konstanting
 static_core/plugins/ets/tests/ets_test_suite/gc/                              @udav
+static_core/plugins/ets/tests/ets_test_suite/taskpool/                        @konstanting @ipetrov
 static_core/plugins/ets/tests/interop_js/tests/                               @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov
 static_core/plugins/ets/tests/native/promise/                                 @konstanting
 static_core/plugins/ets/tests/runtime/tooling/                                @ragnvald

@@ -513,8 +513,10 @@ void GenGC<LanguageConfig>::ReMark(GCMarkingStackType *objectsStack, const GCTas
                 VisitGCRootFlags::ACCESS_ROOT_ONLY_NEW | VisitGCRootFlags::END_RECORDING_NEW_ROOT);
             this->MarkStack(&marker_, objectsStack, GC::EmptyMarkPreprocess, refPred);
         }
-        // NOLINTNEXTLINE(performance-unnecessary-value-param)
-        this->GetPandaVm()->HandleReferences(task, GC::EmptyReferenceProcessPredicate);
+        // ConcurrentMark doesn't visit young objects - so we can't clear references which are in young-space because we
+        // don't know which objects are marked. We will process them on young GC separately later, here we process
+        // only refs in tenured-space
+        this->GetPandaVm()->HandleReferences(task, refPred);
     }
 }
 
