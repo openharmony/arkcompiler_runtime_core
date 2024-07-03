@@ -149,9 +149,6 @@ defining non-exported, i.e., ``internal`` declarations that are not accessible
 In addition, |LANG| supports the *package* initialization semantics that
 makes a *package* even more independent from the environment.
 
-In addition to the notion of *generic constructs*, the *declaration-site
-variance* feature is  considered. The idea of the feature is briefly
-described below, and in greater detail in :ref:`Declaration-Site Variance`.
 
 .. index::
    package
@@ -164,34 +161,6 @@ described below, and in greater detail in :ref:`Declaration-Site Variance`.
    non-exported declaration
    access
    initialization
-   declaration-site variance
-
-Normally, two different argument types that specialize a generic class are
-handled as different and unrelated types (*invariance*). |LANG| proposes
-to extend the rule, and to allow such specializations become base classes and
-derived classes (*covariance* :ref:`Covariance`), or vice versa
-(*contravariance* :ref:`Contravariance`), depending on the relationship of
-inheritance between argument types.
-
-Special markers are used to specify the *declaration-site variance*.
-The markers are to be added to generic parameter declarations.
-
-The practices of some languages (e.g., Scala) have proven the usefulness of
-this powerful mechanism. However, its practical application can be relatively
-difficult. Therefore, the addition of this feature to the language
-is still under consideration.
-
-.. index::
-   generic class
-   argument type
-   invariance
-   contravariance
-   covariance
-   generic parameter declaration
-   inheritance
-   derived class
-   base class
-   declaration-site variance
 
 |
 
@@ -2986,68 +2955,6 @@ The two situations are illustrated by the examples below:
 Generics Experimental
 *********************
 
-.. _Declaration-Site Variance:
-
-Declaration-Site Variance
-=========================
-
-.. meta:
-    frontend_status: Partly
-    todo: Implement semantic checks, now in/out modifiers are only parsed ang ignored.
-
-Optionally, a type parameter can have keywords ``in`` or ``out`` (a
-*variance modifier*, which specifies the variance of the type parameter).
-
-**Note**: This description of variance modifiers is preliminary. The details
-are to be specified in the future versions of |LANG|.
-
-Type parameters with the keyword ``out`` are *covariant* :ref:`Covariance`, and
-can be used in the out-position only.
-
-Type parameters with the keyword ``in`` are *contravariant*
-:ref:`Contravariance`, and can be used in the in-position only.
-
-Type parameters with no variance modifier are implicitly *invariant*, and can
-occur in any position.
-
-.. index::
-   generic
-   declaration-site variance
-   type parameter
-   keyword in
-   keyword out
-   variance modifier
-   variance modifier
-   in-position
-   out-position
-
-A :index:`compile-time error` occurs if a function, method, or constructor
-type parameters have a variance modifier specified.
-
-*Variance* is used to describe the subtyping (see :ref:`Subtyping`) operation
-on parameterized types (see :ref:`Generics`). The
-variance of the corresponding type parameter *F* defines the subtyping between
-*T<A>* and *T<B>* (in the case of declaration-site variance with two different
-types *A* <: *B*) as follows:
-
--  Covariant :ref:`Covariance` (*out F*): *T<A>* <: *T<B>*;
--  Contravariant :ref:`Contravariance` (*in F*): *T<A>* :> *T<B>*;
--  Invariant (default) (*F*).
-
-.. index::
-   type parameter
-   variance modifier
-   function
-   method
-   constructor
-   variance
-   covariance
-   contravariance
-   invariance
-   type-parameterized declaration
-   parameterized type
-   subtyping
-   declaration-site variance
 
 .. _NonNullish Type Parameter:
 

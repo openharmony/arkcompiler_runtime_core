@@ -363,10 +363,10 @@ A type reference refers to a type by one of the following:
 -  Type parameter (see :ref:`Type Parameters`) name with the '``!``' sign
    (see :ref:`NonNullish Type Parameter`).
 
-
-If the referred type is a class or an interface type, then each identifier in
-a name or an alias can be optionally followed by a type argument (see
-:ref:`Type Arguments`):
+If the type name denoted by ``identifier`` refers is a generic class or an
+interface type, then to be a valid type reference it should be a valid
+instantiation of the generic and for that it should have type arguments (see
+:ref:`Type Arguments`) provided explicitly or implicitly based on defaults.
 
 .. index::
    type reference
@@ -392,7 +392,19 @@ a name or an alias can be optionally followed by a type argument (see
 .. code-block:: typescript
    :linenos:
 
-    let map: Map<string, number>
+    let map: Map<string, number> // Map<string, number> is the type reference
+
+    class A<T> {
+       field1: A<T>  // A<T> is a type reference - class type reference
+       field2: A<number> // A<number> is a type reference - class type reference
+       foo (p: T) {} // T is a type reference - type parameter
+       constructor () { /* some body to init fields */ }
+    }
+
+    type MyType<T> = []A<T>
+    let x: MyType<number> = [new A<number>, new A<number>]
+      // MyType<number> is a type reference  - alias reference
+      // A<number> is a type reference - class type reference
 
 |
 

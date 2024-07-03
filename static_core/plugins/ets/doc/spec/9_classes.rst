@@ -292,8 +292,6 @@ A :index:`compile-time error` occurs if:
 -  ``typeReference`` refers directly to, or is an alias of primitive,
    array, string, enumeration, union, interface, or function types.
 
--  Any type argument of ``typeReference`` is a wildcard type argument.
-
 
 *Class extension* implies that a class inherits all members of the direct
 superclass. Notice that private members are also inherited from the superclass
@@ -309,7 +307,6 @@ but they are not accessible (see :ref:`Accessible`) within the subclass.
    class type
    extends clause
    extends graph
-   wildcard
    type argument
    inheritance
 
@@ -384,12 +381,8 @@ of the class.
         typeReference (',' typeReference)*
         ;
 
-A :index:`compile-time error` occurs if:
-
-- ``typeReference`` fails to name an accessible interface type (see
-  :ref:`Accessible`).
-
-- Any type argument of ``typeReference`` is a wildcard type argument.
+A :index:`compile-time error` occurs if ``typeReference`` fails to name an
+accessible interface type (see :ref:`Accessible`).
 
 If some interface is repeated as a direct superinterface in a single
 ``implements`` clause (even if that interface is named differently), then all
@@ -400,7 +393,6 @@ repetitions are ignored.
    implementation
    accessible interface type
    type argument
-   wildcard
    interface
    direct superinterface
    implements clause
@@ -1669,10 +1661,12 @@ for the modifier ``final``, and :ref:`Override Methods` for the modifier
       }
     }
 
-Each *get-accessor* (*getter*) must have neither parameters nor an explicit
-return type. Each *set-accessor* (*setter*) must have a single parameter and
-no return value. The use of getters and setters looks the same as the use of
-fields:
+Each *get-accessor* (*getter*) must have no parameters and explicit return
+type. Each *set-accessor* (*setter*) must have a single parameter and
+no return type. The use of getters and setters looks the same as the use of
+fields. Usage of getters or setters as methods leads to a
+:index:`compile-time error`.
+
 
 .. code-block:: typescript
    :linenos:
@@ -1691,14 +1685,16 @@ fields:
     if (p.age > 30) { // getter is called
       // do something
     }
+    p.age(17) // Compile-time error: setter is used as a method
+    let x = p.age() // Compile-time error: getter is used as a mehtod
 
 A class can define a getter, a setter, or both with the same name.
 If both a getter and a setter with a particular name are defined,
 then both must have the same accessor modifiers. Otherwise, a
 :index:`compile-time error` occurs.
 
-Accessors can be implemented by using a private field to store its value
-(as in the example above).
+Accessors can be implemented by using a private field or fields to store the
+data (as in the example above).
 
 .. index::
    accessor
@@ -1722,6 +1718,55 @@ Accessors can be implemented by using a private field to store its value
         return this.surname + " " + this.name
       }
     }
+    console.log (new Person.fullName)
+
+Accessors could not have the same name with the class or interface non-static
+field or method. Otherwise, a :index:`compile-time error` occurs.
+The same applies to accessors themselves - no overloading is allowed.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Person1 {
+      name: string = ""
+      get name(): string { // Compile-time error: getter name clashes with the field name
+          return this.name
+      }
+      set name(a_name: string) { // Compile-time error: setter name clashes with the field name
+          this.name = a_name
+      }
+    }
+
+    class Person2 {
+      set name(name: string) {}
+      set name(name: number) {} // Compile-time error: setters overloading is not permitted
+      get name(): string {  return "A name" }
+      get name(): number {  return 100 }  // Compile-time error: getters overloading is not permitted
+    }
+
+
+While inheriting and overriding (see :ref:`Overloading and Overriding`)
+accessors behave like methods . Type of the getter will follow the covariance
+pattern, while type of the setter parameter the contravariance one (see
+:ref:`Override-Compatible Signatures`).
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+      get field(): Base { return new Base }
+      set field(a_field: Derived) {}
+    }
+    class Derived extends Base {
+      override get field(): Derived { return new Derived }
+      override set field(a_field: Base) {}
+    }
+    function foo (base: Base) {
+       base.field = new Derived // setter is called
+       let b: Base = base.field // getter is called
+    }
+    foo (new Derived)
+
 
 |
 
@@ -2103,8 +2148,8 @@ Explicit Constructor Call
 There are two kinds of *explicit constructor call* statements:
 
 -  *Alternate constructor calls* that begin with the keyword ``this``, and
-   can be prefixed with explicit type arguments (used to call an alternate
-   same-class constructor).
+   can be prefixed with explicit type arguments (see :ref:`Type Arguments`)
+   (used to call an alternate same-class constructor).
 -  *Superclass constructor calls* (used to call a constructor from
    the direct superclass) called *unqualified superclass constructor calls*
    that begin with the keyword ``super``, and can be prefixed with explicit

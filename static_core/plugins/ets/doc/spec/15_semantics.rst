@@ -135,8 +135,6 @@ Variance
 Variance is how subtyping between class types relates to subtyping between
 class member signatures (types of parameters, return type).
 
-Variance for generic type arguments is described in :ref:`Type Argument Variance`.
-
 Variance can be of three kinds:
 
 -  Invariance,
@@ -452,7 +450,8 @@ are *overload-equivalent* if:
 
 -  Parameter type at some position in *S*:sub:`1` is a *generic type*
    *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
-   same position in *S*:sub:`2` is also *G* with any list of type arguments;
+   same position in *S*:sub:`2` is also *G* with any list of type arguments
+   (see :ref:`Type Arguments`);
 
 -  All other parameter types in *S*:sub:`1` are equal
    to parameter types in the same positions in *S*:sub:`2`.

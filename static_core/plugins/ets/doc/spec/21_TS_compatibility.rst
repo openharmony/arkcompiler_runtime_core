@@ -196,7 +196,7 @@ with object literals only.
 .. code-block:: typescript
    :linenos:
     
-    function <T> foo(t: T, part_t: Partial<T>) {
+    function foo<T>(t: T, part_t: Partial<T>) {
         part_t = t // compile-time error in ArkTS
     }
 
@@ -325,8 +325,8 @@ Excessive Arguments
 .. meta:
     frontend_status: None
 
-|TS| allows calling function type variables with more arguments.
-|LANG| allows no such call.
+|TS| allows calling functions stored in function type variables with more
+arguments than they were declared with. |LANG| allows no such calls.
 
 
 .. code-block:: typescript
@@ -334,12 +334,12 @@ Excessive Arguments
 
 
     let foo: (x?: number, y?: string) => void = ():void => {}
-        /* compile-time error in ArkTS as call with more than zero arguments
-           is invalid while OK for the Typescript */
+        /* compile-time error in ArkTS as a call with more than zero arguments
+           is invalid while it is OK for the Typescript */
 
     foo = (p?: number):void => {} 
-        /* compile-time error in ArkTS as call with two arguments is
-           invalid while OK for the Typescript */
+        /* compile-time error in ArkTS as a call with two arguments is
+           invalid while it is OK for the Typescript */
 
 |
 
