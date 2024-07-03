@@ -23,6 +23,7 @@
 namespace ark {
 
 constexpr std::string_view ARK_VERSION_GIT_HASH = "${ARK_VERSION_GIT_HASH}";
+constexpr std::string_view ARK_VERSION_DATE = "${ARK_VERSION_DATE}";
 
 constexpr auto ARK_VERSION_MAJOR = 0;
 constexpr auto ARK_VERSION_MINOR = 0;
@@ -36,16 +37,13 @@ inline void PrintPandaVersion()
 
     if (ARK_VERSION_GIT_HASH.empty()) {
         ss << "Built from gitless source tree\n";
+        ss << "Built date " << ARK_VERSION_DATE << '\n';
     } else {
         ss << "Built from git commit " << ARK_VERSION_GIT_HASH << '\n';
+        ss << "Built date " << ARK_VERSION_DATE << '\n';
     }
 
     std::cout << ss.str() << std::endl;
-}
-
-inline std::string_view GetPandaVersion()
-{
-    return ARK_VERSION_GIT_HASH;
 }
 
 }  // namespace ark
