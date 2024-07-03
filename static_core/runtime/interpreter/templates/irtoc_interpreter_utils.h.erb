@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,22 +25,18 @@ namespace ark::interpreter {
 % Panda::instructions.each do |i|
     static constexpr void (*HANDLE_FAST_<%= i.handler_name %>)() = nullptr;
 % end
+% Panda::prefixes.each do |p|
+    static constexpr void (*HANDLE_FAST_<%= p.handler_name %>)() = nullptr;
+% end
+    static constexpr void (*HANDLE_FAST_INVALID)() = nullptr;
+    static constexpr void (*HANDLE_FAST_EXCEPTION)() = nullptr;
 
 % Panda::instructions.each do |i|
     static constexpr void (*HANDLE_FAST_<%= i.handler_name %>_LLVM)() = nullptr;
 % end
-
-% Panda::prefixes.each do |p|
-    static constexpr void (*HANDLE_FAST_<%= p.handler_name %>)() = nullptr;
-% end
-
 % Panda::prefixes.each do |p|
     static constexpr void (*HANDLE_FAST_<%= p.handler_name %>_LLVM)() = nullptr;
 % end
-
-    static constexpr void (*HANDLE_FAST_INVALID)() = nullptr;
-    static constexpr void (*HANDLE_FAST_EXCEPTION)() = nullptr;
-
     static constexpr void (*HANDLE_FAST_INVALID_LLVM)() = nullptr;
     static constexpr void (*HANDLE_FAST_EXCEPTION_LLVM)() = nullptr;
 
@@ -51,6 +47,8 @@ namespace ark::interpreter {
 % Panda::prefixes.each do |p|
     extern "C" void HANDLE_FAST_<%= p.handler_name %>();
 % end
+    extern "C" void HANDLE_FAST_INVALID();
+    extern "C" void HANDLE_FAST_EXCEPTION();
 
 % Panda::instructions.each do |i|
     extern "C" void HANDLE_FAST_<%= i.handler_name %>_LLVM();
@@ -58,9 +56,6 @@ namespace ark::interpreter {
 % Panda::prefixes.each do |p|
     extern "C" void HANDLE_FAST_<%= p.handler_name %>_LLVM();
 % end
-    extern "C" void HANDLE_FAST_INVALID();
-    extern "C" void HANDLE_FAST_EXCEPTION();
-
     extern "C" void HANDLE_FAST_INVALID_LLVM();
     extern "C" void HANDLE_FAST_EXCEPTION_LLVM();
 #endif

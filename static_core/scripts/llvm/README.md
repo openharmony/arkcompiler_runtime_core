@@ -24,12 +24,18 @@ BUILD_X86_DEBUG=<debug version for x86_64 architecure>(default: false)
 BUILD_X86_RELEASE=<release version for x86_64 architecure>(default: false)
 BUILD_AARCH64_DEBUG=<debug version for arm64 architecure>(default: false)
 BUILD_AARCH64_RELEASE=<release version for arm64 architecure>(default: false)
+BUILD_OHOS_RELEASE=<release version for OHOS platform (OHOS SDK build)>(default: false)
+BUILD_OHOS_RELEASE_GN=<release version for OHOS GN platform (GN build)>(default: false)
 
 ### Optional variables
 INSTALL_DIR=<directory for installation, empty means "do not install"> (default: "")
 
 DO_STRIPPING=<when install, strip libraries before installation>(default: true)
 DO_TAR=<when install, also pack llvm-$VERSION-*-*.tar.xz archives for corresponding folders>(default: true)
+
+OHOS_SDK=<path to native OHOS SDK>, required for any OHOS build.
+
+OHOS_PREBUILTS=<path to OHOS pre-build directory>, required for OHOS GN build.
 
 ### Build tools
 CC=<C compiler> (default: "/usr/bin/clang-14")
@@ -47,6 +53,7 @@ constant `REQUIRED_LLVM_VERSION` from `libllvmbackend/CMakeLists.txt`.**
 cd /home/user/src
 git clone https://gitee.com/openharmony/third_party_llvm-project.git
 
+INSTALL_DIR="/home/user/inst" \
 BUILD_DIR="/home/user/build" \
 LLVM_SOURCES="/home/user/src/llvm-for-ark/llvm" \
 VERSION="15.0.4-ark99-beta9" \
@@ -71,9 +78,13 @@ BUILD_DIR="/mnt/scratch/build" \
 LLVM_SOURCES="/mnt/scratch/src/llvm-for-ark/llvm" \
 VERSION="15.0.4-ark99-beta9" \
 PACKAGE_VERSION="15.0.4-ark99" \
+OHOS_SDK="/opt/ohos-sdk/native" \
+OHOS_PREBUILTS="/home/user/ohos/prebuilts" \
 BUILD_X86_DEBUG=true \
 BUILD_X86_RELEASE=true \
 BUILD_AARCH64_DEBUG=true \
 BUILD_AARCH64_RELEASE=true \
+BUILD_OHOS_RELEASE=true \
+BUILD_OHOS_RELEASE_GN=true \
 bash -x ./build_llvm.sh
 ```

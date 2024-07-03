@@ -20,6 +20,15 @@ if (is_llvmbackend) {
 
   ### LLVM
   import("llvm.gni")
+  if (current_toolchain == host_toolchain && target_cpu == "arm64") {
+    llvm_dir = llvm_host_dir
+  } else {
+    llvm_dir = llvm_target_dir
+  }
+
+  llvm_include_dir = "$llvm_dir/include"
+  llvm_lib_file = "$llvm_dir/$llvm_lib_file_suffix"
+
   copy("llvm_lib") {
     sources = [ "$llvm_lib_file" ]
     basename = get_path_info("$llvm_lib_file", "file")
@@ -117,16 +126,16 @@ if (is_llvmbackend) {
       ":llvm_lib",
       "$ark_root/compiler:libarktscompiler",
       "$ark_root/libpandabase:libarktsbase",
+      "$ark_root/libpandafile:libarktsfile",
     ]
 
-    # TODO: don't exclude these targets from OHOS build
-    if (ark_standalone_build) {
-      libllvmbackend_aot_sources = [ "llvm_aot_compiler.cpp" ]
+    external_deps = [ sdk_libc_secshared_dep ]
 
-      sources += libllvmbackend_aot_sources
+    libllvmbackend_aot_sources = [ "llvm_aot_compiler.cpp" ]
 
-      deps += [ "$ark_root/compiler/aot/aot_builder:aotbuilder" ]
-    }
+    sources += libllvmbackend_aot_sources
+
+    deps += [ "$ark_root/compiler/aot/aot_builder:aotbuilder" ]
 
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
@@ -298,10 +307,12 @@ if (is_llvmbackend) {
       "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
       "$ark_root/runtime:plugins_entrypoints_gen_h",
     ]
+
+    external_deps = [ sdk_libc_secshared_dep ]
   }
 
   action("irtoc_int_llvm_inl_module") {
-    script = "$llvm_dir/bin/llvm-link"
+    script = "$llvm_host_dir/bin/llvm-link"
 
     outputs = [ "$target_gen_dir/interpreter_inline.bc" ]
     deps = [ ":bitcode" ]

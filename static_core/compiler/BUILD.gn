@@ -610,6 +610,7 @@ if (enable_irtoc) {
     script = "$ark_root/irtoc/lang/irtoc.rb"
     outputs = [ "$target_gen_dir/generated/irtoc_builder.cpp" ]
     working_dir = "$root_build_dir/irtoc_builder_cpp"
+    configs = [ "$ark_root:ark_config" ]
     args = [
       "--input",
       rebase_path("$ark_root/irtoc/scripts/interpreter.irt", working_dir),
@@ -619,8 +620,7 @@ if (enable_irtoc) {
       rebase_path("$ark_root", working_dir),
       "--isa",
       rebase_path("$ark_isa_yaml", working_dir),
-      "--definitions",
-      "NDEBUG",
+      "{{defines}}",
       "--arch",
       target_cpu,
       "--ir-api",
@@ -643,6 +643,7 @@ if (enable_irtoc) {
     script = "$ark_root/irtoc/lang/irtoc.rb"
     outputs = [ "$target_gen_dir/generated/irtoc_ir_inline.h" ]
     working_dir = "$root_build_dir/irtoc_generate_ir_inline"
+    configs = [ "$ark_root:ark_config" ]
     args = [
       "--input",
       rebase_path("$ark_root/irtoc/scripts/interpreter.irt", working_dir),
@@ -652,8 +653,7 @@ if (enable_irtoc) {
       rebase_path("$ark_root", working_dir),
       "--isa",
       rebase_path("$ark_isa_yaml", working_dir),
-      "--definitions",
-      "NDEBUG",
+      "{{defines}}",
       "--arch",
       target_cpu,
       "--ir-api",

@@ -361,10 +361,12 @@ Compilation::Result Compilation::MakeElf(std::string_view output)
         auto code = unit->GetCode();
 
         // Align function
-        if (auto padding = offset % codeAlignment; padding != 0) {
+        if (auto padding = (codeAlignment - (offset % codeAlignment)) % codeAlignment; padding != 0) {
             textSec->append_data(reinterpret_cast<const char *>(PADDING_DATA.data()), padding);
             offset += padding;
         }
+        ASSERT(offset % codeAlignment == 0);
+
         auto symbol = symbolWriter.add_symbol(strWriter, unit->GetName(), offset, code.size(), ELFIO::STB_GLOBAL,
                                               ELFIO::STT_FUNC, 0, textSec->get_index());
         (void)symbol;
