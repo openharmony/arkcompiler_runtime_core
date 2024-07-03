@@ -338,6 +338,7 @@ private:
 
     const Index *FindIndex(const BaseItem *item) const
     {
+        ASSERT(item);
         ASSERT(item->HasOrderIndex());
         auto orderIdx = item->GetOrderIndex();
 
@@ -594,7 +595,13 @@ private:
 class ProtoItem;
 class CodeItem;
 
-class LineNumberProgramItem : public IndexedItem {
+/**
+ * @brief Base class of `LineNumberProgramItem`.
+ *
+ * Instances of this class might be used in order to fill constant pool of a shared `LineNumberProgram`.
+ * Implementations must override `Empty`, `EmitOpcode` and `EmitRegister`, which are left no-op.
+ */
+class LineNumberProgramItemBase {
 public:
     enum class Opcode : uint8_t {
         END_SEQUENCE = 0x00,
@@ -635,14 +642,33 @@ public:
 
     bool EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc);
 
-    void EmitPrologEnd();
+    void EmitPrologueEnd();
 
-    void EmitEpilogBegin();
+    void EmitEpilogueBegin();
 
     void EmitSetFile(std::vector<uint8_t> *constantPool, StringItem *sourceFile);
 
     void EmitSetSourceCode(std::vector<uint8_t> *constantPool, StringItem *sourceCode);
 
+    void EmitOpcode(Opcode opcode);
+
+    virtual bool Empty() const
+    {
+        return true;
+    }
+
+protected:
+    virtual void EmitOpcode([[maybe_unused]] uint8_t opcode) {}
+    virtual void EmitRegister([[maybe_unused]] int32_t registerNumber) {}
+
+    static void EmitUleb128(std::vector<uint8_t> *data, uint32_t value);
+
+    static void EmitSleb128(std::vector<uint8_t> *data, int32_t value);
+};
+
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class LineNumberProgramItem final : public IndexedItem, public LineNumberProgramItemBase {
+public:
     bool Write(Writer *writer) override;
 
     size_t CalculateSize() const override;
@@ -650,6 +676,11 @@ public:
     ItemTypes GetItemType() const override
     {
         return ItemTypes::LINE_NUMBER_PROGRAM_ITEM;
+    }
+
+    bool Empty() const override
+    {
+        return GetData().empty();
     }
 
     const std::vector<uint8_t> &GetData() const
@@ -665,12 +696,8 @@ public:
     void SetData(std::vector<uint8_t> &&data);
 
 private:
-    void EmitOpcode(Opcode opcode);
-    void EmitRegister(int32_t registerNumber);
-
-    static void EmitUleb128(std::vector<uint8_t> *data, uint32_t value);
-
-    static void EmitSleb128(std::vector<uint8_t> *data, int32_t value);
+    void EmitOpcode(uint8_t opcode) override;
+    void EmitRegister(int32_t registerNumber) override;
 
     std::vector<uint8_t> data_;
 };

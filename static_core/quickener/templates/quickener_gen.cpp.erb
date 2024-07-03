@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,11 +127,11 @@ void Quickener::UpdateDebugInfo(panda_file::DebugInfoItem *debug_info_item, pand
                 break;
             }
             case panda_file::LineNumberProgramItem::Opcode::SET_PROLOGUE_END: {
-                lnp_item->EmitPrologEnd();
+                lnp_item->EmitPrologueEnd();
                 break;
             }
             case panda_file::LineNumberProgramItem::Opcode::SET_EPILOGUE_BEGIN: {
-                lnp_item->EmitEpilogBegin();
+                lnp_item->EmitEpilogueBegin();
                 break;
             }
             case panda_file::LineNumberProgramItem::Opcode::SET_FILE: {

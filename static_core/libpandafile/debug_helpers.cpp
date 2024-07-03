@@ -38,4 +38,11 @@ size_t GetLineNumber(ark::panda_file::MethodDataAccessor mda, uint32_t bcOffset,
     return resolver.GetLine();
 }
 
+const char *GetStringFromConstantPool(const File &pf, uint32_t offset)
+{
+    auto id = File::EntityId(offset);
+    ASSERT(id.IsValid());
+    return utf::Mutf8AsCString(pf.GetStringData(id).data);
+}
+
 }  // namespace ark::panda_file::debug_helpers

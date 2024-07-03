@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,11 @@ public:
         return true;
     }
 
+    bool HandleRestartLocal([[maybe_unused]] int32_t regNumber) const
+    {
+        return true;
+    }
+
     bool HandleSetColumn([[maybe_unused]] int32_t columnNumber) const
     {
         return true;
@@ -139,6 +144,8 @@ private:
 
 size_t GetLineNumber(ark::panda_file::MethodDataAccessor mda, uint32_t bcOffset,
                      const ark::panda_file::File *pandaDebugFile);
+
+const char *GetStringFromConstantPool(const File &pf, uint32_t offset);
 
 }  // namespace ark::panda_file::debug_helpers
 

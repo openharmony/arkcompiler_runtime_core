@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1401,24 +1401,24 @@ bool AnnotationItem::Write(Writer *writer)
     return true;
 }
 
-void LineNumberProgramItem::EmitEnd()
+void LineNumberProgramItemBase::EmitEnd()
 {
     EmitOpcode(Opcode::END_SEQUENCE);
 }
 
-void LineNumberProgramItem::EmitAdvancePc(std::vector<uint8_t> *constantPool, uint32_t value)
+void LineNumberProgramItemBase::EmitAdvancePc(std::vector<uint8_t> *constantPool, uint32_t value)
 {
     EmitOpcode(Opcode::ADVANCE_PC);
     EmitUleb128(constantPool, value);
 }
 
-void LineNumberProgramItem::EmitAdvanceLine(std::vector<uint8_t> *constantPool, int32_t value)
+void LineNumberProgramItemBase::EmitAdvanceLine(std::vector<uint8_t> *constantPool, int32_t value)
 {
     EmitOpcode(Opcode::ADVANCE_LINE);
     EmitSleb128(constantPool, value);
 }
 
-void LineNumberProgramItem::EmitColumn(std::vector<uint8_t> *constantPool, uint32_t pcInc, uint32_t column)
+void LineNumberProgramItemBase::EmitColumn(std::vector<uint8_t> *constantPool, uint32_t pcInc, uint32_t column)
 {
     if (pcInc != 0U) {
         EmitAdvancePc(constantPool, pcInc);
@@ -1427,14 +1427,14 @@ void LineNumberProgramItem::EmitColumn(std::vector<uint8_t> *constantPool, uint3
     EmitUleb128(constantPool, column);
 }
 
-void LineNumberProgramItem::EmitStartLocal(std::vector<uint8_t> *constantPool, int32_t registerNumber, StringItem *name,
-                                           StringItem *type)
+void LineNumberProgramItemBase::EmitStartLocal(std::vector<uint8_t> *constantPool, int32_t registerNumber,
+                                               StringItem *name, StringItem *type)
 {
     EmitStartLocalExtended(constantPool, registerNumber, name, type, nullptr);
 }
 
-void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constantPool, int32_t registerNumber,
-                                                   StringItem *name, StringItem *type, StringItem *typeSignature)
+void LineNumberProgramItemBase::EmitStartLocalExtended(std::vector<uint8_t> *constantPool, int32_t registerNumber,
+                                                       StringItem *name, StringItem *type, StringItem *typeSignature)
 {
     if (type == nullptr) {
         return;
@@ -1455,19 +1455,19 @@ void LineNumberProgramItem::EmitStartLocalExtended(std::vector<uint8_t> *constan
     }
 }
 
-void LineNumberProgramItem::EmitEndLocal(int32_t registerNumber)
+void LineNumberProgramItemBase::EmitEndLocal(int32_t registerNumber)
 {
     EmitOpcode(Opcode::END_LOCAL);
     EmitRegister(registerNumber);
 }
 
-void LineNumberProgramItem::EmitRestartLocal(int32_t registerNumber)
+void LineNumberProgramItemBase::EmitRestartLocal(int32_t registerNumber)
 {
     EmitOpcode(Opcode::RESTART_LOCAL);
     EmitRegister(registerNumber);
 }
 
-bool LineNumberProgramItem::EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc)
+bool LineNumberProgramItemBase::EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc)
 {
     if (lineInc < LINE_BASE || (lineInc - LINE_BASE) >= LINE_RANGE) {
         return false;
@@ -1478,76 +1478,73 @@ bool LineNumberProgramItem::EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc)
         return false;
     }
 
-    data_.push_back(static_cast<uint8_t>(opcode));
+    EmitOpcode(static_cast<uint8_t>(opcode));
     return true;
 }
 
-void LineNumberProgramItem::EmitPrologEnd()
+void LineNumberProgramItemBase::EmitPrologueEnd()
 {
     EmitOpcode(Opcode::SET_PROLOGUE_END);
 }
 
-void LineNumberProgramItem::EmitEpilogBegin()
+void LineNumberProgramItemBase::EmitEpilogueBegin()
 {
     EmitOpcode(Opcode::SET_EPILOGUE_BEGIN);
 }
 
-void LineNumberProgramItem::EmitSetFile(std::vector<uint8_t> *constantPool, StringItem *sourceFile)
+void LineNumberProgramItemBase::EmitSetFile(std::vector<uint8_t> *constantPool, StringItem *sourceFile)
 {
-    EmitOpcode(Opcode::SET_FILE);
-
-    if (sourceFile == nullptr) {
-        return;
-    }
-
+    ASSERT(sourceFile);
     ASSERT(sourceFile->GetOffset() != 0);
 
+    EmitOpcode(Opcode::SET_FILE);
     EmitUleb128(constantPool, sourceFile->GetOffset());
 }
 
-void LineNumberProgramItem::EmitSetSourceCode(std::vector<uint8_t> *constantPool, StringItem *sourceCode)
+void LineNumberProgramItemBase::EmitSetSourceCode(std::vector<uint8_t> *constantPool, StringItem *sourceCode)
 {
-    EmitOpcode(Opcode::SET_SOURCE_CODE);
-
-    if (sourceCode == nullptr) {
-        return;
-    }
-
+    ASSERT(sourceCode);
     ASSERT(sourceCode->GetOffset() != 0);
+
+    EmitOpcode(Opcode::SET_SOURCE_CODE);
     EmitUleb128(constantPool, sourceCode->GetOffset());
 }
 
-void LineNumberProgramItem::EmitOpcode(Opcode opcode)
+void LineNumberProgramItemBase::EmitOpcode(Opcode opcode)
 {
-    data_.push_back(static_cast<uint8_t>(opcode));
+    EmitOpcode(static_cast<uint8_t>(opcode));
+}
+
+/* static */
+void LineNumberProgramItemBase::EmitUleb128(std::vector<uint8_t> *data, uint32_t value)
+{
+    ASSERT(data);
+
+    size_t n = leb128::UnsignedEncodingSize(value);
+    std::vector<uint8_t> out(n);
+    leb128::EncodeUnsigned(value, out.data());
+    data->insert(data->end(), out.cbegin(), out.cend());
+}
+
+/* static */
+void LineNumberProgramItemBase::EmitSleb128(std::vector<uint8_t> *data, int32_t value)
+{
+    ASSERT(data);
+
+    size_t n = leb128::SignedEncodingSize(value);
+    std::vector<uint8_t> out(n);
+    leb128::EncodeSigned(value, out.data());
+    data->insert(data->end(), out.cbegin(), out.cend());
+}
+
+void LineNumberProgramItem::EmitOpcode(uint8_t opcode)
+{
+    data_.push_back(opcode);
 }
 
 void LineNumberProgramItem::EmitRegister(int32_t registerNumber)
 {
     EmitSleb128(&data_, registerNumber);
-}
-
-/* static */
-void LineNumberProgramItem::EmitUleb128(std::vector<uint8_t> *data, uint32_t value)
-{
-    size_t n = leb128::UnsignedEncodingSize(value);
-    std::vector<uint8_t> out(n);
-    leb128::EncodeUnsigned(value, out.data());
-
-    if (data == nullptr) {
-        return;
-    }
-
-    data->insert(data->end(), out.cbegin(), out.cend());
-}
-
-/* static */
-void LineNumberProgramItem::EmitSleb128(std::vector<uint8_t> *data, int32_t value)
-{
-    size_t n = leb128::SignedEncodingSize(value);
-    std::vector<uint8_t> out(n);
-    leb128::EncodeSigned(value, out.data());
-    data->insert(data->end(), out.cbegin(), out.cend());
 }
 
 size_t LineNumberProgramItem::CalculateSize() const

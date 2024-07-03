@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,8 +39,10 @@ public:
     {
         auto *cm = cont_->GetClassMap();
         auto iter = cm->find(typeName);
-        ASSERT(iter != cm->end());
-        return iter->second;
+        if (iter != cm->end()) {
+            return iter->second;
+        }
+        return nullptr;
     }
 
 private:
@@ -51,7 +53,10 @@ class LinkerDebugInfoScrapper : public panda_file::DebugInfoUpdater<LinkerDebugI
 public:
     using Super = panda_file::DebugInfoUpdater<LinkerDebugInfoScrapper>;
 
-    LinkerDebugInfoScrapper(const panda_file::File *file, CodePatcher *patcher) : Super(file), patcher_(patcher) {}
+    LinkerDebugInfoScrapper(const panda_file::File *file, CodePatcher *patcher, panda_file::ItemContainer *cont)
+        : Super(file), patcher_(patcher), cont_(cont)
+    {
+    }
 
     panda_file::StringItem *GetOrCreateStringItem(const std::string &s)
     {
@@ -59,14 +64,19 @@ public:
         return nullptr;
     }
 
-    panda_file::BaseClassItem *GetType([[maybe_unused]] panda_file::File::EntityId typeId,
-                                       [[maybe_unused]] const std::string &typeName)
+    panda_file::BaseClassItem *GetType([[maybe_unused]] panda_file::File::EntityId typeId, const std::string &typeName)
     {
+        auto *cm = cont_->GetClassMap();
+        if (cm->find(typeName) == cm->end()) {
+            // This action must create a string for primitive types.
+            GetOrCreateStringItem(typeName);
+        }
         return nullptr;
     }
 
 private:
     CodePatcher *patcher_;
+    panda_file::ItemContainer *cont_;
 };
 }  // namespace
 
@@ -243,20 +253,35 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
         }
     }
 
-    if (auto *dbg = data->omi->GetDebugInfo(); data->patchLnp && dbg != nullptr) {
-        auto file = data->fileReader->GetFilePtr();
-        auto scrapper = LinkerDebugInfoScrapper(file, &p);
-        auto off = data->omi->GetDebugInfo()->GetOffset();
-        ASSERT(off != 0);
-        auto eId = panda_file::File::EntityId(off);
-        scrapper.Scrap(eId);
-
-        auto newDbg = data->nmi->GetDebugInfo();
-        p.Add([file, this, newDbg, eId]() {
-            auto updater = LinkerDebugInfoUpdater(file, &cont_);
-            updater.Emit(newDbg, eId);
-        });
+    auto *dbg = data->omi->GetDebugInfo();
+    if (dbg == nullptr || conf_.stripDebugInfo) {
+        return;
     }
+
+    // Collect string items for each method with debug information.
+    auto file = data->fileReader->GetFilePtr();
+    auto scrapper = LinkerDebugInfoScrapper(file, &p, &cont_);
+    auto off = dbg->GetOffset();
+    ASSERT(off != 0);
+    auto eId = panda_file::File::EntityId(off);
+    scrapper.Scrap(eId);
+
+    auto newDbg = data->nmi->GetDebugInfo();
+    p.Add([file, this, newDbg, eId, patchLnp = data->patchLnp]() {
+        auto updater = LinkerDebugInfoUpdater(file, &cont_);
+
+        auto *constantPool = newDbg->GetConstantPool();
+        if (patchLnp) {
+            // Original `LineNumberProgram` - must emit both instructions and their arguments.
+            auto *lnpItem = newDbg->GetLineNumberProgram();
+            updater.Emit(lnpItem, constantPool, eId);
+        } else {
+            // `LineNumberProgram` is reused and its instructions will be emitted by owner-method.
+            // Still need to emit instructions' arguments, which are unique for each method.
+            panda_file::LineNumberProgramItemBase lnpItem;
+            updater.Emit(&lnpItem, constantPool, eId);
+        }
+    });
 }
 
 }  // namespace ark::static_linker

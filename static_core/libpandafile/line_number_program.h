@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,9 +152,14 @@ public:
                     res = HandleSetSourceCode();
                     break;
                 }
-                case Opcode::SET_PROLOGUE_END:
-                case Opcode::SET_EPILOGUE_BEGIN:
+                case Opcode::SET_PROLOGUE_END: {
+                    res = HandleSetPrologueEnd();
                     break;
+                }
+                case Opcode::SET_EPILOGUE_BEGIN: {
+                    res = HandleSetEpilogueBegin();
+                    break;
+                }
                 case Opcode::START_LOCAL: {
                     res = HandleStartLocal();
                     break;
@@ -164,7 +169,7 @@ public:
                     break;
                 }
                 case Opcode::RESTART_LOCAL: {
-                    LOG(FATAL, PANDAFILE) << "Opcode RESTART_LOCAL is not supported";
+                    res = HandleRestartLocal();
                     break;
                 }
                 case Opcode::END_LOCAL: {
@@ -203,10 +208,10 @@ private:
 
     int32_t ReadRegisterNumber()
     {
-        auto [regiser_number, n, is_full] = leb128::DecodeSigned<int32_t>(program_);
-        LOG_IF(!is_full, FATAL, COMMON) << "Cannot read a register number";
+        auto [regiserNumber, n, isFull] = leb128::DecodeSigned<int32_t>(program_);
+        LOG_IF(!isFull, FATAL, COMMON) << "Cannot read a register number";
         program_ += n;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return regiser_number;
+        return regiserNumber;
     }
 
     bool HandleAdvanceLine() const
@@ -262,6 +267,12 @@ private:
     {
         auto regNumber = ReadRegisterNumber();
         return handler_->HandleEndLocal(regNumber);
+    }
+
+    bool HandleRestartLocal()
+    {
+        auto regNumber = ReadRegisterNumber();
+        return handler_->HandleRestartLocal(regNumber);
     }
 
     bool HandleSetColumn()
