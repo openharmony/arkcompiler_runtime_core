@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c)Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(bouncing_peas)
-add_subdirectory(bouncing_pandas)
-add_subdirectory(export)
-add_subdirectory(export_with_alias)
-add_subdirectory(import_static_member)
-add_subdirectory(re_export)
-add_subdirectory(recursive_import)
-add_subdirectory(import_external_overload)
-add_subdirectory(selective_export_with_alias)
+if (PANDA_TARGET_ARM32)
+    return()
+endif()
+
+run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/import_selective_exported.ets ${CMAKE_CURRENT_BINARY_DIR} selective_export_with_alias EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/selective_export.ets)
