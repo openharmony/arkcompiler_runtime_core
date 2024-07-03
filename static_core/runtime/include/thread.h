@@ -24,12 +24,12 @@
 
 #include "libpandabase/mem/gc_barrier.h"
 #include "libpandabase/mem/ringbuf/lock_free_ring_buffer.h"
+#include "libpandabase/mem/weighted_adaptive_tlab_average.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/os/thread.h"
 #include "libpandabase/utils/arch.h"
 #include "libpandabase/utils/list.h"
 #include "libpandabase/utils/tsan_interface.h"
-#include "libpandabase/utils/weighted_adaptive_tlab_average.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 #include "runtime/include/object_header-inl.h"
