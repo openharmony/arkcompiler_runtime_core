@@ -28,6 +28,7 @@ endif()
 panda_ets_interop_js_plugin(ets_interop_js_napi
     SOURCES
         ets_vm_plugin.cpp
+        timer_module.cpp
     LIBRARIES
         arkruntime
 )
@@ -57,7 +58,7 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_INTEROP_ARCH_SOURCES}
 )
 if(PANDA_TARGET_OHOS)
-    panda_target_link_libraries(arkruntime_obj ace_napi.z  -Wl,--no-undefined)
+    panda_target_link_libraries(arkruntime_obj ace_napi.z uv -Wl,--no-undefined)
 else()
     panda_target_include_directories(arkruntime_obj SYSTEM INTERFACE ${NAPI_HEADERS_PATH})
 endif()

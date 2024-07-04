@@ -43,7 +43,10 @@ ohos_source_set("ets_interop_js_napi_static") {
     "$ark_root/runtime:arkruntime_public_config",
   ]
 
-  sources = [ "ets_vm_plugin.cpp" ]
+  sources = [
+    "ets_vm_plugin.cpp",
+    "timer_module.cpp",
+  ]
 
   deps = [
     ":interop_intrinsic_kinds_h",
@@ -56,6 +59,7 @@ ohos_source_set("ets_interop_js_napi_static") {
     deps += [ ":etsstdlib_install" ]
     external_deps = [
       "hilog:libhilog",
+      "libuv:uv",
       "napi:ace_napi",
     ]
   }

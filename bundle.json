@@ -29,7 +29,8 @@
                 "toolchain",
                 "zlib",
                 "icu",
-                "vixl"
+                "vixl",
+                "libuv"
             ],
             "third_party": [
                 "musl"

@@ -145,6 +145,7 @@ ohos_executable("arkts_disasm") {
     "$ark_root/libpandabase:libarktsbase_frontend_static",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
   ]
+  external_deps = [ sdk_libc_secshared_ext_dep ]
 
   libs = platform_libs
   ldflags = platform_ldflags

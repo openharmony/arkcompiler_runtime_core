@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/timer_module.h"
 #include "generated/base_options.h"
 #include "compiler_options.h"
 #include "compiler/compiler_logger.h"
@@ -163,6 +164,20 @@ static napi_value CallWithCopy(napi_env env, napi_callback_info info)
     return InvokeEtsMethodImpl(env, argv->data(), argc, false);
 }
 
+static bool RegisterTimerModule(napi_env jsEnv)
+{
+    EtsVM *vm = nullptr;
+    ets_size count = 0;
+    ETS_GetCreatedVMs(&vm, 1, &count);
+    if (count != 1) {
+        LogError("No one VM is created");
+        return false;
+    }
+    EtsEnv *etsEnv = nullptr;
+    vm->GetEnv(&etsEnv, ETS_NAPI_VERSION_1_0);
+    return TimerModule::Init(etsEnv, jsEnv);
+}
+
 static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
 {
     napi_value napiFalse;
@@ -216,6 +231,7 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     napi_get_value_bool(env, argv[3U], &useAot);
 
     bool res = ark::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
+    res &= RegisterTimerModule(env);
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);
@@ -317,6 +333,7 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     };
 
     bool res = ets::CreateRuntime(addOpts);
+    res &= RegisterTimerModule(env);
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);

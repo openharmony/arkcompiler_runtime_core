@@ -504,3 +504,66 @@ export function isSafeInteger(v: long): boolean {
 export function isSafeInteger(v: Long): boolean {
     return v.unboxed() <= Double.MAX_SAFE_INTEGER as long;
 }
+
+/**
+ * Execute function on the next cycle.
+ *
+ * @param func: () => void - the function to be executed on the next cycle.
+ * @returns int - timer id
+ */
+export function setTimeout(func: () => void): int {
+    return setTimeout(func, 0);
+}
+
+/**
+ * Execute function after the timer expires.
+ *
+ * @param func: () => void - the function to be executed after the timer expires.
+ * @param delayMs: int - timeout in milliseconds.
+ * @returns int - timer id
+ */
+export function setTimeout(func: () => void, delayMs: int): int {
+    startTimer(func as Object, delayMs, true);
+}
+
+/**
+ * Cancel the specified timer.
+ *
+ * @param timerId: int - the id of the timer returned from setTimeout.
+ */
+export function clearTimeout(timerId: int): void {
+    stopTimer(timerId);
+}
+
+/**
+ * Repeatedly do asynchronous call of the function.
+ *
+ * @param func: () => void - the function to be executed.
+ * @returns int - timer id
+ */
+export function setInterval(func: () => void): int {
+    return setInterval(func, 0);
+}
+
+/**
+ * Repeatedly call the function with delayMs interval between calls. The first call will be after delayMs.
+ *
+ * @param func: () => void - the function to be executed.
+ * @param delayMs: int - timeout in milliseconds.
+ * @returns int - timer id
+ */
+export function setInterval(func: () => void, delayMs: int): int {
+    return startTimer(func as Object, delayMs, false);
+}
+
+/**
+ * Cancel the specified timer.
+ *
+ * @param timerId: int - the id of the timer returned from setInterval.
+ */
+export function clearInterval(timerId: int): void {
+    stopTimer(timerId);
+}
+
+native function startTimer(func: Object, delayMs: int, oneShotTimer: boolean): int;
+native function stopTimer(timerId: int): void;
