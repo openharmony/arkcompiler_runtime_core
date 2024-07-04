@@ -45,6 +45,15 @@ function(compile_ets_code ETS_SRC OUTPUT_ABC TARGET)
 
     if ("${ETS_SRC}" STREQUAL "GEN_STD_LIB")
         list(APPEND ES2PANDA_ARGUMENTS "--gen-stdlib=true")
+        set(STAMP "${OUTPUT_ABC}.stamp")
+        set(STDLIB ${CMAKE_CURRENT_LIST_DIR}/stdlib/)
+        file(WRITE ${STAMP} "")
+        add_custom_target(${TARGET}.stamp
+            BYPRODUCTS ${STAMP}
+            COMMAND find ${STDLIB} -newer ${STAMP} -exec touch ${STAMP} ";" || touch ${STAMP}
+            VERBATIM
+        )
+        list(APPEND COMPILE_DEPENDENCIES ${TARGET}.stamp ${STAMP})
     else()
         list(APPEND ES2PANDA_ARGUMENTS ${ETS_SRC})
         list(APPEND COMPILE_DEPENDENCIES etsstdlib ${ETS_SRC})
