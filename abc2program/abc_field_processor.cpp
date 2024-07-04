@@ -73,14 +73,18 @@ void AbcFieldProcessor::FillMetaDataValue()
 {
     switch (field_.type.GetId()) {
         case panda_file::Type::TypeId::U32: {
-            uint32_t module_literal_array_id = field_data_accessor_->GetValue<uint32_t>().value();
+            uint32_t val = field_data_accessor_->GetValue<uint32_t>().value();
             if (record_.name == ES_MODULE_RECORD || field_.name == MODULE_RECORD_IDX) {
-                entity_container_.AddModuleLiteralArrayId(module_literal_array_id);
-                auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(module_literal_array_id);
+                entity_container_.AddModuleLiteralArrayId(val);
+                auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
                 field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
                     module_literal_array_id_name));
+            } else if (record_.name == ES_SCOPE_NAMES_RECORD || field_.name == SCOPE_NAMES) {
+                entity_container_.AddUnnestedLiteralArrayId(val);
+                auto literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
+                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+                    literal_array_id_name));
             } else {
-                const uint32_t val = field_data_accessor_->GetValue<uint32_t>().value();
                 field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(val));
             }
             break;

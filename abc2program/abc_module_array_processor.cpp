@@ -66,7 +66,7 @@ void AbcModuleArrayProcessor::FillProgramData()
         local_export_num, indirect_export_num, star_export_num};
     FillEntrySize(literal_vec, num_vec);
     auto module_array = panda::pandasm::LiteralArray(std::move(literal_vec));
-    program_->literalarray_table.emplace(entity_container_.GetLiteralArrayIdName(entity_id_),
+    program_->literalarray_table.emplace(entity_container_.GetLiteralArrayIdName(entity_id_.GetOffset()),
                                          std::move(module_array));
 }
 

@@ -26,24 +26,45 @@
 using namespace testing::ext;
 
 namespace panda::abc2program {
+
+struct FuncName {
+    std::string hello_world = ".#~@0=#HelloWorld";
+    std::string foo = ".#*#foo";
+    std::string goo = ".#*#goo";
+    std::string hoo = ".#*#hoo";
+    std::string main = ".func_main_0";
+    std::string method = ".#*@3*#method";
+    std::string lit = ".#~@1>#lit";
+    std::string add = ".#*#add";
+    std::string generate = ".#*#generateFunc";
+    std::string async_generate = ".#*#asyncGenerateFunc";
+    std::string async_arrow = ".#*#asyncArrowFunc";
+    std::string nested_literal_array = ".#~@2>#NestedLiteralArray";
+};
+
+const FuncName FUNC_NAME;
 const std::string HELLO_WORLD_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorld.abc";
-constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 77;
-constexpr std::string_view FUNC_NAME_HELLO_WORLD = ".#~@0=#HelloWorld";
-constexpr std::string_view FUNC_NAME_FOO = ".#*#foo";
-constexpr std::string_view FUNC_NAME_GOO = ".#*#goo";
-constexpr std::string_view FUNC_NAME_HOO = ".#*#hoo";
-constexpr std::string_view FUNC_NAME_MAIN = ".func_main_0";
-constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 13;
+const std::string HELLO_WORLD_DEBUG_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorldDebug.abc";
+constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 73;
+constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 5;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
-constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 5;
+constexpr uint8_t SIZE_OF_LITERAL_ARRAY_TABLE = 7;
 constexpr uint8_t TOTAL_NUM_OF_ASYNC_METHOD_LITERALS = 6;
 constexpr uint8_t TOTAL_NUM_OF_MODULE_LITERALS = 21;
+constexpr uint8_t TOTAL_NUM_OF_NESTED_LITERALS = 10;
 constexpr uint8_t NUM_OF_MODULE_REQUESTS = 4;
 constexpr uint8_t NUM_OF_REGULAR_IMPORTS = 1;
 constexpr uint8_t NUM_OF_NAMESPACE_IMPORTS = 1;
 constexpr uint8_t NUM_OF_LOCAL_EXPORTS = 1;
 constexpr uint8_t NUM_OF_INDIRECT_EXPORTS = 1;
 constexpr uint8_t NUM_OF_STAR_EXPORTS = 1;
+
+static const pandasm::Function *GetFunction(const std::string &name,
+                                            const pandasm::Program &program)
+{
+    ASSERT(program.function_table.find(name) != program.function_table.end());
+    return &(program.function_table.find(name)->second);
+}
 
 class Abc2ProgramHelloWorldTest : public testing::Test {
 public:
@@ -53,23 +74,17 @@ public:
     {
         (void)driver_.Compile(HELLO_WORLD_ABC_TEST_FILE_NAME);
         prog_ = &(driver_.GetProgram());
-        for (const auto &it : prog_->function_table) {
-            if (it.first == FUNC_NAME_HELLO_WORLD) {
-                hello_world_function_ = &(it.second);
-            }
-            if (it.first == FUNC_NAME_FOO) {
-                foo_function_ = &(it.second);
-            }
-            if (it.first == FUNC_NAME_GOO) {
-                goo_function_ = &(it.second);
-            }
-            if (it.first == FUNC_NAME_HOO) {
-                hoo_function_ = &(it.second);
-            }
-            if (it.first == FUNC_NAME_MAIN) {
-                main_function_ = &(it.second);
-            }
-        }
+        hello_world_function_ = GetFunction(FUNC_NAME.hello_world, *prog_);
+        foo_function_ = GetFunction(FUNC_NAME.foo, *prog_);
+        goo_function_ = GetFunction(FUNC_NAME.goo, *prog_);
+        hoo_function_ = GetFunction(FUNC_NAME.hoo, *prog_);
+        main_function_ = GetFunction(FUNC_NAME.main, *prog_);
+        method_function_ = GetFunction(FUNC_NAME.method, *prog_);
+        lit_function_ = GetFunction(FUNC_NAME.lit, *prog_);
+        add_function_ = GetFunction(FUNC_NAME.add, *prog_);
+        generate_function_ = GetFunction(FUNC_NAME.generate, *prog_);
+        async_generate_function_ = GetFunction(FUNC_NAME.async_generate, *prog_);
+        async_arrow_function_ = GetFunction(FUNC_NAME.async_arrow, *prog_);
     }
 
     void TearDown() {}
@@ -81,7 +96,35 @@ public:
     const pandasm::Function *goo_function_ = nullptr;
     const pandasm::Function *hoo_function_ = nullptr;
     const pandasm::Function *main_function_ = nullptr;
+    const pandasm::Function *method_function_ = nullptr;
+    const pandasm::Function *lit_function_ = nullptr;
+    const pandasm::Function *add_function_ = nullptr;
+    const pandasm::Function *generate_function_ = nullptr;
+    const pandasm::Function *async_generate_function_ = nullptr;
+    const pandasm::Function *async_arrow_function_ = nullptr;
 };
+
+class Abc2ProgramHelloWorldDebugTest : public testing::Test {
+public:
+    static void SetUpTestCase(void) {}
+    static void TearDownTestCase(void) {}
+    void SetUp()
+    {
+        (void)driver_.Compile(HELLO_WORLD_DEBUG_ABC_TEST_FILE_NAME);
+        prog_ = &(driver_.GetProgram());
+        foo_function_ = GetFunction(FUNC_NAME.foo, *prog_);
+        main_function_ = GetFunction(FUNC_NAME.main, *prog_);
+    }
+
+    void TearDown() {}
+
+    Abc2ProgramDriver driver_;
+    const pandasm::Program *prog_ = nullptr;
+    const pandasm::Function *foo_function_ = nullptr;
+    const pandasm::Function *main_function_ = nullptr;
+};
+
+/*------------------------------------- Cases of release mode below -------------------------------------*/
 
 /**
  * @tc.name: abc2program_hello_world_test_func_annotation
@@ -116,7 +159,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_field_metadata,
             const std::vector<pandasm::Field> &field_list = record.field_list;
             const pandasm::Field &field = field_list[0];
             EXPECT_TRUE(field.type.GetPandasmName() == "u32");
-            EXPECT_TRUE(field.name.find("HelloWorld.js") != std::string::npos);
+            EXPECT_TRUE(field.name.find("HelloWorld.ts") != std::string::npos);
         }
     }
 }
@@ -185,7 +228,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_async_method_literals, TestSize.
     EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
     ++it;
     EXPECT_EQ(it->tag_, panda_file::LiteralTag::ASYNCGENERATORMETHOD);
-    EXPECT_EQ(std::get<std::string>(it->value_), ".#*@2*#method");
+    EXPECT_EQ(std::get<std::string>(it->value_), FUNC_NAME.method);
     ++it;
     EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
     ++it;
@@ -226,7 +269,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_fields, TestSiz
             EXPECT_EQ(field_list.size(), 1);
             const pandasm::Field &field = field_list[0];
             EXPECT_EQ(field.type.GetPandasmName(), "u32");
-            EXPECT_NE(field.name.find("HelloWorld.js"), std::string::npos);
+            EXPECT_NE(field.name.find("HelloWorld.ts"), std::string::npos);
         } else {
             EXPECT_EQ(it.second.field_list.size(), 0);
         }
@@ -258,6 +301,14 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_function_kind_a
     EXPECT_TRUE(function_kind == panda_file::FunctionKind::FUNCTION);
     uint32_t access_flags = function.metadata->GetAccessFlags();
     EXPECT_TRUE((access_flags & ACC_STATIC) != 0);
+    EXPECT_TRUE(lit_function_->GetFunctionKind() == panda::panda_file::FunctionKind::NONE);
+    EXPECT_TRUE(foo_function_->GetFunctionKind() == panda::panda_file::FunctionKind::FUNCTION);
+    EXPECT_TRUE(add_function_->GetFunctionKind() == panda::panda_file::FunctionKind::NC_FUNCTION);
+    EXPECT_TRUE(generate_function_->GetFunctionKind() == panda::panda_file::FunctionKind::GENERATOR_FUNCTION);
+    EXPECT_TRUE(method_function_->GetFunctionKind() == panda::panda_file::FunctionKind::ASYNC_FUNCTION);
+    EXPECT_TRUE(async_generate_function_->GetFunctionKind() ==
+        panda::panda_file::FunctionKind::ASYNC_GENERATOR_FUNCTION);
+    EXPECT_TRUE(async_arrow_function_->GetFunctionKind() == panda::panda_file::FunctionKind::ASYNC_NC_FUNCTION);
 }
 
 /**
@@ -275,32 +326,20 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part1, Te
     for (size_t i = 0; i < function.params.size(); ++i) {
         EXPECT_TRUE(function.params[i].type.GetPandasmName() == ANY_TYPE_NAME);
     }
-    EXPECT_TRUE(function.name == FUNC_NAME_FOO);
+    EXPECT_TRUE(function.name == FUNC_NAME.foo);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_INS);
     // check ins[0]
     const pandasm::Ins &ins0 = function.ins[0];
     std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str0 == "mov v0, a0");
+    EXPECT_TRUE(pa_ins_str0 == "nop");
     EXPECT_TRUE(ins0.label == "");
     EXPECT_FALSE(ins0.set_label);
-    // check ins[1]
-    const pandasm::Ins &ins1 = function.ins[1];
-    std::string pa_ins_str1 = ins1.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str1 == "mov v1, a1");
-    EXPECT_TRUE(ins1.label == "");
-    EXPECT_FALSE(ins1.set_label);
-    // check ins[2]
-    const pandasm::Ins &ins2 = function.ins[2];
-    std::string pa_ins_str2 = ins2.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str2 == "mov v2, a2");
-    EXPECT_TRUE(ins2.label == "");
-    EXPECT_FALSE(ins2.set_label);
-    // check ins[5]
-    const pandasm::Ins &ins5 = function.ins[5];
-    std::string pa_ins_str5 = ins5.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str5 == "label@5: ldai 0xb");
-    EXPECT_TRUE(ins5.label == "label@5");
-    EXPECT_TRUE(ins5.set_label);
+    // check ins[3]
+    const pandasm::Ins &ins3 = function.ins[3];
+    std::string pa_ins_str3 = ins3.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str3 == "label@3: ldai 0xb");
+    EXPECT_TRUE(ins3.label == "label@3");
+    EXPECT_TRUE(ins3.set_label);
     // check ins[9]
     const pandasm::Ins &ins9 = function.ins[9];
     std::string pa_ins_str9 = ins9.ToString("", true, regs_num);
@@ -310,7 +349,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part1, Te
     // check ins[11]
     const pandasm::Ins &ins11 = function.ins[11];
     std::string pa_ins_str11 = ins11.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str11 == "label@11: jmp label@21");
+    EXPECT_TRUE(pa_ins_str11 == "label@11: jmp label@20");
     EXPECT_TRUE(ins11.label == "label@11");
     EXPECT_TRUE(ins11.set_label);
 }
@@ -329,39 +368,33 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part2, Te
     // check ins[12]
     const pandasm::Ins &ins12 = function.ins[12];
     std::string pa_ins_str12 = ins12.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str12 == "label@12: sta v5");
+    EXPECT_TRUE(pa_ins_str12 == "label@12: lda.str inner catch");
     EXPECT_TRUE(ins12.label == "label@12");
     EXPECT_TRUE(ins12.set_label);
-    // check ins[21]
-    const pandasm::Ins &ins21 = function.ins[21];
-    std::string pa_ins_str21 = ins21.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str21 == "label@21: tryldglobalbyname 0x8, varA");
-    EXPECT_TRUE(ins21.label == "label@21");
-    EXPECT_TRUE(ins21.set_label);
-    // check ins[25]
-    const pandasm::Ins &ins25 = function.ins[25];
-    std::string pa_ins_str25 = ins25.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str25 == "jeqz label@28");
-    EXPECT_TRUE(ins25.label == "");
-    EXPECT_FALSE(ins25.set_label);
-    // check ins[28]
-    const pandasm::Ins &ins28 = function.ins[28];
-    std::string pa_ins_str28 = ins28.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str28 == "label@28: tryldglobalbyname 0xa, x");
-    EXPECT_TRUE(ins28.label == "label@28");
-    EXPECT_TRUE(ins28.set_label);
-    // check ins[32]
-    const pandasm::Ins &ins32 = function.ins[32];
-    std::string pa_ins_str32 = ins32.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str32 == "jeqz label@36");
-    EXPECT_TRUE(ins32.label == "");
-    EXPECT_FALSE(ins32.set_label);
-    // check ins[35]
-    const pandasm::Ins &ins35 = function.ins[35];
-    std::string pa_ins_str35 = ins35.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str35 == "jmp label@38");
-    EXPECT_TRUE(ins35.label == "");
-    EXPECT_FALSE(ins35.set_label);
+    // check ins[22]
+    const pandasm::Ins &ins22 = function.ins[22];
+    std::string pa_ins_str22 = ins22.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str22 == "tryldglobalbyname 0x8, varA");
+    EXPECT_TRUE(ins22.label == "");
+    EXPECT_FALSE(ins22.set_label);
+    // check ins[26]
+    const pandasm::Ins &ins26 = function.ins[26];
+    std::string pa_ins_str26 = ins26.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str26 == "jeqz label@29");
+    EXPECT_TRUE(ins26.label == "");
+    EXPECT_FALSE(ins26.set_label);
+    // check ins[29]
+    const pandasm::Ins &ins29 = function.ins[29];
+    std::string pa_ins_str29 = ins29.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str29 == "label@29: tryldglobalbyname 0xa, x");
+    EXPECT_TRUE(ins29.label == "label@29");
+    EXPECT_TRUE(ins29.set_label);
+    // check ins[33]
+    const pandasm::Ins &ins33 = function.ins[33];
+    std::string pa_ins_str33 = ins33.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str33 == "jeqz label@36");
+    EXPECT_TRUE(ins33.label == "");
+    EXPECT_FALSE(ins33.set_label);
     // check ins[36]
     const pandasm::Ins &ins36 = function.ins[36];
     std::string pa_ins_str36 = ins36.ToString("", true, regs_num);
@@ -383,51 +416,51 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part3, Te
     // check ins[38]
     const pandasm::Ins &ins38 = function.ins[38];
     std::string pa_ins_str38 = ins38.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str38 == "label@38: jmp label@48");
+    EXPECT_TRUE(pa_ins_str38 == "label@38: mov v1, v3");
     EXPECT_TRUE(ins38.label == "label@38");
     EXPECT_TRUE(ins38.set_label);
-    // check ins[39]
-    const pandasm::Ins &ins39 = function.ins[39];
-    std::string pa_ins_str39 = ins39.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str39 == "label@39: sta v5");
-    EXPECT_TRUE(ins39.label == "label@39");
-    EXPECT_TRUE(ins39.set_label);
-    // check ins[48]
-    const pandasm::Ins &ins48 = function.ins[48];
-    std::string pa_ins_str48 = ins48.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str48 == "label@48: ldhole");
-    EXPECT_TRUE(ins48.label == "label@48");
-    EXPECT_TRUE(ins48.set_label);
-    // check ins[50]
-    const pandasm::Ins &ins50 = function.ins[50];
-    std::string pa_ins_str50 = ins50.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str50 == "jmp label@52");
-    EXPECT_TRUE(ins50.label == "");
-    EXPECT_FALSE(ins50.set_label);
+    // check ins[44]
+    const pandasm::Ins &ins44 = function.ins[44];
+    std::string pa_ins_str44 = ins44.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str44 == "sta v4");
+    EXPECT_TRUE(ins44.label == "");
+    EXPECT_FALSE(ins44.set_label);
+    // check ins[47]
+    const pandasm::Ins &ins47 = function.ins[47];
+    std::string pa_ins_str47 = ins47.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str47 == "label@47: ldhole");
+    EXPECT_TRUE(ins47.label == "label@47");
+    EXPECT_TRUE(ins47.set_label);
     // check ins[51]
     const pandasm::Ins &ins51 = function.ins[51];
     std::string pa_ins_str51 = ins51.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str51 == "label@51: sta v5");
-    EXPECT_TRUE(ins51.label == "label@51");
-    EXPECT_TRUE(ins51.set_label);
+    EXPECT_TRUE(pa_ins_str51 == "jmp label@53");
+    EXPECT_TRUE(ins51.label == "");
+    EXPECT_FALSE(ins51.set_label);
     // check ins[52]
     const pandasm::Ins &ins52 = function.ins[52];
     std::string pa_ins_str52 = ins52.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str52 == "label@52: lda v4");
+    EXPECT_TRUE(pa_ins_str52 == "label@52: sta v2");
     EXPECT_TRUE(ins52.label == "label@52");
     EXPECT_TRUE(ins52.set_label);
-    // check ins[56]
-    const pandasm::Ins &ins56 = function.ins[56];
-    std::string pa_ins_str56 = ins56.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str56 == "jeqz label@66");
-    EXPECT_TRUE(ins56.label == "");
-    EXPECT_FALSE(ins56.set_label);
-    // check ins[66]
-    const pandasm::Ins &ins66 = function.ins[66];
-    std::string pa_ins_str66 = ins66.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str66 == "label@66: lda v5");
-    EXPECT_TRUE(ins66.label == "label@66");
-    EXPECT_TRUE(ins66.set_label);
+    // check ins[53]
+    const pandasm::Ins &ins53 = function.ins[53];
+    std::string pa_ins_str53 = ins53.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str53 == "label@53: ldundefined");
+    EXPECT_TRUE(ins53.label == "label@53");
+    EXPECT_TRUE(ins53.set_label);
+    // check ins[55]
+    const pandasm::Ins &ins55 = function.ins[55];
+    std::string pa_ins_str55 = ins55.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str55 == "jeqz label@64");
+    EXPECT_TRUE(ins55.label == "");
+    EXPECT_FALSE(ins55.set_label);
+    // check ins[64]
+    const pandasm::Ins &ins64 = function.ins[64];
+    std::string pa_ins_str64 = ins64.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str64 == "label@64: ldhole");
+    EXPECT_TRUE(ins64.label == "label@64");
+    EXPECT_TRUE(ins64.set_label);
 }
 
 /**
@@ -440,24 +473,24 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, Te
 {
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
+    // check ins[68]
+    const pandasm::Ins &ins68 = function.ins[68];
+    std::string pa_ins_str68 = ins68.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str68 == "jeqz label@71");
+    EXPECT_TRUE(ins68.label == "");
+    EXPECT_FALSE(ins68.set_label);
+    // check ins[71]
+    const pandasm::Ins &ins71 = function.ins[71];
+    std::string pa_ins_str71 = ins71.ToString("", true, regs_num);
+    EXPECT_TRUE(pa_ins_str71 == "label@71: ldundefined");
+    EXPECT_TRUE(ins71.label == "label@71");
+    EXPECT_TRUE(ins71.set_label);
     // check ins[72]
     const pandasm::Ins &ins72 = function.ins[72];
     std::string pa_ins_str72 = ins72.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str72 == "jeqz label@75");
+    EXPECT_TRUE(pa_ins_str72 == "returnundefined");
     EXPECT_TRUE(ins72.label == "");
     EXPECT_FALSE(ins72.set_label);
-    // check ins[75]
-    const pandasm::Ins &ins75 = function.ins[75];
-    std::string pa_ins_str75 = ins75.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str75 == "label@75: ldundefined");
-    EXPECT_TRUE(ins75.label == "label@75");
-    EXPECT_TRUE(ins75.set_label);
-    // check ins[76]
-    const pandasm::Ins &ins76 = function.ins[76];
-    std::string pa_ins_str76 = ins76.ToString("", true, regs_num);
-    EXPECT_TRUE(pa_ins_str76 == "returnundefined");
-    EXPECT_TRUE(ins76.label == "");
-    EXPECT_FALSE(ins76.set_label);
     // check catch blocks
     constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS = 3;
     EXPECT_TRUE(function.catch_blocks.size() == NUM_OF_CODE_TEST_UT_FOO_METHOD_CATCH_BLOCKS);
@@ -466,18 +499,18 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part4, Te
     EXPECT_TRUE(pa_catch_block0.try_begin_label == "label@9");
     EXPECT_TRUE(pa_catch_block0.try_end_label == "label@11");
     EXPECT_TRUE(pa_catch_block0.catch_begin_label == "label@12");
-    EXPECT_TRUE(pa_catch_block0.catch_end_label == "label@21");
+    EXPECT_TRUE(pa_catch_block0.catch_end_label == "label@12");
     // catch_blocks[1]
     const pandasm::Function::CatchBlock &pa_catch_block1 = function.catch_blocks[1];
-    EXPECT_TRUE(pa_catch_block1.try_begin_label == "label@5");
+    EXPECT_TRUE(pa_catch_block1.try_begin_label == "label@3");
     EXPECT_TRUE(pa_catch_block1.try_end_label == "label@38");
-    EXPECT_TRUE(pa_catch_block1.catch_begin_label == "label@39");
-    EXPECT_TRUE(pa_catch_block1.catch_end_label == "label@48");
+    EXPECT_TRUE(pa_catch_block1.catch_begin_label == "label@38");
+    EXPECT_TRUE(pa_catch_block1.catch_end_label == "label@38");
     // catch_blocks[2]
     const pandasm::Function::CatchBlock &pa_catch_block2 = function.catch_blocks[2];
-    EXPECT_TRUE(pa_catch_block2.try_begin_label == "label@5");
-    EXPECT_TRUE(pa_catch_block2.try_end_label == "label@48");
-    EXPECT_TRUE(pa_catch_block2.catch_begin_label == "label@51");
+    EXPECT_TRUE(pa_catch_block2.try_begin_label == "label@3");
+    EXPECT_TRUE(pa_catch_block2.try_end_label == "label@47");
+    EXPECT_TRUE(pa_catch_block2.catch_begin_label == "label@52");
     EXPECT_TRUE(pa_catch_block2.catch_end_label == "label@52");
 }
 
@@ -491,18 +524,18 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
 {
     const pandasm::Function &function = *goo_function_;
     size_t regs_num = function.regs_num;
-    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 5;
-    EXPECT_TRUE(function.name == FUNC_NAME_GOO);
+    constexpr uint32_t NUM_OF_CODE_TEST_UT_GOO_METHOD_INS = 2;
+    EXPECT_TRUE(function.name == FUNC_NAME.goo);
     EXPECT_TRUE(function.ins.size() == NUM_OF_CODE_TEST_UT_GOO_METHOD_INS);
     // check ins[0]
-    constexpr uint32_t INDEX_OF_FUNC_LDUNDEFINED = 3;
+    constexpr uint32_t INDEX_OF_FUNC_LDUNDEFINED = 0;
     const pandasm::Ins &ins0 = function.ins[INDEX_OF_FUNC_LDUNDEFINED];
     std::string pa_ins_str0 = ins0.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str0 == "ldundefined");
     EXPECT_TRUE(ins0.label == "");
     EXPECT_FALSE(ins0.set_label);
     // check ins[1]
-    constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 4;
+    constexpr uint32_t INDEX_OF_FUNC_RETURNUNDEFINED = 1;
     const pandasm::Ins &ins1 = function.ins[INDEX_OF_FUNC_RETURNUNDEFINED];
     std::string pa_ins_str1 = ins1.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str1 == "returnundefined");
@@ -510,32 +543,6 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_goo, TestSize
     EXPECT_FALSE(ins1.set_label);
     // check catch blocks
     EXPECT_TRUE(function.catch_blocks.size() == 0);
-}
-
-/**
- * @tc.name: abc2program_hello_world_test_source_file
- * @tc.desc: Verify the source file.
- * @tc.type: FUNC
- * @tc.require: issueI9CL5Z
- */
-HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_source_file, TestSize.Level1)
-{
-    const pandasm::Function &function = *foo_function_;
-    std::string source_file = function.source_file;
-    EXPECT_TRUE(source_file.find("HelloWorld.js") != std::string::npos);
-}
-
-/**
- * @tc.name: abc2program_hello_world_test_source_code
- * @tc.desc: Verify the source code
- * @tc.type: FUNC
- * @tc.require: issueI9DT0V
- */
-HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_source_code, TestSize.Level1)
-{
-    const pandasm::Function &function = *main_function_;
-    std::string source_code = function.source_code;
-    EXPECT_TRUE(source_code.find("import {a} from './a'") != std::string::npos);
 }
 
 /**
@@ -607,12 +614,97 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_module_literal_entry_test, TestS
 }
 
 /**
+ * @tc.name: abc2program_hello_world_test_nested_literal_array
+ * @tc.desc: check contents of nested literal array
+ * @tc.type: FUNC
+ * @tc.require: issueIA7D9J
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_nested_literal_array, TestSize.Level1)
+{
+    auto &literal_array_table = prog_->literalarray_table;
+    EXPECT_EQ(literal_array_table.size(), SIZE_OF_LITERAL_ARRAY_TABLE);
+    /** current literal array table should be similar to below, each line indicates a literal array, which is
+     *  formated as 'id_name : { literals }':
+     *    _1 : { ... }                   // some other literal arrays
+     *    _2 : { ... }
+     *    _3 : { ... }                   // literal array that be nested, which id name is, for example, '_3'.
+     *    _4 : { ..., literal_array:_3}  // target literal array we are checking.
+     */
+    panda::pandasm::LiteralArray nested_literal_array;
+    for (auto &item : literal_array_table) {
+        std::cout << item.first << std::endl;
+        std::cout << item.second.literals_.size() << std::endl;
+        for (auto &literal : item.second.literals_) {
+            if (literal.tag_ == panda_file::LiteralTag::LITERALARRAY) {
+                nested_literal_array = item.second;
+                break;
+            }
+        }
+        if (nested_literal_array.literals_.size() != 0) {
+            break;
+        }
+    }
+    EXPECT_EQ(nested_literal_array.literals_.size(), TOTAL_NUM_OF_NESTED_LITERALS);
+    auto it = nested_literal_array.literals_.begin();
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::STRING);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::METHOD);
+    EXPECT_EQ(std::get<std::string>(it->value_), FUNC_NAME.nested_literal_array);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::METHODAFFILIATE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::INTEGER);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::TAGVALUE);
+    ++it;
+    EXPECT_EQ(it->tag_, panda_file::LiteralTag::LITERALARRAY);
+    EXPECT_NE(literal_array_table.find(std::get<std::string>(it->value_)), literal_array_table.end());
+}
+
+/*------------------------------------- Cases of release mode above -------------------------------------*/
+/*-------------------------------------- Cases of debug mode below --------------------------------------*/
+
+/**
+ * @tc.name: abc2program_hello_world_test_source_file
+ * @tc.desc: Verify the source file.
+ * @tc.type: FUNC
+ * @tc.require: issueI9CL5Z
+ */
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_source_file, TestSize.Level1)
+{
+    const pandasm::Function &function = *foo_function_;
+    std::string source_file = function.source_file;
+    EXPECT_TRUE(source_file.find("HelloWorld.ts") != std::string::npos);
+}
+
+/**
+ * @tc.name: abc2program_hello_world_test_source_code
+ * @tc.desc: Verify the source code
+ * @tc.type: FUNC
+ * @tc.require: issueI9DT0V
+ */
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_source_code, TestSize.Level1)
+{
+    const pandasm::Function &function = *main_function_;
+    std::string source_code = function.source_code;
+    EXPECT_TRUE(source_code.find("import {a} from './a'") != std::string::npos);
+}
+
+/**
  * @tc.name: abc2program_hello_world_test_local_variable
  * @tc.desc: get local variables
  * @tc.type: FUNC
  * @tc.require: issueI9DT0V
  */
-HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_local_variable, TestSize.Level1)
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_local_variable, TestSize.Level1)
 {
     const pandasm::Function &function = *foo_function_;
     EXPECT_FALSE(function.local_variable_debug.empty());
@@ -630,7 +722,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_local_variable,
  * @tc.type: FUNC
  * @tc.require: issueI9DT0V
  */
-HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_ins_debug, TestSize.Level1)
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_ins_debug, TestSize.Level1)
 {
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
@@ -645,14 +737,13 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_ins_debug, Test
     const pandasm::Ins &ins3 = function.ins[3];
     std::string pa_ins_str3 = ins3.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str3 == "ldundefined");
-    EXPECT_TRUE(ins3.ins_debug.line_number == 32);
+    EXPECT_TRUE(ins3.ins_debug.line_number == 40);
     EXPECT_TRUE(ins3.ins_debug.column_number == 2);
 
     const pandasm::Ins &ins5 = function.ins[5];
     std::string pa_ins_str5 = ins5.ToString("", true, regs_num);
     EXPECT_TRUE(pa_ins_str5 == "label@5: ldai 0xb");
-    EXPECT_TRUE(ins5.ins_debug.line_number == 33);
+    EXPECT_TRUE(ins5.ins_debug.line_number == 41);
     EXPECT_TRUE(ins5.ins_debug.column_number == 11);
 }
-
 };  // panda::abc2program

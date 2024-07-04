@@ -27,7 +27,7 @@ AbcLiteralArrayProcessor::AbcLiteralArrayProcessor(panda_file::File::EntityId en
 void AbcLiteralArrayProcessor::FillProgramData()
 {
     GetLiteralArrayById(&literal_array_, entity_id_);
-    program_->literalarray_table.emplace(entity_container_.GetLiteralArrayIdName(entity_id_),
+    program_->literalarray_table.emplace(entity_container_.GetLiteralArrayIdName(entity_id_.GetOffset()),
                                          std::move(literal_array_));
 }
 
@@ -132,9 +132,11 @@ void AbcLiteralArrayProcessor::FillLiteralData(pandasm::LiteralArray *lit_array,
         case panda_file::LiteralTag::GETTER:
         case panda_file::LiteralTag::SETTER:
         case panda_file::LiteralTag::GENERATORMETHOD:
-        case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
-            value_lit.value_ = entity_container_.GetFullMethodNameById(std::get<uint32_t>(value));
+        case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
+            panda_file::File::EntityId entity_id(std::get<uint32_t>(value));
+            value_lit.value_ = entity_container_.GetFullMethodNameById(entity_id);
             break;
+        }
         case panda_file::LiteralTag::LITERALARRAY:
             value_lit.value_ = entity_container_.GetLiteralArrayIdName(std::get<uint32_t>(value));
             entity_container_.TryAddUnprocessedNestedLiteralArrayId(std::get<uint32_t>(value));

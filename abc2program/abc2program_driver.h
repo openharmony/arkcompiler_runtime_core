@@ -28,8 +28,7 @@ public:
     bool Run(const std::string &input_file_path, const std::string &output_file_path);
     bool Compile(const std::string &input_file_path);
     bool Dump(const std::string &output_file_path);
-    bool Compile(const std::string &input_file_path, pandasm::Program &program);
-    const pandasm::Program &GetProgram();
+    const pandasm::Program &GetProgram() const;
 
 private:
     Abc2ProgramCompiler compiler_;
