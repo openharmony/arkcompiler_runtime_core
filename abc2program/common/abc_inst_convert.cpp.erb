@@ -64,7 +64,7 @@ pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeI
 
     if (ins.IsCall()) {
         // clearing excessive arguments if there are any
-        // if format has ID in it - recieve it. else instruction is indirect call and id = method_id
+        // if format has ID in it - receive it. else instruction is indirect call and id = method_id
         panda_file::File::EntityId id;
 
         if (bc_ins.HasId(format, 0)) {
