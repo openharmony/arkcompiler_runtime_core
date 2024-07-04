@@ -1,0 +1,117 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # type argument is class
+  - use: |-
+      let v = new X()
+      if (a.meth <X> (new X(), v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v = new Y<X>()
+      if (a.meth <X> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends X'
+
+  - use: |-
+      if (a.meth <X|null> (new X(), null) !== null) {
+          return 1;
+      }
+
+  - use: |-
+      if (a.meth <Y<X>|null> (new X(), null) !== null) {
+          return 1;
+      }
+    bound: ' extends Object|null'
+
+  # type argument is interface
+  - use: |-
+      let v: I = new X()
+      if (a.meth <I> (v, v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v: I = new Y<X>()
+      if (a.meth <I> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends Object'
+
+  # type argument is array of classes, interfaces, enums
+  - use: |-
+      let v = new X[0]
+      if (a.meth <X[]> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends Object[]'
+
+  - use: |-
+      let v: I[] = new I[0]
+      if (a.meth <I[]> (new X(), v) !== v) {
+          return 1;
+      }
+
+  - use: |-
+      let v: Color[] = [Color.Red]
+      if (a.meth <Color[]> (new X(), v) !== v) {
+          return 1;
+      }
+    bound: ' extends Object'
+
+  # type argument is alias
+  - use: |-
+      let v = new X()
+      if (a.meth <B> (new X(), v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X
+
+  - use: |-
+      let v: B = null as B
+      if (a.meth <B> (new X(), v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X|null
+    bound: ' extends I|null'
+
+  - use: |-
+      let v: I = new X()
+      if (a.meth <B> (v, v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = I
+
+  - use: |-
+      let v = new X[0]
+      if (a.meth <B> (new X(), v) !== v) {
+          return 1;
+      }
+    decl: |-
+      type B = X[]|null
+
+  - use: |-
+      let v: X|null = null
+      if (a.meth <B> (new X(), v) !== v) {  // X|null is not Y|null
+          return 1;
+      }
+    decl: |-
+      type B = string|null
+    bound: ' extends Object|null'
