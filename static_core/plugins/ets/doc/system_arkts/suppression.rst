@@ -10,45 +10,45 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+|
+
 Warning Suppression
 ====================
 
-|
+"System |LANG|" has some features to boost performance. However, developers
+need to avoid these checks in some cases. Developers can enable or disable any
+single feature or a group of features.
 
-System ArkTS has some features to boost performance. However, in some cases
-developers need to avoid these checks. Developers can enable or disable any feature
-one by one or enable by groups.
+Developers can also disable checks for certain strings or parts of code by
+using ``ETSNOLINT``. Possible warning-suppressions are as follows:
 
-Developers can also disable checks for certain strings or parts of code
-using ``ETSNOLINT``. List of possible warning-suppression:
+* ``ETSNOLINT``:                               Applies to the current line;
+* ``ETSNOLINT-NEXTLINE``:                      Applies to the next line; and
+* ``ETSNOLINT-BEGIN`` with ``ETSNOLINT-END``:  Applies to all lines (including the line where the directive is located) until closed by the corresponding ``ETSNOLINT-END``.
 
-* ``ETSNOLINT`` : Applies to current line.
-* ``ETSNOLINT-NEXTLINE`` : Applies to next line.
-* ``ETSNOLINT-BEGIN`` with ``ETSNOLINT-END`` : Applied to all the lines until the corresponding ``ETSNOLINT-END``, including the one where the directive is located.
 
-**Important**: ``ETSNOLINT-END`` reset the impact of ``ETSNOLINT-BEGIN``, according to the
-arguments. If yout use ``ETSNOLINT-BEGIN(ets-remove-async,ets-remove-lambda)``,
-and ``ETSNOLINT-END(ets-remove-async)`` -> ``ets-remove-lambda`` will continue
-until another ``ETSNOLINT-END`` directive is met containing ``ets-remove-lambda``,
-e.g. ``ETSNOLINT-END(ets-remove-lambda)``.
+**Note**: ``ETSNOLINT-END`` reset the impact of ``ETSNOLINT-BEGIN`` in
+accordance with the arguments. Using ``ETSNOLINT-BEGIN(ets-remove-async,ets-remove-lambda)``
+and ``ETSNOLINT-END(ets-remove-async)`` makes ``ets-remove-lambda`` continue
+until another ``ETSNOLINT-END`` directive containing ``ets-remove-lambda`` is
+found, e.g. ``ETSNOLINT-END(ets-remove-lambda)``.
 
-All types of ``ETSNOLINT`` can be used with arguments, or without them.
-Arguments should be separated by commas, without spaces.
-Only the indicated warning types will be suppressed.
-Otherwise, if there are not any arguments, it will suppress all warnings.
+All types of ``ETSNOLINT`` can be used either with or without arguments.
+Arguments must be separated with commas without whitespaces.
+Only the specified warning types are suppressed.
+Any warning without an argument is also suppressed.
 
-* ``ETSNOLINT(ets-suggest-final)`` : Disable ``ets-suggest-final``. Applies to current line.
-* ``ETSNOLINT-NEXTLINE(ets-implicit-boxing-unboxing)`` : Disable ``ets-implicit-boxing-unboxing``. Applies to next line.
-* ``ETSNOLINT-BEGIN(ets-implicit-boxing-unboxing,ets-suggest-final)`` : Disable ``ets-implicit-boxing-unboxing`` and ``ets-suggest-final`` checks. Applied to all the lines until the corresponding ``ETSNOLINT-END``, including the one where the directive is located.
+* ``ETSNOLINT(ets-suggest-final)``:                     Disable ``ets-suggest-final``. Applies to the current line.
+* ``ETSNOLINT-NEXTLINE(ets-implicit-boxing-unboxing)``: Disable ``ets-implicit-boxing-unboxing``. Applies to the next line.
+* ``ETSNOLINT-BEGIN(ets-implicit-boxing-unboxing,ets-suggest-final)``: Disable ``ets-implicit-boxing-unboxing`` and ``ets-suggest-final`` checks. Applied to all lines (including the line where the directive is located) until closed by the corresponding ``ETSNOLINT-END``, .
 
-Other combinations are also valid. List of possible arguments is the list with
-ets-warnings. Add any type of suppression to single-line comments
-or to multi-line comments.
+Other combinations are also valid. The list of possible arguments is the same as the list of ets-warnings. Add any type of suppression to single-line
+or multi-line comments.
 
-See examples in ArkTS code below:
+Appropriate examples with |LANG| code are provided below:
 
-|LANG| warning suppression common
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Warning Suppression Common
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -60,8 +60,8 @@ or
 
     let k: Int = 5; // ETSNOLINT
 
-|LANG| warning suppression special
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Warning Suppression Special
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -82,7 +82,7 @@ or
     }
 
 
-|LANG| warning suppression - more examples
+|LANG| Warning Suppression -- More Examples
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
@@ -123,7 +123,5 @@ or
     }
     // ETSNOLINT-END(ets-suggest-final)
 
-
-|
 
 |

@@ -13,26 +13,29 @@
 How to Use System ArkTS
 =======================
 
-The main goal of System |LANG| is to help developers make their ArkTS code
+The main goal of "System |LANG|" is to help developers make their ArkTS code
 more efficient.
 
-System ArkTS provides short tips to boost performance - when you use a feature with bad
-performance, System |LANG| warns you about it and suggests what else a developer
-can use and how to rewrite the code.
+System ArkTS provides tips to boost the performance--i.e., if the performance
+of the feature a developer chose to use is poor, then System |LANG| gives them
+an appropriate warning, and suggests what other features a developer can use
+to rewrite the code.
 
 All "System |LANG|" warnings are divided into the following categories:
 
-#. **Subset warnings**: Part of |LANG| which is same as |TS|.
-   The original code requires modifications that keep you within the Common Subset with |TS|.
-#. **Non-subset warnings**: Part of |LANG| which is different with |TS|.
-   The original code requires modifications which are not in Subset with |TS|.
+#. **Subset warnings**: Part of |LANG| that is common with |TS|.
+   The original code requires modifications to keep the code within the Common
+   Subset with |TS|.
+#. **Non-subset warnings**: Part of |LANG| that differs from |TS|.
+   The original code requires modifications that are not within the Common
+   Subset with |TS|.
 
-List of possible options:
+Possible options are as follows:
 
-* **ets-subset-warnings**              : Enable all ETS-warnings that keep you in subset with |TS|.
+* **ets-subset-warnings**              : Enable all ETS-warnings to keep the code in subset with |TS|.
 * **ets-werror**                       : Treat all enabled ETS-warnings as errors.
 * **ets-non-subset-warnings**          : Enable all ETS-warnings that are not in subset with |TS|.
-* **ets-warnings-all**                 : Enable all ETS-warnings in System ArkTS.
+* **ets-warnings-all**                 : Enable all ETS-warnings in "System |LANG|".
 
 * **ets-implicit-boxing-unboxing**     : Check if a program contains implicit boxing or unboxing. ETS Subset Warning.
 * **ets-boost-equality-statement**     : Suggest boosting Equality Statements. ETS Subset Warning.
@@ -41,14 +44,15 @@ List of possible options:
 * **ets-suggest-final**                : Suggest final keyword warning. ETS Non-subset Warning.
 * **ets-remove-lambda**                : Suggestions to replace lambda with regular functions. ETS Subset Warning.
 
+
+To see "System |LANG|" warnings, add "System |LANG|" options from the list above while compiling.
+
 |
 
-To see System ArkTS warnings, just add System ArkTS options from the list above while compile.
-
 Usage Example
-----------------
+-------------
 
-#. Write some ArkTS code. For example, you have the following chunk of code:
+1. Write some |LANG| code. E.g., you have the following chunk of code:
 
 .. code-block:: typescript
 
@@ -65,9 +69,10 @@ Usage Example
         }
     }
 
-#. Provide an option to compiler. For example, add ``--ets-suggest-final`` or ``--ets-suggest-final=true``
-#. Compile your file or project with added options.
-#. Look through ETS-Warnings in output. For certain code System ArkTS will write this:
+2. Specify an option to the compiler. E.g., add ``--ets-suggest-final`` or ``--ets-suggest-final=true``;
+3. Compile your file or project with the options so added;
+4. Look through the ETS-Warnings in the output. For the code in the example
+   above, "System |LANG|" gives the following warnings:
 
     * ``ETS Warning: Suggest 'final' modifier for class. [Test.ets:7:11]``
 
@@ -75,7 +80,8 @@ Usage Example
 
     * ``ETS Warning: Suggest 'final' modifier for method. [Test.ets:9:21]``
 
-#. Rewrite your code as System ArkTS suggested. Rewritten |LANG| code: in certain case:
+5. Rewrite the code as suggested by "System |LANG|". After rewriting |LANG|,
+   the code is as follows:
 
 .. code:: typescript
 
@@ -96,12 +102,12 @@ Usage Example
 |
 
 ``ets-werror`` Usage Example
--------------------------------
+----------------------------
 
-In this part you can see how to treat System ArkTS warnings as errors.
-Let us continue the previous example.
+This section explains handling "System |LANG|" warnings as errors by
+continuing the example as above:
 
-#. Write some ArkTS code. For example, you got this part:
+1. Write some |LANG| code. E.g., you have the following chunk of code:
 
 .. code-block:: typescript
 
@@ -111,13 +117,15 @@ Let us continue the previous example.
     class A extends I { // Suggest final
     }
 
-#. Provide an option to compiler and enable ``ets-werror``. For example, add ``--ets-suggest-final --ets-werror``
-#. Compile file or project with added options. A Compile Time Error happened
-#. Look through ETS-Warnings in output. For certain code System ArkTS will write this:
+2. Specify an option to the compiler and enable ``ets-werror``. E.g., add ``--ets-suggest-final --ets-werror``;
+3. Compile your file or project with the options so added, and a compile-time error occurs;
+4. Look through the ETS-Warnings in the output. For the code in the example
+   above, "System |LANG|" gives the following warnings:
 
     * ``System ArkTS. Warning treated as error: Suggest 'final' modifier for class [werror.ets:4:11]``
 
-#. Rewrite your code as System ArkTS suggested. Rewritten |LANG| code: in certain case:
+5. Rewrite the code as suggested by "System |LANG|". After rewriting |LANG|,
+   the code is as follows:
 
 .. code:: typescript
 
@@ -133,15 +141,15 @@ Let us continue the previous example.
 Status of not implemented features
 -----------------------------------
 
-System ArkTS team is working on providng more and more performance-related
-suggestions for ArkTS developers. In the near future we are going to
-investigate possible performance leaks:
+System |LANG| team is working to provide |LANG| developers even more
+performance-related tips and suggestions. In the near future we are to
+investigate into the following possible performance leaks:
 
-* Union usage
-* Nullable types
-* Rest parameters check VS using Array
-* Non-throwing function
+* Union usage;
+* Nullable types;
+* Rest parameters check vs. Array usage; and
+* Non-throwing function.
 
-See status updates in next releases.
+See status updates in the following releases.
 
 |
