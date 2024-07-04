@@ -16,6 +16,7 @@
 /*---
  desc: 03 Types
  name: issue15013_02.sts
+ files: ['./issue15013_to_export.sts']
  tags:
  ---*/
 
