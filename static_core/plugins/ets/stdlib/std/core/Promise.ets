@@ -23,13 +23,15 @@ export interface PromiseLike<T> {
             onRejected: ((error: NullishType) => E|PromiseLike<E> throws)|undefined): PromiseLike<U|E>;
 }
 
-export class PromiseFulfilledResult<T> {
+class PromiseSettledResultBase {
     status: string;
+}
+
+export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {
     value: T;
 }
 
-export class PromiseRejectedResult {
-    status: string;
+export class PromiseRejectedResult extends PromiseSettledResultBase {
     reason: NullishType;
 }
 
@@ -384,9 +386,9 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
     }
 
     allSettled(promises: (T|PromiseLike<T>)[]): void {
-        this.values = new PromiseSettledResult<T>[promises.length];
+        this.values = new PromiseSettledResultBase[promises.length];
         if (promises.length == 0) {
-            this.resolve(this.values!);
+            this.resolve(this.getValues());
             return;
         }
         for (let i = 0; i < promises.length; ++i) {
@@ -406,7 +408,7 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.values![idx] = res;
         ++this.resolvedCnt;
         if (this.resolvedCnt == this.values!.length) {
-            this.resolve(this.values!);
+            this.resolve(this.getValues());
         }
     }
 
@@ -417,13 +419,17 @@ class AllSettledPromiseConcurrency<T> extends PromiseConcurrencyBase<T> {
         this.values![idx] = res;
         ++this.resolvedCnt;
         if (this.resolvedCnt == this.values!.length) {
-            this.resolve(this.values!);
+            this.resolve(this.getValues());
         }
+    }
+
+    private getValues(): PromiseSettledResult<T>[] {
+        return (this.values as Object) as PromiseSettledResult<T>[];
     }
 
     private resolvedCnt = 0;
     private rejectedCnt = 0;
-    private values: PromiseSettledResult<T>[]|null = null;
+    private values: PromiseSettledResultBase[]|null = null;
     private resolve: (value: PromiseSettledResult<T>[]) => void;
     private reject: (error: NullishType) => void;
 }
