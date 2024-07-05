@@ -13,7 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-help_text = """
+import subprocess
+import sys
+import shutil
+import glob
+import re
+import random
+from collections import namedtuple
+
+HELP_TEXT = """
 Script to help find minimal subsets of compiled methods, inlined methods and compiler passes
 to reproduce compiler bugs.
 
@@ -37,21 +45,15 @@ Example usage:
   $GEN_OPTIONS inside your script
 """
 
-import subprocess
-import sys
-import shutil
-import glob
-import re
-import random
-from collections import namedtuple
 
-class colors:
+class Colors:
     OKCYAN = '\033[96m'
     OKGREEN = '\033[92m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
+
 
 pass_logs = {
     'lowering': 'lowering',
@@ -89,10 +91,11 @@ pass_list = pass_logs.keys()
 def print_color(color, *args, **kwargs):
     print(color, end='')
     print(*args, **kwargs)
-    print(colors.ENDC, end='')
+    print(Colors.ENDC, end='')
+
 
 def exit_fail(message='', usage=False):
-    print(colors.FAIL, end='')
+    print(Colors.FAIL, end='')
     if message:
         print(message)
     if usage:
@@ -100,12 +103,13 @@ def exit_fail(message='', usage=False):
         print(f"{sys.argv[0]} -h for help")
     exit(1)
 
-def get_run_options(compile, noinline, passes, dump, verbose):
-    if compile is None:
+
+def get_run_options(compiled_methods, noinline_methods, passes, dump, verbose):
+    if compiled_methods is None:
         compiler_regex = '.*'
     else:
-        compiler_regex = '(' + '|'.join(compile) + ')'
-    inline_exclude = ','.join(noinline)
+        compiler_regex = '(' + '|'.join(compiled_methods) + ')'
+    inline_exclude = ','.join(noinline_methods)
 
     if passes is None:
         passes = pass_list
@@ -116,20 +120,21 @@ def get_run_options(compile, noinline, passes, dump, verbose):
     if verbose:
         options.append('--compiler-disasm-dump:single-file')
         options.append('--log-debug=compiler')
-        compiler_log = set(pass_logs[opt] for opt in passes) - {None}
+        compiler_log = set(pass_logs.get(opt) for opt in passes) - {None}
         if any('loop' in opt for opt in passes):
             compiler_log.add('loop-transform')
         if compiler_log:
             options.append('--compiler-log=' + ','.join(compiler_log))
     return options
 
-# compile - methods to compile or None if all
+
+# compiled_methods - methods to compile or None if all
 # noinline - methods to exclude in inlining
 # passes - compiler options from `pass_list` to enable or None if all
 # dump - whether to collect compiler dump
 # expect_fail - if not None, print additional info for unexpected run result
-def run(compile, noinline, passes, dump=False, verbose=False, expect_fail=None):
-    options = get_run_options(compile, noinline, passes, dump, verbose)
+def run(compiled_methods, noinline_methods, passes, dump=False, verbose=False, expect_fail=None):
+    options = get_run_options(compiled_methods, noinline_methods, passes, dump, verbose)
     options_str = ' '.join(options)
     if not verbose:
         print(f"GEN_OPTIONS='{options_str}'")
@@ -149,7 +154,7 @@ def run(compile, noinline, passes, dump=False, verbose=False, expect_fail=None):
         res = subprocess.run(cmd_and_args, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except Exception as e:
         exit_fail(str(e), usage=True)
-    print_color(colors.WARNING if res.returncode else colors.OKGREEN, "return value:", res.returncode)
+    print_color(Colors.WARNING if res.returncode else Colors.OKGREEN, "return value:", res.returncode)
     failed = res.returncode != 0
     if (expect_fail is not None) and failed != expect_fail:
         verbose = True
@@ -158,6 +163,7 @@ def run(compile, noinline, passes, dump=False, verbose=False, expect_fail=None):
         print(f"GEN_OPTIONS='{options_str}'")
         print('Command:', ' '.join(cmd_and_args))
     return res
+
 
 class Option:
     def __init__(self, values):
@@ -168,24 +174,25 @@ class Option:
     def neg_values(self):
         return self.all_values - set(self.values)
 
-class Runner:
-    Options = namedtuple('Options', ['compile', 'inline', 'passes'])
 
-    def __init__(self, compile, inline, passes):
-        self.opts = Runner.Options(*map(Option, [compile, inline, passes]))
+class Runner:
+    Options = namedtuple('Options', ['compiled', 'inline', 'passes'])
+
+    def __init__(self, compiled_methods, inline, passes):
+        self.opts = Runner.Options(*map(Option, [compiled_methods, inline, passes]))
         self.current_option = ''
 
     def set_option(self, name, value):
         self.opts = self.opts._replace(**{name: value})
 
     def run(self, verbose=False):
-        return run(self.opts.compile.values, self.opts.inline.neg_values,
+        return run(self.opts.compiled.values, self.opts.inline.neg_values,
                 self.opts.passes.values, verbose=verbose).returncode != 0
 
     # If script failed, updates the option and returns True;
     # otherwise rolls the option back and returns False
     def try_run(self, opt, new_values):
-        print_color(colors.OKCYAN, f'Try {self.current_option}={new_values}')
+        print_color(Colors.OKCYAN, f'Try {self.current_option}={new_values}')
         old_values = opt.values
         opt.values = new_values
         if self.run():
@@ -219,7 +226,7 @@ class Runner:
             else:
                 # Cannot reduce option set
                 break
-        print_color(colors.OKGREEN + colors.BOLD, f'fixed {self.current_option}={opt.values}')
+        print_color(Colors.OKGREEN + Colors.BOLD, f'fixed {self.current_option}={opt.values}')
 
 
 def parse_methods():
@@ -243,23 +250,25 @@ def parse_methods():
         dest.add(qname)
     return (compiled, inlined)
 
+
 def print_out(res):
     print('stdout:', res.stdout.decode('unicode_escape'), sep='\n')
     print('stderr:', res.stderr.decode('unicode_escape'), sep='\n')
+
 
 def main():
     if len(sys.argv) < 2:
         exit_fail(usage=True)
     if sys.argv[1] in ('-h', '--help'):
-        print(help_text)
+        print(HELP_TEXT)
         exit(0)
 
-    print_color(colors.OKCYAN, f'Run without compiled methods')
+    print_color(Colors.OKCYAN, f'Run without compiled methods')
     res = run([], [], [], expect_fail=False)
     if res.returncode:
         exit_fail("Script failed without compiled methods")
 
-    print_color(colors.OKCYAN, f'Run with all methods compiled and all optimizations enabled')
+    print_color(Colors.OKCYAN, f'Run with all methods compiled and all optimizations enabled')
     res = run(None, [], None, dump=True, expect_fail=True)
     if not res.returncode:
         exit_fail("Script didn't fail with default args")
@@ -267,19 +276,19 @@ def main():
     compiled, _ = parse_methods()
 
     runner = Runner(compiled, [], pass_list)
-    runner.bisect('compile')
+    runner.bisect('compiled')
 
-    run(runner.opts.compile.values, [], None, dump=True)
+    run(runner.opts.compiled.values, [], None, dump=True)
     _, inlined = parse_methods()
     runner.set_option('inline', Option(inlined))
     runner.bisect('inline')
 
     runner.bisect('passes')
 
-    print_color(colors.OKGREEN + colors.BOLD, 'Found $GEN_OPTIONS:')
-    print(colors.BOLD, end='')
+    print_color(Colors.OKGREEN + Colors.BOLD, 'Found $GEN_OPTIONS:')
+    print(Colors.BOLD, end='')
     if runner.run(verbose=True):
-        print_color(colors.OKGREEN + colors.BOLD, 'options:',
+        print_color(Colors.OKGREEN + Colors.BOLD, 'options:',
                 *[f'{name}: {opt.values}' for name, opt in runner.opts._asdict().items()], sep='\n')
     else:
         exit_fail("Didn't fail with found options")
