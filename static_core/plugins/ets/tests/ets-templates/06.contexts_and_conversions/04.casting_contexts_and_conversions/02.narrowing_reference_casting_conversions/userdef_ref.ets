@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,17 @@
 {% for c in cases %}
 /*---
 desc: >-
-    A narrowing reference conversion exists from reference type S to a reference
-    type T if all of the following are true
+    A narrowing reference casting conversion converts an expression of
+    a supertype (superclass or superinterface) to a subclass or subinterface.
 ---*/
 
 {{c.defs}}
 
 function main(): int {
-  let src: {{c.stype}} = {{c.sval|safe}};
-  let dst: {{c.dtype}} = {{c.dval|safe}};
-  if (dst.res != 42) {
-    return 1;
+  let src: {{c.stype}} = {{c.val|safe}};
+  let dst: {{c.dtype}} = src as {{c.dtype}};
+  if (src != dst) {
+      return 1;
   }
   return 0;
 }

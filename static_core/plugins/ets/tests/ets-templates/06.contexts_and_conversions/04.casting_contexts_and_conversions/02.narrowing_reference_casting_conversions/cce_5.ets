@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,26 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Casting contexts allow the use of the narrowing reference conversion followed by an unboxing conversion.
+desc: >-
+    A runtime error (ClassCastError) occurs during these conversion
+    if the type of a converted expression cannot be converted to the
+    target type
 ---*/
+type TT1 = [string, boolean]
+type TT2 = [number, boolean]
+
+function foo(p: Object|null): Object {
+    return p!
+}
 
 function main(): int {
-  {%- for t in c['types'] %}
-  let s{{loop.index}}: {{t.stype}} = new {{t.dtype}}({{t.pval}});
-  let d{{loop.index}}: {{t.dtype|lower}} = s{{loop.index}} as {{t.dtype|lower}};
-  if (d{{loop.index}} != {{t.pval}}) {
-      return 1;
-  }
-  {%- endfor %}
-  return 0;
+    let t: TT1 = ["123", false]
+    let b: Object = t
+    try {
+        let d: TT2 = foo(b) as TT2
+    } catch (e) {
+        return e instanceof ClassCastError ? 0 : 1
+    }
+    return 1
 }
-{% endfor %}
