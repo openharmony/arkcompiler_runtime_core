@@ -23,4 +23,9 @@ void EtsWeakReference::ClearReferent()
     referent_ = EtsObject::FromCoreType(PandaEtsVM::GetCurrent()->GetUndefinedObject());
 }
 
+void EtsWeakReference::SetReferent(EtsObject *addr)
+{
+    ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsWeakReference, referent_), addr->GetCoreType());
+}
+
 }  // namespace ark::ets
