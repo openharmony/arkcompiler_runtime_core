@@ -113,12 +113,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Creates a new instance of Array
      */
     public constructor(arrayLen: int) {
-        this.buffer = new NullishType[arrayLen];
+        this.buffer = new NullishType[arrayLen]
         this.actualLength = arrayLen
     }
 
     public constructor(arrayLen: number) {
-        this(arrayLen as int);
+        this(arrayLen as int)
     }
 
     internal constructor(_tag: FromBuffer, buf: NullishType[]) {
@@ -127,7 +127,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     internal constructor() {
-        this.buffer = new NullishType[4];
+        this.buffer = new NullishType[4]
         this.actualLength = 0
     }
 
@@ -137,63 +137,48 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @param d Array initializer
      */
     public constructor(first: T, ...d: T[]) {
-        this.buffer = new NullishType[d.length + 1];
+        this.buffer = new NullishType[d.length + 1]
         this.actualLength = d.length + 1
 
         this.buffer[0] = first
 
         for (let k: int = 0; k < d.length; k++) {
-            this.$_set_unsafe(k + 1, d[k]);
+            this.$_set_unsafe(k + 1, d[k])
         }
     }
 
     /**
      * Creates a new `Array` instance from `Object[]` primitive array.
      *
-     * @param arr primitive 'Object' array to be converted to `Array` instance.
+     * @param arr an iterable object to convert to an array.
      *
      * @returns `Array` intance constructed from `Object[]` primitive array.
      */
-    public static from<T>(arr: ArrayLike<T> | Iterable<T>): Array<T> {
-        return Array.from<T, T>(arr, (x: T, k: number): T => x)
+    public static from<T>(iterable: ArrayLike<T> | Iterable<T>): Array<T> {
+        return Array.from<T, T>(iterable, (x: T, k: number): T => x)
     }
 
     /**
      * Creates a new `Array` instance from `Object[]` primitive array.
      *
-     * @param arr primitive 'Object' array, converted to `Array` instance.
+     * @param iterable an iterable object to convert to an array.
      *
-     * @param fn map function to call on every element of the array.
-     * Every value to be added to the array is first passed through this function, and `fn`'s return value
+     * @param mapfn a mapping function to call on every element of the array.
+     * Every value to be added to the array is first passed through this function, and `mapfn`'s return value
      * is added to the array instead.
      *
      * @returns `Array` intance constructed from `Object[]` primitive array and given function.
      */
-    public static from<T, U>(arr: ArrayLike<T> | Iterable<T>, fn: (v: T, k: number) => U): Array<U> {
+    public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: number) => U): Array<U> {
         const ret = new Array<U>()
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
         idx[0] = 0
-        // NOTE(kprokopenko): see #15523 #15096 can't call .iterator()
-        const verifyCompiles: Iterable<T> = arr
-        const getIteratorFromIterable = (a: Object): Iterator<T> => {
-            if (a instanceof String) {
-                return (a as String).$_iterator() as Iterator<T>
-            }
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum();
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i);
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m.invoke(a, [])! as Iterator<T>
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        iteratorForEach(getIteratorFromIterable(arr), (x: T): void => {
-            ret.push(fn(x, idx[0] as number))
+        iteratorForEach<T>(iterable.$_iterator(), (x: T): void => {
+            ret.push(mapfn(x, idx[0] as number))
             idx[0] += 1
         })
-        return ret;
+        return ret
     }
 
     /**
@@ -204,12 +189,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     * @returns `Array` intance constructed from `Object[]` primitive array.
     */
     public static from<T>(arr: T[]): Array<T> {
-        const len = arr.length;
+        const len = arr.length
         const ret = new NullishType[len as int]
         for (let i: int = 0; i < len; i++) {
-            ret[i] = arr[i] as NullishType;
+            ret[i] = arr[i] as NullishType
         }
-        return new Array<T>(FROM_BUFFER, ret);
+        return new Array<T>(FROM_BUFFER, ret)
     }
 
     /**
@@ -235,26 +220,26 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 return Array.defaultComparatorInts(z, w)
             }
         }
-        let sa = new String(a);
-        let sb = new String(b);
-        return sa.compareTo(sb);
+        let sa = new String(a)
+        let sb = new String(b)
+        return sa.compareTo(sb)
     }
 
     private static defaultComparatorInts(a: int, b: int): number {
         if (a < 0) {
             if (b >= 0) {
-                return -1;
+                return -1
             }
-            a *= -1;
-            b *= -1;
+            a *= -1
+            b *= -1
         } else if (b < 0) {
-            return 1;
+            return 1
         }
-        let aDigs = 1;
+        let aDigs = 1
         while (10 * aDigs <= a) {
             aDigs *= 10
         }
-        let bDigs = 1;
+        let bDigs = 1
         while (10 * bDigs <= b) {
             bDigs *= 10
         }
@@ -276,12 +261,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns Copy of an `Array`'s primitive array data.
      */
     private copyArray(): NullishType[] {
-        let len: int = this.actualLength;
-        let res = new NullishType[len];
+        let len: int = this.actualLength
+        let res = new NullishType[len]
         for (let i = 0; i < len; i++) {
-            res[i] = this.$_get_unsafe(i);
+            res[i] = this.$_get_unsafe(i)
         }
-        return res;
+        return res
     }
 
     /**
@@ -295,13 +280,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public sort(comparator?: (a: T, b: T) => number): this {
         let cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
-            return Array.defaultComparator(l, r);
-        };
+            return Array.defaultComparator(l, r)
+        }
         let sortTo = this.actualLength
         if (!__runtimeIsSameReference(comparator, undefined)) {
             cmp = (l: NullishType, r: NullishType): number => {
-                return comparator!(l as T, r as T);
-            };
+                return comparator!(l as T, r as T)
+            }
         } else {
             let idxNonUndef = 0
             let undefCount = 0
@@ -318,8 +303,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 this.$_set_unsafe(i, undefined as T)
             }
         }
-        sort_stable<NullishType>(this.buffer, 0, sortTo, cmp);
-        return this;
+        sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
+        return this
     }
 
     /**
@@ -371,7 +356,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public pushECMA(...val: T[]): number {
         this.ensureUnusedCapacity(val.length)
         for (let i = 0; i < val.length; i++) {
-            this.buffer[this.actualLength + i] = val[i];
+            this.buffer[this.actualLength + i] = val[i]
         }
         this.actualLength += val.length
         return this.actualLength
@@ -414,7 +399,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     public splice(start: int, delete: int, ...items: T[]): Array<T> {
         start = normalizeIndex(start, this.actualLength)
         if (delete < 0) {
-            delete = 0;
+            delete = 0
         }
         if (start > this.actualLength - delete) {
             delete = this.actualLength - start
@@ -502,7 +487,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         for (let i = 0; i < values.length; i++) {
             ret.push(values[i])
         }
-        return ret;
+        return ret
     }
 
     /**
@@ -519,14 +504,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             buffer = new NullishType[this.buffer.length * 2 + values.length]
         }
         for (let i = 0; i < this.actualLength; i++) {
-            buffer[this.actualLength + values.length - i - 1] = this.buffer[this.actualLength - 1 - i];
+            buffer[this.actualLength + values.length - i - 1] = this.buffer[this.actualLength - 1 - i]
         }
         for (let i = 0; i < values.length; i++) {
-            buffer[i] = values[i];
+            buffer[i] = values[i]
         }
         this.buffer = buffer
-        this.actualLength += values.length;
-        return this.actualLength;
+        this.actualLength += values.length
+        return this.actualLength
     }
 
     /**
@@ -557,12 +542,12 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         const res = new Array<T>()
 
         for (let i: int = 0; i < this.actualLength; i++) {
-            const val = this.$_get_unsafe(i);
+            const val = this.$_get_unsafe(i)
             if (fn(val, i as number)) {
                 res.push(val)
             }
         }
-        return res;
+        return res
     }
 
     /**
@@ -592,7 +577,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     private flatImpl<U>(depth: int, to: Array<U>) {
-        throw new Error("not implemented");
+        throw new Error("not implemented")
     }
 
     /**

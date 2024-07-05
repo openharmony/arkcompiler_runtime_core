@@ -1010,23 +1010,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorMethod = (a: Object): Method => {
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        let m: Method = getIteratorMethod(arrayLike)
-
         // Calc length of items inside arrayLike, save length into i variable
-        let i: long
-        let iter  = m.invoke(arrayLike, [])! as Iterator<number>
+        let i: long = 0
+        let iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -1037,7 +1023,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
 
         let res = new {{element['name']}}Array(i as int)
         i = 0
-        iter = m.invoke(arrayLike, [])! as Iterator<number>
+        iter = arrayLike.$_iterator()
         while (true) {
             const v = iter.next()
             if (v.done) {
@@ -1067,29 +1053,14 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
     {%- if element.get('name') != 'BigUint64' %}
         let res = new {{element['name']}}Array(arrayLike.length)
-        let idx = new int[1]
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx = new int[1]
         idx[0] = 0
-        const verifyCompiles: Iterable<T> = arrayLike
-        // NOTE(aleksander-sotov): Reflection is used due to #15523
-        const getIteratorFromIterable = (a: Object): Iterator<T> => {
-            if (a instanceof String) {
-                return (a as String).$_iterator() as Iterator<T>
-            }
-            const aType = Type.of(a) as ClassType
-            const mNum = aType.getMethodsNum()
-            for (let i = 0; i < mNum; i++) {
-                const m = aType.getMethod(i)
-                if (m.getName() == "$_iterator" && !m.isStatic() && m.getType().getParametersNum() == 0) {
-                    return m.invoke(a, [])! as Iterator<T>
-                }
-            }
-            throw new Error("failed to get iterator from iterable")
-        }
-        iteratorForEach(getIteratorFromIterable(arrayLike), (x: T): void => {
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
         {%- if element.get('name') != 'Uint8Clamped' %}
-            res.setUnsafeClamp(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as {{element['etsType']}})
+            res.setUnsafeClamp(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as {{element['etsType']}})
         {%- else %}
-            res.setUnsafeClamp(idx[0] as int, mapfn(x as T, idx[0] as number) as {{element['etsType']}})
+            res.setUnsafeClamp(idx[0], mapfn(x as T, idx[0] as number) as {{element['etsType']}})
         {%- endif %}
             idx[0] += 1
         })
