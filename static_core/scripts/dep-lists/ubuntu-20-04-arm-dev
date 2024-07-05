@@ -34,3 +34,5 @@ libdwarf-dev=20200114-*                      # For printing function names and l
 gdb-multiarch=9.2-*                          # GDB with support for multiple architectures
 
 llvm-14=1:14*                                # For Thread Sanitizer
+
+postgresql-client-12=12*                     # For pushing benchmark results and test issues to Grafana
