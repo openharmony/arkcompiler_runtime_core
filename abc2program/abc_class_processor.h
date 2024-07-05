@@ -43,6 +43,7 @@ private:
     void FillUnnestedLiteralArrays();
     void FillNestedLiteralArrays();
     void FillModuleLiteralArrayById(uint32_t module_literal_array_id);
+    void FillModuleRequestPhaseById(uint32_t module_literal_array_id);
     void FillLiteralArrayById(uint32_t literal_array_id);
 
     std::unique_ptr<panda_file::ClassDataAccessor> class_data_accessor_;

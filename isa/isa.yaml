@@ -107,10 +107,10 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 12.0.5.0
+version: 12.0.6.0
 
 # 0 is default value, alaways reflects to the newest version
-api_version_map: [[0, 12.0.5.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.5.0]]
+api_version_map: [[0, 12.0.6.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.6.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.
@@ -265,7 +265,7 @@ isa_information:
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x14
+      last_callruntime_prefixed_opcode_idx: 0x18
 
 prefixes:
   - name: throw
@@ -896,6 +896,26 @@ groups:
         format: [pref_op_imm_8]
         prefix: callruntime
         properties: [ic_slot, eight_bit_ic]
+      - sig: callruntime.ldlazymodulevar imm:u8
+        acc: out:top
+        opcode_idx: [0x15]
+        format: [pref_op_imm_8]
+        prefix: callruntime
+      - sig: callruntime.wideldlazymodulevar imm:u16
+        acc: out:top
+        opcode_idx: [0x16]
+        format: [pref_op_imm_16]
+        prefix: callruntime
+      - sig: callruntime.ldlazysendablemodulevar imm:u8
+        acc: out:top
+        opcode_idx: [0x17]
+        format: [pref_op_imm_8]
+        prefix: callruntime
+      - sig: callruntime.wideldlazysendablemodulevar imm:u16
+        acc: out:top
+        opcode_idx: [0x18]
+        format: [pref_op_imm_16]
+        prefix: callruntime
 
   - title: throw instructions
     description: throw instructions

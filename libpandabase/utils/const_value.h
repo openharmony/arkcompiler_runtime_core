@@ -24,6 +24,7 @@ namespace ark {
     static constexpr std::string_view SCOPE_NAME_RECORD = "_ESScopeNamesRecord";
     static constexpr std::string_view TYPE_SUMMARY_FIELD_NAME = "typeSummaryOffset";
     static constexpr std::string_view SCOPE_NAMES = "scopeNames";
+    static constexpr std::string_view MODULE_REQUEST_PAHSE_IDX = "moduleRequestPhaseIdx";
 }  // namespace ark
 
 #endif  // CONST_VALUE_H

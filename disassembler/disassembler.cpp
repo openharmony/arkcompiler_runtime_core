@@ -369,6 +369,9 @@ void Disassembler::GetLiteralArrays()
     size_t num_litarrays = lda.GetLiteralNum();
     for (size_t index = 0; index < num_litarrays; index++) {
         auto id = lda.GetLiteralArrayId(index);
+        if (module_request_phase_literals_.count(id.GetOffset())) {
+            continue;
+        }
         if (IsModuleLiteralOffset(id)) {
             std::stringstream ss;
             ss << index << " 0x" << std::hex << id.GetOffset();
@@ -929,7 +932,9 @@ void Disassembler::GetMetaData(pandasm::Field *field,
     if (field->type.GetId() == panda_file::Type::TypeId::U32) {
         const auto offset = field_accessor.GetValue<uint32_t>().value();
         bool is_scope_name_field = is_scope_names_record || field->name == ark::SCOPE_NAMES;
-        if (field->name != ark::TYPE_SUMMARY_FIELD_NAME && !is_scope_name_field) {
+        if (field->name == ark::MODULE_REQUEST_PAHSE_IDX) {
+            module_request_phase_literals_.insert(offset);
+        } else if (field->name != ark::TYPE_SUMMARY_FIELD_NAME && !is_scope_name_field) {
             LOG(DEBUG, DISASSEMBLER) << "Module literalarray " << field->name << " at offset 0x" << std::hex << offset
                                      << " is excluded";
             module_literals_.insert(offset);
