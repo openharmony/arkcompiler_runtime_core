@@ -358,6 +358,8 @@ ohos_source_set("libarkruntime_set_static") {
     "$ark_root/runtime/asm_defines:asmdefines_public_config",
   ]
 
+  public_configs += plugin_runtime_configs
+
   deps = [
     ":arkruntime_header_deps",
     ":arkruntime_interpreter_impl",
@@ -372,6 +374,10 @@ ohos_source_set("libarkruntime_set_static") {
     "$ark_root/libziparchive:libarktsziparchive",
     "$ark_root/runtime/asm_defines:asm_defines_generator",
   ]
+
+  if (ark_standalone_build) {
+    deps += [ icui18n_dep ]
+  }
 
   external_deps = [
     "napi:ace_napi",

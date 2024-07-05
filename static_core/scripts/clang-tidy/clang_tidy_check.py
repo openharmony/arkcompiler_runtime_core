@@ -315,6 +315,11 @@ def get_file_list(panda_dir: str, build_dir: str, filename_filter: str) -> list:
 
     file_list = []
     for cmd in cmds_json:
+        # this check is needed to exclude symlinks in third_party
+        file_path_raw = cmd["file"]
+        if need_to_ignore_file(file_path_raw, panda_dir, build_dir):
+            continue
+
         file_path = str(os.path.realpath(cmd["file"]))
         if need_to_ignore_file(file_path, panda_dir, build_dir):
             continue

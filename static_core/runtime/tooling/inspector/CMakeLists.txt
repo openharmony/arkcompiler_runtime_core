@@ -71,7 +71,7 @@ else()
     )
     list(APPEND ARKINSPECTOR_LINKED_LIBRARIES toolchain_websocket)
     set(ARKINSPECTOR_INCLUDES
-        ${PANDA_THIRD_PARTY_SOURCES_DIR}/arkcompiler_toolchain/
+        ${PANDA_THIRD_PARTY_SOURCES_DIR}/arkcompiler/toolchain/
     )
 endif()
 

@@ -150,6 +150,8 @@ srcs_runtime = [
   "stdlib/native/escompat/Process.cpp",
 ]
 
+configs_runtime = []
+
 if (ark_ets_interop_js) {
   srcs_runtime += [
     "runtime/interop_js/call/call_ets.cpp",
@@ -182,6 +184,12 @@ if (ark_ets_interop_js) {
     srcs_runtime += [ "runtime/interop_js/arch/arm64/call_bridge_aarch64.S" ]
   } else if (current_cpu == "arm") {
     srcs_runtime += [ "runtime/interop_js/arch/arm32/call_bridge_arm32.S" ]
+  }
+
+  configs_runtime += [ "runtime/interop_js:interop_js_public_config" ]
+
+  if (ark_standalone_build) {
+    arkruntime_deps += [ "$ark_root/plugins/ets/runtime/interop_js:install_nodejs" ]
   }
 }
 

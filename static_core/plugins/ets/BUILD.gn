@@ -105,7 +105,11 @@ ark_isa_gen("isa_gen_ets_bytecodeopt") {
 if (with_stdlib) {
   es2panda_gen("etsstdlib") {
     inputs = [ "stdlib" ]
-    outputs = [ "$target_gen_dir/etsstdlib.abc" ]
+    if (ark_standalone_build) {
+      outputs = [ "$root_build_dir/plugins/ets/etsstdlib.abc" ]
+    } else {
+      outputs = [ "$target_gen_dir/etsstdlib.abc" ]
+    }
     abs_ark_root = rebase_path(ark_root)
     json_array = [
       "{",
@@ -125,7 +129,12 @@ if (with_stdlib) {
     default_arktsconfig =
         get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
                        "root_out_dir")
-    default_arktsconfig += "/arkcompiler/ets_frontend"
+
+    if (ark_standalone_build) {
+      default_arktsconfig += "/bin"
+    } else {
+      default_arktsconfig += "/arkcompiler/ets_frontend"
+    }
 
     write_file("$root_gen_dir/tools/es2panda/generated/arktsconfig.json",
                json_array,
@@ -189,5 +198,26 @@ if (with_stdlib) {
       "--gen-stdlib=true",
       "--output=" + rebase_path(outputs[0], root_build_dir),
     ]
+  }
+
+  action("ets-compile-stdlib-default") {
+    # Running ark_aot compilation for etsstdlib with default options
+    script = "$ark_root/plugins/ets/compiler/tools/paoc_compile_stdlib.sh"
+    outputs = [ "$root_build_dir/plugins/ets/etsstdlib.an" ]
+
+    deps = [
+      ":etsstdlib",
+      "$ark_root/compiler/tools/paoc:ark_aot",
+    ]
+
+    args = [
+      "--binary-dir=" + rebase_path(root_build_dir),
+      "-compiler-options=--compiler-check-final=true",
+      "-paoc-output=" + rebase_path(outputs[0], root_build_dir),
+    ]
+  }
+
+  group("ets_func_tests") {
+    deps = [ "tests:ets_func_tests_int_jit_aot" ]
   }
 }

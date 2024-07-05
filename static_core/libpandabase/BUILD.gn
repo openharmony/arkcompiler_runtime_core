@@ -234,6 +234,10 @@ ohos_source_set("libarktsbase_static") {
 
   deps = libarkbase_deps
 
+  if (ark_standalone_build) {
+    deps += [ sdk_libc_secshared_dep ]
+  }
+
   external_deps = [ sdk_libc_secshared_dep ]
 
   part_name = ark_part_name
