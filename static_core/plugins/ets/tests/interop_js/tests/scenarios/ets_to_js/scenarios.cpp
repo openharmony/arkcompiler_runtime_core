@@ -330,4 +330,54 @@ TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_async_function_user_interface_p
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_async_function_user_interface_param.js"));
 }
 
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_array)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_array.js"));
+}
+
+// NOTE(splatov) #17855 fix boxed primitives casts
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_conflict_boolean)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_boolean.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_string)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_string.js"));
+}
+
+// NOTE(splatov) #17857 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_conflict_arraybuffer)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_arraybuffer.js"));
+}
+
+// NOTE(splatov) #17858 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_conflict_dataview)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_dataview.js"));
+}
+
+// NOTE(splatov) #17859 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_conflict_date)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_date.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_error)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_error.js"));
+}
+
+// NOTE(splatov) #17858 enable this after interop is implemented in this direction
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_conflict_map)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_map.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_object)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_object.js"));
+}
+
 }  // namespace ark::ets::interop::js::testing
