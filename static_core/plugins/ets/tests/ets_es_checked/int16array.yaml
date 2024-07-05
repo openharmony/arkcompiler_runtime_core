@@ -163,3 +163,4 @@ sub:
         mandatory: 1
       - method: "valueOf"
         params: []
+      - method: toLocaleString

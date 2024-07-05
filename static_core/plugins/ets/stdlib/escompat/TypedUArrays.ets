@@ -1414,7 +1414,15 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        let res: StringBuilder = new StringBuilder("")
+        for (let i = 0; i < this.lengthInt - 1; ++i) {
+            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(",")
+        }
+        if (this.lengthInt > 0) {
+            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+        }
+        return res.toString()
     }
 
     /**
@@ -3913,7 +3921,15 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        let res: StringBuilder = new StringBuilder("")
+        for (let i = 0; i < this.lengthInt - 1; ++i) {
+            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(",")
+        }
+        if (this.lengthInt > 0) {
+            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+        }
+        return res.toString()
     }
 
     /**
@@ -6413,7 +6429,15 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        let res: StringBuilder = new StringBuilder("")
+        for (let i = 0; i < this.lengthInt - 1; ++i) {
+            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(",")
+        }
+        if (this.lengthInt > 0) {
+            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+        }
+        return res.toString()
     }
 
     /**
@@ -8940,7 +8964,15 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        let res: StringBuilder = new StringBuilder("")
+        for (let i = 0; i < this.lengthInt - 1; ++i) {
+            res.append((this.getUnsafe(i) as Number).toLocaleString())
+            res.append(",")
+        }
+        if (this.lengthInt > 0) {
+            res.append((this.getUnsafe(this.lengthInt - 1) as Number).toLocaleString())
+        }
+        return res.toString()
     }
 
     /**
@@ -11425,7 +11457,15 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        let res: StringBuilder = new StringBuilder("")
+        for (let i = 0; i < this.lengthInt - 1; ++i) {
+            res.append(new BigInt(this.getUnsafe(i)).toLocaleString())
+            res.append(",")
+        }
+        if (this.lengthInt > 0) {
+            res.append(new BigInt(this.getUnsafe(this.lengthInt - 1)).toLocaleString())
+        }
+        return res.toString()
     }
 
     /**

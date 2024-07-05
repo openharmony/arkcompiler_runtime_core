@@ -293,7 +293,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      *
      */
     public toLocaleString(): String {
-        return Double.toString(this.value, 10);
+        return this.toLocaleString("")
     }
 
     /**

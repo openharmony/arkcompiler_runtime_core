@@ -1622,7 +1622,23 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns string representation
      */
     public toLocaleString(): string {
-        return this.toLocaleString(new Object(), new Object())
+        let res: StringBuilder = new StringBuilder("")
+        for (let i = 0; i < this.lengthInt - 1; ++i) {
+        {%- if N != 'BigInt64' %}
+            res.append((this.getUnsafe(i) as {{subsetTypeValues}}).toLocaleString())
+        {%- else %}
+            res.append(new BigInt(this.getUnsafe(i)).toLocaleString())
+        {%- endif %}
+            res.append(",")
+        }
+        if (this.lengthInt > 0) {
+        {%- if N != 'BigInt64' %}
+            res.append((this.getUnsafe(this.lengthInt - 1) as {{subsetTypeValues}}).toLocaleString())
+        {%- else %}
+            res.append(new BigInt(this.getUnsafe(this.lengthInt - 1)).toLocaleString())
+        {%- endif %}
+        }
+        return res.toString()
     }
 
     /**
