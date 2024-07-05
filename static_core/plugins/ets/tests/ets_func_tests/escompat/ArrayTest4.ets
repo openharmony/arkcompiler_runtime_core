@@ -287,7 +287,7 @@ function toSortedFunc(): int {
 }
 
 function check(result: int, message: String): int {
-    if(result == success) {
+    if (result == success) {
         return success;
     }
     console.println("\nFAILED: " + message);
@@ -302,7 +302,7 @@ function check(fn: () => int, message: String): int {
         console.println("FAILED: " + message + " => Exception catched: " + e);
         return fail;
     }
-    if(result == success) {
+    if (result == success) {
       return success;
     }
     console.println("\nFAILED: " + message);
