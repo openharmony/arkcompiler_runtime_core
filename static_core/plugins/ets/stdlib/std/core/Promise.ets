@@ -35,7 +35,7 @@ export class PromiseRejectedResult extends PromiseSettledResultBase {
     reason: NullishType;
 }
 
-export type PromiseSettledResult<T> = PromiseFulfilledResult<T>|PromiseRejectedResult|undefined
+export type PromiseSettledResult<T> = PromiseFulfilledResult<T>|PromiseRejectedResult
 
 /**
  * Class represents a result of an asynchronous operation in the future.
