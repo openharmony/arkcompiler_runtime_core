@@ -210,17 +210,22 @@ export function keys<%= ctx.this_generic %>(self: <%= ctx.this_type %>): Iterabl
 % }
 
 function builtin_insertion_sort<T>(arr: T[], startIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
-    for (let i = startIndex + 1; i < endIndex; i++) { 
-        const tmp = arr[i]; 
-        let j = i - 1; 
-          
-        while ((j >= startIndex) && (comp(tmp, arr[j]) as int < 0)) { 
-            arr[j + 1] = arr[j]; 
-            j--; 
-        } 
-        arr[j + 1] = tmp; 
-    } 
-    
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i];
+        if (comp(tmp, arr[startIndex]) as int < 0) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[startIndex] = tmp
+        } else {
+            let j = i - 1;
+            while (comp(tmp, arr[j]) as int < 0) {
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = tmp;
+        }
+    }
 }
 
 function perform_merge<T>(arr: T[], startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => number): void {
