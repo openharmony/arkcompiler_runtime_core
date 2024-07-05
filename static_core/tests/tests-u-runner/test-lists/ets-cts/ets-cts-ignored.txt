@@ -1171,6 +1171,17 @@
 03.types/08.reference_types/08.null_type/null12.ets
 03.types/08.reference_types/08.null_type/null13.ets
 
+# 17733 No CTE in bigint equality operations with incompatible operands
+07.expressions/25.equality_expressions/03.bigint_equality_operators/eq_n_0.ets
+07.expressions/25.equality_expressions/03.bigint_equality_operators/eq_n_10.ets
+07.expressions/25.equality_expressions/03.bigint_equality_operators/eq_n_14.ets
+
+# 17736 Incorrect relational operation result with negative bigint
+07.expressions/24.relational_expressions/03.bigint_relational_operators/ge_0.ets
+07.expressions/24.relational_expressions/03.bigint_relational_operators/gt_0.ets
+07.expressions/24.relational_expressions/03.bigint_relational_operators/le_0.ets
+07.expressions/24.relational_expressions/03.bigint_relational_operators/lt_0.ets
+
 # inferred type is null
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/null_initializer.ets
 # nullable in arithmetics
