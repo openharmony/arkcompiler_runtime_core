@@ -79,7 +79,9 @@ enum class FunctionKind : uint8_t {
     ASYNC_FUNCTION = 0x4,
     ASYNC_GENERATOR_FUNCTION = 0x5,
     ASYNC_NC_FUNCTION = 0x6,
-    CONCURRENT_FUNCTION = 0x7
+    CONCURRENT_FUNCTION = 0x7,
+    // Use bit operation to support both sendable function and async sendable function
+    SENDABLE_FUNCTION = 1 << 3
 };
 
 bool IsDynamicLanguage(panda::panda_file::SourceLang lang);

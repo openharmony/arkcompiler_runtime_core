@@ -49,15 +49,15 @@ bool Abc2ProgramCompiler::IsVersionLessEqual(
     return true;
 }
 
-bool Abc2ProgramCompiler::CheckFileVersionIsSupported(uint8_t min_api_version, uint8_t target_api_version) const
+bool Abc2ProgramCompiler::CheckFileVersionIsSupported(std::array<uint8_t, panda_file::File::VERSION_SIZE> min_version,
+                                                      uint8_t target_api_version) const
 {
-    auto min_version = panda_file::GetVersionByApi(min_api_version);
     auto target_version = panda_file::GetVersionByApi(target_api_version);
-    if (!min_version.has_value() || !target_version.has_value()) {
+    if (!target_version.has_value()) {
         return false;
     }
     const auto &file_version = file_->GetHeader()->version;
-    return IsVersionLessEqual(min_version.value(), file_version) &&
+    return IsVersionLessEqual(min_version, file_version) &&
         IsVersionLessEqual(file_version, target_version.value());
 }
 
