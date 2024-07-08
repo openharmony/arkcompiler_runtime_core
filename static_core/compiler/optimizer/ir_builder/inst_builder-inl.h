@@ -970,6 +970,38 @@ void InstBuilder::BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Ty
 }
 
 template <typename T>
+void InstBuilder::BuildUnfoldLoadConstPrimitiveArray(const BytecodeInstruction *bcInst, DataType::Type type,
+                                                     const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst)
+{
+    [[maybe_unused]] auto tag = litArray.literals[0].tag;
+    auto arraySize = litArray.literals.size();
+    for (size_t i = 0; i < arraySize; i++) {
+        auto indexInst = graph_->FindOrCreateConstant(i);
+        ConstantInst *valueInst;
+        if constexpr (std::is_same_v<T, float>) {
+            ASSERT(tag == panda_file::LiteralTag::ARRAY_F32);
+            valueInst = FindOrCreateFloatConstant(std::get<T>(litArray.literals[i].value));
+        } else if constexpr (std::is_same_v<T, double>) {
+            ASSERT(tag == panda_file::LiteralTag::ARRAY_F64);
+            valueInst = FindOrCreateDoubleConstant(std::get<T>(litArray.literals[i].value));
+        } else if constexpr (std::is_same_v<T, bool>) {
+            ASSERT(tag == panda_file::LiteralTag::ARRAY_U1);
+            valueInst = FindOrCreateConstant(std::get<T>(litArray.literals[i].value));
+        } else {
+            auto lit = litArray.literals[i];
+            T val = std::get<T>(lit.value);
+            if (lit.IsSigned()) {
+                valueInst = FindOrCreateConstant(static_cast<std::make_signed_t<T>>(val));
+            } else {
+                valueInst = FindOrCreateConstant(val);
+            }
+        }
+
+        BuildStoreArrayInst<false>(bcInst, type, arrayInst, indexInst, valueInst);
+    }
+}
+
+template <typename T>
 void InstBuilder::BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                                   const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst)
 {
@@ -1025,25 +1057,12 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
     // Create instructions for array filling
     auto tag = litArray.literals[0].tag;
     if (tag != panda_file::LiteralTag::ARRAY_STRING) {
-        for (size_t i = 0; i < arraySize; i++) {
-            auto indexInst = graph_->FindOrCreateConstant(i);
-            ConstantInst *valueInst;
-            if (tag == panda_file::LiteralTag::ARRAY_F32) {
-                valueInst = FindOrCreateFloatConstant(static_cast<float>(std::get<T>(litArray.literals[i].value)));
-            } else if (tag == panda_file::LiteralTag::ARRAY_F64) {
-                valueInst = FindOrCreateDoubleConstant(static_cast<double>(std::get<T>(litArray.literals[i].value)));
-            } else {
-                valueInst = FindOrCreateConstant(std::get<T>(litArray.literals[i].value));
-            }
-
-            BuildStoreArrayInst<false>(bcInst, type, arrayInst, indexInst, valueInst);
-        }
-
+        BuildUnfoldLoadConstPrimitiveArray<T>(bcInst, type, litArray, arrayInst);
         return;
     }
+
     [[maybe_unused]] auto arrayClass = GetRuntime()->ResolveType(method, typeId);
     ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetStringClass(method)));
-
     // Special case for string array
     BuildUnfoldLoadConstStringArray<T>(bcInst, type, litArray, arrayInst);
 }

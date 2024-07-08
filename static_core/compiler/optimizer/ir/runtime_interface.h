@@ -1035,6 +1035,11 @@ public:
         return DataType::NO_TYPE;
     }
 
+    virtual DataType::Type GetArrayComponentType([[maybe_unused]] ClassPtr klass) const
+    {
+        return DataType::NO_TYPE;
+    }
+
     virtual DataType::Type GetFieldTypeById([[maybe_unused]] MethodPtr method, [[maybe_unused]] IdType unused) const
     {
         return DataType::NO_TYPE;

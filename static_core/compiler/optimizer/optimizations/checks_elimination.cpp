@@ -365,6 +365,7 @@ void ChecksElimination::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
         visitor->ReplaceUsersAndRemoveCheck(inst, index);
         return;
     }
+
     if (indexRange.IsNegative() || indexRange.IsMoreOrEqual(lenArrayRange)) {
         COMPILER_LOG(DEBUG, CHECKS_ELIM)
             << "BoundsCheck have incorrect bounds, saved for replace by unconditional deoptimize";

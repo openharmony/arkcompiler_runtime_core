@@ -32,6 +32,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 2
+//! PASS_AFTER    "Escape"
+//! INST_COUNT    "NewArray", 1
 //!
 //! METHOD        "ETSGLOBAL::concat1"
 //! PASS_BEFORE   "BranchElimination"
@@ -42,6 +46,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 1
+//! PASS_AFTER    "Escape"
+//! INST_NOT      "NewArray"
 //!
 //! METHOD        "ETSGLOBAL::concat2"
 //! PASS_BEFORE   "BranchElimination"
@@ -52,6 +60,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,3
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 1
+//! PASS_AFTER    "Escape"
+//! INST_NOT      "NewArray"
 //!
 //! METHOD        "ETSGLOBAL::concat3"
 //! PASS_BEFORE   "BranchElimination"
@@ -62,6 +74,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 1
+//! PASS_AFTER    "Escape"
+//! INST_NOT      "NewArray"
 //!
 //! METHOD        "ETSGLOBAL::concat4"
 //! PASS_BEFORE   "BranchElimination"
@@ -72,6 +88,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 2
+//! PASS_AFTER    "Escape"
+//! INST_COUNT    "NewArray", 1
 //!
 //! METHOD        "ETSGLOBAL::concat5"
 //! PASS_BEFORE   "BranchElimination"
@@ -82,6 +102,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 2
+//! PASS_AFTER    "Escape"
+//! INST_COUNT    "NewArray", 1
 //!
 //! METHOD        "ETSGLOBAL::concat6"
 //! PASS_BEFORE   "BranchElimination"
@@ -92,6 +116,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,4
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 1
+//! PASS_AFTER    "Escape"
+//! INST_NOT      "NewArray"
 //!
 //! METHOD        "ETSGLOBAL::concat7"
 //! PASS_BEFORE   "BranchElimination"
@@ -102,6 +130,10 @@
 //! INST_NOT      /String::concat/
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,6
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
+//! PASS_BEFORE   "Escape"
+//! INST_COUNT    "NewArray", 2
+//! PASS_AFTER    "Escape"
+//! INST_COUNT    "NewArray", 1
 //!
 //! METHOD        "ETSGLOBAL::concat8"
 //! PASS_BEFORE   "BranchElimination"

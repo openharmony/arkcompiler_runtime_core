@@ -28,6 +28,8 @@ public:
     static const RuntimeInterface::FieldPtr UINT8_FIELD;
     static const RuntimeInterface::FieldPtr INT8_FIELD;
 
+    static const RuntimeInterface::ClassPtr INT32_CLASS;
+
     EscapeAnalysisTest()
     {
         RegisterFieldType(OBJ_FIELD, DataType::REFERENCE);
@@ -36,6 +38,8 @@ public:
         RegisterFieldType(INT32_FIELD, DataType::INT32);
         RegisterFieldType(UINT8_FIELD, DataType::UINT8);
         RegisterFieldType(INT8_FIELD, DataType::INT8);
+
+        RegisterClassType(INT32_CLASS, DataType::INT32);
     }
 
     bool Run() const
@@ -57,6 +61,8 @@ const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT32_FIELD = reinterpret_c
 const RuntimeInterface::FieldPtr EscapeAnalysisTest::UINT8_FIELD = reinterpret_cast<void *>(0xB00B00UL);
 const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT8_FIELD = reinterpret_cast<void *>(0xB00B01UL);
 
+const RuntimeInterface::ClassPtr EscapeAnalysisTest::INT32_CLASS = reinterpret_cast<void *>(0xDEAD5320U);
+
 TEST_F(EscapeAnalysisTest, NewEmptyUnusedObject)
 {
     GRAPH(GetGraph())
@@ -67,6 +73,39 @@ TEST_F(EscapeAnalysisTest, NewEmptyUnusedObject)
             INST(1U, Opcode::SaveState);
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
             INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+            INST(4U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(4U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, NewEmptyUnusedArray)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(5U, 5U);
+        // NOLINTBEGIN(readability-magic-numbers)
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewArray).ref().Inputs(2U, 5U, 1U);
             INST(4U, Opcode::ReturnVoid).v0id();
         }
         // NOLINTEND(readability-magic-numbers)
@@ -143,6 +182,60 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectAndControlFlow)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+TEST_F(EscapeAnalysisTest, NewUnusedArrayAndControlFlow)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewArray).ref().Inputs(3U, 1U, 2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U) {}
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U) {}
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
 TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
 {
     GRAPH(GetGraph())
@@ -163,6 +256,65 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
         {
             INST(6U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
             INST(7U, Opcode::NewObject).ref().Inputs(3U, 6U);  // virt
+        }
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(9U, Opcode::Return).Inputs(8U).s32();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U) {}
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(8U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(9U, Opcode::Return).Inputs(8U).s32();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, NewUnusedArrayFromDifferentBranches)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewArray).ref().Inputs(3U, 1U, 2U);  // virt
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(6U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(7U, Opcode::NewArray).ref().Inputs(3U, 1U, 6U);  // virt
         }
 
         BASIC_BLOCK(4U, -1L)
@@ -303,6 +455,109 @@ TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameObject)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameArray)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(42U, 42U);
+
+        BASIC_BLOCK(2U, 3U, 7U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewArray).ref().Inputs(3U, 42U, 2U);  // virt
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(4U, 6U)
+        {
+            INST(7U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U);
+        }
+
+        BASIC_BLOCK(5U, 6U)
+        {
+            INST(9U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(4U, 9U);
+        }
+
+        BASIC_BLOCK(6U, 7U)
+        {
+            INST(11U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(12U, Opcode::NullCheck).ref().Inputs(4U, 11U);
+            INST(13U, Opcode::LoadArray).u64().Inputs(12U, 1U);
+        }
+
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(14U, Opcode::Phi).Inputs(1U, 13U).u64();
+            INST(15U, Opcode::Return).Inputs(14U).u64();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(42U, 42U);
+
+        BASIC_BLOCK(2U, 3U, 7U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(16U, Opcode::SaveState);
+            INST(4U, Opcode::NewArray).ref().Inputs(3U, 42U, 16U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(1U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(4U, 6U)
+        {
+            INST(7U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(4U, 7U);
+        }
+
+        BASIC_BLOCK(5U, 6U)
+        {
+            INST(9U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(10U, Opcode::CallStatic).v0id().InputsAutoType(4U, 9U);
+        }
+
+        BASIC_BLOCK(6U, 7U)
+        {
+            INST(11U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(12U, Opcode::NullCheck).ref().Inputs(4U, 11U);
+            INST(13U, Opcode::LoadArray).u64().Inputs(12U, 1U);
+        }
+
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(14U, Opcode::Phi).Inputs(1U, 13U).u64();
+            INST(15U, Opcode::Return).Inputs(14U).u64();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
 TEST_F(EscapeAnalysisTest, ObjectEscapement)
 {
     GRAPH(GetGraph())
@@ -321,13 +576,32 @@ TEST_F(EscapeAnalysisTest, ObjectEscapement)
     ASSERT_FALSE(Run());
 }
 
+TEST_F(EscapeAnalysisTest, ArrayEscapement)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        CONSTANT(0U, 5U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::SaveState);
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewArray).ref().Inputs(2U, 0U, 1U);
+            INST(4U, Opcode::Return).ref().Inputs(3U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_FALSE(Run());
+}
+
 TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
 {
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 42U).s32();
+        CONSTANT(1U, 42U);
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
@@ -360,7 +634,7 @@ TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 42U).s32();
+        CONSTANT(1U, 42U);
 
         BASIC_BLOCK(2U, 3U, 4U)
         {
@@ -434,6 +708,108 @@ TEST_F(EscapeAnalysisTest, RepeatedLoadStores)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+TEST_F(EscapeAnalysisTest, ArrayPartialEscapement)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(EscapeAnalysisTest::INT32_CLASS);
+            INST(4U, Opcode::NewArray).ref().Inputs(3U, 0U, 2U);
+            INST(10U, Opcode::NullCheck).ref().Inputs(4U, 2U);
+            INST(11U, Opcode::StoreArray).s32().Inputs(10U, 1U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(8U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(4U, 8U);
+        }
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(EscapeAnalysisTest::INT32_CLASS);
+
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(8U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(4U, Opcode::NewArray).ref().Inputs(3U, 0U, 8U);
+            INST(11U, Opcode::StoreArray).s32().Inputs(4U, 1U, 1U);
+            INST(12U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(4U, 12U);
+        }
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, ArrayPartialEscapementNonConstantIndex)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewArray).ref().Inputs(3U, 1U, 2U);
+            INST(10U, Opcode::NullCheck).ref().Inputs(4U, 2U);
+            INST(11U, Opcode::StoreArray).s32().Inputs(10U, 0U, 1U);
+            INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 4U)
+        {
+            INST(8U, Opcode::SaveState).SrcVregs({0U, 1U}).Inputs(0U, 4U);
+            INST(9U, Opcode::CallStatic).v0id().InputsAutoType(4U, 8U);
+        }
+
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(6U, Opcode::Phi).Inputs(0U, 1U).s32();
+            INST(7U, Opcode::Return).Inputs(6U).s32();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_FALSE(Run());
+}
+
 TEST_F(EscapeAnalysisTest, ObjectEscapementThroughPhi)
 {
     GRAPH(GetGraph())
@@ -459,6 +835,44 @@ TEST_F(EscapeAnalysisTest, ObjectEscapementThroughPhi)
             INST(7U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
             INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
             INST(9U, Opcode::NewObject).ref().Inputs(8U, 7U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(10U, Opcode::Phi).Inputs(6U, 9U).ref();
+            INST(11U, Opcode::Return).Inputs(10U).ref();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_FALSE(Run());
+}
+
+TEST_F(EscapeAnalysisTest, ArrayEscapementThroughPhi)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 42U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(4U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
+            INST(6U, Opcode::NewArray).ref().Inputs(5U, 1U, 4U);
+        }
+
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(7U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
+            INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
+            INST(9U, Opcode::NewArray).ref().Inputs(8U, 1U, 7U);
         }
 
         BASIC_BLOCK(5U, -1L)
@@ -506,6 +920,84 @@ TEST_F(EscapeAnalysisTest, ReturnField)
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
             INST(8U, Opcode::Return).u64().Inputs(0U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, ReturnSumOf2Elements)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(3U, 0U).u64();
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::SaveState).Inputs(3U).SrcVregs({3U});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
+            INST(6U, Opcode::NewArray).ref().Inputs(5U, 2U, 4U);
+
+            INST(7U, Opcode::SaveState).Inputs(3U, 6U).SrcVregs({0U, 1U});
+            INST(8U, Opcode::NullCheck).ref().Inputs(6U, 7U);
+            INST(9U, Opcode::BoundsCheck).s32().Inputs(0U, 2U, 7U);
+            INST(10U, Opcode::StoreArray).u64().Inputs(8U, 9U, 3U);
+
+            INST(11U, Opcode::SaveState).Inputs(3U, 6U).SrcVregs({0U, 1U});
+            INST(12U, Opcode::NullCheck).ref().Inputs(6U, 11U);
+            INST(13U, Opcode::BoundsCheck).s32().Inputs(1U, 2U, 11U);
+            INST(14U, Opcode::StoreArray).u64().Inputs(12U, 13U, 3U);
+
+            INST(15U, Opcode::SaveState).Inputs(3U, 6U).SrcVregs({0U, 1U});
+            INST(16U, Opcode::NullCheck).ref().Inputs(6U, 15U);
+            INST(17U, Opcode::BoundsCheck).s32().Inputs(0U, 2U, 15U);
+            INST(18U, Opcode::LoadArray).u64().Inputs(16U, 17U);
+
+            INST(19U, Opcode::SaveState).Inputs(3U, 6U).SrcVregs({0U, 1U});
+            INST(20U, Opcode::NullCheck).ref().Inputs(6U, 19U);
+            INST(21U, Opcode::BoundsCheck).s32().Inputs(1U, 2U, 19U);
+            INST(22U, Opcode::LoadArray).u64().Inputs(20U, 21U);
+
+            INST(23U, Opcode::Add).u64().Inputs(18U, 22U);
+            INST(24U, Opcode::Return).u64().Inputs(23U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(3U, 0U).u64();
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 2U);
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::SaveState).Inputs(3U).SrcVregs({3U});
+            INST(5U, Opcode::LoadAndInitClass).ref().Inputs(4U);
+
+            INST(7U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(9U, Opcode::BoundsCheck).s32().Inputs(0U, 2U, 7U);
+
+            INST(11U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(13U, Opcode::BoundsCheck).s32().Inputs(1U, 2U, 11U);
+
+            INST(15U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(17U, Opcode::BoundsCheck).s32().Inputs(0U, 2U, 15U);
+
+            INST(19U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(21U, Opcode::BoundsCheck).s32().Inputs(1U, 2U, 19U);
+
+            INST(23U, Opcode::Add).u64().Inputs(3U, 3U);
+            INST(24U, Opcode::Return).u64().Inputs(23U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -584,6 +1076,80 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChain)
         // NOLINTEND(readability-magic-numbers)
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, VirtualArraysChain)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(42U, 42U);
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewArray).ref().Inputs(2U, 42U, 1U);  // should not escape
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::NewArray).ref().Inputs(2U, 42U, 4U);  // should not escape
+
+            INST(7U, Opcode::SaveState).Inputs(0U, 3U, 6U).SrcVregs({0U, 1U, 2U});
+
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
+
+            INST(9U, Opcode::StoreArray).ref().Inputs(8U, 42U, 6U);
+            INST(11U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(11U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, VirtualArraysChainMaterialize)
+{
+    GRAPH(GetGraph())
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(42U, 42U);
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
+            INST(3U, Opcode::NewArray).ref().Inputs(2U, 42U, 1U);  // should not escape
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(6U, Opcode::NewArray).ref().Inputs(2U, 42U, 4U);  // should not escape
+
+            INST(7U, Opcode::SaveState).Inputs(0U, 3U, 6U).SrcVregs({0U, 1U, 2U});
+
+            INST(8U, Opcode::NullCheck).ref().Inputs(3U, 7U);
+
+            INST(9U, Opcode::StoreArray).ref().Inputs(8U, 0U, 6U);
+            INST(11U, Opcode::ReturnVoid).v0id();
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+
+    ASSERT_FALSE(Run());
 }
 
 TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)

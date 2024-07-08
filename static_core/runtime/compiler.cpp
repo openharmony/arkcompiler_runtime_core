@@ -610,6 +610,11 @@ compiler::DataType::Type PandaRuntimeInterface::GetFieldType(FieldPtr field) con
     return ToCompilerType(FieldCast(field)->GetType());
 }
 
+compiler::DataType::Type PandaRuntimeInterface::GetArrayComponentType(ClassPtr klass) const
+{
+    return ToCompilerType(ClassCast(klass)->GetComponentType()->GetType());
+}
+
 compiler::DataType::Type PandaRuntimeInterface::GetFieldTypeById(MethodPtr parentMethod, IdType id) const
 {
     auto *pf = MethodCast(parentMethod)->GetPandaFile();

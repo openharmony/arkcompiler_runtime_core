@@ -4163,7 +4163,7 @@ TEST_F(IrBuilderTest, LdaConstUnfold)
     auto source = R"(
 .array array0 panda.String 2 { "a" "ab" }
 .array array1 u1 2 { 0 1 }
-.array array2 i32 2 { 2 3 }
+.array array2 i32 3 { 2 3 -4}
 .array array3 f32 2 { 4.0 5.0 }
 
 .function void main() {
@@ -4182,6 +4182,7 @@ return.void
         CONSTANT(4U, 0U).s64();
         CONSTANT(13U, 1U).s64();
         CONSTANT(43U, 3U).s64();
+        CONSTANT(590U, -4L).s64();
         CONSTANT(52U, 4.0F).f32();
         CONSTANT(59U, 5.0F).f32();
 
@@ -4230,7 +4231,7 @@ return.void
             // int array
             INST(35U, Opcode::SaveState).Inputs().SrcVregs({});
             INST(446U, Opcode::LoadAndInitClass).ref().Inputs(35U).TypeId(68U);
-            INST(36U, Opcode::NegativeCheck).s32().Inputs(0U, 35U);
+            INST(36U, Opcode::NegativeCheck).s32().Inputs(43U, 35U);
             INST(37U, Opcode::NewArray).ref().Inputs(446U, 36U, 35U);
 
             INST(38U, Opcode::SaveState).Inputs(37U).SrcVregs({2U});
@@ -4244,6 +4245,12 @@ return.void
             INST(46U, Opcode::LenArray).s32().Inputs(45U);
             INST(47U, Opcode::BoundsCheck).s32().Inputs(46U, 13U, 44U);
             INST(48U, Opcode::StoreArray).s32().Inputs(45U, 47U, 43U);
+
+            INST(440U, Opcode::SaveState).Inputs(37U).SrcVregs({2U});
+            INST(450U, Opcode::NullCheck).ref().Inputs(37U, 440U);
+            INST(460U, Opcode::LenArray).s32().Inputs(450U);
+            INST(470U, Opcode::BoundsCheck).s32().Inputs(460U, 0U, 440U);
+            INST(480U, Opcode::StoreArray).s32().Inputs(450U, 470U, 590U);
 
             // float array
             INST(49U, Opcode::SaveState).Inputs().SrcVregs({});
@@ -5222,7 +5229,7 @@ TEST_F(IrBuilderTest, CatchPhis)
         }
         BASIC_BLOCK(14U, 24U)  // Catch-begin
         {
-            INST(10U, Opcode::CatchPhi).s64().Inputs(1U, 5U);
+            INST(10U, Opcode::CatchPhi).s64().Inputs(1U, 1U, 5U, 5U);
         }
         BASIC_BLOCK(24U, -1L)
         {
@@ -5230,7 +5237,7 @@ TEST_F(IrBuilderTest, CatchPhis)
         }
         BASIC_BLOCK(15U, 25U)  // Catch-begin
         {
-            INST(12U, Opcode::CatchPhi).s64().Inputs(1U, 5U);
+            INST(12U, Opcode::CatchPhi).s64().Inputs(1U, 1U, 5U, 5U);
         }
         BASIC_BLOCK(25U, -1L)
         {
