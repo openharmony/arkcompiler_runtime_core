@@ -44,3 +44,17 @@ escompat/ArrayTest.ets
 03.types/08.reference_types/13.type_bigint/bint_lmbd_8.ets
 03.types/08.reference_types/13.type_bigint/bint_tup_8.ets
 03.types/08.reference_types/13.type_bigint/bint_un_8.ets
+
+# es2panda: 16707 error working with string
+08.statements/08.for_statements/for_loop_parameters_12.ets
+# end of 16707
+
+# 17965 E/gc: Global reference storage is full
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_18.ets
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_17.ets
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_16.ets
+17.experimental_features/16.coroutines/02.awaiting_coroutine/a_8.ets
+
+# 17964 Segmentation fault with too many repeated calls
+17.experimental_features/16.coroutines/02.awaiting_coroutine/a_2.ets
+17.experimental_features/16.coroutines/02.awaiting_coroutine/a_4.ets

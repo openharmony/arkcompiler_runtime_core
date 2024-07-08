@@ -388,10 +388,6 @@
   title: 'Normal and Abrupt Statement Execution'
   status: 'No testable assertions'
 
-'8.16':
-  title: 'Assert Statements'  # Tested in 17.6.3 Assert Statements
-  status: 'No testable assertions'
-
 '9':
   title: 'Classes'
   status: 'No testable assertions'

@@ -6,3 +6,10 @@
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_function.ets
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_struct.ets
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_variable.ets
+
+# es2panda: 16707 error working with string
+08.statements/08.for_statements/for_loop_parameters_12.ets
+# end of 16707
+
+# 17965 ERRNO: 12 (Cannot allocate memory)
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_16.ets
