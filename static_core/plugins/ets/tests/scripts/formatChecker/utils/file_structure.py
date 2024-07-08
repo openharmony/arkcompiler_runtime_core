@@ -38,15 +38,15 @@ class TestDirectory:
     subdirs: 'List[TestDirectory]'
     
     
-    def __init__(self, path: Path, id: int = 0, name: str = "",
+    def __init__(self, path: Path, ident: int = 0, name: str = "",
                  parent: Union['TestDirectory', None] = None,
                  subdirs: 'List[TestDirectory]' = None) -> None:
         self.path = path
 
-        if id == 0 or name == "":
+        if ident == 0 or name == "":
             self.id, self.name = parse_section_dir_name(path)
         else:
-            self.id = id
+            self.id = ident
             self.name = name 
         
         self.parent = parent
@@ -82,10 +82,10 @@ class TestDirectory:
                 return sd
         return None
 
-    def find_subdir_by_id(self, id: int) -> Union['TestDirectory', None]:
+    def find_subdir_by_id(self, ident: int) -> Union['TestDirectory', None]:
         # TODO: decrease complexity
         for sd in self.subdirs:
-            if sd.id == id:
+            if sd.id == ident:
                 return sd
         return None  
 
@@ -132,7 +132,7 @@ def print_tree(td: TestDirectory):
         section_name = sd.name.replace("_", " ").title()
         right_space = 90 - len(left_space) - len(section_index) - len(section_name)
 
-        print(left_space, section_index, section_name, "." *  right_space, "\n")
+        print(left_space, section_index, section_name, "." * right_space, "\n")
         print_tree(sd)
 
 
@@ -145,7 +145,7 @@ def normalize_section_name(name: str) -> str:
     if not first.isdigit():
         raise InvalidFileStructureException(filepath=name,
                                             message="Invalid section name format")
-    second = second.replace(" ",  "_").replace("-", "_").lower()
+    second = second.replace(" ", "_").replace("-", "_").lower()
     return first + "." + "".join([c for c in second if c.isalpha() or c == "_"])
 
 

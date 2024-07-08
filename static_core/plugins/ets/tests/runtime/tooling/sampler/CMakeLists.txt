@@ -79,7 +79,7 @@ foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
         )
 
         add_custom_target(sampler_trace_check_${c_arg}_${i_arg}
-            COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/tooling/sampler/SamplerTracesCheck.py --file=${testing_dir}/traceout_${c_arg}_${i_arg}.csv
+            COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/tooling/sampler/sampler_traces_check.py --file=${testing_dir}/traceout_${c_arg}_${i_arg}.csv
             WORKING_DIRECTORY "${testing_dir}"
             DEPENDS sampler_run_aspt_converter_${c_arg}_${i_arg}
         )
@@ -95,7 +95,7 @@ add_custom_target(sampler_run_aspt_converter_module_dump_mode
 )
 
 add_custom_target(sampler_aspt_converter_module_file_check
-    COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/tooling/sampler/SamplerModuleFileCheck.py --file=${testing_dir}/modules.txt --bindir=${PANDA_BINARY_ROOT}
+    COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/tooling/sampler/sampler_module_file_check.py --file=${testing_dir}/modules.txt --bindir=${PANDA_BINARY_ROOT}
     WORKING_DIRECTORY "${testing_dir}"
     DEPENDS sampler_run_aspt_converter_module_dump_mode
 )

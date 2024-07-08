@@ -39,6 +39,7 @@ def write_file(path, text):
     with open(path, "w+", encoding="utf8") as f:
         f.write(text)
 
+
 def read_file(path) -> str:
     text = ""
     with open(path, "r", encoding='utf8') as f:

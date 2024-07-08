@@ -29,14 +29,14 @@ trace_list = ["LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBA
 
 trace_list_ignored = []
 
-all_traces_found = True
+ALL_TRACES_FOUND = True
 
 with open(file_name, 'r') as my_file:
     content = my_file.read()
     for string in trace_list:
         if not string in content:
-            all_traces_found = False
-    if not all_traces_found:
+            ALL_TRACES_FOUND = False
+    if not ALL_TRACES_FOUND:
         print("Actual stack trace")
         print(content)
         raise Exception("Not all native traces found")

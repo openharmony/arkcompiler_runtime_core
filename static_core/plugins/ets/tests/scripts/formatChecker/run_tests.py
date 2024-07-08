@@ -85,8 +85,10 @@ class RunStats:
     def record_success(self, path: Path):
         self.passed.append(path)
 
+
 def test_should_pass(filepath: Path) -> bool:
     return not (filepath.name.startswith(NEGATIVE_PREFIX) or filepath.name.startswith(NEGATIVE_EXECUTION_PREFIX))
+
 
 def run_test(filepath: Path, runnerpath: Path) -> bool:
     """

@@ -21,6 +21,7 @@ import sys
 import argparse
 import numpy as np
 
+
 class ModulesDumpTest():
     _file_name = ""
     _binary_dir = ""
@@ -86,10 +87,14 @@ class ModulesDumpTest():
                 modules_from_file.append(pathname)
 
                 checksum: numpy.uint32 = np.uint32(line_content[0])
-                expected_checksum: numpy.uint32 = self._checksum_name_map[pathname]
+                expected_checksum: numpy.uint32 = self._checksum_name_map.get(pathname, -1)
+                
+                if (expected_checksum == -1):
+                    print("sampler_module_file_check: can not find expected checksum for ", pathname)
+                    return False
 
                 if (checksum != expected_checksum):
-                    print("SamplerModuleFileCheck: for file",
+                    print("sampler_module_file_check: for file",
                           pathname,
                           "checksum is not equal",
                           expected_checksum,
@@ -98,21 +103,23 @@ class ModulesDumpTest():
                     return False
 
         if (len(modules_from_file) != len(modules_list)):
-            print("SamplerModuleFileCheck: wrong number of modules in module file " \
+            print("sampler_module_file_check: wrong number of modules in module file " \
             "expected", len(modules_list), ", in file", len(modules_from_file))
             return False
 
         return True
+
 
 def main():
     args = ModulesDumpTest.parse_args()
     test = ModulesDumpTest(args)
 
     if not test.module_file_check():
-        print("SamplerModuleFileCheck: test failed")
+        print("sampler_module_file_check: test failed")
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

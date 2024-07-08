@@ -27,6 +27,7 @@ from utils.file_structure import TestDirectory, walk_test_subdirs, build_directo
 from utils.file_structure import print_tree, denormalize_section_name
 from utils.spec import build_spec_tree
 
+
 def count_tests(folder: TestDirectory):
     pos_tests = 0
     neg_tests = 0
@@ -48,12 +49,12 @@ def print_table_of_contents(testpath: Path):
     total_negative_tests = 0
 
     print("Table of contents:\n")
-    for dir in walk_test_subdirs(testpath):
-        full_index = dir.full_index()
+    for directory in walk_test_subdirs(testpath):
+        full_index = directory.full_index()
         depth = len(full_index)
         assert depth >= 1
         # Count 
-        pos_tests, neg_tests, n_templates = count_tests(dir)
+        pos_tests, neg_tests, n_templates = count_tests(directory)
         # Save
         total_positive_tests += pos_tests
         total_negative_tests += neg_tests
@@ -61,9 +62,9 @@ def print_table_of_contents(testpath: Path):
         # Print
         left_space = " " * 2 * depth
         section_index = ".".join([str(i) for i in full_index])
-        section_name = denormalize_section_name(dir.name)
+        section_name = denormalize_section_name(directory.name)
         right_space = 90 - len(left_space) - len(section_index) - len(section_name)
-        if not dir.is_empty():
+        if not directory.is_empty():
             print(left_space, section_index, section_name, "." * right_space,
                   f"templates: {n_templates}; tests: {pos_tests} pos, {neg_tests} neg.\n")
     
@@ -123,7 +124,7 @@ def find_diffs(test: TestDirectory, ethalon: TestDirectory, strict: bool = False
     return diff_detected
 
 
-def calc_tests_and_spec_stat(test: TestDirectory, spec: TestDirectory, tnum: int = 0, snum: int = 0)-> Tuple[int, int]:
+def calc_tests_and_spec_stat(test: TestDirectory, spec: TestDirectory, tnum: int = 0, snum: int = 0) -> Tuple[int, int]:
     for esd in spec.subdirs:
         snum += 1
         tsd = test.find_subdir_by_name(esd.name)
@@ -144,8 +145,8 @@ def coverage(testpath: Path, specpath: Path):
     print(f"=====\nDIFF tests='{str(testpath)}'; spec='{str(specpath)}'")
     find_diffs(test_tree, ethalon_tree)
 
-    testsNum, specNum = calc_tests_and_spec_stat(test_tree, ethalon_tree)
-    coverage_p = int(float(testsNum) / float(specNum) * 100)
+    test_num, spec_num = calc_tests_and_spec_stat(test_tree, ethalon_tree)
+    coverage_p = int(float(test_num) / float(spec_num) * 100)
     print(f"=====\nCOVEARGE: {coverage_p}%")
     
 
