@@ -270,7 +270,17 @@ export function fill(self: boolean[], value: boolean, start: int, end: int): boo
     return self;
 }
 
-export function find(self: boolean[], predicate: (value: boolean, i: number, self: boolean[]) => boolean): Boolean | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: boolean[], predicate: (value: boolean, index: number, array: boolean[]) => boolean): Boolean | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -279,15 +289,18 @@ export function find(self: boolean[], predicate: (value: boolean, i: number, sel
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: boolean[], fn: (value: boolean, i: number, self: boolean[]) => boolean): number {
+export function findIndex(self: boolean[], predicate: (value: boolean, index: number, array: boolean[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -298,14 +311,14 @@ export function findIndex(self: boolean[], fn: (value: boolean, i: number, self:
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: boolean[], fn: (elem: boolean, i: number, self: boolean[]) => boolean): Boolean | undefined {
+export function findLast(self: boolean[], predicate: (elem: boolean, index: number, array: boolean[]) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -313,17 +326,17 @@ export function findLast(self: boolean[], fn: (elem: boolean, i: number, self: b
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: boolean[], fn: (v: boolean, i: number, self: boolean[]) => boolean): boolean {
+export function every(self: boolean[], predicate: (value: boolean, index: number, array: boolean[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -331,17 +344,17 @@ export function every(self: boolean[], fn: (v: boolean, i: number, self: boolean
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: boolean[], fn: (v: boolean, i: number, self: boolean[]) => boolean): boolean {
+export function some(self: boolean[], predicate: (value: boolean, index: number, array: boolean[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -349,16 +362,14 @@ export function some(self: boolean[], fn: (v: boolean, i: number, self: boolean[
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: boolean[], fn: (v: boolean, i: number, self: boolean[]) => boolean): boolean[] {
-    return filter(self, (v: boolean, i: number): boolean => fn(v, i as number, self));
+export function filter(self: boolean[], predicate: (value: boolean, index: number, array: boolean[]) => boolean): boolean[] {
+    return filter(self, (value: boolean, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -366,13 +377,13 @@ export function filter(self: boolean[], fn: (v: boolean, i: number, self: boolea
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: boolean[], fn: (element: boolean, i: number, self: boolean[]) => boolean): number {
+export function findLastIndex(self: boolean[], predicate: (element: boolean, index: number, array: boolean[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -380,100 +391,98 @@ export function findLastIndex(self: boolean[], fn: (element: boolean, i: number,
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number, self: boolean[]) => boolean): boolean {
+export function reduce(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: boolean[]) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean, i: number, self: boolean[]) => U, initialValue: U): U {
+export function reduce<U = boolean>(self: boolean[], callbackfn: (previousValue: U, currentValue: boolean, index: number, array: boolean[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: number, self: boolean[]) => boolean): boolean {
+export function reduceRight(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean, index: number, array: boolean[]) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number, self: boolean[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: boolean[], callbackfn: (previousValue: U, currentValue: boolean, index: number, array: boolean[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: boolean[], fn: (a: boolean, i: number, self: boolean[]) => void): void {
+export function forEach(self: boolean[], callbackfn: (value: boolean, index: number, array: boolean[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: boolean[], predicate: (value: boolean, i: number) => boolean): Boolean | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: boolean[], predicate: (value: boolean, index: number) => boolean): Boolean | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -482,15 +491,18 @@ export function find(self: boolean[], predicate: (value: boolean, i: number) => 
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: boolean[], fn: (value: boolean, i: number) => boolean): number {
+export function findIndex(self: boolean[], predicate: (value: boolean, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -501,14 +513,14 @@ export function findIndex(self: boolean[], fn: (value: boolean, i: number) => bo
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: boolean[], fn: (elem: boolean, i: number) => boolean): Boolean | undefined {
+export function findLast(self: boolean[], predicate: (elem: boolean, index: number) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -516,17 +528,17 @@ export function findLast(self: boolean[], fn: (elem: boolean, i: number) => bool
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: boolean[], fn: (v: boolean, i: number) => boolean): boolean {
+export function every(self: boolean[], predicate: (value: boolean, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -534,17 +546,17 @@ export function every(self: boolean[], fn: (v: boolean, i: number) => boolean): 
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: boolean[], fn: (v: boolean, i: number) => boolean): boolean {
+export function some(self: boolean[], predicate: (value: boolean, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -556,13 +568,13 @@ export function some(self: boolean[], fn: (v: boolean, i: number) => boolean): b
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: boolean[], fn: (element: boolean, i: number) => boolean): number {
+export function findLastIndex(self: boolean[], predicate: (element: boolean, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -570,99 +582,97 @@ export function findLastIndex(self: boolean[], fn: (element: boolean, i: number)
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: boolean[], fn: (a: boolean, b: boolean, i: number) => boolean): boolean {
+export function reduce(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean, index: number) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean, i: number) => U, initialValue: U): U {
+export function reduce<U = boolean>(self: boolean[], callbackfn: (previousValue: U, currentValue: boolean, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean, i: number) => boolean): boolean {
+export function reduceRight(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean, index: number) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: boolean[], callbackfn: (previousValue: U, currentValue: boolean, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: boolean[], fn: (a: boolean, i: number) => void): void {
+export function forEach(self: boolean[], callbackfn: (value: boolean, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: boolean[], predicate: (value: boolean) => boolean): Boolean | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -672,15 +682,18 @@ export function find(self: boolean[], predicate: (value: boolean) => boolean): B
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: boolean[], fn: (value: boolean) => boolean): number {
+export function findIndex(self: boolean[], predicate: (value: boolean) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -691,14 +704,14 @@ export function findIndex(self: boolean[], fn: (value: boolean) => boolean): num
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: boolean[], fn: (elem: boolean) => boolean): Boolean | undefined {
+export function findLast(self: boolean[], predicate: (elem: boolean) => boolean): Boolean | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -706,17 +719,17 @@ export function findLast(self: boolean[], fn: (elem: boolean) => boolean): Boole
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: boolean[], fn: (v: boolean) => boolean): boolean {
+export function every(self: boolean[], predicate: (value: boolean) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -724,17 +737,17 @@ export function every(self: boolean[], fn: (v: boolean) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: boolean[], fn: (v: boolean) => boolean): boolean {
+export function some(self: boolean[], predicate: (value: boolean) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -742,16 +755,14 @@ export function some(self: boolean[], fn: (v: boolean) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: boolean[], fn: (v: boolean) => boolean): boolean[] {
-    return filter(self, (v: boolean, i: number): boolean => fn(v));
+export function filter(self: boolean[], predicate: (value: boolean) => boolean): boolean[] {
+    return filter(self, (value: boolean, index: number): boolean => predicate(value));
 }
 
 /**
@@ -759,13 +770,13 @@ export function filter(self: boolean[], fn: (v: boolean) => boolean): boolean[] 
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: boolean[], fn: (element: boolean) => boolean): number {
+export function findLastIndex(self: boolean[], predicate: (element: boolean) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -773,96 +784,84 @@ export function findLastIndex(self: boolean[], fn: (element: boolean) => boolean
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: boolean[], fn: (a: boolean, b: boolean) => boolean): boolean {
+export function reduce(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = boolean>(self: boolean[], fn: (previousValue: U, currentValue: boolean) => U, initialValue: U): U {
+export function reduce<U = boolean>(self: boolean[], callbackfn: (previousValue: U, currentValue: boolean) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: boolean[], fn: (a: boolean, b: boolean) => boolean): boolean {
+export function reduceRight(self: boolean[], callbackfn: (previousValue: boolean, currentValue: boolean) => boolean): boolean {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: boolean = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: boolean[], fn: (a: U, b: boolean) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: boolean[], callbackfn: (previousValue: U, currentValue: boolean) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: boolean[], fn: (a: boolean) => void): void {
+export function forEach(self: boolean[], callbackfn: (value: boolean) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -1272,57 +1271,344 @@ export function values(self: boolean[], ): IterableIterator<boolean> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: boolean[], ): IterableIterator<[number, boolean]> {
     return new ArrayEntriesIterator_boolean(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: boolean[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: boolean[], predicate: () => boolean): boolean[] {
+    return filter(self, (value: boolean, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: boolean[], predicate: () => boolean): Boolean | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: boolean[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: boolean[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: boolean[], callbackfn: (previousValue: boolean) => boolean): boolean {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: boolean = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: boolean[], callbackfn: () => boolean): boolean {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: boolean = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = boolean>(self: boolean[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = boolean>(self: boolean[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: boolean[], callbackfn: (previousValue: boolean) => boolean): boolean {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: boolean = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: boolean[], callbackfn: () => boolean): boolean {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: boolean = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: boolean[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: boolean[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: boolean[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: boolean[], predicate: () => boolean): Boolean | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: boolean[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: boolean[], fn: (value: boolean, i: number, self: boolean[]) => boolean): boolean[] {
+export function map(self: boolean[], callbackfn: (value: boolean, index: number, array: boolean[]) => boolean): boolean[] {
     const len = self.length;
     let res = new boolean[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: boolean[], fn: (value: boolean, i: number) => boolean): boolean[] {
+export function map(self: boolean[], callbackfn: (value: boolean, index: number) => boolean): boolean[] {
     const len = self.length;
     let res = new boolean[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: boolean[], fn: (value: boolean) => boolean): boolean[] {
+export function map(self: boolean[], callbackfn: (value: boolean) => boolean): boolean[] {
     const len = self.length;
     let res = new boolean[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: boolean[], callbackfn: () => boolean): boolean[] {
+    const len = self.length;
+    let res = new boolean[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
@@ -1654,7 +1940,17 @@ export function fill(self: byte[], value: byte, start: int, end: int): byte[] {
     return self;
 }
 
-export function find(self: byte[], predicate: (value: byte, i: number, self: byte[]) => boolean): Byte | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: byte[], predicate: (value: byte, index: number, array: byte[]) => boolean): Byte | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -1663,15 +1959,18 @@ export function find(self: byte[], predicate: (value: byte, i: number, self: byt
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: byte[], fn: (value: byte, i: number, self: byte[]) => boolean): number {
+export function findIndex(self: byte[], predicate: (value: byte, index: number, array: byte[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -1682,14 +1981,14 @@ export function findIndex(self: byte[], fn: (value: byte, i: number, self: byte[
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: byte[], fn: (elem: byte, i: number, self: byte[]) => boolean): Byte | undefined {
+export function findLast(self: byte[], predicate: (elem: byte, index: number, array: byte[]) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -1697,17 +1996,17 @@ export function findLast(self: byte[], fn: (elem: byte, i: number, self: byte[])
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: byte[], fn: (v: byte, i: number, self: byte[]) => boolean): boolean {
+export function every(self: byte[], predicate: (value: byte, index: number, array: byte[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -1715,17 +2014,17 @@ export function every(self: byte[], fn: (v: byte, i: number, self: byte[]) => bo
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: byte[], fn: (v: byte, i: number, self: byte[]) => boolean): boolean {
+export function some(self: byte[], predicate: (value: byte, index: number, array: byte[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -1733,16 +2032,14 @@ export function some(self: byte[], fn: (v: byte, i: number, self: byte[]) => boo
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: byte[], fn: (v: byte, i: number, self: byte[]) => boolean): byte[] {
-    return filter(self, (v: byte, i: number): boolean => fn(v, i as number, self));
+export function filter(self: byte[], predicate: (value: byte, index: number, array: byte[]) => boolean): byte[] {
+    return filter(self, (value: byte, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -1750,13 +2047,13 @@ export function filter(self: byte[], fn: (v: byte, i: number, self: byte[]) => b
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: byte[], fn: (element: byte, i: number, self: byte[]) => boolean): number {
+export function findLastIndex(self: byte[], predicate: (element: byte, index: number, array: byte[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -1764,100 +2061,98 @@ export function findLastIndex(self: byte[], fn: (element: byte, i: number, self:
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: byte[], fn: (a: byte, b: byte, i: number, self: byte[]) => byte): byte {
+export function reduce(self: byte[], callbackfn: (previousValue: byte, currentValue: byte, index: number, array: byte[]) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte, i: number, self: byte[]) => U, initialValue: U): U {
+export function reduce<U = byte>(self: byte[], callbackfn: (previousValue: U, currentValue: byte, index: number, array: byte[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number, self: byte[]) => byte): byte {
+export function reduceRight(self: byte[], callbackfn: (previousValue: byte, currentValue: byte, index: number, array: byte[]) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number, self: byte[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: byte[], callbackfn: (previousValue: U, currentValue: byte, index: number, array: byte[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: byte[], fn: (a: byte, i: number, self: byte[]) => void): void {
+export function forEach(self: byte[], callbackfn: (value: byte, index: number, array: byte[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: byte[], predicate: (value: byte, i: number) => boolean): Byte | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: byte[], predicate: (value: byte, index: number) => boolean): Byte | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -1866,15 +2161,18 @@ export function find(self: byte[], predicate: (value: byte, i: number) => boolea
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: byte[], fn: (value: byte, i: number) => boolean): number {
+export function findIndex(self: byte[], predicate: (value: byte, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -1885,14 +2183,14 @@ export function findIndex(self: byte[], fn: (value: byte, i: number) => boolean)
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: byte[], fn: (elem: byte, i: number) => boolean): Byte | undefined {
+export function findLast(self: byte[], predicate: (elem: byte, index: number) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -1900,17 +2198,17 @@ export function findLast(self: byte[], fn: (elem: byte, i: number) => boolean): 
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: byte[], fn: (v: byte, i: number) => boolean): boolean {
+export function every(self: byte[], predicate: (value: byte, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -1918,17 +2216,17 @@ export function every(self: byte[], fn: (v: byte, i: number) => boolean): boolea
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: byte[], fn: (v: byte, i: number) => boolean): boolean {
+export function some(self: byte[], predicate: (value: byte, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -1940,13 +2238,13 @@ export function some(self: byte[], fn: (v: byte, i: number) => boolean): boolean
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: byte[], fn: (element: byte, i: number) => boolean): number {
+export function findLastIndex(self: byte[], predicate: (element: byte, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -1954,99 +2252,97 @@ export function findLastIndex(self: byte[], fn: (element: byte, i: number) => bo
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: byte[], fn: (a: byte, b: byte, i: number) => byte): byte {
+export function reduce(self: byte[], callbackfn: (previousValue: byte, currentValue: byte, index: number) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte, i: number) => U, initialValue: U): U {
+export function reduce<U = byte>(self: byte[], callbackfn: (previousValue: U, currentValue: byte, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: byte[], fn: (a: byte, b: byte, i: number) => byte): byte {
+export function reduceRight(self: byte[], callbackfn: (previousValue: byte, currentValue: byte, index: number) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: byte[], fn: (a: U, b: byte, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: byte[], callbackfn: (previousValue: U, currentValue: byte, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: byte[], fn: (a: byte, i: number) => void): void {
+export function forEach(self: byte[], callbackfn: (value: byte, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: byte[], predicate: (value: byte) => boolean): Byte | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -2056,15 +2352,18 @@ export function find(self: byte[], predicate: (value: byte) => boolean): Byte | 
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: byte[], fn: (value: byte) => boolean): number {
+export function findIndex(self: byte[], predicate: (value: byte) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -2075,14 +2374,14 @@ export function findIndex(self: byte[], fn: (value: byte) => boolean): number {
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: byte[], fn: (elem: byte) => boolean): Byte | undefined {
+export function findLast(self: byte[], predicate: (elem: byte) => boolean): Byte | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -2090,17 +2389,17 @@ export function findLast(self: byte[], fn: (elem: byte) => boolean): Byte | unde
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: byte[], fn: (v: byte) => boolean): boolean {
+export function every(self: byte[], predicate: (value: byte) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -2108,17 +2407,17 @@ export function every(self: byte[], fn: (v: byte) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: byte[], fn: (v: byte) => boolean): boolean {
+export function some(self: byte[], predicate: (value: byte) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -2126,16 +2425,14 @@ export function some(self: byte[], fn: (v: byte) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: byte[], fn: (v: byte) => boolean): byte[] {
-    return filter(self, (v: byte, i: number): boolean => fn(v));
+export function filter(self: byte[], predicate: (value: byte) => boolean): byte[] {
+    return filter(self, (value: byte, index: number): boolean => predicate(value));
 }
 
 /**
@@ -2143,13 +2440,13 @@ export function filter(self: byte[], fn: (v: byte) => boolean): byte[] {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: byte[], fn: (element: byte) => boolean): number {
+export function findLastIndex(self: byte[], predicate: (element: byte) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -2157,96 +2454,84 @@ export function findLastIndex(self: byte[], fn: (element: byte) => boolean): num
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: byte[], fn: (a: byte, b: byte) => byte): byte {
+export function reduce(self: byte[], callbackfn: (previousValue: byte, currentValue: byte) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = byte>(self: byte[], fn: (previousValue: U, currentValue: byte) => U, initialValue: U): U {
+export function reduce<U = byte>(self: byte[], callbackfn: (previousValue: U, currentValue: byte) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: byte[], fn: (a: byte, b: byte) => byte): byte {
+export function reduceRight(self: byte[], callbackfn: (previousValue: byte, currentValue: byte) => byte): byte {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: byte = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: byte[], fn: (a: U, b: byte) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: byte[], callbackfn: (previousValue: U, currentValue: byte) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: byte[], fn: (a: byte) => void): void {
+export function forEach(self: byte[], callbackfn: (value: byte) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -2656,57 +2941,344 @@ export function values(self: byte[], ): IterableIterator<byte> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: byte[], ): IterableIterator<[number, byte]> {
     return new ArrayEntriesIterator_byte(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: byte[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: byte[], predicate: () => boolean): byte[] {
+    return filter(self, (value: byte, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: byte[], predicate: () => boolean): Byte | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: byte[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: byte[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: byte[], callbackfn: (previousValue: byte) => byte): byte {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: byte = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: byte[], callbackfn: () => byte): byte {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: byte = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = byte>(self: byte[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = byte>(self: byte[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: byte[], callbackfn: (previousValue: byte) => byte): byte {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: byte = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: byte[], callbackfn: () => byte): byte {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: byte = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: byte[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: byte[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: byte[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: byte[], predicate: () => boolean): Byte | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: byte[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: byte[], fn: (value: byte, i: number, self: byte[]) => byte): byte[] {
+export function map(self: byte[], callbackfn: (value: byte, index: number, array: byte[]) => byte): byte[] {
     const len = self.length;
     let res = new byte[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: byte[], fn: (value: byte, i: number) => byte): byte[] {
+export function map(self: byte[], callbackfn: (value: byte, index: number) => byte): byte[] {
     const len = self.length;
     let res = new byte[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: byte[], fn: (value: byte) => byte): byte[] {
+export function map(self: byte[], callbackfn: (value: byte) => byte): byte[] {
     const len = self.length;
     let res = new byte[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: byte[], callbackfn: () => byte): byte[] {
+    const len = self.length;
+    let res = new byte[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
@@ -3038,7 +3610,17 @@ export function fill(self: short[], value: short, start: int, end: int): short[]
     return self;
 }
 
-export function find(self: short[], predicate: (value: short, i: number, self: short[]) => boolean): Short | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: short[], predicate: (value: short, index: number, array: short[]) => boolean): Short | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -3047,15 +3629,18 @@ export function find(self: short[], predicate: (value: short, i: number, self: s
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: short[], fn: (value: short, i: number, self: short[]) => boolean): number {
+export function findIndex(self: short[], predicate: (value: short, index: number, array: short[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -3066,14 +3651,14 @@ export function findIndex(self: short[], fn: (value: short, i: number, self: sho
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: short[], fn: (elem: short, i: number, self: short[]) => boolean): Short | undefined {
+export function findLast(self: short[], predicate: (elem: short, index: number, array: short[]) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -3081,17 +3666,17 @@ export function findLast(self: short[], fn: (elem: short, i: number, self: short
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: short[], fn: (v: short, i: number, self: short[]) => boolean): boolean {
+export function every(self: short[], predicate: (value: short, index: number, array: short[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -3099,17 +3684,17 @@ export function every(self: short[], fn: (v: short, i: number, self: short[]) =>
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: short[], fn: (v: short, i: number, self: short[]) => boolean): boolean {
+export function some(self: short[], predicate: (value: short, index: number, array: short[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -3117,16 +3702,14 @@ export function some(self: short[], fn: (v: short, i: number, self: short[]) => 
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: short[], fn: (v: short, i: number, self: short[]) => boolean): short[] {
-    return filter(self, (v: short, i: number): boolean => fn(v, i as number, self));
+export function filter(self: short[], predicate: (value: short, index: number, array: short[]) => boolean): short[] {
+    return filter(self, (value: short, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -3134,13 +3717,13 @@ export function filter(self: short[], fn: (v: short, i: number, self: short[]) =
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: short[], fn: (element: short, i: number, self: short[]) => boolean): number {
+export function findLastIndex(self: short[], predicate: (element: short, index: number, array: short[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -3148,100 +3731,98 @@ export function findLastIndex(self: short[], fn: (element: short, i: number, sel
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: short[], fn: (a: short, b: short, i: number, self: short[]) => short): short {
+export function reduce(self: short[], callbackfn: (previousValue: short, currentValue: short, index: number, array: short[]) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short, i: number, self: short[]) => U, initialValue: U): U {
+export function reduce<U = short>(self: short[], callbackfn: (previousValue: U, currentValue: short, index: number, array: short[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: short[], fn: (a: short, b: short, i: number, self: short[]) => short): short {
+export function reduceRight(self: short[], callbackfn: (previousValue: short, currentValue: short, index: number, array: short[]) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number, self: short[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: short[], callbackfn: (previousValue: U, currentValue: short, index: number, array: short[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: short[], fn: (a: short, i: number, self: short[]) => void): void {
+export function forEach(self: short[], callbackfn: (value: short, index: number, array: short[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: short[], predicate: (value: short, i: number) => boolean): Short | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: short[], predicate: (value: short, index: number) => boolean): Short | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -3250,15 +3831,18 @@ export function find(self: short[], predicate: (value: short, i: number) => bool
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: short[], fn: (value: short, i: number) => boolean): number {
+export function findIndex(self: short[], predicate: (value: short, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -3269,14 +3853,14 @@ export function findIndex(self: short[], fn: (value: short, i: number) => boolea
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: short[], fn: (elem: short, i: number) => boolean): Short | undefined {
+export function findLast(self: short[], predicate: (elem: short, index: number) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -3284,17 +3868,17 @@ export function findLast(self: short[], fn: (elem: short, i: number) => boolean)
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: short[], fn: (v: short, i: number) => boolean): boolean {
+export function every(self: short[], predicate: (value: short, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -3302,17 +3886,17 @@ export function every(self: short[], fn: (v: short, i: number) => boolean): bool
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: short[], fn: (v: short, i: number) => boolean): boolean {
+export function some(self: short[], predicate: (value: short, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -3324,13 +3908,13 @@ export function some(self: short[], fn: (v: short, i: number) => boolean): boole
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: short[], fn: (element: short, i: number) => boolean): number {
+export function findLastIndex(self: short[], predicate: (element: short, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -3338,99 +3922,97 @@ export function findLastIndex(self: short[], fn: (element: short, i: number) => 
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: short[], fn: (a: short, b: short, i: number) => short): short {
+export function reduce(self: short[], callbackfn: (previousValue: short, currentValue: short, index: number) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short, i: number) => U, initialValue: U): U {
+export function reduce<U = short>(self: short[], callbackfn: (previousValue: U, currentValue: short, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: short[], fn: (a: short, b: short, i: number) => short): short {
+export function reduceRight(self: short[], callbackfn: (previousValue: short, currentValue: short, index: number) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: short[], fn: (a: U, b: short, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: short[], callbackfn: (previousValue: U, currentValue: short, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: short[], fn: (a: short, i: number) => void): void {
+export function forEach(self: short[], callbackfn: (value: short, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: short[], predicate: (value: short) => boolean): Short | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -3440,15 +4022,18 @@ export function find(self: short[], predicate: (value: short) => boolean): Short
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: short[], fn: (value: short) => boolean): number {
+export function findIndex(self: short[], predicate: (value: short) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -3459,14 +4044,14 @@ export function findIndex(self: short[], fn: (value: short) => boolean): number 
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: short[], fn: (elem: short) => boolean): Short | undefined {
+export function findLast(self: short[], predicate: (elem: short) => boolean): Short | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -3474,17 +4059,17 @@ export function findLast(self: short[], fn: (elem: short) => boolean): Short | u
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: short[], fn: (v: short) => boolean): boolean {
+export function every(self: short[], predicate: (value: short) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -3492,17 +4077,17 @@ export function every(self: short[], fn: (v: short) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: short[], fn: (v: short) => boolean): boolean {
+export function some(self: short[], predicate: (value: short) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -3510,16 +4095,14 @@ export function some(self: short[], fn: (v: short) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: short[], fn: (v: short) => boolean): short[] {
-    return filter(self, (v: short, i: number): boolean => fn(v));
+export function filter(self: short[], predicate: (value: short) => boolean): short[] {
+    return filter(self, (value: short, index: number): boolean => predicate(value));
 }
 
 /**
@@ -3527,13 +4110,13 @@ export function filter(self: short[], fn: (v: short) => boolean): short[] {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: short[], fn: (element: short) => boolean): number {
+export function findLastIndex(self: short[], predicate: (element: short) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -3541,96 +4124,84 @@ export function findLastIndex(self: short[], fn: (element: short) => boolean): n
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: short[], fn: (a: short, b: short) => short): short {
+export function reduce(self: short[], callbackfn: (previousValue: short, currentValue: short) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = short>(self: short[], fn: (previousValue: U, currentValue: short) => U, initialValue: U): U {
+export function reduce<U = short>(self: short[], callbackfn: (previousValue: U, currentValue: short) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: short[], fn: (a: short, b: short) => short): short {
+export function reduceRight(self: short[], callbackfn: (previousValue: short, currentValue: short) => short): short {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: short = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: short[], fn: (a: U, b: short) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: short[], callbackfn: (previousValue: U, currentValue: short) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: short[], fn: (a: short) => void): void {
+export function forEach(self: short[], callbackfn: (value: short) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -4040,57 +4611,344 @@ export function values(self: short[], ): IterableIterator<short> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: short[], ): IterableIterator<[number, short]> {
     return new ArrayEntriesIterator_short(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: short[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: short[], predicate: () => boolean): short[] {
+    return filter(self, (value: short, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: short[], predicate: () => boolean): Short | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: short[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: short[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: short[], callbackfn: (previousValue: short) => short): short {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: short = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: short[], callbackfn: () => short): short {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: short = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = short>(self: short[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = short>(self: short[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: short[], callbackfn: (previousValue: short) => short): short {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: short = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: short[], callbackfn: () => short): short {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: short = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: short[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: short[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: short[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: short[], predicate: () => boolean): Short | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: short[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: short[], fn: (value: short, i: number, self: short[]) => short): short[] {
+export function map(self: short[], callbackfn: (value: short, index: number, array: short[]) => short): short[] {
     const len = self.length;
     let res = new short[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: short[], fn: (value: short, i: number) => short): short[] {
+export function map(self: short[], callbackfn: (value: short, index: number) => short): short[] {
     const len = self.length;
     let res = new short[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: short[], fn: (value: short) => short): short[] {
+export function map(self: short[], callbackfn: (value: short) => short): short[] {
     const len = self.length;
     let res = new short[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: short[], callbackfn: () => short): short[] {
+    const len = self.length;
+    let res = new short[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
@@ -4422,7 +5280,17 @@ export function fill(self: int[], value: int, start: int, end: int): int[] {
     return self;
 }
 
-export function find(self: int[], predicate: (value: int, i: number, self: int[]) => boolean): Int | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: int[], predicate: (value: int, index: number, array: int[]) => boolean): Int | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -4431,15 +5299,18 @@ export function find(self: int[], predicate: (value: int, i: number, self: int[]
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: int[], fn: (value: int, i: number, self: int[]) => boolean): number {
+export function findIndex(self: int[], predicate: (value: int, index: number, array: int[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -4450,14 +5321,14 @@ export function findIndex(self: int[], fn: (value: int, i: number, self: int[]) 
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: int[], fn: (elem: int, i: number, self: int[]) => boolean): Int | undefined {
+export function findLast(self: int[], predicate: (elem: int, index: number, array: int[]) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -4465,17 +5336,17 @@ export function findLast(self: int[], fn: (elem: int, i: number, self: int[]) =>
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: int[], fn: (v: int, i: number, self: int[]) => boolean): boolean {
+export function every(self: int[], predicate: (value: int, index: number, array: int[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -4483,17 +5354,17 @@ export function every(self: int[], fn: (v: int, i: number, self: int[]) => boole
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: int[], fn: (v: int, i: number, self: int[]) => boolean): boolean {
+export function some(self: int[], predicate: (value: int, index: number, array: int[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -4501,16 +5372,14 @@ export function some(self: int[], fn: (v: int, i: number, self: int[]) => boolea
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: int[], fn: (v: int, i: number, self: int[]) => boolean): int[] {
-    return filter(self, (v: int, i: number): boolean => fn(v, i as number, self));
+export function filter(self: int[], predicate: (value: int, index: number, array: int[]) => boolean): int[] {
+    return filter(self, (value: int, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -4518,13 +5387,13 @@ export function filter(self: int[], fn: (v: int, i: number, self: int[]) => bool
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: int[], fn: (element: int, i: number, self: int[]) => boolean): number {
+export function findLastIndex(self: int[], predicate: (element: int, index: number, array: int[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -4532,100 +5401,98 @@ export function findLastIndex(self: int[], fn: (element: int, i: number, self: i
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: int[], fn: (a: int, b: int, i: number, self: int[]) => int): int {
+export function reduce(self: int[], callbackfn: (previousValue: int, currentValue: int, index: number, array: int[]) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int, i: number, self: int[]) => U, initialValue: U): U {
+export function reduce<U = int>(self: int[], callbackfn: (previousValue: U, currentValue: int, index: number, array: int[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: int[], fn: (a: int, b: int, i: number, self: int[]) => int): int {
+export function reduceRight(self: int[], callbackfn: (previousValue: int, currentValue: int, index: number, array: int[]) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number, self: int[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: int[], callbackfn: (previousValue: U, currentValue: int, index: number, array: int[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: int[], fn: (a: int, i: number, self: int[]) => void): void {
+export function forEach(self: int[], callbackfn: (value: int, index: number, array: int[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: int[], predicate: (value: int, i: number) => boolean): Int | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: int[], predicate: (value: int, index: number) => boolean): Int | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -4634,15 +5501,18 @@ export function find(self: int[], predicate: (value: int, i: number) => boolean)
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: int[], fn: (value: int, i: number) => boolean): number {
+export function findIndex(self: int[], predicate: (value: int, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -4653,14 +5523,14 @@ export function findIndex(self: int[], fn: (value: int, i: number) => boolean): 
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: int[], fn: (elem: int, i: number) => boolean): Int | undefined {
+export function findLast(self: int[], predicate: (elem: int, index: number) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -4668,17 +5538,17 @@ export function findLast(self: int[], fn: (elem: int, i: number) => boolean): In
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: int[], fn: (v: int, i: number) => boolean): boolean {
+export function every(self: int[], predicate: (value: int, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -4686,17 +5556,17 @@ export function every(self: int[], fn: (v: int, i: number) => boolean): boolean 
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: int[], fn: (v: int, i: number) => boolean): boolean {
+export function some(self: int[], predicate: (value: int, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -4708,13 +5578,13 @@ export function some(self: int[], fn: (v: int, i: number) => boolean): boolean {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: int[], fn: (element: int, i: number) => boolean): number {
+export function findLastIndex(self: int[], predicate: (element: int, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -4722,99 +5592,97 @@ export function findLastIndex(self: int[], fn: (element: int, i: number) => bool
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: int[], fn: (a: int, b: int, i: number) => int): int {
+export function reduce(self: int[], callbackfn: (previousValue: int, currentValue: int, index: number) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int, i: number) => U, initialValue: U): U {
+export function reduce<U = int>(self: int[], callbackfn: (previousValue: U, currentValue: int, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: int[], fn: (a: int, b: int, i: number) => int): int {
+export function reduceRight(self: int[], callbackfn: (previousValue: int, currentValue: int, index: number) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: int[], fn: (a: U, b: int, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: int[], callbackfn: (previousValue: U, currentValue: int, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: int[], fn: (a: int, i: number) => void): void {
+export function forEach(self: int[], callbackfn: (value: int, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: int[], predicate: (value: int) => boolean): Int | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -4824,15 +5692,18 @@ export function find(self: int[], predicate: (value: int) => boolean): Int | und
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: int[], fn: (value: int) => boolean): number {
+export function findIndex(self: int[], predicate: (value: int) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -4843,14 +5714,14 @@ export function findIndex(self: int[], fn: (value: int) => boolean): number {
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: int[], fn: (elem: int) => boolean): Int | undefined {
+export function findLast(self: int[], predicate: (elem: int) => boolean): Int | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -4858,17 +5729,17 @@ export function findLast(self: int[], fn: (elem: int) => boolean): Int | undefin
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: int[], fn: (v: int) => boolean): boolean {
+export function every(self: int[], predicate: (value: int) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -4876,17 +5747,17 @@ export function every(self: int[], fn: (v: int) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: int[], fn: (v: int) => boolean): boolean {
+export function some(self: int[], predicate: (value: int) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -4894,16 +5765,14 @@ export function some(self: int[], fn: (v: int) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: int[], fn: (v: int) => boolean): int[] {
-    return filter(self, (v: int, i: number): boolean => fn(v));
+export function filter(self: int[], predicate: (value: int) => boolean): int[] {
+    return filter(self, (value: int, index: number): boolean => predicate(value));
 }
 
 /**
@@ -4911,13 +5780,13 @@ export function filter(self: int[], fn: (v: int) => boolean): int[] {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: int[], fn: (element: int) => boolean): number {
+export function findLastIndex(self: int[], predicate: (element: int) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -4925,96 +5794,84 @@ export function findLastIndex(self: int[], fn: (element: int) => boolean): numbe
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: int[], fn: (a: int, b: int) => int): int {
+export function reduce(self: int[], callbackfn: (previousValue: int, currentValue: int) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = int>(self: int[], fn: (previousValue: U, currentValue: int) => U, initialValue: U): U {
+export function reduce<U = int>(self: int[], callbackfn: (previousValue: U, currentValue: int) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: int[], fn: (a: int, b: int) => int): int {
+export function reduceRight(self: int[], callbackfn: (previousValue: int, currentValue: int) => int): int {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: int = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: int[], fn: (a: U, b: int) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: int[], callbackfn: (previousValue: U, currentValue: int) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: int[], fn: (a: int) => void): void {
+export function forEach(self: int[], callbackfn: (value: int) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -5424,57 +6281,344 @@ export function values(self: int[], ): IterableIterator<int> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: int[], ): IterableIterator<[number, int]> {
     return new ArrayEntriesIterator_int(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: int[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: int[], predicate: () => boolean): int[] {
+    return filter(self, (value: int, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: int[], predicate: () => boolean): Int | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: int[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: int[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: int[], callbackfn: (previousValue: int) => int): int {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: int = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: int[], callbackfn: () => int): int {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: int = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = int>(self: int[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = int>(self: int[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: int[], callbackfn: (previousValue: int) => int): int {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: int = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: int[], callbackfn: () => int): int {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: int = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: int[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: int[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: int[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: int[], predicate: () => boolean): Int | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: int[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: int[], fn: (value: int, i: number, self: int[]) => int): int[] {
+export function map(self: int[], callbackfn: (value: int, index: number, array: int[]) => int): int[] {
     const len = self.length;
     let res = new int[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: int[], fn: (value: int, i: number) => int): int[] {
+export function map(self: int[], callbackfn: (value: int, index: number) => int): int[] {
     const len = self.length;
     let res = new int[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: int[], fn: (value: int) => int): int[] {
+export function map(self: int[], callbackfn: (value: int) => int): int[] {
     const len = self.length;
     let res = new int[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: int[], callbackfn: () => int): int[] {
+    const len = self.length;
+    let res = new int[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
@@ -5806,7 +6950,17 @@ export function fill(self: long[], value: long, start: int, end: int): long[] {
     return self;
 }
 
-export function find(self: long[], predicate: (value: long, i: number, self: long[]) => boolean): Long | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: long[], predicate: (value: long, index: number, array: long[]) => boolean): Long | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -5815,15 +6969,18 @@ export function find(self: long[], predicate: (value: long, i: number, self: lon
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: long[], fn: (value: long, i: number, self: long[]) => boolean): number {
+export function findIndex(self: long[], predicate: (value: long, index: number, array: long[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -5834,14 +6991,14 @@ export function findIndex(self: long[], fn: (value: long, i: number, self: long[
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: long[], fn: (elem: long, i: number, self: long[]) => boolean): Long | undefined {
+export function findLast(self: long[], predicate: (elem: long, index: number, array: long[]) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -5849,17 +7006,17 @@ export function findLast(self: long[], fn: (elem: long, i: number, self: long[])
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: long[], fn: (v: long, i: number, self: long[]) => boolean): boolean {
+export function every(self: long[], predicate: (value: long, index: number, array: long[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -5867,17 +7024,17 @@ export function every(self: long[], fn: (v: long, i: number, self: long[]) => bo
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: long[], fn: (v: long, i: number, self: long[]) => boolean): boolean {
+export function some(self: long[], predicate: (value: long, index: number, array: long[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -5885,16 +7042,14 @@ export function some(self: long[], fn: (v: long, i: number, self: long[]) => boo
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: long[], fn: (v: long, i: number, self: long[]) => boolean): long[] {
-    return filter(self, (v: long, i: number): boolean => fn(v, i as number, self));
+export function filter(self: long[], predicate: (value: long, index: number, array: long[]) => boolean): long[] {
+    return filter(self, (value: long, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -5902,13 +7057,13 @@ export function filter(self: long[], fn: (v: long, i: number, self: long[]) => b
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: long[], fn: (element: long, i: number, self: long[]) => boolean): number {
+export function findLastIndex(self: long[], predicate: (element: long, index: number, array: long[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -5916,100 +7071,98 @@ export function findLastIndex(self: long[], fn: (element: long, i: number, self:
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: long[], fn: (a: long, b: long, i: number, self: long[]) => long): long {
+export function reduce(self: long[], callbackfn: (previousValue: long, currentValue: long, index: number, array: long[]) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long, i: number, self: long[]) => U, initialValue: U): U {
+export function reduce<U = long>(self: long[], callbackfn: (previousValue: U, currentValue: long, index: number, array: long[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: long[], fn: (a: long, b: long, i: number, self: long[]) => long): long {
+export function reduceRight(self: long[], callbackfn: (previousValue: long, currentValue: long, index: number, array: long[]) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number, self: long[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: long[], callbackfn: (previousValue: U, currentValue: long, index: number, array: long[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: long[], fn: (a: long, i: number, self: long[]) => void): void {
+export function forEach(self: long[], callbackfn: (value: long, index: number, array: long[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: long[], predicate: (value: long, i: number) => boolean): Long | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: long[], predicate: (value: long, index: number) => boolean): Long | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -6018,15 +7171,18 @@ export function find(self: long[], predicate: (value: long, i: number) => boolea
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: long[], fn: (value: long, i: number) => boolean): number {
+export function findIndex(self: long[], predicate: (value: long, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -6037,14 +7193,14 @@ export function findIndex(self: long[], fn: (value: long, i: number) => boolean)
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: long[], fn: (elem: long, i: number) => boolean): Long | undefined {
+export function findLast(self: long[], predicate: (elem: long, index: number) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -6052,17 +7208,17 @@ export function findLast(self: long[], fn: (elem: long, i: number) => boolean): 
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: long[], fn: (v: long, i: number) => boolean): boolean {
+export function every(self: long[], predicate: (value: long, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -6070,17 +7226,17 @@ export function every(self: long[], fn: (v: long, i: number) => boolean): boolea
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: long[], fn: (v: long, i: number) => boolean): boolean {
+export function some(self: long[], predicate: (value: long, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -6092,13 +7248,13 @@ export function some(self: long[], fn: (v: long, i: number) => boolean): boolean
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: long[], fn: (element: long, i: number) => boolean): number {
+export function findLastIndex(self: long[], predicate: (element: long, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -6106,99 +7262,97 @@ export function findLastIndex(self: long[], fn: (element: long, i: number) => bo
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: long[], fn: (a: long, b: long, i: number) => long): long {
+export function reduce(self: long[], callbackfn: (previousValue: long, currentValue: long, index: number) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long, i: number) => U, initialValue: U): U {
+export function reduce<U = long>(self: long[], callbackfn: (previousValue: U, currentValue: long, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: long[], fn: (a: long, b: long, i: number) => long): long {
+export function reduceRight(self: long[], callbackfn: (previousValue: long, currentValue: long, index: number) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: long[], fn: (a: U, b: long, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: long[], callbackfn: (previousValue: U, currentValue: long, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: long[], fn: (a: long, i: number) => void): void {
+export function forEach(self: long[], callbackfn: (value: long, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: long[], predicate: (value: long) => boolean): Long | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -6208,15 +7362,18 @@ export function find(self: long[], predicate: (value: long) => boolean): Long | 
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: long[], fn: (value: long) => boolean): number {
+export function findIndex(self: long[], predicate: (value: long) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -6227,14 +7384,14 @@ export function findIndex(self: long[], fn: (value: long) => boolean): number {
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: long[], fn: (elem: long) => boolean): Long | undefined {
+export function findLast(self: long[], predicate: (elem: long) => boolean): Long | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -6242,17 +7399,17 @@ export function findLast(self: long[], fn: (elem: long) => boolean): Long | unde
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: long[], fn: (v: long) => boolean): boolean {
+export function every(self: long[], predicate: (value: long) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -6260,17 +7417,17 @@ export function every(self: long[], fn: (v: long) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: long[], fn: (v: long) => boolean): boolean {
+export function some(self: long[], predicate: (value: long) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -6278,16 +7435,14 @@ export function some(self: long[], fn: (v: long) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: long[], fn: (v: long) => boolean): long[] {
-    return filter(self, (v: long, i: number): boolean => fn(v));
+export function filter(self: long[], predicate: (value: long) => boolean): long[] {
+    return filter(self, (value: long, index: number): boolean => predicate(value));
 }
 
 /**
@@ -6295,13 +7450,13 @@ export function filter(self: long[], fn: (v: long) => boolean): long[] {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: long[], fn: (element: long) => boolean): number {
+export function findLastIndex(self: long[], predicate: (element: long) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -6309,96 +7464,84 @@ export function findLastIndex(self: long[], fn: (element: long) => boolean): num
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: long[], fn: (a: long, b: long) => long): long {
+export function reduce(self: long[], callbackfn: (previousValue: long, currentValue: long) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = long>(self: long[], fn: (previousValue: U, currentValue: long) => U, initialValue: U): U {
+export function reduce<U = long>(self: long[], callbackfn: (previousValue: U, currentValue: long) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: long[], fn: (a: long, b: long) => long): long {
+export function reduceRight(self: long[], callbackfn: (previousValue: long, currentValue: long) => long): long {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: long = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: long[], fn: (a: U, b: long) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: long[], callbackfn: (previousValue: U, currentValue: long) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: long[], fn: (a: long) => void): void {
+export function forEach(self: long[], callbackfn: (value: long) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -6808,57 +7951,344 @@ export function values(self: long[], ): IterableIterator<long> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: long[], ): IterableIterator<[number, long]> {
     return new ArrayEntriesIterator_long(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: long[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: long[], predicate: () => boolean): long[] {
+    return filter(self, (value: long, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: long[], predicate: () => boolean): Long | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: long[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: long[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: long[], callbackfn: (previousValue: long) => long): long {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: long = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: long[], callbackfn: () => long): long {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: long = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = long>(self: long[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = long>(self: long[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: long[], callbackfn: (previousValue: long) => long): long {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: long = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: long[], callbackfn: () => long): long {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: long = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: long[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: long[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: long[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: long[], predicate: () => boolean): Long | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: long[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: long[], fn: (value: long, i: number, self: long[]) => long): long[] {
+export function map(self: long[], callbackfn: (value: long, index: number, array: long[]) => long): long[] {
     const len = self.length;
     let res = new long[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: long[], fn: (value: long, i: number) => long): long[] {
+export function map(self: long[], callbackfn: (value: long, index: number) => long): long[] {
     const len = self.length;
     let res = new long[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: long[], fn: (value: long) => long): long[] {
+export function map(self: long[], callbackfn: (value: long) => long): long[] {
     const len = self.length;
     let res = new long[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: long[], callbackfn: () => long): long[] {
+    const len = self.length;
+    let res = new long[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
@@ -7190,7 +8620,17 @@ export function fill(self: float[], value: float, start: int, end: int): float[]
     return self;
 }
 
-export function find(self: float[], predicate: (value: float, i: number, self: float[]) => boolean): Float | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: float[], predicate: (value: float, index: number, array: float[]) => boolean): Float | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -7199,15 +8639,18 @@ export function find(self: float[], predicate: (value: float, i: number, self: f
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: float[], fn: (value: float, i: number, self: float[]) => boolean): number {
+export function findIndex(self: float[], predicate: (value: float, index: number, array: float[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -7218,14 +8661,14 @@ export function findIndex(self: float[], fn: (value: float, i: number, self: flo
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: float[], fn: (elem: float, i: number, self: float[]) => boolean): Float | undefined {
+export function findLast(self: float[], predicate: (elem: float, index: number, array: float[]) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -7233,17 +8676,17 @@ export function findLast(self: float[], fn: (elem: float, i: number, self: float
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: float[], fn: (v: float, i: number, self: float[]) => boolean): boolean {
+export function every(self: float[], predicate: (value: float, index: number, array: float[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -7251,17 +8694,17 @@ export function every(self: float[], fn: (v: float, i: number, self: float[]) =>
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: float[], fn: (v: float, i: number, self: float[]) => boolean): boolean {
+export function some(self: float[], predicate: (value: float, index: number, array: float[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -7269,16 +8712,14 @@ export function some(self: float[], fn: (v: float, i: number, self: float[]) => 
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: float[], fn: (v: float, i: number, self: float[]) => boolean): float[] {
-    return filter(self, (v: float, i: number): boolean => fn(v, i as number, self));
+export function filter(self: float[], predicate: (value: float, index: number, array: float[]) => boolean): float[] {
+    return filter(self, (value: float, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -7286,13 +8727,13 @@ export function filter(self: float[], fn: (v: float, i: number, self: float[]) =
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: float[], fn: (element: float, i: number, self: float[]) => boolean): number {
+export function findLastIndex(self: float[], predicate: (element: float, index: number, array: float[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -7300,100 +8741,98 @@ export function findLastIndex(self: float[], fn: (element: float, i: number, sel
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: float[], fn: (a: float, b: float, i: number, self: float[]) => float): float {
+export function reduce(self: float[], callbackfn: (previousValue: float, currentValue: float, index: number, array: float[]) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float, i: number, self: float[]) => U, initialValue: U): U {
+export function reduce<U = float>(self: float[], callbackfn: (previousValue: U, currentValue: float, index: number, array: float[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: float[], fn: (a: float, b: float, i: number, self: float[]) => float): float {
+export function reduceRight(self: float[], callbackfn: (previousValue: float, currentValue: float, index: number, array: float[]) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number, self: float[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: float[], callbackfn: (previousValue: U, currentValue: float, index: number, array: float[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: float[], fn: (a: float, i: number, self: float[]) => void): void {
+export function forEach(self: float[], callbackfn: (value: float, index: number, array: float[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: float[], predicate: (value: float, i: number) => boolean): Float | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: float[], predicate: (value: float, index: number) => boolean): Float | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -7402,15 +8841,18 @@ export function find(self: float[], predicate: (value: float, i: number) => bool
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: float[], fn: (value: float, i: number) => boolean): number {
+export function findIndex(self: float[], predicate: (value: float, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -7421,14 +8863,14 @@ export function findIndex(self: float[], fn: (value: float, i: number) => boolea
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: float[], fn: (elem: float, i: number) => boolean): Float | undefined {
+export function findLast(self: float[], predicate: (elem: float, index: number) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -7436,17 +8878,17 @@ export function findLast(self: float[], fn: (elem: float, i: number) => boolean)
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: float[], fn: (v: float, i: number) => boolean): boolean {
+export function every(self: float[], predicate: (value: float, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -7454,17 +8896,17 @@ export function every(self: float[], fn: (v: float, i: number) => boolean): bool
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: float[], fn: (v: float, i: number) => boolean): boolean {
+export function some(self: float[], predicate: (value: float, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -7476,13 +8918,13 @@ export function some(self: float[], fn: (v: float, i: number) => boolean): boole
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: float[], fn: (element: float, i: number) => boolean): number {
+export function findLastIndex(self: float[], predicate: (element: float, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -7490,99 +8932,97 @@ export function findLastIndex(self: float[], fn: (element: float, i: number) => 
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: float[], fn: (a: float, b: float, i: number) => float): float {
+export function reduce(self: float[], callbackfn: (previousValue: float, currentValue: float, index: number) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float, i: number) => U, initialValue: U): U {
+export function reduce<U = float>(self: float[], callbackfn: (previousValue: U, currentValue: float, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: float[], fn: (a: float, b: float, i: number) => float): float {
+export function reduceRight(self: float[], callbackfn: (previousValue: float, currentValue: float, index: number) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: float[], fn: (a: U, b: float, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: float[], callbackfn: (previousValue: U, currentValue: float, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: float[], fn: (a: float, i: number) => void): void {
+export function forEach(self: float[], callbackfn: (value: float, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: float[], predicate: (value: float) => boolean): Float | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -7592,15 +9032,18 @@ export function find(self: float[], predicate: (value: float) => boolean): Float
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: float[], fn: (value: float) => boolean): number {
+export function findIndex(self: float[], predicate: (value: float) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -7611,14 +9054,14 @@ export function findIndex(self: float[], fn: (value: float) => boolean): number 
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: float[], fn: (elem: float) => boolean): Float | undefined {
+export function findLast(self: float[], predicate: (elem: float) => boolean): Float | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -7626,17 +9069,17 @@ export function findLast(self: float[], fn: (elem: float) => boolean): Float | u
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: float[], fn: (v: float) => boolean): boolean {
+export function every(self: float[], predicate: (value: float) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -7644,17 +9087,17 @@ export function every(self: float[], fn: (v: float) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: float[], fn: (v: float) => boolean): boolean {
+export function some(self: float[], predicate: (value: float) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -7662,16 +9105,14 @@ export function some(self: float[], fn: (v: float) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: float[], fn: (v: float) => boolean): float[] {
-    return filter(self, (v: float, i: number): boolean => fn(v));
+export function filter(self: float[], predicate: (value: float) => boolean): float[] {
+    return filter(self, (value: float, index: number): boolean => predicate(value));
 }
 
 /**
@@ -7679,13 +9120,13 @@ export function filter(self: float[], fn: (v: float) => boolean): float[] {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: float[], fn: (element: float) => boolean): number {
+export function findLastIndex(self: float[], predicate: (element: float) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -7693,96 +9134,84 @@ export function findLastIndex(self: float[], fn: (element: float) => boolean): n
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: float[], fn: (a: float, b: float) => float): float {
+export function reduce(self: float[], callbackfn: (previousValue: float, currentValue: float) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = float>(self: float[], fn: (previousValue: U, currentValue: float) => U, initialValue: U): U {
+export function reduce<U = float>(self: float[], callbackfn: (previousValue: U, currentValue: float) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: float[], fn: (a: float, b: float) => float): float {
+export function reduceRight(self: float[], callbackfn: (previousValue: float, currentValue: float) => float): float {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: float = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: float[], fn: (a: U, b: float) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: float[], callbackfn: (previousValue: U, currentValue: float) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: float[], fn: (a: float) => void): void {
+export function forEach(self: float[], callbackfn: (value: float) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -8200,57 +9629,344 @@ export function values(self: float[], ): IterableIterator<float> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: float[], ): IterableIterator<[number, float]> {
     return new ArrayEntriesIterator_float(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: float[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: float[], predicate: () => boolean): float[] {
+    return filter(self, (value: float, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: float[], predicate: () => boolean): Float | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: float[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: float[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: float[], callbackfn: (previousValue: float) => float): float {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: float = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: float[], callbackfn: () => float): float {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: float = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = float>(self: float[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = float>(self: float[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: float[], callbackfn: (previousValue: float) => float): float {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: float = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: float[], callbackfn: () => float): float {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: float = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: float[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: float[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: float[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: float[], predicate: () => boolean): Float | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: float[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: float[], fn: (value: float, i: number, self: float[]) => float): float[] {
+export function map(self: float[], callbackfn: (value: float, index: number, array: float[]) => float): float[] {
     const len = self.length;
     let res = new float[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: float[], fn: (value: float, i: number) => float): float[] {
+export function map(self: float[], callbackfn: (value: float, index: number) => float): float[] {
     const len = self.length;
     let res = new float[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: float[], fn: (value: float) => float): float[] {
+export function map(self: float[], callbackfn: (value: float) => float): float[] {
     const len = self.length;
     let res = new float[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: float[], callbackfn: () => float): float[] {
+    const len = self.length;
+    let res = new float[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
@@ -8582,7 +10298,17 @@ export function fill(self: double[], value: double, start: int, end: int): doubl
     return self;
 }
 
-export function find(self: double[], predicate: (value: double, i: number, self: double[]) => boolean): Double | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: double[], predicate: (value: double, index: number, array: double[]) => boolean): Double | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -8591,15 +10317,18 @@ export function find(self: double[], predicate: (value: double, i: number, self:
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: double[], fn: (value: double, i: number, self: double[]) => boolean): number {
+export function findIndex(self: double[], predicate: (value: double, index: number, array: double[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -8610,14 +10339,14 @@ export function findIndex(self: double[], fn: (value: double, i: number, self: d
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: double[], fn: (elem: double, i: number, self: double[]) => boolean): Double | undefined {
+export function findLast(self: double[], predicate: (elem: double, index: number, array: double[]) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -8625,17 +10354,17 @@ export function findLast(self: double[], fn: (elem: double, i: number, self: dou
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: double[], fn: (v: double, i: number, self: double[]) => boolean): boolean {
+export function every(self: double[], predicate: (value: double, index: number, array: double[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -8643,17 +10372,17 @@ export function every(self: double[], fn: (v: double, i: number, self: double[])
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: double[], fn: (v: double, i: number, self: double[]) => boolean): boolean {
+export function some(self: double[], predicate: (value: double, index: number, array: double[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -8661,16 +10390,14 @@ export function some(self: double[], fn: (v: double, i: number, self: double[]) 
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: double[], fn: (v: double, i: number, self: double[]) => boolean): double[] {
-    return filter(self, (v: double, i: number): boolean => fn(v, i as number, self));
+export function filter(self: double[], predicate: (value: double, index: number, array: double[]) => boolean): double[] {
+    return filter(self, (value: double, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -8678,13 +10405,13 @@ export function filter(self: double[], fn: (v: double, i: number, self: double[]
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: double[], fn: (element: double, i: number, self: double[]) => boolean): number {
+export function findLastIndex(self: double[], predicate: (element: double, index: number, array: double[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -8692,100 +10419,98 @@ export function findLastIndex(self: double[], fn: (element: double, i: number, s
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: double[], fn: (a: double, b: double, i: number, self: double[]) => double): double {
+export function reduce(self: double[], callbackfn: (previousValue: double, currentValue: double, index: number, array: double[]) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double, i: number, self: double[]) => U, initialValue: U): U {
+export function reduce<U = double>(self: double[], callbackfn: (previousValue: U, currentValue: double, index: number, array: double[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: double[], fn: (a: double, b: double, i: number, self: double[]) => double): double {
+export function reduceRight(self: double[], callbackfn: (previousValue: double, currentValue: double, index: number, array: double[]) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number, self: double[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: double[], callbackfn: (previousValue: U, currentValue: double, index: number, array: double[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: double[], fn: (a: double, i: number, self: double[]) => void): void {
+export function forEach(self: double[], callbackfn: (value: double, index: number, array: double[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: double[], predicate: (value: double, i: number) => boolean): Double | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: double[], predicate: (value: double, index: number) => boolean): Double | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -8794,15 +10519,18 @@ export function find(self: double[], predicate: (value: double, i: number) => bo
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: double[], fn: (value: double, i: number) => boolean): number {
+export function findIndex(self: double[], predicate: (value: double, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -8813,14 +10541,14 @@ export function findIndex(self: double[], fn: (value: double, i: number) => bool
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: double[], fn: (elem: double, i: number) => boolean): Double | undefined {
+export function findLast(self: double[], predicate: (elem: double, index: number) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -8828,17 +10556,17 @@ export function findLast(self: double[], fn: (elem: double, i: number) => boolea
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: double[], fn: (v: double, i: number) => boolean): boolean {
+export function every(self: double[], predicate: (value: double, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -8846,17 +10574,17 @@ export function every(self: double[], fn: (v: double, i: number) => boolean): bo
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: double[], fn: (v: double, i: number) => boolean): boolean {
+export function some(self: double[], predicate: (value: double, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -8868,13 +10596,13 @@ export function some(self: double[], fn: (v: double, i: number) => boolean): boo
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: double[], fn: (element: double, i: number) => boolean): number {
+export function findLastIndex(self: double[], predicate: (element: double, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -8882,99 +10610,97 @@ export function findLastIndex(self: double[], fn: (element: double, i: number) =
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: double[], fn: (a: double, b: double, i: number) => double): double {
+export function reduce(self: double[], callbackfn: (previousValue: double, currentValue: double, index: number) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double, i: number) => U, initialValue: U): U {
+export function reduce<U = double>(self: double[], callbackfn: (previousValue: U, currentValue: double, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: double[], fn: (a: double, b: double, i: number) => double): double {
+export function reduceRight(self: double[], callbackfn: (previousValue: double, currentValue: double, index: number) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: double[], fn: (a: U, b: double, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: double[], callbackfn: (previousValue: U, currentValue: double, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: double[], fn: (a: double, i: number) => void): void {
+export function forEach(self: double[], callbackfn: (value: double, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: double[], predicate: (value: double) => boolean): Double | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -8984,15 +10710,18 @@ export function find(self: double[], predicate: (value: double) => boolean): Dou
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: double[], fn: (value: double) => boolean): number {
+export function findIndex(self: double[], predicate: (value: double) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -9003,14 +10732,14 @@ export function findIndex(self: double[], fn: (value: double) => boolean): numbe
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: double[], fn: (elem: double) => boolean): Double | undefined {
+export function findLast(self: double[], predicate: (elem: double) => boolean): Double | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -9018,17 +10747,17 @@ export function findLast(self: double[], fn: (elem: double) => boolean): Double 
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: double[], fn: (v: double) => boolean): boolean {
+export function every(self: double[], predicate: (value: double) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -9036,17 +10765,17 @@ export function every(self: double[], fn: (v: double) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: double[], fn: (v: double) => boolean): boolean {
+export function some(self: double[], predicate: (value: double) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -9054,16 +10783,14 @@ export function some(self: double[], fn: (v: double) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: double[], fn: (v: double) => boolean): double[] {
-    return filter(self, (v: double, i: number): boolean => fn(v));
+export function filter(self: double[], predicate: (value: double) => boolean): double[] {
+    return filter(self, (value: double, index: number): boolean => predicate(value));
 }
 
 /**
@@ -9071,13 +10798,13 @@ export function filter(self: double[], fn: (v: double) => boolean): double[] {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: double[], fn: (element: double) => boolean): number {
+export function findLastIndex(self: double[], predicate: (element: double) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -9085,96 +10812,84 @@ export function findLastIndex(self: double[], fn: (element: double) => boolean):
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: double[], fn: (a: double, b: double) => double): double {
+export function reduce(self: double[], callbackfn: (previousValue: double, currentValue: double) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = double>(self: double[], fn: (previousValue: U, currentValue: double) => U, initialValue: U): U {
+export function reduce<U = double>(self: double[], callbackfn: (previousValue: U, currentValue: double) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: double[], fn: (a: double, b: double) => double): double {
+export function reduceRight(self: double[], callbackfn: (previousValue: double, currentValue: double) => double): double {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: double = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: double[], fn: (a: U, b: double) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: double[], callbackfn: (previousValue: U, currentValue: double) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: double[], fn: (a: double) => void): void {
+export function forEach(self: double[], callbackfn: (value: double) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -9592,57 +11307,344 @@ export function values(self: double[], ): IterableIterator<double> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: double[], ): IterableIterator<[number, double]> {
     return new ArrayEntriesIterator_double(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: double[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: double[], predicate: () => boolean): double[] {
+    return filter(self, (value: double, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: double[], predicate: () => boolean): Double | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: double[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: double[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: double[], callbackfn: (previousValue: double) => double): double {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: double = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: double[], callbackfn: () => double): double {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: double = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = double>(self: double[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = double>(self: double[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: double[], callbackfn: (previousValue: double) => double): double {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: double = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: double[], callbackfn: () => double): double {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: double = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: double[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: double[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: double[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: double[], predicate: () => boolean): Double | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: double[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: double[], fn: (value: double, i: number, self: double[]) => double): double[] {
+export function map(self: double[], callbackfn: (value: double, index: number, array: double[]) => double): double[] {
     const len = self.length;
     let res = new double[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: double[], fn: (value: double, i: number) => double): double[] {
+export function map(self: double[], callbackfn: (value: double, index: number) => double): double[] {
     const len = self.length;
     let res = new double[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: double[], fn: (value: double) => double): double[] {
+export function map(self: double[], callbackfn: (value: double) => double): double[] {
     const len = self.length;
     let res = new double[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: double[], callbackfn: () => double): double[] {
+    const len = self.length;
+    let res = new double[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
@@ -9974,7 +11976,17 @@ export function fill(self: char[], value: char, start: int, end: int): char[] {
     return self;
 }
 
-export function find(self: char[], predicate: (value: char, i: number, self: char[]) => boolean): Char | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: char[], predicate: (value: char, index: number, array: char[]) => boolean): Char | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -9983,15 +11995,18 @@ export function find(self: char[], predicate: (value: char, i: number, self: cha
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: char[], fn: (value: char, i: number, self: char[]) => boolean): number {
+export function findIndex(self: char[], predicate: (value: char, index: number, array: char[]) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i;
         }
     }
@@ -10002,14 +12017,14 @@ export function findIndex(self: char[], fn: (value: char, i: number, self: char[
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: char[], fn: (elem: char, i: number, self: char[]) => boolean): Char | undefined {
+export function findLast(self: char[], predicate: (elem: char, index: number, array: char[]) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number, self)) {
+        if (predicate(val, i as number, self)) {
             return val;
         }
     }
@@ -10017,17 +12032,17 @@ export function findLast(self: char[], fn: (elem: char, i: number, self: char[])
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: char[], fn: (v: char, i: number, self: char[]) => boolean): boolean {
+export function every(self: char[], predicate: (value: char, index: number, array: char[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number, self)) {
+        if (!predicate(self[i], i as number, self)) {
             return false
         }
     }
@@ -10035,17 +12050,17 @@ export function every(self: char[], fn: (v: char, i: number, self: char[]) => bo
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: char[], fn: (v: char, i: number, self: char[]) => boolean): boolean {
+export function some(self: char[], predicate: (value: char, index: number, array: char[]) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return true
         }
     }
@@ -10053,16 +12068,14 @@ export function some(self: char[], fn: (v: char, i: number, self: char[]) => boo
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: char[], fn: (v: char, i: number, self: char[]) => boolean): char[] {
-    return filter(self, (v: char, i: number): boolean => fn(v, i as number, self));
+export function filter(self: char[], predicate: (value: char, index: number, array: char[]) => boolean): char[] {
+    return filter(self, (value: char, index: number): boolean => predicate(value, index, self));
 }
 
 /**
@@ -10070,13 +12083,13 @@ export function filter(self: char[], fn: (v: char, i: number, self: char[]) => b
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: char[], fn: (element: char, i: number, self: char[]) => boolean): number {
+export function findLastIndex(self: char[], predicate: (element: char, index: number, array: char[]) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number, self)) {
+        if (predicate(self[i], i as number, self)) {
             return i
         }
     }
@@ -10084,100 +12097,98 @@ export function findLastIndex(self: char[], fn: (element: char, i: number, self:
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: char[], fn: (a: char, b: char, i: number, self: char[]) => char): char {
+export function reduce(self: char[], callbackfn: (previousValue: char, currentValue: char, index: number, array: char[]) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char, i: number, self: char[]) => U, initialValue: U): U {
+export function reduce<U = char>(self: char[], callbackfn: (previousValue: U, currentValue: char, index: number, array: char[]) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: char[], fn: (a: char, b: char, i: number, self: char[]) => char): char {
+export function reduceRight(self: char[], callbackfn: (previousValue: char, currentValue: char, index: number, array: char[]) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number, self: char[]) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: char[], callbackfn: (previousValue: U, currentValue: char, index: number, array: char[]) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number, self)
+        acc = callbackfn(acc, self[i], i as number, self)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: char[], fn: (a: char, i: number, self: char[]) => void): void {
+export function forEach(self: char[], callbackfn: (value: char, index: number, array: char[]) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number, self)
+        callbackfn(self[i], i as number, self)
     }
 }
 
-export function find(self: char[], predicate: (value: char, i: number) => boolean): Char | undefined {
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: char[], predicate: (value: char, index: number) => boolean): Char | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
         return undefined
@@ -10186,15 +12197,18 @@ export function find(self: char[], predicate: (value: char, i: number) => boolea
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: char[], fn: (value: char, i: number) => boolean): number {
+export function findIndex(self: char[], predicate: (value: char, index: number) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i;
         }
     }
@@ -10205,14 +12219,14 @@ export function findIndex(self: char[], fn: (value: char, i: number) => boolean)
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: char[], fn: (elem: char, i: number) => boolean): Char | undefined {
+export function findLast(self: char[], predicate: (elem: char, index: number) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val, i as number)) {
+        if (predicate(val, i as number)) {
             return val;
         }
     }
@@ -10220,17 +12234,17 @@ export function findLast(self: char[], fn: (elem: char, i: number) => boolean): 
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: char[], fn: (v: char, i: number) => boolean): boolean {
+export function every(self: char[], predicate: (value: char, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i], i as number)) {
+        if (!predicate(self[i], i as number)) {
             return false
         }
     }
@@ -10238,17 +12252,17 @@ export function every(self: char[], fn: (v: char, i: number) => boolean): boolea
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: char[], fn: (v: char, i: number) => boolean): boolean {
+export function some(self: char[], predicate: (value: char, index: number) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return true
         }
     }
@@ -10260,13 +12274,13 @@ export function some(self: char[], fn: (v: char, i: number) => boolean): boolean
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: char[], fn: (element: char, i: number) => boolean): number {
+export function findLastIndex(self: char[], predicate: (element: char, index: number) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i], i as number)) {
+        if (predicate(self[i], i as number)) {
             return i
         }
     }
@@ -10274,99 +12288,97 @@ export function findLastIndex(self: char[], fn: (element: char, i: number) => bo
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: char[], fn: (a: char, b: char, i: number) => char): char {
+export function reduce(self: char[], callbackfn: (previousValue: char, currentValue: char, index: number) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char, i: number) => U, initialValue: U): U {
+export function reduce<U = char>(self: char[], callbackfn: (previousValue: U, currentValue: char, index: number) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: char[], fn: (a: char, b: char, i: number) => char): char {
+export function reduceRight(self: char[], callbackfn: (previousValue: char, currentValue: char, index: number) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: char[], fn: (a: U, b: char, i: number) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: char[], callbackfn: (previousValue: U, currentValue: char, index: number) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i], i as number)
+        acc = callbackfn(acc, self[i], i as number)
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: char[], fn: (a: char, i: number) => void): void {
+export function forEach(self: char[], callbackfn: (value: char, index: number) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i], i as number)
+        callbackfn(self[i], i as number)
     }
 }
 
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
 export function find(self: char[], predicate: (value: char) => boolean): Char | undefined {
     const res = findIndex(self, predicate)
     if (res == -1) {
@@ -10376,15 +12388,18 @@ export function find(self: char[], predicate: (value: char) => boolean): Char | 
 }
 
 /**
- * Returns the index of the first element in an array that satisfies the provided testing function
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
  *
- * @param fn testing function
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
  *
  * @returns found element index or -1 otherwise
  */
-export function findIndex(self: char[], fn: (value: char) => boolean): number {
+export function findIndex(self: char[], predicate: (value: char) => boolean): number {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i;
         }
     }
@@ -10395,14 +12410,14 @@ export function findIndex(self: char[], fn: (value: char) => boolean): number {
  * Iterates the array in reverse order and returns the value of the first element
  * that satisfies the provided testing function
  *
- * @param fn testing function
+ * @param predicate testing function
  *
  * @returns found element or undefined otherwise
  */
-export function findLast(self: char[], fn: (elem: char) => boolean): Char | undefined {
+export function findLast(self: char[], predicate: (elem: char) => boolean): Char | undefined {
     for (let i = self.length - 1; i >= 0; i--) {
         const val = self[i];
-        if (fn(val)) {
+        if (predicate(val)) {
             return val;
         }
     }
@@ -10410,17 +12425,17 @@ export function findLast(self: char[], fn: (elem: char) => boolean): Char | unde
 }
 
 /**
- * Tests whether all elements in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
  */
-export function every(self: char[], fn: (v: char) => boolean): boolean {
+export function every(self: char[], predicate: (value: char) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (!fn(self[i])) {
+        if (!predicate(self[i])) {
             return false
         }
     }
@@ -10428,17 +12443,17 @@ export function every(self: char[], fn: (v: char) => boolean): boolean {
 }
 
 /**
- * Tests whether at least one element in the array pass the test
- * implemented by the provided function. It returns a Boolean value.
+ * Determines whether the specified callback function returns true for any element of an array.
  *
- * @param fn function to execute for each element in the array.
- * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
  *
- * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
  */
-export function some(self: char[], fn: (v: char) => boolean): boolean {
+export function some(self: char[], predicate: (value: char) => boolean): boolean {
     for (let i = 0; i < self.length; i++) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return true
         }
     }
@@ -10446,16 +12461,14 @@ export function some(self: char[], fn: (v: char) => boolean): boolean {
 }
 
 /**
- * Constructs a new `Array` instance and populates it with
- * portion of a given array, filtered down to just the elements from the
- * given array that pass the test implemented by the provided function.
+ * Returns the elements of an array that meet the condition specified in a callback function.
  *
- * @param fn test function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
  *
- * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
  */
-export function filter(self: char[], fn: (v: char) => boolean): char[] {
-    return filter(self, (v: char, i: number): boolean => fn(v));
+export function filter(self: char[], predicate: (value: char) => boolean): char[] {
+    return filter(self, (value: char, index: number): boolean => predicate(value));
 }
 
 /**
@@ -10463,13 +12476,13 @@ export function filter(self: char[], fn: (v: char) => boolean): char[] {
  * the first element that satisfies the provided testing function.
  * If no elements satisfy the testing function, -1 is returned.
  *
- * @param fn testing function
+ * @param predicate testing function
  *
- * @returns index of first element satisfying to fn, -1 if no such element
+ * @returns index of first element satisfying to predicate, -1 if no such element
  */
-export function findLastIndex(self: char[], fn: (element: char) => boolean): number {
+export function findLastIndex(self: char[], predicate: (element: char) => boolean): number {
     for (let i = self.length - 1; i >= 0; i--) {
-        if (fn(self[i])) {
+        if (predicate(self[i])) {
             return i
         }
     }
@@ -10477,96 +12490,84 @@ export function findLastIndex(self: char[], fn: (element: char) => boolean): num
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce(self: char[], fn: (a: char, b: char) => char): char {
+export function reduce(self: char[], callbackfn: (previousValue: char, currentValue: char) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[0];
     for (let i = 1; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from left-to-right.
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
  *
- * @param initialValue initial value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduce<U = char>(self: char[], fn: (previousValue: U, currentValue: char) => U, initialValue: U): U {
+export function reduce<U = char>(self: char[], callbackfn: (previousValue: U, currentValue: char) => U, initialValue: U): U {
     let acc = initialValue
     for (let i = 0; i < self.length; i++) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight(self: char[], fn: (a: char, b: char) => char): char {
+export function reduceRight(self: char[], callbackfn: (previousValue: char, currentValue: char) => char): char {
     if (self.length == 0) {
         throw new TypeError("Reduce of empty array with no initial value")
     }
     let acc: char = self[self.length - 1];
     for (let i = self.length - 2; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a user-supplied "reducer" callback function on each element of the array,
- * in order, passing in the return value from the calculation on the preceding element.
- * The final result of running the reducer across all elements of the array is a single value.
- * Order is from right-to-left.
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
  *
- * @param fn reduce function
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
  *
- * @param initVal start value
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
  *
- * @returns a result after applying fn over all elements of the Array
+ * @returns a result after applying callbackfn over all elements of the Array
  */
-export function reduceRight<U>(self: char[], fn: (a: U, b: char) => U, initVal: U): U {
-    let acc = initVal
+export function reduceRight<U>(self: char[], callbackfn: (previousValue: U, currentValue: char) => U, initialValue: U): U {
+    let acc = initialValue
     for (let i = self.length - 1; i >= 0; i--) {
-        acc = fn(acc, self[i])
+        acc = callbackfn(acc, self[i])
     }
     return acc
 }
 
 /**
- * Executes a provided function once for each array element.
+ * Performs the specified action for each element in an array.
  *
- * @param fn to apply for each element of the Array
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
  */
-export function forEach(self: char[], fn: (a: char) => void): void {
+export function forEach(self: char[], callbackfn: (value: char) => void): void {
     const len0 = self.length;
     for (let i = 0; i < len0; i++) {
-        fn(self[i])
+        callbackfn(self[i])
     }
 }
 
@@ -10976,57 +12977,344 @@ export function values(self: char[], ): IterableIterator<char> {
 }
 
 /**
- * Returns an iterator over all entries
+ * Returns an iterable of key, value pairs for every entry in the array
  */
 export function entries(self: char[], ): IterableIterator<[number, char]> {
     return new ArrayEntriesIterator_char(self);
 }
 
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Determines whether all the members of an array satisfy the specified test.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param predicate A function that accepts up to three arguments. The every method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value false, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+ */
+export function every(self: char[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (!predicate()) {
+            return false
+        }
+    }
+    return true
+}
+
+/**
+ * Returns the elements of an array that meet the condition specified in a callback function.
+ *
+ * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+ *
+ * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+ */
+export function filter(self: char[], predicate: () => boolean): char[] {
+    return filter(self, (value: char, index: number): boolean => predicate());
+}
+
+/**
+ * Returns the value of the first element in the array where predicate is true, and undefined
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found, find
+ * immediately returns that element value. Otherwise, find returns undefined.
+ *
+ * @returns the value of the first element in the array or undefined
+ */
+export function find(self: char[], predicate: () => boolean): Char | undefined {
+    const res = findIndex(self, predicate)
+    if (res == -1) {
+        return undefined
+    }
+    return self[res as int];
+}
+
+/**
+ * Returns the index of the first element in the array where predicate is true, and -1
+ * otherwise.
+ *
+ * @param predicate find calls predicate once for each element of the array, in ascending
+ * order, until it finds one where predicate returns true. If such an element is found,
+ * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ *
+ * @returns found element index or -1 otherwise
+ */
+export function findIndex(self: char[], predicate: () => boolean): number {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Performs the specified action for each element in an array.
+ *
+ * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+ */
+export function forEach(self: char[], callbackfn: () => void): void {
+    const len0 = self.length;
+    for (let i = 0; i < len0; i++) {
+        callbackfn()
+    }
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: char[], callbackfn: (previousValue: char) => char): char {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: char = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce(self: char[], callbackfn: () => char): char {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: char = self[0];
+    for (let i = 1; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = char>(self: char[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduce<U = char>(self: char[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = 0; i < self.length; i++) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: char[], callbackfn: (previousValue: char) => char): char {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: char = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight(self: char[], callbackfn: () => char): char {
+    if (self.length == 0) {
+        throw new TypeError("Reduce of empty array with no initial value")
+    }
+    let acc: char = self[self.length - 1];
+    for (let i = self.length - 2; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: char[], callbackfn: (previousValue: U) => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn(acc)
+    }
+    return acc
+}
+
+/**
+ * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+ *
+ * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+ *
+ * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+ *
+ * @returns a result after applying callbackfn over all elements of the Array
+ */
+export function reduceRight<U>(self: char[], callbackfn: () => U, initialValue: U): U {
+    let acc = initialValue
+    for (let i = self.length - 1; i >= 0; i--) {
+        acc = callbackfn()
+    }
+    return acc
+}
+
+/**
+ * Determines whether the specified callback function returns true for any element of an array.
+ *
+ * @param predicate A function that accepts up to three arguments. The some method calls
+ * the predicate function for each element in the array until the predicate returns a value
+ * which is coercible to the Boolean value true, or until the end of the array.
+ *
+ * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+ */
+export function some(self: char[], predicate: () => boolean): boolean {
+    for (let i = 0; i < self.length; i++) {
+        if (predicate()) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Iterates the array in reverse order and returns the value of the first element
+ * that satisfies the provided testing function
+ *
+ * @param predicate testing function
+ *
+ * @returns found element or undefined otherwise
+ */
+export function findLast(self: char[], predicate: () => boolean): Char | undefined {
+    for (let i = self.length - 1; i >= 0; i--) {
+        const val = self[i];
+        if (predicate()) {
+            return val;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Iterates the array in reverse order and returns the index of
+ * the first element that satisfies the provided testing function.
+ * If no elements satisfy the testing function, -1 is returned.
+ *
+ * @param predicate testing function
+ *
+ * @returns index of first element satisfying to predicate, -1 if no such element
+ */
+export function findLastIndex(self: char[], predicate: () => boolean): number {
+    for (let i = self.length - 1; i >= 0; i--) {
+        if (predicate()) {
+            return i
+        }
+    }
+    return -1
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: char[], fn: (value: char, i: number, self: char[]) => char): char[] {
+export function map(self: char[], callbackfn: (value: char, index: number, array: char[]) => char): char[] {
     const len = self.length;
     let res = new char[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number, self);
+        res[i] = callbackfn(self[i], i as number, self);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: char[], fn: (value: char, i: number) => char): char[] {
+export function map(self: char[], callbackfn: (value: char, index: number) => char): char[] {
     const len = self.length;
     let res = new char[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i], i as number);
+        res[i] = callbackfn(self[i], i as number);
     }
     return res;
 }
+
 /**
- * Creates a new `Array` object and populates
- * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
  *
- * @param fn mapping function, applied to each element of an array.
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
  *
  * @returns `Array` instance, constructed from `this` and given function.
  */
-export function map(self: char[], fn: (value: char) => char): char[] {
+export function map(self: char[], callbackfn: (value: char) => char): char[] {
     const len = self.length;
     let res = new char[len];
     for (let i = 0; i < len; i++) {
-        res[i] = fn(self[i]);
+        res[i] = callbackfn(self[i]);
+    }
+    return res;
+}
+
+/**
+ * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+ *
+ * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+ *
+ * @returns `Array` instance, constructed from `this` and given function.
+ */
+export function map(self: char[], callbackfn: () => char): char[] {
+    const len = self.length;
+    let res = new char[len];
+    for (let i = 0; i < len; i++) {
+        res[i] = callbackfn();
     }
     return res;
 }
