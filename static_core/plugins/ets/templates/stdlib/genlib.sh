@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,6 +32,7 @@ function format_file() {
 mkdir -p "${GEN_ESCOMPAT_PATH}"
 mkdir -p "${GEN_STDCORE_PATH}"
 
+# Generate Array
 readonly ARR="${GEN_ESCOMPAT_PATH}/Array.ets"
 echo "Generating ${ARR}"
 erb Array_escompat.erb | format_file > "${ARR}"
@@ -47,5 +48,20 @@ echo "Generating ${BLT_ARR_SORT}"
 readonly BLT_ARR_ARG="${GEN_STDCORE_PATH}/BuiltinArrayAlgorithms.ets"
 echo "Generating ${BLT_ARR_ARG}"
 "${JINJA_PATH}" Array_builtin_algorithms.ets.j2 | format_file > "${BLT_ARR_ARG}"
+
+# Generate TypedArrays
+echo "Generating $GEN_ESCOMPAT_PATH/DataView.ets"
+"${JINJA_PATH}" "${SCRIPT_DIR}/DataView.ets.j2" -o "$GEN_ESCOMPAT_PATH/DataView.ets"
+
+echo "Generating $GEN_ESCOMPAT_PATH/TypedArrays.ets"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedArray.ets.j2" -o "$GEN_ESCOMPAT_PATH/TypedArrays.ets"
+
+echo "Generating $GEN_ESCOMPAT_PATH/TypedUArrays.ets"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedUArray.ets.j2" -o "$GEN_ESCOMPAT_PATH/TypedUArrays.ets"
+
+# Generate Functions
+readonly FUNC="$GEN_STDCORE_PATH/Function.ets"
+echo "Generating ${FUNC}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"
 
 exit 0

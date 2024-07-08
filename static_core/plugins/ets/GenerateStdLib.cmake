@@ -26,7 +26,7 @@ function(regenerate_and_check_stdlib)
         list(APPEND GEN_FILES "${STD_CORE}/${file}")
     endforeach()
 
-    set(GEN_SCRIPTS "function.sh" "array.sh" "typed_array.sh" )
+    set(GEN_SCRIPTS "genlib.sh" )
 
     message(STATUS "Generating part of StdLib")
     set(GENPATH "${CMAKE_CURRENT_BINARY_DIR}/stdlib")
