@@ -14,8 +14,6 @@
 ---
 cases:
   - types:
-      - { ptype: boolean, expr: 'true', rtype: Boolean }
-      - { ptype: boolean, expr: 'false', rtype: Boolean }
       - { ptype: byte, expr: 0x55 as byte, rtype: Byte }
       - { ptype: char, expr: "c'W'", rtype: Char }
       - { ptype: short, expr: 0x5555 as short, rtype: Short }
