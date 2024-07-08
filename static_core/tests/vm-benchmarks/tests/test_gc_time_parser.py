@@ -43,9 +43,9 @@ class FwTimeParserTests(unittest.TestCase):
         """.format(fw_start_time, vm_start_time, fw_end_time)
 
         result = FwTimeParser().parse_text(text)
-        self.assertEqual(fw_start_time * 1000.0 * 1000.0, result['fw_start_time'])
-        self.assertEqual(fw_end_time * 1000.0 * 1000.0, result['fw_end_time'])
-        self.assertEqual(vm_start_time, result['vm_start_time'])
+        self.assertEqual(fw_start_time * 1000.0 * 1000.0, result.get('fw_start_time'))
+        self.assertEqual(fw_end_time * 1000.0 * 1000.0, result.get('fw_end_time'))
+        self.assertEqual(vm_start_time, result.get('vm_start_time'))
 
 
 if __name__ == '__main__':

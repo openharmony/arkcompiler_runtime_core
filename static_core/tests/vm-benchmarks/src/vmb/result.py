@@ -152,21 +152,6 @@ class TestResult(Jsonable):
     _ext_time: float = 0.0
     __test__ = None
 
-    @classmethod
-    def from_obj(cls, **kwargs):
-        kwargs = {  # skipping 'unknown' props
-            k: v for k, v in kwargs.items()
-            if k in inspect.signature(cls).parameters
-        }
-        for k, v in kwargs.items():
-            if 'build' == k:
-                kwargs[k] = [BuildResult(**i) for i in v]
-            if 'execution_forks' == k:
-                kwargs[k] = [RunResult(**i) for i in v]
-            if 'gc_stats' == k:
-                kwargs[k] = GCStats(**v) if v else None
-        return cls(**kwargs)
-
     def __str__(self) -> str:
         # Note: using avg, as it reported by test itself
         # not `mean_time` which re-calculate by iteration results
@@ -175,13 +160,7 @@ class TestResult(Jsonable):
             return f'{time:.2e} | ' \
                    f'{self.code_size:.2e} | ' \
                    f'{self.mem_bytes:.2e} | {self._status.value:<7}'
-        return ' | '.join(['.'*8]*3 + [f'{self._status.value:<7}'])
-
-    def get_avg_time(self) -> float:
-        """Get mean of avg_time by executions."""
-        if not self.execution_forks:
-            return 0.0
-        return statistics.mean(f.avg_time for f in self.execution_forks)
+        return ' | '.join(['.' * 8] * 3 + [f'{self._status.value:<7}'])
 
     @property
     def code_size(self) -> int:
@@ -212,6 +191,27 @@ class TestResult(Jsonable):
         if len(self.execution_forks[0].iterations) < 2:
             return 0
         return statistics.stdev(self.execution_forks[0].iterations)
+
+    @classmethod
+    def from_obj(cls, **kwargs):
+        kwargs = {  # skipping 'unknown' props
+            k: v for k, v in kwargs.items()
+            if k in inspect.signature(cls).parameters
+        }
+        for k, v in kwargs.items():
+            if 'build' == k:
+                kwargs[k] = [BuildResult(**i) for i in v]
+            if 'execution_forks' == k:
+                kwargs[k] = [RunResult(**i) for i in v]
+            if 'gc_stats' == k:
+                kwargs[k] = GCStats(**v) if v else None
+        return cls(**kwargs)
+
+    def get_avg_time(self) -> float:
+        """Get mean of avg_time by executions."""
+        if not self.execution_forks:
+            return 0.0
+        return statistics.mean(f.avg_time for f in self.execution_forks)
 
 
 @dataclass

@@ -34,12 +34,9 @@ class ReporterTests(unittest.TestCase):
                 freed_object_count=1,
                 freed_large_object_mem=0,
                 freed_large_object_count=0,
-                mem_after=200,
-                mem_total=500,
-                pause_time=100.0,
-                pause_time_sum=200.0,
-                raw_message='',
-                timestamp=1000000
+                mem_after=200, mem_total=500,
+                pause_time=100.0, pause_time_sum=200.0,
+                raw_message='', timestamp=1000000
             ),
             ArkPauseEvent(
                 gc_name='gc2',
@@ -51,28 +48,28 @@ class ReporterTests(unittest.TestCase):
                 freed_object_count=2,
                 freed_large_object_mem=0,
                 freed_large_object_count=0,
-                mem_after=200,
-                mem_total=500,
-                pause_time=50.0,
-                pause_time_sum=200.0,
-                raw_message='',
-                timestamp=2000000
+                mem_after=200, mem_total=500,
+                pause_time=50.0, pause_time_sum=200.0,
+                raw_message='', timestamp=2000000
             )
         ]
-        report = ArkGcLogReporter().generate_report(events)
-        self.assertEqual(events[1].timestamp - events[0].timestamp + events[1].gc_time,
-                         report['gc_vm_time'])
-        self.assertEqual(len(events), report['gc_pause_count'])
-        self.assertEqual(sum(map(lambda x: x.pause_time, events)), report['gc_total_time'])
-        self.assertEqual(len(events), len(report['gc_pauses']))
-        for i, p in enumerate(report['gc_pauses']):
-            self.assertEqual(events[i].timestamp, p[0])
-            self.assertEqual(events[i].gc_name, p[1])
-            self.assertEqual(events[i].pause_time, p[2])
-            self.assertEqual(events[i].mem_after + events[i].freed_object_mem +
-                             events[i].freed_large_object_mem, p[3])
-            self.assertEqual(events[i].mem_after, p[4])
-            self.assertEqual(events[i].mem_total, p[5])
+        try:
+            report = ArkGcLogReporter().generate_report(events)
+            self.assertEqual(events[1].timestamp - events[0].timestamp + events[1].gc_time,
+                             report['gc_vm_time'])
+            self.assertEqual(len(events), report['gc_pause_count'])
+            self.assertEqual(sum(map(lambda x: x.pause_time, events)), report['gc_total_time'])
+            self.assertEqual(len(events), len(report['gc_pauses']))
+            for i, p in enumerate(report['gc_pauses']):
+                self.assertEqual(events[i].timestamp, p[0])
+                self.assertEqual(events[i].gc_name, p[1])
+                self.assertEqual(events[i].pause_time, p[2])
+                self.assertEqual(events[i].mem_after + events[i].freed_object_mem +
+                                 events[i].freed_large_object_mem, p[3])
+                self.assertEqual(events[i].mem_after, p[4])
+                self.assertEqual(events[i].mem_total, p[5])
+        except KeyError as e:
+            unittest.TestCase.fail(self, f'Bad report property: {e}')
 
     def test_generate_report_no_events(self):
         expected_props = [
@@ -99,8 +96,7 @@ class ReporterTests(unittest.TestCase):
                 freed_object_count=1,
                 freed_large_object_mem=0,
                 freed_large_object_count=0,
-                mem_after=200,
-                mem_total=500,
+                mem_after=200, mem_total=500,
                 pause_time=100.0,
                 pause_time_sum=200.0,
                 raw_message='',
@@ -116,26 +112,22 @@ class ReporterTests(unittest.TestCase):
                 freed_object_count=2,
                 freed_large_object_mem=0,
                 freed_large_object_count=0,
-                mem_after=200,
-                mem_total=500,
+                mem_after=200, mem_total=500,
                 pause_time=50.0,
                 pause_time_sum=200.0,
                 raw_message='',
                 timestamp=200
             )
         ]
-        adjust_time = {
-            'vm_start_time': 50,
-            'fw_start_time': 1000,
-            'fw_end_time': 1500
-        }
+        adjust_time = {'vm_start_time': 50, 'fw_start_time': 1000,
+                       'fw_end_time': 1500}
         # Ark uses VM timestamps in the log messages, therefore:
         # gc_vm_time equals fw_end_time minus fw_start_time
         gc_vm_time = adjust_time['fw_end_time'] - adjust_time['fw_start_time']
         delta = events[0].timestamp
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
-        self.assertEqual(gc_vm_time, report['gc_vm_time'])
-        for i, p in enumerate(report['gc_pauses']):
+        self.assertEqual(gc_vm_time, report.get('gc_vm_time'))
+        for i, p in enumerate(report.get('gc_pauses')):
             self.assertEqual(events[i].timestamp - delta, p[0])
 
     def test_generate_report_with_adjust_time_in_future(self):
@@ -166,8 +158,8 @@ class ReporterTests(unittest.TestCase):
         # A rare case when GC has been triggered before VM prints timestamp
         gc_vm_time = adjust_time['fw_end_time'] - adjust_time['fw_start_time']
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
-        self.assertEqual(gc_vm_time, report['gc_vm_time'])
-        for i, p in enumerate(report['gc_pauses']):
+        self.assertEqual(gc_vm_time, report.get('gc_vm_time'))
+        for i, p in enumerate(report.get('gc_pauses')):
             self.assertEqual(0, p[0])
 
     def test_generate_report_with_late_gc_pause(self):
@@ -211,7 +203,7 @@ class ReporterTests(unittest.TestCase):
         # gc_vm_time = first gc ts - last gc ts + last gc duration
         gc_vm_time = events[1].timestamp - events[0].timestamp + events[1].gc_time
         report = ArkGcLogReporter().generate_report(events)
-        self.assertEqual(gc_vm_time, report['gc_vm_time'])
+        self.assertEqual(gc_vm_time, report.get('gc_vm_time'))
 
     def test_generate_report_with_only_late_gc_pause(self):
         events = [
@@ -237,7 +229,7 @@ class ReporterTests(unittest.TestCase):
         # gc_vm_time equals last gc duration
         gc_vm_time = 100
         report = ArkGcLogReporter().generate_report(events)
-        self.assertEqual(gc_vm_time, report['gc_vm_time'])
+        self.assertEqual(gc_vm_time, report.get('gc_vm_time'))
 
     def test_generate_report_with_late_gc_pause_and_adjust(self):
         events = [
@@ -285,7 +277,7 @@ class ReporterTests(unittest.TestCase):
         # gc_vm_time equals late gc ts plus late gc duration
         gc_vm_time = events[1].timestamp - events[0].timestamp + events[1].gc_time
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
-        self.assertEqual(gc_vm_time, report['gc_vm_time'])
+        self.assertEqual(gc_vm_time, report.get('gc_vm_time'))
 
     def test_generate_report_with_late_gc_pause_and_adjust_in_future(self):
         events = [
@@ -299,12 +291,10 @@ class ReporterTests(unittest.TestCase):
                 freed_object_count=1,
                 freed_large_object_mem=0,
                 freed_large_object_count=0,
-                mem_after=200,
-                mem_total=500,
+                mem_after=200, mem_total=500,
                 pause_time=100.0,
                 pause_time_sum=200.0,
-                raw_message='',
-                timestamp=100
+                raw_message='', timestamp=100
             ),
             ArkPauseEvent(
                 gc_name='gc1',
@@ -316,24 +306,19 @@ class ReporterTests(unittest.TestCase):
                 freed_object_count=1,
                 freed_large_object_mem=0,
                 freed_large_object_count=0,
-                mem_after=200,
-                mem_total=500,
+                mem_after=200, mem_total=500,
                 pause_time=100.0,
                 pause_time_sum=200.0,
-                raw_message='',
-                timestamp=2000
+                raw_message='', timestamp=2000
             )
         ]
-        adjust_time = {
-            'vm_start_time': 250,
-            'fw_start_time': 1000,
-            'fw_end_time': 1500
-        }
+        adjust_time = {'vm_start_time': 250, 'fw_start_time': 1000,
+                       'fw_end_time': 1500}
         # A rare case when GC  triggered after VM prints timestamp
         # gc_vm_time equals late gc ts plus late gc duration
         gc_vm_time = events[1].timestamp - events[0].timestamp + 100
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
-        self.assertEqual(gc_vm_time, report['gc_vm_time'])
+        self.assertEqual(gc_vm_time, report.get('gc_vm_time'))
 
     def test_generate_report_with_gc_pause_ending_too_late(self):
         events = [
@@ -381,7 +366,7 @@ class ReporterTests(unittest.TestCase):
         # gc_vm_time equals late gc ts plus late gc duration
         gc_vm_time = events[1].timestamp - adjust_time['fw_start_time'] + events[1].gc_time
         report = ArkGcLogReporter().generate_report(events, adjust_time=adjust_time)
-        self.assertEqual(gc_vm_time, report['gc_vm_time'])
+        self.assertEqual(gc_vm_time, report.get('gc_vm_time'))
 
 
 if __name__ == '__main__':

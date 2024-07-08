@@ -33,9 +33,9 @@ class Platform(PlatformBase):
 
     def __init__(self, args: Args) -> None:
         super().__init__(args)
-        self.es2panda = self.tools['es2panda']
-        self.paoc = self.tools['paoc']
-        self.ark = self.tools['ark']
+        self.es2panda = self.tools_get('es2panda')
+        self.paoc = self.tools_get('paoc')
+        self.ark = self.tools_get('ark')
         # always aot etsstdlib
         if OptFlags.AOT_SKIP_LIBS in self.flags:
             log.info('Skipping aot compilation of libs')
@@ -50,15 +50,6 @@ class Platform(PlatformBase):
                 AOTStatsLib(time=res.tm * 1e9,
                             size=self.x_sh.get_filesize(an))
         self.push_libs()
-
-    def run_unit(self, bu: BenchUnit) -> None:
-        self.es2panda(bu)
-        if OptFlags.DRY_RUN in self.flags:
-            return
-        self.push_unit(bu, '.abc', '.an')
-        if OptFlags.AOT in self.flags:
-            self.paoc(bu)
-        self.ark(bu)
 
     @property
     def name(self) -> str:
@@ -79,3 +70,12 @@ class Platform(PlatformBase):
     @property
     def gc_parcer(self) -> Optional[Type]:
         return ArkGcLogParser
+
+    def run_unit(self, bu: BenchUnit) -> None:
+        self.es2panda(bu)
+        if OptFlags.DRY_RUN in self.flags:
+            return
+        self.push_unit(bu, '.abc', '.an')
+        if OptFlags.AOT in self.flags:
+            self.paoc(bu)
+        self.ark(bu)

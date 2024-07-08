@@ -144,10 +144,6 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
 
 class _ArgumentParser(argparse.ArgumentParser):
 
-    @staticmethod
-    def __epilog() -> str:
-        return ''
-
     def __init__(self, command: Command) -> None:
         super().__init__(
             prog=f'vmb {command.value}',
@@ -185,6 +181,10 @@ class _ArgumentParser(argparse.ArgumentParser):
         if command in (Command.REPORT,):
             add_report_opts(self)
 
+    @staticmethod
+    def __epilog() -> str:
+        return ''
+
 
 class Args(argparse.Namespace):
     """Args parser for VMB."""
@@ -198,12 +198,12 @@ class Args(argparse.Namespace):
             print('Usage: vmb COMMAND [options] [paths]')
             print(f'       COMMAND {{{",".join(Command.getall())}}}')
             for c in Command:
-                print('='*80)
+                print('=' * 80)
                 try:
                     Args.print_help(c)
                 except SystemExit:
                     continue
-            print('='*80)
+            print('=' * 80)
             sys.exit(1)
         self.command = Command(sys.argv[1])
         args = sys.argv[2:]
@@ -222,6 +222,11 @@ class Args(argparse.Namespace):
 
     def __repr__(self) -> str:
         return '\n'.join(super().__repr__().split(','))
+
+    @staticmethod
+    def print_help(cmd: Command) -> None:
+        """Print usage for VMB command."""
+        _ArgumentParser(cmd).parse_args(['--help'])
 
     def get(self, arg: str, default=None) -> Any:
         return vars(self).get(arg, default)
@@ -252,8 +257,3 @@ class Args(argparse.Namespace):
         if path:
             return path
         return self.get('path', ['.'])[0]
-
-    @staticmethod
-    def print_help(cmd: Command) -> None:
-        """Print usage for VMB command."""
-        _ArgumentParser(cmd).parse_args(['--help'])

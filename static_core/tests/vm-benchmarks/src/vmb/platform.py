@@ -72,18 +72,6 @@ class PlatformBase(CrossShell, ABC):
             self.tools[n] = tool
             log.info('%s %s', tool.name, tool.version)
 
-    @classmethod
-    def create(cls, args: Args) -> PlatformBase:
-        try:
-            platform_module = get_plugin(
-                'platforms',
-                args.platform,
-                extra=args.extra_plugins)
-            platform = platform_module.Platform(args)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            die(True, 'Plugin load error: %s', e)
-        return platform
-
     @property
     @abstractmethod
     def name(self) -> str:
@@ -131,18 +119,9 @@ class PlatformBase(CrossShell, ABC):
     def target(self) -> Target:
         return Target.HOST
 
-    @abstractmethod
-    def run_unit(self, bu: BenchUnit) -> None:
-        pass
-
     @property
     def gc_parcer(self) -> Optional[Type]:
         return None
-
-    def cleanup(self, bu: BenchUnit) -> None:
-        """Do default cleanup."""
-        if Target.HOST != self.target:
-            self.device_cleanup(bu)
 
     @staticmethod
     def search_units(paths: List[Path]) -> List[BenchUnit]:
@@ -161,6 +140,27 @@ class PlatformBase(CrossShell, ABC):
                 if p.is_dir():
                     bus.append(BenchUnit(p.resolve()))
         return bus
+
+    @abstractmethod
+    def run_unit(self, bu: BenchUnit) -> None:
+        pass
+
+    @classmethod
+    def create(cls, args: Args) -> PlatformBase:
+        try:
+            platform_module = get_plugin(
+                'platforms',
+                args.platform,
+                extra=args.extra_plugins)
+            platform = platform_module.Platform(args)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            die(True, 'Plugin load error: %s', e)
+        return platform
+
+    def cleanup(self, bu: BenchUnit) -> None:
+        """Do default cleanup."""
+        if Target.HOST != self.target:
+            self.device_cleanup(bu)
 
     def push_unit(self, bu: BenchUnit, *ext) -> None:
         """Push bench unit to device."""
@@ -185,3 +185,9 @@ class PlatformBase(CrossShell, ABC):
             return  # Bench Unit wasn't pused to device
         log.trace('Cleaning: %s', bu.device_path)
         self.x_sh.run(f'rm -rf {bu.device_path}')
+
+    def tools_get(self, name: str) -> ToolBase:
+        tool = self.tools.get(name)
+        if not tool:
+            raise RuntimeError(f'Tool {name} is not available')
+        return tool

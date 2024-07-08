@@ -337,30 +337,30 @@ def test_measure_overrides():
         assert 2 == len(tpl_vars)
         var1, var2 = tpl_vars
         # Bench one
-        assert var1.FIX_ID == 0
-        assert var1.METHOD_NAME == 'one'
-        assert var1.METHOD_RETTYPE == 'int'
-        assert var1.BENCH_NAME == 'X_one'
-        assert var1.MI == 1
-        assert var1.WI == 2
+        assert var1.fix_id == 0
+        assert var1.method_name == 'one'
+        assert var1.method_rettype == 'int'
+        assert var1.bench_name == 'X_one'
+        assert var1.mi == 1
+        assert var1.wi == 2
         # Should use class level
-        assert var1.IT == 55
-        assert var1.WT == 4
-        assert var1.FI == 5
-        assert var1.GC == 6
+        assert var1.it == 55
+        assert var1.wt == 4
+        assert var1.fi == 5
+        assert var1.gc == 6
         # Bench two
-        assert var2.FIX_ID == 0
-        assert var2.METHOD_NAME == 'two'
-        assert var2.METHOD_RETTYPE == 'bool'
-        assert var2.BENCH_NAME == 'X_two'
-        assert var2.MI == 33
-        assert var2.WI == 44
-        assert var2.IT == 55
-        assert var2.WT == 66
+        assert var2.fix_id == 0
+        assert var2.method_name == 'two'
+        assert var2.method_rettype == 'bool'
+        assert var2.bench_name == 'X_two'
+        assert var2.mi == 33
+        assert var2.wi == 44
+        assert var2.it == 55
+        assert var2.wt == 66
         # Should use sys.cmdline
-        assert var2.FI == 123
+        assert var2.fi == 123
         # Should be default
-        assert var2.GC == -1
+        assert var2.gc == -1
 
 
 def test_tags():
@@ -399,8 +399,8 @@ def test_tags():
             '', parser.state, args))
         assert 2 == len(tpl_vars)
         # bench + state params merged
-        assert tpl_vars[0].TAGS == {'Cool', 'Fast', 'One'}
-        assert tpl_vars[1].TAGS == {'Cool', 'Fast'}
+        assert tpl_vars[0].tags == {'Cool', 'Fast', 'One'}
+        assert tpl_vars[1].tags == {'Cool', 'Fast'}
     # with --tags filter
     with patch.object(sys, 'argv',
                       'vmb gen --lang ets --tags=One blah'.split()):
@@ -409,7 +409,7 @@ def test_tags():
             '', parser.state, args))
         assert 1 == len(tpl_vars)
         # bench + state params merged
-        assert tpl_vars[0].TAGS == {'Cool', 'Fast', 'One'}
+        assert tpl_vars[0].tags == {'Cool', 'Fast', 'One'}
     # filter all
     with patch.object(
             sys,

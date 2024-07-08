@@ -104,6 +104,10 @@ class ShellBase(metaclass=Singleton):
     def __init__(self, timeout: Optional[float] = None) -> None:
         self._timeout = timeout
 
+    @staticmethod
+    def timed_cmd(cmd: str) -> str:
+        return f"\\time -v env {cmd}"
+
     def run(self,
             cmd: str,
             measure_time: bool = False,
@@ -130,10 +134,6 @@ class ShellBase(metaclass=Singleton):
         r = self.run(cmd=cmd)
         return r.grep(regex)
 
-    @staticmethod
-    def timed_cmd(cmd: str) -> str:
-        return "\\time -v env " + cmd
-
 
 class ShellUnix(ShellBase):
 
@@ -147,6 +147,16 @@ class ShellUnix(ShellBase):
             cwd: str = '') -> ShellResult:
         return self.__run(
             cmd, measure_time=measure_time, timeout=timeout, cwd=cwd)
+
+    def push(self,
+             src: Union[str, Path],
+             dst: Union[str, Path]) -> ShellResult:
+        raise NotImplementedError
+
+    def pull(self,
+             src: Union[str, Path],
+             dst: Union[str, Path]) -> ShellResult:
+        raise NotImplementedError
 
     def __run(self,
               cmd: str,
@@ -188,16 +198,6 @@ class ShellUnix(ShellBase):
             result.out = out.decode('utf-8')
             result.err = err.decode('utf-8')
         return result
-
-    def push(self,
-             src: Union[str, Path],
-             dst: Union[str, Path]) -> ShellResult:
-        raise NotImplementedError
-
-    def pull(self,
-             src: Union[str, Path],
-             dst: Union[str, Path]) -> ShellResult:
-        raise NotImplementedError
 
 
 class ShellDevice(ShellBase):

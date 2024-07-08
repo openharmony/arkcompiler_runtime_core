@@ -24,17 +24,17 @@ from vmb.gclog.gclog_reporter import LogReporter
 
 class AbstractLogParser:
 
+    @staticmethod
+    def parse_lines(source: Iterable[str]) -> Iterable[str]:
+        for line in source:
+            yield line.replace('\r', '').replace('\n', '')
+
     # pylint: disable-next=unused-argument
     def parse_log_entries(self, source: Iterable[str]) -> Iterable[LogEntry]:
         yield from ()
 
     def reporter(self) -> Optional[LogReporter]:
         return None
-
-    @staticmethod
-    def parse_lines(source: Iterable[str]) -> Iterable[str]:
-        for line in source:
-            yield line.replace('\r', '').replace('\n', '')
 
     def parse_log_file(self, logfile: str) -> List[LogEntry]:
         with Path(logfile).open('r', encoding="utf-8") as log_records:

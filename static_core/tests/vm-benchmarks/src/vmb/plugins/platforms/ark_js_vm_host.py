@@ -32,9 +32,9 @@ class Platform(PlatformBase):
 
     def __init__(self, args: Args) -> None:
         super().__init__(args)
-        self.es2abc = self.tools['es2abc']
-        self.ark_js_vm = self.tools['ark_js_vm']
-        self.aot_compiler = self.tools['ark_aot_compiler']
+        self.es2abc = self.tools_get('es2abc')
+        self.ark_js_vm = self.tools_get('ark_js_vm')
+        self.aot_compiler = self.tools_get('ark_aot_compiler')
         sdk = self.es2abc.sdk
         libark_ts = f'{sdk}/arkcompiler/ets_runtime/' \
             'ecmascript/ts_types/lib_ark_builtins.d.ts'
@@ -42,17 +42,6 @@ class Platform(PlatformBase):
         res = self.es2abc.run_es2abc(libark_ts, self.libark_abc)
         if not res or res.ret != 0:
             raise RuntimeError('lib_ark_builtins compilation failed')
-
-    def run_unit(self, bu: BenchUnit) -> None:
-        self.es2abc(bu)
-        if OptFlags.DRY_RUN in self.flags:
-            return
-        if OptFlags.AOT in self.flags:
-            self.ark_js_vm.profile(bu)
-            self.aot_compiler(bu)
-            self.ark_js_vm.profile(bu, with_aot=True)
-            self.aot_compiler(bu)
-        self.ark_js_vm.exec(bu)
 
     @property
     def name(self) -> str:
@@ -69,3 +58,14 @@ class Platform(PlatformBase):
     @property
     def langs(self) -> List[str]:
         return ['ts']
+
+    def run_unit(self, bu: BenchUnit) -> None:
+        self.es2abc(bu)
+        if OptFlags.DRY_RUN in self.flags:
+            return
+        if OptFlags.AOT in self.flags:
+            self.ark_js_vm.profile(bu)
+            self.aot_compiler(bu)
+            self.ark_js_vm.profile(bu, with_aot=True)
+            self.aot_compiler(bu)
+        self.ark_js_vm.exec(bu)

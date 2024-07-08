@@ -90,7 +90,7 @@ def log_time(f: Callable[..., Any]) -> Callable[..., Any]:
         ret = f(*args, **kwargs)
         log.trace('%s finished in %s',
                   f.__name__,
-                  str(timedelta(seconds=time()-start)))
+                  str(timedelta(seconds=time() - start)))
         return ret
     return f1
 

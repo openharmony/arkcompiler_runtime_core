@@ -26,13 +26,6 @@ log = logging.getLogger('vmb')
 
 class Platform(V_8_device):
 
-    def run_unit(self, bu: BenchUnit) -> None:
-        if self.tsc:
-            self.tsc(bu)
-        if OptFlags.DRY_RUN in self.flags:
-            return
-        self.v_8(bu)
-
     @property
     def name(self) -> str:
         return 'V_8 engine on host'
@@ -40,3 +33,10 @@ class Platform(V_8_device):
     @property
     def target(self) -> Target:
         return Target.HOST
+
+    def run_unit(self, bu: BenchUnit) -> None:
+        if self.tsc:
+            self.tsc(bu)
+        if OptFlags.DRY_RUN in self.flags:
+            return
+        self.v_8(bu)

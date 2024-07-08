@@ -77,10 +77,6 @@ class ToolBase(CrossShell, ABC):
     def __call__(self, bu: BenchUnit) -> None:
         self.exec(bu)
 
-    @abstractmethod
-    def exec(self, bu: BenchUnit) -> None:
-        pass
-
     @property
     @abstractmethod
     def name(self) -> str:
@@ -139,6 +135,10 @@ class ToolBase(CrossShell, ABC):
         if not os.path.isdir(d):
             raise RuntimeError(f'Dir "{d}" not found! {err}')
         return str(d)
+
+    @abstractmethod
+    def exec(self, bu: BenchUnit) -> None:
+        pass
 
     def kill(self) -> None:
         """Kill tool process(es).

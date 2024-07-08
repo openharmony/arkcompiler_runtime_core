@@ -95,22 +95,6 @@ class BenchGenerator:
                 log.warning('Src: %s not found!', root)
         return files
 
-    def process_source_file(self, src: Path, lang: LangBase
-                            ) -> Iterable[TemplateVars]:
-        with open(src, 'r', encoding="utf-8") as f:
-            full_src = f.read()
-        if '@Benchmark' not in full_src:
-            return []
-        try:
-            parser = DocletParser.create(full_src, lang).parse()
-            if not parser.state:
-                return []
-        except ValueError as e:
-            log.error('%s in %s', e, str(src))
-            return []
-        return TemplateVars.params_from_parsed(
-            full_src, parser.state, args=self.args)
-
     @staticmethod
     def process_imports(lang_impl: LangBase, imports: str,
                         bench_dir: Path, src: SrcPath) -> str:
@@ -158,26 +142,42 @@ class BenchGenerator:
                            out: Path,
                            src: SrcPath) -> BenchUnit:
         log.debug('Bench Variant: %s @ %s',
-                  v.BENCH_NAME, v.FIXTURE)
-        tags = set(v.TAGS)
-        v.TAGS = ';'.join([str(t) for t in tags])
-        bugs = set(v.BUGS)
-        v.BUGS = ';'.join([str(t) for t in bugs])
+                  v.bench_name, v.fixture)
+        tags = set(v.tags)
+        v.tags = ';'.join([str(t) for t in tags])
+        bugs = set(v.bugs)
+        v.bugs = ';'.join([str(t) for t in bugs])
         # create bench unit dir
-        bench_dir = out.joinpath(src.rel, f'bu_{v.BENCH_NAME}')
+        bench_dir = out.joinpath(src.rel, f'bu_{v.bench_name}')
         bench_dir.mkdir(parents=True, exist_ok=True)
-        v.METHOD_CALL = lang_impl.get_method_call(
-            v.METHOD_NAME, v.METHOD_RETTYPE)
-        v.IMPORTS = BenchGenerator.process_imports(
-            lang_impl, v.IMPORTS, bench_dir, src)
-        v.COMMON = BenchGenerator.check_common_files(
+        v.method_call = lang_impl.get_method_call(
+            v.method_name, v.method_rettype)
+        v.imports = BenchGenerator.process_imports(
+            lang_impl, v.imports, bench_dir, src)
+        v.common = BenchGenerator.check_common_files(
             src.full, lang_impl.short_name)
         bench = tpl.substitute(asdict(v))
-        bench_file = bench_dir.joinpath(f'bench_{v.BENCH_NAME}{lang_impl.ext}')
+        bench_file = bench_dir.joinpath(f'bench_{v.bench_name}{lang_impl.ext}')
         log.info('Bench: %s', bench_file)
         with create_file(bench_file) as f:
             f.write(bench)
         return BenchUnit(bench_dir, tags=tags, bugs=bugs)
+
+    def process_source_file(self, src: Path, lang: LangBase
+                            ) -> Iterable[TemplateVars]:
+        with open(src, 'r', encoding="utf-8") as f:
+            full_src = f.read()
+        if '@Benchmark' not in full_src:
+            return []
+        try:
+            parser = DocletParser.create(full_src, lang).parse()
+            if not parser.state:
+                return []
+        except ValueError as e:
+            log.error('%s in %s', e, str(src))
+            return []
+        return TemplateVars.params_from_parsed(
+            full_src, parser.state, args=self.args)
 
     def generate_lang(self, lang: str, quick_abort: bool = False
                       ) -> List[BenchUnit]:
