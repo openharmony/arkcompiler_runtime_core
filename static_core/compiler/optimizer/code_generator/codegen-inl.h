@@ -183,10 +183,16 @@ template <typename... Args>
 void Codegen::CallBarrier(RegMask liveRegs, VRegMask liveVregs, std::variant<EntrypointId, Reg> entrypoint,
                           Args &&...params)
 {
-    SaveCallerRegisters(liveRegs, liveVregs, true);
+    bool isFastpath = GetGraph()->GetMode().IsFastPath();
+    if (isFastpath) {
+        // irtoc fastpath needs to save all caller registers in case of call native function
+        liveRegs = GetCallerRegsMask(GetArch(), false);
+        liveVregs = GetCallerRegsMask(GetArch(), true);
+    }
+    SaveCallerRegisters(liveRegs, liveVregs, !isFastpath);
     FillCallParams(std::forward<Args>(params)...);
     EmitCallRuntimeCode(nullptr, entrypoint);
-    LoadCallerRegisters(liveRegs, liveVregs, true);
+    LoadCallerRegisters(liveRegs, liveVregs, !isFastpath);
 }
 
 template <typename T>
