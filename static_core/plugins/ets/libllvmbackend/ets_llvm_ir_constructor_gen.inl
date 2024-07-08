@@ -38,9 +38,9 @@ bool LLVMIrConstructor::EmitArrayCopyTo(Inst *inst)
             break;
     }
 
-    CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), GetInputValue(inst, 1),
-                                   GetInputValue(inst, 2), GetInputValue(inst, 3),
-                                   GetInputValue(inst, 4)});
+    CreateFastPathCall(inst, eid,
+                       {GetInputValue(inst, 0), GetInputValue(inst, 1), GetInputValue(inst, 2), GetInputValue(inst, 3),
+                        GetInputValue(inst, 4)});
     // Fastpath doesn't return anything, but result is in 'dst' arg, which is second
     ValueMapAdd(inst, GetInputValue(inst, 1));
     return true;

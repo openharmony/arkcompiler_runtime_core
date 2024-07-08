@@ -78,6 +78,8 @@ public:
     llvm::Value *GetMappedValue(Inst *inst, DataType::Type type);
     llvm::Value *GetInputValue(Inst *inst, size_t index, bool skipCoerce = false);
     llvm::Value *GetInputValueFromConstant(ConstantInst *constant, DataType::Type pandaType);
+    template <typename T>
+    llvm::FunctionType *GetFunctionTypeForCall(T *inst);
 
     Graph *GetGraph() const
     {
@@ -135,9 +137,7 @@ private:
     llvm::Value *CreateIntegerComparison(CmpInst *inst, llvm::Value *x, llvm::Value *y);
     llvm::Value *CreateNewArrayWithRuntime(Inst *inst);
     llvm::Value *CreateNewObjectWithRuntime(Inst *inst);
-    llvm::Value *CreateLoadMethodUsingVTable(llvm::Value *thiz, CallInst *call);
-    llvm::Value *CreateResolveVirtualCall(Inst *inst, llvm::Value *thiz, uint32_t methodId);
-    llvm::Value *CreateLoadClassFromObject(llvm::Value *object);
+    llvm::Value *CreateResolveVirtualCallBuiltin(Inst *inst, llvm::Value *thiz, uint32_t methodId);
     llvm::Value *CreateLoadManagedClassFromClass(llvm::Value *klass);
     llvm::Value *CreateIsNan(llvm::Value *value)
     {
@@ -186,8 +186,6 @@ private:
     ArenaVector<llvm::Value *> GetIntrinsicArguments(llvm::FunctionType *intrinsicFunctionType, IntrinsicInst *inst);
     void SetIntrinsicParamAttrs(llvm::CallInst *call, IntrinsicInst *inst, llvm::ArrayRef<llvm::Value *> args);
 
-    llvm::FunctionType *GetFunctionTypeForCall(CallInst *call);
-
     llvm::Value *GetThreadRegValue();
     llvm::Value *GetRealFrameRegValue();
 
@@ -208,6 +206,8 @@ private:
         }
         return func_->arg_begin() + offset + index;
     }
+
+    llvm::Function *GetOrCreateFunctionForCall(ark::compiler::CallInst *call, void *method);
 
     llvm::Type *GetType(DataType::Type pandaType);
     llvm::Type *GetExactType(DataType::Type targetType);

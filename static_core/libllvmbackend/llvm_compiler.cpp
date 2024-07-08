@@ -56,7 +56,6 @@ LLVMCompiler::LLVMCompiler(Arch arch) : arch_(arch)
 #endif
     InitializeLLVMTarget(arch);
     InitializeLLVMPasses();
-    InitializeLLVMOptions();
 #ifdef NDEBUG
     context_.setDiscardValueNames(true);
 #endif
@@ -142,6 +141,7 @@ ark::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOption
     llvmCompilerOptions.inlining = !IsInliningDisabled();
     llvmCompilerOptions.recursiveInlining = g_options.IsLlvmRecursiveInlining();
     llvmCompilerOptions.doIrtocInline = !llvmCompilerOptions.inlineModuleFile.empty();
+    llvmCompilerOptions.doVirtualInline = !ark::compiler::g_options.IsCompilerNoVirtualInlining();
 
     return llvmCompilerOptions;
 }
@@ -149,12 +149,11 @@ ark::llvmbackend::LLVMCompilerOptions LLVMCompiler::InitializeLLVMCompilerOption
 void LLVMCompiler::InitializeDefaultLLVMOptions()
 {
     if (ark::compiler::g_options.IsCompilerNonOptimizing()) {
-        constexpr auto DISABLE = llvm::cl::boolOrDefault::BOU_FALSE;
-        SetLLVMOption("fast-isel", DISABLE);
-        SetLLVMOption("global-isel", DISABLE);
+        SetLLVMOption("fast-isel", "false");
+        SetLLVMOption("global-isel", "false");
     } else {
-        SetLLVMOption("fixup-allow-gcptr-in-csr", true);
-        SetLLVMOption("max-registers-for-gc-values", std::numeric_limits<int>::max());
+        SetLLVMOption("fixup-allow-gcptr-in-csr", "true");
+        SetLLVMOption("max-registers-for-gc-values", std::to_string(std::numeric_limits<int>::max()));
     }
 }
 
@@ -162,34 +161,28 @@ void LLVMCompiler::InitializeLLVMOptions()
 {
     llvm::cl::ResetAllOptionOccurrences();
     InitializeDefaultLLVMOptions();
-    auto llvmOptionsStr = g_options.GetLlvmOptions();
-    if (llvmOptionsStr.length() == 0) {
-        return;
-    }
-
+    auto llvmOptionsStr = llvmPreOptions_ + " " + g_options.GetLlvmOptions();
+    LLVM_LOG(DEBUG, INFRA) << "Using the following llvm options: '" << llvmPreOptions_ << "' (set internally), and '"
+                           << g_options.GetLlvmOptions() << "' (from the option to aot compiler)";
     llvm::BumpPtrAllocator alloc;
     llvm::StringSaver stringSaver(alloc);
     llvm::SmallVector<const char *, 0> parsedArgv;
     parsedArgv.emplace_back("");  // First argument is an executable
     llvm::cl::TokenizeGNUCommandLine(llvmOptionsStr, stringSaver, parsedArgv);
     llvm::cl::ParseCommandLineOptions(parsedArgv.size(), parsedArgv.data());
+#ifndef NDEBUG
+    parsedOptions_ = true;
+#endif
 }
 
-template <typename T>
-void LLVMCompiler::SetLLVMOption(const char *option, T val)
+void LLVMCompiler::SetLLVMOption(const char *option, const std::string &value)
 {
-    auto opts = llvm::cl::getRegisteredOptions();
-    auto entry = opts.find(option);
-    ASSERT(entry != opts.end());
-    static_cast<llvm::cl::opt<T> *>(entry->second)->setValue(val);
+#ifndef NDEBUG
+    ASSERT_PRINT(!parsedOptions_, "Should call SetLLVMOptions earlier");
+#endif
+    std::string prefix {llvmPreOptions_.empty() ? "" : " "};
+    llvmPreOptions_ += prefix + "--" + option + (value.empty() ? "" : "=") + value;
 }
-
-// Instantiate for llvm_irtoc_compiler.cpp
-template void LLVMCompiler::SetLLVMOption(const char *option, bool val);
-// Instantiate for llvm_aot_compiler.cpp
-template void LLVMCompiler::SetLLVMOption(const char *option, unsigned int val);
-template void LLVMCompiler::SetLLVMOption(const char *option, uint64_t val);
-template void LLVMCompiler::SetLLVMOption(const char *option, int val);
 
 llvm::Triple LLVMCompiler::GetTripleForArch(Arch arch)
 {

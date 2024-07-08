@@ -55,12 +55,8 @@ using llvm::CastInst;
 using llvm::Instruction;
 using llvm::PHINode;
 
-using ark::llvmbackend::gc_utils::IsAllowedEscapedUser;
 using ark::llvmbackend::gc_utils::IsDerived;
-using ark::llvmbackend::gc_utils::IsGcFunction;
 using ark::llvmbackend::gc_utils::IsGcRefType;
-
-using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static llvm::cl::opt<bool> g_moveCmps("gc-intrusion-move-cmps", llvm::cl::Hidden, llvm::cl::init(true),
@@ -238,11 +234,11 @@ llvm::PreservedAnalyses GcIntrusion::run(Function &function, FunctionAnalysisMan
 {
     LLVM_DEBUG(llvm::dbgs() << "Function: " << function.getName() << "\n" << function << "\n");
 
-    if (!IsFunctionSupplemental(function)) {
+    if (!gc_utils::IsFunctionSupplemental(function)) {
         function.setCallingConv(llvm::CallingConv::ArkMethod);
     }
 
-    if (!IsGcFunction(function) || IsFunctionSupplemental(function)) {
+    if (!gc_utils::IsGcFunction(function) || gc_utils::IsFunctionSupplemental(function)) {
         return llvm::PreservedAnalyses::all();
     }
 
@@ -722,7 +718,7 @@ void GcIntrusion::FixupEscapedUsages(Instruction *inst, const llvm::SmallVector<
     auto def = casts.back()->getOperand(0);
     for (auto uiter = def->user_begin(); uiter != def->user_end();) {
         auto user = *uiter++;
-        if (IsAllowedEscapedUser(user)) {
+        if (gc_utils::IsAllowedEscapedUser(user)) {
             continue;
         }
         auto phi = llvm::dyn_cast<PHINode>(user);

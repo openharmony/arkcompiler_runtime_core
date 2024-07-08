@@ -16,8 +16,6 @@
 #include "wrapped_module.h"
 #include "transforms/gc_utils.h"
 
-using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
-
 namespace ark::llvmbackend {
 
 WrappedModule::WrappedModule(std::unique_ptr<llvm::LLVMContext> llvmContext, std::unique_ptr<llvm::Module> module,
@@ -128,14 +126,14 @@ void WrappedModule::Dump(llvm::raw_ostream *stream)
 
     for (const auto &function : *module_) {
         if (function.getMetadata(LLVMArkInterface::FUNCTION_MD_INLINE_MODULE) == nullptr &&
-            !IsFunctionSupplemental(function)) {
+            !gc_utils::IsFunctionSupplemental(function)) {
             *stream << "\tPrimary function '" << function.getName() << "'\n";
             functions++;
         }
     }
     for (const auto &function : *module_) {
         if (function.getMetadata(LLVMArkInterface::FUNCTION_MD_INLINE_MODULE) != nullptr &&
-            !IsFunctionSupplemental(function)) {
+            !gc_utils::IsFunctionSupplemental(function)) {
             *stream << "\tInline function '" << function.getName() << "'\n";
             inlineFunctions++;
         }

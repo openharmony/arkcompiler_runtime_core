@@ -39,12 +39,15 @@ set(SOURCES
         transforms/passes/ark_inlining.cpp
         transforms/passes/ark_frame_lowering/frame_lowering.cpp
         transforms/passes/ark_frame_lowering/frame_builder.cpp
+        transforms/passes/check_external.cpp
         transforms/passes/check_tail_calls.cpp
+        transforms/passes/devirt.cpp
         transforms/passes/expand_atomics.cpp
         transforms/passes/fixup_poisons.cpp
         transforms/passes/gc_intrusion.cpp
         transforms/passes/gc_intrusion_check.cpp
         transforms/passes/gep_propagation.cpp
+        transforms/passes/inline_devirt.cpp
         transforms/passes/inline_ir/cleanup_inline_module.cpp
         transforms/passes/inline_ir/discard_inline_module.cpp
         transforms/passes/inline_ir/inline_ir_utils.cpp
@@ -68,6 +71,7 @@ set(SOURCES
         llvm_options.cpp
         mir_compiler.cpp
         target_machine_builder.cpp
+        utils.cpp
 )
 
 if (PANDA_LLVM_AOT)

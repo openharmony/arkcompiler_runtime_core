@@ -17,10 +17,12 @@
 #! RUN            options: "", entry: "_GLOBAL::main"
 
 #! CHECKER        VirtualToStatic at LLVM AOT
-#! RUN_LLVM       options: "--llvm-pre-opt=0"
-#! EVENT          "Inline,_GLOBAL::main,Factory::newFactory,6,VIRTUAL,DEVIRTUALIZED"
-#! EVENT          "Paoc,Compiling Factory::newFactory using llvm"
-#! EVENT          "Paoc,Compiling _GLOBAL::main using llvm"
+#! RUN_LLVM       options: "--llvm-pre-opt=0 --llvm-options='--print-before=intrinsics-lowering'"
+#! READ_FILE      "console.out"
+#! LLVM_METHOD    /define protected.*_GLOBAL::main/
+#! INST_NEXT      /call ptr @__builtin_load_init_class/
+#! INST_NEXT_NOT  /call/
+#! INST_NEXT      /ret i32 0/
 #! RUN            options: "", entry: "_GLOBAL::main"
 #
 # class Factory {

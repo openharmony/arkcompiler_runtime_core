@@ -655,23 +655,18 @@ def read_checks(options)
   checks = []
   check = nil
   check_llvm = nil
-  with_aot = false
   checker_start = "#{options.command_token} CHECKER"
   disabled_checker_start = "#{options.command_token} DISABLED_CHECKER"
   File.readlines(options.source).each do |line|
     if check
       unless line.start_with? options.command_token
-        if with_aot
-          checks << check_llvm
-        end
-        with_aot = false
         check = nil
         check_llvm = nil
         next
       end
       raise "No space between two checkers: '#{line.strip}'" if line.start_with? checker_start
       if line.include? "RUN_AOT"
-        with_aot = true
+        checks << check_llvm
       end
       check.append_line(line[options.command_token.size..-1]) unless check == :disabled_check
       check_llvm.append_line(line[options.command_token.size..-1]) unless check == :disabled_check

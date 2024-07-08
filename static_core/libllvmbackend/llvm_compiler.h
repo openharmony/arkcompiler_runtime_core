@@ -47,8 +47,7 @@ protected:
     void InitializeDefaultLLVMOptions();
     void InitializeLLVMOptions();
 
-    template <typename T>
-    static void SetLLVMOption(const char *option, T val);
+    void SetLLVMOption(const char *option, const std::string &value);
 
     static llvm::Triple GetTripleForArch(Arch arch);
     static std::string GetCPUForArch(Arch arch);
@@ -64,6 +63,10 @@ protected:
 private:
     Arch arch_;
     llvm::LLVMContext context_;
+    std::string llvmPreOptions_;
+#ifndef NDEBUG
+    bool parsedOptions_ {false};
+#endif
 };
 }  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_COMPILER_H

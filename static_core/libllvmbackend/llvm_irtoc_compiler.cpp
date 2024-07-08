@@ -194,12 +194,13 @@ std::string LLVMIrtocCompiler::GetFastPathFeatures() const
 void LLVMIrtocCompiler::InitializeSpecificLLVMOptions(Arch arch)
 {
     if (arch == Arch::X86_64) {
-        SetLLVMOption("x86-use-base-pointer", false);
+        SetLLVMOption("x86-use-base-pointer", "false");
     }
     if (arch == Arch::AARCH64) {
-        SetLLVMOption("aarch64-enable-ptr32", true);
+        SetLLVMOption("aarch64-enable-ptr32", "true");
     }
-    SetLLVMOption("inline-remark-attribute", true);
+    SetLLVMOption("inline-remark-attribute", "true");
+    LLVMCompiler::InitializeLLVMOptions();
 }
 
 void LLVMIrtocCompiler::InitializeModule()

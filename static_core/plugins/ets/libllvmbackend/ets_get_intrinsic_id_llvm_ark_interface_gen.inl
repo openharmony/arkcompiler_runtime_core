@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,25 +15,25 @@
 
 LLVMArkInterface::IntrinsicId LLVMArkInterface::GetEtsIntrinsicId(const llvm::Instruction *inst) const
 {
-    if (static_cast<ark::SourceLanguage>(sourceLanguages_.lookup(inst->getParent()->getParent())) !=
-        ark::SourceLanguage::ETS) {
+    if (!llvm::isa<llvm::IntrinsicInst>(inst)) {
+        return NO_INTRINSIC_ID_CONTINUE;
+    }
+    int64_t srcLang = -1;
+    [[maybe_unused]] bool error = inst->getFunction()
+        ->getFnAttribute(ark::llvmbackend::LLVMArkInterface::SOURCE_LANG_ATTR)
+        .getValueAsString().getAsInteger(0, srcLang);
+    ASSERT(!error);
+    ASSERT(srcLang >= 0);
+    if (static_cast<ark::SourceLanguage>(srcLang) != ark::SourceLanguage::ETS) {
         return NO_INTRINSIC_ID_CONTINUE;
     }
 
     auto type = inst->getType();
-
-    if (!llvm::isa<llvm::IntrinsicInst>(inst)) {
-        return NO_INTRINSIC_ID_CONTINUE;
-    }
-
-    auto arch = triple_.getArch();
-    auto intrinsicInst = llvm::cast<llvm::IntrinsicInst>(inst);
-    auto llvmId = intrinsicInst->getIntrinsicID();
     [[maybe_unused]] auto etype = !type->isVectorTy() ? type : llvm::cast<llvm::VectorType>(type)->getElementType();
-    switch (llvmId) {
+    switch (llvm::cast<llvm::IntrinsicInst>(inst)->getIntrinsicID()) {
         case llvm::Intrinsic::ceil: {
             ASSERT(etype->isFloatTy() || etype->isDoubleTy());
-            if (X86NoSSE(arch)) {
+            if (X86NoSSE(triple_.getArch())) {
                 ASSERT(etype->isDoubleTy());
                 return static_cast<IntrinsicId>(RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_CEIL);
             }
@@ -41,7 +41,7 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetEtsIntrinsicId(const llvm::In
         }
         case llvm::Intrinsic::floor: {
             ASSERT(etype->isFloatTy() || etype->isDoubleTy());
-            if (X86NoSSE(arch)) {
+            if (X86NoSSE(triple_.getArch())) {
                 ASSERT(etype->isDoubleTy());
                 return static_cast<IntrinsicId>(RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_FLOOR);
             }
@@ -49,7 +49,7 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetEtsIntrinsicId(const llvm::In
         }
         case llvm::Intrinsic::round: {
             ASSERT(etype->isFloatTy() || etype->isDoubleTy());
-            if (X86NoSSE(arch)) {
+            if (X86NoSSE(triple_.getArch())) {
                 ASSERT(etype->isDoubleTy());
                 return static_cast<IntrinsicId>(RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ROUND);
             }

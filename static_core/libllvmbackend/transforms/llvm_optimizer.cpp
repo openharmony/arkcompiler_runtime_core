@@ -29,6 +29,9 @@
 #include "passes/prune_deopt.h"
 #include "passes/fixup_poisons.h"
 #include "passes/expand_atomics.h"
+#include "passes/devirt.h"
+#include "passes/inline_devirt.h"
+#include "passes/check_external.h"
 
 #include "passes/inline_ir/cleanup_inline_module.h"
 #include "passes/inline_ir/discard_inline_module.h"

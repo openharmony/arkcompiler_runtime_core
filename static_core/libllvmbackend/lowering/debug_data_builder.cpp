@@ -55,7 +55,7 @@ void DebugDataBuilder::EndSubprogram(Function *function)
 
 void DebugDataBuilder::SetLocation(Instruction *inst, uint32_t line, uint32_t column)
 {
-    auto func = inst->getParent()->getParent();
+    auto func = inst->getFunction();
     inst->setDebugLoc(DILocation::get(func->getContext(), line, column, func->getSubprogram()));
 }
 

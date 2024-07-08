@@ -20,6 +20,7 @@
 
 #include "llvm_ark_interface.h"
 #include "transforms/builtins.h"
+#include "utils.h"
 
 #include <llvm/Pass.h>
 #include <llvm/IR/Module.h>
@@ -32,6 +33,9 @@
 
 namespace ark::llvmbackend::passes {
 
+using ark::llvmbackend::utils::CopyDebugLoc;
+using ark::llvmbackend::utils::CopyDeoptBundle;
+using ark::llvmbackend::utils::GetMethodIdFromAttr;
 using builtins::LoadClass;
 using builtins::LoadInitClass;
 using builtins::LoadString;
@@ -59,6 +63,37 @@ llvm::PreservedAnalyses ArkGVN::run(llvm::Function &function, llvm::FunctionAnal
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
+void CreateCallBuiltin(llvm::CallInst *callInst, uint32_t compiledEntrypointOffset)
+{
+    auto isLaunchCall = callInst->hasFnAttr("is-launch-call");
+    llvm::Value *thiz = callInst->getArgOperand(isLaunchCall ? callInst->arg_size() - 1 : 1);
+    ASSERT(thiz->getType()->isPointerTy());
+
+    auto builder = llvm::IRBuilder<>(callInst);
+    auto builtin = ResolveVirtual(callInst->getModule());
+    auto zero = builder.getInt64(0);
+    auto arrayType = llvm::ArrayType::get(builder.getInt64Ty(), 0);
+    auto offset = builder.CreateIntToPtr(zero, arrayType->getPointerTo());
+
+    auto methodId = GetMethodIdFromAttr(callInst);
+    auto builtinCallInst =
+        builder.CreateCall(builtin, {thiz, builder.getInt64(methodId), offset}, CopyDeoptBundle(callInst));
+    CopyDebugLoc(callInst, builtinCallInst);
+    if (callInst->hasFnAttr("inline-info")) {
+        builtinCallInst->addFnAttr(callInst->getFnAttr("inline-info"));
+    }
+
+    if (!isLaunchCall) {
+        auto method = builder.CreateIntToPtr(builtinCallInst, builder.getPtrTy());
+        auto *fType = callInst->getFunctionType();
+        auto entrypointPtr = builder.CreateConstInBoundsGEP1_32(builder.getInt8Ty(), method, compiledEntrypointOffset);
+        auto entrypoint = builder.CreateLoad(builder.getPtrTy(), entrypointPtr);
+        callInst->setCalledFunction(fType, entrypoint);
+    }
+    callInst->setArgOperand(0, builtinCallInst);
+    callInst->setAttributes(callInst->getAttributes().removeFnAttribute(callInst->getContext(), "original-method-id"));
+}
+
 bool ArkGVN::RunOnFunction(const llvm::DominatorTree &tree, const GvnBuiltins &builtins)
 {
     bool changed = false;
@@ -77,9 +112,20 @@ bool ArkGVN::RunOnFunction(const llvm::DominatorTree &tree, const GvnBuiltins &b
 bool ArkGVN::RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree &tree, const GvnBuiltins &builtins)
 {
     bool changed = false;
+    llvm::SmallVector<llvm::CallInst *> replace;
+    for (auto &inst : *block) {
+        auto callInst = llvm::dyn_cast<llvm::CallInst>(&inst);
+        if (callInst != nullptr && callInst->hasFnAttr("original-method-id") &&
+            (arkInterface_->IsInterfaceMethod(callInst) || callInst->hasFnAttr("is-launch-call"))) {
+            replace.push_back(callInst);
+        }
+    }
+    for (auto &inst : replace) {
+        CreateCallBuiltin(inst, arkInterface_->GetCompiledEntryPointOffset());
+        changed = true;
+    }
     for (auto iter = block->begin(), endIter = block->end(); iter != endIter;) {
-        auto callInst = llvm::dyn_cast<llvm::CallInst>(&*iter);
-        iter++;
+        auto callInst = llvm::dyn_cast<llvm::CallInst>(&*(iter++));
         if (callInst == nullptr) {
             continue;
         }
@@ -95,19 +141,18 @@ bool ArkGVN::RunOnBasicBlock(llvm::BasicBlock *block, const llvm::DominatorTree 
             // need replace instruction by another
             callInst->replaceAllUsesWith(alternative);
             callInst->eraseFromParent();
-            changed |= true;
+            changed = true;
             continue;
         }
         if (builtinKey.builtinTy == RESOLVE_VIRTUAL_METHOD && arkInterface_->IsArm64() &&
             llvm::isa<llvm::ConstantInt>(callInst->getOperand(1))) {
-            auto func = callInst->getFunction();
-            auto slotId = arkInterface_->CreateIntfInlineCacheSlotId(func);
-            auto aotGot = func->getParent()->getGlobalVariable("__aot_got");
+            auto slotId = arkInterface_->CreateIntfInlineCacheSlotId(callInst->getFunction());
+            auto aotGot = callInst->getModule()->getGlobalVariable("__aot_got");
             auto builder = llvm::IRBuilder<>(callInst);
             auto arrayType = llvm::ArrayType::get(builder.getInt64Ty(), 0);
             llvm::Value *slot = builder.CreateConstInBoundsGEP2_64(arrayType, aotGot, 0, slotId);
             callInst->setArgOperand(2U, slot);
-            changed |= true;
+            changed = true;
         }
 
         bbTables_[block].insert({builtinKey, callInst});
