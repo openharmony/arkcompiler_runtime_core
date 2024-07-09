@@ -84,6 +84,11 @@ void AbcFieldProcessor::FillMetaDataValue()
                 auto literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
                 field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
                     literal_array_id_name));
+            } else if (field_.name == MODULE_REQUEST_PAHSE_IDX) {
+                entity_container_.AddModuleRequestPhaseId(val);
+                auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
+                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+                    module_literal_array_id_name));
             } else {
                 field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(val));
             }

@@ -31,6 +31,20 @@ void AbcLiteralArrayProcessor::FillProgramData()
                                          std::move(literal_array_));
 }
 
+void AbcLiteralArrayProcessor::FillModuleRequestPhase()
+{
+    auto sp = file_->GetSpanFromId(entity_id_);
+    auto literal_vals_num = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
+    for (size_t i = 0; i < literal_vals_num; i++) {
+        pandasm::LiteralArray::Literal lit;
+        lit.tag_ = panda_file::LiteralTag::INTEGER_8;
+        lit.value_ = static_cast<uint8_t>(panda_file::helpers::Read<sizeof(uint8_t)>(&sp));
+        literal_array_.literals_.emplace_back(lit);
+    }
+    program_->literalarray_table.emplace(entity_container_.GetLiteralArrayIdName(entity_id_.GetOffset()),
+                                         std::move(literal_array_));
+}
+
 void AbcLiteralArrayProcessor::GetLiteralArrayById(pandasm::LiteralArray *lit_array,
                                                    panda_file::File::EntityId lit_array_id) const
 {

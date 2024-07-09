@@ -32,6 +32,8 @@ using StringData = File::StringData;
 enum class LiteralTag : uint8_t {
     TAGVALUE = 0x00,
     BOOL = 0x01,
+    // int_8 and tagvalue have the same range for data representation.
+    INTEGER_8 = TAGVALUE,
     INTEGER = 0x02,
     FLOAT = 0x03,
     DOUBLE = 0x04,

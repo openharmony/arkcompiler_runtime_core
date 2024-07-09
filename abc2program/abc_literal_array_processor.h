@@ -26,6 +26,7 @@ public:
                              Abc2ProgramEntityContainer &entity_container,
                              panda_file::LiteralDataAccessor &literal_data_accessor);
     void FillProgramData() override;
+    void FillModuleRequestPhase();
 
 private:
     void GetLiteralArrayById(pandasm::LiteralArray *lit_array, panda_file::File::EntityId lit_array_id) const;

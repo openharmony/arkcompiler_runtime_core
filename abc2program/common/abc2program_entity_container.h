@@ -45,10 +45,12 @@ public:
 
     std::unordered_set<uint32_t> GetLiteralArrayIdSet();
     const std::unordered_set<uint32_t> &GetMouleLiteralArrayIdSet() const;
+    const std::unordered_set<uint32_t> &GetModuleRequestPhaseIdSet() const;
     const std::unordered_set<uint32_t> &GetUnnestedLiteralArrayIdSet() const;
     std::unordered_set<uint32_t> &GetUnprocessedNestedLiteralArrayIdSet();
     void AddModuleLiteralArrayId(uint32_t module_literal_array_id);
     void AddUnnestedLiteralArrayId(uint32_t literal_array_id);
+    void AddModuleRequestPhaseId(uint32_t module_request_phase_id);
     void AddProcessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     void TryAddUnprocessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     std::string GetLiteralArrayIdName(uint32_t literal_array_id);
@@ -63,6 +65,7 @@ private:
     std::unordered_map<uint32_t, std::string> record_full_name_map_;
     std::unordered_map<uint32_t, std::string> method_full_name_map_;
     std::unordered_set<uint32_t> module_literal_array_id_set_;
+    std::unordered_set<uint32_t> module_request_phase_id_set_;
     std::unordered_set<uint32_t> unnested_literal_array_id_set_;
     std::unordered_set<uint32_t> processed_nested_literal_array_id_set_;
     std::unordered_set<uint32_t> unprocessed_nested_literal_array_id_set_;

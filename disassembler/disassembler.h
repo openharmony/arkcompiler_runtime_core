@@ -223,6 +223,7 @@ private:
     bool quiet_;
     bool skip_strings_;
     std::unordered_set<uint32_t> module_literals_;
+    std::unordered_set<uint32_t> module_request_phase_literals_;
 #include "disasm_plugins.inc"
 };
 }  // namespace panda::disasm

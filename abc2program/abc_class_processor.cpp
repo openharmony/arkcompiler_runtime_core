@@ -121,6 +121,10 @@ void AbcClassProcessor::FillModuleLiteralArrays()
     for (uint32_t module_literal_array_id : entity_container_.GetMouleLiteralArrayIdSet()) {
         FillModuleLiteralArrayById(module_literal_array_id);
     }
+
+    for (uint32_t module_literal_array_id : entity_container_.GetModuleRequestPhaseIdSet()) {
+        FillModuleRequestPhaseById(module_literal_array_id);
+    }
 }
 
 void AbcClassProcessor::FillUnnestedLiteralArrays()
@@ -154,4 +158,12 @@ void AbcClassProcessor::FillLiteralArrayById(uint32_t literal_array_id)
     AbcLiteralArrayProcessor literal_array_processor(entity_id, entity_container_, *literal_data_accessor_);
     literal_array_processor.FillProgramData();
 }
+
+void AbcClassProcessor::FillModuleRequestPhaseById(uint32_t module_literal_array_id)
+{
+    panda_file::File::EntityId entity_id(module_literal_array_id);
+    AbcLiteralArrayProcessor literal_array_processor(entity_id, entity_container_, *literal_data_accessor_);
+    literal_array_processor.FillModuleRequestPhase();
+}
+
 }  // namespace panda::abc2program
