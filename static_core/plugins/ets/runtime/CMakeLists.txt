@@ -13,8 +13,6 @@
 
 set(ETS_EXT_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/runtime)
 
-panda_promote_to_definitions(USE_ETS_NAPI_CRITICAL_BY_DEFAULT)
-
 set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_annotation.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
