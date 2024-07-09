@@ -535,7 +535,7 @@ std::vector<panda_file::Type> Helpers::BreakProto(panda_file::ProtoItem *p)
 
     // SHORTY
     size_t numElem = 0;
-    size_t numRefs = 0;
+    [[maybe_unused]] size_t numRefs = 0;
     auto fetch = [idx = size_t(0), &shorty]() mutable {
         ASSERT(idx < shorty.size());
         return shorty[idx++];
