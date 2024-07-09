@@ -570,9 +570,7 @@ function testPromiseAllSettled(): void {
     let p3: Promise<Object> = Promise.resolve<Object>("xyz");
     Promise.allSettled([
         p1, p2, p3
-    ]).then<void, void>((values: Object): void => {
-        // NOTE(audovichenko): values must have type PromiseSettledResult<Object>[] #17073
-        let result = values as PromiseSettledResult<Object>[];
+    ]).then<void, void>((result: PromiseSettledResult<Object>[]): void => {
         if (result.length != 3) {
             globalTest!.fail();
         }
