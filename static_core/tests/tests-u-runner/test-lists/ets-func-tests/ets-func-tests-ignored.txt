@@ -101,12 +101,12 @@ koala-related-benchmarks/arkts-phase1.ets
 ### End of Koala
 ### Feature: Rest Params
 ### Issue 14111
-spec/rest-params/BadTypeError.ets
+spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/BadTypeError.ets
 ### Issue 14111 end
 ### Issue 14564
-spec/rest-params/RestParamsTest_PassInterfaceArgs.ets
-spec/rest-params/RestParamsTest_PassLambdas_0.ets
-spec/rest-params/RestParamsTest_PassLambdas_1.ets
+spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/RestParamsTest_PassInterfaceArgs.ets
+spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_0.ets
+spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_1.ets
 ### Issue 14564 end
 ### End Of Feature: Rest Params
 ### undefined functionality is not implemented
@@ -175,23 +175,24 @@ spec/11.Enumerations/issue14633_1.ets
 
 ### lambda issues begin
 ### Issue 15579
-spec/lambda/issue15579_0.ets
-spec/lambda/issue15579_1.ets
-spec/lambda/issue15579_2.ets
-spec/lambda/issue15579_3.ets
-spec/lambda/issue15579_4.ets
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_0.ets
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_1.ets
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.ets
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_3.ets
+spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.ets
 ### Issue 14054
-spec/lambda/callMethodFromAsyncLambda1.ets
+spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda1.ets
+spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda1.ets
 ### Issue 14131
-spec/lambda/callRegularLambdaWithAsyncOverload.ets
+spec/07.expressions/7.32.Lambda_Expressions/callRegularLambdaWithAsyncOverload.ets
 ### Negative tests
-spec/lambda/incorrectVariableDeclaration.ets
+spec/07.expressions/7.32.Lambda_Expressions/incorrectVariableDeclaration.ets
 ### Issue 14599
-spec/lambda/propertyLookupWithTypeAlias_01.ets
-spec/lambda/propertyLookupWithTypeAlias_02.ets
-spec/lambda/propertyLookupWithTypeAlias_03.ets
+spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_01.ets
+spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_02.ets
+spec/07.expressions/7.32.Lambda_Expressions/propertyLookupWithTypeAlias_03.ets
 ### Issue 14634
-spec/lambda/lambdaExpressionWithoutParenthesis.ets
+spec/07.expressions/7.32.Lambda_Expressions/lambdaExpressionWithoutParenthesis.ets
 ### lambda issues end
 ### Undefined type
 spec/03.types/References_Types/Type_undefined/array-and-undefined-union_3.ets
@@ -235,29 +236,30 @@ spec/03.types/References_Types/Type_never/useWithLambdaAndUnion.ets
 ### End never issues
 ### Feature: Null safety tests
 ### Issue 14510
-spec/nullables/nullable-function-result_2.ets
-spec/nullables/nullable-method-result_2.ets
-spec/nullables/nullable-method-param_2.ets
-spec/nullables/nullable-function-param_2.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-param_2.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-result_2.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-param_2.ets
 spec/nullables/nullable-member_2.ets
-spec/nullables/nullable-function-default-param_2.ets
-spec/nullables/nullable-function-default-param_5.ets
-spec/nullables/nullable-function-default-param_8.ets
-spec/nullables/nullable-method-default-param_2.ets
-spec/nullables/nullable-method-default-param_5.ets
-spec/nullables/nullable-method-default-param_8.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_2.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_5.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_8.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_2.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_5.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_8.ets
+
 ### End Issue 14510
 ### Issue 14495
-spec/nullables/nullable-function-default-param_6.ets
-spec/nullables/nullable-function-default-param_7.ets
-spec/nullables/nullable-lambda-default-param_1.ets
-spec/nullables/nullable-lambda-default-param_4.ets
-spec/nullables/nullable-lambda-default-param_6.ets
-spec/nullables/nullable-method-default-param_7.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_6.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-default-param_7.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_1.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_4.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_6.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-method-default-param_7.ets
 ### End Issue 14495
 ### Issue 14584
-spec/nullables/nullable-lambda-default-param_3.ets
-spec/nullables/nullable-lambda-default-param_5.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_3.ets
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_5.ets
 ### Issue 14584
 ### End Of Feature: Null safety tests
 
@@ -347,11 +349,11 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export_2.ets
 spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.ets
 ### End of Import-export
 ### issue 14836 begin
-spec/indexable/idx-s01-0030.ets
-spec/indexable/idx-s01-0080.ets
-spec/indexable/idx-s02-0020.ets
-spec/indexable/idx-s02-0030.ets
-spec/indexable/idx-s03-0000.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0030.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0020.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0030.ets
+spec/17.Experimental_Features/17.3.Indexable_Types/idx-s03-0000.ets
 ### issue  14836 end
 
 ### object-literals
@@ -630,3 +632,5 @@ spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_ty
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0010.ets
 spec/05.Generics/5.6.Utility_Types/5.6.1.Partial_Utility_Type/partial_utility_type_0011.ets
 ### Issue 14903 end
+### Issue 1823 (QA Ticket for checking error in test)
+spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-param_0.ets
