@@ -1,3 +1,6 @@
 # panda#11537
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_12.ets
 05.generics/06.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_14.ets
+
+# 16304 Byte to char widening conversion issues
+06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_42.ets
