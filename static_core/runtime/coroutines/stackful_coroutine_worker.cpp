@@ -26,6 +26,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
       vm_(vm),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
+      stats_(name),
       name_(std::move(name)),
       id_(id)
 {
@@ -160,6 +161,8 @@ void StackfulCoroutineWorker::ThreadProc()
     scheduleLoopCtx_->NativeCodeBegin();
     coroManager_->OnWorkerStartup();
 
+    // profiling: start interval here, end in ctxswitch
+    stats_.StartInterval(CoroutineTimeStats::SCH_ALL);
     ScheduleLoopBody();
 
     coroManager_->DestroyEntrypointlessCoroutine(scheduleLoopCtx_);
@@ -223,8 +226,12 @@ void StackfulCoroutineWorker::WaitForRunnables()
 {
     // NOTE(konstanting): in case of work stealing, use timed wait and try periodically to steal some runnables
     while (!RunnableCoroutinesExist() && IsActive()) {
+        // profiling: no need to profile the SLEEPING state, closing the interval
+        stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
         runnablesCv_.Wait(
             &runnablesLock_);  // or timed wait? we may miss the signal in some cases (e.g. IsActive() change)...
+        // profiling: reopening the interval after the sleep
+        stats_.StartInterval(CoroutineTimeStats::SCH_ALL);
         if (!RunnableCoroutinesExist() && IsActive()) {
             LOG(DEBUG, COROUTINES) << "StackfulCoroutineWorker::WaitForRunnables: spurious wakeup!";
         } else {
@@ -340,7 +347,13 @@ void StackfulCoroutineWorker::SwitchCoroutineContext(StackfulCoroutineContext *f
     ASSERT(from != nullptr);
     ASSERT(to != nullptr);
     EnsureCoroutineSwitchEnabled();
+    LOG(DEBUG, COROUTINES) << "Ctx switch: " << from->GetCoroutine()->GetName() << " --> "
+                           << to->GetCoroutine()->GetName();
+    stats_.FinishInterval(CoroutineTimeStats::SCH_ALL);
+    stats_.StartInterval(CoroutineTimeStats::CTX_SWITCH);
     from->SwitchTo(to);
+    stats_.FinishInterval(CoroutineTimeStats::CTX_SWITCH);
+    stats_.StartInterval(CoroutineTimeStats::SCH_ALL);
 }
 
 void StackfulCoroutineWorker::FinalizeTerminatedCoros()

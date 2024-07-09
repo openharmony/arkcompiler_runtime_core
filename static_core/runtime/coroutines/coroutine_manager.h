@@ -31,6 +31,8 @@ struct CoroutineManagerConfig {
     bool emulateJs = false;
     /// Number of coroutine workers for the N:M mode
     uint32_t workersCount = WORKERS_COUNT_AUTO;
+    /// Collection of performance statistics
+    bool enablePerfStats = false;
 };
 
 /// @brief defines the requested launch mode for a coroutine

@@ -199,3 +199,10 @@ options:
   type: bool
   default: false
   description: Enable JS interop mode (affects launch behaviour and async functions)
+
+- name: coroutine-dump-stats
+  lang:
+    - ets
+  type: bool
+  default: false
+  description: Collect coroutine stats and dump it at the end of the program

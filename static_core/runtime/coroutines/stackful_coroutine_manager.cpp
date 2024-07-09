@@ -42,10 +42,14 @@ void StackfulCoroutineManager::FreeCoroutineStack(uint8_t *stack)
 void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, PandaVM *vm)
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
+    bool isStatsEnabled = stats_.IsEnabled();
 
     auto *wMain =
         allocator->New<StackfulCoroutineWorker>(runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::FIBER,
                                                 "[main] worker 0", stackful_coroutines::MAIN_WORKER_ID);
+    if (isStatsEnabled) {
+        wMain->GetPerfStats().Enable();
+    }
     workers_.push_back(wMain);
     ASSERT(workers_[stackful_coroutines::MAIN_WORKER_ID] == wMain);
     ASSERT(wMain->GetId() == stackful_coroutines::MAIN_WORKER_ID);
@@ -53,6 +57,9 @@ void StackfulCoroutineManager::CreateWorkers(size_t howMany, Runtime *runtime, P
     for (uint32_t i = 1; i < howMany; ++i) {
         auto *w = allocator->New<StackfulCoroutineWorker>(
             runtime, vm, this, StackfulCoroutineWorker::ScheduleLoopType::THREAD, "worker " + ToPandaString(i), i);
+        if (isStatsEnabled) {
+            w->GetPerfStats().Enable();
+        }
         workers_.push_back(w);
         ASSERT(workers_[i] == w);
         ASSERT(w->GetId() == i);
@@ -105,6 +112,11 @@ bool StackfulCoroutineManager::IsCoroutineSwitchDisabled()
 
 void StackfulCoroutineManager::Initialize(CoroutineManagerConfig config, Runtime *runtime, PandaVM *vm)
 {
+    // enable stats collection if needed
+    if (config.enablePerfStats) {
+        stats_.Enable();
+    }
+    ScopedCoroutineStats s(&stats_, CoroutineTimeStats::INIT);
     // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
     if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
@@ -168,6 +180,15 @@ void StackfulCoroutineManager::RegisterCoroutine(Coroutine *co)
 
 bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
 {
+    if (co->HasManagedEntrypoint()) {
+        // profiling: start interval here, end in ctxswitch after finalization request is done
+        GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::SCH_ALL);
+    } else {
+        // profiling: no need. MAIN and NATIVE EP coros are deleted from the SCHEDULER itself
+        LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::TerminateCoroutine(): terminating "
+                               << ((GetExistingWorkersCount() == 0) ? "MAIN..." : "NATIVE EP coro...");
+    }
+
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::TerminateCoroutine() started";
     co->NativeCodeEnd();
     co->UpdateStatus(ThreadStatus::TERMINATING);
@@ -195,16 +216,22 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
         GetCurrentWorker()->RequestFinalization(co);
     } else {
         // entrypointless and NOT native: e.g. MAIN
-        // (do nothing, as entrypointless coroutines should should be destroyed manually)
+        // (do nothing, as entrypointless coroutines should be destroyed manually)
     }
 
     return false;
 }
 
-size_t StackfulCoroutineManager::GetActiveWorkersCount()
+size_t StackfulCoroutineManager::GetActiveWorkersCount() const
 {
     os::memory::LockHolder lkWorkers(workersLock_);
     return activeWorkersCount_;
+}
+
+size_t StackfulCoroutineManager::GetExistingWorkersCount() const
+{
+    os::memory::LockHolder lkWorkers(workersLock_);
+    return workers_.size();
 }
 
 void StackfulCoroutineManager::CheckProgramCompletion()
@@ -247,6 +274,10 @@ size_t StackfulCoroutineManager::GetCoroutineCountLimit()
 Coroutine *StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Method *entrypoint,
                                             PandaVector<Value> &&arguments, CoroutineLaunchMode mode)
 {
+    // profiling: scheduler and launch time
+    ScopedCoroutineStats sSch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
+    ScopedCoroutineStats sLaunch(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::LAUNCH);
+
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Launch started";
 
     auto *result = LaunchImpl(completionEvent, entrypoint, std::move(arguments), mode);
@@ -260,6 +291,9 @@ Coroutine *StackfulCoroutineManager::Launch(CompletionEvent *completionEvent, Me
 
 void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
 {
+    // profiling
+    ScopedCoroutineStats s(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
+
     ASSERT(awaitee != nullptr);
     [[maybe_unused]] auto *waiter = Coroutine::GetCurrent();
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Await started by " + waiter->GetName();
@@ -273,6 +307,10 @@ void StackfulCoroutineManager::Await(CoroutineEvent *awaitee)
 
 void StackfulCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
 {
+    // profiling: this function can be called either independently or as a path of some other SCH sequence,
+    // hence using the "weak" stats collector
+    ScopedCoroutineStats s(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL, true);
+
     os::memory::LockHolder lkWorkers(workersLock_);
     ASSERT(blocker != nullptr);
 #ifndef NDEBUG
@@ -289,6 +327,9 @@ void StackfulCoroutineManager::UnblockWaiters(CoroutineEvent *blocker)
 
 void StackfulCoroutineManager::Schedule()
 {
+    // profiling
+    ScopedCoroutineStats s(&GetCurrentWorker()->GetPerfStats(), CoroutineTimeStats::SCH_ALL);
+
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::Schedule() request from "
                            << Coroutine::GetCurrent()->GetName();
     GetCurrentWorker()->RequestSchedule();
@@ -333,6 +374,9 @@ bool StackfulCoroutineManager::IsRunningThreadExist()
 
 void StackfulCoroutineManager::WaitForDeregistration()
 {
+    // profiling: start interval here, end in ctxswitch (if needed)
+    GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::SCH_ALL);
+    //
     MainCoroutineCompleted();
 }
 
@@ -455,32 +499,47 @@ Coroutine *StackfulCoroutineManager::LaunchImpl(CompletionEvent *completionEvent
     return co;
 }
 
+void StackfulCoroutineManager::DumpCoroutineStats() const
+{
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager: dumping performance statistics...";
+    os::memory::LockHolder lock(workersLock_);
+    PandaVector<CoroutineWorkerStats *> wstats;
+    for (auto *worker : workers_) {
+        worker->GetPerfStats().Disable();
+        wstats.push_back(&worker->GetPerfStats());
+    }
+    std::cout << "=== Coroutine statistics begin ===" << std::endl;
+    std::cout << stats_.GetFullStatistics(std::move(wstats));
+    std::cout << "=== Coroutine statistics end ===" << std::endl;
+    LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager: performance statistics dumped successfully.";
+}
+
+void StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion()
+{
+    os::memory::LockHolder lkCompletion(programCompletionLock_);
+    auto *main = Coroutine::GetCurrent();
+    while (coroutineCount_ > 1 + GetActiveWorkersCount()) {  // 1 is for MAIN
+        programCompletionEvent_->SetNotHappened();
+        programCompletionEvent_->Lock();
+        programCompletionLock_.Unlock();
+        ScopedManagedCodeThread s(main);  // perf?
+        GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
+        LOG(DEBUG, COROUTINES)
+            << "StackfulCoroutineManager::WaitForNonMainCoroutinesCompletion(): possibly spurious wakeup from wait...";
+        // NOTE(konstanting, #I67QXC): test for the spurious wakeup
+        programCompletionLock_.Lock();
+    }
+    ASSERT(coroutineCount_ == (1 + GetActiveWorkersCount()));
+}
+
 void StackfulCoroutineManager::MainCoroutineCompleted()
 {
     // precondition: MAIN is already in the native mode
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): STARTED";
-
     // block till only schedule loop coroutines are present
     LOG(DEBUG, COROUTINES)
         << "StackfulCoroutineManager::MainCoroutineCompleted(): waiting for other coroutines to complete";
-
-    {
-        os::memory::LockHolder lkCompletion(programCompletionLock_);
-        auto *main = Coroutine::GetCurrent();
-        while (coroutineCount_ > 1 + GetActiveWorkersCount()) {  // 1 is for MAIN
-            programCompletionEvent_->SetNotHappened();
-            programCompletionEvent_->Lock();
-            programCompletionLock_.Unlock();
-            ScopedManagedCodeThread s(main);  // perf?
-            GetCurrentWorker()->WaitForEvent(programCompletionEvent_);
-            LOG(DEBUG, COROUTINES)
-                << "StackfulCoroutineManager::MainCoroutineCompleted(): possibly spurious wakeup from wait...";
-            // NOTE(konstanting, #I67QXC): test for the spurious wakeup
-            programCompletionLock_.Lock();
-        }
-        ASSERT(coroutineCount_ == (1 + GetActiveWorkersCount()));
-    }
-
+    WaitForNonMainCoroutinesCompletion();
     // NOTE(konstanting, #I67QXC): correct state transitions for MAIN
     GetCurrentContext()->MainThreadFinished();
     GetCurrentContext()->EnterAwaitLoop();
@@ -492,8 +551,12 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
             worker->SetActive(false);
         }
         while (activeWorkersCount_ > 1) {  // 1 is for MAIN
+            // profiling: the SCH interval is expected to be started after the ctxswitch
+            GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::SCH_ALL);
             // NOTE(konstanting, #I67QXC): need timed wait?..
             workersCv_.Wait(&workersLock_);
+            // profiling: we don't want to profile the sleeping state
+            GetCurrentWorker()->GetPerfStats().StartInterval(CoroutineTimeStats::SCH_ALL);
         }
     }
 
@@ -502,6 +565,13 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
     while (coroutineCount_ > 1) {
         GetCurrentWorker()->FinalizeFiberScheduleLoop();
     }
+    // profiling: the SCH interval is expected to be started after the ctxswitch
+    GetCurrentWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::SCH_ALL);
+
+    if (stats_.IsEnabled()) {
+        DumpCoroutineStats();
+    }
+    stats_.Disable();
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): deleting workers";
     {
@@ -509,6 +579,7 @@ void StackfulCoroutineManager::MainCoroutineCompleted()
         for (auto *worker : workers_) {
             Runtime::GetCurrent()->GetInternalAllocator()->Delete(worker);
         }
+        workers_.clear();
     }
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::MainCoroutineCompleted(): DONE";
