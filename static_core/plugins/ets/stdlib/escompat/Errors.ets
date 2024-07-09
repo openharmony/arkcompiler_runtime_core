@@ -22,6 +22,14 @@ export class EvalError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("EvalError", message, options)
     }
+
+    static invoke(message?: String, options?: ErrorOptions): EvalError {
+        return new EvalError(message, options)
+    }
+
+    static invoke(message: String): EvalError {
+        return new EvalError(message)
+    }
 }
 
 /**
@@ -30,6 +38,14 @@ export class EvalError extends Error {
 export class TypeError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("TypeError", message, options)
+    }
+
+    static invoke(message?: String, options?: ErrorOptions): TypeError {
+        return new TypeError(message, options)
+    }
+
+    static invoke(message: String): TypeError {
+        return new TypeError(message)
     }
 }
 
@@ -40,6 +56,14 @@ export class ReferenceError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("ReferenceError", message, options)
     }
+
+    static invoke(message?: String, options?: ErrorOptions): ReferenceError {
+        return new ReferenceError(message, options)
+    }
+
+    static invoke(message: String): ReferenceError {
+        return new ReferenceError(message)
+    }
 }
 
 /**
@@ -48,6 +72,14 @@ export class ReferenceError extends Error {
 export class URIError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("URIError", message, options)
+    }
+
+    static invoke(message?: String, options?: ErrorOptions): URIError {
+        return new URIError(message, options)
+    }
+
+    static invoke(message: String): URIError {
+        return new URIError(message)
     }
 }
 
@@ -88,6 +120,11 @@ export class AggregateError extends Error {
         super("AggregateError", message, undefined)
         this.errors = errors
     }
+
+    static invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
+        return new AggregateError(errors, message, options)
+    }
+
 }
 
 /**

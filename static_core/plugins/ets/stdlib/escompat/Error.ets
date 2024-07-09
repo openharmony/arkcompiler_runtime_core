@@ -62,6 +62,14 @@ export class Error {
         this.stackLines = StackTrace.provisionStackTrace()
     }
 
+    static invoke(message?: String, options?: ErrorOptions): Error {
+        return new Error(message, options)
+    }
+
+    static invoke(message: String): Error {
+        return new Error(message)
+    }
+
     /**
     * Converts this error to a string
     * Result includes error message and the stacktrace

@@ -67,6 +67,14 @@ export class SyntaxError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("SyntaxError", message, options)
     }
+
+    static invoke(message?: String, options?: ErrorOptions): SyntaxError {
+        return new SyntaxError(message, options)
+    }
+
+    static invoke(message: String): SyntaxError {
+        return new SyntaxError(message)
+    }
 }
 
 /**
@@ -84,6 +92,14 @@ export class JSONTypeError extends Error {
 export class RangeError extends Error {
     constructor(message?: String, options?: ErrorOptions) {
         super("RangeError", message, options)
+    }
+
+    static invoke(message?: String, options?: ErrorOptions): RangeError {
+        return new RangeError(message, options)
+    }
+
+    static invoke(message: String): RangeError {
+        return new RangeError(message)
     }
 }
 
