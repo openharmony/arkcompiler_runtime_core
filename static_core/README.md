@@ -21,13 +21,13 @@ E.g. for development purposes you should run:
 $ sudo ./scripts/install-deps-ubuntu -i=dev
 ```
 
-If you want additionally to install python dependencies for running tests add a parameter `-i=test`:
+If you want additionally to install Python dependencies for running tests add a parameter `-i=test`:
 
 ```
 $ sudo ./scripts/install-deps-ubuntu -i=dev -i=test
 ```
 It creates a virtual environment .venv-panda in your home directory with all required dependencies. 
-Later, tests python scripts can activate this environment. If you already have run with the parameter `-i=test`
+Later, tests Python scripts can activate this environment. If you already have run with the parameter `-i=test`
 the second time it might be skipped.
 
 # Third party
