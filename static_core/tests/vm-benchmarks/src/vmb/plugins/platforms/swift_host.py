@@ -31,14 +31,8 @@ class Platform(PlatformBase):
 
     def __init__(self, args: Args) -> None:
         super().__init__(args)
-        self.swiftc = self.tools['swiftc']
-        self.exe = self.tools['exe']
-
-    def run_unit(self, bu: BenchUnit) -> None:
-        self.swiftc(bu)
-        if OptFlags.DRY_RUN in self.flags:
-            return
-        self.exe(bu)
+        self.swiftc = self.tools_get('swiftc')
+        self.exe = self.tools_get('exe')
 
     @property
     def name(self) -> str:
@@ -55,3 +49,9 @@ class Platform(PlatformBase):
     @property
     def langs(self) -> List[str]:
         return ['swift']
+
+    def run_unit(self, bu: BenchUnit) -> None:
+        self.swiftc(bu)
+        if OptFlags.DRY_RUN in self.flags:
+            return
+        self.exe(bu)

@@ -39,6 +39,16 @@ class LineParser:
         self.pos = pos
         self.lang = lang
 
+    @property
+    def current(self) -> str:
+        if 0 <= self.pos < len(self.lines):
+            return self.lines[self.pos]
+        return ''
+
+    @classmethod
+    def create(cls, text: str, lang: LangBase):
+        return cls(text.split("\n"), -1, lang)
+
     def next(self) -> None:
         if self.pos + 1 > len(self.lines):
             raise IndexError('No lines left')
@@ -50,16 +60,6 @@ class LineParser:
             line = self.current.strip()
             if line and not line.startswith('//'):
                 break
-
-    @property
-    def current(self) -> str:
-        if 0 <= self.pos < len(self.lines):
-            return self.lines[self.pos]
-        return ''
-
-    @classmethod
-    def create(cls, text: str, lang: LangBase):
-        return cls(text.split("\n"), -1, lang)
 
 
 class Doclet(StringEnum):
@@ -117,14 +117,6 @@ class DocletParser(LineParser):
         self.__pending_bugs: List[str] = []
         self.__pending_imports: List[str] = []
 
-    def doclist(self, comment: str) -> List[NameVal]:
-        doclets = []
-        for line in comment.split("\n"):
-            m = self.re_doclet.search(line)
-            if m:
-                doclets.append(NameVal(*m.groups()))
-        return doclets
-
     @staticmethod
     def validate_comment(doclets: List[NameVal]) -> None:
         doclet_names = [v.name for v in doclets]
@@ -139,11 +131,6 @@ class DocletParser(LineParser):
                     doclet_names.count(d2.value) > 0:
                 raise ValueError(f'@{d1} and @{d2} doclets in same comment')
 
-    def ensure_state(self) -> BenchClass:
-        if not self.state:
-            raise ValueError('No state found!')
-        return self.state
-
     @staticmethod
     def ensure_value(val: Optional[str]) -> str:
         if not val:
@@ -156,6 +143,19 @@ class DocletParser(LineParser):
         if m:
             return m.group(1)
         return ''
+
+    def doclist(self, comment: str) -> List[NameVal]:
+        doclets = []
+        for line in comment.split("\n"):
+            m = self.re_doclet.search(line)
+            if m:
+                doclets.append(NameVal(*m.groups()))
+        return doclets
+
+    def ensure_state(self) -> BenchClass:
+        if not self.state:
+            raise ValueError('No state found!')
+        return self.state
 
     def parse_bench_overrides(self, line: str) -> Optional[argparse.Namespace]:
         """Parse @Benchmark options."""
@@ -293,32 +293,32 @@ class TemplateVars:  # pylint: disable=invalid-name
     """
 
     # Full bench source to be pasted into template
-    SRC: str
+    src: str
     # Name of main class
-    STATE_NAME: str = ''
+    state_name: str = ''
     # Setup method call: bench.SomeMethod();'
-    STATE_SETUP: str = ''
+    state_setup: str = ''
     # '\n'-joined list of 'bench.param1=5;'
-    STATE_PARAMS: str = ''
+    state_params: str = ''
     # ';'-joined param list of 'param1=5'
-    FIXTURE: str = ''
-    FIX_ID: int = 0
+    fixture: str = ''
+    fix_id: int = 0
     # Name of test method
-    METHOD_NAME: str = ''
-    METHOD_RETTYPE: str = ''
-    METHOD_CALL: str = ''
-    BENCH_NAME: str = ''
-    COMMON: str = ''  # common feature is obsoleted
+    method_name: str = ''
+    method_rettype: str = ''
+    method_call: str = ''
+    bench_name: str = ''
+    common: str = ''  # common feature is obsoleted
     # this should be the only place with defaults
-    MI: int = 3
-    WI: int = 2
-    IT: int = 1
-    WT: int = 1
-    FI: int = 0
-    GC: int = -1
-    TAGS: Any = None
-    BUGS: Any = None
-    IMPORTS: Any = None
+    mi: int = 3
+    wi: int = 2
+    it: int = 1
+    wt: int = 1
+    fi: int = 0
+    gc: int = -1
+    tags: Any = None
+    bugs: Any = None
+    imports: Any = None
 
     @classmethod
     def params_from_parsed(cls,
@@ -349,28 +349,28 @@ class TemplateVars:  # pylint: disable=invalid-name
                 fix_str = ';'.join([f'{x[0]}={x[1]}' for x in f])
                 if not fix_str:
                     fix_str = 'No Params'
-                tp.METHOD_NAME = b.name
-                tp.METHOD_RETTYPE = b.return_type if b.return_type else ''
+                tp.method_name = b.name
+                tp.method_rettype = b.return_type if b.return_type else ''
                 # strictly speaking, this should be lang specific
-                tp.STATE_PARAMS = "\n    ".join([
+                tp.state_params = "\n    ".join([
                     f'bench.{p} = {v};' for p, v in f])
-                tp.FIXTURE = fix_str
-                tp.FIX_ID = fix_id
-                tp.BENCH_NAME = f'{parsed.name}_{b.name}'
-                if tp.FIX_ID > 0:
-                    tp.BENCH_NAME = f'{tp.BENCH_NAME}_{tp.FIX_ID}'
+                tp.fixture = fix_str
+                tp.fix_id = fix_id
+                tp.bench_name = f'{parsed.name}_{b.name}'
+                if tp.fix_id > 0:
+                    tp.bench_name = f'{tp.bench_name}_{tp.fix_id}'
                 if tests_filter and \
-                        not any((x in tp.BENCH_NAME) for x in tests_filter):
+                        not any((x in tp.bench_name) for x in tests_filter):
                     fix_id += 1
                     continue
-                tp.STATE_SETUP = f'bench.{parsed.setup}();' \
+                tp.state_setup = f'bench.{parsed.setup}();' \
                     if parsed.setup else ''
-                tp.TAGS = tags
-                tp.BUGS = set(parsed.bugs + b.bugs)
+                tp.tags = tags
+                tp.bugs = set(parsed.bugs + b.bugs)
                 # Override measure settings in following order:
                 # Defaults -> CmdLine -> Class -> Bench
                 tp.set_measure_overrides(args, parsed.bench_args, b.args)
-                tp.IMPORTS = parsed.imports
+                tp.imports = parsed.imports
                 yield tp
                 fix_id += 1
 
@@ -380,14 +380,14 @@ class TemplateVars:  # pylint: disable=invalid-name
             if not ovr:
                 continue
             if ovr.measure_iters is not None:
-                self.MI = ovr.measure_iters
+                self.mi = ovr.measure_iters
             if ovr.warmup_iters is not None:
-                self.WI = ovr.warmup_iters
+                self.wi = ovr.warmup_iters
             if ovr.iter_time is not None:
-                self.IT = ovr.iter_time
+                self.it = ovr.iter_time
             if ovr.warmup_time is not None:
-                self.WT = ovr.warmup_time
+                self.wt = ovr.warmup_time
             if ovr.fast_iters is not None:
-                self.FI = ovr.fast_iters
+                self.fi = ovr.fast_iters
             if ovr.sys_gc_pause is not None:
-                self.GC = ovr.sys_gc_pause
+                self.gc = ovr.sys_gc_pause

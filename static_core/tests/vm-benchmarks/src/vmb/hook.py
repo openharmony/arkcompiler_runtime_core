@@ -34,6 +34,11 @@ class HookBase(ABC):
     def __init__(self, args: Args) -> None:  # pylint: disable=unused-argument
         self.done = False
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        return ''
+
     @classmethod
     def skipme(cls, args: Args) -> bool:  # pylint: disable=unused-argument
         """Do not register me.
@@ -41,11 +46,6 @@ class HookBase(ABC):
         Hook could decide this depending on args provided
         """
         return False
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        return ''
 
 
 class HookRegistry(metaclass=Singleton):

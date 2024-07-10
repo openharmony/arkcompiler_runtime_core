@@ -47,16 +47,16 @@ class Hook(HookBase):
         if not any(self.cpumask):
             raise ValueError(f'Wrong cpumask: {mask}')
 
+    @property
+    def name(self) -> str:
+        return 'CPU mask'
+
     @classmethod
     def skipme(cls, args: Args) -> bool:
         """Do not register me on host."""
         return (
             args.platform.endswith('host') or
             not args.get('cpumask'))
-
-    @property
-    def name(self) -> str:
-        return 'CPU mask'
 
     def before_suite(self, platform: PlatformBase) -> None:
         def get_prop(cpu: int, prop: str) -> str:
@@ -86,7 +86,10 @@ class Hook(HookBase):
         for c in all_cores:
             max_freqs[c] = get_prop(c, 'cpufreq/cpuinfo_max_freq')
             for p in all_props:
-                self.saved_state[c][p] = get_prop(c, p)
+                try:
+                    self.saved_state[c][p] = get_prop(c, p)
+                except KeyError as e:
+                    raise RuntimeError from e
         log.debug(max_freqs)
         log.debug(self.saved_state)
         # update cpu settings

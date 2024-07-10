@@ -30,10 +30,7 @@ class Platform(PlatformBase):
 
     def __init__(self, args: Args) -> None:
         super().__init__(args)
-        self.dummy = self.tools['dummy']
-
-    def run_unit(self, bu: BenchUnit) -> None:
-        self.dummy(bu)
+        self.dummy = self.tools.get('dummy')
 
     @property
     def name(self) -> str:
@@ -50,3 +47,6 @@ class Platform(PlatformBase):
     @staticmethod
     def langs() -> List[str]:
         return []
+
+    def run_unit(self, bu: BenchUnit) -> None:
+        self.dummy(bu)

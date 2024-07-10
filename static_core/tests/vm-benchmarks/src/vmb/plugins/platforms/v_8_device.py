@@ -29,16 +29,9 @@ class Platform(PlatformBase):
 
     def __init__(self, args: Args) -> None:
         super().__init__(args)
-        self.tsc = self.tools['tsc'] if 'tsc' in self.required_tools else None
-        self.v_8 = self.tools['v_8']
-
-    def run_unit(self, bu: BenchUnit) -> None:
-        if self.tsc:
-            self.tsc(bu)
-        if OptFlags.DRY_RUN in self.flags:
-            return
-        self.push_unit(bu)
-        self.v_8(bu)
+        self.tsc = self.tools_get('tsc') \
+            if 'tsc' in self.required_tools else None
+        self.v_8 = self.tools_get('v_8')
 
     @property
     def name(self) -> str:
@@ -59,3 +52,11 @@ class Platform(PlatformBase):
     @property
     def langs(self) -> List[str]:
         return self.args_langs if self.args_langs else ['ts', 'js']
+
+    def run_unit(self, bu: BenchUnit) -> None:
+        if self.tsc:
+            self.tsc(bu)
+        if OptFlags.DRY_RUN in self.flags:
+            return
+        self.push_unit(bu)
+        self.v_8(bu)

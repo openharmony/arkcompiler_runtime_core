@@ -93,6 +93,75 @@ class VMBReport(Jsonable):
     fail_cnt: float = 0.0
     _name_len: int = 0
 
+    @staticmethod
+    def status_diff(status1: bool, status2: bool, is_flaky: bool) -> str:
+        flaky = '(flaky)' if is_flaky else ''
+        status_diff = f'both pass{flaky}'
+        if not status1 and not status2:
+            status_diff = f'both fail{flaky}'
+        if status1 != status2:
+            if status2:
+                status_diff = f'fixed{flaky}'
+            else:
+                status_diff = f'new fail{flaky}'
+        return status_diff
+
+    @staticmethod
+    def compare_vmb(r1: VMBReport, r2: VMBReport,
+                    flaky: OptList = None
+                    ) -> VMBComparison:
+        if not flaky:
+            flaky = []
+        # create tmp dicts of tests for simple search of test by name
+        results1 = {t.name: t for t in r1.report.tests}
+        results2 = {t.name: t for t in r2.report.tests}
+        tests1, tests2 = set(results1.keys()), set(results2.keys())
+        comparison = VMBComparison()
+        # pylint: disable-next=protected-access
+        comparison._name_len = max(r1._name_len, r2._name_len)
+        times1, times2, sizes1, sizes2, rss1, rss2 = [], [], [], [], [], []
+        missed, new, fixed, new_fail = 0, 0, 0, 0
+        # compare tests present in both reports
+        for t in tests1.intersection(tests2):
+            t1, t2 = results1[t], results2[t]
+            status1, status2 = test_passed(t1), test_passed(t2)
+            is_flaky = t in flaky
+            status_diff = VMBReport.status_diff(status1, status2, is_flaky)
+            if not is_flaky:
+                if status2 and not status1:
+                    fixed += 1
+                elif status1 and not status2:
+                    comparison._regressions += 1
+                    new_fail += 1
+            time_diff = diff_str(t1.mean_time, t2.mean_time)
+            size_diff = diff_str(t1.code_size, t2.code_size)
+            rss_diff = diff_str(t1.mem_bytes, t2.mem_bytes)
+            comparison.add(t, VMBDiff(
+                time_diff, size_diff, rss_diff, status_diff))
+            if status1 and status2:
+                times1.append(t1.mean_time)
+                times2.append(t2.mean_time)
+                sizes1.append(t1.code_size)
+                sizes2.append(t2.code_size)
+                rss1.append(t1.mem_bytes)
+                rss2.append(t2.mem_bytes)
+        for t in tests2.difference(tests1):
+            comparison._regressions += 1
+            missed += 1
+            comparison.add(t, VMBDiff('n/a', 'n/a', 'n/a', 'missed'))
+        for t in tests1.difference(tests2):
+            comparison.add(t, VMBDiff('n/a', 'n/a', 'n/a', 'new'))
+            new += 1
+        comparison.title = f'Comparison: {short_title(r1.title, r2.title)}'
+        # GM should be recalculated because
+        # of possible difference in test set for report1 and report2
+        t_diff = diff_str_gm(times1, times2)
+        s_diff = diff_str_gm(sizes1, sizes2)
+        r_diff = diff_str_gm(rss1, rss2)
+        comparison.set_summary(t_diff, s_diff, r_diff,
+                               new, fixed, new_fail, missed)
+        return comparison
+
     @classmethod
     def parse(cls, text: str,
               exclude: OptList = None) -> VMBReport:
@@ -170,75 +239,6 @@ class VMBReport(Jsonable):
         with create_file(js_path) as f:
             f.write(self.report.js(indent=indent))
 
-    @staticmethod
-    def status_diff(status1: bool, status2: bool, is_flaky: bool) -> str:
-        flaky = '(flaky)' if is_flaky else ''
-        status_diff = f'both pass{flaky}'
-        if not status1 and not status2:
-            status_diff = f'both fail{flaky}'
-        if status1 != status2:
-            if status2:
-                status_diff = f'fixed{flaky}'
-            else:
-                status_diff = f'new fail{flaky}'
-        return status_diff
-
-    @staticmethod
-    def compare_vmb(r1: VMBReport, r2: VMBReport,
-                    flaky: OptList = None
-                    ) -> VMBComparison:
-        if not flaky:
-            flaky = []
-        # create tmp dicts of tests for simple search of test by name
-        results1 = {t.name: t for t in r1.report.tests}
-        results2 = {t.name: t for t in r2.report.tests}
-        tests1, tests2 = set(results1.keys()), set(results2.keys())
-        comparison = VMBComparison()
-        # pylint: disable-next=protected-access
-        comparison._name_len = max(r1._name_len, r2._name_len)
-        times1, times2, sizes1, sizes2, rss1, rss2 = [], [], [], [], [], []
-        missed, new, fixed, new_fail = 0, 0, 0, 0
-        # compare tests present in both reports
-        for t in tests1.intersection(tests2):
-            t1, t2 = results1[t], results2[t]
-            status1, status2 = test_passed(t1), test_passed(t2)
-            is_flaky = t in flaky
-            status_diff = VMBReport.status_diff(status1, status2, is_flaky)
-            if not is_flaky:
-                if status2 and not status1:
-                    fixed += 1
-                elif status1 and not status2:
-                    comparison._regressions += 1
-                    new_fail += 1
-            time_diff = diff_str(t1.mean_time, t2.mean_time)
-            size_diff = diff_str(t1.code_size, t2.code_size)
-            rss_diff = diff_str(t1.mem_bytes, t2.mem_bytes)
-            comparison.add(t, VMBDiff(
-                time_diff, size_diff, rss_diff, status_diff))
-            if status1 and status2:
-                times1.append(t1.mean_time)
-                times2.append(t2.mean_time)
-                sizes1.append(t1.code_size)
-                sizes2.append(t2.code_size)
-                rss1.append(t1.mem_bytes)
-                rss2.append(t2.mem_bytes)
-        for t in tests2.difference(tests1):
-            comparison._regressions += 1
-            missed += 1
-            comparison.add(t, VMBDiff('n/a', 'n/a', 'n/a', 'missed'))
-        for t in tests1.difference(tests2):
-            comparison.add(t, VMBDiff('n/a', 'n/a', 'n/a', 'new'))
-            new += 1
-        comparison.title = f'Comparison: {short_title(r1.title, r2.title)}'
-        # GM should be recalculated because
-        # of possible difference in test set for report1 and report2
-        t_diff = diff_str_gm(times1, times2)
-        s_diff = diff_str_gm(sizes1, sizes2)
-        r_diff = diff_str_gm(rss1, rss2)
-        comparison.set_summary(t_diff, s_diff, r_diff,
-                               new, fixed, new_fail, missed)
-        return comparison
-
 
 @dataclass
 class AOTStatsDiff(Jsonable):
@@ -289,7 +289,7 @@ def safe_geomean(numbers: Iterable[float]) -> float:
 def caption(msg):
     print()
     print(msg)
-    print('='*len(msg))
+    print('=' * len(msg))
 
 
 def split_name(name):
@@ -315,7 +315,7 @@ def diff_str(x, y, less_is_better=True):
         # cannot compare if one of the results is missing
         return 'n/a'
     try:  # just to make linter happy
-        diff_percent = (y/x-1.0)*100
+        diff_percent = (y / x - 1.0) * 100
     except ZeroDivisionError:
         return 'n/a'
     if abs(diff_percent) < TOLERANCE:
