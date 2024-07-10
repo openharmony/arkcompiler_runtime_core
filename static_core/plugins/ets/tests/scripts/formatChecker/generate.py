@@ -42,6 +42,7 @@ env = Environment(
     variable_start_string=VARIABLE_START_STRING
 )
 
+
 def render_template(filepath: str, params=None) -> str:
     """
     Renders a single template and returns result as string 
@@ -105,7 +106,8 @@ def render_and_write_templates(dirpath, outpath):
             for i, test in enumerate(tests):
                 output_filepath = ospath.join(outpath, f"{name_without_ext}_{i}{OUT_EXTENSION}")
                 write_file(path=output_filepath, text=test)
-        
+
+
 def process_tests(root: Path, outpath: Path):
     """
     Renders all templates and saves them.

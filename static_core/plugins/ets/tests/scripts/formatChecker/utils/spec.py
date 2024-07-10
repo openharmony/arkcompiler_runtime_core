@@ -25,6 +25,7 @@ from utils.fsutils import read_file
 
 Spec = dict
 
+
 def build_spec_tree(specpath: str, root: TestDirectory):
     spec = __parse_spec(specpath)
     walk_spec(spec, root, specpath=specpath)

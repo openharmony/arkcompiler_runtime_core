@@ -90,7 +90,7 @@ foreach(c_arg ${COMPILER_ARGUMENTS_LIST})
         )
 
         add_custom_target(sampler_etsnapi_trace_check_${c_arg}_${i_arg}
-            COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/napi/sampler/SamplerNapiTracesCheck.py --file=${testing_dir}/traceout_${c_arg}_${i_arg}.csv
+            COMMAND python3 ${PANDA_ETS_PLUGIN_SOURCE}/tests/napi/sampler/sampler_napi_traces_check.py --file=${testing_dir}/traceout_${c_arg}_${i_arg}.csv
             WORKING_DIRECTORY "${SAMPLER_GEN_ETSNAPI_LIB_DIR}"
             DEPENDS sampler_etsnapi_run_aspt_convertor_${c_arg}_${i_arg}
         )
