@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,6 +18,7 @@ import os
 import re
 import sys
 
+
 def get_args():
     parser = argparse.ArgumentParser(
         description="Doxygen style checker for panda project.")
@@ -26,13 +27,14 @@ def get_args():
 
     return parser.parse_args()
 
+
 def get_file_list(panda_dir) -> list:
     src_exts = (".c", '.cc', ".cp", ".cxx", ".cpp", ".CPP", ".c++", ".C", ".h",
                 ".hh", ".H", ".hp", ".hxx", ".hpp", ".HPP", ".h++", ".tcc")
     skip_dirs = ["third_party", "artifacts", "\..*", "build.*"]
     file_list = []
     for dirpath, dirnames, filenames in os.walk(panda_dir):
-        dirnames[:] = [d for d in dirnames if not re.match(f"({')|('.join(skip_dirs)})" , d)]
+        dirnames[:] = [d for d in dirnames if not re.match(f"({')|('.join(skip_dirs)})", d)]
         for fname in filenames:
             if (fname.endswith(src_exts)):
                 full_path = os.path.join(panda_dir, dirpath, fname)
@@ -40,6 +42,7 @@ def get_file_list(panda_dir) -> list:
                 file_list.append(full_path)
 
     return file_list
+
 
 # Additional check because regexps sometimes find correct comments
 def is_doxygen_comment(s: str) -> bool:
@@ -51,6 +54,7 @@ def is_doxygen_comment(s: str) -> bool:
             return False
     return True
 
+
 def print_correct_style() -> None:
     lines = ["\nPlease, for single-line doxygen comments use the following formats:",\
              "'/// TEXT' - used for commenting on an empty line", "or",\
@@ -59,6 +63,7 @@ def print_correct_style() -> None:
              "\n/**\n * TEXT\n * TEXT\n * TEXT\n */"]
     for line in lines:
         print(line)
+
 
 def check_keywords(src_path: str, splitted_lines: list, line_num: int) -> bool:
     is_right_style = True
@@ -74,32 +79,34 @@ def check_keywords(src_path: str, splitted_lines: list, line_num: int) -> bool:
         line_num += 1
     return is_right_style
 
+
 def check_javadoc(src_path: str, strings: list) -> bool:
     f = open(src_path, 'r')
     text = f.read()
     f.close()
     found_wrong_comment = False
     found_wrong_keyword_sign = False
-    for i in range(0, len(strings)):
-        line_num = text[:text.find(strings[i])].count('\n') + 1
-        if strings[i].find("Copyright") != -1 or strings[i].count('\n') <= 1:
+    for string in strings:
+        line_num = text[:text.find(string)].count('\n') + 1
+        if string.find("Copyright") != -1 or string.count('\n') <= 1:
             continue
-        pattern_to_check = re.search(r' */\*\* *\n( *\* *[^\n]*\n)+ *\*/', strings[i])
-        if not pattern_to_check or pattern_to_check.group(0) != strings[i]:
+        pattern_to_check = re.search(r' */\*\* *\n( *\* *[^\n]*\n)+ *\*/', string)
+        if not pattern_to_check or pattern_to_check.group(0) != string:
             err_msg = "%s:%s" % (src_path, line_num)
             print(err_msg)
-            print("Found doxygen comment with a wrong Javadoc style:\n%s\n" % strings[i])
+            print("Found doxygen comment with a wrong Javadoc style:\n%s\n" % string)
             found_wrong_comment = True
             continue
-        if strings[i].count('\n') == 2:
+        if string.count('\n') == 2:
             err_msg = "%s:%s" % (src_path, line_num)
-            print("%s\n%s\n" % (err_msg, strings[i]))
+            print("%s\n%s\n" % (err_msg, string))
             found_wrong_comment = True
             continue
-        found_wrong_keyword_sign |= not check_keywords(src_path, strings[i].splitlines(), line_num)
+        found_wrong_keyword_sign |= not check_keywords(src_path, string.splitlines(), line_num)
     if found_wrong_comment:
         print_correct_style()
     return not (found_wrong_comment or found_wrong_keyword_sign)
+
 
 def check_additional_slashes(src_path: str, strings: list) -> bool:
     f = open(src_path, 'r')
@@ -110,20 +117,20 @@ def check_additional_slashes(src_path: str, strings: list) -> bool:
     found_wrong_keyword_sign = False
     fine_comments_lines = []
     strings = list(set(strings)) # Only unique strings left
-    for i in range(0, len(strings)):
+    for string in strings:
         # Next line is used to find all occurencies of a given string
-        str_indexes = [s.start() for s in re.finditer(re.escape(strings[i]), text)]
-        for j in range(0, len(str_indexes)):
-            line_num = text[:str_indexes[j]].count('\n') + 1
+        str_indexes = [s.start() for s in re.finditer(re.escape(string), text)]
+        for str_index in str_indexes:
+            line_num = text[:str_index].count('\n') + 1
             pattern_to_check = re.search(r' */// [^ ]+?[^\n]*', lines[line_num - 1])
             if not pattern_to_check or pattern_to_check.group(0) != lines[line_num - 1]:
                 err_msg = "%s:%s" % (src_path, line_num)
                 print(err_msg)
-                print("Found doxygen comment with a wrong style:\n%s\n" % strings[i])
+                print("Found doxygen comment with a wrong style:\n%s\n" % string)
                 found_wrong_comment = True
                 continue
             fine_comments_lines.append(line_num)
-            found_wrong_keyword_sign |= not check_keywords(src_path, strings[i].splitlines(), line_num)
+            found_wrong_keyword_sign |= not check_keywords(src_path, string.splitlines(), line_num)
 
     fine_comments_lines.sort()
     for i in range(0, len(fine_comments_lines) - 1):
@@ -139,6 +146,7 @@ def check_additional_slashes(src_path: str, strings: list) -> bool:
         print_correct_style()
     return not (found_wrong_comment or found_wrong_keyword_sign)
 
+
 def check_less_than_slashes(src_path: str, strings: list) -> bool:
     f = open(src_path, 'r')
     text = f.read()
@@ -146,19 +154,20 @@ def check_less_than_slashes(src_path: str, strings: list) -> bool:
     lines = text.splitlines()
     found_wrong_comment = False
     found_wrong_keyword_sign = False
-    for i in range(0, len(strings)):
-        line_num = text[:text.find(strings[i])].count('\n') + 1
+    for string in strings:
+        line_num = text[:text.find(string)].count('\n') + 1
         pattern_to_check = re.search(r' *[^ \n]+[^\n]* +///< [^\n]+', lines[line_num - 1])
         if not pattern_to_check or pattern_to_check.group(0) != lines[line_num - 1]:
             err_msg = "%s:%s" % (src_path, line_num)
             print(err_msg)
-            print("Found doxygen comment with a wrong style:\n%s\n" % strings[i])
+            print("Found doxygen comment with a wrong style:\n%s\n" % string)
             found_wrong_comment = True
             continue
-        found_wrong_keyword_sign |= not check_keywords(src_path, strings[i].splitlines(), line_num)
+        found_wrong_keyword_sign |= not check_keywords(src_path, string.splitlines(), line_num)
     if found_wrong_comment:
         print_correct_style()
     return not (found_wrong_comment or found_wrong_keyword_sign)
+
 
 def check_all(src_path: str, fine_patterns_found: list, wrong_patterns_number: int) -> bool:
     passed = wrong_patterns_number == 0
@@ -166,6 +175,7 @@ def check_all(src_path: str, fine_patterns_found: list, wrong_patterns_number: i
     passed &= check_additional_slashes(src_path, fine_patterns_found[1])
     passed &= check_less_than_slashes(src_path, fine_patterns_found[2])
     return passed
+
 
 def run_doxygen_check(src_path: str, msg: str) -> bool:
     print(msg)
@@ -206,15 +216,18 @@ def run_doxygen_check(src_path: str, msg: str) -> bool:
         line_num += 1
 
     # Getting comments with possibly allowed styles
-    for i in range(len(regexps_for_fine_styles)):
+    ind = 0
+    for regexp in regexps_for_fine_styles:
         f = open(src_path, 'r')
-        strings = regexps_for_fine_styles[i].findall(f.read())
+        strings = regexp.findall(f.read())
         f.close()
         for s in strings:
             if is_doxygen_comment(s):
-                fine_patterns_found[i].append(s)
+                fine_patterns_found[ind].append(s)
+        ind += 1
 
     return check_all(src_path, fine_patterns_found, len(wrong_patterns_found))
+
 
 def check_file_list(file_list: list) -> bool:
     jobs = []
