@@ -1,13 +1,5 @@
 ### Issue 17069
 escompat/ArrayTest2.ets
-### Issue 17070
-escompat/escompat_Array_Test_escompat_Array.ets
-### Issue 17598
-escompat/escompat_Array_Test_escompat_Array_001.ets
-### Issue 1788
-escompat/escompat_Array_Test_escompat_Array_002.ets
-### Issue 17071
-escompat/escompat_Array_Test_escompat_Array_003.ets
 ### Issue 16444
 std/core/Object.ets
 std/core/std_core_string_String_fromCharCode_005.ets
