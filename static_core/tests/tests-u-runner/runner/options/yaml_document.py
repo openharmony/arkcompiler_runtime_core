@@ -32,18 +32,6 @@ class YamlDocument:
         self._document: Optional[Dict[str, Any]] = None
         self._warnings: List[str] = []
 
-    def load_configs(self, config_paths: Optional[List[str]]) -> None:
-        if config_paths is None:
-            return
-        for config_path in config_paths:
-            self.merge(config_path, self.load(config_path))
-
-    def document(self) -> Optional[Dict[str, Any]]:
-        return self._document
-
-    def warnings(self) -> List[str]:
-        return self._warnings
-
     @staticmethod
     def load(config_path: str) -> Dict[str, Any]:
         with open(config_path, "r", encoding="utf-8") as stream:
@@ -57,6 +45,18 @@ class YamlDocument:
     def save(config_path: str, data: Dict[str, Any]) -> None:
         data_to_save = yaml.dump(data, indent=4)
         utils.write_2_file(config_path, data_to_save)
+
+    def load_configs(self, config_paths: Optional[List[str]]) -> None:
+        if config_paths is None:
+            return
+        for config_path in config_paths:
+            self.merge(config_path, self.load(config_path))
+
+    def document(self) -> Optional[Dict[str, Any]]:
+        return self._document
+
+    def warnings(self) -> List[str]:
+        return self._warnings
 
     # We use Log.exception_and_raise which throws exception. no need in return
     # pylint: disable=inconsistent-return-statements

@@ -63,18 +63,21 @@ class TestPreparationStep(ABC):
 
 
 class CtsTestPreparationStep(TestPreparationStep):
+    def __str__(self) -> str:
+        return f"Test Generator for '{EtsSuites.CTS.value}' test suite"
+
     def transform(self, force_generated: bool) -> List[str]:
         ets_templates_generator = EtsTemplatesGenerator(self.test_source_path, self.test_gen_path)
         return ets_templates_generator.generate()
-
-    def __str__(self) -> str:
-        return f"Test Generator for '{EtsSuites.CTS.value}' test suite"
 
 
 class CustomGeneratorTestPreparationStep(TestPreparationStep):
     def __init__(self, test_source_path: Path, test_gen_path: Path, config: Config, extension: str) -> None:
         super().__init__(test_source_path, test_gen_path, config)
         self.extension = extension
+
+    def __str__(self) -> str:
+        return f"Test Generator for '{EtsSuites.CUSTOM.value} - {self.config.custom.suite_name}' test suite"
 
     def transform(self, force_generated: bool) -> List[str]:
         # call of the custom generator
@@ -107,13 +110,13 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
 
         return result
 
-    def __str__(self) -> str:
-        return f"Test Generator for '{EtsSuites.CUSTOM.value} - {self.config.custom.suite_name}' test suite"
-
 
 class FuncTestPreparationStep(TestPreparationStep):
     def transform(self, force_generated: bool) -> List[str]:
         return self.generate_template_tests(self.test_source_path, self.test_gen_path)
+
+    def __str__(self) -> str:
+        return f"Test Generator for '{EtsSuites.FUNC.value}' test suite"
 
     @staticmethod
     def generate_template_tests(template_root_path: Path, test_gen_path: Path) -> List[str]:
@@ -132,18 +135,18 @@ class FuncTestPreparationStep(TestPreparationStep):
             generated_tests.extend(generated_tests_tmp)
         return generated_tests
 
-    def __str__(self) -> str:
-        return f"Test Generator for '{EtsSuites.FUNC.value}' test suite"
-
 
 class ESCheckedTestPreparationStep(TestPreparationStep):
+    def __str__(self) -> str:
+        return f"Test Generator for '{EtsSuites.ESCHECKED.value}' test suite"
+
     def transform(self, force_generated: bool) -> List[str]:
         confs = list(glob(os.path.join(self.test_source_path, "**/*.yaml"), recursive=True))
         generator_root = Path(self.config.general.static_core_root) / \
-            "tests" / \
-            "tests-u-runner" / \
-            "tools" / \
-            "generate-es-checked"
+                         "tests" / \
+                         "tests-u-runner" / \
+                         "tools" / \
+                         "generate-es-checked"
         generator_executable = generator_root / "main.rb"
         res = subprocess.run(
             [
@@ -169,18 +172,15 @@ class ESCheckedTestPreparationStep(TestPreparationStep):
         glob_expression = os.path.join(self.test_gen_path, "**/*.ets")
         return list(glob(glob_expression, recursive=True))
 
-    def __str__(self) -> str:
-        return f"Test Generator for '{EtsSuites.ESCHECKED.value}' test suite"
-
 
 class CopyStep(TestPreparationStep):
+    def __str__(self) -> str:
+        return "Test preparation step for any ets test suite: copying"
+
     def transform(self, force_generated: bool) -> List[str]:
         utils.copy(self.test_source_path, self.test_gen_path, remove_if_exist=False)
         glob_expression = os.path.join(self.test_gen_path, "**/*.ets")
         return list(glob(glob_expression, recursive=True))
-
-    def __str__(self) -> str:
-        return "Test preparation step for any ets test suite: copying"
 
 
 class JitStep(TestPreparationStep):

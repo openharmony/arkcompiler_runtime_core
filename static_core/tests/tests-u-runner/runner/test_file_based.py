@@ -41,6 +41,7 @@ class TestFileBased(Test):
         self.fail_kind: Optional[FailKind] = None
         self.main_entry_point = "_GLOBAL::func_main_0"
 
+    @property
     def ark_extra_options(self) -> List[str]:
         return []
 
@@ -133,7 +134,7 @@ class TestFileBased(Test):
     def run_runtime(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         ark_flags = []
-        ark_flags.extend(self.ark_extra_options())
+        ark_flags.extend(self.ark_extra_options)
         ark_flags.extend(self.runtime_args)
         if self.test_env.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             ark_flags.extend(["--aot-files", test_an])

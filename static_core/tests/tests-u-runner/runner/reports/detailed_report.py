@@ -69,6 +69,26 @@ class DetailedReport:
 
         return paths
 
+    def populate_report(self) -> None:
+        template_path = path.join(path.dirname(path.abspath(__file__)), self.TEMPLATE)
+        with open(template_path, "r", encoding="utf-8") as file_pointer:
+            report = file_pointer.read()
+        report = report.replace(self.REPORT_DATE, str(date.today()))
+        report = report.replace(self.REPORT_TEST_SUITE, self.test_suite)
+        if not self.has_excluded:
+            report = report.replace(self.REPORT_EXCLUDED_HEADER, "")
+            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, "")
+        else:
+            report = report.replace(self.REPORT_EXCLUDED_HEADER, self.EXCLUDED_HEADER)
+            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, self.EXCLUDED_DIVIDER)
+        lines: List[str] = []
+        for partial_path in self.result:
+            lines.append(self.__report_one_line(partial_path))
+        result = "\n".join(sorted(lines))
+        report = report.replace(self.REPORT_RESULT, result)
+        Log.default(_LOGGER, f"Detailed report is saved to '{self.report_file}'")
+        write_2_file(self.report_file, report)
+
     def __calculate_one_test(self, test: Test) -> None:
         test_paths = self.__get_paths(test.test_id)
         is_passed_not_ignored = test.passed and not test.ignored
@@ -106,23 +126,3 @@ class DetailedReport:
         if self.has_excluded:
             report += f" {summary.excluded_after} |"
         return report
-
-    def populate_report(self) -> None:
-        template_path = path.join(path.dirname(path.abspath(__file__)), self.TEMPLATE)
-        with open(template_path, "r", encoding="utf-8") as file_pointer:
-            report = file_pointer.read()
-        report = report.replace(self.REPORT_DATE, str(date.today()))
-        report = report.replace(self.REPORT_TEST_SUITE, self.test_suite)
-        if not self.has_excluded:
-            report = report.replace(self.REPORT_EXCLUDED_HEADER, "")
-            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, "")
-        else:
-            report = report.replace(self.REPORT_EXCLUDED_HEADER, self.EXCLUDED_HEADER)
-            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, self.EXCLUDED_DIVIDER)
-        lines: List[str] = []
-        for partial_path in self.result:
-            lines.append(self.__report_one_line(partial_path))
-        result = "\n".join(sorted(lines))
-        report = report.replace(self.REPORT_RESULT, result)
-        Log.default(_LOGGER, f"Detailed report is saved to '{self.report_file}'")
-        write_2_file(self.report_file, report)

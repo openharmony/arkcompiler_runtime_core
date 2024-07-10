@@ -46,6 +46,12 @@ class StdlibTemplatesGenerator:
             variable_start_string=VARIABLE_START_STRING
         )
 
+    @staticmethod
+    def __deduplicate_key_content(key: str, key_uniq_suffix: int) -> Tuple[str, int]:
+        key_updated = str(key) + "_" + str(key_uniq_suffix).rjust(3, '0')
+        key_uniq_suffix += 1
+        return key_updated, key_uniq_suffix
+
     def render_and_write_templates(self, root_path: Path, dirpath: Path, outpath: Path) -> List[str]:
         """
         Recursively walk the FS, save rendered templates
@@ -122,9 +128,3 @@ class StdlibTemplatesGenerator:
         result[key] = text[start_indices[-1]:]
 
         return result
-
-    @staticmethod
-    def __deduplicate_key_content(key: str, key_uniq_suffix: int) -> Tuple[str, int]:
-        key_updated = str(key) + "_" + str(key_uniq_suffix).rjust(3, '0')
-        key_uniq_suffix += 1
-        return key_updated, key_uniq_suffix

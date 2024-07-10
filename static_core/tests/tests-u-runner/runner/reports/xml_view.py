@@ -26,16 +26,22 @@ from runner.reports.summary import Summary
 from runner.test_base import Test
 from runner.test_file_based import TestFileBased
 
-
 _LOGGER = logging.getLogger("runner.reports.xml_view")
 
 
 class XmlView:
     def __init__(self, report_root: Path, summary: Summary) -> None:
         self.__report_root = report_root
-        self.__report_xml = 'report.xml'        # filename of xml report in junit format
+        self.__report_xml = 'report.xml'  # filename of xml report in junit format
         self.__ignore_list_xml = 'ignore.list'  # filename of list of ignored tests in the junit like format
         self.__summary = summary
+
+    @staticmethod
+    def remove_special_chars(data: str) -> str:
+        xml_special_chars = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&apos;"}
+        for key, val in xml_special_chars.items():
+            data = data.replace(key, val)
+        return data
 
     def create_xml_report(self, results: List[Test], execution_time: float) -> None:
         total = self.__summary.passed + self.__summary.failed + self.__summary.ignored
@@ -102,10 +108,3 @@ class XmlView:
         result.append('</failure>')
 
         return result
-
-    @staticmethod
-    def remove_special_chars(data: str) -> str:
-        xml_special_chars = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&apos;"}
-        for key, val in xml_special_chars.items():
-            data = data.replace(key, val)
-        return data

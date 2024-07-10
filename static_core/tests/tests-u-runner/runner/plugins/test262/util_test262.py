@@ -46,6 +46,45 @@ class UtilTest262:
         if self.test262_revision is None:
             Log.exception_and_raise(_LOGGER, f"No {TEST262_REVISION} environment variable set", EnvironmentError)
 
+    @staticmethod
+    def process_descriptor(descriptor: Descriptor) -> Dict[str, Any]:
+        desc = descriptor.parse_descriptor()
+
+        includes = []
+
+        if "includes" in desc:
+            includes.extend(desc["includes"])
+            includes.extend(['assert.js', 'sta.js'])
+
+        if 'flags' in desc and 'async' in desc["flags"]:
+            includes.extend(['doneprintHandle.js'])
+
+        negative_phase = desc["negative_phase"] if 'negative_phase' in desc else 'pass'
+        negative_type = desc["negative_type"] if 'negative_type' in desc else ''
+
+        # negative_phase: pass, parse, resolution, runtime
+        return {
+            'flags': desc["flags"] if 'flags' in desc else [],
+            'negative_phase': negative_phase,
+            'negative_type': negative_type,
+            'includes': includes,
+        }
+
+    @staticmethod
+    def validate_parse_result(return_code: int, _: str, desc: Dict[str, Any], out: str) -> Tuple[bool, bool]:
+        is_negative = (desc['negative_phase'] == 'parse')
+
+        if return_code == 0:  # passed
+            if is_negative:
+                return False, False  # negative test passed
+
+            return True, True  # positive test passed
+
+        if return_code == 1:  # failed
+            return is_negative and (desc['negative_type'] in out), False
+
+        return False, False  # abnormal
+
     def generate(self, harness_path: str) -> str:
         stamp_name = f"test262-{self.test262_revision}"
         if self.jit and self.jit_preheat_repeats > 1:
@@ -103,45 +142,6 @@ class UtilTest262:
 
         with open(output_file, 'w', encoding="utf-8") as output:
             output.write(out_str)
-
-    @staticmethod
-    def process_descriptor(descriptor: Descriptor) -> Dict[str, Any]:
-        desc = descriptor.parse_descriptor()
-
-        includes = []
-
-        if "includes" in desc:
-            includes.extend(desc["includes"])
-            includes.extend(['assert.js', 'sta.js'])
-
-        if 'flags' in desc and 'async' in desc["flags"]:
-            includes.extend(['doneprintHandle.js'])
-
-        negative_phase = desc["negative_phase"] if 'negative_phase' in desc else 'pass'
-        negative_type = desc["negative_type"] if 'negative_type' in desc else ''
-
-        # negative_phase: pass, parse, resolution, runtime
-        return {
-            'flags': desc["flags"] if 'flags' in desc else [],
-            'negative_phase': negative_phase,
-            'negative_type': negative_type,
-            'includes': includes,
-        }
-
-    @staticmethod
-    def validate_parse_result(return_code: int, _: str, desc: Dict[str, Any], out: str) -> Tuple[bool, bool]:
-        is_negative = (desc['negative_phase'] == 'parse')
-
-        if return_code == 0:  # passed
-            if is_negative:
-                return False, False  # negative test passed
-
-            return True, True  # positive test passed
-
-        if return_code == 1:  # failed
-            return is_negative and (desc['negative_type'] in out), False
-
-        return False, False  # abnormal
 
     def validate_runtime_result(self, return_code: int, std_err: str, desc: Dict[str, Any], out: str) -> bool:
         is_negative = (desc['negative_phase'] == 'runtime') or \

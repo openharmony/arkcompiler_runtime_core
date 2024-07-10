@@ -80,6 +80,10 @@ class RunnerETS(RunnerFileBased):
 
         self.add_directory(self.test_root, "ets", [])
 
+    @property
+    def default_work_dir_root(self) -> Path:
+        return Path("/tmp") / "ets" / self.__ets_suite_name
+
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestETS:
         test = TestETS(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
@@ -102,10 +106,6 @@ class RunnerETS(RunnerFileBased):
         else:
             Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name
-
-    @property
-    def default_work_dir_root(self) -> Path:
-        return Path("/tmp") / "ets" / self.__ets_suite_name
 
     def _check_binary_artifacts(self) -> None:
         stdlib_path_obj = Path(self.stdlib_path)

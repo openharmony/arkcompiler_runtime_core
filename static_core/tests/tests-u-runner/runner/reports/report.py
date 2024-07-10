@@ -26,7 +26,6 @@ from runner.enum_types.params import TestEnv
 from runner.utils import write_2_file
 from runner.logger import Log
 
-
 _LOGGER = logging.getLogger("runner.reports.report")
 
 
@@ -125,6 +124,14 @@ class HtmlReport(Report):
 
         return report
 
+    @staticmethod
+    def __get_good_line(line: str) -> str:
+        return f'<span class="output_line">{line}</span>'
+
+    @staticmethod
+    def __get_failed_line(line: str) -> str:
+        return f'<span class="output_line output_line--failed">{line}</span>'
+
     def __make_output_diff_html(self, expected: str, actual: str) -> Tuple[List[str], List[str]]:
         expected_list = convert_to_array(expected)
         actual_list = convert_to_array(actual)
@@ -151,14 +158,6 @@ class HtmlReport(Report):
                 result_actual.append(self.__get_good_line(actual_list[i]))
 
         return result_expected, result_actual
-
-    @staticmethod
-    def __get_good_line(line: str) -> str:
-        return f'<span class="output_line">{line}</span>'
-
-    @staticmethod
-    def __get_failed_line(line: str) -> str:
-        return f'<span class="output_line output_line--failed">{line}</span>'
 
 
 class MdReport(Report):
@@ -194,6 +193,18 @@ class MdReport(Report):
 
         return report
 
+    @staticmethod
+    def __get_md_good_line(expected: str, actual: str) -> str:
+        return f"| {expected} | {actual} |"
+
+    @staticmethod
+    def __get_md_failed_line(expected: str, actual: str) -> str:
+        if expected.strip() != "":
+            expected = f"**{expected}**"
+        if actual.strip() != "":
+            actual = f"**{actual}**"
+        return f"| {expected} | {actual} |"
+
     def __make_output_diff_md(self, expected: str, actual: str) -> List[str]:
         expected_list = convert_to_array(expected)
         actual_list = convert_to_array(actual)
@@ -217,18 +228,6 @@ class MdReport(Report):
                 result.append(self.__get_md_failed_line(" ", actual_list[i]))
 
         return result
-
-    @staticmethod
-    def __get_md_good_line(expected: str, actual: str) -> str:
-        return f"| {expected} | {actual} |"
-
-    @staticmethod
-    def __get_md_failed_line(expected: str, actual: str) -> str:
-        if expected.strip() != "":
-            expected = f"**{expected}**"
-        if actual.strip() != "":
-            actual = f"**{actual}**"
-        return f"| {expected} | {actual} |"
 
 
 class TextReport(Report):
