@@ -1328,6 +1328,10 @@
 09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_7.ets
 09.classes/11.local_classes_and_interfaces/local_class_refer_on_constant_8.ets
 
+# es2panda: 18152 Bad operand type, the type of the operand must be boolean type
+07.expressions/18.ensure-not-nullish_expression/undefined_4.ets
+# end of es2panda failure
+
 # es2panda: 16519 CTE if no expression set for the For loop
 08.statements/08.for_statements/for_loop_parameters_0.ets
 08.statements/08.for_statements/for_loop_parameters_1.ets
@@ -1985,6 +1989,7 @@
 
 # 14673,16369, 14338 Function, method, constructor overload signatures
 15.semantic_rules/04.type_compatibility/classes_compatibility_2.ets
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_6.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_7.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_8.ets
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_11.ets
@@ -2165,3 +2170,6 @@
 
 # es2panda: #17766 Order of initialization of global const and let
 07.expressions/17.typeof_expression/tof_const_11.ets
+
+# es2panda: #18121 Failed to verifier
+06.contexts_and_conversions/05.implicit_conversions/09.constant_string_to_char_conversion/str2char_7.ets
