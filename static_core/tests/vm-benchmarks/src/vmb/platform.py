@@ -141,10 +141,6 @@ class PlatformBase(CrossShell, ABC):
                     bus.append(BenchUnit(p.resolve()))
         return bus
 
-    @abstractmethod
-    def run_unit(self, bu: BenchUnit) -> None:
-        pass
-
     @classmethod
     def create(cls, args: Args) -> PlatformBase:
         try:
@@ -156,6 +152,10 @@ class PlatformBase(CrossShell, ABC):
         except Exception as e:  # pylint: disable=broad-exception-caught
             die(True, 'Plugin load error: %s', e)
         return platform
+    
+    @abstractmethod
+    def run_unit(self, bu: BenchUnit) -> None:
+        pass
 
     def cleanup(self, bu: BenchUnit) -> None:
         """Do default cleanup."""

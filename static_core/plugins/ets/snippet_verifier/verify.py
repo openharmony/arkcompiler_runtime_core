@@ -50,6 +50,7 @@ def get_space_len(line):
             return length
     return 10**10
 
+
 def write_snippet_line(line, space_len, ets_file, ts_file=None):
     if not line[0].isspace():
         return
@@ -135,6 +136,7 @@ def add_tag(trailed_line, snippet_tags):
     elif tag == "name":
         snippet_tags["name"] = trailed_line.replace('name: ', '')
 
+
 def parse_snippet_meta(meta_block_ind, rst_lines, snippets_meta):
     snippet_tags = deepcopy(default_snippet_tags)
     snippet_tags["marked"] = True
@@ -165,18 +167,20 @@ def parse_frontend_meta(rst_lines):
     for i in range(len(theme_indices) - 1):
         frontend_status_line = [
             rst_lines[j].split(":")[1].strip()
-            for j in range(theme_indices[i], theme_indices[i+1])
+            for j in range(theme_indices[i], theme_indices[i + 1])
             if re.match(r"\s*frontend_status:.*", rst_lines[j])
         ]
-        frontend_statuses[theme_indices[i]] = {"end_theme" : theme_indices[i+1],
+        frontend_statuses[theme_indices[i]] = {"end_theme" : theme_indices[i + 1],
                                                "status" : frontend_status_line[0]
-            if frontend_status_line  else "Partly"}
+            if frontend_status_line else "Partly"}
 
     return frontend_statuses
+
 
 def print_error(mark, filename, line_idx):
     print("{mark} {fname}::{line_idx} {mark}".format(
             fname=filename, line_idx=line_idx, mark=mark), end=' ')
+
 
 def check_name(names, name, filename, i, correct_tags):
     if name in names:
@@ -186,6 +190,7 @@ def check_name(names, name, filename, i, correct_tags):
     else:
         names[name] = True
         return correct_tags
+
 
 def check_snippets_meta(filename, snippets_meta):
     correct_tags = True
@@ -244,12 +249,14 @@ def write_snippets_from_rst(rst_lines, filename, skiplist):
         )
     return True
 
+
 def parse_skiplist():
     skiplist = open('skiplist', 'r')
-    global skip_names
-    skip_names = skiplist.readlines()
+    global SKIP_NAMES
+    SKIP_NAMES = skiplist.readlines()
     skiplist.close()
-    return skip_names
+    return SKIP_NAMES
+
 
 def parse_dir(skiped_names):
     result = True
@@ -259,6 +266,7 @@ def parse_dir(skiped_names):
             continue
         parse_file(skiped_names, file, os.path.join(spec_dir, file))
     return result
+
 
 def parse_file(skiped_names, file, path=""):
     filename = os.fsdecode(file)
@@ -271,18 +279,18 @@ def parse_file(skiped_names, file, path=""):
         rst_file.close()
     return result
 
-skip_names = parse_skiplist()
+SKIP_NAMES = parse_skiplist()
 
 if args.rst_file:
-    if not parse_file(skip_names, os.path.basename(args.rst_file), rst_):
+    if not parse_file(SKIP_NAMES, os.path.basename(args.rst_file), rst_):
         raise NameError("incorrect snippets meta")
-    parse_file(skip_names, os.path.basename(args.rst_file), rst_)
+    parse_file(SKIP_NAMES, os.path.basename(args.rst_file), rst_)
 if args.spec:
-    if not parse_dir(skip_names):
+    if not parse_dir(SKIP_NAMES):
         raise NameError("incorrect snippets meta")
-    parse_dir(skip_names)
+    parse_dir(SKIP_NAMES)
 
 if args.rst_file:
-    parse_file(skip_names, os.path.basename(args.rst_file), rst_)
+    parse_file(SKIP_NAMES, os.path.basename(args.rst_file), rst_)
 if args.spec:
-    parse_dir(skip_names)
+    parse_dir(SKIP_NAMES)
