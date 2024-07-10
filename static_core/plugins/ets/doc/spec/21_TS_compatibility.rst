@@ -21,6 +21,7 @@
 This section discusses all issues related to different compatibility aspects
 between |LANG| and |TS|.
 
+|
 
 .. _Reserved Names of TS Types:
 
@@ -106,6 +107,7 @@ Undefined is Not a Universal Value
        //        violation or runtime error ArrayOutOfBounds
     console.log(x)
 
+|
 
 .. _Numeric semantics:
 
@@ -134,6 +136,7 @@ on the context and can produce different results:
        // TypeScript: will print 0.5 - floating-point division is used
        // ArkTS: will print 0 - integer division is used
 
+|
 
 .. _Covariant overriding:
 
@@ -176,17 +179,19 @@ by compiler-generated compile-time errors:
     let base: Base = new Derived
     base.foo (new Base)
 
+|
 
-.. _Subtyping for utility types:
+.. _Compatibility for utility types:
 
-Subtyping for utility types
-===========================
+Compatibility for Utility Types
+===============================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-In |LANG|, utility type ``Partial<T>`` is not a supertype for ``T`` and thus,
-variables of this type are to be initialized with object literals only.
+Utility type ``Partial<T>`` in |LANG| is not compatible with ``T`` (see
+:ref:`Type Compatibility`), and variables of this type are to be initialized
+with object literals only.
 
 .. code-block:: typescript
    :linenos:
@@ -195,6 +200,7 @@ variables of this type are to be initialized with object literals only.
         part_t = t // compile-time error in ArkTS
     }
 
+|
 
 .. _Difference in Overload Signatures:
 
@@ -204,7 +210,7 @@ Difference in Overload Signatures
 .. meta:
     frontend_status: Partly
 
-*Implementaion signature* is considered as an accessible (see
+*Implementation signature* is considered as an accessible (see
 :ref:`Accessible`) entity. The following code is valid in |LANG| (while it
 causes a compile-time error in |TS|):
 
@@ -240,9 +246,9 @@ providing more arguments than the actual function or method has.
 
 |
 
-.. _Class fields while inheriting:
+.. _Class Fields While Inheriting:
 
-Class fields while inheriting
+Class Fields While Inheriting
 *****************************
 
 .. meta:
@@ -286,10 +292,11 @@ These situations are illustrated by the examples below:
    // { field: 666, field: 555 }
    // 555 666
 
+|
 
-.. _Overriding for primitive types:
+.. _Overriding for Primitive Types:
 
-Overriding for primitive types
+Overriding for Primitive Types
 ******************************
 
 |TS| allows overriding class type version of the primitive type into a pure
@@ -308,17 +315,18 @@ These situation is illustrated by the example below:
      foo(): number { return 5 } // Such overriding is prohibited
    }
 
+|
 
-.. _Excessive arguments:
+.. _Excessive Arguments:
 
-Excessive arguments
+Excessive Arguments
 *******************
 
 .. meta:
     frontend_status: None
 
-|TS| allows calling function type variables with more arguments. 
-|LANG| does not allow such calls.
+|TS| allows calling function type variables with more arguments.
+|LANG| allows no such call.
 
 
 .. code-block:: typescript
@@ -327,13 +335,13 @@ Excessive arguments
 
     let foo: (x?: number, y?: string) => void = ():void => {}
         /* compile-time error in ArkTS as call with more than zero arguments
-           will be invalid while OK for the Typescript */
+           is invalid while OK for the Typescript */
 
     foo = (p?: number):void => {} 
-        /* compile-time error in ArkTS as call with two arguments will be
+        /* compile-time error in ArkTS as call with two arguments is
            invalid while OK for the Typescript */
 
-
+|
 
 .. _Differences in Math.pow:
 

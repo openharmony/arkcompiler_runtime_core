@@ -1,4 +1,4 @@
-@rem Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+@rem Copyright (c) 2024 Huawei Device Co., Ltd.
 @rem Licensed under the Apache License, Version 2.0 (the "License");
 @rem you may not use this file except in compliance with the License.
 @rem You may obtain a copy of the License at
@@ -12,11 +12,12 @@
 @rem limitations under the License.
 
 @echo off
-echo Building all ArkTS docs ...
-call build_annotations.bat
-call build_cookbook.bat
-call build_stdlib.bat
-call build_tutorial.bat
-call build_system.bat
-call build_spec.bat
-echo all pdf files are in appropriate 'build' sub-folder for every document
+md __build
+cd system_arkts
+sphinx-build -n -b latex . ..\__build
+cd ..\__build
+latexmk -f -silent -pdf -dvi- -ps- *.tex
+md ..\system_arkts\build
+move *.pdf ..\system_arkts\build
+cd ..
+rmdir /S /Q __build

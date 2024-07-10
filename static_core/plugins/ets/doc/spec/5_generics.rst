@@ -56,7 +56,7 @@ Type Parameters
     frontend_status: Done
 
 The type parameter is declared in the type parameter section. It can be used as
-an ordinary type inside a *generic*.
+an ordinary type inside a *generic*. 
 
 Syntactically, a type parameter is an unqualified identifier with a proper
 scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
@@ -121,8 +121,25 @@ the type parameter section.
    parameterized interface
    parameterized function
    type-parameterized declaration
-   argument
    parameterization
+
+No type parameter has a default value, and initialization is mandatory for
+variables and fields of a type parameter (see :ref:`Field Initialization`):
+
+.. code-block:: typescript
+   :linenos:
+   
+    class G<T> {
+        field: T // compile-time error, field is not initialized
+        function foo() {
+            let t: T // compile-time error, variable is not initialized
+        }
+    }
+
+
+.. index::
+    default value
+    field initialization
 
 |
 
@@ -138,17 +155,17 @@ Type Parameter Constraint
 If possible instantiations need to be constrained, then an individual
 *constraint* can be set for every type parameter.
 
-In every type parameter, a constraint can follow the keyword ``extends``. The
-constraint is denoted as a single type parameter *T*. If no constraint is
-declared, then the type parameter is not compatible with ``Object``, and
-has no methods or fields available for use. Lack of constraint effectively
-means ``extends Object|null|undefined``.
+A constraint of any type parameter can follow the keyword ``extends``.
+The constraint is denoted as a type reference, type ``keyof``, or a union type.
+If no constraint is declared, then the type parameter is not compatible with
+``Object``, and has no methods or fields available for use. Lack of constraint
+effectively means ``extends Object|null|undefined``. 
 If type parameter *T* has type constraint *S*, then the actual type of the
-generic instantiation must be a subtype (see :ref:`Subtyping`) of *S*. If the
-constraint *S* is a non-nullish type (see :ref:`Nullish Types`), then *T* is
-non-nullish too. If the type parameter is constrained with the ``keyof T``,
-then valid instantiations of this parameter can be the values of the union type
-created from string names of *T* or the union type itself:
+generic instantiation must be compatible  with *S* (see :ref:`Type Compatibility`).
+If the constraint *S* is a non-nullish type (see :ref:`Nullish Types`), then
+*T* is non-nullish too. If the type parameter is constrained with the
+``keyof T``, then valid instantiations of this parameter can be the values of
+the union type created from string names of *T* or the union type itself:
 
 .. index::
    type parameter constraint
@@ -157,7 +174,6 @@ created from string names of *T* or the union type itself:
    generic instantiation
    instantiation
    constraint
-   subtype
 
 .. code-block:: typescript
    :linenos:
@@ -168,9 +184,19 @@ created from string names of *T* or the union type itself:
 
     class G<T extends Base> { }
     
-    let x: G<Base>      // correct
-    let y: G<Derived>   // also correct
-    let z: G<SomeType>  // error: SomeType is not a subtype of Base
+    let x = new G<Base>      // OK
+    let y = new G<Derived>   // OK
+    let z = new G<SomeType>  // Compile-time : SomeType is not compatible with Base
+
+    class H<T extends Base|SomeType> {}
+    let h1 = new H<Base>     // OK
+    let h2 = new H<Derived>  // OK
+    let h3 = new H<SomeType> // OK
+    let h4 = new H<Object>   // Compile-time : Object is not compatible with Base|SomeType
+
+    class Exotic<T extends 1|2|3> {}
+    let e1 = new Exotic<2>   // OK
+    let e2 = new Exotic<64>  // Compile-time : 64 is not compatible with 1|2|3
 
     class A {
       f1: number = 0
@@ -214,7 +240,7 @@ section depends on itself.
     
     let x: G<Base, Derived>  // correct: the second argument directly
                             // depends on the first one
-    let y: G<Base, SomeType> // error: SomeType doesn't depend on Base
+    let y: G<Base, SomeType> // error: SomeType does not depend on Base
 
     class A0<T> {
        data: T
@@ -360,18 +386,17 @@ the list of its type arguments.
    lines 321, 322 - initially *C*:sub:`1`, ``...``, *C*:sub:`n` and *T*:sub:`1`, ``...``, *T*:sub:`n` 
 
 If type parameters ``T``:sub:`1`, ``...``, ``T``:sub:`n` of a generic
-declaration are constrained by the corresponding ``C``:sub:`1`, ``...``, ``C``:sub:`n`,
-then *T*:sub:`i` is a subtype (see :ref:`Subtyping`) of each constraint type
-*C*:sub:`i`. All subtypes of the type listed in the corresponding constraint
-have each type argument *T*:sub:`i` of the parameterized declaration ranging
-over them.
+declaration are constrained by the corresponding ``C``:sub:`1`, ``...``,
+``C``:sub:`n`, then *T*:sub:`i` is compatible with each constraint type
+*C*:sub:`i` (see :ref:`Type Compatibility`). All subtypes of the type listed
+in the corresponding constraint have each type argument *T*:sub:`i` of the
+parameterized declaration ranging over them.
 
 .. index::
    type argument
    type parameter
    generic declaration
    parameterized declaration
-   subtype
    constraint
 
 A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
@@ -379,8 +404,8 @@ A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 
 -  The generic declaration name is *G*.
 -  The number of type arguments equals the number of type parameters of *G*.
--  All type arguments are subtypes (see :ref:`Subtyping`) of the corresponding
-   type parameter constraint.
+-  All type arguments are compatible with the corresponding type parameter
+   constraint (see :ref:`Type Compatibility`).
 
 A :index:`compile-time error` occurs if an instantiation is not well-formed.
 
@@ -399,7 +424,6 @@ Any two generic instantiations are considered *provably distinct* if:
    generic declaration
    type argument
    type parameter
-   subtype
    type parameter constraint
    compile-time error
    class type
@@ -589,15 +613,15 @@ Any two type arguments are considered *provably distinct* if:
    nor a wildcard; or
 -  One type argument is a type parameter or a wildcard with an upper bound
    of *S*, the other *T* is not a type parameter and not a wildcard, and
-   neither is a subtype (see :ref:`Subtyping`) of the other ; or
+   neither is compatible with the other (see :ref:`Type Compatibility`); or
 -  Each type argument is a type parameter, or wildcard with upper bounds
-   *S* and *T*, and neither is a subtype (see :ref:`Subtyping`) of the other.
+   *S* and *T*, and neither is compatible with the other (see
+   :ref:`Type Compatibility`).
 
 .. index::
    provably distinct type argument
    type parameter
    wildcard
-   subtype
    upper bound
    type argument
 
@@ -657,9 +681,9 @@ analogous type:
         description?: string
     }
 
-Type ``T`` is not a subtype of ``Partial<T>``, and variables of ``Partial<T>``
-are to be initialized with valid object literals.
-
+Type ``T`` is not compatible with ``Partial<T>`` (see :ref:`Type Compatibility`),
+and variables of ``Partial<T>`` are to be initialized with valid object
+literals.
 
 |
 
@@ -701,8 +725,9 @@ but analogous type:
         description: string
     }
 
-Type ``T`` is not a subtype of ``Required<T>``, and variables of ``Required<T>``
-are to be initialized with valid object literals.
+Type ``T`` is not compatible (see :ref:`Type Compatibility`) with
+``Required<T>``, and variables of ``Required<T>`` are to be initialized with
+valid object literals.
 
 
 |
@@ -734,7 +759,9 @@ part of the ``Readonly<T>`` type.
 
     myIssue.title = "Two" // compile-time error: readonly property
 
-Type ``T`` is a subtype of ``Readonly<T>``, and allows assignments as a consequence:
+Type ``T`` is compatible (see :ref:`Type Compatibility`) with ``Readonly<T>``,
+and allows assignments as a consequence:
+
 
 .. code-block:: typescript
    :linenos:
@@ -757,7 +784,7 @@ Record Utility Type
 
 .. meta:
     frontend_status: Partly
-    todo: implement record indexing - #13845
+    todo: support literals in Record types - #13645
 
 Type ``Record<K, V>`` constructs a container that maps keys (of type *K*)
 to values (of type *V*).
@@ -831,11 +858,11 @@ Utility Type Private Fields
 ===========================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 As utility types are built on top of other types private fields of the initial
-type stay in the utility type but they are not acessible and cannot be
-accesssed in any form.
+type stay in the utility type but they are not accessible and cannot be
+accessed in any form.
 
 .. code-block:: typescript
    :linenos:

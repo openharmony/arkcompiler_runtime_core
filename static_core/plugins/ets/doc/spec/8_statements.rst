@@ -34,7 +34,6 @@ Statements are designed to control the execution:
         | switchStatement
         | throwStatement
         | tryStatement
-        | assertStatement
         ;
 
 |
@@ -124,9 +123,9 @@ appearance within the block until exception (see :ref:`Exceptions`), error
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
 :ref:`Method Declarations`) declared implicitly or explicitly with
-return type ``void``, then the block can contain no return statement at all.
-Such a block is equivalent to one that ends in a ``return`` statement, and
-is executed accordingly.
+return type ``void`` (see :ref:`Type void`), then the block can contain no
+return statement at all. Such a block is equivalent to one that ends in a
+``return`` statement, and is executed accordingly.
 
 .. index::
    sequence of statements
@@ -566,15 +565,16 @@ situations:
 
 - Inside a class initializer;
 - Inside a constructor body; or
-- Inside a function or a method body with return type ``void``.
+- Inside a function or a method body with return type ``void`` (see
+  :ref:`Type void`).
 
 A :index:`compile-time error` occurs if a ``return`` statement is found in:
 
 -  Top-level statements (see :ref:`Top-Level Statements`);
 -  Class initializers (see :ref:`Class Initializer`) and constructors (see
    :ref:`Constructor Declaration`), where it has an expression;
--  A function or a method with return type ``void``, where it has
-   an expression;
+-  A function or a method with return type ``void`` (see :ref:`Type void`),
+   where it has    an expression;
 -  A function or a method with a non-``void`` return type, where it has no
    expression.
 
@@ -976,7 +976,7 @@ can be performed while leaving the ``try-catch``:
     class SomeResource {
       // some API
       // ...
-      close() : void {}
+      close() {}
     }
 
     function ProcessFile(name: string) {
@@ -1045,22 +1045,6 @@ can be performed while leaving the ``try-catch``:
    constructor
    throwing function
    caller context
-
-|
-
-.. _Assert Statements:
-
-``Assert`` Statements
-*********************
-
-.. meta:
-    frontend_status: Done
-
-The ``assert`` statements are described in the chapter Experimental Features
-(see :ref:`Assert Statements Experimental`).
-
-.. index::
-   assert statement
 
 .. raw:: pdf
 

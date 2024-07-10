@@ -596,7 +596,7 @@ Variable Declarations
     frontend_status: Done
 
 A *variable declaration* introduces a new named storage location. The named
-storage location is assigned an initial value as part of the declartion, or
+storage location is assigned an initial value as part of the declaration, or
 via initialization before the first usage:
 
 .. code-block:: abnf
@@ -666,8 +666,8 @@ The initial value can be identified as follows:
 -  An exception parameter is initialized to the thrown object (see
    :ref:`Throw Statements`) that represents exception or error.
 
-- If a variable has an *initializer* explicitly specified then its execution
-  will produce an initial value for this variable.
+- If a variable has an *initializer* explicitly specified, then its execution
+  produces the initial value for this variable.
 
 - Otherwise the following cases are possible
 
@@ -827,40 +827,29 @@ Type Inference from Initializer
     frontend_status: Done
 
 If a declaration does not contain an explicit type annotation, then its type
-is inferred from the initializer as follows:
+is inferred from the initializer expression as follows:
 
--  If the initializer expression is the ``null`` literal, then the type is
-   ``Object | null``.
+-  If the initializer expression is of union type then the normalized union
+   type (see :ref:`Union Types Normalization`) will be used.
 
--  If the initializer expression is of union type comprised of numeric literals
-   only, then the type is the smallest numeric type all numeric literals fit
-   into.
+-  Otherwise the type inferred from the initializer expression will be used.
 
--  If the initializer expression is of union type comprised of literals of a
-   single type *T*, then the type is *T*.
-
--  If the type can be inferred from the initializer expression, then the type
-   is that of the initializer expression.
-
-If the type of the initializer cannot be inferred from the expression itself,
-then a :index:`compile-time error` occurs (see :ref:`Object Literal`):
+If the type of the initializer expression cannot be inferred then a
+:index:`compile-time error` occurs (see :ref:`Object Literal`):
 
 .. index::
    type
-   entity
    type inference
    initializer
-   variable declaration
-   constant declaration
    type annotation
    initializer expression
-   null literal
-   Object
 
 .. code-block:: typescript
    :linenos:
 
-    let a = null // type of 'a' is Object | null
+    let a = null                // type of 'a' is null
+    let aa = undefined          // type of 'a' is undefined
+    let arr = [null, undefined] // type of 'arr' is null|undefined[]
 
     let cond: boolean = /*something*/
     let b = cond ? 1 : 2 // type of 'b' is int
@@ -881,7 +870,8 @@ Function Declarations
     frontend_status: Done
 
 *Function declarations* specify names, signatures, and bodies when
-introducing *named functions*. A function body is a block (see :ref:`Block`):
+introducing *named functions*. An optional function body is a block
+(see :ref:`Block`):
 
 .. code-block:: abnf
 
@@ -981,9 +971,10 @@ Parameter List
     frontend_status: Partly
     todo: implement readonly parameters - #14468
 
-A signature contains a *parameter list* that specifies an identifier of
+A signature may contain a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
-parameter must be explicitly defined.
+parameter must be explicitly defined. If *parameter list* is omitted then the
+function or method has no parameters. 
 
 .. code-block:: abnf
 
@@ -1112,10 +1103,9 @@ omitted in a function call.
     pair(1, 2) // prints: 1 2
     pair(1) // prints: 1 7
 
-The second form is a short notation for a parameter of union type
-``T | undefined`` with the default value ``undefined``. It means that
-``identifier '?' ':' type`` is equivalent to
-``identifier ':' type | undefined = undefined``.
+The second form is a short-cut notation and ``identifier '?' ':' type``
+effectively means that ``identifier`` has type ``T | undefined`` with the
+default value ``undefined``.
 If a type is of the value type kind, then implicit boxing (see
 :ref:`Boxing Conversions`) must be applied (as in :ref:`Union Types`) as
 follows:
@@ -1185,7 +1175,7 @@ A :index:`compile-time error` occurs if a rest parameter:
 -  Has a type that is not an array type.
 
 A function with a rest parameter of type ``T[]`` can accept any number of
-arguments of types that are subtypes (see :ref:`Subtyping`) of *T*:
+arguments of types that are compatible (see :ref:`Type Compatibility`) with *T*:
 
 .. index::
    rest parameter
@@ -1296,9 +1286,14 @@ function or method execution (see :ref:`Function Call Expression` and
 produce a value of type compatible (see :ref:`Type Compatibility`) to the
 return type.
 
-If the function or method return type is not ``void``, and the function or 
-method body has an execution path without a return statement (see
-:ref:`Return Statements`), then a :index:`compile-time error` occurs.
+If the function or method return type is not ``void``  (see :ref:`Type void`),
+and the function or method body has an execution path without a return
+statement (see :ref:`Return Statements`), then a :index:`compile-time error`
+occurs.
+
+If function or method return type is not specified then it is
+- inferred from its body (see :ref:`Return Type Inference`)
+- or is ``void`` (see :ref:`Type void`) is body is absent.
 
 .. _Return Type Inference:
 

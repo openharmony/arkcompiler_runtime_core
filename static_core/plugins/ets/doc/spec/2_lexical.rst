@@ -91,7 +91,7 @@ White spaces include the following:
 
 White spaces improve source code readability and help avoiding ambiguities.
 White spaces are ignored by the syntactic grammar. White spaces never occur
-within a signle token, but can occur within a comment.
+within a single token, but can occur within a comment.
 
 .. index::
    lexical input element
@@ -247,29 +247,29 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``else``        |   ``internal``   |    ``static``    |
+|   ``abstract``     |   ``enum``        |   ``launch``     |   ``switch``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``enum``        |   ``launch``     |    ``switch``    |
+|   ``as``           |   ``export``      |   ``let``        |   ``super``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``assert``       |   ``export``      |   ``let``        |    ``super``     |
+|   ``async``        |   ``extends``     |   ``native``     |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``extends``     |   ``native``     |    ``this``      |
+|   ``await``        |   ``false``       |   ``new``        |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``false``       |   ``new``        |    ``throw``     |
+|   ``break``        |   ``final``       |   ``null``       |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``final``       |   ``null``       |    ``true``      |
+|   ``case``         |   ``for``         |   ``override``   |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``for``         |   ``override``   |    ``try``       |
+|   ``class``        |   ``function``    |   ``package``    |   ``undefined``  |
 +--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``function``    |   ``package``    |    ``undefined`` |
-+--------------------+-------------------+------------------+------------------+
-|   ``const``        |   ``if``          |   ``private``    |    ``while``     |
+|   ``const``        |   ``if``          |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
 |   ``constructor``  |   ``implements``  |   ``protected``  |                  |
 +--------------------+-------------------+------------------+------------------+
 |   ``continue``     |   ``import``      |   ``public``     |                  |
 +--------------------+-------------------+------------------+------------------+
 |   ``do``           |   ``interface``   |   ``return``     |                  |
++--------------------+-------------------+------------------+------------------+
+|   ``else``         |   ``internal``    |   ``static``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
 2. The following words have special meaning in certain contexts (*soft
@@ -898,7 +898,7 @@ Comments
 .. meta:
     frontend_status: Done
 
-*Comment*  is a piece of text added in the stream to document and compliment
+*Comment* is a piece of text added in the stream to document and compliment
 the source code. Comments are insignificant for the syntactic grammar.
 
 *Line comments* begin with the sequence of characters '``//``' (as seen in the
@@ -911,7 +911,7 @@ or sequence of characters between them is allowed but ignored.
     // This is a line comment
 
 
-*Multi-line comments* begin with the sequence of  characters '``\*``' (as seen
+*Multi-line comments* begin with the sequence of characters '``\*``' (as seen
 in the example below) and end with the first subsequent sequence of characters
 '``*/``'. Any character or sequence of characters between them is allowed but
 ignored.
