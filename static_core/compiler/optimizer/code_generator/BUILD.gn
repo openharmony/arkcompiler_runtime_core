@@ -49,7 +49,7 @@ if (enable_codegen) {
                target_cpu == "x86_64") {
       if (!is_mingw) {
         # Add vixl for cross-compilation
-        external_deps += [ "vixl:libvixl" ]
+        external_deps += [ vixl_dep ]
 
         sources += [
           "target/amd64/callconv.cpp",
@@ -76,7 +76,7 @@ if (enable_codegen) {
           [ "$ark_root/compiler/optimizer/code_generator/target/aarch32" ]
       defines += [ "USE_VIXL_ARM32" ]
 
-      external_deps += [ "vixl:libvixl" ]
+      external_deps += [ vixl_dep ]
     } else if (target_cpu == "arm64") {
       sources += [
         "target/aarch64/callconv.cpp",
@@ -87,7 +87,7 @@ if (enable_codegen) {
           [ "$ark_root/compiler/optimizer/code_generator/target/aarch64" ]
       defines += [ "USE_VIXL_ARM64" ]
 
-      external_deps += [ "vixl:libvixl" ]
+      external_deps += [ vixl_dep ]
     }
 
     if (is_mac) {
@@ -141,7 +141,7 @@ if (enable_codegen) {
     } else if (target_cpu == "amd64" || target_cpu == "x64" ||
                target_cpu == "x86_64") {
       if (!is_mingw) {
-        external_deps += [ "vixl:libvixl" ]
+        external_deps += [ vixl_dep ]
 
         sources += [
           "target/amd64/callconv.cpp",
@@ -167,7 +167,7 @@ if (enable_codegen) {
       defines = [ "USE_VIXL_ARM32" ]
       include_dirs =
           [ "$ark_root/compiler/optimizer/code_generator/target/aarch32" ]
-      external_deps += [ "vixl:libvixl" ]
+      external_deps += [ vixl_dep ]
     } else if (target_cpu == "arm64") {
       sources += [
         "target/aarch64/callconv.cpp",
@@ -177,7 +177,7 @@ if (enable_codegen) {
       defines = [ "USE_VIXL_ARM64" ]
       include_dirs =
           [ "$ark_root/compiler/optimizer/code_generator/target/aarch64" ]
-      external_deps += [ "vixl:libvixl" ]
+      external_deps += [ vixl_dep ]
     }
 
     if (is_mac) {

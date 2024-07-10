@@ -345,6 +345,7 @@ ohos_source_set("libarkruntime_set_static") {
   sources += plugin_runtime_sources
 
   public_configs = [
+    "$ark_root/assembler:arkassembler_public_config",
     "$ark_root:ark_config",
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/libpandafile:arkfile_public_config",
@@ -371,9 +372,9 @@ ohos_source_set("libarkruntime_set_static") {
   ]
 
   external_deps = [
-    "icu:shared_icui18n",
-    "icu:shared_icuuc",
     "napi:ace_napi",
+    icui18n_dep,
+    icuuc_dep,
     sdk_libc_secshared_dep,
   ]
 
@@ -408,10 +409,7 @@ ohos_source_set("libarkruntime_set_static") {
   if (is_ohos && is_standard_system) {
     defines = [ "PANDA_USE_OHOS_LOG" ]
   }
-  if (current_cpu == "amd64" || current_cpu == "x64" ||
-      current_cpu == "x86_64") {
-    ldflags = [ "-latomic" ]
-  }
+
   if (is_ohos && is_standard_system) {
     external_deps += [ "hilog:libhilog" ]
   }
@@ -428,6 +426,11 @@ ohos_static_library("libarkruntime_static") {
 
 ohos_shared_library("libarkruntime") {
   deps = [ ":libarkruntime_set_static" ]
+
+  if (current_cpu == "amd64" || current_cpu == "x64" ||
+      current_cpu == "x86_64") {
+    ldflags = [ "-latomic" ]
+  }
 
   output_extension = "so"
   part_name = ark_part_name
@@ -475,7 +478,7 @@ config("arkruntime_interpreter_impl_config") {
   }
 }
 
-source_set("arkruntime_interpreter_impl_static") {
+ohos_source_set("arkruntime_interpreter_impl_static") {
   sources = [ "interpreter/interpreter_impl.cpp" ]
 
   public_configs = [
@@ -498,6 +501,9 @@ source_set("arkruntime_interpreter_impl_static") {
   external_deps = [ sdk_libc_secshared_dep ]
 
   deps += plugin_arkruntime_stdlib_plugin_deps
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 # panda_set_lib_32bit_property not used in android

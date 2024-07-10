@@ -224,7 +224,7 @@ libarkbase_deps = [
   ":source_language_gen",
 ]
 
-source_set("libarkbase_static") {
+ohos_source_set("libarktsbase_static") {
   sources = libarkbase_sources
 
   cflags_cc = [
@@ -237,10 +237,13 @@ source_set("libarkbase_static") {
   deps = libarkbase_deps
 
   external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_shared_library("libarktsbase") {
-  deps = [ ":libarkbase_static" ]
+  deps = [ ":libarktsbase_static" ]
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }
@@ -248,7 +251,7 @@ ohos_shared_library("libarktsbase") {
   subsystem_name = "$ark_subsystem_name"
 }
 
-source_set("libarkbase_frontend_set_static") {
+ohos_source_set("libarktsbase_frontend_set_static") {
   sources = libarkbase_sources
 
   public_configs = libarkbase_configs
@@ -256,10 +259,13 @@ source_set("libarkbase_frontend_set_static") {
   deps = libarkbase_deps
 
   external_deps = [ sdk_libc_secshared_dep ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_source_set("libarktsbase_frontend_static") {
-  deps = [ ":libarkbase_frontend_set_static" ]
+  deps = [ ":libarktsbase_frontend_set_static" ]
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }

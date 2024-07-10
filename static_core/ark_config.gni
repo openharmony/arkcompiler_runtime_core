@@ -35,6 +35,12 @@ declare_args() {
   if (!defined(is_llvmbackend)) {
     is_llvmbackend = false
   }
+
+  if (is_ohos && is_standard_system) {
+    ark_ets_interop_js = true
+  } else {
+    ark_ets_interop_js = false
+  }
 }
 
 if (current_cpu == "arm") {
@@ -73,14 +79,28 @@ vixl_with_panda = true
 
 sdk_libc_secshared_dep = ""
 sdk_libc_secshared_ext_dep = ""
+sdk_libc_secshared_config = ""
+
+zlib_public_config = "$ark_third_party_root/zlib:zlib_public_config"
+zlib_dep = "zlib:libz"
+
+icui18n_dep = "icu:shared_icui18n"
+icuuc_dep = "icu:shared_icuuc"
+vixl_dep = "vixl:libvixl"
 
 if (ark_standalone_build) {
-  sdk_libc_secshared_dep = "securec:libc_secshared"
-  sdk_libc_secshared_ext_dep = "securec:libc_secshared"
+  sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secshared"
+  sdk_libc_secshared_ext_dep = "$ark_third_party_root/securec:libc_secshared"
+  sdk_libc_secshared_config =
+      "$ark_third_party_root/securec:libsec_public_config"
+  zlib_dep = "$ark_third_party_root/zlib:libz"
+  icui18n_dep = "$ark_third_party_root/icu/icu4c:shared_icui18n"
+  icuuc_dep = "$ark_third_party_root/icu/icu4c:shared_icuuc"
+  vixl_dep = "$ark_third_party_root/vixl:libvixl"
 
   if (is_mingw || is_mac || is_linux) {
-    sdk_libc_secshared_dep = "securec:libc_secstatic"
-    sdk_libc_secshared_ext_dep = "securec:libc_secstatic"
+    sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secstatic"
+    sdk_libc_secshared_ext_dep = "$ark_third_party_root/securec:libc_secstatic"
   }
 } else {
   # For OpenHarmony build, always link with the static lib:
@@ -336,7 +356,11 @@ template("es2panda_gen") {
         get_label_info("$ark_es2panda_root/aot:es2panda(${host_toolchain})",
                        "root_out_dir")
     script = es2panda_root_out + "/arkcompiler/ets_frontend/es2panda"
-    external_deps = [ "ets_frontend:es2panda(${host_toolchain})" ]
+    if (ark_standalone_build) {
+      deps = [ "$ark_es2panda_root/aot:es2panda" ]
+    } else {
+      external_deps = [ "ets_frontend:es2panda(${host_toolchain})" ]
+    }
 
     inputs = invoker.inputs
     outputs = invoker.outputs

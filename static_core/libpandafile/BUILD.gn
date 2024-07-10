@@ -61,7 +61,11 @@ libarkfile_configs = [
   ":arkfile_public_config",
 ]
 
-source_set("libarkfile_static") {
+if (ark_standalone_build) {
+  libarkfile_configs += [ zlib_public_config ]
+}
+
+ohos_source_set("libarktsfile_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
@@ -86,10 +90,13 @@ source_set("libarkfile_static") {
     "zlib:libz",
     "zlib:shared_libz",
   ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_shared_library("libarktsfile") {
-  deps = [ ":libarkfile_static" ]
+  deps = [ ":libarktsfile_static" ]
 
   if (!is_mingw && !is_mac) {
     output_extension = "so"
@@ -98,7 +105,7 @@ ohos_shared_library("libarktsfile") {
   subsystem_name = "$ark_subsystem_name"
 }
 
-source_set("libarkfile_frontend_set_static") {
+ohos_source_set("libarktsfile_frontend_set_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
@@ -122,10 +129,13 @@ source_set("libarkfile_frontend_set_static") {
     "zlib:libz",
     "zlib:shared_libz",
   ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_static_library("libarktsfile_frontend_static") {
-  deps = [ ":libarkfile_frontend_set_static" ]
+  deps = [ ":libarktsfile_frontend_set_static" ]
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }

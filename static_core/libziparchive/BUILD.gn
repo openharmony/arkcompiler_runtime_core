@@ -21,7 +21,7 @@ config("arkziparchive_config") {
   ]
 }
 
-source_set("libarkziparchive_static") {
+ohos_source_set("libarktsziparchive_static") {
   sources = [ "zip_archive.cpp" ]
 
   public_configs = [
@@ -30,16 +30,23 @@ source_set("libarkziparchive_static") {
     "$ark_root/libpandabase:arkbase_public_config",
   ]
 
+  if (ark_standalone_build) {
+    public_configs += [ zlib_public_config ]
+  }
+
   deps = [ "$ark_root/libpandabase:libarktsbase" ]
 
   external_deps = [
-    "zlib:libz",
     sdk_libc_secshared_dep,
+    zlib_dep,
   ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_shared_library("libarktsziparchive") {
-  deps = [ ":libarkziparchive_static" ]
+  deps = [ ":libarktsziparchive_static" ]
 
   if (!is_mingw && !is_mac) {
     output_extension = "so"
@@ -48,7 +55,7 @@ ohos_shared_library("libarktsziparchive") {
   subsystem_name = "$ark_subsystem_name"
 }
 
-source_set("libarkziparchive_frontend_set_static") {
+ohos_source_set("libarktsziparchive_frontend_set_static") {
   sources = [ "zip_archive.cpp" ]
 
   public_configs = [
@@ -57,16 +64,23 @@ source_set("libarkziparchive_frontend_set_static") {
     "$ark_root/libpandabase:arkbase_public_config",
   ]
 
+  if (ark_standalone_build) {
+    public_configs += [ zlib_public_config ]
+  }
+
   deps = [ "$ark_root/libpandabase:logger_enum_gen_h" ]
 
   external_deps = [
-    "zlib:libz",
     sdk_libc_secshared_dep,
+    zlib_dep,
   ]
+
+  part_name = ark_part_name
+  subsystem_name = "$ark_subsystem_name"
 }
 
 ohos_static_library("libarktsziparchive_frontend_static") {
-  deps = [ ":libarkziparchive_frontend_set_static" ]
+  deps = [ ":libarktsziparchive_frontend_set_static" ]
   part_name = ark_part_name
   subsystem_name = ark_subsystem_name
 }

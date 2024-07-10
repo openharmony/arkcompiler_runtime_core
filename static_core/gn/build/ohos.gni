@@ -14,13 +14,30 @@
 import("ohos-var.gni")
 
 template("ohos_executable") {
-  not_needed(invoker, [ "install_images" ])
+  not_needed(invoker,
+             [
+               "install_images",
+               "part_name",
+             ])
+
+  if (defined(invoker.external_deps) && invoker.external_deps != []) {
+    if (!defined(invoker.deps)) {
+      invoker.deps = []
+    }
+    foreach(dep, invoker.external_deps) {
+      if (label_matches(dep, [ "//third_party/*" ])) {
+        invoker.deps += [ dep ]
+      }
+    }
+  }
+
   executable("${target_name}") {
     forward_variables_from(invoker,
                            "*",
                            [
                              "configs",
                              "remove_configs",
+                             "public_configs",
                              "relative_install_dir",
                              "subsystem_name",
                              "install_enable",
@@ -29,6 +46,9 @@ template("ohos_executable") {
       configs += invoker.configs
     }
 
+    if (defined(invoker.public_configs)) {
+      configs += invoker.public_configs
+    }
     if (defined(invoker.remove_configs)) {
       configs -= invoker.remove_configs
     }
@@ -40,13 +60,30 @@ template("ohos_executable") {
 }
 
 template("ohos_shared_library") {
-  not_needed(invoker, [ "install_images" ])
+  not_needed(invoker,
+             [
+               "install_images",
+               "part_name",
+             ])
+
+  if (defined(invoker.external_deps) && invoker.external_deps != []) {
+    if (!defined(invoker.deps)) {
+      invoker.deps = []
+    }
+    foreach(dep, invoker.external_deps) {
+      if (label_matches(dep, [ "//third_party/*" ])) {
+        invoker.deps += [ dep ]
+      }
+    }
+  }
+
   shared_library("${target_name}") {
     forward_variables_from(invoker,
                            "*",
                            [
                              "configs",
                              "remove_configs",
+                             "public_configs",
                              "relative_install_dir",
                              "subsystem_name",
                              "install_enable",
@@ -55,6 +92,9 @@ template("ohos_shared_library") {
 
     if (defined(invoker.configs)) {
       configs += invoker.configs
+    }
+    if (defined(invoker.public_configs)) {
+      configs += invoker.public_configs
     }
 
     if (defined(invoker.remove_configs)) {
@@ -68,12 +108,26 @@ template("ohos_shared_library") {
 }
 
 template("ohos_static_library") {
+  not_needed(invoker, [ "part_name" ])
+
+  if (defined(invoker.external_deps) && invoker.external_deps != []) {
+    if (!defined(invoker.deps)) {
+      invoker.deps = []
+    }
+    foreach(dep, invoker.external_deps) {
+      if (label_matches(dep, [ "//third_party/*" ])) {
+        invoker.deps += [ dep ]
+      }
+    }
+  }
+
   static_library("${target_name}") {
     forward_variables_from(invoker,
                            "*",
                            [
                              "configs",
                              "remove_configs",
+                             "public_configs",
                              "relative_install_dir",
                              "subsystem_name",
                              "install_enable",
@@ -81,6 +135,10 @@ template("ohos_static_library") {
 
     if (defined(invoker.configs)) {
       configs += invoker.configs
+    }
+
+    if (defined(invoker.public_configs)) {
+      configs += invoker.public_configs
     }
 
     if (defined(invoker.remove_configs)) {
@@ -102,5 +160,44 @@ template("ohos_prebuilt_etc") {
                            ])
     sources = [ invoker.source ]
     outputs = [ "${target_out_dir}/${invoker.source}" ]
+  }
+}
+
+template("ohos_source_set") {
+  not_needed(invoker,
+             [
+               "public_external_deps",
+               "part_name",
+               "subsystem_name",
+             ])
+
+  if (defined(invoker.external_deps) && invoker.external_deps != []) {
+    if (!defined(invoker.deps)) {
+      invoker.deps = []
+    }
+    foreach(dep, invoker.external_deps) {
+      if (label_matches(dep, [ "//third_party/*" ])) {
+        invoker.deps += [ dep ]
+      }
+    }
+  }
+
+  source_set(target_name) {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "public_configs",
+                             "remove_configs",
+                           ])
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+    if (defined(invoker.public_configs)) {
+      configs += invoker.public_configs
+    }
+    if (defined(invoker.remove_configs)) {
+      configs -= invoker.remove_configs
+    }
   }
 }

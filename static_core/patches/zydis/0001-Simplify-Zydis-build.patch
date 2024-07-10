@@ -117,7 +117,7 @@ index 0000000..bc0c3e4
 @@ -0,0 +1,52 @@
 +# Copyright (c) Huawei Technologies Co., Ltd. 2021-2021. All rights reserved.
 +
-+import("//ark/runtime_core/ark_config.gni")
++import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 +import("//build/config/ohos/rules.gni")
 +import("//build/ohos.gni")
 +

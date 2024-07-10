@@ -135,12 +135,12 @@ $ python build/gen.py
 $ ninja -C out
 ```
 
-2. Build panda using gn (`ark_asm`, `ark_disasm`, `ark_aot`, `ark_aotdump`, `c2abc`, `ark_bin`, `es2panda`, `verifier_bin` and `ark` targets are supported)
+2. Build panda using gn (`arkts_asm`, `arkts_disasm`, `ark_aot`, `ark_aotdump`, `arkts_bin`, `es2panda`, and `verifier_bin` targets are supported)
 
 ```
 $ cd /path/to/panda/repository
 $ /path/to/gn/repository/out/gn gen out
-$ ninja -C out ark
+$ ninja -C out arkts_bin
 ```
 When standard system, use
 ```

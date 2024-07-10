@@ -28,7 +28,7 @@ index 0000000..81bbdab
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
 +
-+import("//ark/runtime_core/ark_config.gni")
++import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 +import("//build/config/ohos/rules.gni")
 +import("//build/ohos.gni")
 +
@@ -175,15 +175,15 @@ index 0000000..81bbdab
 +ohos_static_library("libasmjit") {
 +    sources = asmjit_sources
 +    configs = asmjit_configs
-+    deps = [ "$ark_root/libpandabase:libarkbase" ]
-+    subsystem_name = "ark"
++    deps = [ "$ark_root/libpandabase:libarktsbase" ]
++    subsystem_name = "ark_subsystem_name"
 +}
 +
 +ohos_static_library("libasmjit_frontend_static") {
 +    sources = asmjit_sources
 +    configs = asmjit_configs
-+    deps = [ "$ark_root/libpandabase:libarkbase_frontend_static" ]
-+    subsystem_name = "ark"
++    deps = [ "$ark_root/libpandabase:libarktsbase_frontend_static" ]
++    subsystem_name = "ark_subsystem_name"
 +}
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index e033c3f..37a1593 100644

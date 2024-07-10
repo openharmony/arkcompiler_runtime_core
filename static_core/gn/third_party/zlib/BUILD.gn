@@ -25,6 +25,13 @@ config("zlib_config") {
   ]
 }
 
+config("zlib_public_config") {
+  include_dirs = [
+    "$ark_third_party_root/zlib",
+    "$ark_third_party_root/zlib/contrib/minizip",
+  ]
+}
+
 ohos_static_library("libz") {
   sources = [
     "adler32.c",
