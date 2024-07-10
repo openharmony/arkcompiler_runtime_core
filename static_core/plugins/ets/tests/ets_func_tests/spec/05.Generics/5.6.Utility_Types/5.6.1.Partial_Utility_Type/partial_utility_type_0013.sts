@@ -14,8 +14,8 @@
  */
 
 /*---
- desc: Partial type import test exported class
- name: partialType_lib
+ desc: 05.06.01.Partial Utility Type
+ name: 05.Generics/05.06.utility_types/05.06.01.partial_utility_type/partial_utility_type_0012.ets
  tags: [not-a-test, compile-only]
  ---*/
 
