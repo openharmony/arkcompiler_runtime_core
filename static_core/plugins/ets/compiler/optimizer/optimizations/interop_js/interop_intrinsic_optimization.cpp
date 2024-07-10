@@ -385,9 +385,16 @@ void InteropIntrinsicOptimization::BlockBoundaryDfs(BasicBlock *block)
     }
     IterateBlockFromBoundary<IS_END>(block);
 
-    auto &neighbours = IS_END ? block->GetSuccsBlocks() : block->GetPredsBlocks();
-    for (auto *neighbour : neighbours) {
-        BlockBoundaryDfs<!IS_END>(neighbour);
+    if constexpr (IS_END) {
+        auto &neighbours = block->GetSuccsBlocks();
+        for (auto *neighbour : neighbours) {
+            BlockBoundaryDfs<!IS_END>(neighbour);
+        }
+    } else {
+        auto &neighbours = block->GetPredsBlocks();
+        for (auto *neighbour : neighbours) {
+            BlockBoundaryDfs<!IS_END>(neighbour);
+        }
     }
 }
 

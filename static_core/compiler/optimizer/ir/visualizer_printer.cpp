@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,8 @@ void VisualizerPrinter::PrintProperty(const char *prop, int value)
     (*output_) << MakeOffset() << std::dec << prop << " " << value << "\n";
 }
 
-void VisualizerPrinter::PrintDependences(const std::string &preffix, const ArenaVector<BasicBlock *> &blocks)
+template <typename T>
+void VisualizerPrinter::PrintDependences(const std::string &preffix, const T &blocks)
 {
     (*output_) << MakeOffset() << preffix << " ";
     for (const auto &block : blocks) {

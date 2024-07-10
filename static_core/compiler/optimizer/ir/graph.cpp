@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -369,7 +369,7 @@ void Graph::DisconnectBlockRec(BasicBlock *block, bool removeLastInst, bool fixD
         }
     }
     if (block->GetPredsBlocks().empty() || loopFlag) {
-        ArenaVector<BasicBlock *> succs(block->GetSuccsBlocks(), GetLocalAllocator()->Adapter());
+        BasicBlock::SuccsVector succs(block->GetSuccsBlocks());
         DisconnectBlock(block, removeLastInst, fixDomTree);
         for (auto succ : succs) {
             DisconnectBlockRec(succ, removeLastInst, fixDomTree);

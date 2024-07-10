@@ -134,6 +134,9 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/launch_test.ets SUPPORT_RELEASE true)
         # AOT mode for arm32 is not supported
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_string_equals.ets SUPPORT_RELEASE true)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_1.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_2.ets)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_3.ets)
         # LoadAndInitClass in AOT mode for arm32 is not supported
         # NOTE(pantos) Issue #17103 reassign readonly property
         # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_readonly_static.ets)

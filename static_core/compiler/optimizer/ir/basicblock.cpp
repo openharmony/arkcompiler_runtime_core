@@ -24,7 +24,7 @@ class Inst;
 BasicBlock::BasicBlock(Graph *graph, uint32_t guestPc)
     : graph_(graph),
       preds_(graph_->GetAllocator()->Adapter()),
-      succs_(graph_->GetAllocator()->Adapter()),
+      succs_(graph_->GetAllocator()),
       domBlocks_(graph_->GetAllocator()->Adapter()),
       guestPc_(guestPc)
 {

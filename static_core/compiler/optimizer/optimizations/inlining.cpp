@@ -149,11 +149,37 @@ bool Inlining::Do()
     bool inlined = false;
     RunOptimizations();
 
-    for (auto bb : GetGraph()->GetVectorBlocks()) {
-        if (SkipBlock(bb)) {
+    ArenaVector<BasicBlock *> hotBlocks(GetGraph()->GetLocalAllocator()->Adapter());
+
+    hotBlocks = GetGraph()->GetVectorBlocks();
+    if (GetGraph()->IsAotMode()) {
+        std::stable_sort(hotBlocks.begin(), hotBlocks.end(), [](BasicBlock *a, BasicBlock *b) {
+            auto ad = (a == nullptr) ? 0 : a->GetLoop()->GetDepth();
+            auto bd = (b == nullptr) ? 0 : b->GetLoop()->GetDepth();
+            return ad > bd;
+        });
+    } else {
+        std::stable_sort(hotBlocks.begin(), hotBlocks.end(), [](BasicBlock *a, BasicBlock *b) {
+            auto ahtn = (a == nullptr) ? 0 : a->GetHotness();
+            auto bhtn = (b == nullptr) ? 0 : b->GetHotness();
+            return ahtn > bhtn;
+        });
+    }
+
+    LOG_INLINING(DEBUG) << "Process blocks (" << hotBlocks.size() << " blocks):";
+    auto lastId = hotBlocks.size();
+    for (size_t i = 0; i < lastId; i++) {
+        if (SkipBlock(hotBlocks[i])) {
+            LOG_INLINING(DEBUG) << "-skip (" << i << '/' << hotBlocks.size() << ")";
             continue;
         }
-        for (auto inst : bb->InstsSafe()) {
+
+        [[maybe_unused]] auto hotIdx = std::find(hotBlocks.begin(), hotBlocks.end(), hotBlocks[i]) - hotBlocks.begin();
+        [[maybe_unused]] auto bbId = hotBlocks[i]->GetId();
+        LOG_INLINING(DEBUG) << "-process BB" << bbId << " (" << i << '/' << hotBlocks.size() << "): htn_"
+                            << hotBlocks[i]->GetHotness() << " (" << hotIdx << '/' << hotBlocks.size() << ")";
+
+        for (auto inst : hotBlocks[i]->InstsSafe()) {
             if (GetGraph()->GetVectorBlocks()[inst->GetBasicBlock()->GetId()] == nullptr) {
                 break;
             }
@@ -1202,7 +1228,7 @@ bool Inlining::CheckMethodSize(const CallInst *callInst, InlineContext *ctx)
             LOG_INLINING(DEBUG) << "Ignore instructions limit: ";
         } else {
             EmitEvent(GetGraph(), callInst, *ctx, events::InlineResult::LIMIT);
-            LOG_INLINING(DEBUG) << "Method is too big: ";
+            LOG_INLINING(DEBUG) << "Method is too big (d_" << inlinedStack_.size() << "):";
         }
         LOG_INLINING(DEBUG) << "instructions_count_ = " << instructionsCount_
                             << ", expected_inlined_insts_count = " << expectedInlinedInstsCount

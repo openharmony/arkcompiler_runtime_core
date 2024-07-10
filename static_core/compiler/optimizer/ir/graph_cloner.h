@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -182,17 +182,25 @@ protected:
     void CloneEdges(BasicBlock *block)
     {
         auto clone = GetClone(block);
-        auto blockEdges = &block->GetPredsBlocks();
-        auto cloneEdges = &clone->GetPredsBlocks();
+
         // NOLINTNEXTLINE(bugprone-suspicious-semicolon, readability-braces-around-statements)
         if constexpr (EDGE_TYPE == CloneEdgeType::EDGE_SUCC) {
-            blockEdges = &block->GetSuccsBlocks();
-            cloneEdges = &clone->GetSuccsBlocks();
-        }
-        ASSERT(cloneEdges->empty());
-        cloneEdges->reserve(blockEdges->size());
-        for (auto edge : *blockEdges) {
-            cloneEdges->push_back(GetClone(edge));
+            auto blockEdges = &block->GetSuccsBlocks();
+            auto cloneEdges = &clone->GetSuccsBlocks();
+            ASSERT(cloneEdges->empty());
+            cloneEdges->reserve(blockEdges->size());
+            for (auto edge : *blockEdges) {
+                cloneEdges->push_back(GetClone(edge));
+            }
+        } else {
+            auto blockEdges = &block->GetPredsBlocks();
+            auto cloneEdges = &clone->GetPredsBlocks();
+
+            ASSERT(cloneEdges->empty());
+            cloneEdges->reserve(blockEdges->size());
+            for (auto edge : *blockEdges) {
+                cloneEdges->push_back(GetClone(edge));
+            }
         }
     }
 
