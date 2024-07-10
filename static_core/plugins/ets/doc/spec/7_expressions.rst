@@ -672,9 +672,13 @@ The type of an array literal is inferred by the following rules:
    array type
    type inference
 
--  If the type can be inferred from the context, then the type of an array
-   literal is the inferred type ``T[]`` or ``Array<T>``.
--  Otherwise, the type is inferred from the types of its elements.
+-  If the context is available then the type is inferred from the context, if
+   sucsessfull then the type of an array literal is the inferred type ``T[]``
+   or ``Array<T>``.
+-  Otherwise, the type is attempted to be inferred from the types of its
+   elements.
+
+See for more details of both cases below.
 
 .. index::
    type inference
@@ -760,7 +764,6 @@ because the corresponding classes are inherited from Object.
    compatible type
    inheritance
 
-
 If the type used in the context is a *tuple type* (see :ref:`Tuple Types`),
 and types of all literal expressions are compatible with tuple type elements
 at respective positions, then the type of the array literal is a tuple type.
@@ -771,6 +774,22 @@ at respective positions, then the type of the array literal is a tuple type.
     let tuple: [number, string] = [1, "hello"] // ok
 
     let incorrect: [number, string] = ["hello", 1] // compile-time error
+
+If the type used in the context is a *union type* (see :ref:`Union Types`) then
+it is necessary to try to infer the type of array literal from its elements 
+(see :ref:`Array Type Inference from Types of Elements`) and if sucseccfull
+then check if the inferred type is compatible with the union type. Otherwise, it is
+a :index:`compile-time error`.
+
+
+.. code-block:: typescript
+   :linenos:
+
+
+    let union_of_arrays: number[] | string[] = [1, 2] // OK
+    let incorrect_union_of_arrays: number[] | string[] = [1, 2, "string"]
+     // compile-time error: number|string[] is not compatible with number[] | string[]
+
 
 |
 
@@ -786,7 +805,10 @@ If the type of an array literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`
 cannot be inferred from the context, then the following algorithm is to be
 used to infer it from the initialization expressions:
 
-#. If there is no expression (*N == 0*), then the type is ``Object[]``.
+..#. If there is no expression (*N == 0*), then the type is ``Object[]``.
+
+#. If there is no expression (*N == 0*), then the type  of the
+   array literal cannot be inferred, and a :index:`compile-time error` occurs.
 
 #. If the type of the expression cannot be determined, then the type of the
    array literal cannot be inferred, and a :index:`compile-time error` occurs.
@@ -2363,9 +2385,9 @@ system, and the result of the ``instanceof`` expression cannot be determined.
         'typeof' expression
         ;
 
-Any ``typeof`` expression is of type ``string``. The ``typeof`` expression
-values of the types below are predefined, and the expressions require no
-evaluation:
+Any ``typeof`` expression is of type ``string``. For the types presented below
+the value of ``typeof`` expression is known at compile-time and thus requires
+no evaluations at runtime:
 
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |

@@ -271,7 +271,12 @@ provide some initial values (see :ref:`Array Literal`).
    :linenos:
 
       newArrayInstance:
-          'new' typeReference dimensionExpression+ (arrayElement)?
+          'new' arrayElelementType dimensionExpression+ (arrayElement)?
+          ;
+
+      arrayElelementType:
+          typeReference
+          | '(' type ')'
           ;
 
       dimensionExpression:
@@ -288,7 +293,7 @@ provide some initial values (see :ref:`Array Literal`).
       let x = new number[2][2] // create 2x2 matrix
 
 An *array creation expression* creates an object that is a new array with the
-elements of the type specified by ``typeReference``.
+elements of the type specified by ``arrayElelementType``.
 
 The type of each ``dimensionExpression`` must be convertible (see
 :ref:`Primitive Types Conversions`) to an integer type. Otherwise,
@@ -313,9 +318,9 @@ follows:
 If ``arrayElement`` is provided, then the type of the ``expression`` can be
 as follows:
 
-- Type of array element denoted by ``typeReference``, or
+- Type of array element denoted by ``arrayElelementType``, or
 - Lambda function with the return type equal to the type of array element
-  denoted by ``typeReference`` and the parameters of type ``int``, and the
+  denoted by ``arrayElelementType`` and the parameters of type ``int``, and the
   number of parameters equal to the number of array dimensions.
 
 Otherwise, a :index:`compile-time error` occurs.
@@ -333,11 +338,11 @@ Otherwise, a :index:`compile-time error` occurs.
       }
 
 
-A :index:`compile-time error` occurs if ``typeReference`` refers to a class
-that does not contain an accessible (see :ref:`Accessible`) parameterless
+A :index:`compile-time error` occurs if ``arrayElelementType`` refers to a
+class that does not contain an accessible (see :ref:`Accessible`) parameterless
 constructor, or constructor with all parameters of the second form of optional
-parameters (see :ref:`Optional Parameters`), or if ``typeReference`` has no a
-default value:
+parameters (see :ref:`Optional Parameters`), or if ``type`` has no a default
+value:
 
 .. code-block-meta:
    expect-cte:
@@ -353,7 +358,8 @@ default value:
       let y = new A[2] // OK, as all 3 elements of array will be filled with
       // new A() objects
 
-A :index:`compile-time error` occurs if ``typeReference`` is a type parameter:
+A :index:`compile-time error` occurs if ``arrayElelementType`` is a type
+parameter:
 
 .. code-block:: typescript
    :linenos:
@@ -364,7 +370,7 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter:
          }
       }
 
-Creating array with known number of elements:
+Creating an array with a known number of elements:
 
 .. code-block:: typescript
    :linenos:
@@ -387,6 +393,16 @@ Creating array with known number of elements:
          /* Create two-dimensional array of 6 elements total and all of them will
             have initial value equal to the result of lambda function execution with
             different indices */
+
+Creating exotic arrays with the different kinds of element types:
+
+.. code-block:: typescript
+   :linenos:
+
+      let array_of_union = new (Object|null) [5] // filled with null
+      let array_of_functor = new (() => void) [5] ( (): void => {})
+      type aliasTypeName = number []
+      let array_of_array = new aliasTypeName [5] ( [3.141592653589] )
 
 .. index::
    array creation expression
@@ -2774,10 +2790,8 @@ A :index:`compile-time error` occurs if:
 -  Package headers of two package modules in the same package have
    different identifiers.
 
-A *package module* implicitly imports (see :ref:`Implicit Import`) all exported
-entities from the core packages of the standard library (see
-:ref:`Standard Library`). All entities from these packages are accessible (see
-:ref:`Accessible`) as simple names.
+Every *package module* may directly use all exported entities from the core
+packages of the standard library (see :ref:`Standard Library Usage`).
 
 A *package module* can directly access all top-level entities declared in all
 modules that constitute the package.

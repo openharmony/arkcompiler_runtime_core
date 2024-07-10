@@ -1661,12 +1661,14 @@ for the modifier ``final``, and :ref:`Override Methods` for the modifier
       }
     }
 
-Each *get-accessor* (*getter*) must have no parameters and explicit return
-type. Each *set-accessor* (*setter*) must have a single parameter and
-no return type. The use of getters and setters looks the same as the use of
-fields. Usage of getters or setters as methods leads to a
-:index:`compile-time error`.
+A *get-accessor* (*getter*) must not have parameters but must have an
+explicit return type. A *set-accessor* (*setter*) must have a single parameter
+and no return type. The use of getters and setters looks the same as the use of
+fields. A :index:`compile-time error` occurs if:
 
+-  Getters or setters are used as methods;
+-  *Set-accessor* (*setter*) has a single parameter that is optional (see
+   :ref:`Optional Parameters`):
 
 .. code-block:: typescript
    :linenos:
@@ -1687,6 +1689,11 @@ fields. Usage of getters or setters as methods leads to a
     }
     p.age(17) // Compile-time error: setter is used as a method
     let x = p.age() // Compile-time error: getter is used as a mehtod
+
+    class X {
+        set x (p?: Object) {} // Compile-time error: setter has optional parameter
+    }
+
 
 A class can define a getter, a setter, or both with the same name.
 If both a getter and a setter with a particular name are defined,
@@ -1720,9 +1727,10 @@ data (as in the example above).
     }
     console.log (new Person.fullName)
 
-Accessors could not have the same name with the class or interface non-static
-field or method. Otherwise, a :index:`compile-time error` occurs.
-The same applies to accessors themselves - no overloading is allowed.
+An accessor name cannot be the same as that of a non-static field, or of a
+method of a class or an interface. Otherwise, a :index:`compile-time error`
+occurs. Moreover, an accessor name cannot be the same as that of another
+accessor for overloading is not allowed:
 
 .. code-block:: typescript
    :linenos:
@@ -1745,10 +1753,10 @@ The same applies to accessors themselves - no overloading is allowed.
     }
 
 
-While inheriting and overriding (see :ref:`Overloading and Overriding`)
-accessors behave like methods . Type of the getter will follow the covariance
-pattern, while type of the setter parameter the contravariance one (see
-:ref:`Override-Compatible Signatures`).
+In the process of inheriting and overriding (see :ref:`Overloading and Overriding`)
+accessors behave in the same manner as methods. The getter type follows the
+covariance pattern; the setter parameter type follows the contravariance
+pattern (see :ref:`Override-Compatible Signatures`):
 
 .. code-block:: typescript
    :linenos:

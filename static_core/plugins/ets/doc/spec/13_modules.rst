@@ -88,19 +88,15 @@ can optionally consist of the following four parts:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
         ;
 
-Every module implicitly imports (see :ref:`Implicit Import`) all exported
-entities from essential kernel packages of the standard library (see
-:ref:`Standard Library`).
-
-All entities from these packages are accessible (see :ref:`Accessible`) as
-simple names, like the *console* variable:
+Every module may directly use all exported entities from the core packages of
+the standard library (see :ref:`Standard Library Usage`).
 
 .. code-block:: typescript
    :linenos:
 
     // Hello, world! module
     function main() {
-      console.log("Hello, world!")
+      console.log("Hello, world!") // console is defined in the standard library
     }
 
 .. index::
@@ -711,10 +707,10 @@ File name, placement, and format are implementation-specific.
 
 |
 
-.. _Implicit Import:
+.. _Standard Library Usage:
 
-Implicit Import
-***************
+Standard Library Usage
+**********************
 
 .. meta:
     frontend_status: Done
@@ -722,9 +718,9 @@ Implicit Import
     todo: fix stdlib and tests, then import only core by default
     todo: add escompat to spec and default
 
-Any compilation unit implicitly imports all entities exported from the
-essential kernel packages of the standard library(see :ref:`Standard Library`).
-All entities exported from these packages can be accessed as simple names.
+Any compilation unit has all exported entities from the core packages of the
+standard library (see :ref:`Standard Library`) accessible (see
+:ref:`Accessible`) as simple names.
 
 .. code-block:: typescript
    :linenos:
@@ -1144,7 +1140,7 @@ comprise one sequence of statements:
 .. code-block:: abnf
 
     topLevelStatements:
-        statements
+        statement*
         ;
 
 A module can contain any number of top-level statements that logically
@@ -1176,10 +1172,11 @@ The sequence above is equal to the following:
   top-level statements are executed only once before a call to any other
   function, or before the access to any top-level variable of the separate
   module.
-- If a separate module is used a program, then top-level statements are used as
-  a program entry point (see :ref:`Program Entry Point`). If the separate
-  module has the ``main`` function, then it is executed after the execution of
-  the top-level statements.
+- If a separate module is used as a program, then top-level statements are used
+  as a program entry point (see :ref:`Program Entry Point`). Note that an empty
+  set of top-level statements implies an empty program entry point which does
+  nothing. If the separate module has the ``main`` function, then it is
+  executed after the execution of the top-level statements. 
 
 .. code-block:: typescript
    :linenos:

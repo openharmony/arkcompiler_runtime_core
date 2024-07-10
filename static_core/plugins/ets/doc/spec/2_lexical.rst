@@ -32,8 +32,8 @@ Use of Unicode Characters
     frontend_status: Done
 
 The |LANG| programming language uses characters of the Unicode Character
-set [1]_ as its terminal symbols. It represents text in sequences of
-16-bit code units using the Unicode UTF-16 encoding.
+set [1]_ as its terminal symbols. It uses the Unicode UTF-16 encoding to
+represent text in sequences of 16-bit code units.
 
 The term *Unicode code point* is used in this specification only where such
 representation is relevant to refer the reader to Unicode Character set and
@@ -110,8 +110,9 @@ Line Separators
 .. meta:
     frontend_status: Done
 
-Line separators are lexical input elements that divide sequences of Unicode
-input characters into lines. Line separators include the following:
+Line separators are lexical input elements that separate tokens from one
+another and divide sequences of Unicode input characters into lines.
+Line separators include the following:
 
 - Newline character (U+000A or ASCII <LF>),
 
@@ -121,8 +122,8 @@ input characters into lines. Line separators include the following:
 
 - Paragraph separator character (U+2029 or ASCII <PS>).
 
-Line separators separate tokens from one another and improve source code
-readability. Any sequence of line separators is considered a single separator.
+Line separators improve source code readability. Any sequence of line
+separators is considered a single separator.
 
 |
 
@@ -475,8 +476,8 @@ Integral literals with different bases are represented by the examples below:
 The underscore character '``_``' after the base prefix or between successive
 digits can be used to denote an integer literal and improve readability.
 Underscore characters in such positions do not change the values of literals.
-However, the underscore character must not be the very first or the very last
-symbol of an integer literal.
+However, the underscore character must be neither the very first nor the very
+last symbol of an integer literal.
 
 .. index::
    prefix
@@ -537,7 +538,7 @@ a float type suffix as follows:
         'f'
         ;
 
-The concept is presented by the examples below:
+The concept is represented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -552,7 +553,7 @@ The concept is presented by the examples below:
 The underscore character '``_``' after the base prefix or between successive
 digits can be used to denote a floating-point literal and improve readability.
 Underscore characters in such positions do not change the values of literals.
-However, the underscore character must not be the very first and the very
+However, the underscore character must be neither the very first nor the very
 last symbol of an integer literal.
 
 A floating-point literal is of type ``float`` if *float type suffix* is present.

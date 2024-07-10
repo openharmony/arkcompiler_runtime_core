@@ -286,22 +286,6 @@ The scope of an entity depends on the context the entity is declared in:
    access
    default public
 
-.. _enum-access:
-
--  *Enum level scope* is identical to the package or module level scope, as
-   every enumeration defines a type inside a package or module. The scope of
-   all enumeration constants and of the enumeration itself is the same.
-
-.. index::
-   name
-   declaration
-   enum level scope
-   enumeration
-   enumeration constant
-   package
-   module
-   scope
-
 .. _class-or-interface-type-parameter-access:
 
 -  *The scope of a type parameter* name in a class or interface declaration

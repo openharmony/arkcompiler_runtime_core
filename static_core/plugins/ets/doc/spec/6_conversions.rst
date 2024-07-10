@@ -1136,8 +1136,11 @@ This conversion never causes runtime errors.
    :linenos:
 
     enum IntegerEnum {a, b, c}
-    let ie: IntegerEnum = IntegerEnum.a
-    let n: number = ie // n will get the value of 0
+    let int_enum: IntegerEnum = IntegerEnum.a
+    let int_value: int = int_enum // int_value will get the value of 0
+    let number_value: number = int_enum 
+       /* number_value will get the value of 0 as a result of conversion
+          sequence: enumeration -> int - > number  */
 
 |
 
@@ -1158,8 +1161,8 @@ This conversion never causes runtime errors.
    :linenos:
 
     enum StringEnum {a = "a", b = "b", c = "c"}
-    let se: StringEnum = StringEnum.a
-    let s: string = se // n will get the value of "a"
+    let string_enum: StringEnum = StringEnum.a
+    let a_string: string = string_enum // a_string will get the value of "a"
 
 |
 

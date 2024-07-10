@@ -98,10 +98,10 @@ Primitive Types
 .. meta:
     frontend_status: Done
 
-The predefined value types are called *primitive types*. Primitive type names
-are reserved, i.e., they cannot be used for user-defined type names. Primitive
-types have no methods. They only have the operations as referred herein (see
-:ref:`Value Types`).
+The predefined value types are called *primitive types*. Primitive types have
+no methods, and have the operations only as referred herein (see
+:ref:`Value Types`). Primitive type names are reserved, i.e., they cannot be
+used for user-defined type names.
 
 Type ``double`` is an alias to ``number``. Type ``Double`` is an alias to
 ``Number``.
@@ -364,9 +364,9 @@ A type reference refers to a type by one of the following:
    (see :ref:`NonNullish Type Parameter`).
 
 If the type name denoted by ``identifier`` refers is a generic class or an
-interface type, then to be a valid type reference it should be a valid
-instantiation of the generic and for that it should have type arguments (see
-:ref:`Type Arguments`) provided explicitly or implicitly based on defaults.
+interface type, then it must be a valid instantiation of the generic to be
+a valid type reference. A type reference is valid if its type arguments (see
+:ref:`Type Arguments`) are provided explicitly or implicitly based on defaults.
 
 .. index::
    type reference
