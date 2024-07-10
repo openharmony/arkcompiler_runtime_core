@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -53,6 +53,7 @@ def stdev_mean_percent(times: list) -> float:
         return 0.0
     return statistics.stdev(times) / m * 100.0
 
+
 # TODO(ipetrov): Process remark pause
 class StatsInfo:
     """Saved sequence of time"""
@@ -91,6 +92,9 @@ class GCTypeStats:
     def __init__(self, gc_type: str):
         self.times = {gc_type: StatsInfo()}
         self.gc_type = gc_type
+    
+    def __len__(self) -> int:
+        return len(self.times.get(self.gc_type))
 
     def add(self, gc_type_cause: str, ms_time: float) -> None:
         self.times.get(self.gc_type).add(ms_time)
@@ -107,9 +111,6 @@ class GCTypeStats:
                 i = 1
             return [(sorted_info[i][0], sorted_info[i][1].get_stats())]
         return list((st_info[0], st_info[1].get_stats()) for st_info in sorted_info)
-
-    def __len__(self) -> int:
-        return len(self.times.get(self.gc_type))
 
 
 class GCStatsTable:
@@ -133,17 +134,6 @@ class GCStatsTable:
         self.stats.setdefault(gc_type, GCTypeStats(
             gc_type)).add(gc_type_cause, gc_time)
 
-    def __sorted_gc_stats(self) -> list:
-        stats_list = list(x[1] for x in self.stats.items() if (
-            x[0] != GCStatsTable.TOTAL and x[0] != GCStatsTable.WO_FULL))
-        stats_list = sorted(stats_list,
-                            key=lambda x: len(x), reverse=True)
-        result = [self.stats.get(GCStatsTable.TOTAL).get_stats(
-        )[0], self.stats.get(GCStatsTable.WO_FULL).get_stats()[0]]
-        for gc_type_stat in stats_list:
-            result += gc_type_stat.get_stats()
-        return result
-
     def save_table(self, saving_file: str) -> int:
         if len(self.stats.get("Total")) == 0:
             print(f"{self.name}: No gc logs", file=sys.stderr)
@@ -163,6 +153,17 @@ class GCStatsTable:
                     file.write(f" {trigger_stat[1].get(stat_type)} |")
             file.write("\n\n</details>\n\n")
         return 1
+    
+    def __sorted_gc_stats(self) -> list:
+        stats_list = list(x[1] for x in self.stats.items() if (
+            x[0] != GCStatsTable.TOTAL and x[0] != GCStatsTable.WO_FULL))
+        stats_list = sorted(stats_list,
+                            key=lambda x: len(x), reverse=True)
+        result = [self.stats.get(GCStatsTable.TOTAL).get_stats(
+        )[0], self.stats.get(GCStatsTable.WO_FULL).get_stats()[0]]
+        for gc_type_stat in stats_list:
+            result += gc_type_stat.get_stats()
+        return result
 
 
 class GCStatsCollector:
@@ -188,9 +189,6 @@ class GCStatsCollector:
             if i != -1:
                 return (i, len(detect_string))
         return (-1, 0)
-
-    def save_table(self, table: GCStatsTable) -> int:
-        return table.save_table(self.result_file_path)
 
     @staticmethod
     def get_full_type(line: str, cause_start: int, cause_len: int) -> str:
@@ -221,6 +219,9 @@ class GCStatsCollector:
             if time_str.endswith(time_end[0]):
                 return float(time_str[:-len(time_end[0])]) * time_end[1]
         raise ValueError("Could not detect time format")
+
+    def save_table(self, table: GCStatsTable) -> int:
+        return table.save_table(self.result_file_path)
 
     def process_one_log(self, gc_log_path: str) -> None:
         """Process one log file"""

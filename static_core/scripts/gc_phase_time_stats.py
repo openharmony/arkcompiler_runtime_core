@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,6 +42,10 @@ class PhaseStats:
     TIMES: List[Tuple[str, float]] = [
         ("ms", 1.0), ("us", 0.001), ("ns", 0.000001), ("s", 1000.0)]
 
+    def __init__(self):
+        self.phase_thread_times: List[float] = []
+        self.phase_cpu_times: List[float] = []
+
     @staticmethod
     def str_to_time(time_str: str) -> float:
         for possible_time in PhaseStats.TIMES:
@@ -55,10 +59,6 @@ class PhaseStats:
         if len(times) != 2:
             raise ValueError("Incorrect time format in log: " + times_str)
         return PhaseStats.str_to_time(times[0]), PhaseStats.str_to_time(times[1])
-
-    def __init__(self):
-        self.phase_thread_times: List[float] = list()
-        self.phase_cpu_times: List[float] = list()
 
     def add_times(self, thread_time: float, cpu_time: float) -> None:
         self.phase_thread_times.append(thread_time)
@@ -101,8 +101,8 @@ class PhaseStats:
 
 
 def change_gc_mode(log_line: str) -> Optional[str]:
-    COLLECT_TYPES = ["YOUNG", "MIXED", "TENURED", "FULL"]
-    for collect_type in COLLECT_TYPES:
+    collect_types = ["YOUNG", "MIXED", "TENURED", "FULL"]
+    for collect_type in collect_types:
         if log_line.find(f" [{collect_type} ") != -1:
             return f"({collect_type})"
     return None
