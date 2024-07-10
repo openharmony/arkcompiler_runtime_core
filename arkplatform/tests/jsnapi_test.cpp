@@ -112,13 +112,13 @@ TEST_F(JSNapiTest, ArkplatformJSNApiTest_BooleanRef)
     bool input = true;
     Local<BooleanRef> res = BooleanRef::New(vm_, input);
     EXPECT_TRUE(res->IsBoolean());
-    EXPECT_TRUE(res->BooleaValue());
+    EXPECT_TRUE(res->BooleaValue(vm_));
     ASSERT_EQ(ToJSTaggedValue(*res), JSValueRefInternals::VALUE_TRUE);
 
     input = false;
     res = BooleanRef::New(vm_, input);
     EXPECT_TRUE(res->IsBoolean());
-    EXPECT_FALSE(res->BooleaValue());
+    EXPECT_FALSE(res->BooleaValue(vm_));
     ASSERT_EQ(ToJSTaggedValue(*res), JSValueRefInternals::VALUE_FALSE);
 }
 
