@@ -5,7 +5,7 @@ spec/import_export/06.top-level_declarations/01.exported_declarations/exported_d
 spec/import_export/06.top-level_declarations/01.exported_declarations/exported_declarations_04.ets
 ### end of Issue 14647
 
-### tools-testing-and-benchmarking Issue: 1643 
+### tools-testing-and-benchmarking Issue: 1643
 spec/13.Compilation_Units_Packages_and_Modules/import_export/issue14991_01.ets
 ### Issue 1643 end
 
@@ -25,4 +25,5 @@ spec/13.Compilation_Units_Packages_and_Modules/13.06.Export.Directives/13.06.03.
 spec/13.Compilation_Units_Packages_and_Modules/13.06.Export.Directives/13.06.03.Re-export.Directives/issue_15669_03.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.06.Export.Directives/13.06.03.Re-export.Directives/issue_15669_04.ets
 spec/13.Compilation_Units_Packages_and_Modules/13.06.Export.Directives/13.06.03.Re-export.Directives/issue_15669_05.ets
+spec/partial_type/partialType_main.ets
 ### end of Issue 16465
