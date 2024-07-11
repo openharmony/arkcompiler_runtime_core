@@ -53,6 +53,26 @@ export final class String extends Object implements Comparable<String>, JSONable
     public constructor(object: NullishType) {}
 
     /**
+     * Creates a new instance of a String
+     * 
+     * @returns A new String instance
+     */
+    static invoke(): string {
+        return new String();
+    }
+
+    /**
+     * Creates a new instance of a String
+     *
+     * @param value The value to be converted to a string. Can be an Object or null.
+     * 
+     * @returns A new String instance
+     */
+    static invoke(value: Object | null | undefined): string {
+        return new String(value);
+    }
+
+    /**
      * Returns an instance of string at passed index.
      *
      * @param index index to look at

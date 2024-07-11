@@ -257,3 +257,14 @@ sub:
                   'a\uDFB7'
                 - |
                   'a𠮷b'
+      - self: null
+        sub:
+          - expr: Array<number>().length
+            ret_type: number
+            expected: 0
+          - expr: Array<number>(5).length
+            ret_type: number
+            expected: 5
+          - expr: Array<number>(0).length
+            ret_type: number
+            expected: 0

@@ -63,6 +63,33 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
+     * Creates a new instance of a Double
+     *
+     * @returns A new Double instance
+     */
+    static invoke(): number {
+        return new Double();
+    }
+
+    /**
+     * Creates a new instance of a Double
+     *
+     * @param value The value to be converted to a number. Can be a string, number, or BigInt (optional).
+     *
+     * @returns A new Double instance
+     */
+    static invoke(value: String | Number | BigInt | undefined): number {
+        if (value instanceof String) {
+            return new Double(value as String);
+        } else if (value instanceof Number) {
+            return new Double(value as Number);
+        } else if (value instanceof BigInt) {
+            return new Double(value as BigInt);
+        }
+        return new Double(NaN);
+    }
+
+    /**
      * Returns value of this instance as a primitive
      *
      * @returns value of this instance

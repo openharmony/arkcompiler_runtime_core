@@ -628,6 +628,14 @@ export final class Date {
         this.ms += this.TZOffset * msPerMinute
     }
 
+    /**
+     * Creates a new instance of a Date as a string
+     *
+     * @returns A new Date instance as a string
+     */
+    static invoke(): string {
+        return new Date().toString();
+    }
 
     /**
      * The `isDateValid()` method checks if given date `ms` is maximum of ±100,000,000
