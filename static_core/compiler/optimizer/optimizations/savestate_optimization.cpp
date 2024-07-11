@@ -23,6 +23,9 @@ namespace ark::compiler {
 
 bool SaveStateOptimization::RunImpl()
 {
+    if (g_options.IsCompilerEnforceSafepointPlacement()) {
+        return false;
+    }
     uint64_t instsNumber = VisitGraphAndCount();
     if (!HaveCalls() && instsNumber <= g_options.GetCompilerSafepointEliminationLimit()) {
         RemoveSafePoints();

@@ -87,7 +87,7 @@ void InstBuilder::Prepare(bool isInlinedGraph)
         ASSERT(!GetGraph()->IsBytecodeOptimizer() || regNum != INVALID_REG);
 
         paramInst->SetType(type);
-        // This parameter in virtaul method is implicit, so skipped
+        // This parameter in virtual method is implicit, so skipped
         if (type == DataType::REFERENCE && (isStatic || i > 0)) {
             paramInst->SetArgRefNumber(argRefNum++);
         }

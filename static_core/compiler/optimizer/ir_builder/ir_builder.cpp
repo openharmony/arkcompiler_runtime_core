@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <fstream>
 #include "ir_builder.h"
 #include "compiler_logger.h"
 #include "pbc_iterator.h"
@@ -49,11 +48,11 @@ bool IrBuilder::RunImpl()
 
     {
         InstBuilder instBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
-        instBuilder.Prepare(isInlinedGraph_);
+        SetInstBuilder(&instBuilder);
         instDefs_.resize(vregsCount + GetGraph()->GetEnvCount());
         COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
         for (auto bb : GetGraph()->GetBlocksRPO()) {
-            if (!BuildBasicBlock(bb, &instBuilder, instructionsBuf)) {
+            if (!BuildBasicBlock(bb, instructionsBuf)) {
                 return false;
             }
         }
@@ -145,8 +144,9 @@ bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions,
     return true;
 }
 
-bool IrBuilder::CreateSaveStateForLoopBlocks(BasicBlock *bb, InstBuilder *instBuilder)
+bool IrBuilder::CreateSaveStateForLoopBlocks(BasicBlock *bb)
 {
+    auto instBuilder = GetInstBuilder();
     if (GetGraph()->GetEndBlock() != bb && !GetGraph()->IsOsrMode() &&
         (bb->IsLoopPostExit() || bb->IsLoopPreHeader())) {
         // Prepend SaveState as a first instruction in the loop pre header and post exit
@@ -172,6 +172,9 @@ bool IrBuilder::CreateSaveStateForLoopBlocks(BasicBlock *bb, InstBuilder *instBu
             auto ss = instBuilder->CreateSaveStateOsr(bb);
             bb->AppendInst(ss);
             COMPILER_LOG(DEBUG, IR_BUILDER) << "create save state OSR: " << *ss;
+#ifndef NDEBUG
+            instBuilder->TryInsertSafepoint(bb, true);
+#endif
         }
 
         if (g_options.IsCompilerUseSafepoint()) {
@@ -184,8 +187,9 @@ bool IrBuilder::CreateSaveStateForLoopBlocks(BasicBlock *bb, InstBuilder *instBu
     return true;
 }
 
-bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf)
+bool IrBuilder::BuildBasicBlock(BasicBlock *bb, const uint8_t *instructionsBuf)
 {
+    auto instBuilder = GetInstBuilder();
     instBuilder->SetCurrentBlock(bb);
     instBuilder->UpdateDefs();
     if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() &&
@@ -198,7 +202,7 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const 
         return false;
     }
 
-    if (!CreateSaveStateForLoopBlocks(bb, instBuilder)) {
+    if (!CreateSaveStateForLoopBlocks(bb)) {
         return false;
     }
 
@@ -206,9 +210,9 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const 
     // If block is not in the `blocks_` vector, it's auxiliary block without instructions
     if (bb == blocks_[bb->GetGuestPc()]) {
         if (bb->IsLoopPreHeader() && !GetGraph()->IsOsrMode()) {
-            return BuildInstructionsForBB<true>(bb, instBuilder, instructionsBuf);
+            return BuildInstructionsForBB<true>(bb, instructionsBuf);
         }
-        return BuildInstructionsForBB<false>(bb, instBuilder, instructionsBuf);
+        return BuildInstructionsForBB<false>(bb, instructionsBuf);
     }
     if (bb->IsLoopPreHeader() && !GetGraph()->IsOsrMode()) {
         auto ss = instBuilder->CreateSaveStateDeoptimize(bb->GetGuestPc());
@@ -219,12 +223,58 @@ bool IrBuilder::BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const 
 }
 
 template <bool NEED_SS_DEOPT>
-bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf)
+bool IrBuilder::AddInstructionToBB(BasicBlock *bb, BytecodeInstruction &inst, [[maybe_unused]] size_t pc,
+                                   [[maybe_unused]] bool *ssDeoptWasBuilded)
 {
+    auto instBuilder = GetInstBuilder();
+    // Copy current defs for assigning them to catch-phi if current inst is throwable
+    ASSERT(instBuilder->GetCurrentDefs().size() == instDefs_.size());
+    std::copy(instBuilder->GetCurrentDefs().begin(), instBuilder->GetCurrentDefs().end(), instDefs_.begin());
+    auto currentBb = instBuilder->GetCurrentBlock();
+    auto currentLastInst = currentBb->GetLastInst();
+    auto bbCount = GetGraph()->GetVectorBlocks().size();
+    if constexpr (NEED_SS_DEOPT) {
+        if (inst.IsJump()) {
+            auto ss = instBuilder->CreateSaveStateDeoptimize(pc);
+            bb->AppendInst(ss);
+            *ssDeoptWasBuilded = true;
+        }
+    }
+    instBuilder->BuildInstruction(&inst);
+    if (instBuilder->IsFailed()) {
+        COMPILER_LOG(WARNING, IR_BUILDER) << "Unsupported instruction";
+        return false;
+    }
+    if (inst.CanThrow()) {
+        // One PBC instruction can be expanded to the group of IR's instructions, find first built instruction
+        // in this group, and then mark all instructions as throwable; All instructions should be marked, since
+        // some of them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before
+        // Register Allocator
+        auto throwableInst = (currentLastInst == nullptr) ? currentBb->GetFirstInst() : currentLastInst->GetNext();
+        ProcessThrowableInstructions(throwableInst);
+
+        auto &vb = GetGraph()->GetVectorBlocks();
+        for (size_t i = bbCount; i < vb.size(); i++) {
+            ProcessThrowableInstructions(vb[i]->GetFirstInst());
+        }
+    }
+    return true;
+}
+
+template <bool NEED_SS_DEOPT>
+bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, const uint8_t *instructionsBuf)
+{
+    auto instBuilder = GetInstBuilder();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     BytecodeInstructions instructions(instructionsBuf + bb->GetGuestPc(), std::numeric_limits<int>::max());
     bool ssDeoptWasBuilded = false;
+#ifndef NDEBUG
+    instBuilder->TryInsertSafepoint(nullptr, true);
+#endif
     for (auto inst : instructions) {
+#ifndef NDEBUG
+        instBuilder->TryInsertSafepoint();
+#endif
         auto pc = instBuilder->GetPc(inst.GetAddress());
         // Break if current pc is pc of some basic block, that means that it is the end of the current block.
         if (pc != bb->GetGuestPc() && GetBlockForPc(pc) != nullptr) {
@@ -232,36 +282,8 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *instBuilder,
         }
         COMPILER_LOG(DEBUG, IR_BUILDER) << "[PBC] " << inst << "  # "
                                         << reinterpret_cast<void *>(inst.GetAddress() - instructionsBuf);
-        // Copy current defs for assigning them to catch-phi if current inst is throwable
-        ASSERT(instBuilder->GetCurrentDefs().size() == instDefs_.size());
-        std::copy(instBuilder->GetCurrentDefs().begin(), instBuilder->GetCurrentDefs().end(), instDefs_.begin());
-        auto currentBb = instBuilder->GetCurrentBlock();
-        auto currentLastInst = currentBb->GetLastInst();
-        auto bbCount = GetGraph()->GetVectorBlocks().size();
-        if constexpr (NEED_SS_DEOPT) {
-            if (inst.IsJump()) {
-                auto ss = instBuilder->CreateSaveStateDeoptimize(pc);
-                bb->AppendInst(ss);
-                ssDeoptWasBuilded = true;
-            }
-        }
-        instBuilder->BuildInstruction(&inst);
-        if (instBuilder->IsFailed()) {
-            COMPILER_LOG(WARNING, IR_BUILDER) << "Unsupported instruction";
+        if (!AddInstructionToBB<NEED_SS_DEOPT>(bb, inst, pc, &ssDeoptWasBuilded)) {
             return false;
-        }
-        if (inst.CanThrow()) {
-            // One PBC instruction can be expanded to the group of IR's instructions, find first built instruction
-            // in this group, and then mark all instructions as throwable; All instructions should be marked, since
-            // some of them can be deleted during optimizations, unnecessary catch-phi moves will be resolved before
-            // Register Allocator
-            auto throwableInst = (currentLastInst == nullptr) ? currentBb->GetFirstInst() : currentLastInst->GetNext();
-            ProcessThrowableInstructions(instBuilder, throwableInst);
-
-            auto &vb = GetGraph()->GetVectorBlocks();
-            for (size_t i = bbCount; i < vb.size(); i++) {
-                ProcessThrowableInstructions(instBuilder, vb[i]->GetFirstInst());
-            }
         }
         // Break if we meet terminator instruction. If instruction in the middle of basic block we don't create
         // further dead instructions.
@@ -278,8 +300,9 @@ bool IrBuilder::BuildInstructionsForBB(BasicBlock *bb, InstBuilder *instBuilder,
     return true;
 }
 
-void IrBuilder::ProcessThrowableInstructions(InstBuilder *instBuilder, Inst *throwableInst)
+void IrBuilder::ProcessThrowableInstructions(Inst *throwableInst)
 {
+    auto instBuilder = GetInstBuilder();
     for (; throwableInst != nullptr; throwableInst = throwableInst->GetNext()) {
         if (throwableInst->IsSaveState()) {
             continue;
