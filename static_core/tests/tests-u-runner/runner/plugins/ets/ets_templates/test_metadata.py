@@ -43,10 +43,6 @@ class Tags:
         self.__not_a_test = Tags.__contains(Tags.EtsTag.NOT_A_TEST.value, tags)
         self.__no_warmup = Tags.__contains(Tags.EtsTag.NO_WARMUP.value, tags)
 
-    @staticmethod
-    def __contains(tag: str, tags: Optional[List[str]]) -> bool:
-        return tag in tags if tags is not None else False
-
     @property
     def compile_only(self) -> bool:
         return self.__compile_only
@@ -62,6 +58,10 @@ class Tags:
     @property
     def no_warmup(self) -> bool:
         return self.__no_warmup
+
+    @staticmethod
+    def __contains(tag: str, tags: Optional[List[str]]) -> bool:
+        return tag in tags if tags is not None else False
 
 
 @dataclass

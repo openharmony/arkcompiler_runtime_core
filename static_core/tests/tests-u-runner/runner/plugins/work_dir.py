@@ -26,12 +26,6 @@ class WorkDir:
         self.__general = general
         self.__default_work_dir = default_work_dir
 
-    @cached_property
-    def root(self) -> Path:
-        root = Path(self.__general.work_dir) if self.__general.work_dir else self.__default_work_dir
-        root.mkdir(parents=True, exist_ok=True)
-        return root
-
     @property
     def report(self) -> Path:
         return self.root / "report"
@@ -43,6 +37,12 @@ class WorkDir:
     @property
     def intermediate(self) -> Path:
         return self.root / "intermediate"
+
+    @cached_property
+    def root(self) -> Path:
+        root = Path(self.__general.work_dir) if self.__general.work_dir else self.__default_work_dir
+        root.mkdir(parents=True, exist_ok=True)
+        return root
 
     @cached_property
     def coverage_dir(self) -> CoverageDir:

@@ -45,11 +45,11 @@ class RunnerJSHermes(RunnerJS):
         Log.summary(_LOGGER, f"TEST_ROOT reset to {self.test_root}")
         self.add_directory(self.test_root, "js", [])
 
+    @property
+    def default_work_dir_root(self) -> Path:
+        return Path("/tmp") / "hermes"
+
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSHermes:
         test = TestJSHermes(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test
-
-    @property
-    def default_work_dir_root(self) -> Path:
-        return Path("/tmp") / "hermes"

@@ -29,6 +29,7 @@ from runner.runner_js import RunnerJS
 
 _LOGGER = logging.getLogger("runner.plugins.system.runner_ets_system")
 
+
 class SystemArkTSFlags(Enum):
     ALL_WARNINGS = ["--ets-warnings-all"]
     BOOST_EQUALITY_STATEMENTS = ["--ets-boost-equality-statement"]
@@ -40,6 +41,7 @@ class SystemArkTSFlags(Enum):
     SUPPRESSION_TESTS = ["--ets-warnings-all"]
     WERROR_TESTS = ["--ets-warnings-all", "--ets-werror"]
 
+
 class RunnerETSSystem(RunnerJS):
     def __init__(self, config: Config) -> None:
         super().__init__(config, "system")
@@ -50,7 +52,7 @@ class RunnerETSSystem(RunnerJS):
             es2panda_test = symlink_es2panda_test.resolve()
         else:
             es2panda_test = Path(config.general.static_core_root).parent.parent / "plugins" \
-                                / "runtime_core" / "static_core" / "ets" / "tests" / "ets_warnings_tests"
+                            / "runtime_core" / "static_core" / "ets" / "tests" / "ets_warnings_tests"
             if not es2panda_test.exists():
                 raise Exception(f'There is no path {es2panda_test}')
         self.default_list_root = es2panda_test / 'test-lists'
@@ -93,6 +95,10 @@ class RunnerETSSystem(RunnerJS):
             self.add_directory("warnings_suppresion_tests", "ets", flags=suppression_tests)
             self.add_directory("werror_tests", "ets", flags=werror_tests)
 
+    @property
+    def default_work_dir_root(self) -> Path:
+        return Path("/tmp") / "ets_warnings_tests"
+
     def add_directory(self, directory: str, extension: str, flags: List[str]) -> None:
         new_dir = path.normpath(path.join(self.test_root, directory))
         super().add_directory(new_dir, extension, flags)
@@ -101,7 +107,3 @@ class RunnerETSSystem(RunnerJS):
         test = TestETSSystem(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test
-
-    @property
-    def default_work_dir_root(self) -> Path:
-        return Path("/tmp") / "ets_warnings_tests"

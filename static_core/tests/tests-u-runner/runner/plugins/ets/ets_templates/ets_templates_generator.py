@@ -26,7 +26,6 @@ from runner.plugins.ets.utils.exceptions import InvalidFileFormatException, Inva
     UnknownTemplateException
 from runner.plugins.ets.ets_templates.benchmark import Benchmark, TEMPLATE_EXTENSION
 
-
 _LOGGER = logging.getLogger("runner.plugins.ets.ets_templates.ets_templates_generator")
 
 
@@ -38,12 +37,6 @@ class EtsTemplatesGenerator:
 
         if not self.__root_path.is_dir():
             Log.exception_and_raise(_LOGGER, f"{str(self.__root_path.absolute())} must be a directory")
-
-    def __generate_test(self, path: Path) -> None:
-        test_full_name = os.path.relpath(path, self.__root_path)
-        output = self.__output_path / test_full_name
-        bench = Benchmark(path, output, test_full_name)
-        self.generated_tests.extend(bench.generate())
 
     def dfs(self, path: Path, seen: Set) -> None:
         if not path.exists() or path in seen:
@@ -71,3 +64,9 @@ class EtsTemplatesGenerator:
             Log.exception_and_raise(_LOGGER, f"{unknown_template_exp.filepath}: exception while processing template:")
         Log.all(_LOGGER, "Generation finished!")
         return self.generated_tests
+
+    def __generate_test(self, path: Path) -> None:
+        test_full_name = os.path.relpath(path, self.__root_path)
+        output = self.__output_path / test_full_name
+        bench = Benchmark(path, output, test_full_name)
+        self.generated_tests.extend(bench.generate())

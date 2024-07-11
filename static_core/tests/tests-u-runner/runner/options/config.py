@@ -73,22 +73,6 @@ class Config:
     test_lists = TestListsOptions()
     ets = ETSOptions()
 
-    def _to_dict(self) -> Dict[str, object]:
-        return {
-            "test-suites": list(self.test_suites),
-            "custom": self.custom.to_dict(),
-            "general": self.general.to_dict(),
-            "report": self.report.to_dict(),
-            "es2panda": self.es2panda.to_dict(),
-            "verifier": self.verifier.to_dict(),
-            "quick": self.quick.to_dict(),
-            "ark_aot": self.ark_aot.to_dict(),
-            "ark": self.ark.to_dict(),
-            "time-report": self.time_report.to_dict(),
-            "test-lists": self.test_lists.to_dict(),
-            "ets": self.ets.to_dict()
-        }
-
     def generate_config(self) -> None:
         if self.general.generate_config is None:
             return
@@ -113,3 +97,19 @@ class Config:
         options_str = re.sub(r'\s+', ' ', options, re.IGNORECASE | re.DOTALL)
 
         return options_str
+
+    def _to_dict(self) -> Dict[str, object]:
+        return {
+            "test-suites": list(self.test_suites),
+            "custom": self.custom.to_dict(),
+            "general": self.general.to_dict(),
+            "report": self.report.to_dict(),
+            "es2panda": self.es2panda.to_dict(),
+            "verifier": self.verifier.to_dict(),
+            "quick": self.quick.to_dict(),
+            "ark_aot": self.ark_aot.to_dict(),
+            "ark": self.ark.to_dict(),
+            "time-report": self.time_report.to_dict(),
+            "test-lists": self.test_lists.to_dict(),
+            "ets": self.ets.to_dict()
+        }

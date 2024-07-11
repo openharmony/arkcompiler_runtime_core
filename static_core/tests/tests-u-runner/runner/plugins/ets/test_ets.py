@@ -69,6 +69,7 @@ class TestETS(TestFileBased):
         """ True if a test is valid """
         return not self.metadata.tags.not_a_test
 
+    @property
     def ark_extra_options(self) -> List[str]:
         return self.metadata.ark_options
 

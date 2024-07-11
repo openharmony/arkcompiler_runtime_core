@@ -51,6 +51,14 @@ class EtsTestSuite(ABC):
         self._jit: JitOptions = config.ark.jit
         self._is_jit = config.ark.jit.enable and config.ark.jit.num_repeats > 0
 
+    @property
+    def test_root(self) -> Path:
+        return self.__work_dir.gen
+
+    @property
+    def default_list_root_suite_name(self) -> Path:
+        return Path(self.__default_list_root, self.__suite_name)
+
     @staticmethod
     def get_class(ets_suite_name: str) -> Any:
         name_to_class = {
@@ -66,14 +74,6 @@ class EtsTestSuite(ABC):
     @cached_property
     def name(self) -> str:
         return self.__suite_name
-
-    @property
-    def test_root(self) -> Path:
-        return self.__work_dir.gen
-
-    @property
-    def default_list_root_suite_name(self) -> Path:
-        return Path(self.__default_list_root, self.__suite_name)
 
     @cached_property
     def list_root(self) -> Path:
@@ -226,11 +226,13 @@ class FuncEtsTestSuite(EtsTestSuite):
                 num_repeats=self._jit.num_repeats
             ))
 
+
 class ESCheckedEtsTestSuite(EtsTestSuite):
     def __init__(self, config: Config, work_dir: WorkDir, default_list_root: str):
         super().__init__(config, work_dir, EtsSuites.ESCHECKED.value, default_list_root)
         self._ets_test_dir = EtsTestDir(config.general.static_core_root, config.general.test_root)
         self.set_preparation_steps()
+
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(ESCheckedTestPreparationStep(
             test_source_path=self._ets_test_dir.ets_es_checked,

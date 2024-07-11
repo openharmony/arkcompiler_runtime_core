@@ -25,10 +25,6 @@ class EtsTestDir:
         self.__static_core_root = Path(static_core_root)
         self.__root = root
 
-    @cached_property
-    def root(self) -> Path:
-        return Path(self.__root) if self.__root else self.__static_core_root / "plugins" / "ets"
-
     @property
     def tests(self) -> Path:
         return self.root / "tests"
@@ -52,3 +48,7 @@ class EtsTestDir:
     @property
     def ets_es_checked(self) -> Path:
         return self.tests / "ets_es_checked"
+
+    @cached_property
+    def root(self) -> Path:
+        return Path(self.__root) if self.__root else self.__static_core_root / "plugins" / "ets"

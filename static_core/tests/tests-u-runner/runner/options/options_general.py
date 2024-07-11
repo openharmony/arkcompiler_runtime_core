@@ -39,28 +39,25 @@ class GeneralOptions:
     def __str__(self) -> str:
         return _to_str(self, 1)
 
-    def to_dict(self) -> Dict[str, object]:
-        return {
-            "build": self.build,
-            "processes": self.processes,
-            "test-root": self.test_root,
-            "list-root": self.list_root,
-            "work-dir": self.work_dir,
-            "ets-stdlib-root": self.ets_stdlib_root,
-            "show-progress": self.show_progress,
-            "gc_type": self.gc_type,
-            "full-gc-bombing-frequency": self.full_gc_bombing_frequency,
-            "run_gc_in_place": self.run_gc_in_place,
-            "heap-verifier": self.heap_verifier,
-            "verbose": self.verbose.value.upper(),
-            "verbose-filter": self.verbose_filter.value.upper(),
-            "coverage": self.coverage.to_dict(),
-            "force-download": self.force_download,
-            "bco": self.bco,
-            "qemu": self.qemu.value.upper(),
-            "with-js": self.with_js,
-            "generate_only": self.generate_only,
-        }
+    @property
+    def qemu_cmd_line(self) -> str:
+        qemu = ''
+        if self.qemu == QemuKind.ARM64:
+            qemu = '--arm64-qemu'
+        elif self.qemu == QemuKind.ARM32:
+            qemu = '--arm32-qemu'
+        return qemu
+
+    @cached_property
+    def chunksize(self) -> int:
+        return GeneralOptions.__DEFAULT_CHUNKSIZE
+
+    @cached_property
+    def static_core_root(self) -> str:
+        # This file is expected to be located at path:
+        # $PANDA_SOURCE/tests/tests-u-runner/runner/options/options_general.py
+        path_parts = __file__.split(path.sep)[:-5]
+        return path.sep.join(path_parts)
 
     @cached_property
     @value(yaml_path="general.generate-config", cli_name="generate_config", cast_to_type=_to_path)
@@ -73,20 +70,9 @@ class GeneralOptions:
         return GeneralOptions.__DEFAULT_PROCESSES
 
     @cached_property
-    def chunksize(self) -> int:
-        return GeneralOptions.__DEFAULT_CHUNKSIZE
-
-    @cached_property
     @value(yaml_path="general.build", cli_name="build_dir", cast_to_type=_to_path, required=True)
     def build(self) -> Optional[str]:
         return None
-
-    @cached_property
-    def static_core_root(self) -> str:
-        # This file is expected to be located at path:
-        # $PANDA_SOURCE/tests/tests-u-runner/runner/options/options_general.py
-        path_parts = __file__.split(path.sep)[:-5]
-        return path.sep.join(path_parts)
 
     @cached_property
     @value(yaml_path="general.test-root", cli_name="test_root", cast_to_type=_to_path)
@@ -151,8 +137,6 @@ class GeneralOptions:
     def verbose_filter(self) -> VerboseFilter:
         return GeneralOptions.__DEFAULT_VERBOSE_FILTER
 
-    coverage = CoverageOptions()
-
     @cached_property
     @value(yaml_path="general.force-download", cli_name="force_download", cast_to_type=_to_bool)
     def force_download(self) -> bool:
@@ -173,19 +157,12 @@ class GeneralOptions:
     def qemu(self) -> QemuKind:
         return GeneralOptions.__DEFAULT_QEMU
 
-    @property
-    def qemu_cmd_line(self) -> str:
-        qemu = ''
-        if self.qemu == QemuKind.ARM64:
-            qemu = '--arm64-qemu'
-        elif self.qemu == QemuKind.ARM32:
-            qemu = '--arm32-qemu'
-        return qemu
-
     @cached_property
     @value(yaml_path="general.generate-only", cli_name="generate_only", cast_to_type=_to_bool)
     def generate_only(self) -> bool:
         return False
+
+    coverage = CoverageOptions()
 
     def get_command_line(self) -> str:
         options = [
@@ -216,3 +193,26 @@ class GeneralOptions:
             self.qemu_cmd_line,
         ]
         return ' '.join(options)
+
+    def to_dict(self) -> Dict[str, object]:
+        return {
+            "build": self.build,
+            "processes": self.processes,
+            "test-root": self.test_root,
+            "list-root": self.list_root,
+            "work-dir": self.work_dir,
+            "ets-stdlib-root": self.ets_stdlib_root,
+            "show-progress": self.show_progress,
+            "gc_type": self.gc_type,
+            "full-gc-bombing-frequency": self.full_gc_bombing_frequency,
+            "run_gc_in_place": self.run_gc_in_place,
+            "heap-verifier": self.heap_verifier,
+            "verbose": self.verbose.value.upper(),
+            "verbose-filter": self.verbose_filter.value.upper(),
+            "coverage": self.coverage.to_dict(),
+            "force-download": self.force_download,
+            "bco": self.bco,
+            "qemu": self.qemu.value.upper(),
+            "with-js": self.with_js,
+            "generate_only": self.generate_only,
+        }

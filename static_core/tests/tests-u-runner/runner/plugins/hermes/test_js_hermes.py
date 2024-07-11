@@ -29,6 +29,10 @@ class TestJSHermes(TestFileBased):
         self.work_dir = test_env.work_dir
         self.util = self.test_env.util
 
+    @staticmethod
+    def _validate_compiler(return_code: int, output_path: str) -> bool:
+        return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
+
     def do_run(self) -> TestFileBased:
         test_abc = str(self.work_dir.intermediate / f"{self.test_id}.abc")
         test_an = str(self.work_dir.intermediate / f"{self.test_id}.an")
@@ -75,10 +79,6 @@ class TestJSHermes(TestFileBased):
         )
 
         return self
-
-    @staticmethod
-    def _validate_compiler(return_code: int, output_path: str) -> bool:
-        return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 
     def ark_validate_result(self, actual_output: str, _: Any, return_code: int) -> bool:
         return self.util.run_filecheck(self.path, actual_output) and return_code == 0

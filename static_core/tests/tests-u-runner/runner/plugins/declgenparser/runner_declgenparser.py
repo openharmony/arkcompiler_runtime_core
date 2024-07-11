@@ -28,6 +28,7 @@ from runner.runner_js import RunnerJS
 
 _LOGGER = logging.getLogger("runner.plugins.declgenparser.runner_declgenparser")
 
+
 class RunnerDeclgenParser(RunnerJS):
     TEST_DIRS = ("cookbook_tests",)
 
@@ -55,6 +56,10 @@ class RunnerDeclgenParser(RunnerJS):
 
         self.add_directories()
 
+    @property
+    def default_work_dir_root(self) -> Path:
+        return Path("/tmp") / "declgenparser"
+
     def add_directories(self) -> None:
         flags = ["--extension=ets"]
         for test_dir in self.TEST_DIRS:
@@ -65,7 +70,3 @@ class RunnerDeclgenParser(RunnerJS):
         test = TestDeclgenParser(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test
-
-    @property
-    def default_work_dir_root(self) -> Path:
-        return Path("/tmp") / "declgenparser"

@@ -24,6 +24,7 @@ from PyPDF2.generic import Destination
 from PyPDF2.types import OutlineType
 from runner.reports.spec_node import SpecNode
 
+
 class PdfLoader:
     def __init__(self, fpath: Path, config: Optional[Dict]):
         self.spec_file = fpath
@@ -34,6 +35,21 @@ class PdfLoader:
     @staticmethod
     def __is_destination(field: Union[List, Destination]) -> bool:
         return str(type(field)).find("Destination") > 0
+
+    def parse(self) -> PdfLoader:
+        with open(self.spec_file, "rb") as stream:
+            reader: PdfReader = PdfReader(stream)
+            metadata: Optional[DocumentInformation] = reader.metadata
+            self.creation_date = metadata.creation_date if metadata else None
+            fields: OutlineType = reader.outline
+            self.__read_list(fields, self.spec)
+            return self
+
+    def get_root_node(self) -> SpecNode:
+        return self.spec
+
+    def get_creation_date(self) -> str:
+        return str(self.creation_date.date()) if self.creation_date else "unknown"
 
     def __read_dest(self, item: Destination, counter: int, parent: SpecNode) -> SpecNode:
         new_prefix: str = str(counter) if parent.prefix == "" else f"{parent.prefix}.{counter}"
@@ -52,18 +68,3 @@ class PdfLoader:
                 node = self.__read_dest(item, counter, parent)
             else:
                 self.__read_list(item, node)
-
-    def parse(self) -> PdfLoader:
-        with open(self.spec_file, "rb") as stream:
-            reader: PdfReader = PdfReader(stream)
-            metadata: Optional[DocumentInformation] = reader.metadata
-            self.creation_date = metadata.creation_date if metadata else None
-            fields: OutlineType = reader.outline
-            self.__read_list(fields, self.spec)
-            return self
-
-    def get_root_node(self) -> SpecNode:
-        return self.spec
-
-    def get_creation_date(self) -> str:
-        return str(self.creation_date.date()) if self.creation_date else "unknown"

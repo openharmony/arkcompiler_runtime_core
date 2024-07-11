@@ -47,13 +47,13 @@ class SpecReport:
     EXCLUDED_DIVIDER = "-------|"
 
     def __init__(
-        self,
-        results: List[Test],
-        test_suite: str,
-        report_path: Path,
-        md_report: Optional[Path],
-        yaml_report: Optional[Path],
-        spec_file: Path,
+            self,
+            results: List[Test],
+            test_suite: str,
+            report_path: Path,
+            md_report: Optional[Path],
+            yaml_report: Optional[Path],
+            spec_file: Path,
     ):
         self.tests = results
         self.test_suite = test_suite
@@ -78,6 +78,79 @@ class SpecReport:
 
         # process test results
         self.__calculate()
+
+    @staticmethod
+    def obj_to_dict(dumper: yaml.SafeDumper, data: SpecNode) -> Any:
+        return dumper.represent_dict(data.to_dict())
+
+    @staticmethod
+    def __fmt_str(src: str) -> str:
+        "Escape some characters for markdown document"
+        res = src.replace("\\", "\\\\")
+        res = res.replace("|", "\\|")
+        res = res.replace("_", "\\_")
+        res = res.replace("<", "\\<")
+        res = res.replace(">", "\\>")
+        res = res.replace("*", "\\*")
+        res = res.replace("`", "\\`")
+        res = res.replace("{", "\\{")
+        res = res.replace("}", "\\}")
+        res = res.replace("[", "\\[")
+        res = res.replace("]", "\\]")
+        res = res.replace("(", "\\(")
+        res = res.replace(")", "\\)")
+        res = res.replace("#", "\\#")
+        res = res.replace("+", "\\+")
+        res = res.replace("-", "\\-")
+        res = res.replace(".", "\\.")
+        res = res.replace("!", "\\!")
+        return res
+
+    @staticmethod
+    def __fmt_num(src: int) -> str:
+        "Replace 0 with space"
+        return str(src) if src > 0 else ""
+
+    def populate_report(self) -> None:
+        self.populate_report_md()
+        self.populate_report_yaml()
+
+    def populate_report_md(self) -> None:
+        template_path = path.join(path.dirname(path.abspath(__file__)), self.TEMPLATE)
+        with open(template_path, "r", encoding="utf-8") as file:
+            report = file.read()
+        report = report.replace(self.REPORT_DATE, str(date.today()))
+        report = report.replace(self.REPORT_TEST_SUITE, self.test_suite)
+        report = report.replace(self.REPORT_SPEC_FILE, self.__fmt_str(str(self.spec_file)))
+        report = report.replace(self.REPORT_SPEC_CREATION_DATE, self.spec_creation_date)
+
+        if not self.has_excluded:
+            report = report.replace(self.REPORT_EXCLUDED_HEADER, "")
+            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, "")
+        else:
+            report = report.replace(self.REPORT_EXCLUDED_HEADER, self.EXCLUDED_HEADER)
+            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, self.EXCLUDED_DIVIDER)
+
+        lines: List[str] = []
+        self.__report_nodes(self.spec.children, lines)
+        lines.append(self.__report_node(self.spec))  # root node - summary line at the bottom
+        result = "\n".join(lines)
+        report = report.replace(self.REPORT_RESULT, result)
+        Log.default(_LOGGER, f"Spec coverage report is saved to '{self.report_file_md}'")
+        write_2_file(self.report_file_md, report)
+
+    def populate_report_yaml(self) -> None:
+        res: dict = {
+            'report_title': 'ArkTS Specification Coverage Report',
+            'report_date': str(date.today()),
+            'spec_file': str(self.spec_file),
+            'spec_date': self.spec_creation_date,
+            'test_suite': self.test_suite,
+            'data': self.spec.to_dict()
+        }
+        yaml.SafeDumper.add_representer(SpecNode, SpecReport.obj_to_dict)
+        with open(self.report_file_yaml, mode="wt", encoding="utf-8") as file:
+            yaml.safe_dump(res, file, default_flow_style=False, sort_keys=False)
 
     def __calculate_one_test(self, test: Test) -> None:
         node = self.spec
@@ -132,34 +205,6 @@ class SpecReport:
         for test in self.tests:
             self.__calculate_one_test(test)
 
-    @staticmethod
-    def __fmt_str(src: str) -> str:
-        "Escape some characters for markdown document"
-        res = src.replace("\\", "\\\\")
-        res = res.replace("|", "\\|")
-        res = res.replace("_", "\\_")
-        res = res.replace("<", "\\<")
-        res = res.replace(">", "\\>")
-        res = res.replace("*", "\\*")
-        res = res.replace("`", "\\`")
-        res = res.replace("{", "\\{")
-        res = res.replace("}", "\\}")
-        res = res.replace("[", "\\[")
-        res = res.replace("]", "\\]")
-        res = res.replace("(", "\\(")
-        res = res.replace(")", "\\)")
-        res = res.replace("#", "\\#")
-        res = res.replace("+", "\\+")
-        res = res.replace("-", "\\-")
-        res = res.replace(".", "\\.")
-        res = res.replace("!", "\\!")
-        return res
-
-    @staticmethod
-    def __fmt_num(src: int) -> str:
-        "Replace 0 with space"
-        return str(src) if src > 0 else ""
-
     def __report_node(self, node: SpecNode) -> str:
         title = self.__fmt_str(node.prefix + " " + node.title)
         dirs = self.__fmt_str(node.dir.replace("/", "\u200B/\u200B"))
@@ -176,48 +221,3 @@ class SpecReport:
         for node in nodes:
             lines.append(self.__report_node(node))
             self.__report_nodes(node.children, lines)
-
-    def populate_report(self) -> None:
-        self.populate_report_md()
-        self.populate_report_yaml()
-
-    def populate_report_md(self) -> None:
-        template_path = path.join(path.dirname(path.abspath(__file__)), self.TEMPLATE)
-        with open(template_path, "r", encoding="utf-8") as file:
-            report = file.read()
-        report = report.replace(self.REPORT_DATE, str(date.today()))
-        report = report.replace(self.REPORT_TEST_SUITE, self.test_suite)
-        report = report.replace(self.REPORT_SPEC_FILE, self.__fmt_str(str(self.spec_file)))
-        report = report.replace(self.REPORT_SPEC_CREATION_DATE, self.spec_creation_date)
-
-        if not self.has_excluded:
-            report = report.replace(self.REPORT_EXCLUDED_HEADER, "")
-            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, "")
-        else:
-            report = report.replace(self.REPORT_EXCLUDED_HEADER, self.EXCLUDED_HEADER)
-            report = report.replace(self.REPORT_EXCLUDED_DIVIDER, self.EXCLUDED_DIVIDER)
-
-        lines: List[str] = []
-        self.__report_nodes(self.spec.children, lines)
-        lines.append(self.__report_node(self.spec))  # root node - summary line at the bottom
-        result = "\n".join(lines)
-        report = report.replace(self.REPORT_RESULT, result)
-        Log.default(_LOGGER, f"Spec coverage report is saved to '{self.report_file_md}'")
-        write_2_file(self.report_file_md, report)
-
-    def populate_report_yaml(self) -> None:
-        res: dict = {
-            'report_title': 'ArkTS Specification Coverage Report',
-            'report_date': str(date.today()),
-            'spec_file': str(self.spec_file),
-            'spec_date': self.spec_creation_date,
-            'test_suite': self.test_suite,
-            'data': self.spec.to_dict()
-        }
-        yaml.SafeDumper.add_representer(SpecNode, SpecReport.obj_to_dict)
-        with open(self.report_file_yaml, mode="wt", encoding="utf-8") as file:
-            yaml.safe_dump(res, file, default_flow_style=False, sort_keys=False)
-
-    @staticmethod
-    def obj_to_dict(dumper: yaml.SafeDumper, data: SpecNode) -> Any:
-        return  dumper.represent_dict(data.to_dict())

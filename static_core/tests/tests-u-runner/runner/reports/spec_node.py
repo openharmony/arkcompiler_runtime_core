@@ -17,6 +17,7 @@
 from __future__ import annotations
 from typing import List, Optional
 
+
 class SpecNode:
     def __init__(self, title: str, prefix: str, status: str, parent: Optional[SpecNode]):
         self.title = title

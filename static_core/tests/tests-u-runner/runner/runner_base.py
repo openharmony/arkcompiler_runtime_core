@@ -75,7 +75,6 @@ def correct_path(root: Path, test_list: str) -> str:
 
 _LOGGER = logging.getLogger("runner.runner_base")
 
-
 # pylint: disable=invalid-name,global-statement
 worker_cli_wrapper_args: Optional[argparse.Namespace] = None
 
@@ -189,6 +188,40 @@ class Runner(ABC):
 
         return ConfigurationKind.INT
 
+    @staticmethod
+    def _search_duplicates(original: List[str], kind: str) -> None:
+        main_counter = Counter(original)
+        dupes = [test for test, frequency in main_counter.items() if frequency > 1]
+        if len(dupes) > 0:
+            Log.summary(_LOGGER, f"There are {len(dupes)} duplicates in {kind} lists.")
+            for test in dupes:
+                Log.short(_LOGGER, f"\t{test}")
+        elif len(original) > 0:
+            Log.summary(_LOGGER, f"No duplicates found in {kind} lists.")
+
+    @abstractmethod
+    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> Test:
+        pass
+
+    @abstractmethod
+    def summarize(self) -> int:
+        pass
+
+    @abstractmethod
+    def create_coverage_html(self) -> None:
+        pass
+
+    def run(self) -> None:
+        Log.all(_LOGGER, "Start test running")
+        with multiprocessing.Pool(processes=self.config.general.processes,
+                                  initializer=init_worker, initargs=(CliArgsWrapper.args,)) as pool:
+            results = pool.imap_unordered(run_test, self.tests, chunksize=self.config.general.chunksize)
+            if self.config.general.show_progress:
+                results = tqdm(results, total=len(self.tests))
+            self.results = list(results)
+            pool.close()
+            pool.join()
+
     def load_tests_from_lists(self, lists: List[str]) -> List[str]:
         tests = []
         for list_name in lists:
@@ -210,17 +243,6 @@ class Runner(ABC):
         ignored_tests = self.load_tests_from_lists(self.ignored_lists)
         self.ignored_tests.update(ignored_tests)
         self._search_duplicates(ignored_tests, "ignored")
-
-    @staticmethod
-    def _search_duplicates(original: List[str], kind: str) -> None:
-        main_counter = Counter(original)
-        dupes = [test for test, frequency in main_counter.items() if frequency > 1]
-        if len(dupes) > 0:
-            Log.summary(_LOGGER, f"There are {len(dupes)} duplicates in {kind} lists.")
-            for test in dupes:
-                Log.short(_LOGGER, f"\t{test}")
-        elif len(original) > 0:
-            Log.summary(_LOGGER, f"No duplicates found in {kind} lists.")
 
     # Browse the directory, search for files with the specified extension
     # and add them as tests
@@ -255,6 +277,25 @@ class Runner(ABC):
 
         self.tests.update(valid_tests)
         Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
+
+    def _search_both_excluded_and_ignored_tests(self) -> None:
+        already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]
+        if not already_excluded:
+            return
+        Log.summary(_LOGGER, f"Found {len(already_excluded)} tests present both in excluded and ignored test "
+                             f"lists.")
+        for test in already_excluded:
+            Log.all(_LOGGER, f"\t{test}")
+            self.ignored_tests.remove(test)
+
+    def _search_not_used_ignored(self, found_tests: List[str]) -> None:
+        ignored_absent = [test for test in self.ignored_tests if test not in found_tests]
+        if ignored_absent:
+            Log.summary(_LOGGER, f"Found {len(ignored_absent)} tests in ignored lists but absent on the file system:")
+            for test in ignored_absent:
+                Log.summary(_LOGGER, f"\t{test}")
+        else:
+            Log.short(_LOGGER, "All ignored tests are found on the file system")
 
     def __load_test_files(self, directory: str, extension: str) -> List[str]:
         if self.config.test_lists.filter != "*" and self.config.test_lists.groups.chapters:
@@ -297,45 +338,3 @@ class Runner(ABC):
                     f"Not found either '{self.config.test_lists.groups.chapters_file}' or "
                     f"'{corrected_chapters_file}'", FileNotFoundError)
         return chapters
-
-    def _search_both_excluded_and_ignored_tests(self) -> None:
-        already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]
-        if not already_excluded:
-            return
-        Log.summary(_LOGGER, f"Found {len(already_excluded)} tests present both in excluded and ignored test "
-                             f"lists.")
-        for test in already_excluded:
-            Log.all(_LOGGER, f"\t{test}")
-            self.ignored_tests.remove(test)
-
-    def _search_not_used_ignored(self, found_tests: List[str]) -> None:
-        ignored_absent = [test for test in self.ignored_tests if test not in found_tests]
-        if ignored_absent:
-            Log.summary(_LOGGER, f"Found {len(ignored_absent)} tests in ignored lists but absent on the file system:")
-            for test in ignored_absent:
-                Log.summary(_LOGGER, f"\t{test}")
-        else:
-            Log.short(_LOGGER, "All ignored tests are found on the file system")
-
-    @abstractmethod
-    def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> Test:
-        pass
-
-    def run(self) -> None:
-        Log.all(_LOGGER, "Start test running")
-        with multiprocessing.Pool(processes=self.config.general.processes,
-                                  initializer=init_worker, initargs=(CliArgsWrapper.args,)) as pool:
-            results = pool.imap_unordered(run_test, self.tests, chunksize=self.config.general.chunksize)
-            if self.config.general.show_progress:
-                results = tqdm(results, total=len(self.tests))
-            self.results = list(results)
-            pool.close()
-            pool.join()
-
-    @abstractmethod
-    def summarize(self) -> int:
-        pass
-
-    @abstractmethod
-    def create_coverage_html(self) -> None:
-        pass

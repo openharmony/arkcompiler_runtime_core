@@ -63,19 +63,6 @@ class CustomSuiteOptions:
     def generator_options(self) -> List[str]:
         return []
 
-    def __validate(self) -> bool:
-        if self.suite_name is not None:
-            if self.test_root is None or self.list_root is None:
-                return False
-            if self.generator_options:
-                if self.generator is None:
-                    return False
-            return True
-        return (self.test_root is None and
-                self.list_root is None and
-                self.generator is None and
-                len(self.generator_options) == 0)
-
     def validate(self) -> None:
         if not self.__validate():
             Log.exception_and_raise(
@@ -95,3 +82,16 @@ class CustomSuiteOptions:
             ' '.join(generator_options),
         ]
         return ' '.join(options)
+
+    def __validate(self) -> bool:
+        if self.suite_name is not None:
+            if self.test_root is None or self.list_root is None:
+                return False
+            if self.generator_options:
+                if self.generator is None:
+                    return False
+            return True
+        return (self.test_root is None and
+                self.list_root is None and
+                self.generator is None and
+                len(self.generator_options) == 0)

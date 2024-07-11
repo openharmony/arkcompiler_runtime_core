@@ -23,6 +23,7 @@ from runner.enum_types.params import TestEnv
 
 _LOGGER = logging.getLogger("runner.plugins.declgenparser.test_declgenparser")
 
+
 class TestDeclgenParser(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
@@ -32,7 +33,7 @@ class TestDeclgenParser(TestFileBased):
         es2panda_flags.extend(self.flags)
         es2panda_flags.append("--output=/dev/null")
         self.passed, self.report, self.fail_kind = self.run_es2panda(
-            flags = es2panda_flags,
+            flags=es2panda_flags,
             test_abc="",
             result_validator=self.es2panda_result_validator,
         )

@@ -48,11 +48,6 @@ if LLVM_COV_VERSION is not None:
 
 
 class LinuxCommands:
-    def _popen(self, **kwargs: Any) -> Any:
-        if sys.version_info.major == 3 and sys.version_info.minor >= 6:
-            return subprocess.Popen(encoding=sys.stdout.encoding, **kwargs)
-        return subprocess.Popen(**kwargs)
-
     def run_command(self, command: List[str], stdout: Union[TextIO, int] = subprocess.PIPE) -> Union[TextIO, int]:
         with self._popen(
                 args=command,
@@ -68,6 +63,11 @@ class LinuxCommands:
     def do_genhtml(self, args: List[str]) -> Union[TextIO, int]:
         command = ['genhtml'] + args
         return self.run_command(command)
+
+    def _popen(self, **kwargs: Any) -> Any:
+        if sys.version_info.major == 3 and sys.version_info.minor >= 6:
+            return subprocess.Popen(encoding=sys.stdout.encoding, **kwargs)
+        return subprocess.Popen(**kwargs)
 
 
 class LlvmCovCommands:

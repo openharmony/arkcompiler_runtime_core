@@ -52,34 +52,6 @@ class Chapters:
         self.chapters = self.__parse(chapters_file)
         self.__validate_cycles()
 
-    def __validate_cycles(self) -> None:
-        """
-        :raise: CyclicDependencyChapterException if a cyclic dependency found
-            Normal finish means that no cycle found
-        """
-        seen_chapters: List[str] = []
-        for name, chapter in self.chapters.items():
-            seen_chapters.append(name)
-            self.__check_cycle(chapter, seen_chapters)
-            seen_chapters.pop()
-
-    def __check_cycle(self, chapter: Chapter, seen_chapters: List[str]) -> None:
-        """
-        Checks if items contains any name from seen
-        :param chapter: investigated chapter
-        :param seen_chapters: array of seen items' names
-        :raise: CyclicDependencyChapterException if a name of nested chapter is in seen names
-            Normal finish means that no cycle found
-        """
-        for item in chapter.includes + chapter.excludes:
-            if item not in self.chapters:
-                continue
-            if item in seen_chapters:
-                Log.exception_and_raise(_LOGGER, item, CyclicDependencyChapterException)
-            seen_chapters.append(item)
-            self.__check_cycle(self.chapters[item], seen_chapters)
-            seen_chapters.pop()
-
     @staticmethod
     def __parse(chapters_file: str) -> Dict[str, Chapter]:
         result: Dict[str, Chapter] = {}
@@ -131,6 +103,21 @@ class Chapters:
 
         return Chapter(name, includes, excludes)
 
+    @staticmethod
+    def __filter_by_mask(mask: str, files: List[str], extension: str) -> List[str]:
+        filtered: List[str] = []
+        if '*' not in mask and not mask.endswith(f".{extension}"):
+            # mask is a folder
+            mask = f'{mask}/*'
+        mask = mask.replace('\\', r'\\')
+        mask = mask.replace('.', r'\.')
+        mask = mask.replace('*', '.*')
+        for file in files:
+            match = re.search(mask, file)
+            if match is not None:
+                filtered.append(file)
+        return filtered
+
     def filter_by_chapter(self, chapter_name: str, base_folder: str, files: List[str], extension: str) -> Set[str]:
         if chapter_name not in self.chapters:
             return set()
@@ -151,17 +138,30 @@ class Chapters:
                 excluded.update(Chapters.__filter_by_mask(mask, files, extension))
         return filtered - excluded
 
-    @staticmethod
-    def __filter_by_mask(mask: str, files: List[str], extension: str) -> List[str]:
-        filtered: List[str] = []
-        if '*' not in mask and not mask.endswith(f".{extension}"):
-            # mask is a folder
-            mask = f'{mask}/*'
-        mask = mask.replace('\\', r'\\')
-        mask = mask.replace('.', r'\.')
-        mask = mask.replace('*', '.*')
-        for file in files:
-            match = re.search(mask, file)
-            if match is not None:
-                filtered.append(file)
-        return filtered
+    def __validate_cycles(self) -> None:
+        """
+        :raise: CyclicDependencyChapterException if a cyclic dependency found
+            Normal finish means that no cycle found
+        """
+        seen_chapters: List[str] = []
+        for name, chapter in self.chapters.items():
+            seen_chapters.append(name)
+            self.__check_cycle(chapter, seen_chapters)
+            seen_chapters.pop()
+
+    def __check_cycle(self, chapter: Chapter, seen_chapters: List[str]) -> None:
+        """
+        Checks if items contains any name from seen
+        :param chapter: investigated chapter
+        :param seen_chapters: array of seen items' names
+        :raise: CyclicDependencyChapterException if a name of nested chapter is in seen names
+            Normal finish means that no cycle found
+        """
+        for item in chapter.includes + chapter.excludes:
+            if item not in self.chapters:
+                continue
+            if item in seen_chapters:
+                Log.exception_and_raise(_LOGGER, item, CyclicDependencyChapterException)
+            seen_chapters.append(item)
+            self.__check_cycle(self.chapters[item], seen_chapters)
+            seen_chapters.pop()
