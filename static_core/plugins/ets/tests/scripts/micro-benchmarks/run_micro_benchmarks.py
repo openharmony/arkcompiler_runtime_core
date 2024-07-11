@@ -23,6 +23,7 @@ import argparse
 
 SRC_PATH = os.path.realpath(os.path.dirname(__file__))
 
+
 class RunStats:
     def __init__(self):
         self.failed_exec = []
@@ -42,9 +43,10 @@ class RunStats:
 
     def record_success(self, path: Path):
         self.passed.append(path)
-    
+
     def record_time(self, path: Path, time: float):
         self.time[path] = time
+
 
 class Logger:
     def __init__(self, args):
@@ -62,7 +64,8 @@ class Logger:
         print(message)
 
 # =======================================================
-# Main runner class 
+# Main runner class
+
 
 class EtsBenchmarksRunner:
     def __init__(self, args, logger, ark_opts, aot_opts):
@@ -70,25 +73,33 @@ class EtsBenchmarksRunner:
         self.mode = args.mode
         self.interpreter_type = args.interpreter_type
         self.is_device = args.target == "device"
-        self.host_build_dir = args.host_builddir if self.is_device else os.path.join(args.bindir, "..")
-        self.host_output_dir = os.path.join(self.host_build_dir, "plugins", "ets", "tests", "micro-benchmarks")
-        self.device_output_dir = os.path.join(args.bindir, "..", "micro-benchmarks") if self.is_device else None
+        self.host_build_dir = args.host_builddir if self.is_device else os.path.join(
+            args.bindir, "..")
+        self.host_output_dir = os.path.join(
+            self.host_build_dir, "plugins", "ets", "tests", "micro-benchmarks")
+        self.device_output_dir = os.path.join(
+            args.bindir, "..", "micro-benchmarks") if self.is_device else None
         self.current_bench_name = None
-        self.source_dir = os.path.join(SRC_PATH, "..", "..", "micro-benchmarks")
-        self.wrapper_asm_filepath = os.path.join(self.source_dir, "wrapper", "test_wrapper.pa")
+        self.source_dir = os.path.join(
+            SRC_PATH, "..", "..", "micro-benchmarks")
+        self.wrapper_asm_filepath = os.path.join(
+            self.source_dir, "wrapper", "test_wrapper.pa")
         if self.is_device:
             self.stdlib_path = os.path.join(args.libdir, "etsstdlib.abc")
         else:
-            self.stdlib_path = os.path.join(args.bindir, "..", "plugins", "ets", "etsstdlib.abc")
+            self.stdlib_path = os.path.join(
+                args.bindir, "..", "plugins", "ets", "etsstdlib.abc")
         self.ark_asm = os.path.join(args.bindir, "ark_asm")
         self.ark_aot = os.path.join(args.bindir, "ark_aot")
         self.ark = os.path.join(args.bindir, "ark")
-        self.prefix = ["adb", "shell", f"LD_LIBRARY_PATH={args.libdir}"] if self.is_device else []
+        self.prefix = [
+            "adb", "shell", f"LD_LIBRARY_PATH={args.libdir}"] if self.is_device else []
         self.ark_opts = ark_opts
         self.aot_opts = aot_opts
 
     def dump_output_to_file(self, pipe, file_ext):
-        dumpfile = open(os.path.join(self.host_output_dir, self.current_bench_name, f"test.{file_ext}"), "w")
+        dumpfile = open(os.path.join(self.host_output_dir,
+                        self.current_bench_name, f"test.{file_ext}"), "w")
         dumpfile.write(pipe.decode('ascii'))
         dumpfile.close()
 
@@ -99,8 +110,10 @@ class EtsBenchmarksRunner:
         self.dump_output_to_file(pipe, f"{tp}_err")
 
     def compile_test(self, asm_filepath, bin_filepath):
-        cmd = self.prefix + [self.ark_asm, str(asm_filepath), str(bin_filepath)]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cmd = self.prefix + [self.ark_asm,
+                             str(asm_filepath), str(bin_filepath)]
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate(timeout=5400)
         self.dump_stdout(stdout, "asm")
         if proc.returncode == 0:
@@ -114,11 +127,12 @@ class EtsBenchmarksRunner:
         cmd = self.prefix + [
             self.ark_aot, "--paoc-mode=aot", f"--boot-panda-files={self.stdlib_path}",
             "--load-runtimes=ets", "--compiler-ignore-failures=false"
-            ] + self.aot_opts + [
+        ] + self.aot_opts + [
             "--paoc-panda-files", bin_filepath,
             "--paoc-output", aot_filepath
-            ]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ]
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate(timeout=5400)
         self.dump_stdout(stdout, "aot")
         if proc.returncode == 0:
@@ -131,12 +145,15 @@ class EtsBenchmarksRunner:
     def run_test(self, bin_filepath):
         additional_opts = []
         if self.mode == "aot":
-            additional_opts += ["--aot-file", bin_filepath.replace(".abc", ".an")]
+            additional_opts += ["--aot-file",
+                                bin_filepath.replace(".abc", ".an")]
         # NOTE(ipetrov, #14164): return limit standard allocation after fix in taskmanager
         cmd = self.prefix + [self.ark, f"--boot-panda-files={self.stdlib_path}", "--load-runtimes=ets",
-                                        "--compiler-ignore-failures=false"] \
-                                        + self.ark_opts + additional_opts + [bin_filepath,  "_GLOBAL::main"]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                             "--compiler-ignore-failures=false"] \
+            + self.ark_opts + additional_opts + \
+            [bin_filepath, "_GLOBAL::main"]
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate(timeout=5400)
         self.dump_stdout(stdout, "ark")
         if proc.returncode == 0:
@@ -149,16 +166,20 @@ class EtsBenchmarksRunner:
 
     def generate_benchmark(self, filename):
         base_asm_file_path = os.path.join(self.source_dir, filename)
-        current_output_dir = os.path.join(self.host_output_dir, self.current_bench_name)
+        current_output_dir = os.path.join(
+            self.host_output_dir, self.current_bench_name)
         tmp_asm_file_path = os.path.join(current_output_dir, "test.pa")
         os.system(f"mkdir -p {current_output_dir}")
-        open(tmp_asm_file_path, "w").write(open(self.wrapper_asm_filepath, "r").read() + \
-            open(base_asm_file_path, "r").read())
+        open(tmp_asm_file_path, "w").write(open(self.wrapper_asm_filepath, "r").read() +
+                                           open(base_asm_file_path, "r").read())
         if self.is_device:
-            device_current_output_dir = os.path.join(self.device_output_dir, self.current_bench_name)
+            device_current_output_dir = os.path.join(
+                self.device_output_dir, self.current_bench_name)
             os.system(f"adb shell mkdir -p {device_current_output_dir}")
-            os.system(f"adb push {tmp_asm_file_path} {device_current_output_dir}/")
-            tmp_asm_file_path = os.path.join(device_current_output_dir, "test.pa")
+            os.system(
+                f"adb push {tmp_asm_file_path} {device_current_output_dir}/")
+            tmp_asm_file_path = os.path.join(
+                device_current_output_dir, "test.pa")
         return tmp_asm_file_path
 
     def run_separate_bench(self, filename, stats):
@@ -194,7 +215,7 @@ class EtsBenchmarksRunner:
             os.system(f"adb shell mkdir -p {self.device_output_dir}")
         else:
             os.system(f"mkdir -p {self.host_output_dir}")
-    
+
         if args.test_name is not None:
             self.run_separate_bench(args.test_name + ".pa", stats)
             return stats
@@ -218,13 +239,15 @@ class EtsBenchmarksRunner:
 # =======================================================
 # Helpers
 
+
 def dump_time_stats(logger, stats):
     max_width = max([len(x) for x in stats.time.keys()])
     keys = list(stats.time.keys())
     keys.sort()
     for name in keys:
         if name in stats.passed:
-            logger.info(name.split(".")[0].ljust(max_width+5) + str(round(stats.time[name], 3)))
+            logger.info(name.split(".")[0].ljust(
+                max_width + 5) + str(round(stats.time[name], 3)))
         else:
             logger.info(name.split(".")[0].ljust(max_width+5) + "None")
 
@@ -249,15 +272,17 @@ def dump_pass_rate(logger, skiplist_name, passed_tests, failed_tests):
         return False
     return True
 
+
 def parse_results(logger, stats, mode, int_type):
-    all_failed_tests = stats.failed_exec + stats.failed_aot_compile + stats.failed_compile
+    all_failed_tests = stats.failed_exec + \
+        stats.failed_aot_compile + stats.failed_compile
     if len(all_failed_tests) == 0:
         return True
     return dump_pass_rate(logger, f"skiplist_{mode}_{int_type}.txt", stats.passed, all_failed_tests)
 
 
 # =======================================================
-# Entry 
+# Entry
 
 parser = argparse.ArgumentParser(description='Run ETS micro-benchmarks.')
 parser.add_argument("--bindir", required=True,
@@ -285,6 +310,7 @@ parser.add_argument("--test-list",
 parser.add_argument("--log-level", choices=["silence", "info", "debug"], default="info",
                     help="Log level. Default: '%(default)s'")
 
+
 def main():
     args = parser.parse_args()
     if args.test_list and not os.path.isfile(args.test_list):
@@ -296,14 +322,16 @@ def main():
         exit(1)
 
     # =======================================================
-    # Prepare ARK and AOT options 
+    # Prepare ARK and AOT options
 
     ark_opts = []
     aot_opts = []
     if args.runtime_options:
-        ark_opts = ("--" + args.runtime_options.replace(" ", "").replace(",", " --")).split(" ")
+        ark_opts = ("--" + args.runtime_options.replace(" ",
+                    "").replace(",", " --")).split(" ")
     if args.aot_options:
-        aot_opts = ("--" + args.aot_options.replace(" ", "").replace(",", " --")).split(" ")
+        aot_opts = ("--" + args.aot_options.replace(" ",
+                    "").replace(",", " --")).split(" ")
     if args.test_list and not os.path.isfile(args.test_list):
         print_silence(f"ERROR: wrong path to testlist '{args.test_list}' ")
         exit(1)
@@ -316,20 +344,20 @@ def main():
             found_jit_opt = True
         if elem.find("interpreter-type") == -1:
             continue
-            
+
         found_int_type_opt = True
         if elem.find("interpreter-type=cpp") != -1:
-            args.interpreter_type= "cpp"
+            args.interpreter_type = "cpp"
         if elem.find("interpreter-type=irtoc") != -1:
-            args.interpreter_type= "irtoc"
+            args.interpreter_type = "irtoc"
         if elem.find("interpreter-type=llvm") != -1:
-            args.interpreter_type= "llvm"
+            args.interpreter_type = "llvm"
 
     if not found_jit_opt:
-        ark_opts += ["--compiler-enable-jit=" + ("true" if args.mode == "jit" else "false")]
+        ark_opts += ["--compiler-enable-jit=" +
+                     ("true" if args.mode == "jit" else "false")]
     if not found_int_type_opt:
         ark_opts += [f"--interpreter-type={args.interpreter_type}"]
-
 
     # =======================================================
     # Run benchmarks
@@ -340,13 +368,14 @@ def main():
     stats = runner.run(args)
 
     # =======================================================
-    # Prepare and output results 
+    # Prepare and output results
 
     if not stats:
         logger.info("\nFAIL!")
         exit(1)
 
-    all_tests_amount = len(stats.failed_exec) + len(stats.failed_aot_compile) + len(stats.failed_compile) + len(stats.passed)
+    all_tests_amount = len(stats.failed_exec) + len(stats.failed_aot_compile) + \
+        len(stats.failed_compile) + len(stats.passed)
     logger.info("\n=====")
     if args.mode == "aot":
         logger.info(f"TESTS {all_tests_amount} | "
@@ -367,4 +396,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()      
+    main()
