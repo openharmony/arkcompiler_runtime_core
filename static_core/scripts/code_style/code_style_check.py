@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -- coding: utf-8 --
-# Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -23,6 +23,7 @@ import time
 
 
 CLANG_FORMAT = "clang-format-14"
+
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -65,6 +66,7 @@ def run_clang_format(src_path, panda_dir, reformat, msg):
 
     return True
 
+
 def get_proc_count(cmd_ard : int) -> int:
     if cmd_ard > 0:
         return cmd_ard
@@ -74,6 +76,7 @@ def get_proc_count(cmd_ard : int) -> int:
         return int(min_proc_str)
 
     return multiprocessing.cpu_count()
+
 
 def check_file_list(file_list : list, panda_dir : str, reformat : bool, proc_count : int):
     pool = multiprocessing.Pool(proc_count)
@@ -110,7 +113,7 @@ def get_file_list(panda_dir):
     skip_dirs = ["third_party", "artifacts", "build.*"]
     file_list = []
     for dirpath, dirnames, filenames in os.walk(panda_dir, followlinks=True):
-        dirnames[:] = [d for d in dirnames if not re.match(f"({')|('.join(skip_dirs)})" , d)]
+        dirnames[:] = [d for d in dirnames if not re.match(f"({')|('.join(skip_dirs)})", d)]
         for fname in filenames:
             if (fname.endswith(src_exts)):
                 full_path = os.path.join(panda_dir, dirpath, fname)

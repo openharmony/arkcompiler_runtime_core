@@ -88,6 +88,7 @@ pass_logs = {
 }
 pass_list = pass_logs.keys()
 
+
 def print_color(color, *args, **kwargs):
     print(color, end='')
     print(*args, **kwargs)

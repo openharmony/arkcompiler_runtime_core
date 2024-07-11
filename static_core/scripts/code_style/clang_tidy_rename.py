@@ -52,7 +52,7 @@ def run_clang_tidy(src_path, panda_dir, build_dir, fix_dir, compile_args, msg, c
 
     cmd = ['clang-tidy-14']
     cmd += ['--header-filter=.*']
-    cmd += ['-checks=-*,'+ clang_rules_autofix]
+    cmd += ['-checks=-*,' + clang_rules_autofix]
     cmd += ['--format-style=file --fix-errors --fix-notes']
     cmd += ['--config-file=' + os.path.join(panda_dir, '.clang-tidy')]
     cmd += ['--export-fixes=' + fname_fix_patch + '']

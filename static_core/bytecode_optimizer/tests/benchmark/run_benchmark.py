@@ -18,6 +18,7 @@ import os
 import json
 import subprocess
 import tempfile
+import sys
 
 SRC_PATH = os.path.realpath(os.path.dirname(__file__))
 testdir = os.path.join(SRC_PATH, "suite")
@@ -77,7 +78,7 @@ def calc_statistics(sizes):
         return None
     keys = sizes[0].keys()
     avgs = dict.fromkeys(keys, 0)
-    mins = dict.fromkeys(keys, 99999999)
+    mins = dict.fromkeys(keys, sys.maxsize)
     maxs = dict.fromkeys(keys, 0)
     for d in sizes:
         for k in keys:
@@ -85,9 +86,9 @@ def calc_statistics(sizes):
                 continue
             avgs[k] += d[k]
 
-            if d[k] < mins[k]:
+            if d[k] < mins.get(k, sys.maxsize):
                 mins[k] = d[k]
-            if d[k] > maxs[k]:
+            if d[k] > maxs.get(k, 0):
                 maxs[k] = d[k]
 
     for d in avgs:

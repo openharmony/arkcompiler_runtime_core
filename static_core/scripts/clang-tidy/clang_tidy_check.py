@@ -213,7 +213,7 @@ def run_clang_tidy(src_path: str, panda_dir: str, build_dir: str, compile_args: 
     cmd_path = os.getenv('CLANG_TIDY_PATH')
     if not cmd_path:
         cmd_path = 'clang-tidy-14'
-    cmd  = [cmd_path]
+    cmd = [cmd_path]
     cmd += ['-checks=*,' + ','.join(default_disabled_checks)]
     cmd += ['--header-filter=.*']
     cmd += ['--config-file=' + os.path.join(panda_dir, '.clang-tidy')]
@@ -243,11 +243,13 @@ def run_clang_tidy(src_path: str, panda_dir: str, build_dir: str, compile_args: 
 
     return True
 
+
 def get_full_path(relative_path: str, location_base: str, panda_dir: str, build_dir: str) -> str:
     full_path = panda_dir if location_base == "PANDA_DIR" else build_dir
     full_path += "/" + relative_path
     full_path = str(os.path.realpath(full_path))
     return full_path
+
 
 def check_file_list(file_list: list, panda_dir: str, build_dir: str, proc_count: int) -> bool:
     pool = multiprocessing.Pool(proc_count)
@@ -273,7 +275,7 @@ def check_file_list(file_list: list, panda_dir: str, build_dir: str, proc_count:
 
             idx += 1
             print("[%s/%s] %s" % (str(idx), total_count, msg))
-            if main_ret_val and  not proc.get():
+            if main_ret_val and not proc.get():
                 main_ret_val = False
 
         jobs = upd_job
@@ -353,8 +355,9 @@ def filter_test_file_duplicates(file_list: list) -> list:
     filtered.sort(key=lambda tup: tup[0])
     return filtered;
 
+
 def check_file_list_duplicate(dup_path : str, file_list: list) -> bool:
-    count  = 0
+    count = 0
     for file_path, keys in file_list:
         if dup_path == file_path:
             count += 1
@@ -363,6 +366,7 @@ def check_file_list_duplicate(dup_path : str, file_list: list) -> bool:
             return True
 
     return False
+
 
 # Remove same files if their compile keys has minor differents.
 def filter_file_duplicated_options(file_list: list) -> list:
@@ -402,7 +406,7 @@ def verify_args(panda_dir: str, build_dir: str) -> str:
 
 
 def check_headers_in_es2panda_sources(panda_dir):
-    es2panda_dir = panda_dir + "/tools/es2panda"
+    es2panda_dir = os.path.join(panda_dir, "tools/es2panda")
     result = []
     for root, dirs, files in os.walk(es2panda_dir):
         for file in files:

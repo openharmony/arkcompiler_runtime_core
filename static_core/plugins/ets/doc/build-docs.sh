@@ -116,7 +116,7 @@ function build_sphinx_document()
     if [[ "${target}" != "spec" ]]; then
         echo "${target}: Building Markdown"
         sphinx-build ${build_options} -b markdown "${src_dir}" "${BUILD_DIR}/${target}-md"
-        python3 "${SCRIPT_DIR}/merge-markdown.py" "${SCRIPT_DIR}" "${target}" "${BUILD_DIR}"
+        python3 "${SCRIPT_DIR}/merge_markdown.py" "${SCRIPT_DIR}" "${target}" "${BUILD_DIR}"
     fi
 
     echo "${target}: Building LaTeX and PDF"
@@ -224,7 +224,7 @@ mkdir -p "${BUILD_DIR}"
 
 if [[ "${BUILD_SPEC}" == "yes" ]]; then
     echo "spec: Validating ${SCRIPT_DIR}/spec"
-    python3 "${SCRIPT_DIR}/validate-spec.py" "${SCRIPT_DIR}/spec"
+    python3 "${SCRIPT_DIR}/validate_spec.py" "${SCRIPT_DIR}/spec"
     build_sphinx_document spec "${SCRIPT_DIR}/spec"
 fi
 
