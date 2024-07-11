@@ -29,15 +29,16 @@ import shutil
 import subprocess
 
 # List of functions to search for
-function_list = [("add_library",                "panda_add_library"),
-                 ("add_executable",             "panda_add_executable"),
-                 ("target_link_libraries",      "panda_target_link_libraries"),
+function_list = [("add_library", "panda_add_library"),
+                 ("add_executable", "panda_add_executable"),
+                 ("target_link_libraries", "panda_target_link_libraries"),
                  ("target_include_directories", "panda_target_include_directories"),
-                 ("target_compile_options",     "panda_target_compile_options"),
+                 ("target_compile_options", "panda_target_compile_options"),
                  ("target_compile_definitions", "panda_target_compile_definitions"),
-                 ("target_sources",             "panda_target_sources")]
+                 ("target_sources", "panda_target_sources")]
 
-errorMessage = "Found restricted native CMake function usage:"
+ERROR_MESSAGE = "Found restricted native CMake function usage:"
+
 
 def run_cmake_checker(directory):
     # don't search in following files and folders
@@ -51,7 +52,7 @@ def run_cmake_checker(directory):
     cmake_files = []
 
     # Fetch all cmake files in directory
-    for root, dirs, files in os.walk(directory):
+    for root, dirs, files in os.walk(directory, followlinks=True):
         ignore = False
         for white_path in white_list_paths:
             # Check if root directory matches any white list path
@@ -82,7 +83,7 @@ def run_cmake_checker(directory):
                 for function_name in function_list:
                     if re.search(r'\b{}\b'.format(function_name[0]), line.split('#')[0]):
                         if not error:
-                            print(errorMessage)
+                            print(ERROR_MESSAGE)
                         error = True
                         print("  {} instead of {} at {}:{}".format(function_name[0], function_name[1],
                             os.path.relpath(file, directory), line_number), file=sys.stderr)
@@ -93,12 +94,13 @@ def run_cmake_checker(directory):
 
     print("cmake-checker passed successfully!")
 
+
 # create file that uses standard cmake functions and check that cmake_checker will find them
 def test_cmake_checker(directory):
-    source_file = directory + "/CMakeLists.txt"
+    source_file = os.path.join(directory, "CMakeLists.txt")
 
     temp_dir = tempfile.mkdtemp(dir=directory)
-    temp_file = temp_dir + "/CMakeLists.txt"
+    temp_file = os.path.join(temp_dir, "CMakeLists.txt")
 
     try:
         shutil.copy(source_file, temp_file)
@@ -118,7 +120,7 @@ def test_cmake_checker(directory):
         args = [sys.argv[0], directory]
         process = subprocess.run(args, capture_output=True)
 
-        if process.returncode == 1 and errorMessage in process.stdout.decode():
+        if process.returncode == 1 and ERROR_MESSAGE in process.stdout.decode():
             print("test-cmake-checker passed successfully!")
         else:
             sys.exit("Failed: cmake-checker doesn't work properly.")
