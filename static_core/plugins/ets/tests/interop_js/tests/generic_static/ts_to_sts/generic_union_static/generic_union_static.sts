@@ -12,24 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-class ClassToCheckSymbol {
-  constructor(p) {
-      this.x = p;
-  }
+import {
+    tsInt,
+    tsString,
+    UnionStatic,
+    genericUnionStaticCallFromTs,
+} from "main_js"
+
+function checkGenericUnionInt(): boolean {
+    return UnionStatic.get(tsInt) as int == tsInt as int;
 }
 
-function functionArgTypeClassToCheckSymbol(classInstanceArg) {
-  let testProperty = Symbol.for('id');
-  class ExtClassToCheckSymbol extends ClassToCheckSymbol {
-    constructor(parentClassInstance) {
-      super(parentClassInstance.x);
-      this[testProperty] = 1;
-    }
-  }
-  return new ExtClassToCheckSymbol(classInstanceArg);
+function checkGenericUnionString(): boolean {
+    return UnionStatic.get(tsString) as string == tsString as string;
 }
 
-exports.ClassToCheckSymbol = ClassToCheckSymbol;
-exports.functionArgTypeClassToCheckSymbol = functionArgTypeClassToCheckSymbol;
+function checkGenericUnionCallFromTsInt(): boolean {
+    return genericUnionStaticCallFromTs(tsInt) as int == tsInt as int;
+}
+
+function checkGenericUnionCallFromTsString(): boolean {
+    return genericUnionStaticCallFromTs(tsString) as string == tsString as string;
+}

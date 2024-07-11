@@ -12,24 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-class ClassToCheckSymbol {
-  constructor(p) {
-      this.x = p;
-  }
+#include <gtest/gtest.h>
+#include "ets_interop_js_gtest.h"
+
+namespace ark::ets::interop::js::testing {
+
+class EtsUserInterfaceStaticTsToEtsTest : public EtsInteropTest {};
+
+TEST_F(EtsUserInterfaceStaticTsToEtsTest, checkUserInterfaceStatic)
+{
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkUserInterfaceStatic"));
 }
 
-function functionArgTypeClassToCheckSymbol(classInstanceArg) {
-  let testProperty = Symbol.for('id');
-  class ExtClassToCheckSymbol extends ClassToCheckSymbol {
-    constructor(parentClassInstance) {
-      super(parentClassInstance.x);
-      this[testProperty] = 1;
-    }
-  }
-  return new ExtClassToCheckSymbol(classInstanceArg);
+TEST_F(EtsUserInterfaceStaticTsToEtsTest, checkUserInterfaceFromTs)
+{
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkUserInterfaceFromTs"));
 }
 
-exports.ClassToCheckSymbol = ClassToCheckSymbol;
-exports.functionArgTypeClassToCheckSymbol = functionArgTypeClassToCheckSymbol;
+}  // namespace ark::ets::interop::js::testing
