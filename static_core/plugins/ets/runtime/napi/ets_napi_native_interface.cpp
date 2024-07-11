@@ -32,6 +32,7 @@
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg)
 
@@ -2396,6 +2397,52 @@ NO_UB_SANITIZE static void SetDoubleArrayRegion(EtsEnv *env, ets_doubleArray arr
     SetPrimitiveTypeArrayRegion(env, array, start, length, buf);
 }
 
+// NOTE(#18101): this workaround should be removed after the annotations are implemented.
+static bool ExtractNativeMethodInfo(const char *signature, uint32_t *outNativeFlag, const char **outSignature)
+{
+    ASSERT(outSignature);
+
+    *outNativeFlag = 0;
+    *outSignature = signature;
+
+    if (signature == nullptr) {
+        return true;
+    }
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    if (signature[0U] == '#') {
+        if (signature[1U] == '\0' || signature[2U] != '$') {
+            return false;
+        }
+
+        if (signature[1U] == 'F') {
+            *outNativeFlag |= ACC_FAST_NATIVE;
+        } else if (signature[1U] == 'C') {
+            *outNativeFlag |= ACC_CRITICAL_NATIVE;
+        } else {
+            return false;
+        }
+
+        *outSignature = signature + 3U;
+        if (**outSignature == '\0') {
+            *outSignature = nullptr;
+        }
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    return true;
+}
+
+// NOTE(#18101): this workaround should be removed after the annotations are implemented.
+static void SetNativeCallType(EtsMethod *method, uint32_t nativeFlag)
+{
+    ASSERT(method);
+
+    method->GetPandaMethod()->SetAccessFlags(method->GetAccessFlags() | nativeFlag);
+
+    if (method->IsCriticalNative()) {
+        EtsMethod::ToRuntimeMethod(method)->SetCompiledEntryPoint(GetEtsNapiCriticalEntryPoint());
+    }  // EtsNapiEntryPoint is set by default.
+}
+
 NO_UB_SANITIZE static ets_int RegisterNatives(EtsEnv *env, ets_class cls, const EtsNativeMethod *methods,
                                               ets_int nMethods)
 {
@@ -2410,17 +2457,31 @@ NO_UB_SANITIZE static ets_int RegisterNatives(EtsEnv *env, ets_class cls, const 
     ScopedManagedCodeFix s(PandaEtsNapiEnv::ToPandaEtsEnv(env));
     EtsClass *klass = s.ToInternalType(cls);
     for (ets_int i = 0; i < nMethods; ++i) {
+        const char *signature = nullptr;
+        uint32_t nativeFlag = 0;
+
         // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        EtsMethod *method = (methods[i].signature == nullptr ? klass->GetMethod(methods[i].name)
-                                                             : klass->GetMethod(methods[i].name, methods[i].signature));
-        if (method == nullptr || !method->IsNative()) {
+        if (!ExtractNativeMethodInfo(methods[i].signature, &nativeFlag, &signature)) {
             PandaStringStream ss;
             ss << "Method " << klass->GetRuntimeClass()->GetName() << "::" << methods[i].name
-               << " sig = " << (methods[i].signature == nullptr ? "nullptr" : methods[i].signature)
-               << " not found or not native";
+               << " sig = " << (signature == nullptr ? "nullptr" : signature)
+               << " has an invalid signature. Signature prefix for fast native: #F$, for critical native: #C$";
             s.ThrowNewException(EtsNapiException::NO_SUCH_METHOD, ss.str().c_str());
             return ETS_ERR_INVAL;
         }
+
+        EtsMethod *method =
+            (signature == nullptr ? klass->GetMethod(methods[i].name) : klass->GetMethod(methods[i].name, signature));
+
+        if (method == nullptr || !method->IsNative()) {
+            PandaStringStream ss;
+            ss << "Method " << klass->GetRuntimeClass()->GetName() << "::" << methods[i].name
+               << " sig = " << (signature == nullptr ? "nullptr" : signature) << " not found or not native";
+            s.ThrowNewException(EtsNapiException::NO_SUCH_METHOD, ss.str().c_str());
+            return ETS_ERR_INVAL;
+        }
+
+        SetNativeCallType(method, nativeFlag);
         method->RegisterNativeImpl(methods[i].func);
         // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,5 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(promise)
-add_subdirectory(native_methods)
+panda_ets_native_add_gtest(register_native_methods_test
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/register_native_methods_test.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/register_native_methods_test.ets
+)

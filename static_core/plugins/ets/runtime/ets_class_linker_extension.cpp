@@ -53,12 +53,8 @@ extern "C" void EtsAsyncEntryPoint();
 
 static EtsNapiType GetEtsNapiType([[maybe_unused]] Method *method)
 {
-    // NOTE(a.urakov): support other NAPI types
-#ifdef USE_ETS_NAPI_CRITICAL_BY_DEFAULT
-    return EtsNapiType::CRITICAL;
-#else
+    // NOTE(#18101): support other NAPI types after annotations have been implemented.
     return EtsNapiType::GENERIC;
-#endif
 }
 
 static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
