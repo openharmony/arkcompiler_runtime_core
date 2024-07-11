@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,12 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: >-
-    A narrowing reference conversion exists from reference type S to a reference
-    type T if all of the following are true
+desc: Compile-time errors for this conversion are the same as in InstanceOf Expression.
+tags: [compile-only, negative]
 ---*/
-
-{{c.defs}}
-
-function main(): int {
-  let src: {{c.stype}} = {{c.val|safe}};
-  let dst: {{c.dtype}} = src as {{c.dtype}};
-  if (src !== dst ) {  // reference equality
-      return 1;
-  }
-  return 0;
+function foo<T extends Long>(p: Error): Long {
+    return p as T  // CTE expected: casting to type parameter
 }
-{% endfor %}
+
+function main() {}

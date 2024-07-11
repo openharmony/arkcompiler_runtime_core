@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Casting contexts allow the use of the narrowing reference conversion.
+desc: >-
+    A runtime error (ClassCastError) occurs during these conversion
+    if the type of a converted expression cannot be converted to the
+    target type
 ---*/
+interface I {}
+interface J extends I {}
+class A implements J {}
+
+function foo(p: Object|null): Object {
+    return p!
+}
 
 function main(): int {
-  {%- for t in c['types'] %}
-  let s{{loop.index}}: {{t.stype}} = new {{t.dtype}}({{t.pval}});
-  let d{{loop.index}}: {{t.dtype}} = s{{loop.index}} as {{t.dtype}};
-  if (d{{loop.index}}.unboxed() != {{t.pval}}) {
-      return 1;
-  }
-  {%- endfor %}
-  return 0;
+    let b: Object = new A()
+    let d = foo(b) as J
+    return b == d ? 0 : 1
 }
-{% endfor %}

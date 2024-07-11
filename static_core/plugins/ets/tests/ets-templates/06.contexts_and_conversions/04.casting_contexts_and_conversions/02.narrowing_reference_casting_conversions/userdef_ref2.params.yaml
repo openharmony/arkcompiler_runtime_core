@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,11 +24,13 @@ cases:
     dval: src as T<Int>
 
   - defs: |-
-      interface S<V> {}
-      interface T<V> extends S<V> {
+      interface S<V> {
+          res: int;
+      }
+      interface T<V> extends S<V> {}
+      class B<V> implements T<V> {
           res: int = 42;
       }
-      class B<V> implements T<V> {}
     stype: S<Long>
     sval: new B<Long>()
     dtype: T<Long>
@@ -36,10 +38,12 @@ cases:
 
   - defs: |-
       interface T<V> {
-          res: int = 42;
+          res: int;
       }
       class S<V> {}
-      class Z<V> extends S<V> implements T<V> {}
+      class Z<V> extends S<V> implements T<V> {
+          res: int = 42;
+      }
     stype: S<Exception>
     sval: new Z<Exception>()
     dtype: T<Exception>
@@ -47,9 +51,11 @@ cases:
 
   - defs: |-
       interface T<V> {
+          res: int;
+      }
+      class S<V> implements T<V> {
           res: int = 42;
       }
-      class S<V> implements T<V> {}
     stype: S<Byte>
     sval: new S<Byte>()
     dtype: T<Byte>
