@@ -1,0 +1,38 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # import overload-equivalent from multiple files
+    - { file_a: "function_export_a_2params", file_b: "function_export_b_2params" }
+    - { file_a: "function_export_a_array", file_b: "function_export_b_array" }
+    - { file_a: "function_export_a_boxed", file_b: "function_export_b_boxed" }
+    - { file_a: "function_export_a_custom", file_b: "function_export_b_custom" }
+    - { file_a: "function_export_a_function", file_b: "function_export_b_function" }
+    - { file_a: "function_export_a_generic", file_b: "function_export_b_generic" }
+    - { file_a: "function_export_a_no_arg", file_b: "function_export_b_no_arg" }
+    - { file_a: "function_export_a_primitive", file_b: "function_export_b_primitive" }
+    - { file_a: "function_export_a_tuple", file_b: "function_export_b_tuple" }
+    - { file_a: "function_export_a_union", file_b: "function_export_b_union" }
+    # import not overload-equivalent from multiple files
+    - { file_a: "function_export_a_2params", file_b: "function_export_b_generic" }
+    - { file_a: "function_export_a_array", file_b: "function_export_b_primitive" }
+    - { file_a: "function_export_a_boxed", file_b: "function_export_b_primitive" }
+    - { file_a: "function_export_a_generic", file_b: "function_export_b_primitive" }
+    - { file_a: "function_export_a_no_arg", file_b: "function_export_b_tuple" }
+    # import overload-equivalent from the same file
+    - { file_a: "function_export_neg" }
+    - { file_a: "function_export_neg_1" }
+    - { file_a: "function_export_neg_2" }
+    - { file_a: "function_export_neg_3" }
+    - { file_a: "function_export_neg_4" }
