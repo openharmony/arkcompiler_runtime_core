@@ -1,0 +1,72 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # overload-equivalent -> hide Base method
+  - { base: "i: Number|undefined|null", derived: "i: undefined|Number|null", call: "undefined", res: 2 }
+  - { base: "i: Number|undefined|null", derived: "i: undefined|null|Number", call: "null", res: 2 }
+  # not overload-equivalent -> overload base method
+  - { base: "i: Number, j: number", derived: "i: number, k: Number", call: "new Number(), 1", res: 1 }
+  - { base: "i: Number, j: number", derived: "i: number, k: Number", call: "1, new Number()", res: 2 }
+
+# Class
+  # overload-equivalent
+  - { base: "i: Number", derived: "i: Double", call: "new Number()", res: 2 }
+  - { base: "i: Number", derived: "i: Double", call: "new Double()", res: 2 }
+  - { base: "i: Double", derived: "i: Number", call: "new Number()", res: 2 }
+  - { base: "i: Double", derived: "i: Number", call: "new Double()", res: 2 }
+  # not overload-equivalent
+  - { base: "i: A", derived: "i: B", call: "new A()", res: 1 }
+  - { base: "i: A", derived: "i: B", call: "new B()", res: 2 }
+  # overload-equivalent
+  - { base: "i: B", derived: "i: A", call: "new A()", res: 2 }
+  - { base: "i: B", derived: "i: A", call: "new B()", res: 2 }
+
+# Function
+  # not overload-equivalent
+  - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "faa", res: 0, tags: "compile-only, negative" }
+  - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fab", res: 1 }
+  - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fbb", res: 1 }
+  - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fac", res: 2 }
+  - { base: "i: FUN_AB", derived: "i: FUN_AC", call: "fbc", res: 2 }
+
+  # not overload-equivalent, retval type is incompatible
+  - { base: "i: FUN_AB", derived: "i: FUN_BC", call: "faa", res: 0, tags: "compile-only, negative" }
+  # not overload-equivalent
+  - { base: "i: FUN_AB", derived: "i: FUN_BC", call: "fab", res: 1 }
+  - { base: "i: FUN_AB", derived: "i: FUN_BC", call: "fac", res: 1 }
+  - { base: "i: FUN_AB", derived: "i: FUN_BC", call: "fbc", res: 2 }
+  - { base: "i: FUN_AB", derived: "i: FUN_BC", call: "fcb", res: 1 }
+  - { base: "i: FUN_AB", derived: "i: FUN_BC", call: "fcc", res: 2 }
+
+  - { base: "i: FUN_AC", derived: "i: FUN_CA", call: "fca", res: 2 }
+  - { base: "i: FUN_AC", derived: "i: FUN_CA", call: "fcc", res: 1 }
+  - { base: "i: FUN_BC", derived: "i: FUN_CA", call: "fcb", res: 1 }
+
+# Array
+  # overload
+  - { base: "i: int[]", derived: "i: float[]", call: "new int[1]", res: 1 }
+  - { base: "i: int[]", derived: "i: float[]", call: "new float[2]", res: 2 }
+  - { base: "i: int[]", derived: "i: double[]", call: "new double[1]", res: 2 }
+  - { base: "i: number[]", derived: "i: double[]", call: "new number[1]", res: 1 }
+  - { base: "i: number[]", derived: "i: double[]", call: "new double[2]", res: 2 }
+  - { base: "i: String[]", derived: "i: Number[]", call: "new String[1]", res: 1 }
+  - { base: "i: string[]", derived: "i: String[]", call: "new string[1]", res: 2 }
+  - { base: "i: string[]", derived: "i: String[]", call: "new String[1]", res: 2 }
+
+  - { base: "i: A[]", derived: "i: B[]", call: "new A[1]", res: 2 }
+  - { base: "i: A[]", derived: "i: B[]", call: "new B[2]", res: 2 }
+
+  - { base: "i: B[]", derived: "i: A[]", call: "new A[1]", res: 2 }
+  - { base: "i: B[]", derived: "i: A[]", call: "new B[2]", res: 1 }

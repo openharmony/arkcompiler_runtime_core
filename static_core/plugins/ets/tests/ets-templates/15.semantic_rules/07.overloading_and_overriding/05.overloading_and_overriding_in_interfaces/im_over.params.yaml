@@ -87,22 +87,22 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth(new Byte(-1 as byte)) == 11
-          assert i.meth(new Short(-1 as short)) == 12
-          assert i.meth(new Int(-1 as int)) == 13
-          assert i.meth(new Long(-1 as long)) == 14
-          assert i.meth(new Char(c'A')) == 16
-          assert i.meth(new Boolean(false)) == 17
-          assert i.meth(new Float(3.14 as float)) == 18
-          assert i.meth(new Double(3.14)) == 19
-          assert i.meth(-1 as long) == 4
-          assert i.meth(-1 as int) == 3
-          assert i.meth(-1 as short) == 2
-          assert i.meth(-1 as byte) == 1
-          assert i.meth(c'A') == 6
-          assert i.meth(false) == 7
-          assert i.meth(3.14) == 9
-          assert i.meth(3.14 as float) == 8
+          assert(i.meth(new Byte(-1 as byte)) == 11)
+          assert(i.meth(new Short(-1 as short)) == 12)
+          assert(i.meth(new Int(-1 as int)) == 13)
+          assert(i.meth(new Long(-1 as long)) == 14)
+          assert(i.meth(new Char(c'A')) == 16)
+          assert(i.meth(new Boolean(false)) == 17)
+          assert(i.meth(new Float(3.14 as float)) == 18)
+          assert(i.meth(new Double(3.14)) == 19)
+          assert(i.meth(-1 as long) == 4)
+          assert(i.meth(-1 as int) == 3)
+          assert(i.meth(-1 as short) == 2)
+          assert(i.meth(-1 as byte) == 1)
+          assert(i.meth(c'A') == 6)
+          assert(i.meth(false) == 7)
+          assert(i.meth(3.14) == 9)
+          assert(i.meth(3.14 as float) == 8)
 
     - decl: |-
           // primitives and boxed, with default methods
@@ -128,22 +128,22 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assert i.meth(new Byte(-1 as byte)) == 11
-          assert i.meth(new Short(-1 as short)) == 12
-          assert i.meth(new Int(-1 as int)) == 13
-          assert i.meth(new Long(-1 as long)) == 14
-          assert i.meth(new Char(c'A')) == 16
-          assert i.meth(new Boolean(false)) == 17
-          assert i.meth(new Float(3.14 as float)) == 18
-          assert i.meth(new Double(3.14)) == 19
-          assert i.meth(-1 as long) == 4
-          assert i.meth(-1 as int) == 3
-          assert i.meth(-1 as short) == 2
-          assert i.meth(-1 as byte) == 1
-          assert i.meth(c'A') == 6
-          assert i.meth(false) == 7
-          assert i.meth(3.14) == 9
-          assert i.meth(3.14 as float) == 8
+          assert(i.meth(new Byte(-1 as byte)) == 11)
+          assert(i.meth(new Short(-1 as short)) == 12)
+          assert(i.meth(new Int(-1 as int)) == 13)
+          assert(i.meth(new Long(-1 as long)) == 14)
+          assert(i.meth(new Char(c'A')) == 16)
+          assert(i.meth(new Boolean(false)) == 17)
+          assert(i.meth(new Float(3.14 as float)) == 18)
+          assert(i.meth(new Double(3.14)) == 19)
+          assert(i.meth(-1 as long) == 4)
+          assert(i.meth(-1 as int) == 3)
+          assert(i.meth(-1 as short) == 2)
+          assert(i.meth(-1 as byte) == 1)
+          assert(i.meth(c'A') == 6)
+          assert(i.meth(false) == 7)
+          assert(i.meth(3.14) == 9)
+          assert(i.meth(3.14 as float) == 8)
 
     - decl: |-
           // primitives and boxed, with overridden default methods
@@ -187,22 +187,22 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth(new Byte(-1 as byte)) == 11
-          assert i.meth(new Short(-1 as short)) == 12
-          assert i.meth(new Int(-1 as int)) == 13
-          assert i.meth(new Long(-1 as long)) == 14
-          assert i.meth(new Char(c'A')) == 16
-          assert i.meth(new Boolean(false)) == 17
-          assert i.meth(new Float(3.14 as float)) == 18
-          assert i.meth(new Double(3.14)) == 19
-          assert i.meth(-1 as long) == 4
-          assert i.meth(-1 as int) == 3
-          assert i.meth(-1 as short) == 2
-          assert i.meth(-1 as byte) == 1
-          assert i.meth(c'A') == 6
-          assert i.meth(false) == 7
-          assert i.meth(3.14) == 9
-          assert i.meth(3.14 as float) == 8
+          assert(i.meth(new Byte(-1 as byte)) == 11)
+          assert(i.meth(new Short(-1 as short)) == 12)
+          assert(i.meth(new Int(-1 as int)) == 13)
+          assert(i.meth(new Long(-1 as long)) == 14)
+          assert(i.meth(new Char(c'A')) == 16)
+          assert(i.meth(new Boolean(false)) == 17)
+          assert(i.meth(new Float(3.14 as float)) == 18)
+          assert(i.meth(new Double(3.14)) == 19)
+          assert(i.meth(-1 as long) == 4)
+          assert(i.meth(-1 as int) == 3)
+          assert(i.meth(-1 as short) == 2)
+          assert(i.meth(-1 as byte) == 1)
+          assert(i.meth(c'A') == 6)
+          assert(i.meth(false) == 7)
+          assert(i.meth(3.14) == 9)
+          assert(i.meth(3.14 as float) == 8)
 
     - decl: |-
           // enums
@@ -228,12 +228,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth(-1) == 1
-          assert i.meth(Color.Red) == 3
-          assert i.meth(-2 as short) == 1
-          assert i.meth("abc") == 2
-          assert i.meth(Size.L) == 4
-          assert i.meth(42 as byte) == 1
+          assert(i.meth(-1) == 1)
+          assert(i.meth(Color.Red) == 3)
+          assert(i.meth(-2 as short) == 1)
+          assert(i.meth("abc") == 2)
+          assert(i.meth(Size.L) == 4)
+          assert(i.meth(42 as byte) == 1)
 
     - decl: |-
           // enums, with default methods
@@ -249,12 +249,12 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assert i.meth(-1) == 1
-          assert i.meth(Color.Red) == 3
-          assert i.meth(-2 as short) == 1
-          assert i.meth("abc") == 2
-          assert i.meth(Size.L) == 4
-          assert i.meth(42 as byte) == 1
+          assert(i.meth(-1) == 1)
+          assert(i.meth(Color.Red) == 3)
+          assert(i.meth(-2 as short) == 1)
+          assert(i.meth("abc") == 2)
+          assert(i.meth(Size.L) == 4)
+          assert(i.meth(42 as byte) == 1)
 
     - decl: |-
           // enums, with overridden default methods
@@ -275,12 +275,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth(-1) == 1
-          assert i.meth(Color.Red) == 3
-          assert i.meth(-2 as short) == 1
-          assert i.meth("abc") == 2
-          assert i.meth(Size.L) == 4
-          assert i.meth(42 as byte) == 1
+          assert(i.meth(-1) == 1)
+          assert(i.meth(Color.Red) == 3)
+          assert(i.meth(-2 as short) == 1)
+          assert(i.meth("abc") == 2)
+          assert(i.meth(Size.L) == 4)
+          assert(i.meth(42 as byte) == 1)
 
     - decl: |-
           // arrays
@@ -341,26 +341,26 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth([-1 as byte]) == 1
-          assert i.meth([-1 as short]) == 2
-          assert i.meth([-1 as int]) == 3
-          assert i.meth([-1 as long]) == 4
-          assert i.meth([c'A']) == 5
-          assert i.meth([false]) == 6
-          assert i.meth([3.14 as float]) == 7
-          assert i.meth([3.14]) == 8
-          assert i.meth([new Byte(-1 as byte)]) == 9
-          assert i.meth([new Short(-1 as short)]) == 10
-          assert i.meth([new Int(-1)]) == 11
-          assert i.meth([new Long(-1 as long)]) == 12
-          assert i.meth([new Char(c'A')]) == 13
-          assert i.meth([new Boolean(false)]) == 14
-          assert i.meth([new Float(3.14 as float)]) == 15
-          assert i.meth([new Double(3.14)]) == 16
-          assert i.meth([new Object()]) == 17
-          assert i.meth([Color.Red]) == 18
-          assert i.meth([Size.M]) == 19
-          assert i.meth(new A[1]) == 20
+          assert(i.meth([-1 as byte]) == 1)
+          assert(i.meth([-1 as short]) == 2)
+          assert(i.meth([-1 as int]) == 3)
+          assert(i.meth([-1 as long]) == 4)
+          assert(i.meth([c'A']) == 5)
+          assert(i.meth([false]) == 6)
+          assert(i.meth([3.14 as float]) == 7)
+          assert(i.meth([3.14]) == 8)
+          assert(i.meth([new Byte(-1 as byte)]) == 9)
+          assert(i.meth([new Short(-1 as short)]) == 10)
+          assert(i.meth([new Int(-1)]) == 11)
+          assert(i.meth([new Long(-1 as long)]) == 12)
+          assert(i.meth([new Char(c'A')]) == 13)
+          assert(i.meth([new Boolean(false)]) == 14)
+          assert(i.meth([new Float(3.14 as float)]) == 15)
+          assert(i.meth([new Double(3.14)]) == 16)
+          assert(i.meth([new Object()]) == 17)
+          assert(i.meth([Color.Red]) == 18)
+          assert(i.meth([Size.M]) == 19)
+          assert(i.meth(new A[1]) == 20)
 
     - decl: |-
           // arrays with default methods
@@ -392,26 +392,26 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assert i.meth([-1 as byte]) == 1
-          assert i.meth([-1 as short]) == 2
-          assert i.meth([-1 as int]) == 3
-          assert i.meth([-1 as long]) == 4
-          assert i.meth([c'A']) == 5
-          assert i.meth([false]) == 6
-          assert i.meth([3.14 as float]) == 7
-          assert i.meth([3.14]) == 8
-          assert i.meth([new Byte(-1 as byte)]) == 9
-          assert i.meth([new Short(-1 as short)]) == 10
-          assert i.meth([new Int(-1)]) == 11
-          assert i.meth([new Long(-1 as long)]) == 12
-          assert i.meth([new Char(c'A')]) == 13
-          assert i.meth([new Boolean(false)]) == 14
-          assert i.meth([new Float(3.14 as float)]) == 15
-          assert i.meth([new Double(3.14)]) == 16
-          assert i.meth([new Object()]) == 17
-          assert i.meth([Color.Red]) == 18
-          assert i.meth([Size.M]) == 19
-          assert i.meth(new A[1]) == 20
+          assert(i.meth([-1 as byte]) == 1)
+          assert(i.meth([-1 as short]) == 2)
+          assert(i.meth([-1 as int]) == 3)
+          assert(i.meth([-1 as long]) == 4)
+          assert(i.meth([c'A']) == 5)
+          assert(i.meth([false]) == 6)
+          assert(i.meth([3.14 as float]) == 7)
+          assert(i.meth([3.14]) == 8)
+          assert(i.meth([new Byte(-1 as byte)]) == 9)
+          assert(i.meth([new Short(-1 as short)]) == 10)
+          assert(i.meth([new Int(-1)]) == 11)
+          assert(i.meth([new Long(-1 as long)]) == 12)
+          assert(i.meth([new Char(c'A')]) == 13)
+          assert(i.meth([new Boolean(false)]) == 14)
+          assert(i.meth([new Float(3.14 as float)]) == 15)
+          assert(i.meth([new Double(3.14)]) == 16)
+          assert(i.meth([new Object()]) == 17)
+          assert(i.meth([Color.Red]) == 18)
+          assert(i.meth([Size.M]) == 19)
+          assert(i.meth(new A[1]) == 20)
 
     - decl: |-
           // arrays with overridden default methods
@@ -464,26 +464,26 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth([-1 as byte]) == 1
-          assert i.meth([-1 as short]) == 2
-          assert i.meth([-1 as int]) == 3
-          assert i.meth([-1 as long]) == 4
-          assert i.meth([c'A']) == 5
-          assert i.meth([false]) == 6
-          assert i.meth([3.14 as float]) == 7
-          assert i.meth([3.14]) == 8
-          assert i.meth([new Byte(-1 as byte)]) == 9
-          assert i.meth([new Short(-1 as short)]) == 10
-          assert i.meth([new Int(-1)]) == 11
-          assert i.meth([new Long(-1 as long)]) == 12
-          assert i.meth([new Char(c'A')]) == 13
-          assert i.meth([new Boolean(false)]) == 14
-          assert i.meth([new Float(3.14 as float)]) == 15
-          assert i.meth([new Double(3.14)]) == 16
-          assert i.meth([new Object()]) == 17
-          assert i.meth([Color.Red]) == 18
-          assert i.meth([Size.M]) == 19
-          assert i.meth(new A[1]) == 20
+          assert(i.meth([-1 as byte]) == 1)
+          assert(i.meth([-1 as short]) == 2)
+          assert(i.meth([-1 as int]) == 3)
+          assert(i.meth([-1 as long]) == 4)
+          assert(i.meth([c'A']) == 5)
+          assert(i.meth([false]) == 6)
+          assert(i.meth([3.14 as float]) == 7)
+          assert(i.meth([3.14]) == 8)
+          assert(i.meth([new Byte(-1 as byte)]) == 9)
+          assert(i.meth([new Short(-1 as short)]) == 10)
+          assert(i.meth([new Int(-1)]) == 11)
+          assert(i.meth([new Long(-1 as long)]) == 12)
+          assert(i.meth([new Char(c'A')]) == 13)
+          assert(i.meth([new Boolean(false)]) == 14)
+          assert(i.meth([new Float(3.14 as float)]) == 15)
+          assert(i.meth([new Double(3.14)]) == 16)
+          assert(i.meth([new Object()]) == 17)
+          assert(i.meth([Color.Red]) == 18)
+          assert(i.meth([Size.M]) == 19)
+          assert(i.meth(new A[1]) == 20)
 
     - decl: |-
           // tuples, sub/super interfaces
@@ -509,11 +509,11 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth([3.14, "abc"]) == 1
-          assert i.meth([3.14, false]) == 2
-          assert i.meth([3.14]) == 3
-          assert i.meth(["abc"]) == 4
-          assert i.meth(true) == 5
+          assert(i.meth([3.14, "abc"]) == 1)
+          assert(i.meth([3.14, false]) == 2)
+          assert(i.meth([3.14]) == 3)
+          assert(i.meth(["abc"]) == 4)
+          assert(i.meth(true) == 5)
 
     - decl: |-
           // tuples, sub/super interfaces, default methods
@@ -529,11 +529,11 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assert i.meth([3.14, "abc"]) == 1
-          assert i.meth([3.14, false]) == 2
-          assert i.meth([3.14]) == 3
-          assert i.meth(["abc"]) == 4
-          assert i.meth(true) == 5
+          assert(i.meth([3.14, "abc"]) == 1)
+          assert(i.meth([3.14, false]) == 2)
+          assert(i.meth([3.14]) == 3)
+          assert(i.meth(["abc"]) == 4)
+          assert(i.meth(true) == 5)
 
     - decl: |-
           // tuples, sub/super interfaces, overridden default methods
@@ -555,11 +555,11 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth([3.14, "abc"]) == 1
-          assert i.meth([3.14, false]) == 2
-          assert i.meth([3.14]) == 3
-          assert i.meth(["abc"]) == 4
-          assert i.meth(true) == 5
+          assert(i.meth([3.14, "abc"]) == 1)
+          assert(i.meth([3.14, false]) == 2)
+          assert(i.meth([3.14]) == 3)
+          assert(i.meth(["abc"]) == 4)
+          assert(i.meth(true) == 5)
 
     - decl: |-
           // unions with sub/super interfaces
@@ -580,12 +580,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth(3.14) == 4
-          assert i.meth("") == 3
+          assert(i.meth(3.14) == 4)
+          assert(i.meth("") == 3)
           let t1: string|Number|null = "xyz"
-          assert i.meth(t1) == 1
+          assert(i.meth(t1) == 1)
           let t2: Boolean|undefined = undefined
-          assert i.meth(t2) == 2
+          assert(i.meth(t2) == 2)
 
     - decl: |-
           // unions with sub/super interfaces, default methods
@@ -599,12 +599,12 @@ cases:
           class A implements I {}
       use: |-
           let i: I = new A()
-          assert i.meth(3.14) == 4
-          assert i.meth("") == 3
+          assert(i.meth(3.14) == 4)
+          assert(i.meth("") == 3)
           let t1: string|Number|null = "xyz"
-          assert i.meth(t1) == 1
+          assert(i.meth(t1) == 1)
           let t2: Boolean|undefined = undefined
-          assert i.meth(t2) == 2
+          assert(i.meth(t2) == 2)
 
     - decl: |-
           // unions with sub/super interfaces, overridden default methods
@@ -623,12 +623,12 @@ cases:
           }
       use: |-
           let i: I = new A()
-          assert i.meth(3.14) == 4
-          assert i.meth("") == 3
+          assert(i.meth(3.14) == 4)
+          assert(i.meth("") == 3)
           let t1: string|Number|null = "xyz"
-          assert i.meth(t1) == 1
+          assert(i.meth(t1) == 1)
           let t2: Boolean|undefined = undefined
-          assert i.meth(t2) == 2
+          assert(i.meth(t2) == 2)
 
     - decl: |-
           // function types
@@ -656,14 +656,14 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assert false
+              assert(false
           }
       use: |-
           let i: I = new A()
-          assert i.meth(foo) == 1
-          assert i.meth((v: number): void => { assert v == 0.0 }) == 2
-          assert i.meth(fff) == 3
-          assert i.meth(eee) == 4
+          assert(i.meth(foo) == 1)
+          assert(i.meth((v: number): void => { assert(v == 0.0 }) == 2)
+          assert(i.meth(fff) == 3)
+          assert(i.meth(eee) == 4)
 
     - decl: |-
           // function types with default methods
@@ -684,15 +684,15 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assert false
+              assert(false
           }
       use: |-
           let i: I = new A()
-          assert i.meth(foo) == 1
-          assert i.meth((v: number): void => { assert v == 0.0 }) == 2
-          assert i.meth(fff) == 3
+          assert(i.meth(foo) == 1)
+          assert(i.meth((v: number): void => { assert(v == 0.0 }) == 2)
+          assert(i.meth(fff) == 3)
           let v: EE = eee
-          assert i.meth(v) == 4
+          assert(i.meth(v) == 4)
 
     - decl: |-
           // function types with overridden default methods
@@ -718,15 +718,15 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assert false
+              assert(false)
           }
       use: |-
           let i: I = new A()
-          assert i.meth(foo) == 1
-          assert i.meth((v: number): void => { assert v == 0.0 }) == 2
-          assert i.meth(fff) == 3
+          assert(i.meth(foo) == 1)
+          assert(i.meth((v: number): void => { assert(v == 0.0 }) == 2)
+          assert(i.meth(fff) == 3)
           let v: EE = eee
-          assert i.meth(v) == 4
+          assert(i.meth(v) == 4)
 
     - decl: |-
           // nullish types
@@ -752,19 +752,19 @@ cases:
       use: |-
           let a: A = new A()
           let s: S = "ABC"
-          assert a.meth(s) == 4
+          assert(a.meth(s) == 4)
           let sn: SN = "ABC"
-          assert a.meth(sn) == 1
+          assert(a.meth(sn) == 1)
           let su: SU = "ABC"
-          assert a.meth(su) == 2
+          assert(a.meth(su) == 2)
           let snu: SNU = "ABC"
-          assert a.meth(snu) == 3
+          assert(a.meth(snu) == 3)
           sn = null
-          assert a.meth(sn) == 1
+          assert(a.meth(sn) == 1)
           su = undefined
-          assert a.meth(su) == 2
+          assert(a.meth(su) == 2)
           snu = undefined
-          assert a.meth(snu) == 3
+          assert(a.meth(snu) == 3)
 
     - decl: |-
           // nullish types with default methods
@@ -784,19 +784,19 @@ cases:
       use: |-
           let i: A = new A()
           let s: S = "ABC"
-          assert i.meth(s) == 4
+          assert(i.meth(s) == 4)
           let sn: SN = "ABC"
-          assert i.meth(sn) == 1
+          assert(i.meth(sn) == 1)
           let su: SU = "ABC"
-          assert i.meth(su) == 2
+          assert(i.meth(su) == 2)
           let snu: SNU = "ABC"
-          assert i.meth(snu) == 3
+          assert(i.meth(snu) == 3)
           sn = null
-          assert i.meth(sn) == 1
+          assert(i.meth(sn) == 1)
           su = undefined
-          assert i.meth(su) == 2
+          assert(i.meth(su) == 2)
           snu = undefined
-          assert i.meth(snu) == 3
+          assert(i.meth(snu) == 3)
 
     - decl: |-
           // nullish types with overridden default methods
@@ -819,16 +819,16 @@ cases:
       use: |-
           let i: I = new A()
           let s: S = "ABC"
-          assert i.meth(s) == 4
+          assert(i.meth(s) == 4)
           let sn: SN = "ABC"
-          assert i.meth(sn) == 1
+          assert(i.meth(sn) == 1)
           let su: SU = "ABC"
-          assert i.meth(su) == 2
+          assert(i.meth(su) == 2)
           let snu: SNU = "ABC"
-          assert i.meth(snu) == 3
+          assert(i.meth(snu) == 3)
           sn = null
-          assert i.meth(sn) == 1
+          assert(i.meth(sn) == 1)
           su = undefined
-          assert i.meth(su) == 2
+          assert(i.meth(su) == 2)
           snu = undefined
-          assert i.meth(snu) == 3
+          assert(i.meth(snu) == 3)
