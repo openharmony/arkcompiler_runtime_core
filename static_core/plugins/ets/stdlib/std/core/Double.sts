@@ -348,23 +348,24 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
     }
 
     /**
-     * Checks for equality this instance with provided object, treated as a Double
-     *
-     * @param other object to be checked against
-     *
-     * @returns true if provided object and this instance have same value, false otherwise
-     * Returns false if type of provided object is not the same as this type
-     * @tag arkts
-     */
-    public override equals(other: NullishType): boolean {
-        if (other instanceof Double) {
-            const r = (other as Double).unboxed();
-            if (this.value == r) {
-                return true;
-            }
-            return false // Double.compare(this.value, r);
+    * Checks for equality this instance with provided object, treated as a Double
+    *
+    * @param other object to be checked against
+    *
+    * @returns true if provided object and this instance have same value, false otherwise
+    * Returns false if type of provided object is not the same as this type
+    * @tag arkts
+    */
+    public equals(other: NullishType): boolean {
+        if (__runtimeIsSameReference(this, other)) {
+            return true
         }
-        return false;
+
+        if (!(other instanceof Double)) {
+            return false
+        }
+
+        return this.value == (other as Double).value
     }
 
     /**

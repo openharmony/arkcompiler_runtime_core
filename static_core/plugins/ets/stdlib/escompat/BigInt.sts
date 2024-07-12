@@ -134,8 +134,16 @@ export final class BigInt {
         return this.toString().equals(to.toString());
     }
 
-    public override equals(to: NullishType): boolean {
-        return (to instanceof BigInt) && this.equals(to as BigInt);
+    equals(other: NullishType): boolean {
+        if (runtime.isSameReference(this, other)) {
+            return true
+        }
+
+        if (!(other instanceof BigInt)) {
+            return false
+        }
+
+        return this.equals(other as BigInt)
     }
 
     /**

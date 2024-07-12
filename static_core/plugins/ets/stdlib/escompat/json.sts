@@ -412,7 +412,7 @@ export class JSON {
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
     private static checkType(typ: Type, used: Array<TypeColor>): boolean {
         let id = typ.getId()
-        let ind = used.indexOf(new TypeColor(id, 0))
+        let ind = used.findIndex((tc: TypeColor) => tc.typeID == id)
         if (ind != -1) {
             return (used.at(ind) as TypeColor).color == TypeColor.VISITED
         }
@@ -815,9 +815,6 @@ class TypeColor {
     constructor(typeID: long, color: int) {
         this.typeID = typeID
         this.color = color
-    }
-    override equals(oth: NullishType): boolean {
-        return (oth instanceof Object) && (oth as TypeColor).typeID == this.typeID
     }
 }
 
@@ -1229,10 +1226,6 @@ export class JSONString extends JSONValue {
 
     public override toString(): String {
         return this.value
-    }
-
-    public override equals(to: NullishType): boolean {
-        return (to instanceof JSONString) && this.value == (to as JSONString).value
     }
 }
 

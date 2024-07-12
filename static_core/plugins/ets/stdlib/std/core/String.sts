@@ -106,7 +106,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @remarks
      * Implemented as native function,  @see `equals()` intrinsic [declaration](https://gitee.com/openharmony-sig/arkcompiler_runtime_core/blob/master/plugins/ets/runtime/ets_libbase_runtime.yaml#L596).
      */
-    public native override equals(to: NullishType): boolean;
+    public native equals(to: NullishType): boolean;
 
     /**
      * Length of this string

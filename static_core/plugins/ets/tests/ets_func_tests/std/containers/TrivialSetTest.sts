@@ -41,27 +41,26 @@ class BadHash {
     override $_hashCode(): int {
         return 0
     }
-
-    override equals(x: NullishType): boolean {
-        if (!(x instanceof BadHash)) {
-            return false
-        }
-        return (x as BadHash).value == this.value
-    }
 }
 
 function test_bad_hash(): void {
-    const toAdd = new Array<BadHash>()
-    toAdd.push(new BadHash(0))
-    toAdd.push(new BadHash(1))
-    toAdd.push(new BadHash(5))
-    toAdd.push(new BadHash(30))
-    const s = new Set<BadHash>(toAdd)
+    const badHash0 = new BadHash(0)
+    const badHash1 = new BadHash(1)
+    const badHash5 = new BadHash(5)
+    const badHash30 = new BadHash(30)
 
-    assert s.has(new BadHash(0)) : "has 0"
-    assert s.has(new BadHash(1)) : "has 1"
-    assert s.has(new BadHash(5)) : "has 5"
-    assert s.has(new BadHash(30)) : "has 30"
+    const toAdd = Array.of(badHash0, badHash1, badHash5, badHash30)
+
+    const s = new Set<BadHash>(toAdd)
+    s.add(badHash0)
+    s.add(badHash1)
+    s.add(badHash5)
+    s.add(badHash30)
+
+    assert s.has(badHash0) : "has 0"
+    assert s.has(badHash1) : "has 1"
+    assert s.has(badHash5) : "has 5"
+    assert s.has(badHash30) : "has 30"
 
     assert !s.has(new BadHash(29)) : "!has 29"
 

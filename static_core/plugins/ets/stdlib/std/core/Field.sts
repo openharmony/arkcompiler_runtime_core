@@ -19,7 +19,7 @@ package std.core;
  * Represents field of class or interface
  *
  */
-export final class Field extends Object {
+export final class Field {
     private td: TypeDesc
     private ownerTD: TypeDesc
     private name: string
@@ -87,7 +87,7 @@ export final class Field extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public override equals(oth: NullishType): boolean {
+    public equals(oth: NullishType): boolean {
         return oth instanceof Field &&
                 this.td == (oth as Field).td &&
                 this.name == (oth as Field).name &&

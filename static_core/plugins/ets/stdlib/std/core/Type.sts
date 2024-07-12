@@ -165,7 +165,7 @@ export class AccessModifier {
 /**
  * Runtime ArkTS type representation
  */
-export abstract class Type extends Object {
+export abstract class Type {
     internal td: TypeDesc
 
 
@@ -583,6 +583,8 @@ export abstract class Type extends Object {
         }
         return this.getLiteral()
     }
+
+    abstract equals(other: Type): boolean
 }
 
 /**
@@ -645,12 +647,12 @@ export final class NullType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a DoubleType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has NullType
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof NullType
+    public override equals(other: Type): boolean {
+        return other instanceof NullType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -716,12 +718,12 @@ export final class UndefinedType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a UndefinedType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has UndefinedType
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof UndefinedType
+    public override equals(other: Type): boolean {
+        return other instanceof UndefinedType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -787,12 +789,12 @@ export final class VoidType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a VoidType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has VoidType
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof VoidType
+    public override equals(other: Type): boolean {
+        return other instanceof VoidType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -874,8 +876,8 @@ export final class CharType extends Type {
         return "Char"
     }
 
-    public override equals(to: NullishType): boolean {
-        return to instanceof CharType && this.isValue != (to as CharType).isReference()
+    public override equals(other: Type): boolean {
+        return other instanceof CharType && this.isValue != (other as CharType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -957,8 +959,8 @@ export final class BooleanType extends Type {
         return "Boolean"
     }
 
-    public override equals(to: NullishType): boolean {
-        return to instanceof BooleanType && this.isValue != (to as BooleanType).isReference()
+    override equals(other: Type): boolean {
+        return other instanceof BooleanType && this.isValue != (other as BooleanType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1040,8 +1042,8 @@ export final class ByteType extends Type {
         return "Byte"
     }
 
-    public override equals(to: NullishType): boolean {
-        return to instanceof ByteType && this.isValue != (to as ByteType).isReference()
+    public override equals(other: Type): boolean {
+        return other instanceof ByteType && this.isValue != (other as ByteType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1129,13 +1131,13 @@ export final class ShortType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a ShortType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has ShortType and
      * this type and other type both are reference or value
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof ShortType && this.isValue != (to as ShortType).isReference()
+    public override equals(other: Type): boolean {
+        return other instanceof ShortType && this.isValue != (other as ShortType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1223,13 +1225,13 @@ export final class IntType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a IntType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has IntType and
      * this type and other type both are reference or value
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof IntType && this.isValue != (to as IntType).isReference()
+    public override equals(other: Type): boolean {
+        return other instanceof IntType && this.isValue != (other as IntType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1317,13 +1319,13 @@ export final class LongType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a LongType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has LongType and
      * this type and other type both are reference or value
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof LongType && this.isValue != (to as LongType).isReference()
+    public override equals(other: Type): boolean {
+        return other instanceof LongType && this.isValue != (other as LongType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1411,13 +1413,13 @@ export final class FloatType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a FloatType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has FloatType and
      * this type and other type both are reference or value
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof FloatType && this.isValue != (to as FloatType).isReference()
+    public override equals(other: Type): boolean {
+        return other instanceof FloatType && this.isValue != (other as FloatType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1505,13 +1507,13 @@ export final class DoubleType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a DoubleType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has DoubleType and
      * this type and other type both are reference or value
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof DoubleType && this.isValue != (to as DoubleType).isReference()
+    public override equals(other: Type): boolean {
+        return other instanceof DoubleType && this.isValue != (other as DoubleType).isReference()
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -1586,12 +1588,12 @@ export final class ClassType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a ClassType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has ClassType and their names are the same
      */
-    public override equals(to: NullishType): boolean {
-        return (to instanceof ClassType) && (to as ClassType).td == this.td
+    public override equals(other: Type): boolean {
+        return (other instanceof ClassType) && (other as ClassType).td == this.td
     }
 
     /**
@@ -1964,13 +1966,13 @@ export final class InterfaceType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a InterfaceType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has InterfaceType and
      * their names are the same
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof InterfaceType && this.td == (to as InterfaceType).td
+    public override equals(other: Type): boolean {
+        return other instanceof InterfaceType && this.td == (other as InterfaceType).td
     }
 
     // `this` extends of `other` interface?
@@ -2192,13 +2194,13 @@ export final class ArrayType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a ArrayType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has ArrayType and
      * their element types are the same
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof ArrayType && (to as ArrayType).getElementType().equals(this.getElementType())
+    public override equals(other: Type): boolean {
+        return other instanceof ArrayType && (other as ArrayType).getElementType().equals(this.getElementType())
     }
 
     /**
@@ -2262,7 +2264,7 @@ export final class TupleType extends Type {
         throw new Error("Not implemented")
     }
 
-    public override equals(to: NullishType): boolean {
+    public override equals(other: Type): boolean {
         throw new Error("Not implemented")
     }
 
@@ -2368,13 +2370,13 @@ export abstract class FunctionType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a FunctionType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has FunctionType and
      * they both has same signatures
      */
-    public override equals(to: NullishType): boolean {
-        return (to! instanceof FunctionType) && (to! as FunctionType).td == this.td
+    public override equals(other: Type): boolean {
+        return (other instanceof FunctionType) && (other as FunctionType).td == this.td
     }
 
     /**
@@ -2587,12 +2589,12 @@ export final class StringType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a StringType
      *
-     * @param to object to be checked against
+     * @param other object to be checked against
      *
      * @returns true if object also has StringType
      */
-    public override equals(to: NullishType): boolean {
-        return to instanceof StringType
+    public override equals(other: Type): boolean {
+        return other instanceof StringType
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -2673,11 +2675,11 @@ export final class EnumType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a EnumType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has EnumType and their names are the same
      */
-    public override equals(to: NullishType): boolean {
+    public override equals(other: Type): boolean {
         // NOTE(shumilov-petr): not implemented
         return false
     }
@@ -2804,11 +2806,11 @@ export final class UnionType extends Type {
     /**
      * Checks for equality this instance with provided object, treated as a UnionType
      *
-     * @param to object to be checked against
+     * @param other type to be checked against
      *
      * @returns true if object also has UnionType and their cases are the same
      */
-    public override equals(to: NullishType): boolean {
+    public override equals(other: Type): boolean {
         // NOTE(shumilov-petr): not implemented
         return false
     }

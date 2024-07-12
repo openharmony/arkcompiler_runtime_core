@@ -21,7 +21,7 @@ native function TypeAPIMethodInvokeConstructor(methodDesc: string, args: Nullish
 /**
  * Represents method of class or interface
  */
-export final class Method extends Object {
+export final class Method {
     private td: TypeDesc
     private name: string
     private attributes: int
@@ -111,7 +111,7 @@ export final class Method extends Object {
         return this.accessMod
     }
 
-    public override equals(oth: NullishType): boolean {
+    public equals(oth: NullishType): boolean {
         return oth instanceof Method &&
                 this.td == (oth as Method).td &&
                 this.name == (oth as Method).name &&

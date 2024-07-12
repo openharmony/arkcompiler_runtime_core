@@ -73,17 +73,6 @@ export class Object {
     }
 
     /**
-    * Performs default reference equality comparison
-    *
-    * @param to object to be checked against
-    *
-    * @returns true if provided object and this instance have same references, false otherwise
-    */
-    public equals(to: NullishType): boolean {
-        return runtime.isSameReference(this, to);
-    }
-
-    /**
     * Returns the names of the fields of an object
     *
     * @param o an object

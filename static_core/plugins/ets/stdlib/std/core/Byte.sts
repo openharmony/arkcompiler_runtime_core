@@ -208,18 +208,23 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
     }
 
     /**
-     * Checks for equality this instance with provided object, treated as a Byte
-     *
-     * @param other object to be checked against
-     *
-     * @returns true if provided object and this instance have same value, false otherwise
-     * Returns false if type of provided object is not the same as this type
-     */
-    public override equals(other: NullishType): boolean {
-        if (other instanceof Byte) {
-            return this.value == (other as Byte).byteValue();
+    * Checks for equality this instance with provided object, treated as a Byte
+    *
+    * @param other object to be checked against
+    *
+    * @returns true if provided object and this instance have same value, false otherwise
+    * Returns false if type of provided object is not the same as this type
+    */
+    public equals(other: NullishType): boolean {
+        if (__runtimeIsSameReference(this, other)) {
+            return true
         }
-        return false;
+
+        if (!(other instanceof Byte)) {
+            return false
+        }
+
+        return this.value == (other as Byte).value
     }
 
     /**

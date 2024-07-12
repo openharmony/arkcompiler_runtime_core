@@ -33,18 +33,6 @@ class Point {
         this.y = y
     }
 
-    equals(other: NullishType): boolean {
-        if (runtime.isSameReference(this, other)) {
-            return true
-        }
-
-        if (!(other instanceof Point)) {
-            return false
-        }
-
-        return this.x == other.x && this.y == other.y
-    }
-    
     toString(): string {
         return `Point(x=${this.x},y=${this.y})`
     }
@@ -93,9 +81,10 @@ const POINT_TYPE = typeFor([] as Point[])
 function jsonParseUsingUndefinedReviver(): int {
     const point = new Point(1, 2)
 
-    const parsedPoint = JSON.parse<Point>(JSON.stringify(point), undefined, POINT_TYPE)
+    const parsedPoint: Point = JSON.parse<Point>(JSON.stringify(point), undefined, POINT_TYPE)!
 
-    Assertions.assertEquals(point, parsedPoint)
+    Assertions.assertEquals(point.x, parsedPoint.x)
+    Assertions.assertEquals(point.y, parsedPoint.y)
     
     return RESULT_SUCCESS
 }
@@ -127,9 +116,11 @@ function jsonParseUsingReplacingReviver(): int {
     replacements.set("x", NEW_X)
 
     const point = new Point(3, 4)
-    const parsedPoint = JSON.parse<Point>(JSON.stringify(point), newReplacingReviver(replacements), POINT_TYPE)
+    const parsedPoint: Point = JSON.parse<Point>(JSON.stringify(point), newReplacingReviver(replacements), POINT_TYPE)!
 
-    Assertions.assertEquals(new Point(NEW_X, point.y), parsedPoint)
+    const replacedPoint = new Point(NEW_X, point.y)
+    Assertions.assertEquals(replacedPoint.x, parsedPoint.x)
+    Assertions.assertEquals(replacedPoint.y, parsedPoint.y)
 
     const trash = new Trash(new Point(10, 20))
     const trashJson = JSON.stringify(trash)
@@ -228,11 +219,11 @@ function typeFor<T>(a: T[]): Type {
 
 class Assertions {
     static assertEquals(expected: NullishType, actual: NullishType): void {
-        assert runtime.equals(expected, actual) : `expected ${expected} but was ${actual}`
+        assert __runtimeSameValueZero(expected, actual) : `expected ${expected} but was ${actual}`
     }
 
     static assertSame(expected: NullishType, actual: NullishType): void {
-        assert expected === actual : `expected "${expected}" but was "${actual}"`
+        assert __runtimeIsSameReference(expected, actual) : `expected "${expected}" but was "${actual}"`
     }
 
     static assertTrue(actual: boolean): void {
@@ -254,7 +245,7 @@ class Assertions {
                     assert expected.length == actual.length : `expected [${expected}] but was [${actual}]`
 
                     for (let i = 0; i < expected.length; i++) {
-                        if (!runtime.equals(expected[i], actual[i])) {
+                        if (!__runtimeSameValueZero(expected[i], actual[i])) {
                             assert false : `expected [${expected}] but was [${actual}]`
                         }
                     }

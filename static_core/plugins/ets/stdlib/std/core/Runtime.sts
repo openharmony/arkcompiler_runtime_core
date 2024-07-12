@@ -27,15 +27,15 @@ export final class Runtime {
      */
     public native getHashCode(o: Object): int;
 
-    /**
-     * Checks if two items are equal.
-     *
-     * @param o1 first object to compare
-     *
-     * @param o2 second object to compare
-     *
-     * @returns true if items are equal
-     */
+     /**
+      * Checks if two items are equal.
+      *
+      * @param o1 first object to compare
+      *
+      * @param o2 second object to compare
+      *
+      * @returns true if items are equal
+      */
     public equals(o1: NullishType, o2: NullishType): boolean {
         if (this.isSameReference(o1, null)) {
             return this.isSameReference(o2, null)
@@ -46,9 +46,19 @@ export final class Runtime {
         if (this.isSameReference(o2, null) || this.isSameReference(o2, undefined)) {
             return false;
         }
-        return o1!.equals(o2!);
+
+        return o1 == o2
     }
 
+    /**
+     * Checks if two items are equal 'by value'
+     *
+     * @param o1 first object to compare
+     *
+     * @param o2 second object to compare
+     *
+     * @returns true if items are equal 'by value'
+     */
     public sameValue(o1: NullishType, o2: NullishType): boolean {
         if (this.isSameReference(o1, null)) {
             return this.isSameReference(o2, null)
@@ -59,25 +69,46 @@ export final class Runtime {
         if (this.isSameReference(o2, null) || this.isSameReference(o2, undefined)) {
             return false;
         }
+
         if (o1 instanceof Number && o2 instanceof Number) {
-            const n1 = (o1 as Number).valueOf()
-            const n2 = (o2 as Number).valueOf()
-            const pos0 = Double.bitCastToLong(+0);
-            const neg0 = Double.bitCastToLong(-0);
-            if (n1 == 0 || n2 == 0) {
-                return Double.bitCastToLong(n1) == Double.bitCastToLong(n2);
-            }
-            if (isNaN(n1) != isNaN(n2)) {
-                return false;
-            }
-            if (isNaN(n1)) {
-                return true;
-            }
-            if (n1 == n2) {
-                return true;
-            }
+            return this.sameNumberValue(o1 as Number, o2 as Number)
+        } else if (o1 instanceof Float && o2 instanceof Float) {
+            return this.sameFloatValue(o1 as Float, o2 as Float)
         }
-        return o1!.equals(o2!);
+
+        return o1 == o2
+    }
+    
+    private sameNumberValue(n1: Number, n2: Number): boolean {
+        const n1val = n1.valueOf()
+        const n2val = n2.valueOf()
+        if (n1val == 0 || n2val == 0) {
+            return Double.bitCastToLong(n1val) == Double.bitCastToLong(n2val);
+        }
+        if (isNaN(n1val) != isNaN(n2val)) {
+            return false;
+        } else if (isNaN(n1val)) {
+            return true;
+        } else {
+            return n1val == n2val
+        }
+    }
+
+    private sameFloatValue(f1: Float, f2: Float): boolean {
+        const f1val = f1.unboxed()
+        const f2val = f2.unboxed()
+
+        if (f1val == 0 || f2val == 0) {
+            return Float.bitCastToInt(f1val) == Float.bitCastToInt(f2val)
+        }
+
+        if (isNaN(f1val) != isNaN(f2val)) {
+            return false
+        } else if (isNaN(f1val)) {
+            return true
+        } else {
+            return f1val == f2val
+        }
     }
 
     public sameValueZero(o1: NullishType, o2: NullishType): boolean {

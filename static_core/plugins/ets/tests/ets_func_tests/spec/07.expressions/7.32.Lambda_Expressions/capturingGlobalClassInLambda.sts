@@ -24,7 +24,7 @@ let globalClass: Object = new Object();
 function main(): void {
     let lam: () => void =
         (): void => {
-            if (globalClass.equals(null)) {}
+            if (globalClass.toString().length > 0) {}
         }
     lam()
 }
