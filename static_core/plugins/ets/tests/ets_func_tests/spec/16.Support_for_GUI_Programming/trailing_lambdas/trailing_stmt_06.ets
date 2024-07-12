@@ -33,12 +33,12 @@ function main(): void {
     const switch_arg = 1
     with_param() {
         switch (switch_arg) {
-            case is_active() { return 5 }:
+            case is_active() { a = 4; return 5 }:
                 assert false: "Not expected execution here"
                 break
             case 2:
             default:
-                assert a == 5
+                assert a == 4
         }
     }
 }

@@ -147,13 +147,6 @@ spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.ets
 ### Issue 14384
 spec/trailing_lambdas/trailing_only_fn_04_01.ets
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_04_01.ets
-### Issue 14387
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_nested_01.ets
-### Issue 14424
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_stmt_05.ets
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_stmt_06.ets
-### Issue 14427
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_stmt_07.ets
 ### End of Trailing lambda
 ### ArkUI struct
 ### Issue 14040 -> Annotations not yet implemented

@@ -32,7 +32,11 @@ function main(): void {
     nested() {
         fa() {
             assert a == 5
+            a = 4
         }
+        assert a == 4
+        a = 3
     }
+    assert a == 3
 }
 
