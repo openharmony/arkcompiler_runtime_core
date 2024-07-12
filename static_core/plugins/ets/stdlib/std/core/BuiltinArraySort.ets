@@ -32,13 +32,13 @@ function bubbleSort(arr: boolean[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: boolean[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: boolean[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && ((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
+            while (((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -55,7 +55,7 @@ function insertionSort(arr: boolean[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && ((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
+            while (((tmp) ? 1 : 0) < ((arr[pos - 1]) ? 1 : 0)) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -101,13 +101,13 @@ function bubbleSort(arr: boolean[], startIndex: int, endIndex: int, mustPrecede:
     }
 }
 
-function insertionSort(arr: boolean[], startIndex: int, endIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: boolean[], startIndex: int, endIndex: int, mustPrecede: (lhs: boolean, rhs: boolean) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -124,7 +124,7 @@ function insertionSort(arr: boolean[], startIndex: int, endIndex: int, mustPrece
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -369,13 +369,13 @@ function bubbleSort(arr: byte[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: byte[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: byte[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -392,7 +392,7 @@ function insertionSort(arr: byte[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -542,45 +542,63 @@ function quickSortSplitLeft(arr: byte[], startIndex: int, endIndex: int): int {
     return j
 }
 
-function quickSortImpl3(arr: byte[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl3(arr: byte[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth)
+            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
-function quickSortImpl40(arr: byte[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl40(arr: byte[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl40(arr, startIndex, p, maxDepth)
+            quickSortImpl40(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
 
 function quickSort(arr: byte[], startIndex: int, endIndex: int): void {
@@ -639,13 +657,13 @@ function bubbleSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (l
     }
 }
 
-function insertionSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede: (lhs: byte, rhs: byte) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -662,7 +680,7 @@ function insertionSort(arr: byte[], startIndex: int, endIndex: int, mustPrecede:
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -1112,13 +1130,13 @@ function bubbleSort(arr: short[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: short[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: short[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -1135,7 +1153,7 @@ function insertionSort(arr: short[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -1285,45 +1303,63 @@ function quickSortSplitLeft(arr: short[], startIndex: int, endIndex: int): int {
     return j
 }
 
-function quickSortImpl3(arr: short[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl3(arr: short[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth)
+            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
-function quickSortImpl40(arr: short[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl40(arr: short[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl40(arr, startIndex, p, maxDepth)
+            quickSortImpl40(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
 
 function quickSort(arr: short[], startIndex: int, endIndex: int): void {
@@ -1379,13 +1415,13 @@ function bubbleSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (
     }
 }
 
-function insertionSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: short[], startIndex: int, endIndex: int, mustPrecede: (lhs: short, rhs: short) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -1402,7 +1438,7 @@ function insertionSort(arr: short[], startIndex: int, endIndex: int, mustPrecede
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -1836,13 +1872,13 @@ function bubbleSort(arr: int[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: int[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: int[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -1859,7 +1895,7 @@ function insertionSort(arr: int[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -2009,45 +2045,63 @@ function quickSortSplitLeft(arr: int[], startIndex: int, endIndex: int): int {
     return j
 }
 
-function quickSortImpl3(arr: int[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl3(arr: int[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth)
+            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
-function quickSortImpl40(arr: int[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl40(arr: int[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl40(arr, startIndex, p, maxDepth)
+            quickSortImpl40(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
 
 function quickSort(arr: int[], startIndex: int, endIndex: int): void {
@@ -2103,13 +2157,13 @@ function bubbleSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lh
     }
 }
 
-function insertionSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: (lhs: int, rhs: int) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -2126,7 +2180,7 @@ function insertionSort(arr: int[], startIndex: int, endIndex: int, mustPrecede: 
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -2560,13 +2614,13 @@ function bubbleSort(arr: long[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: long[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: long[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -2583,7 +2637,7 @@ function insertionSort(arr: long[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -2733,45 +2787,63 @@ function quickSortSplitLeft(arr: long[], startIndex: int, endIndex: int): int {
     return j
 }
 
-function quickSortImpl3(arr: long[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl3(arr: long[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth)
+            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
-function quickSortImpl40(arr: long[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl40(arr: long[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl40(arr, startIndex, p, maxDepth)
+            quickSortImpl40(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
 
 function quickSort(arr: long[], startIndex: int, endIndex: int): void {
@@ -2827,13 +2899,13 @@ function bubbleSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (l
     }
 }
 
-function insertionSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: long[], startIndex: int, endIndex: int, mustPrecede: (lhs: long, rhs: long) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -2850,7 +2922,7 @@ function insertionSort(arr: long[], startIndex: int, endIndex: int, mustPrecede:
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -3284,13 +3356,13 @@ function bubbleSort(arr: float[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: float[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: float[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -3307,7 +3379,7 @@ function insertionSort(arr: float[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -3457,45 +3529,63 @@ function quickSortSplitLeft(arr: float[], startIndex: int, endIndex: int): int {
     return j
 }
 
-function quickSortImpl3(arr: float[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl3(arr: float[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth)
+            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
-function quickSortImpl40(arr: float[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl40(arr: float[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl40(arr, startIndex, p, maxDepth)
+            quickSortImpl40(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
 
 function quickSort(arr: float[], startIndex: int, endIndex: int): void {
@@ -3551,13 +3641,13 @@ function bubbleSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (
     }
 }
 
-function insertionSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: float[], startIndex: int, endIndex: int, mustPrecede: (lhs: float, rhs: float) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -3574,7 +3664,7 @@ function insertionSort(arr: float[], startIndex: int, endIndex: int, mustPrecede
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -4008,13 +4098,13 @@ function bubbleSort(arr: double[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: double[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: double[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -4031,7 +4121,7 @@ function insertionSort(arr: double[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -4181,45 +4271,63 @@ function quickSortSplitLeft(arr: double[], startIndex: int, endIndex: int): int 
     return j
 }
 
-function quickSortImpl3(arr: double[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl3(arr: double[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth)
+            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
-function quickSortImpl40(arr: double[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl40(arr: double[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl40(arr, startIndex, p, maxDepth)
+            quickSortImpl40(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
 
 function quickSort(arr: double[], startIndex: int, endIndex: int): void {
@@ -4275,13 +4383,13 @@ function bubbleSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: 
     }
 }
 
-function insertionSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: double[], startIndex: int, endIndex: int, mustPrecede: (lhs: double, rhs: double) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -4298,7 +4406,7 @@ function insertionSort(arr: double[], startIndex: int, endIndex: int, mustPreced
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -4732,13 +4840,13 @@ function bubbleSort(arr: char[], startIndex: int, endIndex: int): void {
     }
 }
 
-function insertionSort(arr: char[], startIndex: int, endIndex: int): void {
-    if (startIndex != 0) {
+function insertionSort(arr: char[], startIndex: int, endIndex: int, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -4755,7 +4863,7 @@ function insertionSort(arr: char[], startIndex: int, endIndex: int): void {
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && (tmp < arr[pos - 1])) {
+            while ((tmp < arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -4905,45 +5013,63 @@ function quickSortSplitLeft(arr: char[], startIndex: int, endIndex: int): int {
     return j
 }
 
-function quickSortImpl3(arr: char[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl3(arr: char[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 3) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl3(arr, startIndex, p, maxDepth)
+            quickSortImpl3(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl3(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl3(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
-function quickSortImpl40(arr: char[], startIndex: int, endIndex: int, maxDepth: int): void {
+function quickSortImpl40(arr: char[], startIndex: int, endIndex: int, maxDepth: int, initIndex: int = startIndex): void {
     while (endIndex - startIndex > 40) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex)
             return
         }
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
 
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2)
         let p = quickSortSplit(arr, startIndex, endIndex)
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl40(arr, startIndex, p, maxDepth)
+            quickSortImpl40(arr, startIndex, p, maxDepth, initIndex)
             startIndex = p + 1
         } else {
-            quickSortImpl40(arr, p + 1, endIndex, maxDepth)
+            quickSortImpl40(arr, p + 1, endIndex, maxDepth, initIndex)
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex)
+    insertionSort(arr, startIndex, endIndex, initIndex)
 }
 
 function quickSort(arr: char[], startIndex: int, endIndex: int): void {
@@ -4999,13 +5125,13 @@ function bubbleSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (l
     }
 }
 
-function insertionSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: char[], startIndex: int, endIndex: int, mustPrecede: (lhs: char, rhs: char) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -5022,7 +5148,7 @@ function insertionSort(arr: char[], startIndex: int, endIndex: int, mustPrecede:
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -5456,13 +5582,13 @@ function bubbleSort(arr: NullishType[], startIndex: int, endIndex: int, mustPrec
     }
 }
 
-function insertionSort(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean): void {
-    if (startIndex != 0) {
+function insertionSort(arr: NullishType[], startIndex: int, endIndex: int, mustPrecede: (lhs: NullishType, rhs: NullishType) => boolean, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -5479,7 +5605,7 @@ function insertionSort(arr: NullishType[], startIndex: int, endIndex: int, mustP
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && mustPrecede(tmp, arr[pos - 1])) {
+            while (mustPrecede(tmp, arr[pos - 1])) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }

@@ -69,6 +69,8 @@ chapters:
     - 'std/core/SortInternalTestInt*.ets'
     - 'std/core/SortInternalTestLong*.ets'
     - 'std/core/SortInternalTestShort*.ets'
+    - 'std/core/SortNotFromBeginningTest*.ets'
+    - 'std/core/SortStringsTest*.ets'
     - 'std/core/StringAtExceptionTest*.ets'
     - 'std/core/TypeAssignableFromTest*.ets'
     - 'std/core/TypeCreateClassTest*.ets'

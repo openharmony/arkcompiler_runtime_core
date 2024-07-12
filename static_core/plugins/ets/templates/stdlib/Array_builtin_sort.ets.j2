@@ -19,7 +19,7 @@ package std.core;
 
 {% for T in ['boolean', 'byte', 'short', 'int', 'long', 'float', 'double', 'char', 'NullishType'] %}
 
-{%- for arg, fwdArg, prec, sortNameSuff in [('', '', '(%s < %s)', ''), (', mustPrecede: (lhs: ' + T + ', rhs: ' + T + ') => boolean', ', mustPrecede', 'mustPrecede(%s, %s)', '_subarray')] %}
+{%- for arg, fwdArg, prec, sortNameSuff, initIndex in [('', '', '(%s < %s)', '', ', initIndex: int = startIndex'), (', mustPrecede: (lhs: ' + T + ', rhs: ' + T + ') => boolean', ', mustPrecede', 'mustPrecede(%s, %s)', '_subarray', '')] %}
 {%- if T == 'NullishType' and arg == '' %}
 {%- continue %}
 {%- elif T == 'boolean' and arg == '' %}
@@ -40,13 +40,13 @@ function bubbleSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
     }
 }
 
-function insertionSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): void {
-    if (startIndex != 0) {
+function insertionSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}, initIndex: int = startIndex): void {
+    if (startIndex != initIndex) {
         // arr[startIndex - 1] exists and is less than or equal to all elements in range
         for (let i = startIndex + 1; i < endIndex; i++) {
             const tmp = arr[i]
             let pos = i
-            while ((pos > startIndex) && {{prec % ('tmp', 'arr[pos - 1]')}}) {
+            while ({{prec % ('tmp', 'arr[pos - 1]')}}) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -63,7 +63,7 @@ function insertionSort(arr: {{T}}[], startIndex: int, endIndex: int{{arg}}): voi
             arr[startIndex] = tmp
         } else {
             let pos = i
-            while ((pos > startIndex) && {{prec % ('tmp', 'arr[pos - 1]')}}) {
+            while ({{prec % ('tmp', 'arr[pos - 1]')}}) {
                 arr[pos] = arr[pos - 1]
                 pos--
             }
@@ -216,25 +216,38 @@ function quickSortSplitLeft(arr: {{T}}[], startIndex: int, endIndex: int{{arg}})
 }
 
 {% for quickUpTo in [3, 40] %}
-function quickSortImpl{{quickUpTo}}(arr: {{T}}[], startIndex: int, endIndex: int, maxDepth: int{{arg}}): void {
+function quickSortImpl{{quickUpTo}}(arr: {{T}}[], startIndex: int, endIndex: int, maxDepth: int{{arg}}{{initIndex}}): void {
+    {%- set fwdInitIndex = initIndex.split(':')[0] %}
     while (endIndex - startIndex > {{quickUpTo}}) {
         if (--maxDepth == 0) {
             heapSort(arr, startIndex, endIndex{{fwdArg}})
             return
         }
 
+        {%- if initIndex != '' %}
+        // Here we assume that current interval is not the most left in the sorted range
+        if (startIndex != initIndex && arr[startIndex - 1] >= arr[startIndex]) {
+            // We call quickSortSplitLeft here to move all elements equal to pivot (and arr[startIndex - 1]) to the left part;
+            // after that only the right part needs to be sorted
+            // If we always used quickSortSplitLeft instead of quickSortSplit, this would not work well for array
+            // with many occurencies of the smallest element
+            startIndex = quickSortSplitLeft(arr, startIndex, endIndex) + 1
+            continue
+        }
+        {%- endif %}
+
         median3(arr, startIndex, endIndex - 1, (startIndex + endIndex) / 2{{fwdArg}})
         let p = quickSortSplit(arr, startIndex, endIndex{{fwdArg}})
         // make a call for the smaller part of array and continue processing the larger part in the loop
         if (p - startIndex < endIndex - p) {
-            quickSortImpl{{quickUpTo}}(arr, startIndex, p, maxDepth{{fwdArg}})
+            quickSortImpl{{quickUpTo}}(arr, startIndex, p, maxDepth{{fwdArg}}{{fwdInitIndex}})
             startIndex = p + 1
         } else {
-            quickSortImpl{{quickUpTo}}(arr, p + 1, endIndex, maxDepth{{fwdArg}})
+            quickSortImpl{{quickUpTo}}(arr, p + 1, endIndex, maxDepth{{fwdArg}}{{fwdInitIndex}})
             endIndex = p
         }
     }
-    insertionSort(arr, startIndex, endIndex{{fwdArg}})
+    insertionSort(arr, startIndex, endIndex{{fwdArg}}{{fwdInitIndex}})
 }
 {%- endfor %}
 
