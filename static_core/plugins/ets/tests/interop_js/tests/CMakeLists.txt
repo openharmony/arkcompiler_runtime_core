@@ -58,6 +58,7 @@ file(WRITE ${ETS_CONFIG_DECL}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/getter/ts_to_ets/getter.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/setter/ts_to_ets/setter.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/interface/ts_to_ets/interface_method.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/generic/ts_to_ets/generic.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/number_subtypes/module\": {\"language\": \"js\", \"hasDecl\": true},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite\": {\"language\": \"js\", \"hasDecl\": true},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/instanceof/js/instanceof\": {\"language\": \"js\", \"hasDecl\": true},\n"
@@ -182,3 +183,4 @@ add_subdirectory(getter)
 add_subdirectory(setter)
 add_subdirectory(constructor_as_arg)
 add_subdirectory(interface)
+add_subdirectory(generic)
