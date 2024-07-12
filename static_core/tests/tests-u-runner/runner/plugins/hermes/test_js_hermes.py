@@ -64,7 +64,7 @@ class TestJSHermes(TestFileBased):
         if self.test_env.conf_kind in [ConfigurationKind.AOT, ConfigurationKind.AOT_FULL]:
             self.passed, self.report, self.fail_kind = self.run_aot(
                 test_an,
-                test_abc,
+                [test_abc],
                 lambda o, e, rc: rc == 0
             )
 
