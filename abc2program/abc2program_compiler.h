@@ -28,7 +28,7 @@ public:
     ~Abc2ProgramCompiler();
     bool OpenAbcFile(const std::string &file_path);
     bool CheckFileVersionIsSupported(std::array<uint8_t, panda_file::File::VERSION_SIZE> min_version,
-                                     uint8_t target_api_version) const;
+                                     uint8_t target_api_version, std::string target_api_sub_version) const;
     const panda_file::File &GetAbcFile() const;
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
     pandasm::Program *CompileAbcFile();

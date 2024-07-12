@@ -502,7 +502,7 @@ ProtoItem::ProtoItem(TypeItem *ret_type, const std::vector<MethodParamItem> &par
         AddType(p.GetType(), &n);
     }
 
-    const auto bc_version = GetVersionByApi(ItemContainer::GetApi());
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
     if (bc_version.value().front() >= API_12) {
         // no need to emit protoItem
         SetNeedsEmit(false);
@@ -575,7 +575,7 @@ bool BaseMethodItem::Write(Writer *writer)
         return false;
     }
 
-    const auto bc_version = GetVersionByApi(ItemContainer::GetApi());
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
     if (bc_version.value().front() >= API_12) {
         // reserve [proto_idx] field, write invalid index
         if (!writer->Write<uint16_t>(INVALID_INDEX_16)) {

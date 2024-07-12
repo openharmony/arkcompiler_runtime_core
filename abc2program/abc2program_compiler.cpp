@@ -50,9 +50,10 @@ bool Abc2ProgramCompiler::IsVersionLessEqual(
 }
 
 bool Abc2ProgramCompiler::CheckFileVersionIsSupported(std::array<uint8_t, panda_file::File::VERSION_SIZE> min_version,
-                                                      uint8_t target_api_version) const
+                                                      uint8_t target_api_version,
+                                                      std::string target_api_sub_version) const
 {
-    auto target_version = panda_file::GetVersionByApi(target_api_version);
+    auto target_version = panda_file::GetVersionByApi(target_api_version, target_api_sub_version);
     if (!target_version.has_value()) {
         return false;
     }
