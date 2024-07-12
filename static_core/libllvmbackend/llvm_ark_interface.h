@@ -64,6 +64,7 @@ enum class BridgeType {
 class LLVMArkInterface {
 public:
     using MethodPtr = void *;
+    using ClassPtr = void *;
     using MethodId = uint32_t;
     using IntrinsicId = int;
     using EntrypointId = int;
@@ -76,9 +77,9 @@ public:
 
     RuntimeCallee GetEntrypointCallee(EntrypointId id) const;
 
-    void PutCalleeSavedRegistersMask(const llvm::Function *method, RegMasks masks);
+    void PutCalleeSavedRegistersMask(llvm::StringRef method, RegMasks masks);
 
-    RegMasks GetCalleeSavedRegistersMask(const llvm::Function *method);
+    RegMasks GetCalleeSavedRegistersMask(llvm::StringRef method);
 
     intptr_t GetCompiledEntryPointOffset() const;
 
@@ -89,8 +90,7 @@ public:
     size_t GetTlsFrameKindOffset() const;
     size_t GetTlsPreWrbEntrypointOffset() const;
 
-    llvm::Function *GetFunctionByMethodPtr(MethodPtr method) const;
-    void PutFunction(MethodPtr methodPtr, llvm::Function *function);
+    void PutVirtualFunction(MethodPtr methodPtr, llvm::Function *function);
 
     IntrinsicId GetIntrinsicId(const llvm::Instruction *inst) const;
     llvm::Intrinsic::ID GetLLVMIntrinsicId(const llvm::Instruction *inst) const;
@@ -118,10 +118,12 @@ public:
     uint32_t GetClassOffset() const;
     uint32_t GetManagedThreadPostWrbOneObjectOffset() const;
     size_t GetStackOverflowCheckOffset() const;
+    uint32_t GetVTableOffset(llvm::Function *caller, uint32_t methodId) const;
 
     void RememberFunctionCall(const llvm::Function *caller, const llvm::Function *callee, MethodId methodId);
 
     int32_t GetPltSlotId(const llvm::Function *caller, const llvm::Function *callee) const;
+    int32_t GetObjectClassOffset() const;
     int32_t GetClassIndexInAotGot(ark::compiler::AotData *aotData, uint32_t klassId, bool initialized);
     int32_t GetStringSlotId(ark::compiler::AotData *aotData, uint32_t typeId);
     uint64_t GetMethodStackSize(MethodPtr method) const;
@@ -141,6 +143,10 @@ public:
 
     int32_t CreateIntfInlineCacheSlotId(const llvm::Function *caller) const;
 
+    MethodPtr ResolveVirtual(uint32_t classId, llvm::CallInst *call);
+    bool IsInterfaceMethod(llvm::CallInst *call);
+    bool IsExternal(llvm::CallInst *call);
+
 public:
     static constexpr auto NO_INTRINSIC_ID = static_cast<IntrinsicId>(-1);
     static constexpr auto GC_ADDR_SPACE = 271;
@@ -152,6 +158,7 @@ public:
     static constexpr std::string_view FUNCTION_MD_INLINE_MODULE = "inline_module";
     static constexpr std::string_view PATCH_STACK_ADJUSTMENT_COMMENT = " ${:comment} patch-stack-adjustment";
     static constexpr std::string_view AARCH64_SDIV_INST = "aarch64_sdiv";
+    static constexpr std::string_view SOURCE_LANG_ATTR = "source-language";
 
     ark::compiler::RuntimeInterface *GetRuntime()
     {
@@ -179,8 +186,29 @@ public:
         constexpr size_t R11 = 3U;   // dwarf 11
         constexpr size_t R12 = 12U;  // dwarf 12
 
-        constexpr std::array<size_t, R12> TO_ARK = {RAX, RDX, RCX, RBX, RSI, RDI, RBP, RSP, R8, R9, R10, R11};
+        constexpr std::array TO_ARK = {RAX, RDX, RCX, RBX, RSI, RDI, RBP, RSP, R8, R9, R10, R11};
         return dwarfReg >= R12 ? dwarfReg : TO_ARK[dwarfReg];
+    }
+
+    // Convert given Ark register id to dwarf register id
+    static constexpr size_t ToDwarfRegNumX86(size_t arkReg)
+    {
+        constexpr size_t RAX = 0U;   // Ark 0
+        constexpr size_t RCX = 2U;   // Ark 1
+        constexpr size_t RDX = 1U;   // Ark 2
+        constexpr size_t R11 = 11U;  // Ark 3
+        constexpr size_t R10 = 10U;  // Ark 4
+        constexpr size_t R9 = 9U;    // Ark 5
+        constexpr size_t RSI = 4U;   // Ark 6
+        constexpr size_t RDI = 5U;   // Ark 7
+        constexpr size_t R8 = 8U;    // Ark 8
+        constexpr size_t RBP = 6U;   // Ark 9
+        constexpr size_t RSP = 7U;   // Ark 10
+        constexpr size_t RBX = 3U;   // Ark 11
+        constexpr size_t R12 = 12U;  // Ark 12
+
+        constexpr std::array TO_DWARF = {RAX, RCX, RDX, R11, R10, R9, RSI, RDI, R8, RBP, RSP, RBX};
+        return arkReg >= R12 ? arkReg : TO_DWARF[arkReg];
     }
 
 private:
@@ -197,10 +225,9 @@ private:
     llvm::StringMap<llvm::FunctionType *> runtimeFunctionTypes_;
     llvm::ValueMap<const llvm::Function *, const panda_file::File *> functionOrigins_;
     llvm::DenseMap<std::pair<const llvm::Function *, const panda_file::File *>, MethodId> methodIds_;
-    llvm::DenseMap<MethodPtr, llvm::Function *> functions_;
-    llvm::DenseMap<llvm::Function *, uint8_t> sourceLanguages_;
+    llvm::DenseMap<const llvm::Function *, MethodPtr> methodPtrs_;
     llvm::StringMap<uint64_t> llvmStackSizes_;
-    llvm::DenseMap<const llvm::Function *, RegMasks> calleeSavedRegisters_;
+    llvm::StringMap<RegMasks> calleeSavedRegisters_;
     ark::compiler::AotBuilder *aotBuilder_;
     std::vector<llvm::StringRef> irtocReturnHandlers_;
     mutable llvm::sys::Mutex *lock_;

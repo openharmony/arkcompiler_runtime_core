@@ -35,9 +35,6 @@ using llvm::CallInst;
 using llvm::Function;
 using llvm::Instruction;
 
-using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
-using ark::llvmbackend::gc_utils::IsGcFunction;
-
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 static llvm::cl::opt<uint32_t> g_safepointOnEntryLimit("isp-on-entry-limit", llvm::cl::Hidden, llvm::cl::init(0));
 
@@ -119,7 +116,7 @@ bool InsertSafepoints::ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions 
 llvm::PreservedAnalyses InsertSafepoints::run(llvm::Function &function,
                                               llvm::FunctionAnalysisManager & /*analysisManager*/)
 {
-    if (!IsGcFunction(function) || IsFunctionSupplemental(function)) {
+    if (!gc_utils::IsGcFunction(function) || gc_utils::IsFunctionSupplemental(function)) {
         return llvm::PreservedAnalyses::all();
     }
 

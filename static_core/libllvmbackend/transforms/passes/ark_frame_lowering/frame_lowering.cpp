@@ -26,6 +26,27 @@
 #define DEBUG_TYPE "frame-builder"
 
 namespace {
+// See https://github.com/ARM-software/abi-aa/blob/main/aadwarf64/aadwarf64.rst#dwarf-register-names
+constexpr int32_t X0 = 0;
+constexpr int32_t D0 = 64;
+constexpr int32_t D31 = 95;
+
+// See amd64 abi spec
+constexpr int32_t RAX = 0;
+constexpr int32_t XMM0 = 17;
+constexpr int32_t XMM15 = 32;
+
+constexpr size_t ToDwarfReg(ark::Arch arch, bool fp, size_t arkReg)
+{
+    ASSERT(arkReg <= 32U);
+    if (arch == ark::Arch::AARCH64) {
+        return !fp ? arkReg : D0 + arkReg;
+    }
+    ASSERT(arch == ark::Arch::X86_64);
+    constexpr int32_t SIXTEEN = 16U;
+    ASSERT(!fp || arkReg < SIXTEEN);
+    return fp ? 1U + SIXTEEN + arkReg : ark::llvmbackend::LLVMArkInterface::ToDwarfRegNumX86(arkReg);
+}
 
 class FrameLoweringPass : public llvm::MachineFunctionPass {
 public:
@@ -42,6 +63,35 @@ public:
         return PASS_NAME;
     }
 
+    bool runOnMachineFunction(llvm::MachineFunction &mfunc) override
+    {
+        if (mfunc.getFunction().getMetadata("use-ark-frame") == nullptr) {
+            return false;
+        }
+        // Collect information about current function
+        FrameInfo frameInfo;
+        frameInfo.regMasks = GetUsedRegs(mfunc);
+        frameInfo.hasCalls = HasCalls(mfunc);
+        frameInfo.stackSize = mfunc.getFrameInfo().getStackSize();
+        frameInfo.soOffset = -arkInterface_->GetStackOverflowCheckOffset();
+        frameInfo.usesStack = IsStackUsed(&mfunc);
+        frameInfo.usesFloatRegs = FloatRegsUsed(&mfunc);
+        if (arkInterface_->IsArm64()) {
+            constexpr uint32_t SLOT_SIZE = 8U;
+            ASSERT(frameInfo.stackSize >= SLOT_SIZE);
+            frameInfo.stackSize -= 2U * SLOT_SIZE;
+        }
+        if (arkInterface_->IsArm64()) {
+            ARM64FrameBuilder frameBuilder(
+                frameInfo, [this](FrameConstantDescriptor descr) { return GetConstantFromRuntime(descr); });
+            return VisitMachineFunction(mfunc, &frameBuilder);
+        }
+        AMD64FrameBuilder frameBuilder(frameInfo,
+                                       [this](FrameConstantDescriptor descr) { return GetConstantFromRuntime(descr); });
+        return VisitMachineFunction(mfunc, &frameBuilder);
+    }
+
+private:
     ssize_t GetConstantFromRuntime(FrameConstantDescriptor descr)
     {
         switch (descr) {
@@ -54,65 +104,36 @@ public:
         }
     }
 
-    template <typename FrameBuilderT>
-    bool VisitMachineFunction(llvm::MachineFunction &mfunc)
+    bool VisitMachineFunction(llvm::MachineFunction &mfunc, FrameBuilderInterface *frameBuilder)
     {
-        // Collect information about current function
-        FrameInfo frameInfo;
-        frameInfo.regMasks = GetUsedRegs(mfunc);
-        frameInfo.hasCalls = HasCalls(mfunc);
-        frameInfo.stackSize = mfunc.getFrameInfo().getStackSize();
-        frameInfo.soOffset = -arkInterface_->GetStackOverflowCheckOffset();
-        if (arkInterface_->IsArm64()) {
-            constexpr uint32_t SLOT_SIZE = 8U;
-            ASSERT(frameInfo.stackSize >= SLOT_SIZE);
-            frameInfo.stackSize -= 2U * SLOT_SIZE;
-        }
-        FrameBuilderT frameBuilder(frameInfo,
-                                   [this](FrameConstantDescriptor descr) { return GetConstantFromRuntime(descr); });
-
         // Remove generated prolog/epilog and insert custom one
         for (auto &bb : mfunc) {
-            auto isPrologue = frameBuilder.RemovePrologue(bb);
-            auto isEpilogue = frameBuilder.RemoveEpilogue(bb);
+            auto isPrologue = frameBuilder->RemovePrologue(bb);
+            auto isEpilogue = frameBuilder->RemoveEpilogue(bb);
             if (isPrologue) {
-                frameBuilder.InsertPrologue(bb);
+                frameBuilder->InsertPrologue(bb);
             }
             if (isEpilogue) {
-                frameBuilder.InsertEpilogue(bb);
+                frameBuilder->InsertEpilogue(bb);
             }
         }
-
-        frameInfo = frameBuilder.GetFrameInfo();
 
         // Remember info for CodeInfoProducer
         auto &func = mfunc.getFunction();
         arkInterface_->PutMethodStackSize(&func, mfunc.getFrameInfo().getStackSize());
-        arkInterface_->PutCalleeSavedRegistersMask(&func, frameInfo.regMasks);
+        arkInterface_->PutCalleeSavedRegistersMask(func.getName(), frameBuilder->GetFrameInfo().regMasks);
 
         return true;
     }
 
-    bool runOnMachineFunction(llvm::MachineFunction &mfunc) override
+    int32_t GetDwarfRegNum(llvm::Register reg, const llvm::TargetRegisterInfo *regInfo) const
     {
-        if (mfunc.getFunction().getMetadata("use-ark-frame") == nullptr) {
-            return false;
-        }
-        if (arkInterface_->IsArm64()) {
-            return VisitMachineFunction<ARM64FrameBuilder>(mfunc);
-        }
-        return VisitMachineFunction<AMD64FrameBuilder>(mfunc);
-    }
-
-    static void FillOperand(const llvm::MCRegisterInfo *regInfo, const llvm::MachineOperand &operand,
-                            std::function<void(unsigned)> &fillMask, bool isArm)
-    {
-        if (!operand.isReg()) {
-            return;
-        }
-        llvm::MCRegister reg = operand.getReg().asMCReg();
+        ASSERT(reg.isPhysical());
+        // dwarfId < 0 means, there is no dwarf mapping.
+        // E.g. for status registers.
+        // But need to check separately for x86
         int dwarfId = regInfo->getDwarfRegNum(reg, false);
-        if (dwarfId < 0 && !isArm) {
+        if (dwarfId < 0 && !arkInterface_->IsArm64()) {
             // Check super regs as X86 dwarf info in LLVM is weird
             for (llvm::MCSuperRegIterator sreg(reg, regInfo); sreg.isValid(); ++sreg) {
                 dwarfId = regInfo->getDwarfRegNum(*sreg, false);
@@ -121,58 +142,63 @@ public:
                 }
             }
         }
-        if (dwarfId >= 0) {
-            fillMask(dwarfId);
-        }
+
+        ASSERT(!regInfo->isConstantPhysReg(reg.asMCReg()));
+        return dwarfId;
     }
 
     // first -- X-regs, second -- V-regs
     FrameInfo::RegMasks GetUsedRegs(const llvm::MachineFunction &mfunc) const
     {
         FrameInfo::RegMasks masks {};
+        llvm::SmallVector<llvm::Register> usedRegisters;
 
-        std::function<void(unsigned)> fillMaskArm = [&masks](unsigned idx) {
-            // Dwarf numbers from llvm/lib/Target/AArch64/AArch64RegisterInfo.td
-            constexpr unsigned X0_IDX = 0;
-            constexpr unsigned D0_IDX = 64;
-            if (idx >= D0_IDX) {
-                std::get<1>(masks) |= 1U << (idx - D0_IDX);
-            } else {
-                std::get<0>(masks) |= 1U << (idx - X0_IDX);
-            }
-        };
-
-        std::function<void(unsigned)> fillMaskAmd = [&masks](unsigned idx) {
-            // Dwarf numbers from llvm/lib/Target/X86/X86RegisterInfo.td
-            constexpr unsigned RAX_IDX = 0;
-            constexpr unsigned XMM0_IDX = 17;
-            constexpr unsigned XMM16_IDX = 67;
-            constexpr unsigned XMM_COUNT = 16U;
-            if ((idx >= XMM0_IDX && idx < XMM0_IDX + XMM_COUNT) || (idx >= XMM16_IDX && idx < XMM16_IDX + XMM_COUNT)) {
-                std::get<1>(masks) |= 1U << (idx - XMM0_IDX);
-            } else {
-                idx = ark::llvmbackend::LLVMArkInterface::X86RegNumberConvert(idx);
-                std::get<0>(masks) |= 1U << (idx - RAX_IDX);
-            }
-        };
-
-        bool isArm = arkInterface_->IsArm64();
-        std::function<void(unsigned)> fillMask = isArm ? fillMaskArm : fillMaskAmd;
-
-        const llvm::MCRegisterInfo *regInfo = mfunc.getSubtarget().getRegisterInfo();
-        for (auto &mblock : mfunc) {
-            for (auto &minst : mblock) {
-                bool isFrameSetup = minst.getFlag(llvm::MachineInstr::FrameSetup);
-                bool isFrameDestroy = minst.getFlag(llvm::MachineInstr::FrameDestroy);
-                if (isFrameSetup || isFrameDestroy) {
-                    continue;
-                }
-                for (auto &operand : minst.operands()) {
-                    FillOperand(regInfo, operand, fillMask, isArm);
-                }
+        auto arch = arkInterface_->IsArm64() ? ark::Arch::AARCH64 : ark::Arch::X86_64;
+        auto csrMask = ark::GetCalleeRegsMask(arch, false);
+        auto csrVMask = ark::GetCalleeRegsMask(arch, true);
+        auto regInfo = mfunc.getSubtarget().getRegisterInfo();
+        // Convert ark mask of csr to vector of llvm registers
+        for (size_t i = 0; i < csrMask.Size(); i++) {
+            if (csrMask.Test(i)) {
+                auto dwarf = ToDwarfReg(arch, false, i);
+                auto llvm = *regInfo->getLLVMRegNum(dwarf, false);
+                usedRegisters.push_back(llvm::Register {llvm});
             }
         }
+        for (size_t i = 0; i < csrVMask.Size(); i++) {
+            if (csrVMask.Test(i)) {
+                auto dwarf = ToDwarfReg(arch, true, i);
+                auto llvm = *regInfo->getLLVMRegNum(dwarf, false);
+                usedRegisters.push_back(llvm::Register {llvm});
+            }
+        }
+
+        for (auto &block : mfunc) {
+            for (auto &inst : block) {
+                FillMaskForInst(&masks, usedRegisters, inst);
+            }
+        }
+
+        // Drop thread register from the mask since it is reserved
+        auto threadReg = ark::GetThreadReg(arch);
+        std::get<0>(masks) &= ~(1U << threadReg);
+
         return masks;
+    }
+
+    void FillMaskForInst(FrameInfo::RegMasks *masks, const llvm::SmallVector<llvm::Register> &usedRegisters,
+                         const llvm::MachineInstr &inst) const
+    {
+        auto registerInfo = inst.getMF()->getSubtarget().getRegisterInfo();
+        for (auto reg : usedRegisters) {
+            if (inst.getFlag(llvm::MachineInstr::FrameSetup) || inst.getFlag(llvm::MachineInstr::FrameDestroy) ||
+                !inst.modifiesRegister(reg, registerInfo) || registerInfo->isConstantPhysReg(reg)) {
+                continue;
+            }
+            auto dwarfRegNum = GetDwarfRegNum(reg, registerInfo);
+            ASSERT(dwarfRegNum >= 0);
+            FillMask(dwarfRegNum, masks);
+        }
     }
 
     bool HasCalls(const llvm::MachineFunction &mfunc)
@@ -194,6 +220,102 @@ public:
         return false;
     }
 
+    bool IsStackUsed(llvm::MachineFunction *machineFunction)
+    {
+        for (auto &basicBlock : *machineFunction) {
+            for (auto &instruction : basicBlock) {
+                if (instruction.getFlag(llvm::MachineInstr::FrameSetup) ||
+                    instruction.getFlag(llvm::MachineInstr::FrameDestroy)) {
+                    continue;
+                }
+                if (HasOperandUsingStack(&instruction)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool HasOperandUsingStack(llvm::MachineInstr *machineInstr)
+    {
+        auto regInfo = machineInstr->getMF()->getSubtarget().getRegisterInfo();
+        auto arch = arkInterface_->IsArm64() ? ark::Arch::AARCH64 : ark::Arch::X86_64;
+        auto sp = GetDwarfSP(arch);
+        auto fp = GetDwarfFP(arch);
+
+        for (auto operand : machineInstr->operands()) {
+            if (operand.isReg()) {
+                llvm::MCRegister reg = operand.getReg().asMCReg();
+                size_t dwarfId = regInfo->getDwarfRegNum(reg, false);
+                // Aarch64 zero registers (xzr/wzr) have same dwarfId as sp, and should be skipped
+                if (regInfo->isConstantPhysReg(reg)) {
+                    ASSERT(arkInterface_->IsArm64() && dwarfId == sp);
+                    continue;
+                }
+                if (dwarfId == sp || dwarfId == fp) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void FillMask(int32_t index, FrameInfo::RegMasks *regMasks) const
+    {
+        if (arkInterface_->IsArm64()) {
+            // Dwarf numbers from llvm/lib/Target/AArch64/AArch64RegisterInfo.td
+            if (index >= D0) {
+                std::get<1>(*regMasks) |= 1U << static_cast<unsigned>(index - D0);
+            } else {
+                std::get<0>(*regMasks) |= 1U << static_cast<unsigned>(index - X0);
+            }
+        } else {
+            // Dwarf numbers from llvm/lib/Target/X86/X86RegisterInfo.td
+            if (index >= XMM0 && index <= XMM15) {
+                std::get<1>(*regMasks) |= 1U << static_cast<unsigned>(index - XMM0);
+            } else {
+                index = ark::llvmbackend::LLVMArkInterface::X86RegNumberConvert(index);
+                std::get<0>(*regMasks) |= 1U << static_cast<unsigned>(index - RAX);
+            }
+        }
+    }
+
+    bool FloatRegsUsed(llvm::MachineFunction *function)
+    {
+        // Check if any float register is used in this function.
+        // Usage here means either read or write to register
+        for (auto &basicBlock : *function) {
+            for (auto &inst : basicBlock) {
+                if (inst.getFlag(llvm::MachineInstr::FrameSetup) || inst.getFlag(llvm::MachineInstr::FrameDestroy)) {
+                    continue;
+                }
+                if (HasOperandUsingFloatReg(&inst)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool HasOperandUsingFloatReg(llvm::MachineInstr *instr)
+    {
+        auto regInfo = instr->getMF()->getSubtarget().getRegisterInfo();
+        for (auto operand : instr->operands()) {
+            if (operand.isReg() && operand.getReg().isPhysical() &&
+                !regInfo->isConstantPhysReg(operand.getReg().asMCReg())) {
+                auto dwarf = GetDwarfRegNum(operand.getReg(), regInfo);
+                if (arkInterface_->IsArm64() && dwarf >= D0 && dwarf < D31) {
+                    return true;
+                }
+                if (!arkInterface_->IsArm64() && dwarf >= XMM0 && dwarf <= XMM15) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+public:
     static inline char ID = 0;  // NOLINT(readability-identifier-naming)
 private:
     ark::llvmbackend::LLVMArkInterface *arkInterface_ {nullptr};

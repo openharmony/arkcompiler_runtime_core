@@ -68,6 +68,23 @@ llvm_passes:
   type: [scc]
   setup: default
 
+- name: Devirt
+  description: Devirtualization
+  type: [function]
+  setup: custom
+
+- name: CheckExternal
+  description: >
+    Remove `NoInline` attribute from external calls when possible
+    Remove `KeepThis`, see CheckExternal for details
+  type: [function]
+  setup: default
+
+- name: InlineDevirt
+  description: Run Inline+Devirt in loop
+  type: [scc]
+  setup: custom
+
 - name: PruneDeopt
   description: >
     Remove deopt bundles when possible otherwise change a record format inside bundles.

@@ -22,8 +22,9 @@
 #include "compiler/optimizer/code_generator/target_info.h"
 
 #include <llvm/CodeGen/GlobalISel/MachineIRBuilder.h>
-#include <llvm/IR/InlineAsm.h>
 #include <llvm/CodeGen/TargetInstrInfo.h>
+#include <llvm/IR/InlineAsm.h>
+#include <llvm/Target/TargetMachine.h>
 
 struct InlineAsmBuilder {
     InlineAsmBuilder(llvm::MachineBasicBlock *block, llvm::MachineBasicBlock::iterator iterator)
@@ -73,27 +74,6 @@ void RemoveInstsIf(llvm::MachineBasicBlock &mblock, const std::function<bool(llv
     }
 }
 
-std::tuple<uint32_t, uint32_t> GetCalleeSavedRegMasks(FrameInfo::RegMasks masks, ark::Arch arch)
-{
-    auto xregsMask = std::get<0>(masks);
-    auto vregsMask = std::get<1>(masks);
-    xregsMask &= GetCalleeRegsMask(arch, false).GetValue();
-    vregsMask &= GetCalleeRegsMask(arch, true).GetValue();
-    return {xregsMask, vregsMask};
-}
-
-bool IsStackUsed(FrameInfo::RegMasks masks, ark::Arch arch)
-{
-    auto spIndex = GetDwarfSP(arch);
-    auto fpIndex = GetDwarfFP(arch);
-    if (arch == ark::Arch::X86_64) {
-        spIndex = ark::llvmbackend::LLVMArkInterface::X86RegNumberConvert(spIndex);
-        fpIndex = ark::llvmbackend::LLVMArkInterface::X86RegNumberConvert(fpIndex);
-    }
-    auto xregsMask = std::get<0>(masks);
-    return ((xregsMask >> spIndex) & 1U) != 0 || ((xregsMask >> fpIndex) & 1U) != 0;
-}
-
 // AMD64 Frame builder implementation
 
 bool AMD64FrameBuilder::RemovePrologue(llvm::MachineBasicBlock &mblock)
@@ -122,10 +102,9 @@ bool AMD64FrameBuilder::RemoveEpilogue(llvm::MachineBasicBlock &mblock)
 
 void AMD64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
 {
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::X86_64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::X86_64);
-    if (!frameInfo_.hasCalls && !useStack && xregsMask == 0 && vregsMask == 0) {
-        // Dont generate any code
+    auto [xregsMask, vregsMask] = frameInfo_.regMasks;
+    if (!frameInfo_.hasCalls && !frameInfo_.usesStack && xregsMask == 0 && vregsMask == 0) {
+        // Do not generate any code
         return;
     }
 
@@ -148,7 +127,7 @@ void AMD64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
     builder.CreateInlineAsm("movq   %rsp, %rbp");
     builder.CreateInlineAsm("lea    ${0:c}(%rsp), %rsp", {-(FRAME_SIZE - SLOT_SIZE * 2U)});
     builder.CreateInlineAsm("movq   %rdi,  ${0:c}(%rsp)", {METHOD_OFFSET});
-    if (std::get<1>(frameInfo_.regMasks) == 0) {
+    if (!frameInfo_.usesFloatRegs) {
         frameFlags = 0;
     }
     builder.CreateInlineAsm("movq   $0, ${1:c}(%rsp)", {frameFlags, FLAGS_OFFSET});
@@ -169,10 +148,9 @@ void AMD64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
 
 void AMD64FrameBuilder::InsertEpilogue(llvm::MachineBasicBlock &mblock)
 {
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::X86_64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::X86_64);
-    if (!frameInfo_.hasCalls && !useStack && xregsMask == 0 && vregsMask == 0) {
-        // Dont generate any code
+    auto [xregsMask, vregsMask] = frameInfo_.regMasks;
+    if (!frameInfo_.hasCalls && !frameInfo_.usesStack && xregsMask == 0 && vregsMask == 0) {
+        // Do not generate any code
         return;
     }
 
@@ -245,19 +223,17 @@ void ARM64FrameBuilder::InsertPrologue(llvm::MachineBasicBlock &mblock)
 {
     InlineAsmBuilder builder(&mblock, mblock.begin());
 
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::AARCH64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::AARCH64);
-    bool useVregs = std::get<1>(frameInfo_.regMasks) != 0;
+    auto [xregsMask, vregsMask] = frameInfo_.regMasks;
 
-    // Dont generate any code
-    if (!frameInfo_.hasCalls && !useStack && xregsMask == 0 && vregsMask == 0) {
+    // Do not generate any code
+    if (!frameInfo_.hasCalls && !frameInfo_.usesStack && xregsMask == 0 && vregsMask == 0) {
         return;
     }
 
     builder.CreateInlineAsm("stp  x29, x30, [sp, #-16]!");
     builder.CreateInlineAsm("mov  x29, sp");
 
-    if (useVregs) {
+    if (frameInfo_.usesFloatRegs) {
         auto frameFlags = constantPool_(FrameConstantDescriptor::FRAME_FLAGS);
         builder.CreateInlineAsm("mov x30, $0", {frameFlags});
         builder.CreateInlineAsm("stp x30, x0, [fp, ${0:n}]", {arm_frame_helpers::FLAGS_OFFSET});
@@ -297,10 +273,9 @@ void ARM64FrameBuilder::InsertEpilogue(llvm::MachineBasicBlock &mblock)
 {
     InlineAsmBuilder builder(&mblock, mblock.getFirstTerminator());
 
-    auto [xregsMask, vregsMask] = GetCalleeSavedRegMasks(frameInfo_.regMasks, ark::Arch::AARCH64);
-    bool useStack = IsStackUsed(frameInfo_.regMasks, ark::Arch::AARCH64);
-    if (!frameInfo_.hasCalls && !useStack && xregsMask == 0 && vregsMask == 0) {
-        // Dont generate any code
+    auto [xregsMask, vregsMask] = frameInfo_.regMasks;
+    if (!frameInfo_.hasCalls && !frameInfo_.usesStack && xregsMask == 0 && vregsMask == 0) {
+        // Do not generate any code
         return;
     }
 

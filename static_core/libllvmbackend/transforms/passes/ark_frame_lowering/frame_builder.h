@@ -25,9 +25,16 @@ struct FrameInfo {
 
     // This field used only in aarch64 FrameBuilder
     uint32_t stackSize {};
+    // Mask of used callee saved registers in Ark terms
     RegMasks regMasks {};
     bool hasCalls = false;
     ssize_t soOffset = 0;
+    // True, if the function uses stack in blocks except prologue and epilogue.
+    // E.g. allocates a stack object
+    bool usesStack = false;
+    // True, if the function uses float register in some way.
+    // It is needed to notify runtime about usage of float registers
+    bool usesFloatRegs = false;
 };
 
 enum class FrameConstantDescriptor {

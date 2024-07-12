@@ -23,6 +23,7 @@
 #include "llvm_logger.h"
 #include "llvm_options.h"
 #include "metadata.h"
+#include "utils.h"
 #include "transforms/builtins.h"
 #include "transforms/runtime_calls.h"
 
@@ -41,6 +42,7 @@ namespace ark::compiler {
 using ark::llvmbackend::DebugDataBuilder;
 using ark::llvmbackend::LLVMArkInterface;
 using ark::llvmbackend::builtins::BarrierReturnVoid;
+using ark::llvmbackend::builtins::KeepThis;
 using ark::llvmbackend::builtins::LenArray;
 using ark::llvmbackend::builtins::LoadClass;
 using ark::llvmbackend::builtins::LoadInitClass;
@@ -50,6 +52,7 @@ using ark::llvmbackend::irtoc_function_utils::IsNoAliasIrtocFunction;
 #ifndef NDEBUG
 using ark::llvmbackend::irtoc_function_utils::IsPtrIgnIrtocFunction;
 #endif
+using ark::llvmbackend::utils::CreateLoadClassFromObject;
 
 static constexpr unsigned VECTOR_SIZE_8 = 8;
 static constexpr unsigned VECTOR_SIZE_16 = 16;
@@ -161,10 +164,11 @@ static void MarkNormalBlocksRecursive(BasicBlock *block, Marker normal)
     for (size_t i = 0; i < block->GetSuccsBlocks().size(); i++) {
         auto succ = block->GetSuccessor(i);
         if (succ->IsCatch()) {
-            ASSERT_DO(i > expected, (std::cerr << "Catch block found too early in successors: at index " << i));
+            ASSERT_DO(i > expected,
+                      (std::cerr << "Catch block found too early in successors: at index " << i << std::endl));
             continue;
         }
-        ASSERT_DO(i <= expected, (std::cerr << "Unexpected non-catch successor block at index " << i));
+        ASSERT_DO(i <= expected, (std::cerr << "Unexpected non-catch successor block at index " << i << std::endl));
         if (processSucc && !succ->SetMarker(normal)) {
             MarkNormalBlocksRecursive(succ, normal);
         }
@@ -288,7 +292,7 @@ static DeoptimizeType GetDeoptimizationType(Inst *inst)
         case Opcode::RefTypeCheck:
         default:
             ASSERT_DO(false, (std::cerr << "Unexpected inst to GetDeoptimizationType, inst:" << std::endl,
-                              inst->Dump(&std::cerr)));
+                              inst->Dump(&std::cerr, true)));
             UNREACHABLE();
     }
 }
@@ -521,6 +525,10 @@ bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
     ASSERT(inst->CastToIntrinsic()->HasImms() && inst->CastToIntrinsic()->GetImms().size() == 2U);
     uint32_t externalId = inst->CastToIntrinsic()->GetImms()[1];
     auto externalName = GetGraph()->GetRuntime()->GetExternalMethodName(GetGraph()->GetMethod(), externalId);
+
+    ASSERT_DO(std::string_view {externalName}.find("SlowPath") == std::string_view::npos,
+              std::cerr << "Unexpected SlowPath bridge call in LLVM FastPath: " << externalName << std::endl);
+
     auto callee = func_->getParent()->getFunction(externalName);
     if (callee == nullptr) {
         ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
@@ -1657,24 +1665,7 @@ llvm::Value *LLVMIrConstructor::CreateNewObjectWithRuntime(Inst *inst)
     return result;
 }
 
-llvm::Value *LLVMIrConstructor::CreateLoadMethodUsingVTable(llvm::Value *thiz, CallInst *call)
-{
-    ASSERT(thiz != nullptr);
-    ASSERT(call != nullptr);
-    ASSERT(GetGraph()->GetAotData()->GetUseCha());
-
-    auto runtime = GetGraph()->GetRuntime();
-    auto klass = CreateLoadClassFromObject(thiz);
-
-    // Get index
-    auto vtableIndex = runtime->GetVTableIndex(call->GetCallMethod());
-    // Load from VTable, address = klass + ((index << shift) + vtableOffset)
-    auto totalOffset = (vtableIndex << 3U) + runtime->GetVTableOffset(GetGraph()->GetArch());
-    auto methodPtr = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), klass, totalOffset);
-    return builder_.CreateLoad(builder_.getPtrTy(), methodPtr);
-}
-
-llvm::Value *LLVMIrConstructor::CreateResolveVirtualCall(Inst *inst, llvm::Value *thiz, uint32_t methodId)
+llvm::Value *LLVMIrConstructor::CreateResolveVirtualCallBuiltin(Inst *inst, llvm::Value *thiz, uint32_t methodId)
 {
     ASSERT(thiz->getType()->isPointerTy());
 
@@ -1693,18 +1684,6 @@ llvm::Value *LLVMIrConstructor::CreateResolveVirtualCall(Inst *inst, llvm::Value
         builder_.CreateCall(builtin, {thiz, ToSizeT(builder_.getInt32(methodId)), offset}, CreateSaveStateBundle(inst));
     WrapArkCall(inst, callInst);
     return builder_.CreateIntToPtr(callInst, builder_.getPtrTy());
-}
-
-llvm::Value *LLVMIrConstructor::CreateLoadClassFromObject(llvm::Value *object)
-{
-    ASSERT(object->getType()->isPointerTy());
-
-    auto dataOff = GetGraph()->GetRuntime()->GetObjClassOffset(GetGraph()->GetArch());
-    auto ptrData = builder_.CreateConstInBoundsGEP1_32(builder_.getInt8Ty(), object, dataOff);
-    static_assert(OBJECT_POINTER_SIZE == 4U);
-    // object + offset stores the Class* as i32
-    auto classAddress = builder_.CreateLoad(builder_.getInt32Ty(), ptrData);
-    return builder_.CreateIntToPtr(classAddress, builder_.getPtrTy());
 }
 
 llvm::Value *LLVMIrConstructor::CreateLoadManagedClassFromClass(llvm::Value *klass)
@@ -1946,7 +1925,11 @@ void LLVMIrConstructor::CreateLaunchCall([[maybe_unused]] CallInst *callInst)
             UNREACHABLE();
         }
 
-        args.push_back(CreateLoadMethodUsingVTable(GetInputValue(callInst, 1), callInst));
+        ASSERT(GetGraph()->GetAotData()->GetUseCha());
+
+        auto method = ark::llvmbackend::utils::CreateLoadMethodUsingVTable(
+            GetInputValue(callInst, 1), func_, callInst->GetCallMethodId(), &builder_, arkInterface_);
+        args.push_back(method);
         args.push_back(GetInputValue(callInst, 0));
 
         auto callArgs = CreateLaunchArgsArray(callInst, 2U);
@@ -1957,6 +1940,11 @@ void LLVMIrConstructor::CreateLaunchCall([[maybe_unused]] CallInst *callInst)
     auto eid = callInst->IsStaticLaunchCall() ? RuntimeInterface::EntrypointId::CREATE_LAUNCH_STATIC_COROUTINE
                                               : RuntimeInterface::EntrypointId::CREATE_LAUNCH_VIRTUAL_COROUTINE;
     auto entryCall = CreateEntrypointCall(eid, callInst, args);
+    if (callInst->GetOpcode() == Opcode::CallResolvedLaunchVirtual) {
+        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "original-method-id",
+                                                  std::to_string(callInst->GetCallMethodId())));
+        entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "is-launch-call"));
+    }
     if (callInst->GetFlag(inst_flags::MEM_BARRIER)) {
         entryCall->addFnAttr(llvm::Attribute::get(entryCall->getContext(), "needs-mem-barrier"));
     }
@@ -2035,14 +2023,7 @@ ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Ins
         }
         ASSERT(method != nullptr);
         // Put a function as a delimiter in inlining chain
-        auto function = arkInterface_->GetFunctionByMethodPtr(method);
-        if (function == nullptr) {
-            auto methodName = arkInterface_->GetUniqMethodName(method);
-            auto functionProto = GetFunctionTypeForCall(caller);
-            function = CreateFunctionDeclaration(functionProto, methodName, func_->getParent());
-            function->addFnAttr("frame-pointer", "all");
-            arkInterface_->PutFunction(method, function);
-        }
+        auto function = GetOrCreateFunctionForCall(caller, method);
         ASSERT(function != nullptr);
         vals.push_back(function);
         // Put methodId needed for inline info
@@ -2104,18 +2085,12 @@ void LLVMIrConstructor::EncodeInlineInfo(Inst *inst, llvm::Instruction *instruct
     llvm::reverse(saveStates);
     for (auto ss : saveStates) {
         auto method = ss->GetMethod();
-        auto function = arkInterface_->GetFunctionByMethodPtr(method);
+        auto methodName = arkInterface_->GetUniqMethodName(method);
+        auto function = func_->getParent()->getFunction(methodName);
         auto caller = ss->GetCallerInst();
         if (caller != nullptr) {
             method = ss->GetCallerInst()->GetCallMethod();
-            if (function == nullptr) {
-                auto methodName = arkInterface_->GetUniqMethodName(method);
-                auto functionProto = GetFunctionTypeForCall(caller);
-                function = CreateFunctionDeclaration(functionProto, methodName, func_->getParent());
-                function->addFnAttr("frame-pointer", "all");
-
-                arkInterface_->PutFunction(method, function);
-            }
+            function = GetOrCreateFunctionForCall(caller, method);
         }
         ASSERT(function != nullptr);
         debugData_->AppendInlinedAt(instruction, function, ss->GetPc());
@@ -2462,7 +2437,8 @@ void LLVMIrConstructor::SetIntrinsicParamAttrs(llvm::CallInst *call, IntrinsicIn
     ASSERT(i == args.size());
 }
 
-llvm::FunctionType *LLVMIrConstructor::GetFunctionTypeForCall(CallInst *call)
+template <typename T>
+llvm::FunctionType *LLVMIrConstructor::GetFunctionTypeForCall(T *inst)
 {
     ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
 
@@ -2473,7 +2449,7 @@ llvm::FunctionType *LLVMIrConstructor::GetFunctionTypeForCall(CallInst *call)
 
     auto runtime = GetGraph()->GetRuntime();
     auto methodPtr = GetGraph()->GetMethod();
-    auto methodId = call->GetCallMethodId();
+    auto methodId = inst->GetCallMethodId();
     // For instance methods pass implicit object argument
     if (!runtime->IsMethodStatic(methodPtr, methodId)) {
         argTypes.push_back(builder_.getPtrTy(LLVMArkInterface::GC_ADDR_SPACE));
@@ -2487,9 +2463,13 @@ llvm::FunctionType *LLVMIrConstructor::GetFunctionTypeForCall(CallInst *call)
     auto retType = runtime->GetMethodReturnType(methodPtr, methodId);
     // Ugly fix CallVirtual opcode for SaveState-excluded run codegen statistics
     if (methodPtr == nullptr) {
-        retType = call->GetType();
+        retType = inst->GetType();
     }
-    ASSERT(call->IsInlined() || call->GetType() == retType);
+
+    if constexpr (std::is_same_v<T, CallInst>) {
+        ASSERT(inst->IsInlined() || inst->GetType() == retType);
+    }
+
     return llvm::FunctionType::get(GetType(retType), argTypes, false);
 }
 
@@ -2514,6 +2494,23 @@ llvm::Value *LLVMIrConstructor::GetRealFrameRegValue()
     ASSERT(regInput != cc_.end());
     auto frameRegValue = func_->arg_begin() + std::distance(cc_.begin(), regInput);
     return frameRegValue;
+}
+
+llvm::Function *LLVMIrConstructor::GetOrCreateFunctionForCall(ark::compiler::CallInst *call, void *method)
+{
+    ASSERT(method != nullptr);
+    auto module = func_->getParent();
+    auto methodName = arkInterface_->GetUniqMethodName(method);
+    auto function = module->getFunction(methodName);
+    if (function == nullptr) {
+        auto functionProto = GetFunctionTypeForCall(call);
+        function = CreateFunctionDeclaration(functionProto, methodName, module);
+        function->addFnAttr("frame-pointer", "all");
+        function->addFnAttr(
+            ark::llvmbackend::LLVMArkInterface::SOURCE_LANG_ATTR,
+            std::to_string(static_cast<uint8_t>(GetGraph()->GetRuntime()->GetMethodSourceLanguage(method))));
+    }
+    return function;
 }
 
 llvm::Type *LLVMIrConstructor::GetType(DataType::Type pandaType)
@@ -2542,7 +2539,7 @@ llvm::Type *LLVMIrConstructor::GetType(DataType::Type pandaType)
             return builder_.getDoubleTy();
         default:
             ASSERT_DO(false, (std::cerr << "No handler for panda type = '" << DataType::ToString(pandaType)
-                                        << "' to llvm type conversion."));
+                                        << "' to llvm type conversion." << std::endl));
             UNREACHABLE();
     }
 }
@@ -2589,7 +2586,7 @@ llvm::Type *LLVMIrConstructor::GetExactType(DataType::Type targetType)
             return builder_.getDoubleTy();
         default:
             ASSERT_DO(false, (std::cerr << "No handler for panda type = '" << DataType::ToString(targetType)
-                                        << "' to llvm type conversion."));
+                                        << "' to llvm type conversion." << std::endl));
             UNREACHABLE();
     }
 }
@@ -2628,7 +2625,7 @@ llvm::Instruction::CastOps LLVMIrConstructor::GetCastOp(DataType::Type from, Dat
         return llvm::Instruction::AddrSpaceCast;
     }
     ASSERT_DO(false, (std::cerr << "Cast from " << DataType::ToString(from) << " to " << DataType::ToString(to))
-                         << " is not supported");
+                         << " is not supported" << std::endl);
     UNREACHABLE();
 }
 
@@ -2855,6 +2852,12 @@ void LLVMIrConstructor::InitializeEntryBlock(bool noInline)
         if (!GetGraph()->GetRuntime()->IsMethodStatic(GetGraph()->GetMethod())) {
             func_->addParamAttr(GetArgument(0)->getArgNo(), llvm::Attribute::NonNull);
         }
+    }
+
+    if (func_->hasMetadata(LLVMArkInterface::FUNCTION_MD_INLINE_MODULE) &&
+        !GetGraph()->GetRuntime()->IsMethodStatic(GetGraph()->GetMethod())) {
+        SetCurrentBasicBlock(&func_->getEntryBlock());
+        builder_.CreateCall(KeepThis(func_->getParent()), GetArgument(0));
     }
 }
 
@@ -3112,13 +3115,13 @@ void LLVMIrConstructor::VisitRefTypeCheck(GraphVisitor *v, Inst *inst)
 
     // Get element class from array
     ctor->SetCurrentBasicBlock(compareBb);
-    auto arrayClass = ctor->CreateLoadClassFromObject(array);
+    auto arrayClass = CreateLoadClassFromObject(array, &ctor->builder_, ctor->arkInterface_);
     auto elementTypeOffset = runtime->GetClassComponentTypeOffset(arch);
     auto int8Ty = ctor->builder_.getInt8Ty();
     auto elementClassPtr = ctor->builder_.CreateConstInBoundsGEP1_32(int8Ty, arrayClass, elementTypeOffset);
     auto elementClass = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), elementClassPtr);
     // And class from stored object
-    auto refClass = ctor->CreateLoadClassFromObject(ref);
+    auto refClass = CreateLoadClassFromObject(ref, &ctor->builder_, ctor->arkInterface_);
 
     // Unlike other checks, there's another check in the runtime function, so don't use CreateDeoptimizationBranch
     cmp = ctor->builder_.CreateICmpNE(elementClass, refClass);
@@ -3790,7 +3793,7 @@ void LLVMIrConstructor::VisitMin(GraphVisitor *v, Inst *inst)
     } else if (IsInteger(operType)) {
         llvmId = DataType::IsTypeSigned(operType) ? llvm::Intrinsic::smin : llvm::Intrinsic::umin;
     } else {
-        ASSERT_DO(false, (std::cerr << "Min is not supported for type " << DataType::ToString(operType)));
+        ASSERT_DO(false, (std::cerr << "Min is not supported for type " << DataType::ToString(operType) << std::endl));
         UNREACHABLE();
     }
     auto min = ctor->builder_.CreateBinaryIntrinsic(llvmId, x, y);
@@ -3811,7 +3814,7 @@ void LLVMIrConstructor::VisitMax(GraphVisitor *v, Inst *inst)
     } else if (IsInteger(operType)) {
         llvmId = DataType::IsTypeSigned(operType) ? llvm::Intrinsic::smax : llvm::Intrinsic::umax;
     } else {
-        ASSERT_DO(false, (std::cerr << "Max is not supported for type " << DataType::ToString(operType)));
+        ASSERT_DO(false, (std::cerr << "Max is not supported for type " << DataType::ToString(operType) << std::endl));
         UNREACHABLE();
     }
     auto max = ctor->builder_.CreateBinaryIntrinsic(llvmId, x, y);
@@ -4165,33 +4168,24 @@ void LLVMIrConstructor::VisitCallStatic(GraphVisitor *v, Inst *inst)
     auto callee = ctor->GetGraph()->GetRuntime()->GetMethodById(methodPtr, methodId);
     ASSERT(callee != nullptr);
     // Create a declare statement if we haven't met this function yet
-    llvm::Function *func = ctor->arkInterface_->GetFunctionByMethodPtr(callee);
-    if (func == nullptr) {
-        /**
-         * Optimistically assume we can compile callee and just haven't met
-         * it yet.  So, create function declaration.
-         */
-        auto methodName = ctor->arkInterface_->GetUniqMethodName(callee);
-        auto functionProto = ctor->GetFunctionTypeForCall(call);
-        auto function = CreateFunctionDeclaration(functionProto, methodName, ctor->func_->getParent());
-        function->addFnAttr("frame-pointer", "all");
-
-        ctor->arkInterface_->PutFunction(callee, function);
-        func = function;
-    }
-    ctor->arkInterface_->RememberFunctionCall(ctor->func_, func, methodId);
+    auto function = ctor->GetOrCreateFunctionForCall(call, callee);
+    ctor->arkInterface_->RememberFunctionCall(ctor->func_, function, methodId);
 
     // Replaced to real callee in the PandaRuntimeLowering
     auto args = ctor->GetArgumentsForCall(ctor->GetMethodArgument(), call);
-    auto result = ctor->builder_.CreateCall(func, args, ctor->CreateSaveStateBundle(inst));
+    auto result = ctor->builder_.CreateCall(function, args, ctor->CreateSaveStateBundle(inst));
     ctor->WrapArkCall(inst, result);
 
     if (inst->GetType() != DataType::VOID) {
         ctor->ValueMapAdd(inst, result);
     }
 
-    if (ctor->GetGraph()->GetRuntime()->IsMethodExternal(methodPtr, callee) || IsAlwaysThrowBasicBlock(inst)) {
+    if (ctor->GetGraph()->GetRuntime()->IsMethodExternal(methodPtr, callee)) {
         result->addAttributeAtIndex(llvm::AttributeList::FunctionIndex, llvm::Attribute::NoInline);
+    }
+    if (IsAlwaysThrowBasicBlock(inst)) {
+        result->addAttributeAtIndex(llvm::AttributeList::FunctionIndex, llvm::Attribute::NoInline);
+        result->addFnAttr(llvm::Attribute::get(ctor->func_->getContext(), "keep-noinline"));
     }
 }
 
@@ -4219,7 +4213,6 @@ void LLVMIrConstructor::VisitCallResolvedStatic(GraphVisitor *v, Inst *inst)
 
     auto method = ctor->GetInputValue(inst, 0);
 
-    // Since we are creating call through raw pointer, we need clear type, without frame.
     llvm::FunctionType *fType = ctor->GetFunctionTypeForCall(call);
     auto args = ctor->GetArgumentsForCall(method, call, true);  // skip first input
 
@@ -4234,36 +4227,51 @@ void LLVMIrConstructor::VisitCallResolvedStatic(GraphVisitor *v, Inst *inst)
     ctor->WrapArkCall(inst, result);
 }
 
+template <typename T>
+llvm::Function *CreateDeclForVirtualCall(T *inst, LLVMIrConstructor *ctor, LLVMArkInterface *arkInterface)
+{
+    arkInterface->GetOrCreateRuntimeFunctionType(
+        ctor->GetFunc()->getContext(), ctor->GetFunc()->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+        static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::RESOLVE_VIRTUAL_CALL_AOT));
+    arkInterface->GetOrCreateRuntimeFunctionType(
+        ctor->GetFunc()->getContext(), ctor->GetFunc()->getParent(), LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+        static_cast<LLVMArkInterface::EntrypointId>(RuntimeInterface::EntrypointId::INTF_INLINE_CACHE));
+
+    auto methodPtr = ctor->GetGraph()->GetMethod();
+    auto methodId = inst->GetCallMethodId();
+    auto callee = ctor->GetGraph()->GetRuntime()->GetMethodById(methodPtr, methodId);
+    ASSERT(callee != nullptr);
+
+    std::stringstream ssUniqName;
+    ssUniqName << "f_" << std::hex << inst;
+    auto uniqName = ssUniqName.str();
+    auto methodName = arkInterface->GetUniqMethodName(callee) + "_" + uniqName;
+    auto functionProto = ctor->GetFunctionTypeForCall(inst);
+    auto func = CreateFunctionDeclaration(functionProto, methodName, ctor->GetFunc()->getParent());
+
+    func->addFnAttr("frame-pointer", "all");
+    arkInterface->PutVirtualFunction(inst->GetCallMethod(), func);
+    return func;
+}
+
 void LLVMIrConstructor::VisitCallVirtual(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
-    auto graph = ctor->GetGraph();
     auto call = inst->CastToCallVirtual();
     if (call->IsInlined()) {
         return;
     }
-    auto runtime = ctor->GetGraph()->GetRuntime();
-    ASSERT_PRINT(graph->GetAotData()->GetUseCha(),
+    ASSERT_PRINT(ctor->GetGraph()->GetAotData()->GetUseCha(),
                  std::string("GetUseCha must be 'true' but was 'false' for method = '") +
-                     runtime->GetMethodFullName(graph->GetMethod()) + "'");
+                     ctor->GetGraph()->GetRuntime()->GetMethodFullName(ctor->GetGraph()->GetMethod()) + "'");
 
-    llvm::Value *thiz = ctor->GetInputValue(inst, 0);
-    llvm::Value *method;
-    if (runtime->IsInterfaceMethod(call->GetCallMethod())) {
-        method = ctor->CreateResolveVirtualCall(inst, thiz, call->GetCallMethodId());
-    } else {
-        method = ctor->CreateLoadMethodUsingVTable(thiz, call);
-    }
+    ASSERT(!ctor->GetGraph()->GetRuntime()->IsInterfaceMethod(call->GetCallMethod()));
+    auto methodId = call->GetCallMethodId();
 
-    // Since we are creating call through raw pointer, we need clear type, without frame.
-    llvm::FunctionType *fType = ctor->GetFunctionTypeForCall(call);
-
-    auto args = ctor->GetArgumentsForCall(method, call);
-    auto offset = runtime->GetCompiledEntryPointOffset(graph->GetArch());
-    auto entrypointPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), method, offset);
-    auto entrypoint = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), entrypointPtr);
-
-    auto result = ctor->builder_.CreateCall(fType, entrypoint, args, ctor->CreateSaveStateBundle(inst));
+    auto func = CreateDeclForVirtualCall(call, ctor, ctor->arkInterface_);
+    auto args = ctor->GetArgumentsForCall(ctor->GetMethodArgument(), call);
+    auto result = ctor->builder_.CreateCall(func, args, ctor->CreateSaveStateBundle(inst));
+    result->addFnAttr(llvm::Attribute::get(result->getContext(), "original-method-id", std::to_string(methodId)));
     if (inst->GetType() != DataType::VOID) {
         ctor->ValueMapAdd(inst, result);
     }
@@ -4274,13 +4282,17 @@ void LLVMIrConstructor::VisitResolveVirtual(GraphVisitor *v, Inst *inst)
 {
     auto ctor = static_cast<LLVMIrConstructor *>(v);
     auto resolver = inst->CastToResolveVirtual();
-    llvm::Value *thiz = ctor->GetInputValue(inst, 0);
-    llvm::Value *method;
 
-    method = ctor->CreateResolveVirtualCall(inst, thiz, resolver->GetCallMethodId());
-
-    ASSERT(method->getType()->isPointerTy());
-    ctor->ValueMapAdd(inst, method);
+    llvm::Value *method = nullptr;
+    if (resolver->GetCallMethod() == nullptr) {
+        llvm::Value *thiz = ctor->GetInputValue(inst, 0);
+        method = ctor->CreateResolveVirtualCallBuiltin(inst, thiz, resolver->GetCallMethodId());
+        ASSERT(method->getType()->isPointerTy());
+    } else {
+        ASSERT(ctor->GetGraph()->GetRuntime()->IsInterfaceMethod(resolver->GetCallMethod()));
+        method = CreateDeclForVirtualCall(resolver, ctor, ctor->arkInterface_);
+    }
+    ctor->ValueMapAdd(inst, method, false);
 }
 
 void LLVMIrConstructor::VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst)
@@ -4290,17 +4302,25 @@ void LLVMIrConstructor::VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst)
     if (call->IsInlined()) {
         return;
     }
-
+    auto runtime = ctor->GetGraph()->GetRuntime();
     auto method = ctor->GetInputValue(inst, 0);
-    // Since we are creating call through raw pointer, we need clear type, without frame.
-    llvm::FunctionType *fType = ctor->GetFunctionTypeForCall(call);
-
     auto args = ctor->GetArgumentsForCall(method, call, true);
-    auto offset = ctor->GetGraph()->GetRuntime()->GetCompiledEntryPointOffset(ctor->GetGraph()->GetArch());
-    auto entrypointPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), method, offset);
-    auto entrypoint = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), entrypointPtr);
 
-    auto result = ctor->builder_.CreateCall(fType, entrypoint, args, ctor->CreateSaveStateBundle(inst));
+    llvm::CallInst *result = nullptr;
+    if (call->GetCallMethod() == nullptr) {
+        llvm::FunctionType *fType = ctor->GetFunctionTypeForCall(call);
+
+        auto offset = runtime->GetCompiledEntryPointOffset(ctor->GetGraph()->GetArch());
+        auto entrypointPtr = ctor->builder_.CreateConstInBoundsGEP1_32(ctor->builder_.getInt8Ty(), method, offset);
+        auto entrypoint = ctor->builder_.CreateLoad(ctor->builder_.getPtrTy(), entrypointPtr);
+        result = ctor->builder_.CreateCall(fType, entrypoint, args, ctor->CreateSaveStateBundle(inst));
+    } else {
+        ASSERT(runtime->IsInterfaceMethod(call->GetCallMethod()));
+        auto *func = llvm::cast<llvm::Function>(method);
+        result = ctor->builder_.CreateCall(func, args, ctor->CreateSaveStateBundle(inst));
+        auto methodId = call->GetCallMethodId();
+        result->addFnAttr(llvm::Attribute::get(result->getContext(), "original-method-id", std::to_string(methodId)));
+    }
     if (inst->GetType() != DataType::VOID) {
         ctor->ValueMapAdd(inst, result);
     }
@@ -4320,7 +4340,7 @@ void LLVMIrConstructor::VisitAbs(GraphVisitor *v, Inst *inst)
     } else if (IsInteger(pandaType)) {
         result = ctor->builder_.CreateBinaryIntrinsic(llvm::Intrinsic::abs, argument, ctor->builder_.getFalse());
     } else {
-        ASSERT_DO(false, (std::cerr << "Abs is not supported for type " << DataType::ToString(pandaType)));
+        ASSERT_DO(false, (std::cerr << "Abs is not supported for type " << DataType::ToString(pandaType) << std::endl));
         UNREACHABLE();
     }
     ASSERT(result != nullptr);
@@ -4534,7 +4554,7 @@ void LLVMIrConstructor::VisitIsInstance(GraphVisitor *v, Inst *inst)
 
         llvm::Value *innerResult = nullptr;
         auto klassId = ctor->GetInputValue(inst, 1);
-        auto klassObj = ctor->CreateLoadClassFromObject(object);
+        auto klassObj = CreateLoadClassFromObject(object, &ctor->builder_, ctor->arkInterface_);
         auto notnullPostBb = ctor->GetCurrentBasicBlock();
         auto cmp = ctor->builder_.CreateICmpEQ(klassId, klassObj);
         if (klassType == ClassType::FINAL_CLASS) {
@@ -4591,7 +4611,7 @@ void LLVMIrConstructor::VisitCheckCast(GraphVisitor *v, Inst *inst)
         ctor->CreateFastPathCall(inst, entrypoint, {src, ctor->GetInputValue(inst, 1)});
     } else {
         auto klassId = ctor->GetInputValue(inst, 1);
-        auto klassObj = ctor->CreateLoadClassFromObject(src);
+        auto klassObj = CreateLoadClassFromObject(src, &ctor->builder_, ctor->arkInterface_);
         if (klassType == ClassType::FINAL_CLASS) {
             auto cmpNe = ctor->builder_.CreateICmpNE(klassId, klassObj);
             auto exception = RuntimeInterface::EntrypointId::CLASS_CAST_EXCEPTION;
@@ -4633,7 +4653,7 @@ void LLVMIrConstructor::VisitGetInstanceClass(GraphVisitor *v, Inst *inst)
     auto ctor = static_cast<LLVMIrConstructor *>(v);
 
     auto object = ctor->GetInputValue(inst, 0);
-    auto klass = ctor->CreateLoadClassFromObject(object);
+    auto klass = CreateLoadClassFromObject(object, &ctor->builder_, ctor->arkInterface_);
     ctor->ValueMapAdd(inst, klass);
 }
 
@@ -4733,7 +4753,6 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
     auto funcProto = GetEntryFunctionType();
     auto methodName = arkInterface_->GetUniqMethodName(graph_->GetMethod());
     func_ = CreateFunctionDeclaration(funcProto, methodName, module);
-    arkInterface_->PutFunction(graph_->GetMethod(), func_);
 
     if (graph->SupportManagedCode()) {
         func_->setGC(std::string {llvmbackend::LLVMArkInterface::GC_STRATEGY});
@@ -4769,6 +4788,8 @@ bool LLVMIrConstructor::BuildIr(bool preventInlining)
     auto method = graph_->GetMethod();
     auto runtime = graph_->GetRuntime();
     arkInterface_->RememberFunctionOrigin(func_, method);
+    func_->addFnAttr(ark::llvmbackend::LLVMArkInterface::SOURCE_LANG_ATTR,
+                     std::to_string(static_cast<uint8_t>(runtime->GetMethodSourceLanguage(method))));
 
     if (!graph_->GetMode().IsFastPath()) {
         debugData_->BeginSubprogram(func_, runtime->GetFullFileName(method), runtime->GetMethodId(method));

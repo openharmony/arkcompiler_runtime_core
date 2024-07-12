@@ -32,10 +32,12 @@ llvm::Function *PostWRB(llvm::Module *module, unsigned addrSpace);
 llvm::Function *LoadString(llvm::Module *module);
 llvm::Function *ResolveVirtual(llvm::Module *module);
 llvm::Function *BarrierReturnVoid(llvm::Module *module);
+llvm::Function *KeepThis(llvm::Module *module);
 llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst,
                           ark::llvmbackend::LLVMArkInterface *arkInterface);
 constexpr auto BUILTIN_SECTION = ".builtins";
 constexpr auto LEN_ARRAY_BUILTIN = "__builtin_lenarray";
+constexpr auto KEEP_THIS_BUILTIN = "__builtin_keep_this";
 constexpr auto LOAD_CLASS_BUILTIN = "__builtin_load_class";
 constexpr auto LOAD_INIT_CLASS_BUILTIN = "__builtin_load_init_class";
 constexpr auto PRE_WRB_BUILTIN = "__builtin_pre_wrb";

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,14 +54,21 @@ not_inlined_call:
 #! PASS_AFTER   "Codegen"
 #! INST         /CallVirtual.*C::bar/
 #! RUN          options: "--boot-panda-files=../../vcalls_aux.checked/test.abc", entry: "AotChaTest::main", result: 95
+
+#! CHECKER      aot with cha using boot panda files - LLVM
+#! RUN_LLVM     options: "--boot-panda-files=../../vcalls_aux.checked/test.abc --paoc-use-cha=true"
+#! METHOD       "AotChaTest::main"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /CallVirtual.*C::bar/
+#! RUN          options: "--boot-panda-files=../../vcalls_aux.checked/test.abc", entry: "AotChaTest::main", result: 95
 #! EVENT        /AotLoadedForClass,.*,AotChaTest/
 
 #! CHECKER      invalid aot boot panda files
-#! RUN_PAOC     options: "--paoc-use-cha=true"
+#! RUN_AOT      options: "--paoc-use-cha=true"
 #! RUN          options: "--boot-panda-files=../../vcalls_aux.checked/test.abc", entry: "AotChaTest::main", abort: 6
 
 #! CHECKER      invalid runtime boot panda files
-#! RUN_PAOC     options: "--boot-panda-files=../../vcalls_aux.checked/test.abc --paoc-use-cha=true"
+#! RUN_AOT      options: "--boot-panda-files=../../vcalls_aux.checked/test.abc --paoc-use-cha=true"
 #! RUN          options: "", entry: "AotChaTest::main", abort: 6
 
 #! CHECKER      boot aot without cha
@@ -76,14 +83,27 @@ not_inlined_call:
 #! RUN          options: "--boot-panda-files=../test.abc --enable-an", entry: "_GLOBAL::CompilationStub", result: 42
 #! EVENT        /AotEntrypointFound,_GLOBAL::CompilationStub/
 
+#! CHECKER      boot aot with cha - LLVM
+#! RUN_LLVM     options: "--boot-panda-files=../test.abc --paoc-use-cha=true", boot: true
+#! RUN          options: "--boot-panda-files=../test.abc --enable-an", entry: "_GLOBAL::CompilationStub", result: 42
+#! EVENT        /AotEntrypointFound,_GLOBAL::CompilationStub/
+
 #! CHECKER      invalid boot aot
 #! RUN_PAOC     options: "--boot-panda-files=../../vcalls_aux.checked/test.abc --paoc-use-cha=true", boot: true
 #! EVENT        /Compilation,_GLOBAL::CompilationStub,.*,COMPILED/
 #! RUN          options: "--boot-panda-files=../test.abc --enable-an", entry: "_GLOBAL::CompilationStub", abort: 6
 
+#! CHECKER      invalid boot aot - LLVM
+#! RUN_LLVM     options: "--boot-panda-files=../../vcalls_aux.checked/test.abc --paoc-use-cha=true", boot: true
+#! RUN          options: "--boot-panda-files=../test.abc --enable-an", entry: "_GLOBAL::CompilationStub", abort: 6
+
 #! CHECKER      invalid boot runtime
 #! RUN_PAOC     options: "--boot-panda-files=../test.abc --paoc-use-cha=true", boot: true
 #! EVENT        /Compilation,_GLOBAL::CompilationStub,.*,COMPILED/
+#! RUN          options: "--enable-an", entry: "_GLOBAL::CompilationStub", abort: 6
+
+#! CHECKER      invalid boot runtime - LLVM
+#! RUN_LLVM     options: "--boot-panda-files=../test.abc --paoc-use-cha=true", boot: true
 #! RUN          options: "--enable-an", entry: "_GLOBAL::CompilationStub", abort: 6
 
 #! CHECKER      boot aot files with cha
@@ -92,8 +112,18 @@ not_inlined_call:
 #! RUN          options: "--boot-panda-files=../test.abc", entry: "_GLOBAL::CompilationStub", result: 42
 #! EVENT        /AotEntrypointFound,_GLOBAL::CompilationStub/
 
+#! CHECKER      boot aot files with cha - LLVM
+#! RUN_LLVM     options: "--paoc-use-cha=true", boot: true
+#! RUN          options: "--boot-panda-files=../test.abc", entry: "_GLOBAL::CompilationStub", result: 42
+#! EVENT        /AotEntrypointFound,_GLOBAL::CompilationStub/
+
 #! CHECKER      invalid runtime boot aot files
 #! RUN_PAOC     options: "--paoc-use-cha=true", boot: true
 #! EVENT        /Compilation,_GLOBAL::CompilationStub,.*,COMPILED/
+#! RUN          entry: "_GLOBAL::CompilationStub", abort: 6
+#! EVENT_NOT    /AotEntrypointFound,_GLOBAL::CompilationStub/
+
+#! CHECKER      invalid runtime boot aot files - LLVM
+#! RUN_LLVM     options: "--paoc-use-cha=true", boot: true
 #! RUN          entry: "_GLOBAL::CompilationStub", abort: 6
 #! EVENT_NOT    /AotEntrypointFound,_GLOBAL::CompilationStub/

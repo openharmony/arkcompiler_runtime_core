@@ -44,18 +44,15 @@ public:
                                        const ark::llvmbackend::LLVMCompilerOptions *options);
 
     // NOLINTNEXTLINE(readability-identifier-naming)
-    llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &analysisManager);
+    llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &am);
 
 private:
-    void LowerCallStatic(llvm::CallInst *inst);
-
+    llvm::Value *CreateLoadMethodUsingVTable(llvm::Value *thiz, llvm::CallInst *call, llvm::IRBuilder<> *builder);
     llvm::Value *GetMethodOrResolverPtr(llvm::IRBuilder<> *builder, llvm::CallInst *inst);
-
+    bool NeedsToBeLowered(llvm::CallInst *call);
     void LowerBuiltin(llvm::CallInst *inst);
-
-    bool IsRememberedCall(const llvm::Instruction &inst);
-
-    bool IsBuiltinCall(const llvm::Instruction &inst);
+    void LowerCallStatic(llvm::CallInst *inst);
+    void LowerCallVirtual(llvm::CallInst *inst);
 
 private:
     LLVMArkInterface *arkInterface_;

@@ -263,6 +263,7 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         auto callInst = static_cast<CallInst *>(inst);
         auto saveState = graph->CreateInstSaveState()->CastToSaveState();
         saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+        callInst->SetCallMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
         block->PrependInst(saveState);
         callInst->AllocateInputTypes(&allocator_, n + 1);
         for (int32_t i = 0; i < n; ++i) {

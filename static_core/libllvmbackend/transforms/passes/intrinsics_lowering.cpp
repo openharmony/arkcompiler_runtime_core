@@ -15,6 +15,7 @@
 
 #include <unordered_map>
 
+#include "transforms/gc_utils.h"
 #include "transforms/passes/intrinsics_lowering.h"
 #include "transforms/runtime_calls.h"
 #include "transforms/transform_utils.h"
@@ -44,6 +45,9 @@ IntrinsicsLowering::IntrinsicsLowering(LLVMArkInterface *arkInterface) : arkInte
 llvm::PreservedAnalyses IntrinsicsLowering::run(Function &function, FunctionAnalysisManager & /*analysisManager*/)
 {
     ASSERT(arkInterface_ != nullptr);
+    if (gc_utils::IsFunctionSupplemental(function)) {
+        return llvm::PreservedAnalyses::all();
+    }
     bool changed = false;
     std::unordered_map<llvm::Instruction *, llvm::Instruction *> instToReplaceWithInst;
     for (auto &block : function) {

@@ -21,6 +21,7 @@
 #include "utils/cframe_layout.h"
 #include "llvm_ark_interface.h"
 #include "llvm_logger.h"
+#include "utils.h"
 
 #include <llvm/IR/Function.h>
 #include <llvm/Support/raw_ostream.h>
@@ -142,12 +143,12 @@ const char *LLVMArkInterface::GetFramePointerRegister() const
     }
 }
 
-void LLVMArkInterface::PutCalleeSavedRegistersMask(const llvm::Function *method, RegMasks masks)
+void LLVMArkInterface::PutCalleeSavedRegistersMask(llvm::StringRef method, RegMasks masks)
 {
     calleeSavedRegisters_.insert({method, masks});
 }
 
-LLVMArkInterface::RegMasks LLVMArkInterface::GetCalleeSavedRegistersMask(const llvm::Function *method)
+LLVMArkInterface::RegMasks LLVMArkInterface::GetCalleeSavedRegistersMask(llvm::StringRef method)
 {
     return calleeSavedRegisters_.lookup(method);
 }
@@ -534,9 +535,11 @@ void LLVMArkInterface::RememberFunctionOrigin(const llvm::Function *function, Me
     ASSERT(methodPtr != nullptr);
 
     auto file = static_cast<panda_file::File *>(runtime_->GetBinaryFileForMethod(methodPtr));
-    [[maybe_unused]] auto insertionResult = functionOrigins_.insert({function, file});
-    ASSERT(insertionResult.second);
+    [[maybe_unused]] auto insertionResultFunctionOrigins = functionOrigins_.insert({function, file});
+    ASSERT(insertionResultFunctionOrigins.second);
     LLVM_LOG(DEBUG, INFRA) << function->getName().data() << " defined in " << runtime_->GetFileName(methodPtr);
+    [[maybe_unused]] auto insertionResultMethodPtrs = methodPtrs_.insert({function, methodPtr});
+    ASSERT(insertionResultMethodPtrs.second);
 }
 
 LLVMArkInterface::MethodId LLVMArkInterface::GetMethodId(const llvm::Function *caller,
@@ -582,6 +585,40 @@ bool ark::llvmbackend::LLVMArkInterface::IsRememberedCall(const llvm::Function *
                      caller->getName().str() + " before calling IsRememberedCall");
 
     return methodIds_.find({callee, callerOriginFile->second}) != methodIds_.end();
+}
+
+int32_t ark::llvmbackend::LLVMArkInterface::GetObjectClassOffset() const
+{
+    auto arch = LLVMArchToArkArch(triple_.getArch());
+    return runtime_->GetObjClassOffset(arch);
+}
+
+bool ark::llvmbackend::LLVMArkInterface::IsExternal(llvm::CallInst *call)
+{
+    auto caller = methodPtrs_.find(call->getFunction());
+    ASSERT(caller != methodPtrs_.end());
+    auto callee = methodPtrs_.find(call->getCalledFunction());
+    ASSERT(callee != methodPtrs_.end());
+    return runtime_->IsMethodExternal(caller->second, callee->second);
+}
+
+LLVMArkInterface::MethodPtr ark::llvmbackend::LLVMArkInterface::ResolveVirtual(uint32_t classId, llvm::CallInst *call)
+{
+    auto caller = methodPtrs_.find(call->getFunction());
+    ASSERT(caller != methodPtrs_.end());
+    auto klass = runtime_->GetClass(caller->second, classId);
+    if (klass == nullptr) {
+        return nullptr;
+    }
+    auto callee = methodPtrs_.find(call->getCalledFunction());
+    ASSERT(callee != methodPtrs_.end());
+    auto calleeClassId = runtime_->GetClassIdForMethod(callee->getSecond());
+    auto calleeClass = runtime_->GetClass(callee->getSecond(), calleeClassId);
+    if (!runtime_->IsAssignableFrom(calleeClass, klass)) {
+        return nullptr;
+    }
+    auto resolved = runtime_->ResolveVirtualMethod(klass, callee->second);
+    return resolved;
 }
 
 int32_t LLVMArkInterface::GetPltSlotId(const llvm::Function *caller, const llvm::Function *callee) const
@@ -630,28 +667,32 @@ BridgeType LLVMArkInterface::GetBridgeType(EntrypointId id) const
     return GetBridgeTypeInternal(static_cast<RuntimeInterface::EntrypointId>(id));
 }
 
-llvm::Function *LLVMArkInterface::GetFunctionByMethodPtr(LLVMArkInterface::MethodPtr method) const
-{
-    ASSERT(method != nullptr);
-
-    return functions_.lookup(method);
-}
-
-void LLVMArkInterface::PutFunction(LLVMArkInterface::MethodPtr methodPtr, llvm::Function *function)
+void LLVMArkInterface::PutVirtualFunction(LLVMArkInterface::MethodPtr methodPtr, llvm::Function *function)
 {
     ASSERT(function != nullptr);
     ASSERT(methodPtr != nullptr);
-    // We are not expecting `tan` functions other than we are adding in LLVMIrConstructor::EmitTan()
-    ASSERT(function->getName() != "tan");
 
-    [[maybe_unused]] auto fInsertionResult = functions_.insert({methodPtr, function});
-    ASSERT_PRINT(fInsertionResult.first->second == function,
-                 std::string("Attempt to map '") + GetUniqMethodName(methodPtr) + "' to a function = '" +
-                     function->getName().str() + "', but the method_ptr already mapped to '" +
-                     fInsertionResult.first->second->getName().str() + "'");
-    auto sourceLang = static_cast<uint8_t>(runtime_->GetMethodSourceLanguage(methodPtr));
-    [[maybe_unused]] auto slInsertionResult = sourceLanguages_.insert({function, sourceLang});
-    ASSERT(slInsertionResult.first->second == sourceLang);
+    methodPtrs_.insert({function, methodPtr});
+}
+
+uint32_t LLVMArkInterface::GetVTableOffset(llvm::Function *caller, uint32_t methodId) const
+{
+    auto arkCaller = methodPtrs_.find(caller);
+    auto callee = runtime_->GetMethodById(arkCaller->second, methodId);
+
+    auto arch = LLVMArchToArkArch(triple_.getArch());
+    auto vtableIndex = runtime_->GetVTableIndex(callee);
+    uint32_t offset = runtime_->GetVTableOffset(arch) + (vtableIndex << 3U);
+    return offset;
+}
+
+bool LLVMArkInterface::IsInterfaceMethod(llvm::CallInst *call)
+{
+    auto methodId = utils::GetMethodIdFromAttr(call);
+    auto caller = methodPtrs_.find(call->getFunction());
+    auto callee = runtime_->GetMethodById(caller->second, methodId);
+
+    return runtime_->IsInterfaceMethod(callee);
 }
 
 const char *LLVMArkInterface::GetIntrinsicRuntimeFunctionName(LLVMArkInterface::IntrinsicId id) const

@@ -37,6 +37,7 @@
 #include "optimizer/optimizations/lse.h"
 #include "optimizer/optimizations/memory_barriers.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
+#include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/reserve_string_builder_buffer.h"
@@ -298,11 +299,12 @@ bool LLVMAotCompiler::RunArkPasses(compiler::Graph *graph)
     graph->RunPass<compiler::Cleanup>(false);
     if (!compiler::g_options.IsCompilerNonOptimizing()) {
         // Same logic as in ark::compiler::Pipeline::RunOptimizations
-        if (!compiler::g_options.IsCompilerLoopUnroll()) {
+        if (!(compiler::g_options.WasSetCompilerLoopUnroll() && compiler::g_options.IsCompilerLoopUnroll())) {
             graph->SetUnrollComplete();
         }
         graph->RunPass<compiler::Peepholes>();
         graph->RunPass<compiler::BranchElimination>();
+        graph->RunPass<compiler::OptimizeStringConcat>();
         graph->RunPass<compiler::SimplifyStringBuilder>();
         graph->RunPass<compiler::Inlining>(llvmPreOpt == 0);
         graph->RunPass<compiler::Cleanup>();
@@ -352,9 +354,12 @@ void LLVMAotCompiler::PreOpt2(compiler::Graph *graph)
     if (graph->RunPass<compiler::DeoptimizeElimination>()) {
         graph->RunPass<compiler::Peepholes>();
     }
-    graph->RunPass<compiler::LoopUnroll>(compiler::g_options.GetCompilerLoopUnrollInstLimit(),
-                                         compiler::g_options.GetCompilerLoopUnrollFactor());
+    if (compiler::g_options.WasSetCompilerLoopUnroll()) {
+        graph->RunPass<compiler::LoopUnroll>(compiler::g_options.GetCompilerLoopUnrollInstLimit(),
+                                             compiler::g_options.GetCompilerLoopUnrollFactor());
+    }
     compiler::OptimizationsAfterUnroll(graph);
+    graph->RunPass<compiler::Peepholes>();
     graph->RunPass<compiler::EscapeAnalysis>();
     graph->RunPass<compiler::ReserveStringBuilderBuffer>();
     ASSERT(graph->IsUnrollComplete());
@@ -397,6 +402,9 @@ Expected<bool, std::string> LLVMAotCompiler::AddGraphToModule(compiler::Graph *g
                                      module.GetLLVMArkInterface().get(), module.GetDebugData());
     auto llvmFunction = ctor.GetFunc();
     bool noInline = IsInliningDisabled(graph);
+    if (addGraphMode == AddGraphMode::INLINE_FUNCTION) {
+        MarkAsInlineObject(llvmFunction);
+    }
     bool builtIr = ctor.BuildIr(noInline);
     if (!builtIr) {
         if (addGraphMode == AddGraphMode::PRIMARY_FUNCTION) {
@@ -484,20 +492,20 @@ LLVMAotCompiler::LLVMAotCompiler(compiler::RuntimeInterface *runtime, ArenaAlloc
     auto arch = aotBuilder->GetArch();
     llvm::Triple ttriple = GetTripleForArch(arch);
     auto llvmCompilerOptions = InitializeLLVMCompilerOptions();
-    SetLLVMOption("spill-slot-min-size-bytes", GetFrameSlotSize(arch));
+    SetLLVMOption("spill-slot-min-size-bytes", std::to_string(GetFrameSlotSize(arch)));
     // Disable some options of PlaceSafepoints pass
-    SetLLVMOption("spp-no-entry", true);
-    SetLLVMOption("spp-no-call", true);
+    SetLLVMOption("spp-no-entry", "true");
+    SetLLVMOption("spp-no-call", "true");
     // Set limit to skip Safepoints on entry for small functions
-    SetLLVMOption("isp-on-entry-limit", compiler::g_options.GetCompilerSafepointEliminationLimit());
-    SetLLVMOption("enable-implicit-null-checks", compiler::g_options.IsCompilerImplicitNullCheck());
-    SetLLVMOption("imp-null-check-page-size", static_cast<int>(runtime->GetProtectedMemorySize()));
+    SetLLVMOption("isp-on-entry-limit", std::to_string(compiler::g_options.GetCompilerSafepointEliminationLimit()));
+    SetLLVMOption("enable-implicit-null-checks", compiler::g_options.IsCompilerImplicitNullCheck() ? "true" : "false");
+    SetLLVMOption("imp-null-check-page-size", std::to_string(runtime->GetProtectedMemorySize()));
     if (arch == Arch::AARCH64) {
-        SetLLVMOption("aarch64-enable-ptr32", true);
+        SetLLVMOption("aarch64-enable-ptr32", "true");
     }
     if (static_cast<mem::GCType>(aotBuilder->GetGcType()) != mem::GCType::G1_GC) {
         // NOTE(zdenis): workaround to prevent vector stores of adjacent references
-        SetLLVMOption("vectorize-slp", false);
+        SetLLVMOption("vectorize-slp", "false");
     }
 
     spreader_ = std::make_unique<FixedCountSpreader>(
@@ -512,6 +520,7 @@ LLVMAotCompiler::LLVMAotCompiler(compiler::RuntimeInterface *runtime, ArenaAlloc
         ASSERT(numThreads > 0);
         semaphore_ = numThreads;
     }
+    LLVMCompiler::InitializeLLVMOptions();
 }
 
 /* static */
@@ -698,8 +707,7 @@ void LLVMAotCompiler::FinishCompile()
 void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, compiler::Graph *caller,
                                              compiler::RuntimeInterface::MethodPtr method, int32_t depth)
 {
-    if (!runtime_->IsMethodCanBeInlined(method) || IsInliningDisabled(runtime_, method) ||
-        caller->GetRuntime()->IsMethodExternal(caller->GetMethod(), method)) {
+    if (!runtime_->IsMethodCanBeInlined(method) || IsInliningDisabled(runtime_, method)) {
         LLVM_LOG(DEBUG, INFRA) << "Will not add inline function = '" << runtime_->GetMethodFullName(method)
                                << "' for caller = '" << runtime_->GetMethodFullName(caller->GetMethod())
                                << "' because !IsMethodCanBeInlined or IsInliningDisabled or the inline "
@@ -729,7 +737,6 @@ void LLVMAotCompiler::AddInlineMethodByDepth(WrappedModule &module, compiler::Gr
                                  << "' for caller = '" << runtime_->GetMethodFullName(caller->GetMethod()) << "'";
         return;
     }
-    MarkAsInlineObject(module.GetFunctionByMethodPtr(method));
 
     LLVM_LOG(DEBUG, INFRA) << "Added inline function = '" << runtime_->GetMethodFullName(callee->GetMethod(), true)
                            << "because '" << runtime_->GetMethodFullName(caller->GetMethod(), true) << "' calls it";

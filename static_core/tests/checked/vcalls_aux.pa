@@ -34,6 +34,21 @@
     return
 }
 
+.function i32 C.call_but_inline(C a0) {
+    call.short C.bar, a0
+    return
+}
+
+.function i32 C.bar__noinline__(C a0) {
+    ldai 0x30
+    return
+}
+
+.function i32 C.call(C a0) {
+    call.short C.bar__noinline__, a0
+    return
+}
+
 .function void C._clinit_() <cctor> {
     ldai 87
     ststatic C.c

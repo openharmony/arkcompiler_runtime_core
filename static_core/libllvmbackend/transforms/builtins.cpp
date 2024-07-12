@@ -16,6 +16,7 @@
 #include "builtins.h"
 #include "llvm_ark_interface.h"
 #include "runtime_calls.h"
+#include "utils.h"
 #include "lowering/gc_barriers.h"
 #include "lowering/metadata.h"
 
@@ -31,37 +32,22 @@ using ark::llvmbackend::LLVMArkInterface;
 using ark::llvmbackend::Metadata::BranchWeights::LIKELY_BRANCH_WEIGHT;
 using ark::llvmbackend::Metadata::BranchWeights::UNLIKELY_BRANCH_WEIGHT;
 using ark::llvmbackend::runtime_calls::GetThreadRegValue;
+using ark::llvmbackend::utils::CopyDebugLoc;
+using ark::llvmbackend::utils::CopyDeoptBundle;
 
 namespace {
 llvm::CallInst *CreateEntrypointCallHelper(llvm::IRBuilder<> *builder, ark::compiler::RuntimeInterface::EntrypointId id,
                                            llvm::ArrayRef<llvm::Value *> arguments, LLVMArkInterface *arkInterface,
                                            llvm::CallInst *inst)
 {
-    auto func = builder->GetInsertBlock()->getParent();
-
-    llvm::SmallVector<llvm::OperandBundleDef, 1> bundles;
-    auto deoptBundle = inst->getOperandBundle(llvm::LLVMContext::OB_deopt);
-    if (deoptBundle) {
-        ASSERT(arkInterface->DeoptsEnabled());
-        llvm::SmallVector<llvm::Value *, 0> deoptVals;
-        for (auto &user : deoptBundle->Inputs) {
-            deoptVals.push_back(user.get());
-        }
-        bundles.push_back(llvm::OperandBundleDef {"deopt", deoptVals});
-    }
-
     auto threadReg = GetThreadRegValue(builder, arkInterface);
     auto call = ark::llvmbackend::runtime_calls::CreateEntrypointCallCommon(
         builder, threadReg, arkInterface, static_cast<ark::llvmbackend::runtime_calls::EntrypointId>(id), arguments,
-        llvm::makeArrayRef(bundles));
+        CopyDeoptBundle(inst));
+    CopyDebugLoc(inst, call);
     if (inst->hasFnAttr("inline-info")) {
         call->addFnAttr(inst->getFnAttr("inline-info"));
     }
-
-    auto &debugLoc = inst->getDebugLoc();
-    auto line = debugLoc ? debugLoc.getLine() : 0;
-    auto inlinedAt = debugLoc ? debugLoc.getInlinedAt() : nullptr;
-    call->setDebugLoc(llvm::DILocation::get(func->getContext(), line, 1, func->getSubprogram(), inlinedAt));
 
     return call;
 }
@@ -212,6 +198,23 @@ llvm::Function *LenArray(llvm::Module *module)
     function->setDoesNotThrow();
     function->setSectionPrefix(BUILTIN_SECTION);
     function->addFnAttr(llvm::Attribute::ReadNone);
+    function->addFnAttr(llvm::Attribute::WillReturn);
+    return function;
+}
+
+llvm::Function *KeepThis(llvm::Module *module)
+{
+    auto function = module->getFunction(KEEP_THIS_BUILTIN);
+    if (function != nullptr) {
+        return function;
+    }
+
+    auto type =
+        llvm::FunctionType::get(llvm::Type::getVoidTy(module->getContext()),
+                                {llvm::PointerType::get(module->getContext(), LLVMArkInterface::GC_ADDR_SPACE)}, false);
+    function = llvm::Function::Create(type, llvm::Function::ExternalLinkage, KEEP_THIS_BUILTIN, module);
+    function->setDoesNotThrow();
+    function->setSectionPrefix(BUILTIN_SECTION);
     function->addFnAttr(llvm::Attribute::WillReturn);
     return function;
 }
@@ -395,6 +398,7 @@ llvm::Value *LowerResolveVirtual(llvm::IRBuilder<> *builder, llvm::CallInst *ins
     auto method = inst->getFunction()->arg_begin();
     auto thiz = inst->getOperand(0U);
     auto methodId = inst->getOperand(1U);
+    ASSERT(!llvm::isa<llvm::PoisonValue>(thiz));
     if (!arkInterface->IsArm64() || !llvm::isa<llvm::ConstantInt>(methodId)) {
         static constexpr auto ENTRYPOINT_ID = compiler::RuntimeInterface::EntrypointId::RESOLVE_VIRTUAL_CALL_AOT;
         auto offset = builder->getInt64(0);
@@ -438,6 +442,9 @@ llvm::Value *LowerBuiltin(llvm::IRBuilder<> *builder, llvm::CallInst *inst, LLVM
         return LowerResolveVirtual(builder, inst, arkInterface);
     }
     if (funcName.equals(BARRIER_RETURN_VOID_BUILTIN)) {
+        return nullptr;
+    }
+    if (funcName.equals(KEEP_THIS_BUILTIN)) {
         return nullptr;
     }
     UNREACHABLE();

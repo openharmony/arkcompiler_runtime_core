@@ -20,6 +20,7 @@
 #include "transforms/runtime_calls.h"
 #include "transforms/builtins.h"
 #include "transforms/transform_utils.h"
+#include "utils.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/InlineAsm.h>
@@ -27,14 +28,6 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Transforms/Utils/BasicBlockUtils.h>
 #include <llvm/Pass.h>
-
-using llvm::BasicBlock;
-using llvm::CallInst;
-using llvm::cast;
-using llvm::Function;
-using llvm::FunctionAnalysisManager;
-using llvm::Instruction;
-using llvm::Value;
 
 namespace ark::llvmbackend::passes {
 
@@ -46,29 +39,42 @@ PandaRuntimeLowering PandaRuntimeLowering::Create(llvmbackend::LLVMArkInterface 
 
 PandaRuntimeLowering::PandaRuntimeLowering(LLVMArkInterface *arkInterface) : arkInterface_ {arkInterface} {}
 
-llvm::PreservedAnalyses PandaRuntimeLowering::run(Function &function, FunctionAnalysisManager & /*analysisManager*/)
+llvm::PreservedAnalyses PandaRuntimeLowering::run(llvm::Function &function, llvm::FunctionAnalysisManager & /*am*/)
 {
     ASSERT(arkInterface_ != nullptr);
     bool changed = false;
-    for (BasicBlock &block : function) {
+    bool hasDeopt = false;
+    for (llvm::BasicBlock &block : function) {
         llvm::SmallVector<llvm::CallInst *> calls;
-        for (Instruction &inst : block) {
-            if (IsRememberedCall(inst) || IsBuiltinCall(inst)) {
-                calls.push_back(cast<CallInst>(&inst));
+        for (llvm::Instruction &inst : block) {
+            auto call = llvm::dyn_cast<llvm::CallInst>(&inst);
+            if (call == nullptr) {
+                continue;
+            }
+            if (call->hasFnAttr("may-deoptimize")) {
+                hasDeopt = true;
+            }
+            if (NeedsToBeLowered(call)) {
+                calls.push_back(call);
             }
         }
         for (auto call : calls) {
-            if (call->getCalledFunction() == call->getCaller()) {
-                // Do not touch pure recursive calls as LLVM is able to
-                // make correct call by itself
+            auto callee = call->getCalledFunction();
+            ASSERT(callee != nullptr && !callee->isIntrinsic());
+
+            // LLVM is able to process pure recursive calls, but they may confuse StackWalker after deoptimization
+            if (callee == &function && !hasDeopt) {
                 continue;
             }
-            if (IsRememberedCall(*call)) {
-                LowerCallStatic(call);
-            } else if (IsBuiltinCall(*call)) {
+
+            if (callee->getSectionPrefix() && callee->getSectionPrefix()->equals(builtins::BUILTIN_SECTION)) {
                 LowerBuiltin(call);
+            } else if (arkInterface_->IsRememberedCall(&function, callee)) {
+                LowerCallStatic(call);
+            } else if (call->hasFnAttr("original-method-id")) {
+                LowerCallVirtual(call);
             } else {
-                llvm_unreachable("Unexpected call to be lowered");
+                llvm_unreachable("Do not know how to lower a call - unknown call type.");
             }
             changed = true;
         }
@@ -76,22 +82,7 @@ llvm::PreservedAnalyses PandaRuntimeLowering::run(Function &function, FunctionAn
     return changed ? llvm::PreservedAnalyses::none() : llvm::PreservedAnalyses::all();
 }
 
-bool PandaRuntimeLowering::IsBuiltinCall(const llvm::Instruction &inst)
-{
-    if (!llvm::isa<CallInst>(inst)) {
-        return false;
-    }
-    const auto &callInst = llvm::cast<CallInst>(inst);
-    auto function = callInst.getCalledFunction();
-    if (function == nullptr) {
-        // callInst is a call through a function pointer
-        return false;
-    }
-    auto prefix = function->getSectionPrefix();
-    return prefix && prefix->equals(builtins::BUILTIN_SECTION);
-}
-
-void PandaRuntimeLowering::LowerCallStatic(CallInst *inst)
+void PandaRuntimeLowering::LowerCallStatic(llvm::CallInst *inst)
 {
     auto epOffset = llvm::ConstantInt::get(llvm::Type::getInt64Ty(inst->getContext()),
                                            arkInterface_->GetCompiledEntryPointOffset());
@@ -114,9 +105,26 @@ void PandaRuntimeLowering::LowerCallStatic(CallInst *inst)
     inst->addFnAttr(llvm::Attribute::get(inst->getContext(), "use-ark-spills"));
 }
 
-Value *PandaRuntimeLowering::GetMethodOrResolverPtr(llvm::IRBuilder<> *builder, CallInst *inst)
+void PandaRuntimeLowering::LowerCallVirtual(llvm::CallInst *inst)
 {
-    auto slot = arkInterface_->GetPltSlotId(inst->getFunction(), inst->getCalledFunction());
+    ASSERT(!arkInterface_->IsInterfaceMethod(inst));
+    auto builder = llvm::IRBuilder<>(inst);
+    llvm::Value *thiz = inst->getArgOperand(1);
+    auto methodId = ark::llvmbackend::utils::GetMethodIdFromAttr(inst);
+    auto func = inst->getFunction();
+    auto method = ark::llvmbackend::utils::CreateLoadMethodUsingVTable(thiz, func, methodId, &builder, arkInterface_);
+
+    auto offset = arkInterface_->GetCompiledEntryPointOffset();
+    auto calleeAdr = builder.CreateConstInBoundsGEP1_32(builder.getInt8Ty(), method, offset);
+    auto calleeP = builder.CreateLoad(builder.getPtrTy(), calleeAdr);
+
+    inst->setCalledFunction(inst->getFunctionType(), calleeP);
+    inst->setArgOperand(0, method);
+}
+
+llvm::Value *PandaRuntimeLowering::GetMethodOrResolverPtr(llvm::IRBuilder<> *builder, llvm::CallInst *inst)
+{
+    auto slot = arkInterface_->GetPltSlotId(inst->getCaller(), inst->getCalledFunction());
     auto block = builder->GetInsertBlock();
     auto aotGot = block->getModule()->getGlobalVariable("__aot_got");
     auto arrayType = llvm::ArrayType::get(builder->getInt64Ty(), 0);
@@ -125,12 +133,12 @@ Value *PandaRuntimeLowering::GetMethodOrResolverPtr(llvm::IRBuilder<> *builder, 
     return builder->CreateIntToPtr(cachedMethodAddr, builder->getPtrTy(), "method_ptr");
 }
 
-void PandaRuntimeLowering::LowerBuiltin(CallInst *inst)
+void PandaRuntimeLowering::LowerBuiltin(llvm::CallInst *inst)
 {
     auto builder = llvm::IRBuilder<>(inst);
     auto lowered = builtins::LowerBuiltin(&builder, inst, arkInterface_);
     if (lowered != nullptr) {
-        BasicBlock::iterator ii(inst);
+        llvm::BasicBlock::iterator ii(inst);
         ReplaceInstWithValue(inst->getParent()->getInstList(), ii, lowered);
     } else {
         ASSERT(inst->use_empty());
@@ -139,20 +147,15 @@ void PandaRuntimeLowering::LowerBuiltin(CallInst *inst)
     }
 }
 
-bool PandaRuntimeLowering::IsRememberedCall(const llvm::Instruction &inst)
+bool PandaRuntimeLowering::NeedsToBeLowered(llvm::CallInst *call)
 {
-    if (!llvm::isa<CallInst>(inst)) {
+    auto callee = call->getCalledFunction();
+    if (callee == nullptr || callee->isIntrinsic()) {
         return false;
     }
-    const auto &callInst = llvm::cast<CallInst>(inst);
-    if (callInst.getCalledFunction() == nullptr) {
-        // callInst is a call through a function pointer
-        return false;
-    }
-    if (callInst.getCalledFunction()->isIntrinsic()) {
-        return false;
-    }
-    return arkInterface_->IsRememberedCall(callInst.getFunction(), callInst.getCalledFunction());
+    ASSERT((callee->getSectionPrefix() && callee->getSectionPrefix()->equals(builtins::BUILTIN_SECTION)) ||
+           arkInterface_->IsRememberedCall(call->getCaller(), callee) || call->hasFnAttr("original-method-id"));
+    return true;
 }
 
 }  // namespace ark::llvmbackend::passes

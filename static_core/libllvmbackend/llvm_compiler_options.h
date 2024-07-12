@@ -34,6 +34,7 @@ struct LLVMCompilerOptions {
     std::string pipelineFile;
     // Internal options
     bool doIrtocInline;
+    bool doVirtualInline;
 };
 }  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_COMPILER_OPTIONS_H

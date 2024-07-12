@@ -42,12 +42,7 @@ using llvm::Instruction;
 using llvm::PHINode;
 using llvm::SelectInst;
 // Gc utils
-using ark::llvmbackend::gc_utils::HasBeenGcRef;
-using ark::llvmbackend::gc_utils::IsDerived;
-using ark::llvmbackend::gc_utils::IsGcFunction;
 using ark::llvmbackend::gc_utils::IsGcRefType;
-// Utils
-using ark::llvmbackend::gc_utils::IsFunctionSupplemental;
 
 /// Optimize no-op PHINodes and Selects in place.
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
@@ -58,7 +53,7 @@ namespace ark::llvmbackend::passes {
 llvm::PreservedAnalyses GepPropagation::run(llvm::Function &function, llvm::FunctionAnalysisManager & /*AM*/)
 {
     LLVM_DEBUG(llvm::dbgs() << "Function: " << function.getName() << "\n");
-    if (!IsGcFunction(function) || IsFunctionSupplemental(function)) {
+    if (!gc_utils::IsGcFunction(function) || gc_utils::IsFunctionSupplemental(function)) {
         return llvm::PreservedAnalyses::all();
     }
 
@@ -85,7 +80,7 @@ void GepPropagation::AddToVector(Instruction *inst, SmallVector<Instruction *> *
             break;
         case Instruction::Select:
         case Instruction::PHI:
-            if ((IsGcRefType(inst->getType()) && IsDerived(inst)) || HasBeenGcRef(inst, false)) {
+            if ((IsGcRefType(inst->getType()) && gc_utils::IsDerived(inst)) || gc_utils::HasBeenGcRef(inst, false)) {
                 selectors->push_back(inst);
                 toExpand->push_back(inst);
             }

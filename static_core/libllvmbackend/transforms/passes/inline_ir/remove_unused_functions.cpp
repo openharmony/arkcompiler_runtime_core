@@ -66,7 +66,7 @@ llvm::PreservedAnalyses RemoveUnusedFunctions::run(llvm::Module &module, llvm::M
         if (!usedFunctions.contains(&function)) {
             LLVM_DEBUG(llvm::dbgs() << "Deleted body of " << function.getName() << "\n");
             convertToDeclaration(function);
-            changed |= true;
+            changed = true;
         }
     }
 

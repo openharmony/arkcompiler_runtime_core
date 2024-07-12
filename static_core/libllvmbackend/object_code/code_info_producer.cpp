@@ -75,8 +75,8 @@ void CodeInfoProducer::Produce(Method *method, compiler::CodeInfoBuilder *builde
     auto vregsMask = GetCalleeRegsMask(arch_, true).GetValue();
 
     if (arch_ == Arch::AARCH64) {
-        auto func = compilation_->GetFunctionByMethodPtr(method);
-        auto regMasks = compilation_->GetCalleeSavedRegistersMask(func);
+        auto funcName = compilation_->GetUniqMethodName(method);
+        auto regMasks = compilation_->GetCalleeSavedRegistersMask(funcName);
         xregsMask &= std::get<0>(regMasks);
         vregsMask &= std::get<1>(regMasks);
     }
