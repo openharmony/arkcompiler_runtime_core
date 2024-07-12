@@ -201,10 +201,14 @@ ohos_static_library("libarkbase_static") {
 
   deps = libarkbase_deps
 
-  if (!ark_standalone_build) {
-    public_external_deps = [ sdk_libc_secshared_dep ]
+  if (is_arkui_x) {
+    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
   } else {
-    external_deps = [ sdk_libc_secshared_dep ]
+    if (!ark_standalone_build) {
+      public_external_deps = [ sdk_libc_secshared_dep ]
+    } else {
+      external_deps = [ sdk_libc_secshared_dep ]
+    }
   }
 
   if (enable_hilog) {
@@ -235,7 +239,11 @@ ohos_source_set("libarkbase_frontend_set_static") {
 
   deps = libarkbase_deps
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  if (is_arkui_x) {
+    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+  } else {
+    external_deps = [ sdk_libc_secshared_dep ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
