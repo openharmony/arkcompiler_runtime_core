@@ -42,25 +42,32 @@ export interface ReadonlyMap<K, V> extends Iterable<[K, V]> {
     has(key: K): boolean;
 
     /**
-     * Applies a function over all elements of the Map
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
+     */
+    forEach(callbackfn: () => void): void;
+
+    /**
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
+     *
+     * @param callbackfn to apply
      */
     forEach(callbackfn: (value: V) => void): void;
 
     /**
-     * Applies a function over all elements of the Map
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
      *
      * @param fn to apply
      */
     forEach(callbackfn: (value: V, key: K) => void): void;
 
     /**
-     * Applies a function over all elements of the Map
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-    forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void { throw new Error("15998") }
+    forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void): void;
 
     /**
      * Returns elements from the Map as an keys Iterator
@@ -242,35 +249,45 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     }
 
     /**
-     * Applies a function over all elements of the Map
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-     // NOTE(gogabr): should override from ReadonlyMap, but blocked by #15096
-    /* override */ forEach(fn: (v: V, k: K, map: Map<K, V>) => void): void {
+    override forEach(callbackfn: (v: V, k: K, map: Map<K, V>) => void): void {
         iteratorForEach<MapEntry<K, V>>(this.s.keys(), (x: MapEntry<K, V>): void => {
-            fn(x.value, x.key, this)
+            callbackfn(x.value, x.key, this)
         })
     }
 
     /**
-     * Applies a function over all elements of the Map
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-    override forEach(fn: (v: V, k: K) => void): void {
+    override forEach(callbackfn: (v: V, k: K) => void): void {
         iteratorForEach<MapEntry<K, V>>(this.s.keys(), (x: MapEntry<K, V>): void => {
-            fn(x.value, x.key)
+            callbackfn(x.value, x.key)
         })
     }
 
     /**
-     * Applies a function over all elements of the Map
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-    override forEach(fn: (v: V) => void): void {
-        iteratorForEach<V>(this.values(), fn)
+    override forEach(callbackfn: (v: V) => void): void {
+        iteratorForEach<V>(this.values(), callbackfn)
+    }
+
+    /**
+     * Executes a provided function once per each key/value pair in the Map, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    override forEach(callbackfn: () => void): void {
+        for (let i = 0; i < this.s.size; i++) {
+            callbackfn();
+        }
     }
     
 }

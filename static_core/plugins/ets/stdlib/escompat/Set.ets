@@ -34,25 +34,32 @@ export interface ReadonlySet<T> extends Iterable<T> {
     get size(): number;
 
     /**
-     * Applies a function over all elements of the Set
+     * Executes a provided function once per each value in the Set object, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-    forEach(fn: (value: T) => void): void;
+    forEach(callbackfn: () => void): void;
 
     /**
-     * Applies a function over all elements of the Set
+     * Executes a provided function once per each value in the Set object, in insertion order
      *
-     * @param fn to apply; value2 is always same as value1
+     * @param callbackfn to apply
      */
-    forEach(fn: (value: T, value2: T) => void): void;
+    forEach(callbackfn: (value: T) => void): void;
 
     /**
-     * Applies a function over all elements of the Set
+     * Executes a provided function once per each value in the Set object, in insertion order
      *
-     * @param fn to apply; value2 is always same as value1
+     * @param callbackfn to apply; value2 is always same as value1
      */
-    forEach(fn: (value: T, value2: T, set: ReadonlySet<T>) => void): void { throw new Error("15998") }
+    forEach(callbackfn: (value: T, value2: T) => void): void;
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply; value2 is always same as value1
+     */
+    forEach(callbackfn: (value: T, value2: T, set: ReadonlySet<T>) => void): void;
 
     /**
      * Despite name, returns elements from the Set
@@ -321,29 +328,40 @@ export final class Set<K> implements ReadonlySet<K> {
     }
 
     /**
-     * Applies a function over all elements of the Set
+     * Executes a provided function once per each value in the Set object, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-    override forEach(fn: (k: K) => void): void {
-        iteratorForEach<K>(this.keys(), fn)
+    override forEach(callbackfn: () => void): void {
+        for (let i = 0; i < this.sizeVal; i++) {
+            callbackfn();
+        }
     }
 
     /**
-     * Applies a function over all elements of the Set
+     * Executes a provided function once per each value in the Set object, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-    override forEach(fn: (k: K, v: K) => void): void {
-        iteratorForEach<K>(this.keys(), (x: K): void => fn(x, x))
+    override forEach(callbackfn: (k: K) => void): void {
+        iteratorForEach<K>(this.keys(), callbackfn)
     }
 
     /**
-     * Applies a function over all elements of the Set
+     * Executes a provided function once per each value in the Set object, in insertion order
      *
-     * @param fn to apply
+     * @param callbackfn to apply
      */
-    override forEach(fn: (k: K, v: K, set: Set<K>) => void): void {
-        iteratorForEach<K>(this.keys(), (x: K): void => fn(x, x, this))
+    override forEach(callbackfn: (k: K, v: K) => void): void {
+        iteratorForEach<K>(this.keys(), (x: K): void => callbackfn(x, x))
+    }
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    override forEach(callbackfn: (k: K, v: K, set: Set<K>) => void): void {
+        iteratorForEach<K>(this.keys(), (x: K): void => callbackfn(x, x, this))
     }
 }

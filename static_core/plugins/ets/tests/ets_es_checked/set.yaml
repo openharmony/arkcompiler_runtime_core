@@ -54,6 +54,10 @@ sub:
               (x: number): void => { self.add(x) }
             - |
               (x: number): void => { self.add(-x) }
+      - expr: valsArr
+        setup: |
+          let valsArr = Array.of<string>()
+          self.forEach((): void | number => valsArr.push('call'))
       - self:
           - new Set<Object|null|undefined>(Array.of<Object|null|undefined>(null))
           - new Set<Object|null|undefined>(Array.of<Object|null|undefined>(undefined))
