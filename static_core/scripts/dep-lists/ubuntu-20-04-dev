@@ -36,7 +36,7 @@ parallel=20161222-*                          # For rt.jar test
 
 llvm-14=1:14*                                # For Thread Sanitizer
 
-postgresql-client-12=12*                     # For pushing benchmark results to Grafana
+postgresql-client-12=12*                     # For pushing benchmark results and test issues to Grafana
 libdwarf-dev=20200114-*                      # For printing function names and line numbers
 zlib1g-dev=1:1.2.11*
 
