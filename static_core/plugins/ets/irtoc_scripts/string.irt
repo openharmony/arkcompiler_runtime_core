@@ -225,7 +225,7 @@ function(:StringEmpty,
   Return(empty_str).ptr
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("CREATE_EMPTY_STRING_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY).AddImm(entrypoint).MethodAsImm("CreateEmptyStringBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY).AddImm(entrypoint).MethodAsImm("CreateEmptyString1ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 

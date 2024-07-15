@@ -150,7 +150,7 @@ $ ninja -C out <target name>
 ```
 To use LLVM Backend add the following arguments:
 ```
-$ /path/to/gn/repository/out/gn out is_llvmbackend=true llvm_dir="/opt/llvm-15-{type}-{arch}" ...
+$ /path/to/gn/repository/out/gn out is_llvmbackend=true llvm_target_dir="/opt/llvm-15-{type}-{arch}" ...
 ```
 Setting `is_llvmbackend=true` option enables the same scenarios as `-DPANDA_LLVM_BACKEND=true` option in cmake builds
 

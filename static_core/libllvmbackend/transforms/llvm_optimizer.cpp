@@ -30,7 +30,10 @@
 #include "passes/fixup_poisons.h"
 #include "passes/expand_atomics.h"
 #include "passes/devirt.h"
+#include "passes/infer_flags.h"
 #include "passes/inline_devirt.h"
+#include "passes/loop_peeling.h"
+#include "passes/propagate_lenarray.h"
 #include "passes/check_external.h"
 
 #include "passes/inline_ir/cleanup_inline_module.h"

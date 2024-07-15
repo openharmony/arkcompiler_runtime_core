@@ -53,10 +53,10 @@ if (enable_irtoc) {
 
   action("irtoc_compile") {
     script = "$ark_root/irtoc/lang/irtoc.rb"
-    outputs = [
-      "$target_gen_dir/generated/irtoc_code.cpp",
-      "$target_gen_dir/generated/irtoc_code_llvm.cpp",
-    ]
+    outputs = [ "$target_gen_dir/generated/irtoc_code.cpp" ]
+    if (is_llvm_interpreter) {
+      outputs += [ "$target_gen_dir/generated/irtoc_code_llvm.cpp" ]
+    }
 
     sources = irtoc_scripts + [ irtoc_plugins_file ]
 
@@ -99,7 +99,6 @@ if (enable_irtoc) {
   ohos_executable("irtoc") {
     sources = [
       "$target_gen_dir/generated/irtoc_code.cpp",
-      "$target_gen_dir/generated/irtoc_code_llvm.cpp",
       "backend/compilation.cpp",
       "backend/compiler/codegen_boundary.cpp",
       "backend/compiler/codegen_fastpath.cpp",
@@ -132,7 +131,10 @@ if (enable_irtoc) {
 
     external_deps = [ sdk_libc_secshared_dep ]
 
-    if (is_llvmbackend) {
+    if (is_llvm_interpreter) {
+      sources += [ "$target_gen_dir/generated/irtoc_code_llvm.cpp" ]
+    }
+    if (is_llvm_interpreter || is_llvm_fastpath) {
       configs += [ "$ark_root/libllvmbackend:libllvmbackend_public_config" ]
       deps += [ "$ark_root/libllvmbackend:libllvmbackend" ]
     }
@@ -167,14 +169,19 @@ if (enable_irtoc) {
     ]
     deps = [ ":irtoc(${host_toolchain})" ]
 
-    if (is_llvmbackend) {
+    if (is_llvm_interpreter || is_llvm_fastpath) {
       outputs += [ "$ark_root_gen_dir/generated/irtoc_llvm_lib.o" ]
       args += [
         "--irtoc-output-llvm",
         rebase_path("$ark_root_gen_dir/generated/irtoc_llvm_lib.o"),
-        "--llvm-inline-module",
-        rebase_path("$target_gen_dir/../libllvmbackend/interpreter_inline.bc"),
       ]
+      if (is_llvm_interpreter) {
+        args += [
+          "--llvm-inline-module",
+          rebase_path(
+              "$target_gen_dir/../libllvmbackend/interpreter_inline.bc"),
+        ]
+      }
       deps += [ "$ark_root/libllvmbackend:irtoc_int_llvm_inl_module" ]
     }
   }

@@ -25,6 +25,7 @@
 #include "metadata.h"
 #include "utils.h"
 #include "transforms/builtins.h"
+#include "transforms/gc_utils.h"
 #include "transforms/runtime_calls.h"
 
 namespace ark::compiler {
@@ -500,6 +501,34 @@ bool LLVMIrConstructor::EmitNothing([[maybe_unused]] Inst *inst)
     return true;
 }
 
+#ifndef NDEBUG
+static void CheckSlowPathName(const std::string &name, size_t funcArgsNum, size_t callArgsNum)
+{
+    ASSERT_DO(std::string_view {name}.find("SlowPath") == std::string_view::npos,
+              std::cerr << "Bad bridge: SlowPath bridge not allowed in LLVM FastPath: " << name << std::endl);
+    ASSERT(callArgsNum <= funcArgsNum);
+    if (callArgsNum < funcArgsNum) {
+        funcArgsNum -= 2U;  // exclude fake arguments for these asserts
+        ASSERT(funcArgsNum <= 4U);
+        ASSERT_DO((std::string_view {name}.find("1ArgBridge") != std::string_view::npos) == (funcArgsNum == 1U),
+                  std::cerr << "Bad bridge: OddSaved1 for FastPath with 1 arguments "
+                            << "and SlowPath with zero arguments: " << name << std::endl);
+        ASSERT_DO((std::string_view {name}.find("2ArgBridge") != std::string_view::npos) == (funcArgsNum == 2U),
+                  std::cerr << "Bad bridge: OddSaved2 for FastPath with 2 arguments "
+                            << "and SlowPath with 0-1 arguments: " << name << std::endl);
+        ASSERT_DO((std::string_view {name}.find("3ArgBridge") != std::string_view::npos) == (funcArgsNum == 3U),
+                  std::cerr << "Bad bridge: OddSaved3 for FastPath with 3 arguments "
+                            << "and SlowPath with 0-2 arguments: " << name << std::endl);
+        ASSERT_DO((std::string_view {name}.find("4ArgBridge") != std::string_view::npos) == (funcArgsNum == 4U),
+                  std::cerr << "Bad bridge: OddSaved4 for FastPath with 4 arguments "
+                            << "and SlowPath with 0-3 arguments: " << name << std::endl);
+    } else {  // callArgsNum == funcArgsNum
+        ASSERT_DO((std::string_view {name}.find("OddSaved") != std::string_view::npos) == (funcArgsNum % 2U == 1U),
+                  std::cerr << "Bad bridge: OddSaved <=> amount of arguments is odd: " << name << std::endl);
+    }
+}
+#endif
+
 bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
 {
     ASSERT(GetGraph()->GetMode().IsFastPath());
@@ -520,15 +549,13 @@ bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
     auto frameRegPtr = builder_.CreateIntToPtr(GetRealFrameRegValue(), builder_.getPtrTy());
     args.push_back(threadRegPtr);
     args.push_back(frameRegPtr);
-    ASSERT(args.size() <= func_->arg_size());
 
     ASSERT(inst->CastToIntrinsic()->HasImms() && inst->CastToIntrinsic()->GetImms().size() == 2U);
     uint32_t externalId = inst->CastToIntrinsic()->GetImms()[1];
     auto externalName = GetGraph()->GetRuntime()->GetExternalMethodName(GetGraph()->GetMethod(), externalId);
-
-    ASSERT_DO(std::string_view {externalName}.find("SlowPath") == std::string_view::npos,
-              std::cerr << "Unexpected SlowPath bridge call in LLVM FastPath: " << externalName << std::endl);
-
+#ifndef NDEBUG
+    CheckSlowPathName(externalName, func_->arg_size(), args.size());
+#endif
     auto callee = func_->getParent()->getFunction(externalName);
     if (callee == nullptr) {
         ArenaVector<llvm::Type *> argTypes(GetGraph()->GetLocalAllocator()->Adapter());
@@ -836,7 +863,6 @@ bool LLVMIrConstructor::EmitStringGetCharsTlab(Inst *inst)
     result->setCallingConv(llvm::CallingConv::ArkFast4);
     result->addRetAttr(llvm::Attribute::NonNull);
     result->addRetAttr(llvm::Attribute::NoAlias);
-    WrapArkCall(inst, result);
     ValueMapAdd(inst, result);
     return true;
 }
@@ -1159,7 +1185,6 @@ llvm::CallInst *LLVMIrConstructor::CreateFastPathCall(Inst *inst, RuntimeInterfa
     auto call = CreateEntrypointCall(eid, inst, args);
     ASSERT(call->getCallingConv() == llvm::CallingConv::C);
     call->setCallingConv(GetFastPathCallingConv(args.size()));
-    WrapArkCall(inst, call);
     return call;
 }
 
@@ -1864,7 +1889,6 @@ llvm::Value *LLVMIrConstructor::CreateNewStringFromCharsTlab(Inst *inst, llvm::V
     auto result = CreateEntrypointCall(entryId, inst, arguments);
     ASSERT(result->getCallingConv() == llvm::CallingConv::C);
     result->setCallingConv(callConv);
-    WrapArkCall(inst, result);
     MarkAsAllocation(result);
     return result;
 }
@@ -1875,7 +1899,6 @@ llvm::Value *LLVMIrConstructor::CreateNewStringFromStringTlab(Inst *inst, llvm::
     auto result = CreateEntrypointCall(entryId, inst, {stringVal});
     ASSERT(result->getCallingConv() == llvm::CallingConv::C);
     result->setCallingConv(llvm::CallingConv::ArkFast1);
-    WrapArkCall(inst, result);
     MarkAsAllocation(result);
     return result;
 }
@@ -2755,6 +2778,13 @@ llvm::Value *LLVMIrConstructor::CoerceValue(llvm::Value *value, llvm::Type *targ
 
 void LLVMIrConstructor::ValueMapAdd(Inst *inst, llvm::Value *value, bool setName)
 {
+    if (!inst->IsMovableObject() && !inst->IsCheck() && llvmbackend::gc_utils::IsGcRefType(value->getType())) {
+        auto llvmInst = llvm::dyn_cast<llvm::Instruction>(value);
+        if (llvmInst != nullptr) {
+            llvmbackend::gc_utils::MarkAsNonMovable(llvmInst);
+        }
+    }
+
     auto type = inst->GetType();
     auto ltype = GetExactType(type);
     ASSERT(inputMap_.count(inst) == 0);
@@ -2831,6 +2861,7 @@ void LLVMIrConstructor::FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, l
 
 void LLVMIrConstructor::WrapArkCall(Inst *orig, llvm::CallInst *call)
 {
+    ASSERT_PRINT(!call->getDebugLoc(), "Debug info must be unset");
     // Ark calls may call GC inside, so add statepoint
     debugData_->SetLocation(call, orig->GetPc());
     EncodeInlineInfo(orig, call);
@@ -4377,8 +4408,6 @@ void LLVMIrConstructor::VisitMonitor(GraphVisitor *v, Inst *inst)
     auto call = ctor->CreateEntrypointCall(eid, inst, {object});
     ASSERT(call->getCallingConv() == llvm::CallingConv::C);
     call->setCallingConv(llvm::CallingConv::ArkFast1);
-
-    ctor->WrapArkCall(inst, call);
 }
 
 void LLVMIrConstructor::VisitSqrt(GraphVisitor *v, Inst *inst)

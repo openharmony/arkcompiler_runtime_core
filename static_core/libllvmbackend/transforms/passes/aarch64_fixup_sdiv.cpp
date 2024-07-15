@@ -31,11 +31,10 @@ AArch64FixupSDiv AArch64FixupSDiv::Create(LLVMArkInterface *arkInterface,
 
 bool AArch64FixupSDiv::ReplaceSelect(llvm::Instruction *selectInst)
 {
-    auto cmp = selectInst->getOperand(0U);
+    auto cmp = llvm::cast<llvm::Instruction>(selectInst->getOperand(0U));
     auto sub = selectInst->getOperand(1U);
     auto sdiv = selectInst->getOperand(2U);
 
-    auto cmpInst = llvm::cast<llvm::CmpInst>(cmp);
     // sub instruction may be replaced with value
     auto sdivInst = llvm::cast<llvm::Instruction>(sdiv);
 
@@ -44,8 +43,8 @@ bool AArch64FixupSDiv::ReplaceSelect(llvm::Instruction *selectInst)
     ASSERT(!sdivInst->getDebugLoc());
     sdivInst->setDebugLoc(selectInst->getDebugLoc());
     selectInst->eraseFromParent();
-    if (cmpInst->uses().empty()) {
-        cmpInst->eraseFromParent();
+    if (cmp->uses().empty()) {
+        cmp->eraseFromParent();
     }
     if (sub->uses().empty() && llvm::isa<llvm::Instruction>(sub)) {
         auto subInst = llvm::cast<llvm::Instruction>(sub);

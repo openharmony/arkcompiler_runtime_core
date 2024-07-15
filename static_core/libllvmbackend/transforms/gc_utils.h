@@ -30,6 +30,8 @@ bool IsDerived(llvm::Value *val);
 DerivedStatus IsPHIDerived(llvm::PHINode *phi, llvm::SmallSet<llvm::Value *, 8U> *visited);
 DerivedStatus IsDerivedImpl(llvm::Value *val, llvm::SmallSet<llvm::Value *, 8U> *visited = nullptr);
 bool HasBeenGcRef(const llvm::Value *val, bool any = true);
+void MarkAsNonMovable(llvm::Instruction *instruction);
+bool IsNonMovable(const llvm::Value *value);
 
 inline bool IsGcRefType(llvm::Type *type)
 {

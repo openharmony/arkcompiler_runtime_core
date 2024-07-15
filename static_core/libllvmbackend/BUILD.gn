@@ -32,7 +32,11 @@ if (is_llvmbackend) {
   copy("llvm_lib") {
     sources = [ "$llvm_lib_file" ]
     basename = get_path_info("$llvm_lib_file", "file")
-    outputs = [ "$root_out_dir/$ark_subsystem_name/$ark_part_name/$basename" ]
+    if (ark_standalone_build) {
+      outputs = [ "$root_out_dir/lib/$basename" ]
+    } else {
+      outputs = [ "$root_out_dir/$ark_subsystem_name/$ark_part_name/$basename" ]
+    }
   }
 
   ### LLVM Backend
@@ -79,6 +83,7 @@ if (is_llvmbackend) {
     "transforms/passes/gc_intrusion.cpp",
     "transforms/passes/gc_intrusion_check.cpp",
     "transforms/passes/gep_propagation.cpp",
+    "transforms/passes/infer_flags.cpp",
     "transforms/passes/inline_devirt.cpp",
     "transforms/passes/inline_ir/cleanup_inline_module.cpp",
     "transforms/passes/inline_ir/discard_inline_module.cpp",
@@ -89,8 +94,10 @@ if (is_llvmbackend) {
     "transforms/passes/inline_ir/remove_unused_functions.cpp",
     "transforms/passes/insert_safepoints.cpp",
     "transforms/passes/intrinsics_lowering.cpp",
+    "transforms/passes/loop_peeling.cpp",
     "transforms/passes/mem_barriers.cpp",
     "transforms/passes/panda_runtime_lowering.cpp",
+    "transforms/passes/propagate_lenarray.cpp",
     "transforms/passes/prune_deopt.cpp",
     "transforms/runtime_calls.cpp",
     "utils.cpp",
@@ -135,9 +142,10 @@ if (is_llvmbackend) {
 
     external_deps = [ sdk_libc_secshared_dep ]
 
-    libllvmbackend_aot_sources = [ "llvm_aot_compiler.cpp" ]
-
-    sources += libllvmbackend_aot_sources
+    if (is_llvm_aot) {
+      libllvmbackend_aot_sources = [ "llvm_aot_compiler.cpp" ]
+      sources += libllvmbackend_aot_sources
+    }
 
     deps += [ "$ark_root/compiler/aot/aot_builder:aotbuilder" ]
 
@@ -279,7 +287,7 @@ if (is_llvmbackend) {
   }
 
   ##### IRTOC
-  source_set("bitcode") {
+  ohos_source_set("bitcode") {
     cflags_cc = [
       "-Wno-invalid-offsetof",
       "-emit-llvm",
@@ -313,10 +321,17 @@ if (is_llvmbackend) {
     ]
 
     external_deps = [ sdk_libc_secshared_dep ]
+
+    part_name = ark_part_name
+    subsystem_name = "$ark_subsystem_name"
   }
 
   action("irtoc_int_llvm_inl_module") {
-    script = "$llvm_host_dir/bin/llvm-link"
+    if (target_cpu == "arm64") {
+      script = "$llvm_host_dir/bin/llvm-link"
+    } else {
+      script = "$llvm_dir/bin/llvm-link"
+    }
 
     outputs = [ "$target_gen_dir/interpreter_inline.bc" ]
     deps = [ ":bitcode" ]

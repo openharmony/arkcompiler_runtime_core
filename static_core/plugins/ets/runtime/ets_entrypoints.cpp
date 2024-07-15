@@ -253,22 +253,19 @@ extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint3
         errorMsg);
 }
 
-extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v,
-                                                           [[maybe_unused]] Class *arrayKlass)
+extern "C" ObjectHeader *StringBuilderAppendLongEntrypoint(ObjectHeader *sb, int64_t v)
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendLong(sb, v);
 }
 
-extern "C" ObjectHeader *StringBuilderAppendCharEntrypoint(ObjectHeader *sb, uint16_t ch,
-                                                           [[maybe_unused]] Class *arrayKlass)
+extern "C" ObjectHeader *StringBuilderAppendCharEntrypoint(ObjectHeader *sb, uint16_t ch)
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendChar(sb, ch);
 }
 
-extern "C" ObjectHeader *StringBuilderAppendBoolEntrypoint(ObjectHeader *sb, uint8_t v,
-                                                           [[maybe_unused]] Class *arrayKlass)
+extern "C" ObjectHeader *StringBuilderAppendBoolEntrypoint(ObjectHeader *sb, uint8_t v)
 {
     ASSERT(sb != nullptr);
     return StringBuilderAppendBool(sb, ToEtsBoolean(static_cast<bool>(v)));
@@ -299,14 +296,13 @@ extern "C" bool CompareETSValueTypedEntrypoint(ManagedThread *thread, ObjectHead
     return EtsValueTypedEquals(coro, eobj1, eobj2);
 }
 
-extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb, [[maybe_unused]] Class *stringKlass)
+extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb)
 {
     ASSERT(sb != nullptr);
     return StringBuilderToString(sb)->GetCoreType();
 }
 
-extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, uint64_t number,
-                                                         [[maybe_unused]] uint64_t unused)
+extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, uint64_t number)
 {
     ASSERT(cache != nullptr);
     return DoubleToStringCache::FromCoreType(cache)
@@ -321,8 +317,7 @@ extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem
     return cache->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<double>(number), elem, cached)->GetCoreType();
 }
 
-extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number, [[maybe_unused]] uint64_t unused1,
-                                                                [[maybe_unused]] uint64_t unused2)
+extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number)
 {
     return DoubleToStringCache::GetNoCache(bit_cast<double>(number))->GetCoreType();
 }

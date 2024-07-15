@@ -16,6 +16,11 @@
 #include "gc_utils.h"
 #include "transforms/transform_utils.h"
 
+namespace {
+/// Tag for instructions have a managed pointer type but the reference is not moved by GC
+constexpr llvm::StringRef MD_NON_MOVABLE = "non-movable";
+}  // namespace
+
 namespace ark::llvmbackend::gc_utils {
 
 bool IsDerived(llvm::Value *val)
@@ -143,6 +148,18 @@ bool HasBeenGcRef(const llvm::Value *val, bool any)
         }
     }
     return oneRef;
+}
+
+void MarkAsNonMovable(llvm::Instruction *instruction)
+{
+    ASSERT(IsGcRefType(instruction->getType()));
+    instruction->setMetadata(MD_NON_MOVABLE, llvm::MDNode::get(instruction->getContext(), {}));
+}
+
+bool IsNonMovable(const llvm::Value *value)
+{
+    auto instruction = llvm::dyn_cast<const llvm::Instruction>(value);
+    return instruction != nullptr && instruction->hasMetadata(MD_NON_MOVABLE);
 }
 
 }  // namespace ark::llvmbackend::gc_utils
