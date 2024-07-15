@@ -24,7 +24,7 @@ import {
     NullVal,
     NanVal,
     UndefinedVal,
-} from "/plugins/ets/tests/interop_js/tests/es_object/to_string/test_to_string_method.js";
+} from "to_string";
 
 function vstringify(val: JSValue): String {
     return StringifyValue(val) as String;

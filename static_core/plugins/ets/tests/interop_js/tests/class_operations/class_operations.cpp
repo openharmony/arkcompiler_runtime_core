@@ -27,7 +27,7 @@ public:
         if (!SetGtestEnv()) {
             std::abort();
         }
-        LoadModuleAs("module", "number_subtypes/module.js");
+        LoadModuleAs("module", "module.js");
     }
 };
 

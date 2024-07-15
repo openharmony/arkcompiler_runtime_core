@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { A } from "/plugins/ets/tests/interop_js/tests/strict_equality/strict_equality.js"
+import { A } from "strict_equality"
 
 function TestEqualTrue(): boolean {
     let a = new A(42);

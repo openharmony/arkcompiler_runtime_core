@@ -20,7 +20,7 @@ import {
 	evaluateObject,
 	MyNamespace,
 	evaluateArray,
-} from '/plugins/ets/tests/interop_js/tests/number_subtypes/module.js';
+} from 'module';
 
 //! CHECKER      jscallEmpty JIT
 //! RUN          force_jit: true, entry: "jscallEmpty", options: "--compiler-regex=ETSGLOBAL::jscallEmpty"

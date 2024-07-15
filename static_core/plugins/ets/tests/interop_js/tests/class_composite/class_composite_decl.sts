@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { A } from "/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite"
+import { A } from "./js"
 
 function Test1(): int {
     let a: A = { name: "Edalyn", age: 30, location: "Boiling Isles" };

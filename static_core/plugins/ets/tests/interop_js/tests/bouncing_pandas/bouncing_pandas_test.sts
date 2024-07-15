@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { bouncingPandas } from "/plugins/ets/tests/interop_js/tests/bouncing_pandas/bouncing_pandas.js";
+import { bouncingPandas } from "."
 
 function Test1(): boolean {
   let ret = bouncingPandas();

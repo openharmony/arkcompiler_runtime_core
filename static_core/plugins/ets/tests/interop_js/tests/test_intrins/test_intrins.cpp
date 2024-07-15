@@ -23,7 +23,7 @@ public:
     void SetUp() override
     {
         EtsInteropTest::SetUp();
-        LoadModuleAs("test_intrins", "test_intrins/test_intrins.js");
+        LoadModuleAs("test_intrins", "index.js");
     }
 };
 

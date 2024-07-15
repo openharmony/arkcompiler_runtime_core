@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- import {fnWithAnyParamObject, ObjectTypeWithArr, TestUserType, fnWithUserInterface, fnWithUserClass, TestUserClass,
+ import {
+  fnWithAnyParamObject, ObjectTypeWithArr, TestUserType, fnWithUserInterface, fnWithUserClass, TestUserClass,
   UnionArrOrObj, fnWithUnionParam, UserPartial, UserOmit, fnWithSubsetPick, UserPick, AddressType,
-  fnWithExtraSetParam, fnWithLiteralParam, fnWithAnyParams }
-  from "/plugins/ets/tests/interop_js/tests/optional_reference_type/optional_reference_type.js"
+  fnWithExtraSetParam, fnWithLiteralParam, fnWithAnyParams
+  } from "."
 
  function referenceAnyParam(): boolean {
     return fnWithAnyParams(['one', 'two']) == 'one';
