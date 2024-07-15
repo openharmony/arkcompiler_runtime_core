@@ -69,7 +69,7 @@ class EtsTestSuite(ABC):
             EtsSuites.ESCHECKED.value: ESCheckedEtsTestSuite,
             EtsSuites.CUSTOM.value: CustomEtsTestSuite,
         }
-        return name_to_class[ets_suite_name]
+        return name_to_class.get(ets_suite_name)
 
     @cached_property
     def name(self) -> str:

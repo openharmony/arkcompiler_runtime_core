@@ -112,9 +112,6 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
 
 
 class FuncTestPreparationStep(TestPreparationStep):
-    def transform(self, force_generated: bool) -> List[str]:
-        return self.generate_template_tests(self.test_source_path, self.test_gen_path)
-
     def __str__(self) -> str:
         return f"Test Generator for '{EtsSuites.FUNC.value}' test suite"
 
@@ -134,6 +131,9 @@ class FuncTestPreparationStep(TestPreparationStep):
             generated_tests_tmp = ets_render.render_and_write_templates(template_root_path, dir_name.path, dir_outpath)
             generated_tests.extend(generated_tests_tmp)
         return generated_tests
+
+    def transform(self, force_generated: bool) -> List[str]:
+        return self.generate_template_tests(self.test_source_path, self.test_gen_path)
 
 
 class ESCheckedTestPreparationStep(TestPreparationStep):

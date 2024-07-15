@@ -91,6 +91,14 @@ class Report(ABC):
 
 
 class HtmlReport(Report):
+    @staticmethod
+    def __get_good_line(line: str) -> str:
+        return f'<span class="output_line">{line}</span>'
+
+    @staticmethod
+    def __get_failed_line(line: str) -> str:
+        return f'<span class="output_line output_line--failed">{line}</span>'
+
     def make_report(self) -> str:
         actual_report = self.test.report if self.test.report is not None else TestReport("", "", -1)
         expected, actual = self.__make_output_diff_html(self.test.expected, actual_report.output)
@@ -124,14 +132,6 @@ class HtmlReport(Report):
 
         return report
 
-    @staticmethod
-    def __get_good_line(line: str) -> str:
-        return f'<span class="output_line">{line}</span>'
-
-    @staticmethod
-    def __get_failed_line(line: str) -> str:
-        return f'<span class="output_line output_line--failed">{line}</span>'
-
     def __make_output_diff_html(self, expected: str, actual: str) -> Tuple[List[str], List[str]]:
         expected_list = convert_to_array(expected)
         actual_list = convert_to_array(actual)
@@ -161,6 +161,18 @@ class HtmlReport(Report):
 
 
 class MdReport(Report):
+    @staticmethod
+    def __get_md_good_line(expected: str, actual: str) -> str:
+        return f"| {expected} | {actual} |"
+
+    @staticmethod
+    def __get_md_failed_line(expected: str, actual: str) -> str:
+        if expected.strip() != "":
+            expected = f"**{expected}**"
+        if actual.strip() != "":
+            actual = f"**{actual}**"
+        return f"| {expected} | {actual} |"
+
     def make_report(self) -> str:
         actual_report = self.test.report if self.test.report is not None else TestReport("", "", -1)
         result = self.__make_output_diff_md(self.test.expected, actual_report.output)
@@ -192,18 +204,6 @@ class MdReport(Report):
             report = report.replace(REPORT_RETURN_CODE, str(actual_report.return_code))
 
         return report
-
-    @staticmethod
-    def __get_md_good_line(expected: str, actual: str) -> str:
-        return f"| {expected} | {actual} |"
-
-    @staticmethod
-    def __get_md_failed_line(expected: str, actual: str) -> str:
-        if expected.strip() != "":
-            expected = f"**{expected}**"
-        if actual.strip() != "":
-            actual = f"**{actual}**"
-        return f"| {expected} | {actual} |"
 
     def __make_output_diff_md(self, expected: str, actual: str) -> List[str]:
         expected_list = convert_to_array(expected)
