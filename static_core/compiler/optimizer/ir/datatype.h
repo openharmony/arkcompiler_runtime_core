@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -300,6 +300,35 @@ inline uint8_t GetTypeByteSize(Type type, Arch arch)
 {
     // NOLINTNEXTLINE(readability-magic-numbers, cppcoreguidelines-avoid-magic-numbers)
     return 1U << ShiftByType(type, arch);
+}
+
+static bool NeedCastIntTypes(Arch arch, DataType::Type typeBefore, DataType::Type typeAfter)
+{
+    auto sizeBefore = DataType::GetTypeSize(typeBefore, arch);
+    auto sizeAfter = DataType::GetTypeSize(typeAfter, arch);
+
+    // In our ISA minimal type is 32-bit, so type less then 32-bit we should extend to 32-bit.
+    // Thereby we may to avoid some casts.
+    constexpr auto NUM_BITS_INT32 = 32U;
+    bool extendNotNeed = sizeBefore < sizeAfter && sizeAfter <= NUM_BITS_INT32;
+    return !extendNotNeed || DataType::IsTypeSigned(typeBefore) != DataType::IsTypeSigned(typeAfter);
+}
+
+inline bool NeedCastForTypes(Arch arch, DataType::Type typeBefore, DataType::Type typeAfter)
+{
+    // If types is equal, we avoid cast
+    if (typeBefore == typeAfter) {
+        return false;
+    }
+
+    // There are types left here: int and float
+    ASSERT(DataType::IsTypeNumeric(typeBefore) && DataType::IsTypeNumeric(typeAfter));
+    if (DataType::IsFloatType(typeBefore) || DataType::IsFloatType(typeAfter)) {
+        return true;
+    }
+
+    // There are types left here: int
+    return NeedCastIntTypes(arch, typeBefore, typeAfter);
 }
 
 }  // namespace DataType

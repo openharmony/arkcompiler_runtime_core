@@ -1195,7 +1195,9 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)
         {
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
-            INST(14U, Opcode::Return).u64().Inputs(15U);
+            INST(16U, Opcode::Cast).u64().SrcType(DataType::INT64).Inputs(15U);
+            // That cast of constant will be optimized in constant folding in Peepholes
+            INST(14U, Opcode::Return).u64().Inputs(16U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1593,7 +1595,9 @@ TEST_F(EscapeAnalysisTest, LoadDefaultValue)
         {
             INST(1U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
-            INST(8U, Opcode::Return).u64().Inputs(9U);
+            // That cast of constant will be optimized in constant folding in Peepholes
+            INST(10U, Opcode::Cast).u64().SrcType(DataType::INT64).Inputs(9U);
+            INST(8U, Opcode::Return).u64().Inputs(10U);
         }
         // NOLINTEND(readability-magic-numbers)
     }
@@ -1647,10 +1651,14 @@ TEST_F(EscapeAnalysisTest, VirtualLoadAfterMaterialization)
             INST(2U, Opcode::LoadAndInitClass).ref().Inputs(1U);
             INST(6U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
-        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(3U, 4U)
+        {
+            // Cast of constant will be optimize in constant folding in Peepholes
+            INST(15U, Opcode::Cast).u64().SrcType(DataType::INT64).Inputs(12U);
+        }
         BASIC_BLOCK(4U, -1L)
         {
-            INST(8U, Opcode::Phi).u64().Inputs(0U, 12U);
+            INST(8U, Opcode::Phi).u64().Inputs(0U, 15U);
             INST(10U, Opcode::SaveState);
             INST(11U, Opcode::CallStatic).v0id().InputsAutoType(8U, 10U);
             INST(13U, Opcode::SaveState);
