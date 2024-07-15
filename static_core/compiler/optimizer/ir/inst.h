@@ -50,11 +50,8 @@ class SaveStateItem;
 class LocationsInfo;
 using InstVector = ArenaVector<Inst *>;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(opcode, base, ...) class base;
-// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-OPCODE_LIST(INST_DEF)
-#undef INST_DEF
+template <size_t N>
+class FixedInputsInst;
 
 /*
  * Condition code, used in Compare, If[Imm] and Select[Imm] instructions.
@@ -83,135 +80,10 @@ enum ConditionCode {
     CC_LAST = CC_TST_NE,
 };
 
-inline ConditionCode GetInverseConditionCode(ConditionCode code)
-{
-    switch (code) {
-        case ConditionCode::CC_EQ:
-            return ConditionCode::CC_NE;
-        case ConditionCode::CC_NE:
-            return ConditionCode::CC_EQ;
-
-        case ConditionCode::CC_LT:
-            return ConditionCode::CC_GE;
-        case ConditionCode::CC_LE:
-            return ConditionCode::CC_GT;
-        case ConditionCode::CC_GT:
-            return ConditionCode::CC_LE;
-        case ConditionCode::CC_GE:
-            return ConditionCode::CC_LT;
-
-        case ConditionCode::CC_B:
-            return ConditionCode::CC_AE;
-        case ConditionCode::CC_BE:
-            return ConditionCode::CC_A;
-        case ConditionCode::CC_A:
-            return ConditionCode::CC_BE;
-        case ConditionCode::CC_AE:
-            return ConditionCode::CC_B;
-
-        case ConditionCode::CC_TST_EQ:
-            return ConditionCode::CC_TST_NE;
-        case ConditionCode::CC_TST_NE:
-            return ConditionCode::CC_TST_EQ;
-
-        default:
-            UNREACHABLE();
-    }
-}
-
-inline ConditionCode InverseSignednessConditionCode(ConditionCode code)
-{
-    switch (code) {
-        case ConditionCode::CC_EQ:
-            return ConditionCode::CC_EQ;
-        case ConditionCode::CC_NE:
-            return ConditionCode::CC_NE;
-
-        case ConditionCode::CC_LT:
-            return ConditionCode::CC_B;
-        case ConditionCode::CC_LE:
-            return ConditionCode::CC_BE;
-        case ConditionCode::CC_GT:
-            return ConditionCode::CC_A;
-        case ConditionCode::CC_GE:
-            return ConditionCode::CC_AE;
-
-        case ConditionCode::CC_B:
-            return ConditionCode::CC_LT;
-        case ConditionCode::CC_BE:
-            return ConditionCode::CC_LE;
-        case ConditionCode::CC_A:
-            return ConditionCode::CC_GT;
-        case ConditionCode::CC_AE:
-            return ConditionCode::CC_GE;
-
-        case ConditionCode::CC_TST_EQ:
-            return ConditionCode::CC_TST_EQ;
-        case ConditionCode::CC_TST_NE:
-            return ConditionCode::CC_TST_NE;
-
-        default:
-            UNREACHABLE();
-    }
-}
-
-inline bool IsSignedConditionCode(ConditionCode code)
-{
-    switch (code) {
-        case ConditionCode::CC_LT:
-        case ConditionCode::CC_LE:
-        case ConditionCode::CC_GT:
-        case ConditionCode::CC_GE:
-            return true;
-
-        case ConditionCode::CC_EQ:
-        case ConditionCode::CC_NE:
-        case ConditionCode::CC_B:
-        case ConditionCode::CC_BE:
-        case ConditionCode::CC_A:
-        case ConditionCode::CC_AE:
-        case ConditionCode::CC_TST_EQ:
-        case ConditionCode::CC_TST_NE:
-            return false;
-
-        default:
-            UNREACHABLE();
-    }
-}
-
-inline ConditionCode SwapOperandsConditionCode(ConditionCode code)
-{
-    switch (code) {
-        case ConditionCode::CC_EQ:
-        case ConditionCode::CC_NE:
-            return code;
-
-        case ConditionCode::CC_LT:
-            return ConditionCode::CC_GT;
-        case ConditionCode::CC_LE:
-            return ConditionCode::CC_GE;
-        case ConditionCode::CC_GT:
-            return ConditionCode::CC_LT;
-        case ConditionCode::CC_GE:
-            return ConditionCode::CC_LE;
-
-        case ConditionCode::CC_B:
-            return ConditionCode::CC_A;
-        case ConditionCode::CC_BE:
-            return ConditionCode::CC_AE;
-        case ConditionCode::CC_A:
-            return ConditionCode::CC_B;
-        case ConditionCode::CC_AE:
-            return ConditionCode::CC_BE;
-
-        case ConditionCode::CC_TST_EQ:
-        case ConditionCode::CC_TST_NE:
-            return code;
-
-        default:
-            UNREACHABLE();
-    }
-}
+ConditionCode GetInverseConditionCode(ConditionCode code);
+ConditionCode InverseSignednessConditionCode(ConditionCode code);
+bool IsSignedConditionCode(ConditionCode code);
+ConditionCode SwapOperandsConditionCode(ConditionCode code);
 
 template <typename T>
 bool Compare(ConditionCode cc, T lhs, T rhs)
@@ -826,7 +698,6 @@ private:
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_INST(TYPE) void Accept(GraphVisitor *v) override
 
 /// Base class for all instructions, should not be instantiated directly
 class InstBase {
@@ -837,8 +708,6 @@ public:
     virtual ~InstBase() = default;
 
 public:
-    virtual void Accept(GraphVisitor *v) = 0;
-
     ALWAYS_INLINE void operator delete([[maybe_unused]] void *unused, [[maybe_unused]] size_t size)
     {
         UNREACHABLE();
@@ -858,7 +727,9 @@ protected:
 /// Base instruction class
 class Inst : public MarkerSet, public InstBase {
 public:
-    DECLARE_INST(Inst);
+    // Used for SFINAE for inputs deduction during CreateInst-calls
+    template <typename... Ds>
+    using CheckBase = std::enable_if_t<std::conjunction_v<std::is_convertible<Ds, Inst *>...>>;
 
 public:
     /**
@@ -874,15 +745,7 @@ public:
     template <typename InstType, typename... Args>
     [[nodiscard]] static InstType *New(ArenaAllocator *allocator, Args &&...args);
 
-    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(opcode, base, ...) inline const base *CastTo##opcode() const;
-    OPCODE_LIST(INST_DEF)
-#undef INST_DEF
-
-    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(opcode, base, ...) inline base *CastTo##opcode();
-    OPCODE_LIST(INST_DEF)
-#undef INST_DEF
+    INST_CAST_TO_DECL()
 
     // Methods for instruction chaining inside basic blocks.
     Inst *GetNext()
@@ -1801,18 +1664,20 @@ public:
     }
 #endif
 
+    using Initializer = std::tuple<Opcode, DataType::Type, uint32_t>;
+
 protected:
     using InstBase::InstBase;
     static constexpr int INPUT_COUNT = 0;
 
     Inst() = default;
 
-    explicit Inst(Opcode opcode) : Inst(opcode, DataType::Type::NO_TYPE, INVALID_PC) {}
+    explicit Inst(Opcode opcode) : Inst(Initializer {opcode, DataType::Type::NO_TYPE, INVALID_PC}) {}
 
-    explicit Inst(Opcode opcode, DataType::Type type, uint32_t pc) : pc_(pc), opcode_(opcode)
+    explicit Inst(Initializer t) : pc_(std::get<uint32_t>(t)), opcode_(std::get<Opcode>(t))
     {
-        bitFields_ = inst_flags::GetFlagsMask(opcode);
-        SetField<FieldType>(type);
+        bitFields_ = inst_flags::GetFlagsMask(opcode_);
+        SetField<FieldType>(std::get<DataType::Type>(t));
     }
 
 protected:
@@ -1827,6 +1692,9 @@ protected:
     }
 
 private:
+    template <typename InstType, typename... Args>
+    static InstType *ConstructInst(InstType *ptr, ArenaAllocator *allocator, Args &&...args);
+
     User *GetUser(unsigned index)
     {
         if (UNLIKELY(IsOperandsDynamic())) {
@@ -2044,8 +1912,8 @@ public:
     TypeIdMixin(uint32_t typeId, RuntimeInterface::MethodPtr method) : typeId_(typeId), method_(method) {}
 
     TypeIdMixin() = default;
-    NO_COPY_SEMANTIC(TypeIdMixin);
-    NO_MOVE_SEMANTIC(TypeIdMixin);
+    DEFAULT_COPY_SEMANTIC(TypeIdMixin);
+    DEFAULT_MOVE_SEMANTIC(TypeIdMixin);
     virtual ~TypeIdMixin() = default;
 
     void SetTypeId(uint32_t id)
@@ -2482,6 +2350,31 @@ public:
 
     static constexpr int INPUT_COUNT = N;
 
+    using InputsArray = std::array<Inst *, INPUT_COUNT>;
+    struct Initializer {
+        Inst::Initializer base;
+        InputsArray inputs;
+    };
+
+    explicit FixedInputsInst(Initializer t) : Inst(t.base)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+        for (size_t i = 0; i < t.inputs.size(); i++) {
+            SetInput(i, t.inputs[i]);
+        }
+    }
+
+    template <typename... Inputs, typename = Inst::CheckBase<Inputs...>>
+    explicit FixedInputsInst(Inst::Initializer t, Inputs... inputs) : FixedInputsInst(Initializer {t, {inputs...}})
+    {
+    }
+
+    explicit FixedInputsInst(Opcode opcode) : Inst(opcode)
+    {
+        SetField<InputsCount>(INPUT_COUNT);
+    }
+    FixedInputsInst(Opcode opcode, DataType::Type type) : FixedInputsInst({opcode, type, INVALID_PC}) {}
+
     void SetSrcReg(unsigned index, Register reg) override
     {
         ASSERT(index < N);
@@ -2533,103 +2426,15 @@ private:
     Location tmpLocation_ {};
 };
 
-/**
- * Instructions with fixed static inputs
- * We need to explicitly declare these proxy classes because some code can't work with the templated inst classes, for
- * example DEFINE_INST macro.
- */
-class FixedInputsInst0 : public FixedInputsInst<0> {
-public:
-    DECLARE_INST(FixedInputsInst0);
-    using FixedInputsInst::FixedInputsInst;
-
-    FixedInputsInst0(Opcode opcode, DataType::Type type, uint32_t pc = INVALID_PC) : FixedInputsInst(opcode, type, pc)
-    {
-    }
-
-    NO_COPY_SEMANTIC(FixedInputsInst0);
-    NO_MOVE_SEMANTIC(FixedInputsInst0);
-    ~FixedInputsInst0() override = default;
-};
-
-class FixedInputsInst1 : public FixedInputsInst<1> {
-public:
-    DECLARE_INST(FixedInputsInst1);
-    using FixedInputsInst::FixedInputsInst;
-
-    FixedInputsInst1(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : FixedInputsInst(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
-    }
-
-    NO_COPY_SEMANTIC(FixedInputsInst1);
-    NO_MOVE_SEMANTIC(FixedInputsInst1);
-    ~FixedInputsInst1() override = default;
-
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        if (RequireState()) {
-            return DataType::NO_TYPE;
-        }
-        return GetType();
-    }
-};
-
-class FixedInputsInst2 : public FixedInputsInst<2U> {
-public:
-    DECLARE_INST(FixedInputsInst2);
-    using FixedInputsInst::FixedInputsInst;
-
-    FixedInputsInst2(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1)
-        : FixedInputsInst(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-    }
-
-    NO_COPY_SEMANTIC(FixedInputsInst2);
-    NO_MOVE_SEMANTIC(FixedInputsInst2);
-    ~FixedInputsInst2() override = default;
-};
-
-class FixedInputsInst3 : public FixedInputsInst<3U> {
-public:
-    DECLARE_INST(FixedInputsInst3);
-    using FixedInputsInst::FixedInputsInst;
-
-    FixedInputsInst3(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2)
-        : FixedInputsInst(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
-    }
-};
-
-class FixedInputsInst4 : public FixedInputsInst<4U> {
-public:
-    DECLARE_INST(FixedInputsInst4);
-    using FixedInputsInst::FixedInputsInst;
-
-    FixedInputsInst4(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                     Inst *input3)
-        : FixedInputsInst(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
-        SetInput(3U, input3);
-    }
-};
+using FixedInputsInst0 = FixedInputsInst<0>;
+using FixedInputsInst1 = FixedInputsInst<1>;
+using FixedInputsInst2 = FixedInputsInst<2U>;
+using FixedInputsInst3 = FixedInputsInst<3U>;
+using FixedInputsInst4 = FixedInputsInst<4U>;
 
 /// Instruction with variable inputs count
 class DynamicInputsInst : public Inst {
 public:
-    DECLARE_INST(DynamicInputsInst);
     using Inst::Inst;
 
     static constexpr int INPUT_COUNT = MAX_STATIC_INPUTS;
@@ -2698,13 +2503,7 @@ private:
 /// Unary operation instruction
 class UnaryOperation : public FixedInputsInst<1> {
 public:
-    DECLARE_INST(UnaryOperation);
     using FixedInputsInst::FixedInputsInst;
-    UnaryOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : FixedInputsInst(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
-    }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -2728,16 +2527,7 @@ public:
 /// Binary operation instruction
 class BinaryOperation : public FixedInputsInst<2U> {
 public:
-    DECLARE_INST(BinaryOperation);
     using FixedInputsInst::FixedInputsInst;
-
-    BinaryOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1)
-        : FixedInputsInst(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-    }
 
     uint32_t Latency() const override
     {
@@ -2782,21 +2572,9 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class BinaryImmOperation : public FixedInputsInst<1>, public ImmediateMixin {
 public:
-    DECLARE_INST(BinaryImmOperation);
     using FixedInputsInst::FixedInputsInst;
 
-    explicit BinaryImmOperation(Opcode opcode, uint64_t imm) : FixedInputsInst(opcode), ImmediateMixin(imm) {}
-    explicit BinaryImmOperation(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm)
-    {
-    }
-
-    BinaryImmOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
-    }
+    BinaryImmOperation(Initializer t, uint64_t imm) : FixedInputsInst(std::move(t)), ImmediateMixin(imm) {}
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -2840,19 +2618,11 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class UnaryShiftedRegisterOperation : public FixedInputsInst<1>, public ImmediateMixin, public ShiftTypeMixin {
 public:
-    DECLARE_INST(UnaryShiftedRegisterOperation);
     using FixedInputsInst::FixedInputsInst;
 
-    explicit UnaryShiftedRegisterOperation(Opcode opcode, ShiftType shiftType, uint64_t imm)
-        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
+    UnaryShiftedRegisterOperation(Initializer t, uint64_t imm, ShiftType shiftType)
+        : FixedInputsInst(std::move(t)), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
-    }
-    explicit UnaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm,
-                                           ShiftType shiftType)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -2870,20 +2640,11 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class BinaryShiftedRegisterOperation : public FixedInputsInst<2U>, public ImmediateMixin, public ShiftTypeMixin {
 public:
-    DECLARE_INST(BinaryShiftedRegisterOperation);
     using FixedInputsInst::FixedInputsInst;
 
-    explicit BinaryShiftedRegisterOperation(Opcode opcode, ShiftType shiftType, uint64_t imm)
-        : FixedInputsInst(opcode), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
+    BinaryShiftedRegisterOperation(Initializer t, uint64_t imm, ShiftType shiftType)
+        : FixedInputsInst(std::move(t)), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
     {
-    }
-    explicit BinaryShiftedRegisterOperation(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                            uint64_t imm, ShiftType shiftType)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm), ShiftTypeMixin(shiftType)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -2931,7 +2692,9 @@ private:
 template <typename T>
 class InputTypesMixin : public T {
 public:
-    using T::T;
+    using Base = T;
+    using Base::AppendInput;
+    using Base::Base;
 
     void AllocateInputTypes(ArenaAllocator *allocator, size_t capacity)
     {
@@ -2975,7 +2738,7 @@ public:
         }
     }
 
-    void AppendInputAndType(Inst *input, DataType::Type type)
+    void AppendInput(Inst *input, DataType::Type type)
     {
         static_assert(std::is_base_of_v<DynamicInputsInst, T>);
         static_cast<Inst *>(this)->AppendInput(input);
@@ -3047,13 +2810,11 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ResolveStaticInst : public FixedInputsInst1, public MethodDataMixin {
 public:
-    DECLARE_INST(ResolveStaticInst);
     using Base = FixedInputsInst1;
     using Base::Base;
 
-    ResolveStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t methodId,
-                      RuntimeInterface::MethodPtr method)
-        : Base(opcode, type, pc), MethodDataMixin(methodId, method)
+    ResolveStaticInst(Inst::Initializer t, uint32_t methodId, RuntimeInterface::MethodPtr method)
+        : Base(std::move(t)), MethodDataMixin(methodId, method)
     {
     }
 
@@ -3081,13 +2842,11 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ResolveVirtualInst : public FixedInputsInst2, public MethodDataMixin {
 public:
-    DECLARE_INST(ResolveVirtualInst);
     using Base = FixedInputsInst2;
     using Base::Base;
 
-    ResolveVirtualInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t methodId,
-                       RuntimeInterface::MethodPtr method)
-        : Base(opcode, type, pc), MethodDataMixin(methodId, method)
+    ResolveVirtualInst(Inst::Initializer t, uint32_t methodId, RuntimeInterface::MethodPtr method)
+        : Base(std::move(t)), MethodDataMixin(methodId, method)
     {
     }
 
@@ -3120,16 +2879,11 @@ public:
 
 class InitStringInst : public FixedInputsInst2 {
 public:
-    DECLARE_INST(InitStringInst);
     using Base = FixedInputsInst2;
     using Base::Base;
 
-    InitStringInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, StringCtorType ctorType)
-        : Base(opcode, type, pc)
+    InitStringInst(Initializer t, StringCtorType ctorType) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetStringCtorType(ctorType);
     }
 
@@ -3179,13 +2933,11 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class CallInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public MethodDataMixin {
 public:
-    DECLARE_INST(CallInst);
     using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
 
-    CallInst(Opcode opcode, DataType::Type type, uint32_t pc, uint32_t methodId,
-             RuntimeInterface::MethodPtr method = nullptr)
-        : Base(opcode, type, pc), MethodDataMixin(methodId, method)
+    CallInst(Initializer t, uint32_t methodId, RuntimeInterface::MethodPtr method = nullptr)
+        : Base(std::move(t)), MethodDataMixin(methodId, method)
     {
     }
 
@@ -3234,11 +2986,10 @@ protected:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class CallIndirectInst : public InputTypesMixin<DynamicInputsInst> {
 public:
-    DECLARE_INST(CallIndirectInst);
     using Base = InputTypesMixin<DynamicInputsInst>;
     using Base::Base;
 
-    CallIndirectInst(Opcode opcode, DataType::Type type, uint32_t pc) : Base(opcode, type, pc) {}
+    explicit CallIndirectInst(Initializer t) : Base(std::move(t)) {}
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -3254,7 +3005,6 @@ public:
 /// Length methods instruction
 class LengthMethodInst : public ArrayInstMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(LengthMethodInst);
     using Base = ArrayInstMixin<FixedInputsInst1>;
     using Base::Base;
 
@@ -3262,11 +3012,8 @@ public:
     {
         SetIsArray(isArray);
     }
-    LengthMethodInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, bool isArray = true)
-        : Base(opcode, type, pc)
+    explicit LengthMethodInst(Initializer t, bool isArray = true) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetIsArray(isArray);
     }
 
@@ -3288,21 +3035,15 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class CompareInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
 public:
-    DECLARE_INST(CompareInst);
     using BaseInst = InstWithOperandsType<ConditionMixin<FixedInputsInst2>>;
     using BaseInst::BaseInst;
 
-    CompareInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : BaseInst(opcode, type, pc)
+    CompareInst(Initializer t, ConditionCode cc) : BaseInst(std::move(t))
     {
         SetCc(cc);
     }
-    CompareInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type operType,
-                ConditionCode cc)
-        : BaseInst(opcode, type, pc)
+    CompareInst(Initializer t, DataType::Type operType, ConditionCode cc) : BaseInst(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetOperandsType(operType);
         SetCc(cc);
     }
@@ -3392,22 +3133,13 @@ protected:
 /// CompareAnyTypeInst instruction
 class CompareAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(CompareAnyTypeInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CompareAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, DataType::Type::BOOL, pc)
-    {
-        SetAnyType(anyType);
-    }
-
     CompareAnyTypeInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, DataType::Type::BOOL, pc)
+        : BaseInst({opcode, DataType::Type::BOOL, pc}, input0)
     {
-        SetField<InputsCount>(INPUT_COUNT);
         SetAnyType(anyType);
-        SetInput(0, input0);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -3430,12 +3162,11 @@ public:
 /// GetAnyTypeName instruction
 class GetAnyTypeNameInst : public AnyTypeMixin<FixedInputsInst0> {
 public:
-    DECLARE_INST(GetAnyTypeNameInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst0>;
     using BaseInst::BaseInst;
 
     GetAnyTypeNameInst(Opcode opcode, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, DataType::Type::ANY, pc)
+        : BaseInst({opcode, DataType::Type::ANY, pc})
     {
         SetAnyType(anyType);
     }
@@ -3454,21 +3185,13 @@ public:
 /// CastAnyTypeValueInst instruction
 class CastAnyTypeValueInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(CastAnyTypeValueInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CastAnyTypeValueInst(Opcode opcode, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, AnyBaseTypeToDataType(anyType), pc)
-    {
-    }
-
     CastAnyTypeValueInst(Opcode opcode, uint32_t pc, Inst *input0, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, AnyBaseTypeToDataType(anyType), pc)
+        : BaseInst({opcode, AnyBaseTypeToDataType(anyType), pc}, input0)
     {
-        SetField<InputsCount>(INPUT_COUNT);
         SetAnyType(anyType);
-        SetInput(0, input0);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -3496,18 +3219,13 @@ public:
 /// CastValueToAnyTypeInst instruction
 class CastValueToAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(CastValueToAnyTypeInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CastValueToAnyTypeInst(Opcode opcode, uint32_t pc) : BaseInst(opcode, DataType::ANY, pc) {}
-
     CastValueToAnyTypeInst(Opcode opcode, uint32_t pc, AnyBaseType anyType, Inst *input0)
-        : BaseInst(opcode, DataType::ANY, pc)
+        : BaseInst({opcode, DataType::ANY, pc}, input0)
     {
-        SetField<InputsCount>(INPUT_COUNT);
         SetAnyType(anyType);
-        SetInput(0, input0);
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -3530,17 +3248,11 @@ public:
 /// AnyTypeCheckInst instruction
 class AnyTypeCheckInst : public AnyTypeMixin<FixedInputsInst2> {
 public:
-    DECLARE_INST(AnyTypeCheckInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst2>;
     using BaseInst::BaseInst;
 
-    AnyTypeCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                     AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, type, pc)
+    explicit AnyTypeCheckInst(Initializer t, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE) : BaseInst(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetAnyType(anyType);
     }
 
@@ -3570,17 +3282,11 @@ enum class HclassChecks {
 };
 class HclassCheckInst : public AnyTypeMixin<FixedInputsInst2> {
 public:
-    DECLARE_INST(HclassCheckInst);
     using BaseInst = AnyTypeMixin<FixedInputsInst2>;
     using BaseInst::BaseInst;
 
-    HclassCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                    AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, type, pc)
+    explicit HclassCheckInst(Initializer t, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE) : BaseInst(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetAnyType(anyType);
     }
 
@@ -3634,13 +3340,12 @@ protected:
  * Available types: INT64, FLOAT32, FLOAT64, ANY. All integer types are stored as INT64 value.
  * Once type of constant is set, it can't be changed anymore.
  */
-class ConstantInst : public Inst {
+class ConstantInst : public FixedInputsInst<0> {
 public:
-    DECLARE_INST(ConstantInst);
-    using Inst::Inst;
+    using FixedInputsInst::FixedInputsInst;
 
     template <typename T>
-    explicit ConstantInst(Opcode /* unused */, T value, bool supportInt32 = false) : Inst(Opcode::Constant)
+    explicit ConstantInst(Opcode /* unused */, T value, bool supportInt32 = false) : FixedInputsInst(Opcode::Constant)
     {
         ASSERT(GetTypeFromCType<T>() != DataType::NO_TYPE);
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
@@ -3831,8 +3536,6 @@ enum SpillFillType {
 
 class SpillFillInst : public FixedInputsInst0 {
 public:
-    DECLARE_INST(SpillFillInst);
-
     explicit SpillFillInst(ArenaAllocator *allocator, Opcode opcode, SpillFillType type = UNKNOWN)
         : FixedInputsInst0(opcode), spillFills_(allocator->Adapter()), sfType_(type)
     {
@@ -3939,15 +3642,14 @@ private:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ParameterInst : public Inst, public LocationDataMixin {
+class ParameterInst : public FixedInputsInst<0>, public LocationDataMixin {
 public:
-    DECLARE_INST(ParameterInst);
-    using Inst::Inst;
+    using FixedInputsInst::FixedInputsInst;
     static constexpr uint16_t DYNAMIC_NUM_ARGS = std::numeric_limits<uint16_t>::max();
     static constexpr uint16_t INVALID_ARG_REF_NUM = std::numeric_limits<uint16_t>::max();
 
     explicit ParameterInst(Opcode /* unused */, uint16_t argNumber, DataType::Type type = DataType::NO_TYPE)
-        : Inst(Opcode::Parameter, type, INVALID_PC), argNumber_(argNumber)
+        : FixedInputsInst({Opcode::Parameter, type, INVALID_PC}), argNumber_(argNumber)
     {
     }
     uint16_t GetArgNumber() const
@@ -3990,12 +3692,10 @@ inline bool IsZeroConstantOrNullPtr(const Inst *inst)
 /// Phi instruction
 class PhiInst : public AnyTypeMixin<DynamicInputsInst> {
 public:
-    DECLARE_INST(PhiInst);
     using BaseInst = AnyTypeMixin<DynamicInputsInst>;
     using BaseInst::BaseInst;
 
-    PhiInst(Opcode opcode, DataType::Type type, uint32_t pc, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE)
-        : BaseInst(opcode, type, pc)
+    explicit PhiInst(Initializer t, AnyBaseType anyType = AnyBaseType::UNDEFINED_TYPE) : BaseInst(std::move(t))
     {
         SetAnyType(anyType);
     }
@@ -4069,11 +3769,10 @@ struct SaveStateImm {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class SaveStateInst : public DynamicInputsInst {
 public:
-    DECLARE_INST(SaveStateInst);
     using DynamicInputsInst::DynamicInputsInst;
 
     SaveStateInst(Opcode opcode, uint32_t pc, void *method, CallInst *inst, uint32_t inliningDepth)
-        : DynamicInputsInst(opcode, DataType::NO_TYPE, pc),
+        : DynamicInputsInst({opcode, DataType::NO_TYPE, pc}),
           method_(method),
           callerInst_(inst),
           inliningDepth_(inliningDepth)
@@ -4247,7 +3946,6 @@ private:
 /// Load value from array or string
 class LoadInst : public ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>> {
 public:
-    DECLARE_INST(LoadInst);
     using Base = ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
 
@@ -4255,13 +3953,8 @@ public:
     {
         SetIsArray(isArray);
     }
-    LoadInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool needBarrier = false,
-             bool isArray = true)
-        : Base(opcode, type, pc)
+    explicit LoadInst(Initializer t, bool needBarrier = false, bool isArray = true) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetNeedBarrier(needBarrier);
         SetIsArray(isArray);
     }
@@ -4312,19 +4005,8 @@ public:
 
 class LoadCompressedStringCharInst : public FixedInputsInst3 {
 public:
-    DECLARE_INST(LoadCompressedStringCharInst);
     using Base = FixedInputsInst3;
     using Base::Base;
-
-    LoadCompressedStringCharInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                 Inst *input2)
-        : Base(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
-    }
 
     Inst *GetArray()
     {
@@ -4363,18 +4045,10 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadCompressedStringCharInstI : public FixedInputsInst2, public ImmediateMixin {
 public:
-    DECLARE_INST(LoadCompressedStringCharInstI);
     using Base = FixedInputsInst2;
     using Base::Base;
 
-    LoadCompressedStringCharInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                  uint64_t imm)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-    }
+    LoadCompressedStringCharInstI(Initializer t, uint64_t imm) : Base(std::move(t)), ImmediateMixin(imm) {}
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -4397,18 +4071,11 @@ public:
 /// Store value into array element
 class StoreInst : public NeedBarrierMixin<FixedInputsInst3> {
 public:
-    DECLARE_INST(StoreInst);
     using Base = NeedBarrierMixin<FixedInputsInst3>;
     using Base::Base;
 
-    StoreInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-              bool needBarrier = false)
-        : Base(opcode, type, pc)
+    explicit StoreInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetNeedBarrier(needBarrier);
     }
 
@@ -4458,7 +4125,6 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadInstI : public VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>, public ImmediateMixin {
 public:
-    DECLARE_INST(LoadInstI);
     using Base = VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>;
     using Base::Base;
 
@@ -4466,12 +4132,10 @@ public:
     {
         SetIsArray(isArray);
     }
-    LoadInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool isVolatile = false,
-              bool needBarrier = false, bool isArray = true)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
+
+    LoadInstI(Initializer t, uint64_t imm, bool isVolatile = false, bool needBarrier = false, bool isArray = true)
+        : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetIsArray(isArray);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
@@ -4516,17 +4180,13 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public ImmediateMixin {
 public:
-    DECLARE_INST(LoadMemInstI);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
 
     LoadMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    LoadMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, bool isVolatile = false,
-                 bool needBarrier = false)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
+    LoadMemInstI(Initializer t, uint64_t imm, bool isVolatile = false, bool needBarrier = false)
+        : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -4569,21 +4229,10 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
 public:
-    DECLARE_INST(StoreInstI);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
 
     StoreInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    StoreInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
-               bool isVolatile = false, bool needBarrier = false)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
-    }
 
     bool IsBarrier() const override
     {
@@ -4635,21 +4284,10 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
 public:
-    DECLARE_INST(StoreMemInstI);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
 
     StoreMemInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
-    StoreMemInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
-                  bool isVolatile = false, bool needBarrier = false)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-        SetVolatile(isVolatile);
-        SetNeedBarrier(needBarrier);
-    }
 
     bool IsBarrier() const override
     {
@@ -4695,7 +4333,6 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class BoundsCheckInstI : public ArrayInstMixin<FixedInputsInst<2U>>, public ImmediateMixin {
 public:
-    DECLARE_INST(BoundsCheckInstI);
     using Base = ArrayInstMixin<FixedInputsInst<2U>>;
     using Base::Base;
 
@@ -4704,13 +4341,8 @@ public:
         SetIsArray(isArray);
     }
 
-    BoundsCheckInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint64_t imm,
-                     bool isArray = true)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
+    BoundsCheckInstI(Initializer t, uint64_t imm, bool isArray = true) : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetIsArray(isArray);
     }
 
@@ -4729,7 +4361,6 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class BoundsCheckInst : public ArrayInstMixin<FixedInputsInst<3U>> {
 public:
-    DECLARE_INST(BoundsCheckInst);
     using Base = ArrayInstMixin<FixedInputsInst<3U>>;
     using Base::Base;
 
@@ -4738,14 +4369,8 @@ public:
         SetIsArray(isArray);
     }
 
-    BoundsCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                    bool isArray = true)
-        : Base(opcode, type, pc)
+    explicit BoundsCheckInst(Initializer t, bool isArray = true) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetIsArray(isArray);
     }
 
@@ -4767,16 +4392,8 @@ public:
 
 class NullCheckInst : public FixedInputsInst2 {
 public:
-    DECLARE_INST(NullCheckInst);
     using Base = FixedInputsInst2;
     using Base::Base;
-
-    NullCheckInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1) : Base(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-    }
 
     bool IsImplicit() const
     {
@@ -4805,14 +4422,10 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ReturnInstI : public FixedInputsInst<0>, public ImmediateMixin {
 public:
-    DECLARE_INST(ReturnInstI);
     using FixedInputsInst::FixedInputsInst;
 
     ReturnInstI(Opcode opcode, uint64_t imm) : FixedInputsInst(opcode), ImmediateMixin(imm) {}
-    ReturnInstI(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t imm)
-        : FixedInputsInst(opcode, type, pc), ImmediateMixin(imm)
-    {
-    }
+    ReturnInstI(Inst::Initializer t, uint64_t imm) : FixedInputsInst(std::move(t)), ImmediateMixin(imm) {}
 
     bool DumpInputs(std::ostream * /* out */) const override;
 
@@ -4826,14 +4439,7 @@ public:
 
 class ReturnInlinedInst : public FixedInputsInst<1> {
 public:
-    DECLARE_INST(ReturnInlinedInst);
     using FixedInputsInst::FixedInputsInst;
-
-    ReturnInlinedInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : FixedInputsInst(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
-    }
 
     bool IsExtendedLiveness() const
     {
@@ -4853,16 +4459,8 @@ private:
 /// Monitor instruction
 class MonitorInst : public FixedInputsInst2 {
 public:
-    DECLARE_INST(MonitorInst);
     using Base = FixedInputsInst2;
     using Base::Base;
-
-    MonitorInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1) : Base(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-    }
 
     bool IsExit() const
     {
@@ -4905,7 +4503,6 @@ protected:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public TypeIdMixin {
 public:
-    DECLARE_INST(IntrinsicInst);
     using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
     using IntrinsicId = RuntimeInterface::IntrinsicId;
@@ -4915,8 +4512,7 @@ public:
         AdjustFlags(intrinsicId, this);
     }
 
-    IntrinsicInst(Opcode opcode, DataType::Type type, uint32_t pc, IntrinsicId intrinsicId)
-        : Base(opcode, type, pc), intrinsicId_(intrinsicId)
+    IntrinsicInst(Initializer t, IntrinsicId intrinsicId) : Base(std::move(t)), intrinsicId_(intrinsicId)
     {
         AdjustFlags(intrinsicId, this);
     }
@@ -5064,15 +4660,11 @@ private:
 /// Cast instruction
 class CastInst : public InstWithOperandsType<FixedInputsInst1> {
 public:
-    DECLARE_INST(CastInst);
     using BaseInst = InstWithOperandsType<FixedInputsInst1>;
     using BaseInst::BaseInst;
 
-    CastInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, DataType::Type operType)
-        : BaseInst(opcode, type, pc)
+    CastInst(Initializer t, DataType::Type operType) : BaseInst(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
         SetOperandsType(operType);
     }
 
@@ -5100,16 +4692,11 @@ public:
 /// Cmp instruction
 class CmpInst : public InstWithOperandsType<FixedInputsInst2> {
 public:
-    DECLARE_INST(CmpInst);
     using BaseInst = InstWithOperandsType<FixedInputsInst2>;
     using BaseInst::BaseInst;
 
-    CmpInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type operType)
-        : BaseInst(opcode, type, pc)
+    CmpInst(Initializer t, DataType::Type operType) : BaseInst(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetOperandsType(operType);
     }
 
@@ -5172,17 +4759,13 @@ class LoadObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<Fix
                        public TypeIdMixin,
                        public FieldMixin {
 public:
-    DECLARE_INST(LoadObjectInst);
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>;
     using Base::Base;
 
-    LoadObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
-                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+    LoadObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
                    bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5224,17 +4807,11 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>> {
 public:
-    DECLARE_INST(LoadMemInst);
     using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
     using Base::Base;
 
-    LoadMemInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, bool isVolatile = false,
-                bool needBarrier = false)
-        : Base(opcode, type, pc)
+    explicit LoadMemInst(Initializer t, bool isVolatile = false, bool needBarrier = false) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5279,18 +4856,8 @@ public:
 /// Load value from dynamic object
 class LoadObjectDynamicInst : public DynObjectAccessMixin<FixedInputsInst3> {
 public:
-    DECLARE_INST(LoadObjectDynamicInst);
     using Base = DynObjectAccessMixin<FixedInputsInst3>;
     using Base::Base;
-
-    LoadObjectDynamicInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2)
-        : Base(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
-    }
 
     bool IsBarrier() const override
     {
@@ -5301,20 +4868,8 @@ public:
 /// Store value to dynamic object
 class StoreObjectDynamicInst : public DynObjectAccessMixin<FixedInputsInst<4U>> {
 public:
-    DECLARE_INST(StoreObjectDynamicInst);
     using Base = DynObjectAccessMixin<FixedInputsInst<4U>>;
     using Base::Base;
-
-    StoreObjectDynamicInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                           Inst *input3)
-        : Base(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
-        SetInput(3U, input3);
-    }
 
     bool IsBarrier() const override
     {
@@ -5326,16 +4881,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ResolveObjectFieldInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
-    DECLARE_INST(ResolveObjectFieldInst);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    ResolveObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
-                           RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    ResolveObjectFieldInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetNeedBarrier(needBarrier);
     }
 
@@ -5367,18 +4918,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public TypeIdMixin {
 public:
-    DECLARE_INST(LoadResolvedObjectFieldInst);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
 
-    LoadResolvedObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                uint32_t typeId, RuntimeInterface::MethodPtr method, bool isVolatile = false,
-                                bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    LoadResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5418,19 +4963,14 @@ class StoreObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<Fi
                         public TypeIdMixin,
                         public FieldMixin {
 public:
-    DECLARE_INST(StoreObjectInst);
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
-                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+    StoreObjectInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
                     bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5471,20 +5011,13 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>, public TypeIdMixin {
 public:
-    DECLARE_INST(StoreResolvedObjectFieldInst);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreResolvedObjectFieldInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                 Inst *input2, uint32_t typeId, RuntimeInterface::MethodPtr method,
-                                 bool isVolatile = false, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    StoreResolvedObjectFieldInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5530,20 +5063,13 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>> {
 public:
-    DECLARE_INST(StoreMemInst);
     using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
 
     static constexpr size_t STORED_INPUT_INDEX = 2;
 
-    StoreMemInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                 bool isVolatile = false, bool needBarrier = false)
-        : Base(opcode, type, pc)
+    explicit StoreMemInst(Initializer t, bool isVolatile = false, bool needBarrier = false) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5586,17 +5112,13 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public TypeIdMixin, public FieldMixin {
 public:
-    DECLARE_INST(LoadStaticInst);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
 
-    LoadStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
-                   RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+    LoadStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
                    bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5635,16 +5157,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ResolveObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
-    DECLARE_INST(ResolveObjectFieldStaticInst);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    ResolveObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
-                                 RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    ResolveObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetNeedBarrier(needBarrier);
     }
 
@@ -5676,17 +5194,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadResolvedObjectFieldStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public TypeIdMixin {
 public:
-    DECLARE_INST(LoadResolvedObjectFieldStaticInst);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
 
-    LoadResolvedObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint32_t typeId,
-                                      RuntimeInterface::MethodPtr method, bool isVolatile = false,
-                                      bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    LoadResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool isVolatile = false, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5726,19 +5239,14 @@ class StoreStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>
                         public TypeIdMixin,
                         public FieldMixin {
 public:
-    DECLARE_INST(StoreStaticInst);
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 1;
 
-    StoreStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
-                    RuntimeInterface::MethodPtr method, RuntimeInterface::FieldPtr field, bool isVolatile = false,
+    StoreStaticInst(Initializer t, TypeIdMixin m, RuntimeInterface::FieldPtr field, bool isVolatile = false,
                     bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), FieldMixin(field)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
     }
@@ -5780,17 +5288,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class UnresolvedStoreStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
-    DECLARE_INST(UnresolvedStoreStaticInst);
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
-    UnresolvedStoreStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                              uint32_t typeId, RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    UnresolvedStoreStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetNeedBarrier(needBarrier);
     }
 
@@ -5825,17 +5328,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreResolvedObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
-    DECLARE_INST(StoreResolvedObjectFieldStaticInst);
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
-    StoreResolvedObjectFieldStaticInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                                       uint32_t typeId, RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    StoreResolvedObjectFieldStaticInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetNeedBarrier(needBarrier);
     }
 
@@ -5869,17 +5367,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class NewObjectInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
-    DECLARE_INST(NewObjectInst);
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
-    NewObjectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
-                  RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    NewObjectInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetNeedBarrier(needBarrier);
     }
 
@@ -5911,7 +5404,6 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class NewArrayInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
 public:
-    DECLARE_INST(NewArrayInst);
     using Base = NeedBarrierMixin<FixedInputsInst3>;
     using Base::Base;
 
@@ -5919,14 +5411,8 @@ public:
     static constexpr size_t INDEX_SIZE = 1;
     static constexpr size_t INDEX_SAVE_STATE = 2;
 
-    NewArrayInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *inputClass, Inst *inputSize,
-                 Inst *inputSaveState, uint32_t typeId, RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    NewArrayInst(Initializer t, TypeIdMixin m, bool needBarrier = false) : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(INDEX_CLASS, inputClass);
-        SetInput(INDEX_SIZE, inputSize);
-        SetInput(INDEX_SAVE_STATE, inputSaveState);
         SetNeedBarrier(needBarrier);
     }
 
@@ -5965,16 +5451,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadConstArrayInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
-    DECLARE_INST(LoadConstArrayInst);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    LoadConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
-                       RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    LoadConstArrayInst(Initializer t, TypeIdMixin m, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6003,17 +5485,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class FillConstArrayInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin, public ImmediateMixin {
 public:
-    DECLARE_INST(FillConstArrayInst);
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
-    FillConstArrayInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
-                       RuntimeInterface::MethodPtr method, uint64_t imm, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), ImmediateMixin(imm)
+    FillConstArrayInst(Initializer t, TypeIdMixin m, uint64_t imm, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), ImmediateMixin(imm)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6045,18 +5522,12 @@ public:
 class CheckCastInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
                       public TypeIdMixin {
 public:
-    DECLARE_INST(CheckCastInst);
     using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
 
-    CheckCastInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                  uint32_t typeId, RuntimeInterface::MethodPtr method, ClassType classType, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    CheckCastInst(Initializer t, TypeIdMixin m, ClassType classType, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetClassType(classType);
         SetNeedBarrier(needBarrier);
     }
@@ -6094,18 +5565,12 @@ public:
 class IsInstanceInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
                        public TypeIdMixin {
 public:
-    DECLARE_INST(IsInstanceInst);
     using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
 
-    IsInstanceInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                   uint32_t typeId, RuntimeInterface::MethodPtr method, ClassType classType, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    IsInstanceInst(Initializer t, TypeIdMixin m, ClassType classType, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetClassType(classType);
         SetNeedBarrier(needBarrier);
     }
@@ -6142,16 +5607,11 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadFromPool : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
-    DECLARE_INST(LoadFromPool);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    LoadFromPool(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
-                 RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    LoadFromPool(Initializer t, TypeIdMixin m, bool needBarrier = false) : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6181,16 +5641,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadFromPoolDynamic : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
-    DECLARE_INST(LoadFromPoolDynamic);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    LoadFromPoolDynamic(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
-                        RuntimeInterface::MethodPtr method, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method)
+    LoadFromPoolDynamic(Initializer t, TypeIdMixin m, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6231,16 +5687,12 @@ protected:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ClassInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
-    DECLARE_INST(ClassInst);
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
 
-    ClassInst(Opcode opcode, DataType::Type type, int32_t pc, Inst *input, uint32_t typeId,
-              RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), klass_(klass)
+    ClassInst(Initializer t, TypeIdMixin m, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), klass_(klass)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6283,13 +5735,11 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class RuntimeClassInst : public NeedBarrierMixin<FixedInputsInst0>, public TypeIdMixin {
 public:
-    DECLARE_INST(RuntimeClassInst);
     using Base = NeedBarrierMixin<FixedInputsInst0>;
     using Base::Base;
 
-    RuntimeClassInst(Opcode opcode, DataType::Type type, int32_t pc, uint32_t typeId,
-                     RuntimeInterface::MethodPtr method, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), klass_(klass)
+    RuntimeClassInst(Inst::Initializer t, TypeIdMixin m, RuntimeInterface::ClassPtr klass, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), klass_(klass)
     {
         SetNeedBarrier(needBarrier);
     }
@@ -6330,22 +5780,14 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class GlobalVarInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
-    DECLARE_INST(GlobalVarInst);
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
 
-    GlobalVarInst(Opcode opcode, DataType::Type type, uint32_t pc, uintptr_t address)
-        : Base(opcode, type, pc), address_(address)
-    {
-    }
+    GlobalVarInst(Initializer t, uintptr_t address) : Base(std::move(t)), address_(address) {}
 
-    GlobalVarInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, uint32_t typeId,
-                  RuntimeInterface::MethodPtr method, uintptr_t address, bool needBarrier = false)
-        : Base(opcode, type, pc), TypeIdMixin(typeId, method), address_(address)
+    GlobalVarInst(Initializer t, TypeIdMixin m, uintptr_t address, bool needBarrier = false)
+        : Base(std::move(t)), TypeIdMixin(std::move(m)), address_(address)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6384,10 +5826,9 @@ private:
 
 /// Get object pointer from the specific source.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadImmediateInst : public Inst {
+class LoadImmediateInst : public FixedInputsInst<0> {
 public:
-    DECLARE_INST(LoadImmediateInst);
-    using Base = Inst;
+    using Base = FixedInputsInst;
     using Base::Base;
 
     enum class ObjectType {
@@ -6402,23 +5843,21 @@ public:
         LAST
     };
 
-    LoadImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, const void *obj,
-                      ObjectType objType = ObjectType::CLASS)
-        : Base(opcode, type, pc), obj_(reinterpret_cast<uint64_t>(obj))
+    LoadImmediateInst(Inst::Initializer t, const void *obj, ObjectType objType = ObjectType::CLASS)
+        : Base(std::move(t)), obj_(reinterpret_cast<uint64_t>(obj))
     {
         SetObjectType(objType);
     }
 
-    LoadImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, uint64_t obj,
-                      ObjectType objType = ObjectType::CLASS)
-        : Base(opcode, type, pc), obj_(obj)
+    LoadImmediateInst(Inst::Initializer t, uint64_t obj, ObjectType objType = ObjectType::CLASS)
+        : Base(std::move(t)), obj_(obj)
     {
         SetObjectType(objType);
     }
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = Inst::Clone(targetGraph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadImmediate()->SetObjectType(GetObjectType());
         clone->CastToLoadImmediate()->obj_ = obj_;
         return clone;
@@ -6534,20 +5973,16 @@ private:
 
 /// Get function from the specific source.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class FunctionImmediateInst : public Inst {
+class FunctionImmediateInst : public FixedInputsInst<0> {
 public:
-    DECLARE_INST(FunctionImmediateInst);
-    using Base = Inst;
+    using Base = FixedInputsInst;
     using Base::Base;
 
-    FunctionImmediateInst(Opcode opcode, DataType::Type type, uint32_t pc, uintptr_t ptr)
-        : Base(opcode, type, pc), functionPtr_(ptr)
-    {
-    }
+    FunctionImmediateInst(Inst::Initializer t, uintptr_t ptr) : Base(std::move(t)), functionPtr_(ptr) {}
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = Inst::Clone(targetGraph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToFunctionImmediate()->functionPtr_ = functionPtr_;
         return clone;
     }
@@ -6571,20 +6006,16 @@ private:
 
 /// Get object from the specific source(handle).
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadObjFromConstInst : public Inst {
+class LoadObjFromConstInst : public FixedInputsInst<0> {
 public:
-    DECLARE_INST(LoadObjFromConstInst);
-    using Base = Inst;
+    using Base = FixedInputsInst;
     using Base::Base;
 
-    LoadObjFromConstInst(Opcode opcode, DataType::Type type, uint32_t pc, uintptr_t ptr)
-        : Base(opcode, type, pc), objectPtr_(ptr)
-    {
-    }
+    LoadObjFromConstInst(Inst::Initializer t, uintptr_t ptr) : Base(std::move(t)), objectPtr_(ptr) {}
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = Inst::Clone(targetGraph);
+        auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToLoadObjFromConst()->objectPtr_ = objectPtr_;
         return clone;
     }
@@ -6610,19 +6041,11 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class SelectInst : public ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>> {
 public:
-    DECLARE_INST(SelectInst);
     using Base = ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>>;
     using Base::Base;
 
-    SelectInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2, Inst *input3,
-               DataType::Type operType, ConditionCode cc)
-        : Base(opcode, type, pc)
+    SelectInst(Initializer t, DataType::Type operType, ConditionCode cc) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
-        SetInput(3U, input3);
         SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
@@ -6658,18 +6081,12 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class SelectImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst3>>, public ImmediateMixin {
 public:
-    DECLARE_INST(SelectImmInst);
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst3>>;
     using Base::Base;
 
-    SelectImmInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                  uint64_t imm, DataType::Type operType, ConditionCode cc)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
+    SelectImmInst(Initializer t, uint64_t imm, DataType::Type operType, ConditionCode cc)
+        : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetOperandsType(operType);
         SetCc(cc);
         if (IsReferenceOrAny()) {
@@ -6704,22 +6121,17 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class IfInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
 public:
-    DECLARE_INST(IfInst);
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst2>>;
     using Base::Base;
 
-    IfInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : Base(opcode, type, pc)
+    IfInst(Initializer t, ConditionCode cc) : Base(std::move(t))
     {
         SetCc(cc);
     }
 
-    IfInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, DataType::Type operType,
-           ConditionCode cc, RuntimeInterface::MethodPtr method = nullptr)
-        : Base(opcode, type, pc), method_(method)
+    IfInst(Initializer t, DataType::Type operType, ConditionCode cc, RuntimeInterface::MethodPtr method = nullptr)
+        : Base(std::move(t)), method_(method)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetOperandsType(operType);
         SetCc(cc);
     }
@@ -6761,22 +6173,18 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class IfImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst1>>, public ImmediateMixin {
 public:
-    DECLARE_INST(IfImmInst);
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst1>>;
     using Base::Base;
 
-    IfImmInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc, uint64_t imm)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
+    IfImmInst(Initializer t, ConditionCode cc, uint64_t imm) : Base(std::move(t)), ImmediateMixin(imm)
     {
         SetCc(cc);
     }
 
-    IfImmInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm, DataType::Type operType,
-              ConditionCode cc, RuntimeInterface::MethodPtr method = nullptr)
-        : Base(opcode, type, pc), ImmediateMixin(imm), method_(method)
+    IfImmInst(Initializer t, uint64_t imm, DataType::Type operType, ConditionCode cc,
+              RuntimeInterface::MethodPtr method = nullptr)
+        : Base(std::move(t)), ImmediateMixin(imm), method_(method)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetOperandsType(operType);
         SetCc(cc);
     }
@@ -6823,15 +6231,11 @@ private:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadPairPartInst : public FixedInputsInst1, public ImmediateMixin {
 public:
-    DECLARE_INST(LoadPairPartInst);
     using FixedInputsInst1::FixedInputsInst1;
 
-    explicit LoadPairPartInst(Opcode opcode, uint64_t imm) : FixedInputsInst1(opcode), ImmediateMixin(imm) {}
+    LoadPairPartInst(Opcode opcode, uint64_t imm) : FixedInputsInst1(opcode), ImmediateMixin(imm) {}
 
-    LoadPairPartInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm)
-        : FixedInputsInst1(opcode, type, pc, input), ImmediateMixin(imm)
-    {
-    }
+    LoadPairPartInst(Initializer t, uint64_t imm) : FixedInputsInst1(std::move(t)), ImmediateMixin(imm) {}
 
     uint32_t GetSrcRegIndex() const override
     {
@@ -6857,17 +6261,11 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadArrayPairInst : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>, public ImmediateMixin {
 public:
-    DECLARE_INST(LoadArrayPairInst);
     using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>;
     using Base::Base;
 
-    LoadArrayPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                      bool needBarrier = false)
-        : Base(opcode, type, pc)
+    explicit LoadArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetNeedBarrier(needBarrier);
     }
 
@@ -6925,14 +6323,11 @@ class LoadObjectPairInst
       public TypeIdMixin2,
       public FieldMixin2 {
 public:
-    DECLARE_INST(LoadObjectPairInst);
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>>>;
     using Base::Base;
 
-    LoadObjectPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input) : Base(opcode, type, pc)
+    explicit LoadObjectPairInst(Initializer t) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(InputOrd::INP0, input);
         SetVolatile(false);
         SetNeedBarrier(false);
     }
@@ -6976,19 +6371,11 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>>, public ImmediateMixin {
 public:
-    DECLARE_INST(StoreVectorInst);
     using Base = NeedBarrierMixin<FixedInputsInst<4U>>;
     using Base::Base;
 
-    StoreArrayPairInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                       Inst *input3, bool needBarrier = false)
-        : Base(opcode, type, pc)
+    explicit StoreArrayPairInst(Initializer t, bool needBarrier = false) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
-        SetInput(3U, input3);
         SetNeedBarrier(needBarrier);
     }
 
@@ -7047,14 +6434,12 @@ class StoreObjectPairInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixi
                             public TypeIdMixin2,
                             public FieldMixin2 {
 public:
-    DECLARE_INST(StoreObjectPairInst);
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
     static constexpr size_t STORED_INPUT_INDEX = 2;
 
-    StoreObjectPairInst(Opcode opcode, DataType::Type type, uint32_t pc) : Base(opcode, type, pc)
+    explicit StoreObjectPairInst(Initializer t) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
         SetVolatile(false);
         SetNeedBarrier(false);
     }
@@ -7097,18 +6482,13 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class LoadArrayPairInstI : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>, public ImmediateMixin {
 public:
-    DECLARE_INST(LoadArrayPairInstI);
     using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>;
     using Base::Base;
 
     explicit LoadArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
-    LoadArrayPairInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input, uint64_t imm,
-                       bool needBarrier = false)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
+    LoadArrayPairInstI(Initializer t, uint64_t imm, bool needBarrier = false) : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetNeedBarrier(needBarrier);
     }
 
@@ -7154,20 +6534,13 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class StoreArrayPairInstI : public NeedBarrierMixin<FixedInputsInst3>, public ImmediateMixin {
 public:
-    DECLARE_INST(StoreArrayPairInstI);
     using Base = NeedBarrierMixin<FixedInputsInst3>;
     using Base::Base;
 
     explicit StoreArrayPairInstI(Opcode opcode, uint64_t imm) : Base(opcode), ImmediateMixin(imm) {}
 
-    StoreArrayPairInstI(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1, Inst *input2,
-                        uint64_t imm, bool needBarrier = false)
-        : Base(opcode, type, pc), ImmediateMixin(imm)
+    StoreArrayPairInstI(Initializer t, uint64_t imm, bool needBarrier = false) : Base(std::move(t)), ImmediateMixin(imm)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetNeedBarrier(needBarrier);
     }
 
@@ -7221,10 +6594,9 @@ public:
 /// CatchPhiInst instruction
 class CatchPhiInst : public DynamicInputsInst {
 public:
-    DECLARE_INST(CatchPhiInst);
     using DynamicInputsInst::DynamicInputsInst;
 
-    CatchPhiInst(Opcode opcode, DataType::Type type, uint32_t pc) : DynamicInputsInst(opcode, type, pc) {}
+    explicit CatchPhiInst(Initializer t) : DynamicInputsInst(std::move(t)) {}
 
     const ArenaVector<const Inst *> *GetThrowableInsts() const
     {
@@ -7270,11 +6642,10 @@ private:
 
 class TryInst : public FixedInputsInst0 {
 public:
-    DECLARE_INST(TryInst);
     using FixedInputsInst0::FixedInputsInst0;
 
     explicit TryInst(Opcode opcode, BasicBlock *endBb = nullptr)
-        : FixedInputsInst0(opcode, DataType::NO_TYPE, INVALID_PC), tryEndBb_(endBb)
+        : FixedInputsInst0({opcode, DataType::NO_TYPE, INVALID_PC}), tryEndBb_(endBb)
     {
     }
 
@@ -7382,16 +6753,11 @@ protected:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class DeoptimizeInst : public DeoptimizeTypeMixin<FixedInputsInst1> {
 public:
-    DECLARE_INST(DeoptimizeInst);
     using Base = DeoptimizeTypeMixin<FixedInputsInst1>;
     using Base::Base;
 
-    DeoptimizeInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input,
-                   DeoptimizeType deoptType = DeoptimizeType::NOT_PROFILED)
-        : Base(opcode, type, pc)
+    explicit DeoptimizeInst(Initializer t, DeoptimizeType deoptType = DeoptimizeType::NOT_PROFILED) : Base(std::move(t))
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input);
         SetDeoptimizeType(deoptType);
     }
 
@@ -7407,19 +6773,14 @@ public:
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class DeoptimizeIfInst : public DeoptimizeTypeMixin<FixedInputsInst2> {
-    DECLARE_INST(DeoptimizeInst);
     using Base = DeoptimizeTypeMixin<FixedInputsInst2>;
 
 public:
     using Base::Base;
 
-    DeoptimizeIfInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1,
-                     DeoptimizeType deoptType)
-        : Base(opcode, type, pc)
+    DeoptimizeIfInst(Opcode opcode, uint32_t pc, Inst *cond, Inst *ss, DeoptimizeType deoptType)
+        : Base({opcode, DataType::NO_TYPE, pc}, cond, ss)
     {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetDeoptimizeType(deoptType);
     }
 
@@ -7449,27 +6810,13 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class DeoptimizeCompareInst : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>> {
 public:
-    DECLARE_INST(DeoptimizeCompareInst);
     using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>>;
     using Base::Base;
 
     explicit DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare)
-        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc())
+        : Base({opcode, deoptIf->GetType(), deoptIf->GetPc()})
     {
         SetDeoptimizeType(deoptIf->GetDeoptimizeType());
-        SetOperandsType(compare->GetOperandsType());
-        SetCc(compare->GetCc());
-    }
-
-    DeoptimizeCompareInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare, Inst *input0,
-                          Inst *input1, Inst *input2)
-        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc())
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
-        SetInput(0U, input0);
-        SetInput(1U, input1);
-        SetInput(2U, input2);
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
     }
@@ -7504,26 +6851,13 @@ public:
 class DeoptimizeCompareImmInst : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>,
                                  public ImmediateMixin {
 public:
-    DECLARE_INST(DeoptimizeCompareImmInst);
     using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>;
     using Base::Base;
 
     explicit DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare,
                                       uint64_t imm)
-        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc()), ImmediateMixin(imm)
+        : Base({opcode, deoptIf->GetType(), deoptIf->GetPc()}), ImmediateMixin(imm)
     {
-        SetDeoptimizeType(deoptIf->GetDeoptimizeType());
-        SetOperandsType(compare->GetOperandsType());
-        SetCc(compare->GetCc());
-    }
-
-    DeoptimizeCompareImmInst(Opcode opcode, const DeoptimizeIfInst *deoptIf, const CompareInst *compare, Inst *input0,
-                             Inst *input1, uint64_t imm)
-        : Base(opcode, deoptIf->GetType(), deoptIf->GetPc()), ImmediateMixin(imm)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
         SetDeoptimizeType(deoptIf->GetDeoptimizeType());
         SetOperandsType(compare->GetOperandsType());
         SetCc(compare->GetCc());
@@ -7559,16 +6893,8 @@ public:
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ThrowInst : public FixedInputsInst2, public MethodDataMixin {
 public:
-    DECLARE_INST(ThrowInst);
     using Base = FixedInputsInst2;
     using Base::Base;
-
-    ThrowInst(Opcode opcode, DataType::Type type, uint32_t pc, Inst *input0, Inst *input1) : Base(opcode, type, pc)
-    {
-        SetField<InputsCount>(INPUT_COUNT);
-        SetInput(0, input0);
-        SetInput(1, input1);
-    }
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -7599,13 +6925,12 @@ public:
 
 class BinaryOverflowInst : public IfInst {
 public:
-    DECLARE_INST(BinaryOverflowInst);
     using Base = IfInst;
     using Base::Base;
 
-    BinaryOverflowInst(Opcode opcode, DataType::Type type, uint32_t pc, ConditionCode cc) : Base(opcode, type, pc, cc)
+    BinaryOverflowInst(Initializer t, ConditionCode cc) : Base(t, cc)
     {
-        SetOperandsType(type);
+        SetOperandsType(GetType());
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -7620,29 +6945,7 @@ public:
     }
 };
 
-inline bool IsVolatileMemInst(const Inst *inst)
-{
-    switch (inst->GetOpcode()) {
-        case Opcode::LoadObject:
-            return inst->CastToLoadObject()->GetVolatile();
-        case Opcode::LoadObjectPair:
-            return inst->CastToLoadObjectPair()->GetVolatile();
-        case Opcode::StoreObject:
-            return inst->CastToStoreObject()->GetVolatile();
-        case Opcode::StoreObjectPair:
-            return inst->CastToStoreObjectPair()->GetVolatile();
-        case Opcode::LoadStatic:
-            return inst->CastToLoadStatic()->GetVolatile();
-        case Opcode::StoreStatic:
-            return inst->CastToStoreStatic()->GetVolatile();
-        case Opcode::UnresolvedStoreStatic:
-        case Opcode::LoadResolvedObjectFieldStatic:
-        case Opcode::StoreResolvedObjectFieldStatic:
-            return true;
-        default:
-            return false;
-    }
-}
+bool IsVolatileMemInst(const Inst *inst);
 
 // Check if instruction is pseudo-user for mutli-output instruction
 inline bool IsPseudoUserOfMultiOutput(Inst *inst)
@@ -7656,46 +6959,114 @@ inline bool IsPseudoUserOfMultiOutput(Inst *inst)
     }
 }
 
+template <typename T>
+struct ConstructWrapper : public T {
+    template <typename... Args>
+    explicit ConstructWrapper([[maybe_unused]] ArenaAllocator *a, Args &&...args)
+        : ConstructWrapper(std::forward<Args>(args)...)
+    {
+    }
+
+    // Try wrap Inst::Initializer:
+    template <typename PC, typename... Args>
+    ConstructWrapper(Opcode opcode, DataType::Type type, PC pc, Args &&...args)
+        : ConstructWrapper(Inst::Initializer {opcode, type, pc}, std::forward<Args>(args)...)
+    {
+    }
+
+    // Try wrap FixedInputs:
+    using Initializer = typename T::Initializer;
+
+    template <typename T0, typename... Args, typename = Inst::CheckBase<T0>>
+    ConstructWrapper(Inst::Initializer t, T0 input0, Args &&...args)
+        : ConstructWrapper(Initializer {t, std::array<Inst *, 1U> {input0}}, std::forward<Args>(args)...)
+    {
+    }
+
+    template <typename T0, typename T1, typename... Args, typename = Inst::CheckBase<T0, T1>>
+    ConstructWrapper(Inst::Initializer t, T0 input0, T1 input1, Args &&...args)
+        : ConstructWrapper(Initializer {t, std::array<Inst *, 2U> {input0, input1}}, std::forward<Args>(args)...)
+    {
+    }
+
+    template <typename T0, typename T1, typename T2, typename... Args, typename = Inst::CheckBase<T0, T1, T2>>
+    ConstructWrapper(Inst::Initializer t, T0 input0, T1 input1, T2 input2, Args &&...args)
+        : ConstructWrapper(Initializer {t, std::array<Inst *, 3U> {input0, input1, input2}},
+                           std::forward<Args>(args)...)
+    {
+    }
+
+    template <size_t N, typename... Args>
+    ConstructWrapper(Inst::Initializer t, std::array<Inst *, N> &&inputs, Args &&...args)
+        : ConstructWrapper(Initializer {t, std::move(inputs)}, std::forward<Args>(args)...)
+    {
+    }
+
+    // Final forward:
+    template <typename... Args>
+    explicit ConstructWrapper(Args &&...args) : T(std::forward<Args>(args)...)
+    {
+    }
+};
+
+template <>
+struct ConstructWrapper<SpillFillInst> : SpillFillInst {
+    ConstructWrapper(ArenaAllocator *allocator, Opcode opcode, SpillFillType type = UNKNOWN)
+        : SpillFillInst(allocator, opcode, type)
+    {
+    }
+};
+
 template <typename InstType, typename... Args>
-InstType *Inst::New(ArenaAllocator *allocator, Args &&...args)
+InstType *Inst::ConstructInst(InstType *ptr, ArenaAllocator *allocator, Args &&...args)
 {
-    static_assert(alignof(InstType) >= alignof(uintptr_t));
-    // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
-    if constexpr (std::is_same_v<InstType, SpillFillInst>) {
-        auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(sizeof(InstType), DEFAULT_ALIGNMENT));
-        ASSERT(data != 0);
-        return new (reinterpret_cast<void *>(data)) InstType(allocator, std::forward<Args>(args)...);
+    // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
+    if constexpr (InstType::INPUT_COUNT == MAX_STATIC_INPUTS) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto opsPtr = reinterpret_cast<char *>(ptr) - sizeof(DynamicOperands);
+        [[maybe_unused]] auto ops = new (opsPtr) DynamicOperands(allocator);
         // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-    } else if constexpr (InstType::INPUT_COUNT == 0) {
-        auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(sizeof(InstType), DEFAULT_ALIGNMENT));
-        ASSERT(data != 0);
-        return new (reinterpret_cast<void *>(data)) InstType(std::forward<Args>(args)...);
-        // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
-    } else if constexpr (InstType::INPUT_COUNT == MAX_STATIC_INPUTS) {
-        constexpr size_t OPERANDS_SIZE = sizeof(DynamicOperands);
-        static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
-        auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(OPERANDS_SIZE + sizeof(InstType), DEFAULT_ALIGNMENT));
-        ASSERT(data != 0);
-        auto inst = new (reinterpret_cast<void *>(data + OPERANDS_SIZE)) InstType(std::forward<Args>(args)...);
-        [[maybe_unused]] auto operands = new (reinterpret_cast<void *>(data)) DynamicOperands(allocator);
-        static_cast<Inst *>(inst)->SetField<InputsCount>(InstType::INPUT_COUNT);
-        return inst;
-    } else {  // NOLINT(readability-misleading-indentation)
+    } else if constexpr (InstType::INPUT_COUNT != 0) {
         constexpr size_t OPERANDS_SIZE = sizeof(Operands<InstType::INPUT_COUNT>);
-        constexpr auto ALIGNMENT {GetLogAlignment(alignof(Operands<InstType::INPUT_COUNT>))};
-        static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
-        auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(OPERANDS_SIZE + sizeof(InstType), ALIGNMENT));
-        ASSERT(data != 0);
-        auto operands = new (reinterpret_cast<void *>(data)) Operands<InstType::INPUT_COUNT>;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto operands = new (reinterpret_cast<char *>(ptr) - OPERANDS_SIZE) Operands<InstType::INPUT_COUNT>;
         unsigned idx = InstType::INPUT_COUNT - 1;
         for (auto &user : operands->users) {
             new (&user) User(true, idx--, InstType::INPUT_COUNT);
         }
-        auto inst = new (reinterpret_cast<void *>(data + OPERANDS_SIZE)) InstType(std::forward<Args>(args)...);
-        static_cast<Inst *>(inst)->SetField<InputsCount>(InstType::INPUT_COUNT);
-        return inst;
     }
+    auto inst = new (ptr) ConstructWrapper<InstType>(allocator, std::forward<Args>(args)...);
+    inst->template SetField<Inst::InputsCount>(InstType::INPUT_COUNT);
+    return inst;
 }
+
+template <typename InstType, typename... Args>
+InstType *Inst::New(ArenaAllocator *allocator, Args &&...args)
+{
+    static_assert(alignof(InstType) >= alignof(uintptr_t));
+
+    size_t allocSize = sizeof(InstType);
+    auto alignment = DEFAULT_ALIGNMENT;
+    size_t operandsSize = 0;
+    // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
+    if constexpr (InstType::INPUT_COUNT == MAX_STATIC_INPUTS) {
+        constexpr size_t OPERANDS_SIZE = sizeof(DynamicOperands);
+        static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
+        operandsSize = OPERANDS_SIZE;
+        // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
+    } else if constexpr (InstType::INPUT_COUNT != 0) {
+        constexpr size_t OPERANDS_SIZE = sizeof(Operands<InstType::INPUT_COUNT>);
+        static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
+        operandsSize = OPERANDS_SIZE;
+        alignment = GetLogAlignment(alignof(Operands<InstType::INPUT_COUNT>));
+    }
+
+    auto ptr = reinterpret_cast<uintptr_t>(allocator->Alloc(allocSize + operandsSize, alignment));
+    ASSERT(ptr != 0);
+    return ConstructInst(reinterpret_cast<InstType *>(ptr + operandsSize), allocator, std::forward<Args>(args)...);
+}
+
+INST_CAST_TO_DEF()
 
 inline Inst *User::GetInput()
 {
@@ -7713,25 +7084,6 @@ inline std::ostream &operator<<(std::ostream &os, const Inst &inst)
     return os;
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(opcode, base, ...)                 \
-    inline const base *Inst::CastTo##opcode() const \
-    {                                               \
-        ASSERT(GetOpcode() == Opcode::opcode);      \
-        return static_cast<const base *>(this);     \
-    }
-OPCODE_LIST(INST_DEF)
-#undef INST_DEF
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(opcode, base, ...)            \
-    inline base *Inst::CastTo##opcode()        \
-    {                                          \
-        ASSERT(GetOpcode() == Opcode::opcode); \
-        return static_cast<base *>(this);      \
-    }
-OPCODE_LIST(INST_DEF)
-#undef INST_DEF
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_IR_INST_H

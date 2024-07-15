@@ -97,8 +97,8 @@ void TryCatchResolving::DeoptimizeIfs()
 #endif
         saveState->RemoveUsers<false>();
         tryBB->EraseInst(saveState, true);
-        auto deoptimizeIf = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, saveState->GetPc(), compInst,
-                                                               saveState, DeoptimizeType::IFIMM_TRY);
+        auto deoptimizeIf =
+            GetGraph()->CreateInstDeoptimizeIf(saveState->GetPc(), compInst, saveState, DeoptimizeType::IFIMM_TRY);
         deoptimizeIf->SetInput(0, compInst);
         deoptimizeIf->SetInput(1, saveState);
         lastInst->InsertBefore(compInst);

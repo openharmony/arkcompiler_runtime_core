@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,9 @@ namespace ark::compiler {
 class MemoryBarrierTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(MemoryBarrierTest, Test1)
+SRC_GRAPH(Test1, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -45,6 +45,11 @@ TEST_F(MemoryBarrierTest, Test1)
             INST(13U, Opcode::Return).ref().Inputs(10U);
         }
     }
+}
+
+TEST_F(MemoryBarrierTest, Test1)
+{
+    src_graph::Test1::CREATE(GetGraph());
     ASSERT_EQ(INS(0U).GetFlag(inst_flags::MEM_BARRIER), false);
     ASSERT_EQ(INS(1U).GetFlag(inst_flags::MEM_BARRIER), false);
     ASSERT_EQ(INS(2U).GetFlag(inst_flags::MEM_BARRIER), true);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,13 +66,6 @@ public:
     virtual uint64_t VisitGraphAndCount() = 0;
     virtual void VisitBlock(BasicBlock *bb) = 0;
     virtual void VisitInstruction(Inst *inst) = 0;
-    virtual void VisitGraphGrouped() = 0;
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define GROUP_DEF(BASE) \
-    virtual void VisitInst([[maybe_unused]] BASE *i) {}
-    OPCODE_CLASS_LIST(GROUP_DEF)
-#undef GROUP_DEF
 
     NO_COPY_SEMANTIC(GraphVisitor);
     NO_MOVE_SEMANTIC(GraphVisitor);
@@ -97,8 +90,6 @@ protected:
      * It defines following:
      * - VisitGraph() method, that aims to iterate over graph.
      * - VisitBlock() method, that aims to iterate over given basic block.
-     * - VisitGraphGrouped() method, that aims to iterate over graph and invoke methods for instruction groups rather
-     *                       than opcodes.
      * - VisitFunc table_ - list of methods for all opcodes.
      */
 };

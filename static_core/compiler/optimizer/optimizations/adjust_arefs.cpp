@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -151,21 +151,18 @@ void AdjustRefs::WalkChainDown(BasicBlock *bb, Inst *startFrom, Inst *head)
         if (succ->GetLoop() != loop_ || succ->IsMarked(blockEntered_)) {
             continue;
         }
-        auto allPredsVisited = true;
+
         if (head != nullptr) {
-            for (auto pred : succ->GetPredsBlocks()) {
-                if (!pred->IsMarked(blockProcessed_)) {
-                    allPredsVisited = false;
-                    break;
-                }
+            auto blockNotProcessed = [this](BasicBlock *b) { return !b->IsMarked(blockProcessed_); };
+            auto it = std::find_if(succ->GetPredsBlocks().begin(), succ->GetPredsBlocks().end(), blockNotProcessed);
+            if (it != succ->GetPredsBlocks().end()) {
+                continue;
             }
         }
         // If all predecessors of succ were walked with the current value of head,
         // we can be sure that there are no SafePoints or runtime calls
         // on any path from block with head to succ
-        if (allPredsVisited) {
-            WalkChainDown(succ, succ->GetFirstInst(), head);
-        }
+        WalkChainDown(succ, succ->GetFirstInst(), head);
     }
 }
 

@@ -295,21 +295,9 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardIfTest)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(DeoptimizeEliminationTest, ChaGuardIfSeveralGuardsTest)
+SRC_GRAPH(ChaGuardIfSeveralGuardsTest, Graph *graph)
 {
-    /*
-     * bb1
-     * guard
-     * call
-     * guard
-     * |   \
-     * |   bb2
-     * |   some inst
-     * |  /
-     * bb3
-     * guard
-     */
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(10U, 0U).s32();
         CONSTANT(11U, 1U);
@@ -340,8 +328,10 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardIfSeveralGuardsTest)
             INST(9U, Opcode::ReturnVoid).v0id();
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(ChaGuardIfSeveralGuardsTest, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(10U, 0U).s32();
@@ -373,12 +363,32 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardIfSeveralGuardsTest)
             INST(9U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(DeoptimizeEliminationTest, ChaGuardIfSeveralGuardsTest)
+{
+    /*
+     * bb1
+     * guard
+     * call
+     * guard
+     * |   \
+     * |   bb2
+     * |   some inst
+     * |  /
+     * bb3
+     * guard
+     */
+    src_graph::ChaGuardIfSeveralGuardsTest::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::ChaGuardIfSeveralGuardsTest::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(DeoptimizeEliminationTest, ChaGuardLoopTest)
+SRC_GRAPH(ChaGuardLoopTest, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(10U, 0U);
         CONSTANT(11U, 1U);
@@ -407,8 +417,10 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardLoopTest)
             INST(13U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(ChaGuardLoopTest, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(10U, 0U);
@@ -438,6 +450,14 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardLoopTest)
             INST(13U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(DeoptimizeEliminationTest, ChaGuardLoopTest)
+{
+    src_graph::ChaGuardLoopTest::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::ChaGuardLoopTest::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -517,9 +537,9 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithCallBeforeGuardTest)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithCallBetweenGuardsWithDomGuardTest)
+SRC_GRAPH(ChaGuardLoopWithCallBetweenGuardsWithDomGuardTest, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(10U, 0U);
         CONSTANT(11U, 1U);
@@ -553,8 +573,10 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithCallBetweenGuardsWithDomGuardT
             INST(13U, Opcode::Return).s32().Inputs(3U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(ChaGuardLoopWithCallBetweenGuardsWithDomGuardTest, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(10U, 0U);
@@ -589,12 +611,20 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithCallBetweenGuardsWithDomGuardT
             INST(13U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithCallBetweenGuardsWithDomGuardTest)
+{
+    src_graph::ChaGuardLoopWithCallBetweenGuardsWithDomGuardTest::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::ChaGuardLoopWithCallBetweenGuardsWithDomGuardTest::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithDuplicatedGuardsTest)
+SRC_GRAPH(ChaGuardLoopWithDuplicatedGuardsTest, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -634,8 +664,10 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithDuplicatedGuardsTest)
             INST(18U, Opcode::Return).s32().Inputs(17U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(ChaGuardLoopWithDuplicatedGuardsTest, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -676,6 +708,14 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithDuplicatedGuardsTest)
             INST(18U, Opcode::Return).s32().Inputs(17U);
         }
     }
+}
+
+TEST_F(DeoptimizeEliminationTest, ChaGuardLoopWithDuplicatedGuardsTest)
+{
+    src_graph::ChaGuardLoopWithDuplicatedGuardsTest::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::ChaGuardLoopWithDuplicatedGuardsTest::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -709,18 +749,9 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardNotDominateTest)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(DeoptimizeEliminationTest, ChaGuardIfWithGuardsTest)
+SRC_GRAPH(ChaGuardIfWithGuardsTest, Graph *graph)
 {
-    /*
-     *    some code
-     *    /       \
-     *  call     call
-     * guard    guard
-     * \          /
-     *  \        /
-     *    guard(*, deleted)
-     */
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -753,8 +784,10 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardIfWithGuardsTest)
             INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(ChaGuardIfWithGuardsTest, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -788,6 +821,23 @@ TEST_F(DeoptimizeEliminationTest, ChaGuardIfWithGuardsTest)
             INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(DeoptimizeEliminationTest, ChaGuardIfWithGuardsTest)
+{
+    /*
+     *    some code
+     *    /       \
+     *  call     call
+     * guard    guard
+     * \          /
+     *  \        /
+     *    guard(*, deleted)
+     */
+    src_graph::ChaGuardIfWithGuardsTest::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<DeoptimizeElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::ChaGuardIfWithGuardsTest::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

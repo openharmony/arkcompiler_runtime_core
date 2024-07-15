@@ -113,11 +113,11 @@ Inst *CreateInstructionStringBuilderInstance(Graph *graph, uint32_t pc, SaveStat
     auto method = graph->GetMethod();
 
     auto classId = GetStringBuilderClassId(graph);
-    auto loadClass = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, CopySaveState(graph, saveState),
-                                                       classId, method, runtime->ResolveType(method, classId));
-
+    auto loadClass =
+        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, CopySaveState(graph, saveState),
+                                          TypeIdMixin {classId, method}, runtime->ResolveType(method, classId));
     auto newObject = graph->CreateInstNewObject(DataType::REFERENCE, pc, loadClass, CopySaveState(graph, saveState),
-                                                classId, method);
+                                                TypeIdMixin {classId, method});
 
     return newObject;
 }

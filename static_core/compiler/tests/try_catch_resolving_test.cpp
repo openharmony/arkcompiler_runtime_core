@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,21 @@ catch_block2_begin:
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
+SRC_GRAPH(RemoveAllCatchHandlers, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(7U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
+            INST(9U, Opcode::NewObject).ref().Inputs(8U, 7U);
+            INST(10U, Opcode::SaveState).Inputs(9U).SrcVregs({0U});
+            INST(11U, Opcode::Throw).Inputs(9U, 10U);
+        }
+    }
+}
+
 TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
 {
     auto source = R"(
@@ -129,23 +144,12 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
     graph->RunPass<Cleanup>();
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
-    {
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(7U, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(8U, Opcode::LoadAndInitClass).ref().Inputs(7U);
-            INST(9U, Opcode::NewObject).ref().Inputs(8U, 7U);
-            INST(10U, Opcode::SaveState).Inputs(9U).SrcVregs({0U});
-            INST(11U, Opcode::Throw).Inputs(9U, 10U);
-        }
-    }
+    src_graph::RemoveAllCatchHandlers::CREATE(expectedGraph);
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(TryCatchResolvingTest, EmptyTryCatches)
+SRC_GRAPH(EmptyTryCatches, Graph *graph)
 {
-    auto graph = CreateGraphWithDefaultRuntime();
     GRAPH(graph)
     {
         CONSTANT(5U, 2U).i32();
@@ -177,6 +181,27 @@ TEST_F(TryCatchResolvingTest, EmptyTryCatches)
             INST(16U, Opcode::ReturnVoid);
         }
     }
+}
+
+OUT_GRAPH(EmptyTryCatches, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        CONSTANT(8U, 10U).i32();
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(13U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(14U, Opcode::LoadAndInitClass).ref().Inputs(13U);
+            INST(15U, Opcode::StoreStatic).s32().Inputs(14U, 8U);
+            INST(16U, Opcode::ReturnVoid);
+        }
+    }
+}
+
+TEST_F(TryCatchResolvingTest, EmptyTryCatches)
+{
+    auto graph = CreateGraphWithDefaultRuntime();
+    src_graph::EmptyTryCatches::CREATE(graph);
     BB(2U).SetTryBegin(true);
     BB(4U).SetTry(true);
     BB(3U).SetTryEnd(true);
@@ -189,17 +214,7 @@ TEST_F(TryCatchResolvingTest, EmptyTryCatches)
 
     graph->RunPass<TryCatchResolving>();
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
-    {
-        CONSTANT(8U, 10U).i32();
-        BASIC_BLOCK(8U, -1L)
-        {
-            INST(13U, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(14U, Opcode::LoadAndInitClass).ref().Inputs(13U);
-            INST(15U, Opcode::StoreStatic).s32().Inputs(14U, 8U);
-            INST(16U, Opcode::ReturnVoid);
-        }
-    }
+    out_graph::EmptyTryCatches::CREATE(expectedGraph);
     GraphChecker(expectedGraph).Check();
 
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));

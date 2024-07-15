@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,14 +86,9 @@ TEST_F(RegAllocGraphColoringTest, Simple)
     EXPECT_LT(INS(7U).GetDstReg(), firstCallee);
 }
 
-TEST_F(RegAllocGraphColoringTest, AffineComponent)
+SRC_GRAPH(AffineComponent, Graph *graph)
 {
-    // Test is for bigger number of registers (spilling is not supported yet)
-    if (GetGraph()->GetArch() == Arch::AARCH32) {
-        return;
-    }
-
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         CONSTANT(1U, 1U);
@@ -139,6 +134,16 @@ TEST_F(RegAllocGraphColoringTest, AffineComponent)
             INST(14U, Opcode::Return).u64().Inputs(13U);
         }
     }
+}
+
+TEST_F(RegAllocGraphColoringTest, AffineComponent)
+{
+    // Test is for bigger number of registers (spilling is not supported yet)
+    if (GetGraph()->GetArch() == Arch::AARCH32) {
+        return;
+    }
+
+    src_graph::AffineComponent::CREATE(GetGraph());
     auto result = GetGraph()->RunPass<RegAllocGraphColoring>();
     ASSERT_TRUE(result);
     GraphChecker(GetGraph()).Check();
@@ -152,14 +157,9 @@ TEST_F(RegAllocGraphColoringTest, AffineComponent)
     EXPECT_EQ(INS(5U).GetDstReg(), INS(11U).GetDstReg());
 }
 
-TEST_F(RegAllocGraphColoringTest, SimpleCall)
+SRC_GRAPH(SimpleCall, Graph *graph)
 {
-    // Test is for bigger number of registers (spilling is not supported yet)
-    if (GetGraph()->GetArch() == Arch::AARCH32 || GetGraph()->GetCallingConvention() == nullptr) {
-        return;
-    }
-
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).u64();
@@ -186,6 +186,16 @@ TEST_F(RegAllocGraphColoringTest, SimpleCall)
             INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
+}
+
+TEST_F(RegAllocGraphColoringTest, SimpleCall)
+{
+    // Test is for bigger number of registers (spilling is not supported yet)
+    if (GetGraph()->GetArch() == Arch::AARCH32 || GetGraph()->GetCallingConvention() == nullptr) {
+        return;
+    }
+
+    src_graph::SimpleCall::CREATE(GetGraph());
     auto regalloc = RegAllocGraphColoring(GetGraph());
     auto arch = GetGraph()->GetArch();
     size_t firstCallee = arch != Arch::NONE ? GetFirstCalleeReg(arch, false) : 0U;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -755,8 +755,10 @@ private:
         ASSERT(second->GetOpcode() == Opcode::StoreArray);
 
         auto pstore = graph_->CreateInstStoreArrayPair(
-            first->GetType(), INVALID_PC, first->GetInput(0).GetInst(), first->CastToStoreArray()->GetIndex(),
-            first->CastToStoreArray()->GetStoredValue(), second->CastToStoreArray()->GetStoredValue());
+            first->GetType(), INVALID_PC,
+            std::array<Inst *, 4U> {first->GetInput(0).GetInst(), first->CastToStoreArray()->GetIndex(),
+                                    first->CastToStoreArray()->GetStoredValue(),
+                                    second->CastToStoreArray()->GetStoredValue()});
         pstore->CastToStoreArrayPair()->SetNeedBarrier(first->CastToStoreArray()->GetNeedBarrier() ||
                                                        second->CastToStoreArray()->GetNeedBarrier());
         insertAfter->InsertAfter(pstore);

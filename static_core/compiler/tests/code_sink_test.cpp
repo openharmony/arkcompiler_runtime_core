@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,9 +77,9 @@ TEST_F(CodeSinkTest, OperationPropagation)
  * exception should be thrown where it was initially.
  */
 // NOTE(Kudriashov Evgenii) enable the test after fixing CodeSink
-TEST_F(CodeSinkTest, DISABLED_LoadWithOperationPropagation)
+SRC_GRAPH(DISABLED_LoadWithOperationPropagation, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -103,6 +103,11 @@ TEST_F(CodeSinkTest, DISABLED_LoadWithOperationPropagation)
             INST(13U, Opcode::Return).s64().Inputs(3U);
         }
     }
+}
+
+TEST_F(CodeSinkTest, DISABLED_LoadWithOperationPropagation)
+{
+    src_graph::DISABLED_LoadWithOperationPropagation::CREATE(GetGraph());
     Graph *sunkGraph = CreateEmptyGraph();
     GRAPH(sunkGraph)
     {
@@ -199,9 +204,9 @@ TEST_F(CodeSinkTest, LoadStoreAliasing)
     ASSERT_TRUE(GraphComparator().Compare(equalGraphs[0U], equalGraphs[1U]));
 }
 
-TEST_F(CodeSinkTest, LoopSinking)
+SRC_GRAPH(LoopSinking, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s64();
@@ -231,6 +236,11 @@ TEST_F(CodeSinkTest, LoopSinking)
             INST(27U, Opcode::Return).s64().Inputs(26U);
         }
     }
+}
+
+TEST_F(CodeSinkTest, LoopSinking)
+{
+    src_graph::LoopSinking::CREATE(GetGraph());
     Graph *sunkGraph = CreateEmptyGraph();
     GRAPH(sunkGraph)
     {
@@ -267,9 +277,9 @@ TEST_F(CodeSinkTest, LoopSinking)
 }
 
 /// Sink instruction over critical edge
-TEST_F(CodeSinkTest, CriticalEdgeSinking)
+SRC_GRAPH(CriticalEdgeSinking, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -292,6 +302,11 @@ TEST_F(CodeSinkTest, CriticalEdgeSinking)
             INST(15U, Opcode::Return).s32().Inputs(5U);
         }
     }
+}
+
+TEST_F(CodeSinkTest, CriticalEdgeSinking)
+{
+    src_graph::CriticalEdgeSinking::CREATE(GetGraph());
     Graph *sunkGraph = CreateEmptyGraph();
     GRAPH(sunkGraph)
     {
@@ -323,9 +338,9 @@ TEST_F(CodeSinkTest, CriticalEdgeSinking)
 }
 
 /// Do not sink loads over monitor
-TEST_F(CodeSinkTest, LoadOverMonitor)
+SRC_GRAPH(LoadOverMonitor, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -357,6 +372,11 @@ TEST_F(CodeSinkTest, LoadOverMonitor)
             INST(14U, Opcode::Return).s64().Inputs(3U);
         }
     }
+}
+
+TEST_F(CodeSinkTest, LoadOverMonitor)
+{
+    src_graph::LoadOverMonitor::CREATE(GetGraph());
     Graph *sunkGraph = CreateEmptyGraph();
     GRAPH(sunkGraph)
     {
@@ -396,9 +416,9 @@ TEST_F(CodeSinkTest, LoadOverMonitor)
 
 /// Reordering of Normal Load and subsequent Volatile Load is allowed
 // NOTE(Kudriashov Evgenii) enable the test after fixing CodeSink
-TEST_F(CodeSinkTest, DISABLED_LoadOverVolatileLoad)
+SRC_GRAPH(DISABLED_LoadOverVolatileLoad, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(2U, 2U).ref();
@@ -421,6 +441,11 @@ TEST_F(CodeSinkTest, DISABLED_LoadOverVolatileLoad)
             INST(13U, Opcode::Return).s64().Inputs(3U);
         }
     }
+}
+
+TEST_F(CodeSinkTest, DISABLED_LoadOverVolatileLoad)
+{
+    src_graph::DISABLED_LoadOverVolatileLoad::CREATE(GetGraph());
     Graph *optGraph = CreateEmptyGraph();
     GRAPH(optGraph)
     {
@@ -462,9 +487,9 @@ TEST_F(CodeSinkTest, DISABLED_LoadOverVolatileLoad)
  *
  * Sink from BB 4 to BB 5
  */
-TEST_F(CodeSinkTest, IntermediateSinking)
+SRC_GRAPH(IntermediateSinking, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -493,6 +518,11 @@ TEST_F(CodeSinkTest, IntermediateSinking)
             INST(18U, Opcode::Return).s32().Inputs(2U);
         }
     }
+}
+
+TEST_F(CodeSinkTest, IntermediateSinking)
+{
+    src_graph::IntermediateSinking::CREATE(GetGraph());
     Graph *sunkGraph = CreateEmptyGraph();
     GRAPH(sunkGraph)
     {

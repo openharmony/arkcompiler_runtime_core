@@ -62,9 +62,9 @@ IntrinsicInst *InstBuilder::BuildInteropIntrinsic(size_t pc, RuntimeInterface::I
     auto intrinsic = GetGraph()->CreateInstIntrinsic(retType, pc, id);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), N + 1);
     for (size_t i = 0; i < N; ++i) {
-        intrinsic->AppendInputAndType(inputs[i], types[i]);
+        intrinsic->AppendInput(inputs[i], types[i]);
     }
-    intrinsic->AppendInputAndType(inputs[N], DataType::NO_TYPE);  // SaveState input
+    intrinsic->AppendInput(inputs[N], DataType::NO_TYPE);  // SaveState input
     AddInstruction(intrinsic);
     return intrinsic;
 }
@@ -179,7 +179,7 @@ void InstBuilder::BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInt
     GetGraph()->GetRuntime()->GetInfoForInteropCallArgsConversion(method, skipArgs, &intrinsicsIds);
     if (callKind != RuntimeInterface::InteropCallKind::NEW_INSTANCE) {
         jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 4U);
-        jsCall->AppendInputAndType(jsThis, DataType::POINTER);
+        jsCall->AppendInput(jsThis, DataType::POINTER);
     } else {
         jsCall->AllocateInputTypes(GetGraph()->GetAllocator(), intrinsicsIds.size() + 3U);
     }
@@ -196,11 +196,11 @@ void InstBuilder::BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInt
         } else {
             arg = BuildInteropIntrinsic<0>(pc, intrinsicId, DataType::POINTER, {}, {saveState});
         }
-        jsCall->AppendInputAndType(arg, DataType::POINTER);
+        jsCall->AppendInput(arg, DataType::POINTER);
         argIdx++;
     }
 
-    jsCall->AppendInputAndType(saveState, DataType::NO_TYPE);
+    jsCall->AppendInput(saveState, DataType::NO_TYPE);
     AddInstruction(jsCall);
 
     // Convert ret value

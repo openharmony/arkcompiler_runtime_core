@@ -22,6 +22,160 @@
 
 namespace ark::compiler {
 
+ConditionCode GetInverseConditionCode(ConditionCode code)
+{
+    switch (code) {
+        case ConditionCode::CC_EQ:
+            return ConditionCode::CC_NE;
+        case ConditionCode::CC_NE:
+            return ConditionCode::CC_EQ;
+
+        case ConditionCode::CC_LT:
+            return ConditionCode::CC_GE;
+        case ConditionCode::CC_LE:
+            return ConditionCode::CC_GT;
+        case ConditionCode::CC_GT:
+            return ConditionCode::CC_LE;
+        case ConditionCode::CC_GE:
+            return ConditionCode::CC_LT;
+
+        case ConditionCode::CC_B:
+            return ConditionCode::CC_AE;
+        case ConditionCode::CC_BE:
+            return ConditionCode::CC_A;
+        case ConditionCode::CC_A:
+            return ConditionCode::CC_BE;
+        case ConditionCode::CC_AE:
+            return ConditionCode::CC_B;
+
+        case ConditionCode::CC_TST_EQ:
+            return ConditionCode::CC_TST_NE;
+        case ConditionCode::CC_TST_NE:
+            return ConditionCode::CC_TST_EQ;
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+ConditionCode InverseSignednessConditionCode(ConditionCode code)
+{
+    switch (code) {
+        case ConditionCode::CC_EQ:
+            return ConditionCode::CC_EQ;
+        case ConditionCode::CC_NE:
+            return ConditionCode::CC_NE;
+
+        case ConditionCode::CC_LT:
+            return ConditionCode::CC_B;
+        case ConditionCode::CC_LE:
+            return ConditionCode::CC_BE;
+        case ConditionCode::CC_GT:
+            return ConditionCode::CC_A;
+        case ConditionCode::CC_GE:
+            return ConditionCode::CC_AE;
+
+        case ConditionCode::CC_B:
+            return ConditionCode::CC_LT;
+        case ConditionCode::CC_BE:
+            return ConditionCode::CC_LE;
+        case ConditionCode::CC_A:
+            return ConditionCode::CC_GT;
+        case ConditionCode::CC_AE:
+            return ConditionCode::CC_GE;
+
+        case ConditionCode::CC_TST_EQ:
+            return ConditionCode::CC_TST_EQ;
+        case ConditionCode::CC_TST_NE:
+            return ConditionCode::CC_TST_NE;
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+bool IsSignedConditionCode(ConditionCode code)
+{
+    switch (code) {
+        case ConditionCode::CC_LT:
+        case ConditionCode::CC_LE:
+        case ConditionCode::CC_GT:
+        case ConditionCode::CC_GE:
+            return true;
+
+        case ConditionCode::CC_EQ:
+        case ConditionCode::CC_NE:
+        case ConditionCode::CC_B:
+        case ConditionCode::CC_BE:
+        case ConditionCode::CC_A:
+        case ConditionCode::CC_AE:
+        case ConditionCode::CC_TST_EQ:
+        case ConditionCode::CC_TST_NE:
+            return false;
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+ConditionCode SwapOperandsConditionCode(ConditionCode code)
+{
+    switch (code) {
+        case ConditionCode::CC_EQ:
+        case ConditionCode::CC_NE:
+            return code;
+
+        case ConditionCode::CC_LT:
+            return ConditionCode::CC_GT;
+        case ConditionCode::CC_LE:
+            return ConditionCode::CC_GE;
+        case ConditionCode::CC_GT:
+            return ConditionCode::CC_LT;
+        case ConditionCode::CC_GE:
+            return ConditionCode::CC_LE;
+
+        case ConditionCode::CC_B:
+            return ConditionCode::CC_A;
+        case ConditionCode::CC_BE:
+            return ConditionCode::CC_AE;
+        case ConditionCode::CC_A:
+            return ConditionCode::CC_B;
+        case ConditionCode::CC_AE:
+            return ConditionCode::CC_BE;
+
+        case ConditionCode::CC_TST_EQ:
+        case ConditionCode::CC_TST_NE:
+            return code;
+
+        default:
+            UNREACHABLE();
+    }
+}
+
+bool IsVolatileMemInst(const Inst *inst)
+{
+    switch (inst->GetOpcode()) {
+        case Opcode::LoadObject:
+            return inst->CastToLoadObject()->GetVolatile();
+        case Opcode::LoadObjectPair:
+            return inst->CastToLoadObjectPair()->GetVolatile();
+        case Opcode::StoreObject:
+            return inst->CastToStoreObject()->GetVolatile();
+        case Opcode::StoreObjectPair:
+            return inst->CastToStoreObjectPair()->GetVolatile();
+        case Opcode::LoadStatic:
+            return inst->CastToLoadStatic()->GetVolatile();
+        case Opcode::StoreStatic:
+            return inst->CastToStoreStatic()->GetVolatile();
+        case Opcode::UnresolvedStoreStatic:
+        case Opcode::LoadResolvedObjectFieldStatic:
+        case Opcode::StoreResolvedObjectFieldStatic:
+            return true;
+        default:
+            return false;
+    }
+}
+
 const ObjectTypeInfo ObjectTypeInfo::INVALID {};
 const ObjectTypeInfo ObjectTypeInfo::UNKNOWN {1};
 
@@ -259,16 +413,6 @@ bool CastInst::IsDynamicCast() const
            GetBasicBlock()->GetGraph()->IsDynamicMethod();
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFINE_INST(TYPE)              \
-    void TYPE::Accept(GraphVisitor *v) \
-    {                                  \
-        v->VisitInst(this);            \
-    }
-// NOTE(msherstennikov): There must be another way to generate this list
-OPCODE_CLASS_LIST(DEFINE_INST)
-#undef DEFINE_INST
-
 BasicBlock *PhiInst::GetPhiInputBb(unsigned index)
 {
     ASSERT(index < GetInputsCount());
@@ -497,7 +641,7 @@ Inst *ConstantInst::Clone(const Graph *targetGraph) const
 
 Inst *ParameterInst::Clone(const Graph *targetGraph) const
 {
-    auto clone = Inst::Clone(targetGraph)->CastToParameter();
+    auto clone = FixedInputsInst::Clone(targetGraph)->CastToParameter();
     clone->SetArgNumber(GetArgNumber());
     clone->SetLocationData(GetLocationData());
     return clone;

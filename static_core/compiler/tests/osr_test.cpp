@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -405,7 +405,7 @@ TEST_F(OsrTest, MainOsrCatchF1Throw)
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::f1).*");
 
     ScopeEvents scopeEvents;
-    runner.Run(MAIN_OSR_CATCH_F1_THROW_SOURCE, 123);
+    runner.Run(MAIN_OSR_CATCH_F1_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osrEvents.size(), 1);
@@ -426,7 +426,7 @@ TEST_F(OsrTest, MainOsrCatchF1ThrowCompiled)
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
     ScopeEvents scopeEvents;
-    runner.Run(MAIN_OSR_CATCH_F1_THROW_SOURCE, 123);
+    runner.Run(MAIN_OSR_CATCH_F1_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osrEvents.size(), 1);
@@ -541,7 +541,7 @@ TEST_F(OsrTest, MainCatchF1OsrF2Throw)
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::f2).*");
 
     ScopeEvents scopeEvents;
-    runner.Run(MAIN_CATCH_F1_OSR_F2_THROW_SOURCE, 123);
+    runner.Run(MAIN_CATCH_F1_OSR_F2_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osrEvents.size(), 1);
@@ -564,7 +564,7 @@ TEST_F(OsrTest, MainCatchF1OsrF2ThrowCompiled)
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
     ScopeEvents scopeEvents;
-    runner.Run(MAIN_CATCH_F1_OSR_F2_THROW_SOURCE, 123);
+    runner.Run(MAIN_CATCH_F1_OSR_F2_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osrEvents.size(), 1);
@@ -626,7 +626,7 @@ TEST_F(OsrTest, MainF1OsrCatchF2Throw)
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::f2).*");
 
     ScopeEvents scopeEvents;
-    runner.Run(MAIN_F1_OSR_CATCH_F2_THROW_SOURCE, 123);
+    runner.Run(MAIN_F1_OSR_CATCH_F2_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osrEvents.size(), 1);
@@ -649,7 +649,7 @@ TEST_F(OsrTest, MainF1OsrCatchF2ThrowCompiled)
     runner.GetCompilerOptions().SetCompilerInlining(false);
 
     ScopeEvents scopeEvents;
-    runner.Run(MAIN_F1_OSR_CATCH_F2_THROW_SOURCE, 123);
+    runner.Run(MAIN_F1_OSR_CATCH_F2_THROW_SOURCE, 123U);
     auto events = Events::CastTo<Events::MEMORY>();
     auto osrEvents = events->Select<events::EventsMemory::OsrEntryEvent>();
     ASSERT_EQ(osrEvents.size(), 1);

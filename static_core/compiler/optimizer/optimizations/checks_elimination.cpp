@@ -862,8 +862,7 @@ void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *
         insertAfter = newLeft;
     }
     auto deoptComp = GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, newLeft, right, DataType::INT32, cc);
-    auto deopt =
-        GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, ss->GetPc(), deoptComp, ss, DeoptimizeType::BOUNDS_CHECK);
+    auto deopt = GetGraph()->CreateInstDeoptimizeIf(ss->GetPc(), deoptComp, ss, DeoptimizeType::BOUNDS_CHECK);
     InsertInstAfter(deoptComp, insertAfter, block);
     block->InsertAfter(deopt, deoptComp);
 }
@@ -872,7 +871,7 @@ Inst *ChecksElimination::InsertDeoptimization(ConditionCode cc, Inst *left, Inst
                                               DeoptimizeType deoptType)
 {
     auto deoptComp = GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, left, right, left->GetType(), cc);
-    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, ss->GetPc(), deoptComp, ss, deoptType);
+    auto deopt = GetGraph()->CreateInstDeoptimizeIf(ss->GetPc(), deoptComp, ss, deoptType);
     auto block = insertAfter->GetBasicBlock();
     block->InsertAfter(deoptComp, insertAfter);
     block->InsertAfter(deopt, deoptComp);

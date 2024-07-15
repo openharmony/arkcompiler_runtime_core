@@ -291,46 +291,56 @@ void InstBuilder::RemoveNotDominateInputs(SaveStateInst *saveState)
     }
 }
 
+// Remove dead Phi and set types to phi which have not type.
+// Phi may not have type if all it users are pseudo instructions, like SaveState
+void InstBuilder::FixType(PhiInst *inst, BasicBlock *bb)
+{
+    inst->ReserveInputs(bb->GetPredsBlocks().size());
+    for (auto &predBb : bb->GetPredsBlocks()) {
+        if (inst->GetLinearNumber() == INVALID_LINEAR_NUM) {
+            continue;
+        }
+        auto pred = defs_[predBb->GetId()][inst->GetLinearNumber()];
+        if (pred == nullptr) {
+            // If any input of phi instruction is not defined then we assume that phi is dead. DCE should
+            // remove it.
+            continue;
+        }
+        inst->AppendInput(pred);
+    }
+}
+
+// Check all instructions that have no type and fix it. Type is got from instructions with known input types.
+void InstBuilder::FixType(Inst *inst)
+{
+    if (inst->IsSaveState()) {
+        RemoveNotDominateInputs(static_cast<SaveStateInst *>(inst));
+        return;
+    }
+    auto inputIdx = 0;
+    for (auto input : inst->GetInputs()) {
+        if (input.GetInst()->IsMarked(GetNoTypeMarker())) {
+            auto inputType = inst->GetInputType(inputIdx);
+            if (inputType != DataType::NO_TYPE) {
+                SetTypeRec(input.GetInst(), inputType);
+            }
+        }
+        inputIdx++;
+    }
+}
+
 /// Fix instructions that can't be fully completed in building process.
 void InstBuilder::FixInstructions()
 {
-    // Remove dead Phi and set types to phi which have not type.
-    // Phi may not have type if all it users are pseudo instructions, like SaveState
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->PhiInstsSafe()) {
-            inst->ReserveInputs(bb->GetPredsBlocks().size());
-            for (auto &predBb : bb->GetPredsBlocks()) {
-                if (inst->GetLinearNumber() == INVALID_LINEAR_NUM) {
-                    continue;
-                }
-                auto pred = defs_[predBb->GetId()][inst->GetLinearNumber()];
-                if (pred == nullptr) {
-                    // If any input of phi instruction is not defined then we assume that phi is dead. DCE should
-                    // remove it.
-                    continue;
-                }
-                inst->AppendInput(pred);
-            }
+            FixType(inst->CastToPhi(), bb);
         }
     }
 
-    // Check all instructions that have no type and fix it. Type is got from instructions with known input types.
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInsts()) {
-            if (inst->IsSaveState()) {
-                RemoveNotDominateInputs(static_cast<SaveStateInst *>(inst));
-                continue;
-            }
-            auto inputIdx = 0;
-            for (auto input : inst->GetInputs()) {
-                if (input.GetInst()->IsMarked(GetNoTypeMarker())) {
-                    auto inputType = inst->GetInputType(inputIdx);
-                    if (inputType != DataType::NO_TYPE) {
-                        SetTypeRec(input.GetInst(), inputType);
-                    }
-                }
-                inputIdx++;
-            }
+            FixType(inst);
         }
     }
     // Resolve dead and inconsistent phi instructions
@@ -395,15 +405,15 @@ ClassInst *InstBuilder::CreateLoadAndInitClassGeneric(uint32_t classId, size_t p
     ClassInst *inst = nullptr;
     if (classPtr == nullptr) {
         ASSERT(!graph_->IsBytecodeOptimizer());
-        inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc, nullptr, classId,
-                                                            GetGraph()->GetMethod(), classPtr);
+        inst = graph_->CreateInstUnresolvedLoadAndInitClass(DataType::REFERENCE, pc, nullptr,
+                                                            TypeIdMixin {classId, GetGraph()->GetMethod()}, classPtr);
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), classId,
                                                              UnresolvedTypesInterface::SlotKind::CLASS);
         }
     } else {
-        inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, nullptr, classId, GetGraph()->GetMethod(),
-                                                  classPtr);
+        inst = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, nullptr,
+                                                  TypeIdMixin {classId, GetGraph()->GetMethod()}, classPtr);
     }
     return inst;
 }

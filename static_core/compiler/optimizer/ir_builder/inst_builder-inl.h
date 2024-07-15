@@ -21,218 +21,205 @@
 
 namespace ark::compiler {
 // NOLINTNEXTLINE(misc-definitions-in-headers,readability-function-size)
-template <Opcode OPCODE>
-void InstBuilder::BuildCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead, Inst *additionalInput)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallHelper(const BytecodeInstruction *bcInst,
+                                                                          InstBuilder *builder, Inst *additionalInput)
+    : builder_(builder), bcInst_(bcInst)
 {
-    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
-    if (GetRuntime()->IsMethodIntrinsic(GetMethod(), methodId)) {
-        BuildIntrinsic(bcInst, isRange, accRead);
+    methodId_ = GetRuntime()->ResolveMethodIndex(Builder()->GetMethod(), bcInst->GetId(0).AsIndex());
+    pc_ = Builder()->GetPc(bcInst->GetAddress());
+    hasImplicitArg_ = !GetRuntime()->IsMethodStatic(Builder()->GetMethod(), methodId_);
+    method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
+
+    if (GetRuntime()->IsMethodIntrinsic(Builder()->GetMethod(), methodId_)) {
+        BuildIntrinsic();
         return;
     }
-    auto pc = GetPc(bcInst->GetAddress());
-    auto saveState = CreateSaveState(Opcode::SaveState, pc);
-    auto hasImplicitArg = !GetRuntime()->IsMethodStatic(GetMethod(), methodId);
-    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
+    saveState_ = Builder()->CreateSaveState(Opcode::SaveState, pc_);
 
-    NullCheckInst *nullCheck = nullptr;
     uint32_t classId = 0;
-    if (hasImplicitArg) {
-        nullCheck =
-            graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetArgDefinition(bcInst, 0, accRead), saveState);
-    } else if (method != nullptr) {
-        if (graph_->IsAotMode()) {
-            classId = GetRuntime()->GetClassIdWithinFile(GetMethod(), GetRuntime()->GetClass(method));
+    if (hasImplicitArg_) {
+        nullCheck_ = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, pc_,
+                                                     Builder()->GetArgDefinition(bcInst, 0, ACC_READ), saveState_);
+    } else if (method_ != nullptr) {
+        if (GetGraph()->IsAotMode()) {
+            classId = GetRuntime()->GetClassIdWithinFile(GetMethod(), GetRuntime()->GetClass(method_));
         } else {
-            classId = GetRuntime()->GetClassIdForMethod(GetMethod(), methodId);
+            classId = GetRuntime()->GetClassIdForMethod(GetMethod(), methodId_);
         }
     }
 
-    Inst *resolver = nullptr;
     // NOLINTNEXTLINE(readability-magic-numbers)
-    CallInst *call = BuildCallInst<OPCODE>(method, methodId, pc, &resolver, classId);
-    SetCallArgs(bcInst, isRange, accRead, resolver, call, nullCheck, saveState, hasImplicitArg, methodId,
-                additionalInput);
+    BuildCallInst(classId);
+    SetCallArgs(additionalInput);
 
     // Add SaveState
-    AddInstruction(saveState);
+    Builder()->AddInstruction(saveState_);
     // Add NullCheck
-    if (hasImplicitArg) {
-        ASSERT(nullCheck != nullptr);
-        AddInstruction(nullCheck);
-    } else if (!call->IsUnresolved() && call->GetCallMethod() != nullptr) {
+    if (hasImplicitArg_) {
+        ASSERT(nullCheck_ != nullptr);
+        Builder()->AddInstruction(nullCheck_);
+    } else if (!call_->IsUnresolved() && static_cast<CallInst *>(call_)->GetCallMethod() != nullptr) {
         // Initialize class as call is resolved
-        BuildInitClassInstForCallStatic(method, classId, pc, saveState);
+        BuildInitClassInstForCallStatic(classId);
     }
     // Add resolver
-    if (resolver != nullptr) {
-        if (call->IsStaticCall()) {
-            resolver->SetInput(0, saveState);
+    if (resolver_ != nullptr) {
+        if (call_->IsStaticCall()) {
+            resolver_->SetInput(0, saveState_);
         } else {
-            resolver->SetInput(0, nullCheck);
-            resolver->SetInput(1, saveState);
+            resolver_->SetInput(0, nullCheck_);
+            resolver_->SetInput(1, saveState_);
         }
-        AddInstruction(resolver);
+        Builder()->AddInstruction(resolver_);
     }
     // Add Call
-    AddInstruction(call);
-    if (call->GetType() != DataType::VOID) {
-        UpdateDefinitionAcc(call);
+    Builder()->AddInstruction(call_);
+    if (call_->GetType() != DataType::VOID) {
+        Builder()->UpdateDefinitionAcc(call_);
     } else {
-        UpdateDefinitionAcc(nullptr);
+        Builder()->UpdateDefinitionAcc(nullptr);
     }
 }
 
-template void InstBuilder::BuildCall<Opcode::CallLaunchStatic>(const BytecodeInstruction *bcInst, bool isRange,
-                                                               bool accRead, Inst *additionalInput);
-template void InstBuilder::BuildCall<Opcode::CallLaunchVirtual>(const BytecodeInstruction *bcInst, bool isRange,
-                                                                bool accRead, Inst *additionalInput);
-
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <typename T>
-void InstBuilder::SetCallArgs(const BytecodeInstruction *bcInst, bool isRange, bool accRead, Inst *resolver, T *call,
-                              Inst *nullCheck, SaveStateInst *saveState, bool hasImplicitArg, uint32_t methodId,
-                              Inst *additionalInput)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::SetCallArgs(Inst *additionalInput)
 {
-    size_t hiddenArgsCount = hasImplicitArg ? 1 : 0;                  // +1 for non-static call
+    size_t hiddenArgsCount = hasImplicitArg_ ? 1 : 0;                 // +1 for non-static call
     size_t additionalArgsCount = additionalInput == nullptr ? 0 : 1;  // +1 for launch call
-    size_t argsCount = GetMethodArgumentsCount(methodId);
+    size_t argsCount = Builder()->GetMethodArgumentsCount(methodId_);
     size_t totalArgsCount = hiddenArgsCount + argsCount + additionalArgsCount;
-    size_t inputsCount = totalArgsCount + (saveState == nullptr ? 0 : 1) + (resolver == nullptr ? 0 : 1);
-    call->ReserveInputs(inputsCount);
-    call->AllocateInputTypes(GetGraph()->GetAllocator(), inputsCount);
-    if (resolver != nullptr) {
-        call->AppendInput(resolver);
-        call->AddInputType(DataType::POINTER);
+    size_t inputsCount = totalArgsCount + (call_->RequireState() ? 0 : 1) + (resolver_ == nullptr ? 0 : 1);
+    call_->ReserveInputs(inputsCount);
+    call_->AllocateInputTypes(GetGraph()->GetAllocator(), inputsCount);
+    if (resolver_ != nullptr) {
+        call_->AppendInput(resolver_);
+        call_->AddInputType(DataType::POINTER);
     }
     if (additionalInput != nullptr) {
-        call->AppendInput(additionalInput);
-        call->AddInputType(DataType::REFERENCE);
-        saveState->AppendBridge(additionalInput);
+        ASSERT(call_->RequireState() && saveState_ != nullptr);
+        call_->AppendInput(additionalInput);
+        call_->AddInputType(DataType::REFERENCE);
+        saveState_->AppendBridge(additionalInput);
     }
-    if (hasImplicitArg) {
-        call->AppendInput(nullCheck);
-        call->AddInputType(DataType::REFERENCE);
+    if (hasImplicitArg_) {
+        call_->AppendInput(nullCheck_);
+        call_->AddInputType(DataType::REFERENCE);
     }
-    if (isRange) {
-        auto startReg = bcInst->GetVReg(0);
+    if constexpr (IS_RANGE) {
+        auto startReg = bcInst_->GetVReg(0);
         // start reg for Virtual call was added
-        if (hasImplicitArg) {
+        if (hasImplicitArg_) {
             ++startReg;
         }
         for (size_t i = 0; i < argsCount; startReg++, i++) {
-            call->AppendInput(GetDefinition(startReg));
-            call->AddInputType(GetMethodArgumentType(methodId, i));
+            call_->AppendInput(Builder()->GetDefinition(startReg));
+            call_->AddInputType(Builder()->GetMethodArgumentType(methodId_, i));
         }
     } else {
         for (size_t i = 0; i < argsCount; i++) {
-            call->AppendInput(GetArgDefinition(bcInst, i + hiddenArgsCount, accRead));
-            call->AddInputType(GetMethodArgumentType(methodId, i));
+            call_->AppendInput(Builder()->GetArgDefinition(bcInst_, i + hiddenArgsCount, ACC_READ));
+            call_->AddInputType(Builder()->GetMethodArgumentType(methodId_, i));
         }
     }
-    if (saveState != nullptr) {
-        call->AppendInput(saveState);
-        call->AddInputType(DataType::NO_TYPE);
+    if (call_->RequireState()) {
+        call_->AppendInput(saveState_);
+        call_->AddInputType(DataType::NO_TYPE);
     }
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr method, uint32_t classId, size_t pc,
-                                                  Inst *saveState)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildInitClassInstForCallStatic(uint32_t classId)
 {
-    if (GetClassId() != classId) {
-        auto initClass = graph_->CreateInstInitClass(DataType::NO_TYPE, pc, saveState, classId, GetGraph()->GetMethod(),
-                                                     GetRuntime()->GetClass(method));
-        AddInstruction(initClass);
+    if (Builder()->GetClassId() != classId) {
+        auto initClass = GetGraph()->CreateInstInitClass(DataType::NO_TYPE, pc_, saveState_,
+                                                         TypeIdMixin {classId, GetGraph()->GetMethod()},
+                                                         GetRuntime()->GetClass(method_));
+        Builder()->AddInstruction(initClass);
     }
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE>
-CallInst *InstBuilder::BuildCallStaticInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc,
-                                           Inst **resolver, uint32_t classId)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallStaticInst(uint32_t classId)
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
-    CallInst *call = nullptr;
-    if (method == nullptr || (runtime_->IsMethodStatic(GetMethod(), methodId) && classId == 0) || ForceUnresolved() ||
-        (OPCODE == Opcode::CallLaunchStatic && graph_->IsAotMode())) {
-        ResolveStaticInst *resolveStatic = graph_->CreateInstResolveStatic(DataType::POINTER, pc, methodId, nullptr);
-        *resolver = resolveStatic;
+    if (method_ == nullptr || (GetRuntime()->IsMethodStatic(GetMethod(), methodId_) && classId == 0) ||
+        Builder()->ForceUnresolved() || (OPCODE == Opcode::CallLaunchStatic && GetGraph()->IsAotMode())) {
+        resolver_ = GetGraph()->CreateInstResolveStatic(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallStatic) {
-            call = graph_->CreateInstCallResolvedStatic(GetMethodReturnType(methodId), pc, methodId);
+            call_ = GetGraph()->CreateInstCallResolvedStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
         } else {
-            call = graph_->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc, methodId);
+            call_ = GetGraph()->CreateInstCallResolvedLaunchStatic(DataType::VOID, pc_, methodId_);
         }
-        if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
-            runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), methodId, SLOT_KIND);
+        if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
+            GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), methodId_, SLOT_KIND);
         }
     } else {
         if constexpr (OPCODE == Opcode::CallStatic) {
-            call = graph_->CreateInstCallStatic(GetMethodReturnType(methodId), pc, methodId, method);
+            call_ =
+                GetGraph()->CreateInstCallStatic(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
         } else {
-            call = graph_->CreateInstCallLaunchStatic(DataType::VOID, pc, methodId, method);
+            call_ = GetGraph()->CreateInstCallLaunchStatic(DataType::VOID, pc_, methodId_, method_);
         }
     }
-    return call;
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE>
-CallInst *InstBuilder::BuildCallVirtualInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc,
-                                            Inst **resolver)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallVirtualInst()
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::VIRTUAL_METHOD;
-    CallInst *call = nullptr;
-    ASSERT(!runtime_->IsMethodStatic(GetMethod(), methodId));
-    if (method != nullptr && (runtime_->IsInterfaceMethod(method) || graph_->IsAotNoChaMode())) {
-        ResolveVirtualInst *resolveVirtual = graph_->CreateInstResolveVirtual(DataType::POINTER, pc, methodId, method);
-        *resolver = resolveVirtual;
+    ASSERT(!GetRuntime()->IsMethodStatic(Builder()->GetMethod(), methodId_));
+    if (method_ != nullptr && (GetRuntime()->IsInterfaceMethod(method_) || GetGraph()->IsAotNoChaMode())) {
+        resolver_ = GetGraph()->CreateInstResolveVirtual(DataType::POINTER, pc_, methodId_, method_);
         if constexpr (OPCODE == Opcode::CallVirtual) {
-            call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(methodId), pc, methodId, method);
+            call_ = GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_,
+                                                              method_);
         } else {
-            call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, methodId, method);
+            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
-    } else if (method == nullptr || ForceUnresolved()) {
-        ResolveVirtualInst *resolveVirtual = graph_->CreateInstResolveVirtual(DataType::POINTER, pc, methodId, nullptr);
-        *resolver = resolveVirtual;
+    } else if (method_ == nullptr || Builder()->ForceUnresolved()) {
+        resolver_ = GetGraph()->CreateInstResolveVirtual(DataType::POINTER, pc_, methodId_, nullptr);
         if constexpr (OPCODE == Opcode::CallVirtual) {
-            call = graph_->CreateInstCallResolvedVirtual(GetMethodReturnType(methodId), pc, methodId);
+            call_ =
+                GetGraph()->CreateInstCallResolvedVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_);
         } else {
-            call = graph_->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc, methodId);
+            call_ = GetGraph()->CreateInstCallResolvedLaunchVirtual(DataType::VOID, pc_, methodId_);
         }
-        if (!graph_->IsAotMode() && !graph_->IsBytecodeOptimizer()) {
-            runtime_->GetUnresolvedTypes()->AddTableSlot(GetMethod(), methodId, SLOT_KIND);
+        if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
+            GetRuntime()->GetUnresolvedTypes()->AddTableSlot(Builder()->GetMethod(), methodId_, SLOT_KIND);
         }
     } else {
-        ASSERT(method != nullptr);
+        ASSERT(method_ != nullptr);
         if constexpr (OPCODE == Opcode::CallVirtual) {
-            call = graph_->CreateInstCallVirtual(GetMethodReturnType(methodId), pc, methodId, method);
+            call_ =
+                GetGraph()->CreateInstCallVirtual(Builder()->GetMethodReturnType(methodId_), pc_, methodId_, method_);
         } else {
-            call = graph_->CreateInstCallLaunchVirtual(DataType::VOID, pc, methodId, method);
+            call_ = GetGraph()->CreateInstCallLaunchVirtual(DataType::VOID, pc_, methodId_, method_);
         }
     }
-    return call;
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE>
-CallInst *InstBuilder::BuildCallInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc, Inst **resolver,
-                                     [[maybe_unused]] uint32_t classId)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallInst([[maybe_unused]] uint32_t classId)
 {
-    ASSERT(resolver != nullptr);
-    CallInst *call = nullptr;
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
     if constexpr (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic) {
-        call = BuildCallStaticInst<OPCODE>(method, methodId, pc, resolver, classId);
+        BuildCallStaticInst(classId);
     }
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
     if constexpr (OPCODE == Opcode::CallVirtual || OPCODE == Opcode::CallLaunchVirtual) {
-        call = BuildCallVirtualInst<OPCODE>(method, methodId, pc, resolver);
+        BuildCallVirtualInst();
     }
-    if (UNLIKELY(call == nullptr)) {
+    if (UNLIKELY(call_ == nullptr)) {
         UNREACHABLE();
     }
-    call->SetCanNativeException(method == nullptr || runtime_->HasNativeException(method));
-    return call;
+    static_cast<CallInst *>(call_)->SetCanNativeException(method_ == nullptr ||
+                                                          GetRuntime()->HasNativeException(method_));
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
@@ -258,31 +245,29 @@ void InstBuilder::BuildMonitor(const BytecodeInstruction *bcInst, Inst *def, boo
 #include <intrinsics_ir_build.inl>
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildDefaultStaticIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultStaticIntrinsic(
+    RuntimeInterface::IntrinsicId intrinsicId)
 {
-    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), bcInst->GetId(0).AsIndex());
-    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
-    auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
     ASSERT(intrinsicId != RuntimeInterface::IntrinsicId::COUNT);
-    auto retType = GetMethodReturnType(methodId);
-    auto pc = GetPc(bcInst->GetAddress());
-    IntrinsicInst *call = GetGraph()->CreateInstIntrinsic(retType, pc, intrinsicId);
+    auto retType = Builder()->GetMethodReturnType(methodId_);
+    call_ = GetGraph()->CreateInstIntrinsic(retType, pc_, intrinsicId);
     // If an intrinsic may call runtime then we need a SaveState
-    SaveStateInst *saveState = call->RequireState() ? CreateSaveState(Opcode::SaveState, pc) : nullptr;
-    SetCallArgs(bcInst, isRange, accRead, nullptr, call, nullptr, saveState, false, methodId);
-    if (saveState != nullptr) {
-        AddInstruction(saveState);
+    saveState_ = call_->RequireState() ? Builder()->CreateSaveState(Opcode::SaveState, pc_) : nullptr;
+    SetCallArgs();
+    if (saveState_ != nullptr) {
+        Builder()->AddInstruction(saveState_);
     }
     /* if there are reference type args to be checked for NULL ('need_nullcheck' intrinsic property) */
-    AddArgNullcheckIfNeeded<false>(intrinsicId, call, saveState, pc);
-    AddInstruction(call);
-    if (call->GetType() != DataType::VOID) {
-        UpdateDefinitionAcc(call);
+    Builder()->template AddArgNullcheckIfNeeded<false>(intrinsicId, call_, saveState_, pc_);
+    Builder()->AddInstruction(call_);
+    if (call_->GetType() != DataType::VOID) {
+        Builder()->UpdateDefinitionAcc(call_);
     } else {
-        UpdateDefinitionAcc(nullptr);
+        Builder()->UpdateDefinitionAcc(nullptr);
     }
     if (NeedSafePointAfterIntrinsic(intrinsicId)) {
-        AddInstruction(CreateSafePoint(currentBb_));
+        Builder()->AddInstruction(Builder()->CreateSafePoint(Builder()->GetCurrentBlock()));
     }
 }
 
@@ -541,135 +526,137 @@ Inst *InstBuilder::GetArgDefinitionRange(const BytecodeInstruction *bcInst, size
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildMonitorIntrinsic(const BytecodeInstruction *bcInst, bool isEnter, bool accRead)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildMonitorIntrinsic(bool isEnter)
 {
-    auto methodIndex = bcInst->GetId(0).AsIndex();
-    [[maybe_unused]] auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
-    ASSERT(GetMethodReturnType(methodId) == DataType::VOID);
-    ASSERT(GetMethodArgumentsCount(methodId) == 1);
-    BuildMonitor(bcInst, GetArgDefinition(bcInst, 0, accRead), isEnter);
+    ASSERT(Builder()->GetMethodReturnType(methodId_) == DataType::VOID);
+    ASSERT(Builder()->GetMethodArgumentsCount(methodId_) == 1);
+    Builder()->BuildMonitor(bcInst_, Builder()->GetArgDefinition(bcInst_, 0, ACC_READ), isEnter);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildIntrinsic()
 {
-    auto methodIndex = bcInst->GetId(0).AsIndex();
-    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
-    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
-    auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
+    auto intrinsicId = GetRuntime()->GetIntrinsicId(method_);
     auto isVirtual = IsVirtual(intrinsicId);
     if (GetGraph()->IsBytecodeOptimizer() || !g_options.IsCompilerEncodeIntrinsics()) {
-        BuildDefaultIntrinsic(isVirtual, bcInst, isRange, accRead);
+        BuildDefaultIntrinsic(intrinsicId, isVirtual);
         return;
     }
     if (!isVirtual) {
-        return BuildStaticCallIntrinsic(bcInst, isRange, accRead);
+        return BuildStaticCallIntrinsic(intrinsicId);
     }
-    return BuildVirtualCallIntrinsic(bcInst, isRange, accRead);
+    return BuildVirtualCallIntrinsic(intrinsicId);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildDefaultIntrinsic(bool isVirtual, const BytecodeInstruction *bcInst, bool isRange, bool accRead)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultIntrinsic(
+    RuntimeInterface::IntrinsicId intrinsicId, bool isVirtual)
 {
-    auto methodIndex = bcInst->GetId(0).AsIndex();
-    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
-    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
-    auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
     if (intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER ||
         intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_EXIT) {
-        BuildMonitorIntrinsic(bcInst, intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER,
-                              accRead);
+        BuildMonitorIntrinsic(intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER);
         return;
     }
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if (!isVirtual) {
-        BuildDefaultStaticIntrinsic(bcInst, isRange, accRead);
+        BuildDefaultStaticIntrinsic(intrinsicId);
         // NOLINTNEXTLINE(readability-misleading-indentation)
     } else {
-        BuildDefaultVirtualCallIntrinsic(bcInst, isRange, accRead);
+        BuildDefaultVirtualCallIntrinsic(intrinsicId);
     }
 }
 
 // do not specify reason for tidy suppression because comment does not fit single line
 // NOLINTNEXTLINE
-void InstBuilder::BuildStaticCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildStaticCallIntrinsic(
+    RuntimeInterface::IntrinsicId intrinsicId)
 {
-    auto methodIndex = bcInst->GetId(0).AsIndex();
-    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
-    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
-    auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
     switch (intrinsicId) {
         case RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER:
         case RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_EXIT: {
-            BuildMonitorIntrinsic(bcInst, intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER,
-                                  accRead);
+            BuildMonitorIntrinsic(intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_I32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_I64:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_ABS_F64: {
-            BuildAbsIntrinsic(bcInst, accRead);
+            Builder()->BuildAbsIntrinsic(bcInst_, ACC_READ);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_SQRT_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_SQRT_F64: {
-            BuildSqrtIntrinsic(bcInst, accRead);
+            Builder()->BuildSqrtIntrinsic(bcInst_, ACC_READ);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_I32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_I64:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MIN_F64: {
-            BuildBinaryOperationIntrinsic<Opcode::Min>(bcInst, accRead);
+            Builder()->template BuildBinaryOperationIntrinsic<Opcode::Min>(bcInst_, ACC_READ);
             break;
         }
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_I32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_I64:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_F32:
         case RuntimeInterface::IntrinsicId::INTRINSIC_MATH_MAX_F64: {
-            BuildBinaryOperationIntrinsic<Opcode::Max>(bcInst, accRead);
+            Builder()->template BuildBinaryOperationIntrinsic<Opcode::Max>(bcInst_, ACC_READ);
             break;
         }
 #include "intrinsics_ir_build_static_call.inl"
         default: {
-            BuildDefaultStaticIntrinsic(bcInst, isRange, accRead);
+            BuildDefaultStaticIntrinsic(intrinsicId);
         }
     }
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildDefaultVirtualCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultVirtualCallIntrinsic(
+    RuntimeInterface::IntrinsicId intrinsicId)
 {
-    auto methodIndex = bcInst->GetId(0).AsIndex();
-    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
-    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
-    auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
-    auto bcAddr = GetPc(bcInst->GetAddress());
-    auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
-    auto nullCheck =
-        graph_->CreateInstNullCheck(DataType::REFERENCE, bcAddr, GetArgDefinition(bcInst, 0, accRead), saveState);
+    saveState_ = Builder()->CreateSaveState(Opcode::SaveState, pc_);
+    nullCheck_ = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, pc_,
+                                                 Builder()->GetArgDefinition(bcInst_, 0, ACC_READ), saveState_);
 
-    auto call = GetGraph()->CreateInstIntrinsic(GetMethodReturnType(methodId), bcAddr, intrinsicId);
-    SetCallArgs(bcInst, isRange, accRead, nullptr, call, nullCheck, call->RequireState() ? saveState : nullptr, true,
-                methodId);
+    call_ = GetGraph()->CreateInstIntrinsic(Builder()->GetMethodReturnType(methodId_), pc_, intrinsicId);
+    SetCallArgs();
 
-    AddInstruction(saveState);
-    AddInstruction(nullCheck);
+    Builder()->AddInstruction(saveState_);
+    Builder()->AddInstruction(nullCheck_);
 
     /* if there are reference type args to be checked for NULL */
-    AddArgNullcheckIfNeeded<true>(intrinsicId, call, saveState, bcAddr);
+    Builder()->template AddArgNullcheckIfNeeded<true>(intrinsicId, call_, saveState_, pc_);
 
-    AddInstruction(call);
-    if (call->GetType() != DataType::VOID) {
-        UpdateDefinitionAcc(call);
+    Builder()->AddInstruction(call_);
+    if (call_->GetType() != DataType::VOID) {
+        Builder()->UpdateDefinitionAcc(call_);
     } else {
-        UpdateDefinitionAcc(nullptr);
+        Builder()->UpdateDefinitionAcc(nullptr);
     }
     if (NeedSafePointAfterIntrinsic(intrinsicId)) {
-        AddInstruction(CreateSafePoint(currentBb_));
+        Builder()->AddInstruction(Builder()->CreateSafePoint(Builder()->GetCurrentBlock()));
     }
 }
+
+template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 
 // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
 template <bool IS_ACC_WRITE>
@@ -698,19 +685,21 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), fieldId,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
         }
-        auto *resolveField =
-            graph_->CreateInstResolveObjectField(DataType::UINT32, pc, saveState, fieldId, GetGraph()->GetMethod());
+        auto *resolveField = graph_->CreateInstResolveObjectField(DataType::UINT32, pc, saveState,
+                                                                  TypeIdMixin {fieldId, GetGraph()->GetMethod()});
         AddInstruction(resolveField);
         // 2. Create an instruction to load a value from the resolved field
-        auto loadField = graph_->CreateInstLoadResolvedObjectField(type, pc, nullCheck, resolveField, fieldId,
-                                                                   GetGraph()->GetMethod());
+        auto loadField = graph_->CreateInstLoadResolvedObjectField(type, pc, nullCheck, resolveField,
+                                                                   TypeIdMixin {fieldId, GetGraph()->GetMethod()});
         inst = loadField;
     } else {
-        auto loadField = graph_->CreateInstLoadObject(type, pc, nullCheck, fieldId, GetGraph()->GetMethod(), field,
-                                                      runtime->IsFieldVolatile(field));
+        auto loadField =
+            graph_->CreateInstLoadObject(type, pc, nullCheck, TypeIdMixin {fieldId, GetGraph()->GetMethod()}, field,
+                                         runtime->IsFieldVolatile(field));
         // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
         // `IsInConstructor` check should not be necessary, but need proper frontend support first
-        if (runtime->IsFieldReadonly(field) && !IsInConstructor</* IS_STATIC= */ false>()) {
+        constexpr bool IS_STATIC = false;
+        if (runtime->IsFieldReadonly(field) && !IsInConstructor<IS_STATIC>()) {
             loadField->ClearFlag(inst_flags::NO_CSE);
         }
         inst = loadField;
@@ -728,28 +717,30 @@ void InstBuilder::BuildLoadObject(const BytecodeInstruction *bcInst, DataType::T
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 Inst *InstBuilder::BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataType::Type type,
-                                        RuntimeInterface::FieldPtr field, size_t fieldId, Inst **resolveInst)
+                                        RuntimeInterface::FieldPtr field, uint32_t fieldId, Inst **resolveInst)
 {
     auto pc = GetPc(bcInst->GetAddress());
     if (field == nullptr || ForceUnresolved()) {
         // The field is unresolved, so we have to resolve it and then store
         // 1. Create an instruction to resolve an object's field
-        auto resolveField =
-            graph_->CreateInstResolveObjectField(DataType::UINT32, pc, nullptr, fieldId, GetGraph()->GetMethod());
+        auto resolveField = graph_->CreateInstResolveObjectField(DataType::UINT32, pc, nullptr,
+                                                                 TypeIdMixin {fieldId, GetGraph()->GetMethod()});
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), fieldId,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
         }
         // 2. Create an instruction to store a value to the resolved field
-        auto storeField = graph_->CreateInstStoreResolvedObjectField(
-            type, pc, nullptr, nullptr, nullptr, fieldId, GetGraph()->GetMethod(), false, type == DataType::REFERENCE);
+        auto storeField = graph_->CreateInstStoreResolvedObjectField(type, pc, nullptr, nullptr, nullptr,
+                                                                     TypeIdMixin {fieldId, GetGraph()->GetMethod()},
+                                                                     false, type == DataType::REFERENCE);
         *resolveInst = resolveField;
         return storeField;
     }
 
     ASSERT(field != nullptr);
-    auto storeField = graph_->CreateInstStoreObject(type, pc, nullptr, nullptr, fieldId, GetGraph()->GetMethod(), field,
-                                                    GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
+    auto storeField =
+        graph_->CreateInstStoreObject(type, pc, nullptr, nullptr, TypeIdMixin {fieldId, GetGraph()->GetMethod()}, field,
+                                      GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
     *resolveInst = nullptr;  // resolver is not needed in this case
     return storeField;
 }
@@ -800,36 +791,37 @@ void InstBuilder::BuildStoreObject(const BytecodeInstruction *bcInst, DataType::
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, size_t typeId, Inst *saveState)
+Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t typeId, Inst *saveState)
 {
     uint32_t classId;
     auto field = GetRuntime()->ResolveField(GetMethod(), typeId, !GetGraph()->IsAotMode(), &classId);
-
     if (field == nullptr || ForceUnresolved()) {
         // The static field is unresolved, so we have to resolve it and then load
         // 1. Create an instruction to resolve an object's static field.
         //    Its result is a static field memory address (not an offset as there is no object)
-        auto resolveField = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc, saveState, typeId,
-                                                                       GetGraph()->GetMethod());
+        auto resolveField = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc, saveState,
+                                                                       TypeIdMixin {typeId, GetGraph()->GetMethod()});
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), typeId,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
         }
         AddInstruction(resolveField);
         // 2. Create an instruction to load a value from the resolved static field address
-        auto loadField =
-            graph_->CreateInstLoadResolvedObjectFieldStatic(type, pc, resolveField, typeId, GetGraph()->GetMethod());
+        auto loadField = graph_->CreateInstLoadResolvedObjectFieldStatic(type, pc, resolveField,
+                                                                         TypeIdMixin {typeId, GetGraph()->GetMethod()});
         return loadField;
     }
 
     ASSERT(field != nullptr);
-    auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState, classId,
-                                                        GetGraph()->GetMethod(), GetRuntime()->GetClassForField(field));
-    auto loadField = graph_->CreateInstLoadStatic(type, pc, initClass, typeId, GetGraph()->GetMethod(), field,
-                                                  GetRuntime()->IsFieldVolatile(field));
+    auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
+                                                        TypeIdMixin {classId, GetGraph()->GetMethod()},
+                                                        GetRuntime()->GetClassForField(field));
+    auto loadField = graph_->CreateInstLoadStatic(type, pc, initClass, TypeIdMixin {typeId, GetGraph()->GetMethod()},
+                                                  field, GetRuntime()->IsFieldVolatile(field));
     // 'final' field can be reassigned e. g. with reflection, but 'readonly' cannot
     // `IsInConstructor` check should not be necessary, but need proper frontend support first
-    if (GetRuntime()->IsFieldReadonly(field) && !IsInConstructor</* IS_STATIC= */ true>()) {
+    constexpr bool IS_STATIC = true;
+    if (GetRuntime()->IsFieldReadonly(field) && !IsInConstructor<IS_STATIC>()) {
         loadField->ClearFlag(inst_flags::NO_CSE);
     }
     AddInstruction(initClass);
@@ -837,14 +829,10 @@ Inst *InstBuilder::BuildLoadStaticInst(size_t pc, DataType::Type type, size_t ty
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-Inst *InstBuilder::BuildAnyTypeCheckInst(size_t bcAddr, Inst *input, Inst *saveState, AnyBaseType type,
-                                         bool typeWasProfiled, profiling::AnyInputType allowedInputType)
+AnyTypeCheckInst *InstBuilder::BuildAnyTypeCheckInst(size_t bcAddr, Inst *input, Inst *saveState, AnyBaseType type)
 {
     auto anyCheck = graph_->CreateInstAnyTypeCheck(DataType::ANY, bcAddr, input, saveState, type);
-    anyCheck->SetAllowedInputType(allowedInputType);
-    anyCheck->SetIsTypeWasProfiled(typeWasProfiled);
     AddInstruction(anyCheck);
-
     return anyCheck;
 }
 
@@ -864,7 +852,7 @@ void InstBuilder::BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::T
 }
 
 // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)
-Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, size_t typeId,
+Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, uint32_t typeId,
                                         Inst *storeInput, Inst *saveState)
 {
     AddInstruction(saveState);
@@ -879,19 +867,19 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataT
             // 2. GC Pre/Post write barriers may be needed.
             // Just call runtime EntrypointId::UNRESOLVED_STORE_STATIC_BARRIERED,
             // which performs all the necessary steps (see codegen.cpp for the details).
-            auto inst = graph_->CreateInstUnresolvedStoreStatic(type, pc, storeInput, saveState, typeId,
-                                                                GetGraph()->GetMethod(), true);
+            auto inst = graph_->CreateInstUnresolvedStoreStatic(type, pc, storeInput, saveState,
+                                                                TypeIdMixin {typeId, GetGraph()->GetMethod()}, true);
             return inst;
         }
         ASSERT(type != DataType::REFERENCE);
         // 1. Create an instruction to resolve an object's static field.
         //    Its result is a static field memory address (REFERENCE)
-        auto resolveField = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc, saveState, typeId,
-                                                                       GetGraph()->GetMethod());
+        auto resolveField = graph_->CreateInstResolveObjectFieldStatic(DataType::REFERENCE, pc, saveState,
+                                                                       TypeIdMixin {typeId, GetGraph()->GetMethod()});
         AddInstruction(resolveField);
         // 2. Create an instruction to store a value to the resolved static field address
-        auto storeField = graph_->CreateInstStoreResolvedObjectFieldStatic(type, pc, resolveField, storeInput, typeId,
-                                                                           GetGraph()->GetMethod());
+        auto storeField = graph_->CreateInstStoreResolvedObjectFieldStatic(
+            type, pc, resolveField, storeInput, TypeIdMixin {typeId, GetGraph()->GetMethod()});
         if (!GetGraph()->IsAotMode() && !GetGraph()->IsBytecodeOptimizer()) {
             GetRuntime()->GetUnresolvedTypes()->AddTableSlot(GetMethod(), typeId,
                                                              UnresolvedTypesInterface::SlotKind::FIELD);
@@ -900,11 +888,12 @@ Inst *InstBuilder::BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataT
     }
 
     ASSERT(field != nullptr);
-    auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState, classId,
-                                                        GetGraph()->GetMethod(), GetRuntime()->GetClassForField(field));
+    auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
+                                                        TypeIdMixin {classId, GetGraph()->GetMethod()},
+                                                        GetRuntime()->GetClassForField(field));
     auto storeField =
-        graph_->CreateInstStoreStatic(type, pc, initClass, storeInput, typeId, GetGraph()->GetMethod(), field,
-                                      GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
+        graph_->CreateInstStoreStatic(type, pc, initClass, storeInput, TypeIdMixin {typeId, GetGraph()->GetMethod()},
+                                      field, GetRuntime()->IsFieldVolatile(field), type == DataType::REFERENCE);
     AddInstruction(initClass);
     return storeField;
 }
@@ -924,8 +913,8 @@ void InstBuilder::BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildChecksBeforeArray(size_t pc, Inst *arrayRef, Inst **ss, Inst **nc, Inst **al, Inst **bc,
-                                         bool withNullcheck)
+std::tuple<SaveStateInst *, Inst *, LengthMethodInst *, BoundsCheckInst *> InstBuilder::BuildChecksBeforeArray(
+    size_t pc, Inst *arrayRef, bool withNullcheck)
 {
     // Create SaveState instruction
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
@@ -944,22 +933,17 @@ void InstBuilder::BuildChecksBeforeArray(size_t pc, Inst *arrayRef, Inst **ss, I
     // Create BoundCheck instruction
     auto boundsCheck = graph_->CreateInstBoundsCheck(DataType::INT32, pc, arrayLength, nullptr, saveState);
 
-    *ss = saveState;
-    *nc = nullCheck;
-    *al = arrayLength;
-    *bc = boundsCheck;
+    return std::make_tuple(saveState, nullCheck, arrayLength, boundsCheck);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 void InstBuilder::BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Type type)
 {
     ASSERT(type != DataType::NO_TYPE);
-    Inst *saveState = nullptr;
-    Inst *nullCheck = nullptr;
-    Inst *arrayLength = nullptr;
-    Inst *boundsCheck = nullptr;
     auto pc = GetPc(bcInst->GetAddress());
-    BuildChecksBeforeArray(pc, GetDefinition(bcInst->GetVReg(0)), &saveState, &nullCheck, &arrayLength, &boundsCheck);
+
+    auto [saveState, nullCheck, arrayLength, boundsCheck] =
+        BuildChecksBeforeArray(pc, GetDefinition(bcInst->GetVReg(0)));
     ASSERT(saveState != nullptr && nullCheck != nullptr && arrayLength != nullptr && boundsCheck != nullptr);
 
     // Create instruction
@@ -1010,8 +994,9 @@ void InstBuilder::BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcI
     for (size_t i = 0; i < arraySize; i++) {
         auto indexInst = graph_->FindOrCreateConstant(i);
         auto save = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
+        auto typeId = static_cast<uint32_t>(std::get<T>(litArray.literals[i].value));
         auto loadStringInst = GetGraph()->CreateInstLoadString(DataType::REFERENCE, GetPc(bcInst->GetAddress()), save,
-                                                               std::get<T>(litArray.literals[i].value), method);
+                                                               TypeIdMixin {typeId, method});
         AddInstruction(save);
         AddInstruction(loadStringInst);
         if (GetGraph()->IsDynamicMethod()) {
@@ -1037,7 +1022,7 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
     auto initClass = CreateLoadAndInitClassGeneric(typeId, GetPc(bcInst->GetAddress()));
     initClass->SetInput(0, saveState);
     auto arrayInst = graph_->CreateInstNewArray(DataType::REFERENCE, GetPc(bcInst->GetAddress()), initClass, negCheck,
-                                                saveState, typeId, GetGraph()->GetMethod());
+                                                saveState, TypeIdMixin {typeId, GetGraph()->GetMethod()});
     AddInstruction(saveState);
     AddInstruction(initClass);
     AddInstruction(negCheck);
@@ -1048,7 +1033,8 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
         // Create LoadConstArray instruction
         auto ss = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
         auto inst = GetGraph()->CreateInstFillConstArray(type, GetPc(bcInst->GetAddress()), arrayInst, ss,
-                                                         bcInst->GetId(0).AsFileId().GetOffset(), method, arraySize);
+                                                         TypeIdMixin {bcInst->GetId(0).AsFileId().GetOffset(), method},
+                                                         arraySize);
         AddInstruction(ss);
         AddInstruction(inst);
         return;
@@ -1079,7 +1065,7 @@ void InstBuilder::BuildLoadConstStringArray(const BytecodeInstruction *bcInst)
         auto saveState = CreateSaveState(Opcode::SaveState, GetPc(bcInst->GetAddress()));
         auto method = GetGraph()->GetMethod();
         auto inst = GetGraph()->CreateInstLoadConstArray(DataType::REFERENCE, GetPc(bcInst->GetAddress()), saveState,
-                                                         literalArrayIdx, method);
+                                                         TypeIdMixin {literalArrayIdx, method});
         AddInstruction(saveState);
         AddInstruction(inst);
         UpdateDefinition(bcInst->GetVReg(0), inst);
@@ -1153,12 +1139,9 @@ void InstBuilder::BuildStoreArrayInst(const BytecodeInstruction *bcInst, DataTyp
 {
     ASSERT(type != DataType::NO_TYPE);
     Inst *refCheck = nullptr;
-    Inst *saveState = nullptr;
-    Inst *nullCheck = nullptr;
-    Inst *arrayLength = nullptr;
-    Inst *boundsCheck = nullptr;
+
     auto pc = GetPc(bcInst->GetAddress());
-    BuildChecksBeforeArray(pc, arrayRef, &saveState, &nullCheck, &arrayLength, &boundsCheck);
+    auto [saveState, nullCheck, arrayLength, boundsCheck] = BuildChecksBeforeArray(pc, arrayRef);
     ASSERT(saveState != nullptr && nullCheck != nullptr && arrayLength != nullptr && boundsCheck != nullptr);
 
     // Create instruction
@@ -1211,7 +1194,7 @@ void InstBuilder::BuildNewArray(const BytecodeInstruction *bcInst)
     initClass->SetInput(0, saveState);
 
     auto inst = graph_->CreateInstNewArray(DataType::REFERENCE, GetPc(bcInst->GetAddress()), initClass, negCheck,
-                                           saveState, typeId, GetGraph()->GetMethod());
+                                           saveState, TypeIdMixin {typeId, GetGraph()->GetMethod()});
     AddInstruction(saveState, initClass, negCheck, inst);
     UpdateDefinition(bcInst->GetVReg(0), inst);
 }
@@ -1281,9 +1264,9 @@ void InstBuilder::BuildInitObjectMultiDimensionalArray(const BytecodeInstruction
     auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
     auto classId = GetRuntime()->GetClassIdForMethod(GetMethod(), methodId);
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
-    auto initClass =
-        graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState, classId, GetGraph()->GetMethod(),
-                                           GetRuntime()->ResolveType(GetGraph()->GetMethod(), classId));
+    auto initClass = graph_->CreateInstLoadAndInitClass(DataType::REFERENCE, pc, saveState,
+                                                        TypeIdMixin {classId, GetGraph()->GetMethod()},
+                                                        GetRuntime()->ResolveType(GetGraph()->GetMethod(), classId));
     auto inst = GetGraph()->CreateInstInitObject(DataType::REFERENCE, pc, methodId);
 
     size_t argsCount = GetMethodArgumentsCount(methodId);
@@ -1394,28 +1377,23 @@ void InstBuilder::BuildInitObject(const BytecodeInstruction *bcInst, bool isRang
     Inst *resolver = nullptr;
     CallInst *call = BuildCallStaticForInitObject(bcInst, methodId, &resolver);
     if (resolver != nullptr) {
-        call->AppendInput(resolver);
-        call->AddInputType(DataType::POINTER);
+        call->AppendInput(resolver, DataType::POINTER);
     }
-    call->AppendInput(newObj);
-    call->AddInputType(DataType::REFERENCE);
+    call->AppendInput(newObj, DataType::REFERENCE);
 
     size_t argsCount = GetMethodArgumentsCount(methodId);
     if (isRange) {
         auto startReg = bcInst->GetVReg(0);
         for (size_t i = 0; i < argsCount; startReg++, i++) {
-            call->AppendInput(GetDefinition(startReg));
-            call->AddInputType(GetMethodArgumentType(methodId, i));
+            call->AppendInput(GetDefinition(startReg), GetMethodArgumentType(methodId, i));
         }
     } else {
         for (size_t i = 0; i < argsCount; i++) {
-            call->AppendInput(GetDefinition(bcInst->GetVReg(i)));
-            call->AddInputType(GetMethodArgumentType(methodId, i));
+            call->AppendInput(GetDefinition(bcInst->GetVReg(i)), GetMethodArgumentType(methodId, i));
         }
     }
     auto saveStateForCall = CreateSaveState(Opcode::SaveState, pc);
-    call->AppendInput(saveStateForCall);
-    call->AddInputType(DataType::NO_TYPE);
+    call->AppendInput(saveStateForCall, DataType::NO_TYPE);
     if (resolver != nullptr) {
         resolver->SetInput(0, saveStateForCall);
         AddInstruction(saveState, initClass, newObj, saveStateForCall, resolver, call);
@@ -1433,8 +1411,8 @@ void InstBuilder::BuildCheckCast(const BytecodeInstruction *bcInst)
     auto pc = GetPc(bcInst->GetAddress());
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
     auto loadClass = BuildLoadClass(typeId, pc, saveState);
-    auto inst = GetGraph()->CreateInstCheckCast(DataType::NO_TYPE, pc, GetDefinitionAcc(), loadClass, saveState, typeId,
-                                                GetGraph()->GetMethod(), klassType);
+    auto inst = GetGraph()->CreateInstCheckCast(DataType::NO_TYPE, pc, GetDefinitionAcc(), loadClass, saveState,
+                                                TypeIdMixin {typeId, GetGraph()->GetMethod()}, klassType);
     AddInstruction(saveState, loadClass, inst);
 }
 
@@ -1447,8 +1425,8 @@ void InstBuilder::BuildIsInstance(const BytecodeInstruction *bcInst)
     auto pc = GetPc(bcInst->GetAddress());
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
     auto loadClass = BuildLoadClass(typeId, pc, saveState);
-    auto inst = GetGraph()->CreateInstIsInstance(DataType::BOOL, pc, GetDefinitionAcc(), loadClass, saveState, typeId,
-                                                 GetGraph()->GetMethod(), klassType);
+    auto inst = GetGraph()->CreateInstIsInstance(DataType::BOOL, pc, GetDefinitionAcc(), loadClass, saveState,
+                                                 TypeIdMixin {typeId, GetGraph()->GetMethod()}, klassType);
     AddInstruction(saveState, loadClass, inst);
     UpdateDefinitionAcc(inst);
 }
@@ -1456,8 +1434,8 @@ void InstBuilder::BuildIsInstance(const BytecodeInstruction *bcInst)
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 Inst *InstBuilder::BuildLoadClass(RuntimeInterface::IdType typeId, size_t pc, Inst *saveState)
 {
-    auto inst =
-        GetGraph()->CreateInstLoadClass(DataType::REFERENCE, pc, saveState, typeId, GetGraph()->GetMethod(), nullptr);
+    auto inst = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, pc, saveState,
+                                                TypeIdMixin {typeId, GetGraph()->GetMethod()}, nullptr);
     auto klass = GetRuntime()->ResolveType(GetGraph()->GetMethod(), typeId);
     if (klass != nullptr) {
         inst->SetClass(klass);

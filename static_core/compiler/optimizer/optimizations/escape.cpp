@@ -1659,7 +1659,7 @@ Inst *ScalarReplacement::CreateNewObject(Inst *originalInst, Inst *saveState)
     ASSERT(originalInst->GetOpcode() == Opcode::NewObject);
     auto newAlloc = graph_->CreateInstNewObject(
         originalInst->GetType(), originalInst->GetPc(), originalInst->GetInput(0).GetInst(), saveState,
-        originalInst->CastToNewObject()->GetTypeId(), originalInst->CastToNewObject()->GetMethod());
+        TypeIdMixin {originalInst->CastToNewObject()->GetTypeId(), originalInst->CastToNewObject()->GetMethod()});
     saveState->GetBasicBlock()->InsertAfter(newAlloc, saveState);
     COMPILER_LOG(DEBUG, PEA) << "Materialized " << originalInst->GetId() << " at SavePoint " << saveState->GetId()
                              << " as " << *newAlloc;
@@ -1669,10 +1669,10 @@ Inst *ScalarReplacement::CreateNewObject(Inst *originalInst, Inst *saveState)
 Inst *ScalarReplacement::CreateNewArray(Inst *originalInst, Inst *saveState)
 {
     ASSERT(originalInst->GetOpcode() == Opcode::NewArray);
-    auto newAlloc = graph_->CreateInstNewArray(originalInst->GetType(), originalInst->GetPc(),
-                                               originalInst->GetInput(0).GetInst(), originalInst->GetInput(1).GetInst(),
-                                               saveState, originalInst->CastToNewArray()->GetTypeId(),
-                                               originalInst->CastToNewArray()->GetMethod());
+    auto newAlloc = graph_->CreateInstNewArray(
+        originalInst->GetType(), originalInst->GetPc(), originalInst->GetInput(0).GetInst(),
+        originalInst->GetInput(1).GetInst(), saveState,
+        TypeIdMixin {originalInst->CastToNewArray()->GetTypeId(), originalInst->CastToNewArray()->GetMethod()});
     saveState->InsertAfter(newAlloc);
     COMPILER_LOG(DEBUG, PEA) << "Materialized " << originalInst->GetId() << " at SavePoint " << saveState->GetId()
                              << " as " << *newAlloc;
@@ -1729,10 +1729,10 @@ void ScalarReplacement::InitializeObject(Inst *alloc, Inst *instBefore, VirtualS
         if (std::holds_alternative<FieldPtr>(fieldVariant)) {
             auto field = std::get<FieldPtr>(fieldVariant);
             auto fieldType = graph_->GetRuntime()->GetFieldType(field);
-            store = graph_->CreateInstStoreObject(fieldType, alloc->GetPc(), alloc, fieldSourceInst,
-                                                  graph_->GetRuntime()->GetFieldId(field), graph_->GetMethod(), field,
-                                                  graph_->GetRuntime()->IsFieldVolatile(field),
-                                                  DataType::IsReference(fieldType));
+            store = graph_->CreateInstStoreObject(
+                fieldType, alloc->GetPc(), alloc, fieldSourceInst,
+                TypeIdMixin {graph_->GetRuntime()->GetFieldId(field), graph_->GetMethod()}, field,
+                graph_->GetRuntime()->IsFieldVolatile(field), DataType::IsReference(fieldType));
         } else {
             ASSERT(std::holds_alternative<Index>(fieldVariant));
             auto index = std::get<Index>(fieldVariant).index;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,10 +60,10 @@ CallInst *CreateInitObject(compiler::GraphVisitor *v, compiler::ClassInst *load,
 
     auto inputTypesCount = callInit->GetInputsCount();
     initObject->AllocateInputTypes(graph->GetAllocator(), inputTypesCount);
-    initObject->AppendInputAndType(load, compiler::DataType::REFERENCE);
+    initObject->AppendInput(load, compiler::DataType::REFERENCE);
     for (size_t i = 1; i < inputTypesCount; ++i) {
         auto inputInst = callInit->GetInput(i).GetInst();
-        initObject->AppendInputAndType(inputInst, inputInst->GetType());
+        initObject->AppendInput(inputInst, inputInst->GetType());
     }
 
     initObject->SetCallMethodId(callInit->GetCallMethodId());

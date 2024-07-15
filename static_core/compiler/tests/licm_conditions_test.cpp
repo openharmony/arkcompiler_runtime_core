@@ -138,9 +138,9 @@ TEST_F(LicmConditionsTest, TestConditionIsNotHoistable)
  *     |
  *     \----->[3]
  */
-TEST_F(LicmConditionsTest, TestBrachWithoutPhi)
+SRC_GRAPH(TestBrachWithoutPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -180,8 +180,10 @@ TEST_F(LicmConditionsTest, TestBrachWithoutPhi)
             INST(15U, Opcode::Return).i64().Inputs(5U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestBrachWithoutPhi, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -243,6 +245,14 @@ TEST_F(LicmConditionsTest, TestBrachWithoutPhi)
             INST(15U, Opcode::Return).i64().Inputs(5U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestBrachWithoutPhi)
+{
+    src_graph::TestBrachWithoutPhi::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestBrachWithoutPhi::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -297,9 +307,9 @@ TEST_F(LicmConditionsTest, TestExtraInstPreventsHoisting)
  * - Loop contains condition combination BB12, BB14 and BB15.
  * - Longest chain should be processed
  */
-TEST_F(LicmConditionsTest, TestProcessLongestChain)
+SRC_GRAPH(TestProcessLongestChain, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -354,8 +364,10 @@ TEST_F(LicmConditionsTest, TestProcessLongestChain)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestProcessLongestChain, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -428,6 +440,14 @@ TEST_F(LicmConditionsTest, TestProcessLongestChain)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestProcessLongestChain)
+{
+    src_graph::TestProcessLongestChain::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestProcessLongestChain::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -436,9 +456,9 @@ TEST_F(LicmConditionsTest, TestProcessLongestChain)
  * - Loop contains condition combination BB12, BB14 and BB15.
  * - Longest chain should be processed but it has Phi with different inputs in multiple predecessors successor
  */
-TEST_F(LicmConditionsTest, TestProcessLongestChainNotSuitable)
+SRC_GRAPH(TestProcessLongestChainNotSuitable, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -497,8 +517,10 @@ TEST_F(LicmConditionsTest, TestProcessLongestChainNotSuitable)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestProcessLongestChainNotSuitable, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -575,6 +597,14 @@ TEST_F(LicmConditionsTest, TestProcessLongestChainNotSuitable)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestProcessLongestChainNotSuitable)
+{
+    src_graph::TestProcessLongestChainNotSuitable::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestProcessLongestChainNotSuitable::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -606,9 +636,9 @@ TEST_F(LicmConditionsTest, TestProcessLongestChainNotSuitable)
  *     |
  *     \----->[3]
  */
-TEST_F(LicmConditionsTest, TestUpdatePhi)
+SRC_GRAPH(TestUpdatePhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -663,8 +693,10 @@ TEST_F(LicmConditionsTest, TestUpdatePhi)
             INST(16U, Opcode::Return).i32().Inputs(14U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestUpdatePhi, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -741,6 +773,14 @@ TEST_F(LicmConditionsTest, TestUpdatePhi)
             INST(16U, Opcode::Return).i32().Inputs(14U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestUpdatePhi)
+{
+    src_graph::TestUpdatePhi::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestUpdatePhi::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -749,9 +789,9 @@ TEST_F(LicmConditionsTest, TestUpdatePhi)
  * - Loop contains condition combination BB50 and BB52.
  * - Branch BB51 contains phi which is hoisted
  */
-TEST_F(LicmConditionsTest, TestHoistPhi)
+SRC_GRAPH(TestHoistPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -801,8 +841,10 @@ TEST_F(LicmConditionsTest, TestHoistPhi)
             INST(16U, Opcode::Return).i64().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestHoistPhi, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -868,6 +910,14 @@ TEST_F(LicmConditionsTest, TestHoistPhi)
             INST(16U, Opcode::Return).i64().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestHoistPhi)
+{
+    src_graph::TestHoistPhi::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestHoistPhi::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -877,9 +927,9 @@ TEST_F(LicmConditionsTest, TestHoistPhi)
  * - Branch BB51 contains phi 13 which cannot be hoist (input is not from chain)
  *   but we can update inputs
  */
-TEST_F(LicmConditionsTest, TestCannotHoistPhi)
+SRC_GRAPH(TestCannotHoistPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -934,8 +984,10 @@ TEST_F(LicmConditionsTest, TestCannotHoistPhi)
             INST(16U, Opcode::Return).i32().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestCannotHoistPhi, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -1006,6 +1058,14 @@ TEST_F(LicmConditionsTest, TestCannotHoistPhi)
             INST(16U, Opcode::Return).i32().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestCannotHoistPhi)
+{
+    src_graph::TestCannotHoistPhi::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestCannotHoistPhi::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1014,9 +1074,9 @@ TEST_F(LicmConditionsTest, TestCannotHoistPhi)
  * - Loop contains condition combination BB4 and BB27.
  * - Branch BB24 contains phi which requires new edge in correct predecessors order
  */
-TEST_F(LicmConditionsTest, TestHoistPhiCorrectPredOrder)
+SRC_GRAPH(TestHoistPhiCorrectPredOrder, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -1060,8 +1120,10 @@ TEST_F(LicmConditionsTest, TestHoistPhiCorrectPredOrder)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestHoistPhiCorrectPredOrder, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -1123,6 +1185,14 @@ TEST_F(LicmConditionsTest, TestHoistPhiCorrectPredOrder)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestHoistPhiCorrectPredOrder)
+{
+    src_graph::TestHoistPhiCorrectPredOrder::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestHoistPhiCorrectPredOrder::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1130,9 +1200,9 @@ TEST_F(LicmConditionsTest, TestHoistPhiCorrectPredOrder)
  * Test graph:
  * - two chains with neighbour blocks
  */
-TEST_F(LicmConditionsTest, TestProcessNeigbourChains)
+SRC_GRAPH(TestProcessNeigbourChains, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
         PARAMETER(1U, 1U).i32();
@@ -1192,8 +1262,10 @@ TEST_F(LicmConditionsTest, TestProcessNeigbourChains)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestProcessNeigbourChains, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
@@ -1286,6 +1358,14 @@ TEST_F(LicmConditionsTest, TestProcessNeigbourChains)
             INST(19U, Opcode::Return).i64().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestProcessNeigbourChains)
+{
+    src_graph::TestProcessNeigbourChains::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestProcessNeigbourChains::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1293,9 +1373,9 @@ TEST_F(LicmConditionsTest, TestProcessNeigbourChains)
  * Test graph:
  * - two chains with common successors
  */
-TEST_F(LicmConditionsTest, TestProcessChainsWithCommonSuccessors)
+SRC_GRAPH(TestProcessChainsWithCommonSuccessors, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -1353,8 +1433,10 @@ TEST_F(LicmConditionsTest, TestProcessChainsWithCommonSuccessors)
             INST(20U, Opcode::Return).i64().Inputs(19U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestProcessChainsWithCommonSuccessors, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -1438,6 +1520,14 @@ TEST_F(LicmConditionsTest, TestProcessChainsWithCommonSuccessors)
             INST(20U, Opcode::Return).i64().Inputs(19U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestProcessChainsWithCommonSuccessors)
+{
+    src_graph::TestProcessChainsWithCommonSuccessors::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestProcessChainsWithCommonSuccessors::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1445,9 +1535,9 @@ TEST_F(LicmConditionsTest, TestProcessChainsWithCommonSuccessors)
  * Test graph:
  * - two chains can be merged
  */
-TEST_F(LicmConditionsTest, TestMergeChains)
+SRC_GRAPH(TestMergeChains, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
         PARAMETER(1U, 1U).i32();
@@ -1516,9 +1606,10 @@ TEST_F(LicmConditionsTest, TestMergeChains)
             INST(20U, Opcode::Return).i32().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    GetGraph()->RunPass<Cleanup>();
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestMergeChains, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
@@ -1593,6 +1684,15 @@ TEST_F(LicmConditionsTest, TestMergeChains)
             INST(20U, Opcode::Return).i32().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestMergeChains)
+{
+    src_graph::TestMergeChains::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    GetGraph()->RunPass<Cleanup>();
+    auto graph = CreateEmptyGraph();
+    out_graph::TestMergeChains::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1600,9 +1700,9 @@ TEST_F(LicmConditionsTest, TestMergeChains)
  * Test graph:
  * - two chains can be merged
  */
-TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
+SRC_GRAPH(TestMergeChainsPhiHoisted, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
         PARAMETER(1U, 1U).i32();
@@ -1672,9 +1772,10 @@ TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
             INST(20U, Opcode::Return).i32().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    GetGraph()->RunPass<Cleanup>();
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestMergeChainsPhiHoisted, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
@@ -1766,6 +1867,15 @@ TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
             INST(20U, Opcode::Return).i32().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
+{
+    src_graph::TestMergeChainsPhiHoisted::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    GetGraph()->RunPass<Cleanup>();
+    auto graph = CreateEmptyGraph();
+    out_graph::TestMergeChainsPhiHoisted::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1773,9 +1883,9 @@ TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
  * Test graph:
  * - One of the chains is an extension of the other.
  */
-TEST_F(LicmConditionsTest, TestNoMergeChains)
+SRC_GRAPH(TestNoMergeChains, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
         PARAMETER(1U, 1U).i32();
@@ -1844,9 +1954,10 @@ TEST_F(LicmConditionsTest, TestNoMergeChains)
             INST(20U, Opcode::Return).i32().Inputs(18U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
-    GetGraph()->RunPass<Cleanup>();
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestNoMergeChains, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
@@ -1938,6 +2049,15 @@ TEST_F(LicmConditionsTest, TestNoMergeChains)
             INST(20U, Opcode::Return).i32().Inputs(18U);
         }
     }
+}
+
+TEST_F(LicmConditionsTest, TestNoMergeChains)
+{
+    src_graph::TestNoMergeChains::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<LicmConditions>());
+    GetGraph()->RunPass<Cleanup>();
+    auto graph = CreateEmptyGraph();
+    out_graph::TestNoMergeChains::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 // NOLINTEND(readability-magic-numbers,readability-function-size)

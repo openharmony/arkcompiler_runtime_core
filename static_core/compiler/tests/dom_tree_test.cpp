@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,9 +100,9 @@ TEST_F(DomTreeTest, OneBlock)
  *
  *
  */
-TEST_F(DomTreeTest, GraphNoCycles)
+SRC_GRAPH(GraphNoCycles, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -130,6 +130,11 @@ TEST_F(DomTreeTest, GraphNoCycles)
             INST(9U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(DomTreeTest, GraphNoCycles)
+{
+    src_graph::GraphNoCycles::CREATE(GetGraph());
 
     auto entry = GetGraph()->GetStartBlock();
     auto a = &BB(2U);
@@ -239,9 +244,9 @@ TEST_F(DomTreeTest, GraphNoCycles)
  *                                       v
  *                                     [exit]
  */
-TEST_F(DomTreeTest, GraphWithCycles)
+SRC_GRAPH(GraphWithCycles, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -274,6 +279,11 @@ TEST_F(DomTreeTest, GraphWithCycles)
             INST(14U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(DomTreeTest, GraphWithCycles)
+{
+    src_graph::GraphWithCycles::CREATE(GetGraph());
     auto entry = GetGraph()->GetStartBlock();
     auto k = &BB(2U);
     auto a = &BB(3U);

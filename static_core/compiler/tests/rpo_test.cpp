@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,9 +77,9 @@ TEST_F(RpoTest, OneBlock)
  *                    v              |
  *                  [exit] <---------/
  */
-TEST_F(RpoTest, GraphNoCycles)
+SRC_GRAPH(GraphNoCyclesRPO, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -100,6 +100,11 @@ TEST_F(RpoTest, GraphNoCycles)
             INST(9U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(RpoTest, GraphNoCyclesRPO)
+{
+    src_graph::GraphNoCyclesRPO::CREATE(GetGraph());
     auto a = &BB(2U);
     auto b = &BB(3U);
     auto c = &BB(4U);
@@ -189,9 +194,9 @@ TEST_F(RpoTest, GraphNoCycles)
  *     v  /           v
  *    [K]/          [exit]
  */
-TEST_F(RpoTest, GraphWithCycles)
+SRC_GRAPH(GraphWithCyclesRPO, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -219,6 +224,11 @@ TEST_F(RpoTest, GraphWithCycles)
         }
         BASIC_BLOCK(8U, 5U) {}
     }
+}
+
+TEST_F(RpoTest, GraphWithCyclesRPO)
+{
+    src_graph::GraphWithCyclesRPO::CREATE(GetGraph());
     auto a = &BB(2U);
     auto b = &BB(3U);
     auto c = &BB(4U);

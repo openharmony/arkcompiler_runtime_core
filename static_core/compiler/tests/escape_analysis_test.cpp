@@ -19,17 +19,17 @@
 #include "optimizer/analysis/liveness_analyzer.h"
 
 namespace ark::compiler {
+
+inline const RuntimeInterface::FieldPtr OBJ_FIELD = reinterpret_cast<void *>(0xDEADBEEFU);
+inline const RuntimeInterface::FieldPtr INT64_FIELD = reinterpret_cast<void *>(0xDEADFEEDU);
+inline const RuntimeInterface::FieldPtr UINT64_FIELD = reinterpret_cast<void *>(0xDEAD64BU);
+inline const RuntimeInterface::FieldPtr INT32_FIELD = reinterpret_cast<void *>(0xDEAD5320U);
+inline const RuntimeInterface::FieldPtr UINT8_FIELD = reinterpret_cast<void *>(0xB00B00UL);
+inline const RuntimeInterface::FieldPtr INT8_FIELD = reinterpret_cast<void *>(0xB00B01UL);
+inline const RuntimeInterface::ClassPtr INT32_CLASS = reinterpret_cast<void *>(0xDEAD5320U);
+
 class EscapeAnalysisTest : public GraphTest {
 public:
-    static const RuntimeInterface::FieldPtr OBJ_FIELD;
-    static const RuntimeInterface::FieldPtr INT64_FIELD;
-    static const RuntimeInterface::FieldPtr UINT64_FIELD;
-    static const RuntimeInterface::FieldPtr INT32_FIELD;
-    static const RuntimeInterface::FieldPtr UINT8_FIELD;
-    static const RuntimeInterface::FieldPtr INT8_FIELD;
-
-    static const RuntimeInterface::ClassPtr INT32_CLASS;
-
     EscapeAnalysisTest()
     {
         RegisterFieldType(OBJ_FIELD, DataType::REFERENCE);
@@ -53,15 +53,6 @@ public:
         return res;
     }
 };
-
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::OBJ_FIELD = reinterpret_cast<void *>(0xDEADBEEFU);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT64_FIELD = reinterpret_cast<void *>(0xDEADFEEDU);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::UINT64_FIELD = reinterpret_cast<void *>(0xDEAD64BU);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT32_FIELD = reinterpret_cast<void *>(0xDEAD5320U);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::UINT8_FIELD = reinterpret_cast<void *>(0xB00B00UL);
-const RuntimeInterface::FieldPtr EscapeAnalysisTest::INT8_FIELD = reinterpret_cast<void *>(0xB00B01UL);
-
-const RuntimeInterface::ClassPtr EscapeAnalysisTest::INT32_CLASS = reinterpret_cast<void *>(0xDEAD5320U);
 
 TEST_F(EscapeAnalysisTest, NewEmptyUnusedObject)
 {
@@ -128,9 +119,9 @@ TEST_F(EscapeAnalysisTest, NewEmptyUnusedArray)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, NewUnusedObjectAndControlFlow)
+SRC_GRAPH(NewUnusedObjectAndControlFlow, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
@@ -153,10 +144,10 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectAndControlFlow)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(NewUnusedObjectAndControlFlow, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -179,12 +170,22 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectAndControlFlow)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, NewUnusedObjectAndControlFlow)
+{
+    src_graph::NewUnusedObjectAndControlFlow::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::NewUnusedObjectAndControlFlow::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, NewUnusedArrayAndControlFlow)
+SRC_GRAPH(NewUnusedArrayAndControlFlow, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
@@ -207,10 +208,10 @@ TEST_F(EscapeAnalysisTest, NewUnusedArrayAndControlFlow)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(NewUnusedArrayAndControlFlow, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -233,12 +234,22 @@ TEST_F(EscapeAnalysisTest, NewUnusedArrayAndControlFlow)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, NewUnusedArrayAndControlFlow)
+{
+    src_graph::NewUnusedArrayAndControlFlow::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::NewUnusedArrayAndControlFlow::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
+SRC_GRAPH(NewUnusedObjectsFromDifferentBranches, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
@@ -265,10 +276,10 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(NewUnusedObjectsFromDifferentBranches, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -291,13 +302,23 @@ TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, NewUnusedObjectsFromDifferentBranches)
+{
+    src_graph::NewUnusedObjectsFromDifferentBranches::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::NewUnusedObjectsFromDifferentBranches::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, NewUnusedArrayFromDifferentBranches)
+SRC_GRAPH(NewUnusedArrayFromDifferentBranches, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
@@ -324,10 +345,10 @@ TEST_F(EscapeAnalysisTest, NewUnusedArrayFromDifferentBranches)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(NewUnusedArrayFromDifferentBranches, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -350,13 +371,23 @@ TEST_F(EscapeAnalysisTest, NewUnusedArrayFromDifferentBranches)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, NewUnusedArrayFromDifferentBranches)
+{
+    src_graph::NewUnusedArrayFromDifferentBranches::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::NewUnusedArrayFromDifferentBranches::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameObject)
+SRC_GRAPH(MergeDifferentMaterializedStatesForSameObject, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -401,10 +432,10 @@ TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameObject)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MergeDifferentMaterializedStatesForSameObject, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -451,13 +482,23 @@ TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameObject)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameObject)
+{
+    src_graph::MergeDifferentMaterializedStatesForSameObject::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MergeDifferentMaterializedStatesForSameObject::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameArray)
+SRC_GRAPH(MergeDifferentMaterializedStatesForSameArray, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -503,10 +544,10 @@ TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameArray)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MergeDifferentMaterializedStatesForSameArray, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -554,6 +595,16 @@ TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameArray)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MergeDifferentMaterializedStatesForSameArray)
+{
+    src_graph::MergeDifferentMaterializedStatesForSameArray::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MergeDifferentMaterializedStatesForSameArray::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
@@ -595,9 +646,9 @@ TEST_F(EscapeAnalysisTest, ArrayEscapement)
     ASSERT_FALSE(Run());
 }
 
-TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
+SRC_GRAPH(ObjectPartialEscapement, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
@@ -626,10 +677,10 @@ TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(ObjectPartialEscapement, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -659,6 +710,16 @@ TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, ObjectPartialEscapement)
+{
+    src_graph::ObjectPartialEscapement::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::ObjectPartialEscapement::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -708,9 +769,9 @@ TEST_F(EscapeAnalysisTest, RepeatedLoadStores)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, ArrayPartialEscapement)
+SRC_GRAPH(ArrayPartialEscapement, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
@@ -719,7 +780,7 @@ TEST_F(EscapeAnalysisTest, ArrayPartialEscapement)
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(EscapeAnalysisTest::INT32_CLASS);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
             INST(4U, Opcode::NewArray).ref().Inputs(3U, 0U, 2U);
             INST(10U, Opcode::NullCheck).ref().Inputs(4U, 2U);
             INST(11U, Opcode::StoreArray).s32().Inputs(10U, 1U, 1U);
@@ -739,9 +800,10 @@ TEST_F(EscapeAnalysisTest, ArrayPartialEscapement)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(ArrayPartialEscapement, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -751,7 +813,7 @@ TEST_F(EscapeAnalysisTest, ArrayPartialEscapement)
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(2U, Opcode::SaveState).SrcVregs({0U}).Inputs(0U);
-            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(EscapeAnalysisTest::INT32_CLASS);
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U).Class(INT32_CLASS);
 
             INST(5U, Opcode::IfImm).SrcType(DataType::INT32).Imm(0U).CC(CC_EQ).Inputs(0U);
         }
@@ -772,6 +834,15 @@ TEST_F(EscapeAnalysisTest, ArrayPartialEscapement)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, ArrayPartialEscapement)
+{
+    src_graph::ArrayPartialEscapement::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+    auto graph = CreateEmptyGraph();
+    out_graph::ArrayPartialEscapement::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -927,9 +998,9 @@ TEST_F(EscapeAnalysisTest, ReturnField)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, ReturnSumOf2Elements)
+SRC_GRAPH(ReturnSumOf2Elements, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(3U, 0U).u64();
@@ -968,9 +1039,10 @@ TEST_F(EscapeAnalysisTest, ReturnSumOf2Elements)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(ReturnSumOf2Elements, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1001,6 +1073,15 @@ TEST_F(EscapeAnalysisTest, ReturnSumOf2Elements)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, ReturnSumOf2Elements)
+{
+    src_graph::ReturnSumOf2Elements::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+    auto graph = CreateEmptyGraph();
+    out_graph::ReturnSumOf2Elements::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
@@ -1152,9 +1233,9 @@ TEST_F(EscapeAnalysisTest, VirtualArraysChainMaterialize)
     ASSERT_FALSE(Run());
 }
 
-TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)
+SRC_GRAPH(VirtualObjectsChainDereference, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -1181,10 +1262,10 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(VirtualObjectsChainDereference, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1201,6 +1282,16 @@ TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, VirtualObjectsChainDereference)
+{
+    src_graph::VirtualObjectsChainDereference::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::VirtualObjectsChainDereference::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1251,9 +1342,9 @@ TEST_F(EscapeAnalysisTest, VirtualLoadEscape)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, EscapeThroughAliasOnCfgMerge)
+SRC_GRAPH(EscapeThroughAliasOnCfgMerge, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -1292,10 +1383,10 @@ TEST_F(EscapeAnalysisTest, EscapeThroughAliasOnCfgMerge)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(EscapeThroughAliasOnCfgMerge, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1321,6 +1412,16 @@ TEST_F(EscapeAnalysisTest, EscapeThroughAliasOnCfgMerge)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, EscapeThroughAliasOnCfgMerge)
+{
+    src_graph::EscapeThroughAliasOnCfgMerge::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::EscapeThroughAliasOnCfgMerge::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1362,9 +1463,9 @@ TEST_F(EscapeAnalysisTest, EscapeInsideLoop)
     ASSERT_FALSE(Run());
 }
 
-TEST_F(EscapeAnalysisTest, PartialEscapeInsideLoop)
+SRC_GRAPH(PartialEscapeInsideLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -1404,12 +1505,10 @@ TEST_F(EscapeAnalysisTest, PartialEscapeInsideLoop)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    GetGraph()->RunPass<LivenessAnalyzer>();
-
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(PartialEscapeInsideLoop, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1446,12 +1545,24 @@ TEST_F(EscapeAnalysisTest, PartialEscapeInsideLoop)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, PartialEscapeInsideLoop)
+{
+    src_graph::PartialEscapeInsideLoop::CREATE(GetGraph());
+
+    GetGraph()->RunPass<LivenessAnalyzer>();
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::PartialEscapeInsideLoop::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MergeFieldInsideLoop)
+SRC_GRAPH(MergeFieldInsideLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         CONSTANT(1U, 1U);
@@ -1485,9 +1596,10 @@ TEST_F(EscapeAnalysisTest, MergeFieldInsideLoop)
         }
         // NOLINTEND(readability-magic-numbers)
     }
-    ASSERT_TRUE(Run());
+}
 
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MergeFieldInsideLoop, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1519,6 +1631,15 @@ TEST_F(EscapeAnalysisTest, MergeFieldInsideLoop)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MergeFieldInsideLoop)
+{
+    src_graph::MergeFieldInsideLoop::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MergeFieldInsideLoop::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1605,9 +1726,9 @@ TEST_F(EscapeAnalysisTest, LoadDefaultValue)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, VirtualLoadAfterMaterialization)
+SRC_GRAPH(VirtualLoadAfterMaterialization, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -1634,11 +1755,10 @@ TEST_F(EscapeAnalysisTest, VirtualLoadAfterMaterialization)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
-
+OUT_GRAPH(VirtualLoadAfterMaterialization, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1667,13 +1787,23 @@ TEST_F(EscapeAnalysisTest, VirtualLoadAfterMaterialization)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, VirtualLoadAfterMaterialization)
+{
+    src_graph::VirtualLoadAfterMaterialization::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::VirtualLoadAfterMaterialization::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MergeVirtualFields)
+SRC_GRAPH(MergeVirtualFields, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -1708,10 +1838,10 @@ TEST_F(EscapeAnalysisTest, MergeVirtualFields)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MergeVirtualFields, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1733,12 +1863,22 @@ TEST_F(EscapeAnalysisTest, MergeVirtualFields)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MergeVirtualFields)
+{
+    src_graph::MergeVirtualFields::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MergeVirtualFields::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MergeVirtualObjFields)
+SRC_GRAPH(MergeVirtualObjFields, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -1773,10 +1913,10 @@ TEST_F(EscapeAnalysisTest, MergeVirtualObjFields)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MergeVirtualObjFields, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1805,13 +1945,23 @@ TEST_F(EscapeAnalysisTest, MergeVirtualObjFields)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MergeVirtualObjFields)
+{
+    src_graph::MergeVirtualObjFields::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MergeVirtualObjFields::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MultipleIterationsOverCfg)
+SRC_GRAPH(MultipleIterationsOverCfg, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -1847,11 +1997,10 @@ TEST_F(EscapeAnalysisTest, MultipleIterationsOverCfg)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
-
+OUT_GRAPH(MultipleIterationsOverCfg, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1887,13 +2036,23 @@ TEST_F(EscapeAnalysisTest, MultipleIterationsOverCfg)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MultipleIterationsOverCfg)
+{
+    src_graph::MultipleIterationsOverCfg::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MultipleIterationsOverCfg::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, CarryNestedState)
+SRC_GRAPH(CarryNestedState, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).ref();
@@ -1932,10 +2091,10 @@ TEST_F(EscapeAnalysisTest, CarryNestedState)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(CarryNestedState, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -1962,13 +2121,23 @@ TEST_F(EscapeAnalysisTest, CarryNestedState)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, CarryNestedState)
+{
+    src_graph::CarryNestedState::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::CarryNestedState::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, RemoveVirtualObjectFromSaveStates)
+SRC_GRAPH(RemoveVirtualObjectFromSaveStates, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u32();
@@ -2002,10 +2171,10 @@ TEST_F(EscapeAnalysisTest, RemoveVirtualObjectFromSaveStates)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(RemoveVirtualObjectFromSaveStates, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2041,13 +2210,23 @@ TEST_F(EscapeAnalysisTest, RemoveVirtualObjectFromSaveStates)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, RemoveVirtualObjectFromSaveStates)
+{
+    src_graph::RemoveVirtualObjectFromSaveStates::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::RemoveVirtualObjectFromSaveStates::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleBlockLoops)
+SRC_GRAPH(CorrectlyHandleSingleBlockLoops, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).u64();
@@ -2074,10 +2253,10 @@ TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleBlockLoops)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(CorrectlyHandleSingleBlockLoops, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2106,6 +2285,16 @@ TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleBlockLoops)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleBlockLoops)
+{
+    src_graph::CorrectlyHandleSingleBlockLoops::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::CorrectlyHandleSingleBlockLoops::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
@@ -2146,9 +2335,9 @@ TEST_F(EscapeAnalysisTest, MaterializeObjOnPhiInsideLoop)
     ASSERT_FALSE(Run());
 }
 
-TEST_F(EscapeAnalysisTest, NotMergingMaterializationPaths)
+SRC_GRAPH(NotMergingMaterializationPaths, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s64();
@@ -2189,10 +2378,10 @@ TEST_F(EscapeAnalysisTest, NotMergingMaterializationPaths)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(NotMergingMaterializationPaths, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2237,13 +2426,23 @@ TEST_F(EscapeAnalysisTest, NotMergingMaterializationPaths)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, NotMergingMaterializationPaths)
+{
+    src_graph::NotMergingMaterializationPaths::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::NotMergingMaterializationPaths::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjects)
+SRC_GRAPH(MaterializeCrossReferencingObjects, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).ref();
@@ -2280,10 +2479,10 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjects)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MaterializeCrossReferencingObjects, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2316,13 +2515,23 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjects)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjects)
+{
+    src_graph::MaterializeCrossReferencingObjects::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MaterializeCrossReferencingObjects::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
+SRC_GRAPH(MaterializeCrossReferencingObjectsAtNewSaveState, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).ref();
@@ -2359,10 +2568,10 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MaterializeCrossReferencingObjectsAtNewSaveState, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2395,6 +2604,16 @@ TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MaterializeCrossReferencingObjectsAtNewSaveState)
+{
+    src_graph::MaterializeCrossReferencingObjectsAtNewSaveState::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MaterializeCrossReferencingObjectsAtNewSaveState::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
@@ -2518,9 +2737,9 @@ TEST_F(EscapeAnalysisTest, EliminateStoreToNarrowIntField)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(EscapeAnalysisTest, PatchSaveStates)
+SRC_GRAPH(PatchSaveStates, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).ref();
@@ -2545,10 +2764,10 @@ TEST_F(EscapeAnalysisTest, PatchSaveStates)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(PatchSaveStates, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2577,6 +2796,16 @@ TEST_F(EscapeAnalysisTest, PatchSaveStates)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, PatchSaveStates)
+{
+    src_graph::PatchSaveStates::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::PatchSaveStates::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -2665,12 +2894,10 @@ TEST_F(EscapeAnalysisTest, MaterializeObjectDuringItsFieldsMerge)
     ASSERT_FALSE(Run());
 }
 
-TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
+SRC_GRAPH(MaterializeBeforeReferencedObjectMaterialization, Graph *graph, uint32_t callInstId, uint32_t ss1Id,
+          uint32_t ss2Id)
 {
-    static constexpr uint32_t CALL_INST_ID = 10;
-    static constexpr uint32_t SS1_ID = 11;
-    static constexpr uint32_t SS2_ID = 13;
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).b();
@@ -2690,10 +2917,10 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
         BASIC_BLOCK(3U, 4U)
         {
             INST(9U, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
-            INST(CALL_INST_ID, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
-            INST(SS1_ID, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(callInstId, Opcode::CallStatic).v0id().InputsAutoType(9U).Inlined();
+            INST(ss1Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
             INST(12U, Opcode::CallStatic).v0id().InputsAutoType(7U, 11U);
-            INST(SS2_ID, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
+            INST(ss2Id, Opcode::SaveState).Inputs(4U, 7U).SrcVregs({0U, 1U});
             // Due to deopt inst all its save state inputs should be materialized before the first inlined call.
             // So both inst 4 and 7 should be materialized before inst 10, but before we hit deopt inst the inst 7
             // will be materialized at save state 11 (due to call static 12).
@@ -2707,13 +2934,10 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
-    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
-
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MaterializeBeforeReferencedObjectMaterialization, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2751,11 +2975,27 @@ TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, MaterializeBeforeReferencedObjectMaterialization)
+{
+    static constexpr uint32_t CALL_INST_ID = 10;
+    static constexpr uint32_t SS1_ID = 11;
+    static constexpr uint32_t SS2_ID = 13;
+    src_graph::MaterializeBeforeReferencedObjectMaterialization::CREATE(GetGraph(), CALL_INST_ID, SS1_ID, SS2_ID);
+
+    INS(SS1_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+    INS(SS2_ID).CastToSaveState()->SetCallerInst(static_cast<CallInst *>(&INS(CALL_INST_ID)));
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MaterializeBeforeReferencedObjectMaterialization::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
-TEST_F(EscapeAnalysisTest, FillSaveStateBetweenSaveState)
+SRC_GRAPH(FillSaveStateBetweenSaveState, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).s32();
@@ -2787,10 +3027,10 @@ TEST_F(EscapeAnalysisTest, FillSaveStateBetweenSaveState)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(FillSaveStateBetweenSaveState, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2821,15 +3061,25 @@ TEST_F(EscapeAnalysisTest, FillSaveStateBetweenSaveState)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, FillSaveStateBetweenSaveState)
+{
+    src_graph::FillSaveStateBetweenSaveState::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::FillSaveStateBetweenSaveState::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
 /* if the original input for a newly created phi was a
  * load then we have to ensure the current phi's actual
  * input type matches the type of phi itself */
-TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
+SRC_GRAPH(FixPhiInputTypes, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
         PARAMETER(0U, 0U).ref();
@@ -2859,10 +3109,10 @@ TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(Run());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(FixPhiInputTypes, Graph *graph)
+{
     GRAPH(graph)
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -2890,6 +3140,16 @@ TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
+
+TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
+{
+    src_graph::FixPhiInputTypes::CREATE(GetGraph());
+
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::FixPhiInputTypes::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 }  // namespace ark::compiler

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,15 +22,9 @@ namespace ark::compiler {
 class CleanupEmptyBlocksTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(CleanupEmptyBlocksTest, RemoveEmptyBlockAfterRegAlloc)
+SRC_GRAPH(RemoveEmptyBlockAfterRegAlloc, Graph *graph)
 {
-    if (GetGraph()->GetArch() == Arch::AARCH32 || !BackendSupport(GetGraph()->GetArch())) {
-        return;
-    }
-
-    // Empty basic block 5 cannot be removed because it is part of a special triangle
-    // After RegAlloc inserts BB 7, BB 5 can be removed
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
         CONSTANT(1U, 0U);
@@ -59,12 +53,10 @@ TEST_F(CleanupEmptyBlocksTest, RemoveEmptyBlockAfterRegAlloc)
             INST(12U, Opcode::Return).b().Inputs(11U);
         }
     }
+}
 
-    ASSERT_FALSE(GetGraph()->RunPass<Cleanup>());
-    ASSERT_TRUE(GetGraph()->RunPass<RegAllocGraphColoring>());
-    ASSERT_TRUE(CleanupEmptyBlocks(GetGraph()));
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(RemoveEmptyBlockAfterRegAlloc, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).i32();
@@ -101,6 +93,24 @@ TEST_F(CleanupEmptyBlocksTest, RemoveEmptyBlockAfterRegAlloc)
             INST(12U, Opcode::Return).b().Inputs(11U);
         }
     }
+}
+
+TEST_F(CleanupEmptyBlocksTest, RemoveEmptyBlockAfterRegAlloc)
+{
+    if (GetGraph()->GetArch() == Arch::AARCH32 || !BackendSupport(GetGraph()->GetArch())) {
+        return;
+    }
+
+    // Empty basic block 5 cannot be removed because it is part of a special triangle
+    // After RegAlloc inserts BB 7, BB 5 can be removed
+    src_graph::RemoveEmptyBlockAfterRegAlloc::CREATE(GetGraph());
+
+    ASSERT_FALSE(GetGraph()->RunPass<Cleanup>());
+    ASSERT_TRUE(GetGraph()->RunPass<RegAllocGraphColoring>());
+    ASSERT_TRUE(CleanupEmptyBlocks(GetGraph()));
+
+    auto graph = CreateEmptyGraph();
+    out_graph::RemoveEmptyBlockAfterRegAlloc::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 // NOLINTEND(readability-magic-numbers)

@@ -14,28 +14,29 @@
 */
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_IS_SAME_REFERENCE: {
-    BuildStdRuntimeEquals(bcInst, accRead);
+    Builder()->BuildStdRuntimeEquals(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CHAR_AT: {
-    if (!TryBuildStringCharAtIntrinsic(bcInst, accRead)) {
-        BuildDefaultVirtualCallIntrinsic(bcInst, isRange, accRead);
+    if (!Builder()->TryBuildStringCharAtIntrinsic(bcInst_, ACC_READ)) {
+        BuildDefaultVirtualCallIntrinsic(intrinsicId);
     }
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_GET_LENGTH: {
-    BuildStringLengthIntrinsic(bcInst, accRead);
+    Builder()->BuildStringLengthIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_LENGTH: {
-    BuildStringLengthIntrinsic(bcInst, accRead);
-    auto input = GetDefinitionAcc();
-    auto inst = graph_->CreateInstCast(DataType::FLOAT64, GetPc(bcInst->GetAddress()), input, DataType::INT32);
-    UpdateDefinitionAcc(inst);
-    AddInstruction(inst);
+    Builder()->BuildStringLengthIntrinsic(bcInst_, ACC_READ);
+    auto input = Builder()->GetDefinitionAcc();
+    auto inst = GetGraph()->CreateInstCast(DataType::FLOAT64, Builder()->GetPc(bcInst_->GetAddress()),
+                                           input, DataType::INT32);
+    Builder()->UpdateDefinitionAcc(inst);
+    Builder()->AddInstruction(inst);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_IS_EMPTY: {
-    BuildStringIsEmptyIntrinsic(bcInst, accRead);
+    Builder()->BuildStringIsEmptyIntrinsic(bcInst_, ACC_READ);
     break;
 }

@@ -1568,9 +1568,9 @@ TEST_F(PeepholesTest, NegTest2)
     ASSERT_EQ(INS(4U).GetInput(0U).GetInst(), sub);
 }
 
-TEST_F(PeepholesTest, NegationCompare)
+SRC_GRAPH(NegationCompare, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -1583,10 +1583,10 @@ TEST_F(PeepholesTest, NegationCompare)
             INST(4U, Opcode::Return).b().Inputs(6U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+}
 
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(NegationCompare, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
@@ -1597,11 +1597,11 @@ TEST_F(PeepholesTest, NegationCompare)
             INST(4U, Opcode::Return).b().Inputs(2U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
 
-    // Test with OSR
-    auto defaultGraph = CreateEmptyGraph();
-    GRAPH(defaultGraph)
+SRC_GRAPH(NegationCompareOSR, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -1617,17 +1617,11 @@ TEST_F(PeepholesTest, NegationCompare)
             INST(4U, Opcode::Return).b().Inputs(6U);
         }
     }
-    Graph *graphOsr =
-        GraphCloner(defaultGraph, defaultGraph->GetAllocator(), defaultGraph->GetLocalAllocator()).CloneGraph();
-    graphOsr->SetMode(GraphMode::Osr());
+}
 
-    Graph *graphClone = GraphCloner(graphOsr, graphOsr->GetAllocator(), graphOsr->GetLocalAllocator()).CloneGraph();
-
-    ASSERT_FALSE(graphOsr->RunPass<Peepholes>());
-    ASSERT_TRUE(GraphComparator().Compare(graphOsr, graphClone));
-
-    auto optimizedGraph = CreateEmptyGraph();
-    GRAPH(optimizedGraph)
+OUT_GRAPH(NegationCompareOSR, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -1643,15 +1637,39 @@ TEST_F(PeepholesTest, NegationCompare)
             INST(4U, Opcode::Return).b().Inputs(2U);
         }
     }
+}
+
+TEST_F(PeepholesTest, NegationCompare)
+{
+    src_graph::NegationCompare::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::NegationCompare::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+
+    // Test with OSR
+    auto defaultGraph = CreateEmptyGraph();
+    src_graph::NegationCompareOSR::CREATE(defaultGraph);
+    Graph *graphOsr =
+        GraphCloner(defaultGraph, defaultGraph->GetAllocator(), defaultGraph->GetLocalAllocator()).CloneGraph();
+    graphOsr->SetMode(GraphMode::Osr());
+
+    Graph *graphClone = GraphCloner(graphOsr, graphOsr->GetAllocator(), graphOsr->GetLocalAllocator()).CloneGraph();
+
+    ASSERT_FALSE(graphOsr->RunPass<Peepholes>());
+    ASSERT_TRUE(GraphComparator().Compare(graphOsr, graphClone));
+
+    auto optimizedGraph = CreateEmptyGraph();
+    out_graph::NegationCompareOSR::CREATE(optimizedGraph);
     ASSERT_TRUE(defaultGraph->RunPass<Peepholes>());
     ASSERT_TRUE(GraphComparator().Compare(defaultGraph, optimizedGraph));
 }
 
-TEST_F(PeepholesTest, TransformNegationToCompare)
+SRC_GRAPH(TransformNegationToCompare, Graph *graph)
 {
-    // Test with OSR
-    auto defaultGraph = CreateEmptyGraph();
-    GRAPH(defaultGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         CONSTANT(5U, 0x1U);
@@ -1667,17 +1685,11 @@ TEST_F(PeepholesTest, TransformNegationToCompare)
             INST(4U, Opcode::Return).b().Inputs(6U);
         }
     }
-    Graph *graphOsr =
-        GraphCloner(defaultGraph, defaultGraph->GetAllocator(), defaultGraph->GetLocalAllocator()).CloneGraph();
-    graphOsr->SetMode(GraphMode::Osr());
+}
 
-    Graph *graphClone = GraphCloner(graphOsr, graphOsr->GetAllocator(), graphOsr->GetLocalAllocator()).CloneGraph();
-
-    ASSERT_FALSE(graphOsr->RunPass<Peepholes>());
-    ASSERT_TRUE(GraphComparator().Compare(graphOsr, graphClone));
-    // Test without OSR
-    auto optimizedGraph = CreateEmptyGraph();
-    GRAPH(optimizedGraph)
+OUT_GRAPH(TransformNegationToCompare, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         CONSTANT(5U, 0x1U);
@@ -1695,6 +1707,24 @@ TEST_F(PeepholesTest, TransformNegationToCompare)
             INST(4U, Opcode::Return).b().Inputs(8U);
         }
     }
+}
+
+TEST_F(PeepholesTest, TransformNegationToCompare)
+{
+    // Test with OSR
+    auto defaultGraph = CreateEmptyGraph();
+    src_graph::TransformNegationToCompare::CREATE(defaultGraph);
+    Graph *graphOsr =
+        GraphCloner(defaultGraph, defaultGraph->GetAllocator(), defaultGraph->GetLocalAllocator()).CloneGraph();
+    graphOsr->SetMode(GraphMode::Osr());
+
+    Graph *graphClone = GraphCloner(graphOsr, graphOsr->GetAllocator(), graphOsr->GetLocalAllocator()).CloneGraph();
+
+    ASSERT_FALSE(graphOsr->RunPass<Peepholes>());
+    ASSERT_TRUE(GraphComparator().Compare(graphOsr, graphClone));
+    // Test without OSR
+    auto optimizedGraph = CreateEmptyGraph();
+    out_graph::TransformNegationToCompare::CREATE(optimizedGraph);
     ASSERT_TRUE(defaultGraph->RunPass<Peepholes>());
     ASSERT_TRUE(GraphComparator().Compare(defaultGraph, optimizedGraph));
 }
@@ -1719,9 +1749,9 @@ TEST_F(PeepholesTest, NegCompareNotWork)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphClone));
 }
 
-TEST_F(PeepholesTest, CompareNegation)
+SRC_GRAPH(CompareNegation, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -1734,7 +1764,10 @@ TEST_F(PeepholesTest, CompareNegation)
             INST(7U, Opcode::Return).b().Inputs(4U);
         }
     }
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(CompareNegation, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
@@ -1745,6 +1778,13 @@ TEST_F(PeepholesTest, CompareNegation)
             INST(7U, Opcode::Return).b().Inputs(4U);
         }
     }
+}
+
+TEST_F(PeepholesTest, CompareNegation)
+{
+    src_graph::CompareNegation::CREATE(GetGraph());
+    auto graph = CreateEmptyGraph();
+    out_graph::CompareNegation::CREATE(graph);
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
@@ -1784,11 +1824,9 @@ TEST_F(PeepholesTest, CompareNegation)
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
 }
 
-TEST_F(PeepholesTest, CompareNegationBoolOsr)
+SRC_GRAPH(CompareNegationBoolOsr, Graph *graph)
 {
-    // Peephole don't work with that graph in OSR
-    GetGraph()->SetMode(GraphMode::Osr());
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(1U, 1U).b();
         CONSTANT(3U, 0x1U);
@@ -1805,12 +1843,11 @@ TEST_F(PeepholesTest, CompareNegationBoolOsr)
             INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
-    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+}
 
-    // Work with that graph
-    auto optimizableGraph = CreateEmptyGraph();
-    optimizableGraph->SetMode(GraphMode::Osr());
-    GRAPH(optimizableGraph)
+OUT_GRAPH(CompareNegationBoolOsr, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(1U, 1U).b();
         CONSTANT(3U, 0x1U);
@@ -1825,6 +1862,19 @@ TEST_F(PeepholesTest, CompareNegationBoolOsr)
             INST(5U, Opcode::Return).b().Inputs(4U);
         }
     }
+}
+
+TEST_F(PeepholesTest, CompareNegationBoolOsr)
+{
+    // Peephole don't work with that graph in OSR
+    GetGraph()->SetMode(GraphMode::Osr());
+    src_graph::CompareNegationBoolOsr::CREATE(GetGraph());
+    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+
+    // Work with that graph
+    auto optimizableGraph = CreateEmptyGraph();
+    optimizableGraph->SetMode(GraphMode::Osr());
+    out_graph::CompareNegationBoolOsr::CREATE(optimizableGraph);
 
     auto optimizableGraphAfter = CreateEmptyGraph();
     optimizableGraphAfter->SetMode(GraphMode::Osr());
@@ -1845,6 +1895,57 @@ TEST_F(PeepholesTest, CompareNegationBoolOsr)
     ASSERT_TRUE(GraphComparator().Compare(optimizableGraph, optimizableGraphAfter));
 }
 
+SRC_GRAPH(IfImmNegation, Graph *graph, ConditionCode code)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(8U, 0x1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::Neg).b().Inputs(0U);
+            INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(code).Inputs(9U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(6U, Opcode::Return).b().Inputs(0U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(7U, Opcode::Return).b().Inputs(0U);
+        }
+    }
+}
+
+OUT_GRAPH(IfImmNegation, Graph *graph, ConditionCode code)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).b();
+        PARAMETER(1U, 1U).b();
+        CONSTANT(8U, 0x1U);
+        CONSTANT(10U, 0x0U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(2U, Opcode::Neg).b().Inputs(0U);
+            INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
+            INST(11U, Opcode::Compare).b().SrcType(DataType::BOOL).Inputs(0U, 10U);
+            // That optimized by combination Compare + IfImm
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(GetInverseConditionCode(code)).Inputs(0U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(6U, Opcode::Return).b().Inputs(0U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(7U, Opcode::Return).b().Inputs(0U);
+        }
+    }
+}
+
 TEST_F(PeepholesTest, IfImmNegation)
 {
     // ConditionCode in IfImm with bool src maybe not only CC_EQ or CC_NE
@@ -1852,62 +1953,19 @@ TEST_F(PeepholesTest, IfImmNegation)
                                          ConditionCode::CC_B};
     for (auto code : codes) {
         auto graph = CreateEmptyGraph();
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).b();
-            PARAMETER(1U, 1U).b();
-            CONSTANT(8U, 0x1U);
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(2U, Opcode::Neg).b().Inputs(0U);
-                INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
-                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(code).Inputs(9U);
-            }
-            BASIC_BLOCK(3U, -1L)
-            {
-                INST(6U, Opcode::Return).b().Inputs(0U);
-            }
-            BASIC_BLOCK(4U, -1L)
-            {
-                INST(7U, Opcode::Return).b().Inputs(0U);
-            }
-        }
+        src_graph::IfImmNegation::CREATE(graph, code);
 
         Graph *finalGraph = nullptr;
         finalGraph = CreateEmptyGraph();
-        GRAPH(finalGraph)
-        {
-            PARAMETER(0U, 0U).b();
-            PARAMETER(1U, 1U).b();
-            CONSTANT(8U, 0x1U);
-            CONSTANT(10U, 0x0U);
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(2U, Opcode::Neg).b().Inputs(0U);
-                INST(9U, Opcode::Add).i32().Inputs(2U, 8U);
-                INST(11U, Opcode::Compare).b().SrcType(DataType::BOOL).Inputs(0U, 10U);
-                // That optimized by combination Compare + IfImm
-                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).Imm(1U).CC(GetInverseConditionCode(code)).Inputs(0U);
-            }
-            BASIC_BLOCK(3U, -1L)
-            {
-                INST(6U, Opcode::Return).b().Inputs(0U);
-            }
-            BASIC_BLOCK(4U, -1L)
-            {
-                INST(7U, Opcode::Return).b().Inputs(0U);
-            }
-        }
+        out_graph::IfImmNegation::CREATE(finalGraph, code);
         ASSERT_TRUE(graph->RunPass<Peepholes>());
         ASSERT_TRUE(GraphComparator().Compare(graph, finalGraph));
     }
 }
 
-TEST_F(PeepholesTest, IfImmNegationOsr)
+SRC_GRAPH(IfImmNegationOsr, Graph *graph)
 {
-    // Peephole don't work with that graph in OSR
-    GetGraph()->SetMode(GraphMode::Osr());
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -1932,12 +1990,11 @@ TEST_F(PeepholesTest, IfImmNegationOsr)
             INST(8U, Opcode::Return).b().Inputs(0U);
         }
     }
-    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+}
 
-    // Work with that graph
-    auto optimizableGraph = CreateEmptyGraph();
-    optimizableGraph->SetMode(GraphMode::Osr());
-    GRAPH(optimizableGraph)
+OUT_GRAPH(IfImmNegationOsr, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).b();
@@ -1960,6 +2017,19 @@ TEST_F(PeepholesTest, IfImmNegationOsr)
             INST(8U, Opcode::Return).b().Inputs(0U);
         }
     }
+}
+
+TEST_F(PeepholesTest, IfImmNegationOsr)
+{
+    // Peephole don't work with that graph in OSR
+    GetGraph()->SetMode(GraphMode::Osr());
+    src_graph::IfImmNegationOsr::CREATE(GetGraph());
+    ASSERT_FALSE(GetGraph()->RunPass<Peepholes>());
+
+    // Work with that graph
+    auto optimizableGraph = CreateEmptyGraph();
+    optimizableGraph->SetMode(GraphMode::Osr());
+    out_graph::IfImmNegationOsr::CREATE(optimizableGraph);
 
     auto optimizableGraphAfter = CreateEmptyGraph();
     optimizableGraphAfter->SetMode(GraphMode::Osr());
@@ -2081,9 +2151,9 @@ TEST_F(PeepholesTest, ShlRepeatConstTest2)
 }
 
 // Checking the shift for a constant greater than the type size
-TEST_F(PeepholesTest, ShlBigConstTest)
+SRC_GRAPH(ShlBigConstTest, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u32();
@@ -2102,6 +2172,11 @@ TEST_F(PeepholesTest, ShlBigConstTest)
             INST(9U, Opcode::Return).s64().Inputs(10U);
         }
     }
+}
+
+TEST_F(PeepholesTest, ShlBigConstTest)
+{
+    src_graph::ShlBigConstTest::CREATE(GetGraph());
     GetGraph()->RunPass<Peepholes>();
 
     ASSERT_NE(INS(4U).GetNext(), nullptr);
@@ -2324,9 +2399,9 @@ TEST_F(PeepholesTest, ShrRepeatConstTest2)
 }
 
 // Checking the shift for a constant greater than the type size
-TEST_F(PeepholesTest, ShrBigConstTest)
+SRC_GRAPH(ShrBigConstTest, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u32();
@@ -2345,6 +2420,11 @@ TEST_F(PeepholesTest, ShrBigConstTest)
             INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
+}
+
+TEST_F(PeepholesTest, ShrBigConstTest)
+{
+    src_graph::ShrBigConstTest::CREATE(GetGraph());
     GetGraph()->RunPass<Peepholes>();
 
     ASSERT_NE(INS(4U).GetNext(), nullptr);
@@ -2469,9 +2549,9 @@ TEST_F(PeepholesTest, AShrRepeatConstTest2)
 }
 
 // Checking the shift for a constant greater than the type size
-TEST_F(PeepholesTest, AShrBigConstTest)
+SRC_GRAPH(AShrBigConstTest, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u32();
@@ -2490,6 +2570,11 @@ TEST_F(PeepholesTest, AShrBigConstTest)
             INST(9U, Opcode::Return).u64().Inputs(10U);
         }
     }
+}
+
+TEST_F(PeepholesTest, AShrBigConstTest)
+{
+    src_graph::AShrBigConstTest::CREATE(GetGraph());
     GetGraph()->RunPass<Peepholes>();
 
     ASSERT_NE(INS(4U).GetNext(), nullptr);
@@ -2793,18 +2878,9 @@ TEST_F(PeepholesTest, TestMulCase3)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(PeepholesTest, TestMulCase4)
+SRC_GRAPH(TestMulCase4, Graph *graph)
 {
-    // case 4:
-    // 0. Const 2^N
-    // 1. MUL v5, v0
-    // 2. INS v1
-    // ===>
-    // 0. Const -1
-    // 1. MUL v5, v0
-    // 3. SHL v5 , N -> {v2, ...}
-    // 2. INS v3
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).s64();
@@ -2828,9 +2904,10 @@ TEST_F(PeepholesTest, TestMulCase4)
             INST(22U, Opcode::Return).u64().Inputs(21U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
-    GetGraph()->RunPass<Cleanup>();
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestMulCase4, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -2855,6 +2932,24 @@ TEST_F(PeepholesTest, TestMulCase4)
             INST(22U, Opcode::Return).u64().Inputs(21U);
         }
     }
+}
+
+TEST_F(PeepholesTest, TestMulCase4)
+{
+    // case 4:
+    // 0. Const 2^N
+    // 1. MUL v5, v0
+    // 2. INS v1
+    // ===>
+    // 0. Const -1
+    // 1. MUL v5, v0
+    // 3. SHL v5 , N -> {v2, ...}
+    // 2. INS v3
+    src_graph::TestMulCase4::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
+    GetGraph()->RunPass<Cleanup>();
+    auto graph = CreateEmptyGraph();
+    out_graph::TestMulCase4::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -3104,15 +3199,9 @@ TEST_F(PeepholesTest, TestLenArray2)
     ASSERT_TRUE(INS(4U).GetUsers().Empty());
 }
 
-TEST_F(PeepholesTest, TestPhi1)
+SRC_GRAPH(TestPhi1, Graph *graph)
 {
-    // Users isn't intersect
-    // 2.type  Phi v0, v1 -> v4
-    // 3.type  Phi v0, v1 -> v5
-    // ===>
-    // 2.type  Phi v0, v1 -> v4, v5
-    // 3.type  Phi v0, v1
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -3139,8 +3228,10 @@ TEST_F(PeepholesTest, TestPhi1)
             INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    GetGraph()->RunPass<Peepholes>();
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestPhi1, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -3168,10 +3259,9 @@ TEST_F(PeepholesTest, TestPhi1)
             INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(PeepholesTest, PhiTestWithChecks)
+TEST_F(PeepholesTest, TestPhi1)
 {
     // Users isn't intersect
     // 2.type  Phi v0, v1 -> v4
@@ -3179,7 +3269,16 @@ TEST_F(PeepholesTest, PhiTestWithChecks)
     // ===>
     // 2.type  Phi v0, v1 -> v4, v5
     // 3.type  Phi v0, v1
-    GRAPH(GetGraph())
+    src_graph::TestPhi1::CREATE(GetGraph());
+    GetGraph()->RunPass<Peepholes>();
+    auto graph = CreateEmptyGraph();
+    out_graph::TestPhi1::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+SRC_GRAPH(PhiTestWithChecks, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -3205,9 +3304,10 @@ TEST_F(PeepholesTest, PhiTestWithChecks)
             INST(14U, Opcode::Return).s32().Inputs(11U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(PhiTestWithChecks, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
@@ -3233,18 +3333,27 @@ TEST_F(PeepholesTest, PhiTestWithChecks)
             INST(14U, Opcode::Return).s32().Inputs(11U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(PeepholesTest, TestPhi2)
+TEST_F(PeepholesTest, PhiTestWithChecks)
 {
-    // Users is intersect
-    // 2.type  Phi v0, v1 -> v4, v5
-    // 3.type  Phi v0, v1 -> v5, v6
+    // Users isn't intersect
+    // 2.type  Phi v0, v1 -> v4
+    // 3.type  Phi v0, v1 -> v5
     // ===>
     // 2.type  Phi v0, v1 -> v4, v5
     // 3.type  Phi v0, v1
-    GRAPH(GetGraph())
+    src_graph::PhiTestWithChecks::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+    auto graph = CreateEmptyGraph();
+    out_graph::PhiTestWithChecks::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+SRC_GRAPH(TestPhi2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -3276,8 +3385,10 @@ TEST_F(PeepholesTest, TestPhi2)
             INST(17U, Opcode::Return).s32().Inputs(15U);
         }
     }
-    GetGraph()->RunPass<Peepholes>();
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestPhi2, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -3309,44 +3420,102 @@ TEST_F(PeepholesTest, TestPhi2)
             INST(17U, Opcode::Return).s32().Inputs(15U);
         }
     }
+}
+
+TEST_F(PeepholesTest, TestPhi2)
+{
+    // Users is intersect
+    // 2.type  Phi v0, v1 -> v4, v5
+    // 3.type  Phi v0, v1 -> v5, v6
+    // ===>
+    // 2.type  Phi v0, v1 -> v4, v5
+    // 3.type  Phi v0, v1
+    src_graph::TestPhi2::CREATE(GetGraph());
+    GetGraph()->RunPass<Peepholes>();
+    auto graph = CreateEmptyGraph();
+    out_graph::TestPhi2::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+SRC_GRAPH(TestPhi3, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);  // Phi 11
+            INST(6U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);  // Phi 11
+            INST(9U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
+        }
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(6U, 9U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
+            INST(15U, Opcode::Return).s32().Inputs(13U);
+        }
+    }
+}
+
+OUT_GRAPH(TestPhi3, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);  // Phi 11
+            INST(6U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);  // Phi 11
+            INST(9U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
+        }
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(6U, 9U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
+            INST(15U, Opcode::Return).s32().Inputs(13U);
+        }
+    }
 }
 
 TEST_F(PeepholesTest, TestPhi3)
 {
     // Peephole rule isn't applied.
     // Same types, different inputs.
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s32();
-        PARAMETER(1U, 1U).s32();
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-        }
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);  // Phi 11
-            INST(6U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
-        }
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);  // Phi 11
-            INST(9U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
-        }
-        BASIC_BLOCK(5U, 1U)
-        {
-            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
-            INST(12U, Opcode::Phi).s32().Inputs(6U, 9U);
-            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
-            INST(15U, Opcode::Return).s32().Inputs(13U);
-        }
-    }
+    src_graph::TestPhi3::CREATE(GetGraph());
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
+    out_graph::TestPhi3::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+SRC_GRAPH(TestPhi4, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -3358,64 +3527,74 @@ TEST_F(PeepholesTest, TestPhi3)
         }
         BASIC_BLOCK(3U, 5U)
         {
-            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);  // Phi 11
-            INST(6U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
         }
         BASIC_BLOCK(4U, 5U)
         {
-            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);  // Phi 11
-            INST(9U, Opcode::Add).s32().Inputs(0U, 1U);  // Phi 12
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);
         }
         BASIC_BLOCK(5U, 1U)
         {
-            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
-            INST(12U, Opcode::Phi).s32().Inputs(6U, 9U);
+            INST(11U, Opcode::Phi).s16().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(5U, 8U);
             INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
             INST(20U, Opcode::SaveState).NoVregs();
             INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
             INST(15U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+OUT_GRAPH(TestPhi4, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);
+        }
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(11U, Opcode::Phi).s16().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
+            INST(15U, Opcode::Return).s32().Inputs(13U);
+        }
+    }
 }
 
 TEST_F(PeepholesTest, TestPhi4)
 {
     // Peephole rule isn't applied.
     // Different types, same inputs.
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s32();
-        PARAMETER(1U, 1U).s32();
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-        }
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
-        }
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);
-        }
-        BASIC_BLOCK(5U, 1U)
-        {
-            INST(11U, Opcode::Phi).s16().Inputs(5U, 8U);
-            INST(12U, Opcode::Phi).s32().Inputs(5U, 8U);
-            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
-            INST(15U, Opcode::Return).s32().Inputs(13U);
-        }
-    }
+    src_graph::TestPhi4::CREATE(GetGraph());
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
+    out_graph::TestPhi4::CREATE(graph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+SRC_GRAPH(TestPhi5, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
+        PARAMETER(17U, 2U).f32();
+        PARAMETER(18U, 3U).f32();
         BASIC_BLOCK(2U, 3U, 4U)
         {
             INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
@@ -3423,95 +3602,71 @@ TEST_F(PeepholesTest, TestPhi4)
         }
         BASIC_BLOCK(3U, 5U)
         {
-            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);    // Phi 11
+            INST(6U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
         }
         BASIC_BLOCK(4U, 5U)
         {
-            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);    // Phi 11
+            INST(9U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
         }
         BASIC_BLOCK(5U, 1U)
         {
-            INST(11U, Opcode::Phi).s16().Inputs(5U, 8U);
-            INST(12U, Opcode::Phi).s32().Inputs(5U, 8U);
-            INST(13U, Opcode::Add).s32().Inputs(11U, 12U);
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).f32().Inputs(6U, 9U);
+            INST(13U, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11U);
+            INST(14U, Opcode::Add).f32().Inputs(13U, 12U);
             INST(20U, Opcode::SaveState).NoVregs();
-            INST(14U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 20U);
-            INST(15U, Opcode::Return).s32().Inputs(13U);
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 14U, 20U);
+            INST(16U, Opcode::Return).f32().Inputs(14U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+OUT_GRAPH(TestPhi5, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(17U, 2U).f32();
+        PARAMETER(18U, 3U).f32();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);    // Phi 11
+            INST(6U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);    // Phi 11
+            INST(9U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
+        }
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
+            INST(12U, Opcode::Phi).f32().Inputs(6U, 9U);
+            INST(13U, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11U);
+            INST(14U, Opcode::Add).f32().Inputs(13U, 12U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 14U, 20U);
+            INST(16U, Opcode::Return).f32().Inputs(14U);
+        }
+    }
 }
 
 TEST_F(PeepholesTest, TestPhi5)
 {
     // Peephole rule isn't applied.
     // Different types, different inputs.
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s32();
-        PARAMETER(1U, 1U).s32();
-        PARAMETER(17U, 2U).f32();
-        PARAMETER(18U, 3U).f32();
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-        }
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);    // Phi 11
-            INST(6U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
-        }
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);    // Phi 11
-            INST(9U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
-        }
-        BASIC_BLOCK(5U, 1U)
-        {
-            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
-            INST(12U, Opcode::Phi).f32().Inputs(6U, 9U);
-            INST(13U, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11U);
-            INST(14U, Opcode::Add).f32().Inputs(13U, 12U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 14U, 20U);
-            INST(16U, Opcode::Return).f32().Inputs(14U);
-        }
-    }
+    src_graph::TestPhi5::CREATE(GetGraph());
     GetGraph()->RunPass<Peepholes>();
     auto graph = CreateEmptyGraph();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).s32();
-        PARAMETER(1U, 1U).s32();
-        PARAMETER(17U, 2U).f32();
-        PARAMETER(18U, 3U).f32();
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-        }
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(5U, Opcode::Sub).s32().Inputs(0U, 1U);    // Phi 11
-            INST(6U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
-        }
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(8U, Opcode::Sub).s32().Inputs(1U, 0U);    // Phi 11
-            INST(9U, Opcode::Add).f32().Inputs(18U, 17U);  // Phi 12
-        }
-        BASIC_BLOCK(5U, 1U)
-        {
-            INST(11U, Opcode::Phi).s32().Inputs(5U, 8U);
-            INST(12U, Opcode::Phi).f32().Inputs(6U, 9U);
-            INST(13U, Opcode::Cast).f32().SrcType(DataType::INT32).Inputs(11U);
-            INST(14U, Opcode::Add).f32().Inputs(13U, 12U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(15U, Opcode::CallStatic).v0id().InputsAutoType(11U, 12U, 13U, 14U, 20U);
-            INST(16U, Opcode::Return).f32().Inputs(14U);
-        }
-    }
+    out_graph::TestPhi5::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -4250,9 +4405,9 @@ TEST_F(PeepholesTest, XorWithZero)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(PeepholesTest, CleanupTrigger)
+SRC_GRAPH(CleanupTrigger, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         CONSTANT(1U, 1U);
@@ -4273,11 +4428,10 @@ TEST_F(PeepholesTest, CleanupTrigger)
             INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
+}
 
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(CleanupTrigger, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -4300,6 +4454,17 @@ TEST_F(PeepholesTest, CleanupTrigger)
             INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
+}
+
+TEST_F(PeepholesTest, CleanupTrigger)
+{
+    src_graph::CleanupTrigger::CREATE(GetGraph());
+
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::CleanupTrigger::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -4380,9 +4545,9 @@ TEST_F(PeepholesTest, SafePointWithRegMap)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(PeepholesTest, ShlShlAddAdd)
+SRC_GRAPH(ShlShlAddAdd, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4397,8 +4562,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
-    Graph *graphPeepholed = CreateEmptyGraph();
-    GRAPH(graphPeepholed)
+}
+
+OUT_GRAPH(ShlShlAddAdd, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4413,15 +4581,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphPeepholed));
-
-    // Not optimizable cases
-    Graph *graphNotOptimizable = CreateEmptyGraph();
-    GRAPH(graphNotOptimizable)
+SRC_GRAPH(ShlShlAddAdd1, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4438,10 +4602,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(9U, Opcode::Return).i64().Inputs(8U);
         }
     }
-    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+}
 
-    graphNotOptimizable = CreateEmptyGraph();
-    GRAPH(graphNotOptimizable)
+SRC_GRAPH(ShlShlAddAdd2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4458,10 +4623,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(9U, Opcode::Return).i64().Inputs(8U);
         }
     }
-    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+}
 
-    graphNotOptimizable = CreateEmptyGraph();
-    GRAPH(graphNotOptimizable)
+SRC_GRAPH(ShlShlAddAdd3, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4478,10 +4644,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(9U, Opcode::Return).i64().Inputs(8U);
         }
     }
-    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+}
 
-    graphNotOptimizable = CreateEmptyGraph();
-    GRAPH(graphNotOptimizable)
+SRC_GRAPH(ShlShlAddAdd4, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4497,10 +4664,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
-    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+}
 
-    graphNotOptimizable = CreateEmptyGraph();
-    GRAPH(graphNotOptimizable)
+SRC_GRAPH(ShlShlAddAdd5, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4516,10 +4684,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
-    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+}
 
-    graphNotOptimizable = CreateEmptyGraph();
-    GRAPH(graphNotOptimizable)
+SRC_GRAPH(ShlShlAddAdd6, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4535,10 +4704,11 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(8U, Opcode::Return).i64().Inputs(7U);
         }
     }
-    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+}
 
-    graphNotOptimizable = CreateEmptyGraph();
-    GRAPH(graphNotOptimizable)
+SRC_GRAPH(ShlShlAddAdd7, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i64();
@@ -4561,6 +4731,46 @@ TEST_F(PeepholesTest, ShlShlAddAdd)
             INST(41U, Opcode::Return).i64().Inputs(40U);
         }
     }
+}
+
+TEST_F(PeepholesTest, ShlShlAddAdd)
+{
+    src_graph::ShlShlAddAdd::CREATE(GetGraph());
+    Graph *graphPeepholed = CreateEmptyGraph();
+    out_graph::ShlShlAddAdd::CREATE(graphPeepholed);
+
+    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphPeepholed));
+
+    // Not optimizable cases
+    Graph *graphNotOptimizable = CreateEmptyGraph();
+    src_graph::ShlShlAddAdd1::CREATE(graphNotOptimizable);
+    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+
+    graphNotOptimizable = CreateEmptyGraph();
+    src_graph::ShlShlAddAdd2::CREATE(graphNotOptimizable);
+    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+
+    graphNotOptimizable = CreateEmptyGraph();
+    src_graph::ShlShlAddAdd3::CREATE(graphNotOptimizable);
+    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+
+    graphNotOptimizable = CreateEmptyGraph();
+    src_graph::ShlShlAddAdd4::CREATE(graphNotOptimizable);
+    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+
+    graphNotOptimizable = CreateEmptyGraph();
+    src_graph::ShlShlAddAdd5::CREATE(graphNotOptimizable);
+    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+
+    graphNotOptimizable = CreateEmptyGraph();
+    src_graph::ShlShlAddAdd6::CREATE(graphNotOptimizable);
+    ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
+
+    graphNotOptimizable = CreateEmptyGraph();
+    src_graph::ShlShlAddAdd7::CREATE(graphNotOptimizable);
     ASSERT_FALSE(graphNotOptimizable->RunPass<Peepholes>());
 }
 
@@ -4766,9 +4976,8 @@ TEST_F(PeepholesTest, TestEqualInputs)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphPeepholed));
 }
 
-TEST_F(PeepholesTest, AndWithCast)
+SRC_GRAPH(AndWithCast, Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
@@ -4808,9 +5017,11 @@ TEST_F(PeepholesTest, AndWithCast)
             INST(38U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
-    auto graphExpected = CreateEmptyGraph();
-    GRAPH(graphExpected)
+OUT_GRAPH(AndWithCast, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).i64();
         PARAMETER(1U, 1U).i32();
@@ -4849,13 +5060,21 @@ TEST_F(PeepholesTest, AndWithCast)
             INST(38U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(PeepholesTest, AndWithCast)
+{
+    auto graph = CreateEmptyGraph();
+    src_graph::AndWithCast::CREATE(graph);
+
+    auto graphExpected = CreateEmptyGraph();
+    out_graph::AndWithCast::CREATE(graphExpected);
     ASSERT_TRUE(graph->RunPass<Peepholes>());
     ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
 }
 
-TEST_F(PeepholesTest, AndWithStore)
+SRC_GRAPH(AndWithStore, Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ptr();
@@ -4905,8 +5124,11 @@ TEST_F(PeepholesTest, AndWithStore)
             INST(34U, Opcode::ReturnVoid).v0id();
         }
     }
-    auto graphExpected = CreateEmptyGraph();
-    GRAPH(graphExpected)
+}
+
+OUT_GRAPH(AndWithStore, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ptr();
         PARAMETER(1U, 1U).u64();
@@ -4955,13 +5177,20 @@ TEST_F(PeepholesTest, AndWithStore)
             INST(34U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(PeepholesTest, AndWithStore)
+{
+    auto graph = CreateEmptyGraph();
+    src_graph::AndWithStore::CREATE(graph);
+    auto graphExpected = CreateEmptyGraph();
+    out_graph::AndWithStore::CREATE(graphExpected);
     ASSERT_TRUE(graph->RunPass<Peepholes>());
     ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
 }
 
-TEST_F(PeepholesTest, CastWithStore)
+SRC_GRAPH(CastWithStore, Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ptr();
@@ -5001,8 +5230,11 @@ TEST_F(PeepholesTest, CastWithStore)
             INST(27U, Opcode::ReturnVoid).v0id();
         }
     }
-    auto graphExpected = CreateEmptyGraph();
-    GRAPH(graphExpected)
+}
+
+OUT_GRAPH(CastWithStore, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ptr();
         PARAMETER(1U, 1U).i64();
@@ -5041,6 +5273,14 @@ TEST_F(PeepholesTest, CastWithStore)
             INST(27U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(PeepholesTest, CastWithStore)
+{
+    auto graph = CreateEmptyGraph();
+    src_graph::CastWithStore::CREATE(graph);
+    auto graphExpected = CreateEmptyGraph();
+    out_graph::CastWithStore::CREATE(graphExpected);
     ASSERT_TRUE(graph->RunPass<Peepholes>());
     ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
 }
@@ -6374,9 +6614,9 @@ TEST_F(PeepholesTest, NegOverflowAndZeroCheckNotApplied)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(PeepholesTest, OverflowCheckAsBitwiseInput)
+SRC_GRAPH(OverflowCheckAsBitwiseInput, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -6407,8 +6647,10 @@ TEST_F(PeepholesTest, OverflowCheckAsBitwiseInput)
             INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(OverflowCheckAsBitwiseInput, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
@@ -6440,6 +6682,14 @@ TEST_F(PeepholesTest, OverflowCheckAsBitwiseInput)
             INST(14U, Opcode::Return).s32().Inputs(12U);
         }
     }
+}
+
+TEST_F(PeepholesTest, OverflowCheckAsBitwiseInput)
+{
+    src_graph::OverflowCheckAsBitwiseInput::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
+    auto graph = CreateEmptyGraph();
+    out_graph::OverflowCheckAsBitwiseInput::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -6543,10 +6793,10 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayFirstLayer)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(PeepholesTest, MultiArrayWithLenArraySecondLayer)
+SRC_GRAPH(MultiArrayWithLenArraySecondLayer, Graph *graph)
 {
     auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0x3U).s32();
         CONSTANT(1U, 0x2U);
@@ -6567,8 +6817,11 @@ TEST_F(PeepholesTest, MultiArrayWithLenArraySecondLayer)
             INST(10U, Opcode::Return).s32().Inputs(14U);
         }
     }
+}
 
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MultiArrayWithLenArraySecondLayer, Graph *graph)
+{
+    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
     GRAPH(graph)
     {
         PARAMETER(0U, 0x3U).s32();
@@ -6590,15 +6843,23 @@ TEST_F(PeepholesTest, MultiArrayWithLenArraySecondLayer)
             INST(10U, Opcode::Return).s32().Inputs(14U);
         }
     }
+}
+
+TEST_F(PeepholesTest, MultiArrayWithLenArraySecondLayer)
+{
+    src_graph::MultiArrayWithLenArraySecondLayer::CREATE(GetGraph());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MultiArrayWithLenArraySecondLayer::CREATE(graph);
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
+SRC_GRAPH(MultiArrayWithLenArrayOfString, Graph *graph)
 {
     auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0x1U).s32();
         CONSTANT(1U, 0x3U);
@@ -6627,8 +6888,11 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
             INST(15U, Opcode::Return).s32().Inputs(14U);
         }
     }
+}
 
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(MultiArrayWithLenArrayOfString, Graph *graph)
+{
+    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
     GRAPH(graph)
     {
         PARAMETER(0U, 0x1U).s32();
@@ -6658,6 +6922,14 @@ TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
             INST(15U, Opcode::Return).s32().Inputs(14U);
         }
     }
+}
+
+TEST_F(PeepholesTest, MultiArrayWithLenArrayOfString)
+{
+    src_graph::MultiArrayWithLenArrayOfString::CREATE(GetGraph());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::MultiArrayWithLenArrayOfString::CREATE(graph);
 
     ASSERT_TRUE(GetGraph()->RunPass<Peepholes>());
     GraphChecker(GetGraph()).Check();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,9 +99,9 @@ TEST_F(MonitorAnalysisTest, OneMonitorForSeveralBlocks)
     EXPECT_FALSE(GetGraph()->GetEndBlock()->GetMonitorBlock());
 }
 
-TEST_F(MonitorAnalysisTest, TwoMonitorForSeveralBlocks)
+SRC_GRAPH(TwoMonitorForSeveralBlocks, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).ref();
@@ -131,6 +131,11 @@ TEST_F(MonitorAnalysisTest, TwoMonitorForSeveralBlocks)
             INST(13U, Opcode::Return).u64().Inputs(11U);
         }
     }
+}
+
+TEST_F(MonitorAnalysisTest, TwoMonitorForSeveralBlocks)
+{
+    src_graph::TwoMonitorForSeveralBlocks::CREATE(GetGraph());
     GetGraph()->RunPass<MonitorAnalysis>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<MonitorAnalysis>());
     EXPECT_TRUE(BB(2U).GetMonitorEntryBlock());
@@ -154,9 +159,9 @@ TEST_F(MonitorAnalysisTest, TwoMonitorForSeveralBlocks)
     EXPECT_FALSE(GetGraph()->GetEndBlock()->GetMonitorBlock());
 }
 
-TEST_F(MonitorAnalysisTest, OneEntryMonitorAndTwoExitMonitors)
+SRC_GRAPH(OneEntryMonitorAndTwoExitMonitors, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).ref();
@@ -186,6 +191,11 @@ TEST_F(MonitorAnalysisTest, OneEntryMonitorAndTwoExitMonitors)
             INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
+}
+
+TEST_F(MonitorAnalysisTest, OneEntryMonitorAndTwoExitMonitors)
+{
+    src_graph::OneEntryMonitorAndTwoExitMonitors::CREATE(GetGraph());
     GetGraph()->RunPass<MonitorAnalysis>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<MonitorAnalysis>());
     EXPECT_TRUE(BB(2U).GetMonitorEntryBlock());

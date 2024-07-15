@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,9 @@ namespace ark::compiler {
 class MoveConstantsTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(MoveConstantsTest, MoveNullPtrToCommonImmediateDominator)
+SRC_GRAPH(MoveNullPtrToCommonImmediateDominator, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         CONSTANT(1U, nullptr);
@@ -53,8 +53,11 @@ TEST_F(MoveConstantsTest, MoveNullPtrToCommonImmediateDominator)
             INST(8U, Opcode::Return).ref().Inputs(1U);
         }
     }
-    Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(MoveNullPtrToCommonImmediateDominator, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -84,92 +87,216 @@ TEST_F(MoveConstantsTest, MoveNullPtrToCommonImmediateDominator)
             INST(8U, Opcode::Return).ref().Inputs(1U);
         }
     }
+}
+
+TEST_F(MoveConstantsTest, MoveNullPtrToCommonImmediateDominator)
+{
+    src_graph::MoveNullPtrToCommonImmediateDominator::CREATE(GetGraph());
+    Graph *graphEt = CreateEmptyGraph();
+    out_graph::MoveNullPtrToCommonImmediateDominator::CREATE(graphEt);
 
     bool result = GetGraph()->RunPass<MoveConstants>();
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
+}
+
+SRC_GRAPH(MoveToCommonImmediateDominator, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, 12345U);
+
+        BASIC_BLOCK(2U, 4U, 3U)
+        {
+            INST(2U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::ReturnI).u64().Imm(0U);
+        }
+
+        BASIC_BLOCK(4U, 6U, 5U)
+        {
+            INST(4U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(5U, Opcode::Sub).u64().Inputs(1U, 0U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
+        }
+
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(7U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
+        }
+    }
+}
+
+OUT_GRAPH(MoveToCommonImmediateDominator, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 1U).u64();
+
+        BASIC_BLOCK(2U, 4U, 3U)
+        {
+            INST(2U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(3U, Opcode::ReturnI).u64().Imm(0U);
+        }
+
+        BASIC_BLOCK(4U, 6U, 5U)
+        {
+            CONSTANT(1U, 12345U);
+            INST(4U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(5U, Opcode::Sub).u64().Inputs(1U, 0U);
+            INST(6U, Opcode::Return).u64().Inputs(5U);
+        }
+
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(7U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(8U, Opcode::Return).u64().Inputs(7U);
+        }
+    }
 }
 
 TEST_F(MoveConstantsTest, MoveToCommonImmediateDominator)
 {
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 1U).u64();
-        CONSTANT(1U, 12345U);
-
-        BASIC_BLOCK(2U, 4U, 3U)
-        {
-            INST(2U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(3U, Opcode::ReturnI).u64().Imm(0U);
-        }
-
-        BASIC_BLOCK(4U, 6U, 5U)
-        {
-            INST(4U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(5U, Opcode::Sub).u64().Inputs(1U, 0U);
-            INST(6U, Opcode::Return).u64().Inputs(5U);
-        }
-
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(7U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(8U, Opcode::Return).u64().Inputs(7U);
-        }
-    }
+    src_graph::MoveToCommonImmediateDominator::CREATE(GetGraph());
     Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
-    {
-        PARAMETER(0U, 1U).u64();
-
-        BASIC_BLOCK(2U, 4U, 3U)
-        {
-            INST(2U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(3U, Opcode::ReturnI).u64().Imm(0U);
-        }
-
-        BASIC_BLOCK(4U, 6U, 5U)
-        {
-            CONSTANT(1U, 12345U);
-            INST(4U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(5U, Opcode::Sub).u64().Inputs(1U, 0U);
-            INST(6U, Opcode::Return).u64().Inputs(5U);
-        }
-
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(7U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(8U, Opcode::Return).u64().Inputs(7U);
-        }
-    }
+    out_graph::MoveToCommonImmediateDominator::CREATE(graphEt);
 
     bool result = GetGraph()->RunPass<MoveConstants>();
     ASSERT_TRUE(result);
 
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
+}
+
+SRC_GRAPH(MoveToClosestCommonDominator, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 1U).u64();
+        CONSTANT(1U, 12345U);
+
+        BASIC_BLOCK(2U, 4U, 3U)
+        {
+            INST(4U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(30U, Opcode::ReturnI).u64().Imm(0U);
+        }
+
+        BASIC_BLOCK(4U, 8U, 5U)
+        {
+            INST(9U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(5U, 7U, 6U)
+        {
+            INST(12U, Opcode::IfImm).CC(CC_LE).Imm(15U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(17U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
+        }
+
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(23U, Opcode::Sub).u64().Inputs(1U, 0U);
+            INST(24U, Opcode::Return).u64().Inputs(23U);
+        }
+
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(27U, Opcode::Div).u64().Inputs(1U, 0U);
+            INST(28U, Opcode::Return).u64().Inputs(27U);
+        }
+    }
+}
+
+OUT_GRAPH(MoveToClosestCommonDominator, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 1U).u64();
+
+        BASIC_BLOCK(2U, 4U, 3U)
+        {
+            INST(4U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(30U, Opcode::ReturnI).u64().Imm(0U);
+        }
+
+        BASIC_BLOCK(4U, 8U, 5U)
+        {
+            CONSTANT(1U, 12345U);
+            INST(9U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(5U, 7U, 6U)
+        {
+            INST(12U, Opcode::IfImm).CC(CC_LE).Imm(15U).Inputs(0U);
+        }
+
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(17U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(18U, Opcode::Return).u64().Inputs(17U);
+        }
+
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(23U, Opcode::Sub).u64().Inputs(1U, 0U);
+            INST(24U, Opcode::Return).u64().Inputs(23U);
+        }
+
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(27U, Opcode::Div).u64().Inputs(1U, 0U);
+            INST(28U, Opcode::Return).u64().Inputs(27U);
+        }
+    }
 }
 
 TEST_F(MoveConstantsTest, MoveToClosestCommonDominator)
 {
-    GRAPH(GetGraph())
+    src_graph::MoveToClosestCommonDominator::CREATE(GetGraph());
+    Graph *graphEt = CreateEmptyGraph();
+    out_graph::MoveToClosestCommonDominator::CREATE(graphEt);
+
+    bool result = GetGraph()->RunPass<MoveConstants>();
+    ASSERT_TRUE(result);
+
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
+}
+
+SRC_GRAPH(MoveJustBeforeUser, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         CONSTANT(1U, 12345U);
@@ -181,39 +308,30 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator)
 
         BASIC_BLOCK(3U, -1L)
         {
-            INST(30U, Opcode::ReturnI).u64().Imm(0U);
+            INST(13U, Opcode::ReturnI).u64().Imm(0U);
         }
 
-        BASIC_BLOCK(4U, 8U, 5U)
+        BASIC_BLOCK(4U, 6U, 5U)
         {
             INST(9U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
         }
 
-        BASIC_BLOCK(5U, 7U, 6U)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(12U, Opcode::IfImm).CC(CC_LE).Imm(15U).Inputs(0U);
+            INST(10U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
 
         BASIC_BLOCK(6U, -1L)
         {
-            INST(17U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(18U, Opcode::Return).u64().Inputs(17U);
-        }
-
-        BASIC_BLOCK(7U, -1L)
-        {
-            INST(23U, Opcode::Sub).u64().Inputs(1U, 0U);
-            INST(24U, Opcode::Return).u64().Inputs(23U);
-        }
-
-        BASIC_BLOCK(8U, -1L)
-        {
-            INST(27U, Opcode::Div).u64().Inputs(1U, 0U);
-            INST(28U, Opcode::Return).u64().Inputs(27U);
+            INST(12U, Opcode::Return).u64().Inputs(0U);
         }
     }
-    Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(MoveJustBeforeUser, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -224,61 +342,56 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator)
 
         BASIC_BLOCK(3U, -1L)
         {
-            INST(30U, Opcode::ReturnI).u64().Imm(0U);
+            INST(13U, Opcode::ReturnI).u64().Imm(0U);
         }
 
-        BASIC_BLOCK(4U, 8U, 5U)
+        BASIC_BLOCK(4U, 6U, 5U)
         {
-            CONSTANT(1U, 12345U);
             INST(9U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
         }
 
-        BASIC_BLOCK(5U, 7U, 6U)
+        BASIC_BLOCK(5U, -1L)
         {
-            INST(12U, Opcode::IfImm).CC(CC_LE).Imm(15U).Inputs(0U);
+            CONSTANT(1U, 12345U);
+            INST(10U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(11U, Opcode::Return).u64().Inputs(10U);
         }
 
         BASIC_BLOCK(6U, -1L)
         {
-            INST(17U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(18U, Opcode::Return).u64().Inputs(17U);
-        }
-
-        BASIC_BLOCK(7U, -1L)
-        {
-            INST(23U, Opcode::Sub).u64().Inputs(1U, 0U);
-            INST(24U, Opcode::Return).u64().Inputs(23U);
-        }
-
-        BASIC_BLOCK(8U, -1L)
-        {
-            INST(27U, Opcode::Div).u64().Inputs(1U, 0U);
-            INST(28U, Opcode::Return).u64().Inputs(27U);
+            INST(12U, Opcode::Return).u64().Inputs(0U);
         }
     }
-
-    bool result = GetGraph()->RunPass<MoveConstants>();
-    ASSERT_TRUE(result);
-
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveJustBeforeUser)
 {
-    GRAPH(GetGraph())
+    src_graph::MoveJustBeforeUser::CREATE(GetGraph());
+    Graph *graphEt = CreateEmptyGraph();
+    out_graph::MoveJustBeforeUser::CREATE(graphEt);
+
+    bool result = GetGraph()->RunPass<MoveConstants>();
+    ASSERT_TRUE(result);
+
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
+}
+
+SRC_GRAPH(MoveJustBeforeUserSingleBlock, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         CONSTANT(1U, 12345U);
 
         BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(4U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
+            INST(5U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
         }
 
         BASIC_BLOCK(3U, -1L)
         {
-            INST(13U, Opcode::ReturnI).u64().Imm(0U);
+            INST(17U, Opcode::ReturnI).Imm(0U);
         }
 
         BASIC_BLOCK(4U, 6U, 5U)
@@ -288,28 +401,32 @@ TEST_F(MoveConstantsTest, MoveJustBeforeUser)
 
         BASIC_BLOCK(5U, -1L)
         {
-            INST(10U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(11U, Opcode::Return).u64().Inputs(10U);
+            INST(12U, Opcode::Div).u64().Inputs(1U, 0U);
+            INST(13U, Opcode::Add).u64().Inputs(12U, 1U);
+            INST(14U, Opcode::Return).u64().Inputs(13U);
         }
 
         BASIC_BLOCK(6U, -1L)
         {
-            INST(12U, Opcode::Return).u64().Inputs(0U);
+            INST(15U, Opcode::Return).u64().Inputs(0U);
         }
     }
-    Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(MoveJustBeforeUserSingleBlock, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
 
         BASIC_BLOCK(2U, 4U, 3U)
         {
-            INST(4U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
+            INST(5U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
         }
 
         BASIC_BLOCK(3U, -1L)
         {
-            INST(13U, Opcode::ReturnI).u64().Imm(0U);
+            INST(17U, Opcode::ReturnI).Imm(0U);
         }
 
         BASIC_BLOCK(4U, 6U, 5U)
@@ -320,90 +437,23 @@ TEST_F(MoveConstantsTest, MoveJustBeforeUser)
         BASIC_BLOCK(5U, -1L)
         {
             CONSTANT(1U, 12345U);
-            INST(10U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(11U, Opcode::Return).u64().Inputs(10U);
+            INST(12U, Opcode::Div).u64().Inputs(1U, 0U);
+            INST(13U, Opcode::Add).u64().Inputs(12U, 1U);
+            INST(14U, Opcode::Return).u64().Inputs(13U);
         }
 
         BASIC_BLOCK(6U, -1L)
         {
-            INST(12U, Opcode::Return).u64().Inputs(0U);
+            INST(15U, Opcode::Return).u64().Inputs(0U);
         }
     }
-
-    bool result = GetGraph()->RunPass<MoveConstants>();
-    ASSERT_TRUE(result);
-
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
 TEST_F(MoveConstantsTest, MoveJustBeforeUserSingleBlock)
 {
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 1U).u64();
-        CONSTANT(1U, 12345U);
-
-        BASIC_BLOCK(2U, 4U, 3U)
-        {
-            INST(5U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(17U, Opcode::ReturnI).Imm(0U);
-        }
-
-        BASIC_BLOCK(4U, 6U, 5U)
-        {
-            INST(9U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(12U, Opcode::Div).u64().Inputs(1U, 0U);
-            INST(13U, Opcode::Add).u64().Inputs(12U, 1U);
-            INST(14U, Opcode::Return).u64().Inputs(13U);
-        }
-
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(15U, Opcode::Return).u64().Inputs(0U);
-        }
-    }
+    src_graph::MoveJustBeforeUserSingleBlock::CREATE(GetGraph());
     Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
-    {
-        PARAMETER(0U, 1U).u64();
-
-        BASIC_BLOCK(2U, 4U, 3U)
-        {
-            INST(5U, Opcode::IfImm).CC(CC_GE).Imm(5U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(17U, Opcode::ReturnI).Imm(0U);
-        }
-
-        BASIC_BLOCK(4U, 6U, 5U)
-        {
-            INST(9U, Opcode::IfImm).CC(CC_LE).Imm(10U).Inputs(0U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            CONSTANT(1U, 12345U);
-            INST(12U, Opcode::Div).u64().Inputs(1U, 0U);
-            INST(13U, Opcode::Add).u64().Inputs(12U, 1U);
-            INST(14U, Opcode::Return).u64().Inputs(13U);
-        }
-
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(15U, Opcode::Return).u64().Inputs(0U);
-        }
-    }
+    out_graph::MoveJustBeforeUserSingleBlock::CREATE(graphEt);
 
     bool result = GetGraph()->RunPass<MoveConstants>();
     ASSERT_TRUE(result);
@@ -412,9 +462,9 @@ TEST_F(MoveConstantsTest, MoveJustBeforeUserSingleBlock)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(MoveConstantsTest, MovePhiInput)
+SRC_GRAPH(MovePhiInput, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         CONSTANT(2U, 12345U);
@@ -439,8 +489,11 @@ TEST_F(MoveConstantsTest, MovePhiInput)
             INST(13U, Opcode::Return).u64().Inputs(19U);
         }
     }
-    Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(MovePhiInput, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -465,6 +518,13 @@ TEST_F(MoveConstantsTest, MovePhiInput)
             INST(13U, Opcode::Return).u64().Inputs(19U);
         }
     }
+}
+
+TEST_F(MoveConstantsTest, MovePhiInput)
+{
+    src_graph::MovePhiInput::CREATE(GetGraph());
+    Graph *graphEt = CreateEmptyGraph();
+    out_graph::MovePhiInput::CREATE(graphEt);
 
     bool result = GetGraph()->RunPass<MoveConstants>();
     ASSERT_TRUE(result);
@@ -473,9 +533,9 @@ TEST_F(MoveConstantsTest, MovePhiInput)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(MoveConstantsTest, AvoidMoveToLoop)
+SRC_GRAPH(AvoidMoveToLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         CONSTANT(2U, 5U);
@@ -521,8 +581,11 @@ TEST_F(MoveConstantsTest, AvoidMoveToLoop)
             INST(27U, Opcode::Return).u64().Inputs(4U);
         }
     }
-    Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(AvoidMoveToLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
 
@@ -568,6 +631,13 @@ TEST_F(MoveConstantsTest, AvoidMoveToLoop)
             INST(27U, Opcode::Return).u64().Inputs(4U);
         }
     }
+}
+
+TEST_F(MoveConstantsTest, AvoidMoveToLoop)
+{
+    src_graph::AvoidMoveToLoop::CREATE(GetGraph());
+    Graph *graphEt = CreateEmptyGraph();
+    out_graph::AvoidMoveToLoop::CREATE(graphEt);
 
     bool result = GetGraph()->RunPass<MoveConstants>();
     ASSERT_TRUE(result);
@@ -576,9 +646,9 @@ TEST_F(MoveConstantsTest, AvoidMoveToLoop)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
+SRC_GRAPH(MoveToClosestCommonDominator2, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).u64();
@@ -601,8 +671,11 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
-    Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(MoveToClosestCommonDominator2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).u64();
@@ -625,6 +698,13 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
+}
+
+TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
+{
+    src_graph::MoveToClosestCommonDominator2::CREATE(GetGraph());
+    Graph *graphEt = CreateEmptyGraph();
+    out_graph::MoveToClosestCommonDominator2::CREATE(graphEt);
 
     bool result = GetGraph()->RunPass<MoveConstants>();
     ASSERT_TRUE(result);
@@ -633,9 +713,9 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominator2)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(MoveConstantsTest, MoveToClosestCommonDominatorPhi)
+SRC_GRAPH(MoveToClosestCommonDominatorPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).u64();
@@ -662,8 +742,11 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominatorPhi)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
-    Graph *graphEt = CreateEmptyGraph();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(MoveToClosestCommonDominatorPhi, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 1U).u64();
         PARAMETER(1U, 2U).u64();
@@ -690,6 +773,13 @@ TEST_F(MoveConstantsTest, MoveToClosestCommonDominatorPhi)
             INST(7U, Opcode::Return).u64().Inputs(6U);
         }
     }
+}
+
+TEST_F(MoveConstantsTest, MoveToClosestCommonDominatorPhi)
+{
+    src_graph::MoveToClosestCommonDominatorPhi::CREATE(GetGraph());
+    Graph *graphEt = CreateEmptyGraph();
+    out_graph::MoveToClosestCommonDominatorPhi::CREATE(graphEt);
 
     bool result = GetGraph()->RunPass<MoveConstants>();
     ASSERT_TRUE(result);

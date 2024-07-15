@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,9 +57,9 @@ TEST_F(CleanupTest, Simple)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, BothHasPhi)
+SRC_GRAPH(BothHasPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -85,10 +85,10 @@ TEST_F(CleanupTest, BothHasPhi)
             INST(7U, Opcode::Return).s64().Inputs(6U);
         }
     }
+}
 
-    ASSERT_TRUE(RunCleanupEmptyBlocks());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(BothHasPhi, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
@@ -111,6 +111,16 @@ TEST_F(CleanupTest, BothHasPhi)
             INST(6U, Opcode::Return).s64().Inputs(5U);
         }
     }
+}
+
+TEST_F(CleanupTest, BothHasPhi)
+{
+    src_graph::BothHasPhi::CREATE(GetGraph());
+
+    ASSERT_TRUE(RunCleanupEmptyBlocks());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::BothHasPhi::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -237,9 +247,9 @@ TEST_F(CleanupTest, LoopPreHeader)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, TwoPredecessors)
+SRC_GRAPH(TwoPredecessors, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -264,10 +274,10 @@ TEST_F(CleanupTest, TwoPredecessors)
             INST(6U, Opcode::ReturnVoid);
         }
     }
+}
 
-    ASSERT_TRUE(RunCleanupEmptyBlocks());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(TwoPredecessors, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
@@ -292,12 +302,22 @@ TEST_F(CleanupTest, TwoPredecessors)
             INST(6U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CleanupTest, TwoPredecessors)
+{
+    src_graph::TwoPredecessors::CREATE(GetGraph());
+
+    ASSERT_TRUE(RunCleanupEmptyBlocks());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::TwoPredecessors::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, TwoPredecessorsPhi)
+SRC_GRAPH(TwoPredecessorsPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -329,10 +349,10 @@ TEST_F(CleanupTest, TwoPredecessorsPhi)
             INST(10U, Opcode::Return).s64().Inputs(9U);
         }
     }
+}
 
-    ASSERT_TRUE(RunCleanupEmptyBlocks());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(TwoPredecessorsPhi, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
@@ -364,6 +384,16 @@ TEST_F(CleanupTest, TwoPredecessorsPhi)
             INST(10U, Opcode::Return).s64().Inputs(9U);
         }
     }
+}
+
+TEST_F(CleanupTest, TwoPredecessorsPhi)
+{
+    src_graph::TwoPredecessorsPhi::CREATE(GetGraph());
+
+    ASSERT_TRUE(RunCleanupEmptyBlocks());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::TwoPredecessorsPhi::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -558,9 +588,9 @@ TEST_F(CleanupTest, InfiniteLoop)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, JointDiamond)
+SRC_GRAPH(JointDiamond, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -587,10 +617,10 @@ TEST_F(CleanupTest, JointDiamond)
             INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(JointDiamond, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -614,6 +644,16 @@ TEST_F(CleanupTest, JointDiamond)
             INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
+}
+
+TEST_F(CleanupTest, JointDiamond)
+{
+    src_graph::JointDiamond::CREATE(GetGraph());
+
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::JointDiamond::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -921,9 +961,9 @@ TEST_F(CleanupTest, Loop1)
  *                        [1]
  */
 
-TEST_F(CleanupTest, PhiInputs1)
+SRC_GRAPH(PhiInputs1, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(18U, 2U);
@@ -965,6 +1005,11 @@ TEST_F(CleanupTest, PhiInputs1)
             INST(17U, Opcode::Return).u64().Inputs(16U);
         }
     }
+}
+
+TEST_F(CleanupTest, PhiInputs1)
+{
+    src_graph::PhiInputs1::CREATE(GetGraph());
 
     // Delete all phi instructions
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
@@ -997,9 +1042,9 @@ TEST_F(CleanupTest, PhiInputs1)
  *                                       [1]
  */
 
-TEST_F(CleanupTest, PhiInputs2)
+SRC_GRAPH(PhiInputs2, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -1033,18 +1078,10 @@ TEST_F(CleanupTest, PhiInputs2)
             INST(5U, Opcode::Return).u64().Inputs(4U);
         }
     }
+}
 
-    // Delete 3 and 4 phi (replace with v2p in return)
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
-
-    ASSERT_TRUE(CheckInputs(INS(2U), {0U, 1U}));
-    ASSERT_TRUE(CheckInputs(INS(5U), {2U}));
-
-    ASSERT_TRUE(CheckUsers(INS(0U), {2U}));
-    ASSERT_TRUE(CheckUsers(INS(1U), {2U}));
-    ASSERT_TRUE(CheckUsers(INS(2U), {5U}));
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(PhiInputs2, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -1071,6 +1108,24 @@ TEST_F(CleanupTest, PhiInputs2)
             INST(5U, Opcode::Return).u64().Inputs(2U);
         }
     }
+}
+
+TEST_F(CleanupTest, PhiInputs2)
+{
+    src_graph::PhiInputs2::CREATE(GetGraph());
+
+    // Delete 3 and 4 phi (replace with v2p in return)
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
+
+    ASSERT_TRUE(CheckInputs(INS(2U), {0U, 1U}));
+    ASSERT_TRUE(CheckInputs(INS(5U), {2U}));
+
+    ASSERT_TRUE(CheckUsers(INS(0U), {2U}));
+    ASSERT_TRUE(CheckUsers(INS(1U), {2U}));
+    ASSERT_TRUE(CheckUsers(INS(2U), {5U}));
+
+    auto graph = CreateEmptyGraph();
+    out_graph::PhiInputs2::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1271,9 +1326,9 @@ TEST_F(CleanupTest, TwoBlocks)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, SameBlockPhiTwice)
+SRC_GRAPH(SameBlockPhiTwice, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
         CONSTANT(1U, 13U).s64();
@@ -1312,9 +1367,10 @@ TEST_F(CleanupTest, SameBlockPhiTwice)
             INST(18U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(17U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+}
 
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(SameBlockPhiTwice, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
@@ -1328,12 +1384,21 @@ TEST_F(CleanupTest, SameBlockPhiTwice)
             INST(18U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(17U);
         }
     }
+}
+
+TEST_F(CleanupTest, SameBlockPhiTwice)
+{
+    src_graph::SameBlockPhiTwice::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::SameBlockPhiTwice::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, TwoBlocksLoop)
+SRC_GRAPH(TwoBlocksLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
         CONSTANT(1U, 13U).s64();
@@ -1372,9 +1437,10 @@ TEST_F(CleanupTest, TwoBlocksLoop)
             INST(18U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(17U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+}
 
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(TwoBlocksLoop, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
@@ -1416,12 +1482,21 @@ TEST_F(CleanupTest, TwoBlocksLoop)
             INST(18U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(17U);
         }
     }
+}
+
+TEST_F(CleanupTest, TwoBlocksLoop)
+{
+    src_graph::TwoBlocksLoop::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::TwoBlocksLoop::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, TwoLoopsPreHeader)
+SRC_GRAPH(TwoLoopsPreHeader, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
         CONSTANT(1U, 13U).s64();
@@ -1450,17 +1525,10 @@ TEST_F(CleanupTest, TwoLoopsPreHeader)
             INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
     }
+}
 
-    ASSERT_EQ(&BB(3U), BB(4U).GetLoop()->GetPreHeader());
-    ASSERT_EQ(&BB(3U), BB(5U).GetLoop()->GetPreHeader());
-    ASSERT_EQ(1U, BB(4U).GetLoop()->GetBlocks().size());
-    ASSERT_EQ(1U, BB(5U).GetLoop()->GetBlocks().size());
-    ASSERT_EQ(4U, BB(4U).GetLoop()->GetOuterLoop()->GetBlocks().size());
-    ASSERT_EQ(4U, BB(5U).GetLoop()->GetOuterLoop()->GetBlocks().size());
-
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(TwoLoopsPreHeader, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
@@ -1486,6 +1554,23 @@ TEST_F(CleanupTest, TwoLoopsPreHeader)
             INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
         }
     }
+}
+
+TEST_F(CleanupTest, TwoLoopsPreHeader)
+{
+    src_graph::TwoLoopsPreHeader::CREATE(GetGraph());
+
+    ASSERT_EQ(&BB(3U), BB(4U).GetLoop()->GetPreHeader());
+    ASSERT_EQ(&BB(3U), BB(5U).GetLoop()->GetPreHeader());
+    ASSERT_EQ(1U, BB(4U).GetLoop()->GetBlocks().size());
+    ASSERT_EQ(1U, BB(5U).GetLoop()->GetBlocks().size());
+    ASSERT_EQ(4U, BB(4U).GetLoop()->GetOuterLoop()->GetBlocks().size());
+    ASSERT_EQ(4U, BB(5U).GetLoop()->GetOuterLoop()->GetBlocks().size());
+
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::TwoLoopsPreHeader::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 
     EXPECT_EQ(&BB(2U), BB(4U).GetLoop()->GetPreHeader());
@@ -1635,9 +1720,9 @@ TEST_F(CleanupTest, ThreeBlocks)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, TwoBlocksAndPhi)
+SRC_GRAPH(TwoBlocksAndPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
         CONSTANT(1U, 13U).s64();
@@ -1688,10 +1773,10 @@ TEST_F(CleanupTest, TwoBlocksAndPhi)
             INST(23U, Opcode::Return).u64().Inputs(22U);
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(TwoBlocksAndPhi, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 12U).s64();
@@ -1739,6 +1824,16 @@ TEST_F(CleanupTest, TwoBlocksAndPhi)
             INST(23U, Opcode::Return).u64().Inputs(22U);
         }
     }
+}
+
+TEST_F(CleanupTest, TwoBlocksAndPhi)
+{
+    src_graph::TwoBlocksAndPhi::CREATE(GetGraph());
+
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::TwoBlocksAndPhi::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1827,9 +1922,9 @@ TEST_F(CleanupTest, RemoveNestedCallInlined)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(CleanupTest, InlinedCallsWithCommonSaveState)
+SRC_GRAPH(InlinedCallsWithCommonSaveState, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).u64();
@@ -1857,10 +1952,10 @@ TEST_F(CleanupTest, InlinedCallsWithCommonSaveState)
             INST(9U, Opcode::Return).u64().Inputs(12U);
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(InlinedCallsWithCommonSaveState, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
@@ -1887,6 +1982,16 @@ TEST_F(CleanupTest, InlinedCallsWithCommonSaveState)
             INST(9U, Opcode::Return).u64().Inputs(12U);
         }
     }
+}
+
+TEST_F(CleanupTest, InlinedCallsWithCommonSaveState)
+{
+    src_graph::InlinedCallsWithCommonSaveState::CREATE(GetGraph());
+
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
+
+    auto graph = CreateEmptyGraph();
+    out_graph::InlinedCallsWithCommonSaveState::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

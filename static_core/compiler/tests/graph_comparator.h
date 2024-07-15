@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
 #define CAST(Opc) CastTo##Opc()
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
-#define CHECK(Opc, Getter)                                                                               \
+#define CHECK_OR_RETURN(Opc, Getter)                                                                     \
     if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
         instCompareMap_.erase(inst1);                                                                    \
         return false;                                                                                    \
@@ -124,113 +124,113 @@ public:
 
     bool InstPropertiesCompare(Inst *inst1, Inst *inst2)
     {
-        CHECK(Cast, GetOperandsType)
-        CHECK(Cmp, GetOperandsType)
+        CHECK_OR_RETURN(Cast, GetOperandsType)
+        CHECK_OR_RETURN(Cmp, GetOperandsType)
 
-        CHECK(Compare, GetCc)
-        CHECK(Compare, GetOperandsType)
+        CHECK_OR_RETURN(Compare, GetCc)
+        CHECK_OR_RETURN(Compare, GetOperandsType)
 
-        CHECK(If, GetCc)
-        CHECK(If, GetOperandsType)
+        CHECK_OR_RETURN(If, GetCc)
+        CHECK_OR_RETURN(If, GetOperandsType)
 
-        CHECK(IfImm, GetCc)
-        CHECK(IfImm, GetImm)
-        CHECK(IfImm, GetOperandsType)
+        CHECK_OR_RETURN(IfImm, GetCc)
+        CHECK_OR_RETURN(IfImm, GetImm)
+        CHECK_OR_RETURN(IfImm, GetOperandsType)
 
-        CHECK(Select, GetCc)
-        CHECK(Select, GetOperandsType)
+        CHECK_OR_RETURN(Select, GetCc)
+        CHECK_OR_RETURN(Select, GetOperandsType)
 
-        CHECK(SelectImm, GetCc)
-        CHECK(SelectImm, GetImm)
-        CHECK(SelectImm, GetOperandsType)
+        CHECK_OR_RETURN(SelectImm, GetCc)
+        CHECK_OR_RETURN(SelectImm, GetImm)
+        CHECK_OR_RETURN(SelectImm, GetOperandsType)
 
-        CHECK(LoadArrayI, GetImm)
-        CHECK(LoadArrayPairI, GetImm)
-        CHECK(LoadPairPart, GetImm)
-        CHECK(StoreArrayI, GetImm)
-        CHECK(StoreArrayPairI, GetImm)
-        CHECK(LoadArrayPair, GetImm)
-        CHECK(StoreArrayPair, GetImm)
-        CHECK(BoundsCheckI, GetImm)
-        CHECK(ReturnI, GetImm)
-        CHECK(AddI, GetImm)
-        CHECK(SubI, GetImm)
-        CHECK(ShlI, GetImm)
-        CHECK(ShrI, GetImm)
-        CHECK(AShrI, GetImm)
-        CHECK(AndI, GetImm)
-        CHECK(OrI, GetImm)
-        CHECK(XorI, GetImm)
+        CHECK_OR_RETURN(LoadArrayI, GetImm)
+        CHECK_OR_RETURN(LoadArrayPairI, GetImm)
+        CHECK_OR_RETURN(LoadPairPart, GetImm)
+        CHECK_OR_RETURN(StoreArrayI, GetImm)
+        CHECK_OR_RETURN(StoreArrayPairI, GetImm)
+        CHECK_OR_RETURN(LoadArrayPair, GetImm)
+        CHECK_OR_RETURN(StoreArrayPair, GetImm)
+        CHECK_OR_RETURN(BoundsCheckI, GetImm)
+        CHECK_OR_RETURN(ReturnI, GetImm)
+        CHECK_OR_RETURN(AddI, GetImm)
+        CHECK_OR_RETURN(SubI, GetImm)
+        CHECK_OR_RETURN(ShlI, GetImm)
+        CHECK_OR_RETURN(ShrI, GetImm)
+        CHECK_OR_RETURN(AShrI, GetImm)
+        CHECK_OR_RETURN(AndI, GetImm)
+        CHECK_OR_RETURN(OrI, GetImm)
+        CHECK_OR_RETURN(XorI, GetImm)
 
         return true;
     }
 
     bool InstAdditionalPropertiesCompare(Inst *inst1, Inst *inst2)
     {
-        CHECK(LoadArray, GetNeedBarrier)
-        CHECK(LoadArrayPair, GetNeedBarrier)
-        CHECK(StoreArray, GetNeedBarrier)
-        CHECK(StoreArrayPair, GetNeedBarrier)
-        CHECK(LoadArrayI, GetNeedBarrier)
-        CHECK(LoadArrayPairI, GetNeedBarrier)
-        CHECK(StoreArrayI, GetNeedBarrier)
-        CHECK(StoreArrayPairI, GetNeedBarrier)
-        CHECK(LoadStatic, GetNeedBarrier)
-        CHECK(StoreStatic, GetNeedBarrier)
-        CHECK(LoadObject, GetNeedBarrier)
-        CHECK(StoreObject, GetNeedBarrier)
-        CHECK(LoadStatic, GetVolatile)
-        CHECK(StoreStatic, GetVolatile)
-        CHECK(LoadObject, GetVolatile)
-        CHECK(StoreObject, GetVolatile)
-        CHECK(NewObject, GetNeedBarrier)
-        CHECK(NewArray, GetNeedBarrier)
-        CHECK(CheckCast, GetNeedBarrier)
-        CHECK(IsInstance, GetNeedBarrier)
-        CHECK(LoadString, GetNeedBarrier)
-        CHECK(LoadConstArray, GetNeedBarrier)
-        CHECK(LoadType, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadArray, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadArrayPair, GetNeedBarrier)
+        CHECK_OR_RETURN(StoreArray, GetNeedBarrier)
+        CHECK_OR_RETURN(StoreArrayPair, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadArrayI, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadArrayPairI, GetNeedBarrier)
+        CHECK_OR_RETURN(StoreArrayI, GetNeedBarrier)
+        CHECK_OR_RETURN(StoreArrayPairI, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadStatic, GetNeedBarrier)
+        CHECK_OR_RETURN(StoreStatic, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadObject, GetNeedBarrier)
+        CHECK_OR_RETURN(StoreObject, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadStatic, GetVolatile)
+        CHECK_OR_RETURN(StoreStatic, GetVolatile)
+        CHECK_OR_RETURN(LoadObject, GetVolatile)
+        CHECK_OR_RETURN(StoreObject, GetVolatile)
+        CHECK_OR_RETURN(NewObject, GetNeedBarrier)
+        CHECK_OR_RETURN(NewArray, GetNeedBarrier)
+        CHECK_OR_RETURN(CheckCast, GetNeedBarrier)
+        CHECK_OR_RETURN(IsInstance, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadString, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadConstArray, GetNeedBarrier)
+        CHECK_OR_RETURN(LoadType, GetNeedBarrier)
 
-        CHECK(CallStatic, IsInlined)
-        CHECK(CallVirtual, IsInlined)
+        CHECK_OR_RETURN(CallStatic, IsInlined)
+        CHECK_OR_RETURN(CallVirtual, IsInlined)
 
-        CHECK(LoadArray, IsArray)
-        CHECK(LenArray, IsArray)
+        CHECK_OR_RETURN(LoadArray, IsArray)
+        CHECK_OR_RETURN(LenArray, IsArray)
 
-        CHECK(Deoptimize, GetDeoptimizeType)
-        CHECK(DeoptimizeIf, GetDeoptimizeType)
+        CHECK_OR_RETURN(Deoptimize, GetDeoptimizeType)
+        CHECK_OR_RETURN(DeoptimizeIf, GetDeoptimizeType)
 
-        CHECK(CompareAnyType, GetAnyType)
-        CHECK(CastValueToAnyType, GetAnyType)
-        CHECK(CastAnyTypeValue, GetAnyType)
-        CHECK(AnyTypeCheck, GetAnyType)
+        CHECK_OR_RETURN(CompareAnyType, GetAnyType)
+        CHECK_OR_RETURN(CastValueToAnyType, GetAnyType)
+        CHECK_OR_RETURN(CastAnyTypeValue, GetAnyType)
+        CHECK_OR_RETURN(AnyTypeCheck, GetAnyType)
 
-        CHECK(HclassCheck, GetCheckIsFunction)
-        CHECK(HclassCheck, GetCheckFunctionIsNotClassConstructor)
+        CHECK_OR_RETURN(HclassCheck, GetCheckIsFunction)
+        CHECK_OR_RETURN(HclassCheck, GetCheckFunctionIsNotClassConstructor)
 
         // Those below can fail because unit test Graph don't have proper Runtime links
-        // CHECK(Intrinsic, GetEntrypointId)
-        // CHECK(CallStatic, GetCallMethodId)
-        // CHECK(CallVirtual, GetCallMethodId)
+        // CHECK_OR_RETURN(Intrinsic, GetEntrypointId)
+        // CHECK_OR_RETURN(CallStatic, GetCallMethodId)
+        // CHECK_OR_RETURN(CallVirtual, GetCallMethodId)
 
-        // CHECK(InitClass, GetTypeId)
-        // CHECK(LoadAndInitClass, GetTypeId)
-        // CHECK(LoadStatic, GetTypeId)
-        // CHECK(StoreStatic, GetTypeId)
-        // CHECK(LoadObject, GetTypeId)
-        // CHECK(StoreObject, GetTypeId)
-        // CHECK(NewObject, GetTypeId)
-        // CHECK(InitObject, GetTypeId)
-        // CHECK(NewArray, GetTypeId)
-        // CHECK(LoadConstArray, GetTypeId)
-        // CHECK(CheckCast, GetTypeId)
-        // CHECK(IsInstance, GetTypeId)
-        // CHECK(LoadString, GetTypeId)
-        // CHECK(LoadType, GetTypeId)
+        // CHECK_OR_RETURN(InitClass, GetTypeId)
+        // CHECK_OR_RETURN(LoadAndInitClass, GetTypeId)
+        // CHECK_OR_RETURN(LoadStatic, GetTypeId)
+        // CHECK_OR_RETURN(StoreStatic, GetTypeId)
+        // CHECK_OR_RETURN(LoadObject, GetTypeId)
+        // CHECK_OR_RETURN(StoreObject, GetTypeId)
+        // CHECK_OR_RETURN(NewObject, GetTypeId)
+        // CHECK_OR_RETURN(InitObject, GetTypeId)
+        // CHECK_OR_RETURN(NewArray, GetTypeId)
+        // CHECK_OR_RETURN(LoadConstArray, GetTypeId)
+        // CHECK_OR_RETURN(CheckCast, GetTypeId)
+        // CHECK_OR_RETURN(IsInstance, GetTypeId)
+        // CHECK_OR_RETURN(LoadString, GetTypeId)
+        // CHECK_OR_RETURN(LoadType, GetTypeId)
 
         return true;
     }
-#undef CHECK
+#undef CHECK_OR_RETURN
 #undef CAST
 
     bool InstSaveStateCompare(Inst *inst1, Inst *inst2)
@@ -269,7 +269,8 @@ public:
         return true;
     }
 
-    bool Compare(Inst *inst1, Inst *inst2)
+private:
+    bool CompareCommon(Inst *inst1, Inst *inst2)
     {
         if (auto it = instCompareMap_.insert({inst1, inst2}); !it.second) {
             if (inst2 == it.first->second) {
@@ -288,6 +289,15 @@ public:
         }
 
         if (!InstAdditionalPropertiesCompare(inst1, inst2)) {
+            return false;
+        }
+        return true;
+    }
+
+public:
+    bool Compare(Inst *inst1, Inst *inst2)
+    {
+        if (!CompareCommon(inst1, inst2)) {
             return false;
         }
 

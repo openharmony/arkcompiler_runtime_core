@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,13 +80,9 @@ TEST_F(MemoryCoalescingTest, ImmidiateLoads)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
+SRC_GRAPH(LoopLoadCoalescing, Graph *graph)
 {
-    // Coalescing is supported only for aarch64
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        return;
-    }
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(5U, 0U).ref();
         CONSTANT(6U, 0x0U).s64();
@@ -112,8 +108,11 @@ TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
             INST(33U, Opcode::Return).s32().Inputs(28U);
         }
     }
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+}
+
+OUT_GRAPH(LoopLoadCoalescing, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(5U, 0U).ref();
         CONSTANT(6U, 0x0U).s64();
@@ -140,18 +139,25 @@ TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
             INST(33U, Opcode::Return).s32().Inputs(28U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
+TEST_F(MemoryCoalescingTest, LoopLoadCoalescing)
 {
     // Coalescing is supported only for aarch64
     if (GetGraph()->GetArch() != Arch::AARCH64) {
         return;
     }
-    GRAPH(GetGraph())
+    src_graph::LoopLoadCoalescing::CREATE(GetGraph());
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::LoopLoadCoalescing::CREATE(optGraph);
+    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
+}
+
+SRC_GRAPH(LoopStoreCoalescing, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(4U, 0x0U).s64();
@@ -178,8 +184,11 @@ TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
             INST(29U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+}
+
+OUT_GRAPH(LoopStoreCoalescing, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(4U, 0x0U).s64();
@@ -205,6 +214,17 @@ TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
             INST(29U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(MemoryCoalescingTest, LoopStoreCoalescing)
+{
+    // Coalescing is supported only for aarch64
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    src_graph::LoopStoreCoalescing::CREATE(GetGraph());
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::LoopStoreCoalescing::CREATE(optGraph);
     ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
@@ -326,13 +346,9 @@ TEST_F(MemoryCoalescingTest, PseudoParts)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, UnalignedStores)
+SRC_GRAPH(UnalignedStores, Graph *graph)
 {
-    // Coalescing is supported only for aarch64
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        return;
-    }
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -351,8 +367,11 @@ TEST_F(MemoryCoalescingTest, UnalignedStores)
             INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+}
+
+OUT_GRAPH(UnalignedStores, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -369,6 +388,17 @@ TEST_F(MemoryCoalescingTest, UnalignedStores)
             INST(11U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(MemoryCoalescingTest, UnalignedStores)
+{
+    // Coalescing is supported only for aarch64
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    src_graph::UnalignedStores::CREATE(GetGraph());
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::UnalignedStores::CREATE(optGraph);
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
     ASSERT_FALSE(GetGraph()->RunPass<MemoryCoalescing>(true));
     GraphChecker(GetGraph()).Check();
@@ -503,13 +533,9 @@ TEST_F(MemoryCoalescingTest, LoadsRoundedByStores)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, UnalignedInLoop)
+SRC_GRAPH(UnalignedInLoop, Graph *graph)
 {
-    // Coalescing is supported only for aarch64
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        return;
-    }
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -532,8 +558,11 @@ TEST_F(MemoryCoalescingTest, UnalignedInLoop)
             INST(29U, Opcode::Return).s32().Inputs(33U);
         }
     }
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+}
+
+OUT_GRAPH(UnalignedInLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -555,6 +584,17 @@ TEST_F(MemoryCoalescingTest, UnalignedInLoop)
             INST(29U, Opcode::Return).s32().Inputs(33U);
         }
     }
+}
+
+TEST_F(MemoryCoalescingTest, UnalignedInLoop)
+{
+    // Coalescing is supported only for aarch64
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    src_graph::UnalignedInLoop::CREATE(GetGraph());
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::UnalignedInLoop::CREATE(optGraph);
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
     ASSERT_FALSE(GetGraph()->RunPass<MemoryCoalescing>(true));
     GraphChecker(GetGraph()).Check();
@@ -700,13 +740,9 @@ TEST_F(MemoryCoalescingTest, ObjectAccessesCoalescing)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
+SRC_GRAPH(AllowedVolatileReordering, Graph *graph)
 {
-    // Coalescing is supported only for aarch64
-    if (GetGraph()->GetArch() != Arch::AARCH64) {
-        return;
-    }
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -728,8 +764,11 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
             INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+}
+
+OUT_GRAPH(AllowedVolatileReordering, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -749,18 +788,25 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
             INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
+TEST_F(MemoryCoalescingTest, AllowedVolatileReordering)
 {
     // Coalescing is supported only for aarch64
     if (GetGraph()->GetArch() != Arch::AARCH64) {
         return;
     }
-    GRAPH(GetGraph())
+    src_graph::AllowedVolatileReordering::CREATE(GetGraph());
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::AllowedVolatileReordering::CREATE(optGraph);
+    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
+}
+
+SRC_GRAPH(AllowedVolatileReordering2, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -782,8 +828,11 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
             INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+}
+
+OUT_GRAPH(AllowedVolatileReordering2, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -803,18 +852,25 @@ TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
             INST(40U, Opcode::Return).s64().Inputs(51U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, UnrolledLoop)
+TEST_F(MemoryCoalescingTest, AllowedVolatileReordering2)
 {
     // Coalescing is supported only for aarch64
     if (GetGraph()->GetArch() != Arch::AARCH64) {
         return;
     }
-    GRAPH(GetGraph())
+    src_graph::AllowedVolatileReordering2::CREATE(GetGraph());
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::AllowedVolatileReordering2::CREATE(optGraph);
+    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
+}
+
+SRC_GRAPH(UnrolledLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).ref();
@@ -845,8 +901,11 @@ TEST_F(MemoryCoalescingTest, UnrolledLoop)
             INST(40U, Opcode::ReturnVoid);
         }
     }
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+}
+
+OUT_GRAPH(UnrolledLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).ref();
@@ -877,18 +936,25 @@ TEST_F(MemoryCoalescingTest, UnrolledLoop)
             INST(40U, Opcode::ReturnVoid);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }
 
-TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
+TEST_F(MemoryCoalescingTest, UnrolledLoop)
 {
     // Coalescing is supported only for aarch64
     if (GetGraph()->GetArch() != Arch::AARCH64) {
         return;
     }
-    GRAPH(GetGraph())
+    src_graph::UnrolledLoop::CREATE(GetGraph());
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::UnrolledLoop::CREATE(optGraph);
+    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
+}
+
+SRC_GRAPH(CoalescingOverSaveState, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         BASIC_BLOCK(2U, -1L)
@@ -910,12 +976,11 @@ TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
             INST(40U, Opcode::Return).s64().Inputs(53U);
         }
     }
-    GraphChecker(GetGraph()).Check();
-    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
-    GraphChecker(GetGraph()).Check();
+}
 
-    Graph *optGraph = CreateEmptyGraph();
-    GRAPH(optGraph)
+OUT_GRAPH(CoalescingOverSaveState, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
 
@@ -940,6 +1005,21 @@ TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
             INST(40U, Opcode::Return).s64().Inputs(53U);
         }
     }
+}
+
+TEST_F(MemoryCoalescingTest, CoalescingOverSaveState)
+{
+    // Coalescing is supported only for aarch64
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return;
+    }
+    src_graph::CoalescingOverSaveState::CREATE(GetGraph());
+    GraphChecker(GetGraph()).Check();
+    ASSERT_TRUE(GetGraph()->RunPass<MemoryCoalescing>());
+    GraphChecker(GetGraph()).Check();
+
+    Graph *optGraph = CreateEmptyGraph();
+    out_graph::CoalescingOverSaveState::CREATE(optGraph);
     GraphChecker(optGraph).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), optGraph));
 }

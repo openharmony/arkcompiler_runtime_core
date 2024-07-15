@@ -474,8 +474,10 @@ void BasicBlock::GenerateSelect(Inst *phi, Inst *inst1, Inst *inst2, const Saved
                                                  ifInfo->swapped ? inst1 : inst2, ifInfo->ifInput0, ifInfo->ifImm,
                                                  ifInfo->ifType, ifInfo->ifCc);
     } else if (ifInfo->ifOpcode == Opcode::If) {
-        select = GetGraph()->CreateInstSelect(phi->GetType(), ifInfo->ifPc, ifInfo->swapped ? inst2 : inst1,
-                                              ifInfo->swapped ? inst1 : inst2, ifInfo->ifInput0, ifInfo->ifInput1,
+        select = GetGraph()->CreateInstSelect(phi->GetType(), ifInfo->ifPc,
+                                              std::array<Inst *, 4U> {ifInfo->swapped ? inst2 : inst1,
+                                                                      ifInfo->swapped ? inst1 : inst2, ifInfo->ifInput0,
+                                                                      ifInfo->ifInput1},
                                               ifInfo->ifType, ifInfo->ifCc);
     } else {
         UNREACHABLE();
