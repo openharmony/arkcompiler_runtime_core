@@ -17,8 +17,12 @@ if (!defined(ark_standalone_build)) {
 
 if (ark_standalone_build) {
   ark_root = "//"
+  build_root = "//gn/build"
+  import("$build_root/fastverify.gni")
 } else {
   ark_root = "//arkcompiler/runtime_core/static_core"
+  build_root = "//build"
+  import("$build_root/config/components/toolchain/build_type.gni")
 }
 
 ark_third_party_root = "//third_party"

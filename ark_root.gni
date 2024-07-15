@@ -19,10 +19,12 @@ if (!ark_standalone_build) {
   ark_third_party_root = "//third_party"
   hilog_root = "//base/hiviewdfx/hilog/interfaces/native/innerkits"
   build_root = "//build"
+  import("$build_root/config/components/toolchain/build_type.gni")
   import("$build_root/ohos.gni")
 } else {
   ark_third_party_root = "//arkcompiler/toolchain/build/third_party_gn"
   import("$build_root/ark.gni")
+  import("$build_root/config/build_type.gni")
 }
 
 ark_root = "//arkcompiler/runtime_core"

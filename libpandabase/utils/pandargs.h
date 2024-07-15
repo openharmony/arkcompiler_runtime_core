@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -966,8 +966,9 @@ private:
             pos++;
         }
         // look for hex-style integer
-        if (str[0] == '0' && str[1] == 'x') {
+        if ((str.size() > pos + 2U) && (str.compare(pos, 2U, "0x") == 0)) {
             pos += HEX_PREFIX_WIDTH;
+            return str.find_first_not_of("0123456789abcdefABCDEF", pos) == std::string::npos;
         }
         return str.find_first_not_of("0123456789", pos) == std::string::npos;
     }

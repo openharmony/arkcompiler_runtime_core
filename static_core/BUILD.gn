@@ -241,6 +241,8 @@ config("ark_config") {
     "-Wno-unused-result",
   ]
 
+  cflags_c = []
+
   if (ark_standalone_build) {
     cflags_cc += [ "-Wno-bitwise-instead-of-logical" ]
   }
@@ -253,7 +255,20 @@ config("ark_config") {
     ]
   }
 
-  if (is_debug) {
+  if (is_fastverify) {
+    cflags_cc += [
+      "-O3",
+      "-ggdb3",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+    cflags_c += [
+      "-O3",
+      "-ggdb3",
+      "-fno-omit-frame-pointer",
+      "-D_GLIBCXX_ASSERTIONS",
+    ]
+  } else if (is_debug) {
     cflags_cc += [
       "-Og",
       "-ggdb3",
