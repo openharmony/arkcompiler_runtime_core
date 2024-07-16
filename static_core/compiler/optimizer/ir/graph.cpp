@@ -621,6 +621,16 @@ bool Graph::HasFloatRegs() const
     return FlagFloatRegs::Get(bitFields_);
 }
 
+static void MarkSuccessBlocks(BasicBlock *block, Marker marker)
+{
+    auto loop = block->GetSuccessor(0)->GetLoop();
+    for (size_t i = 1; i < block->GetSuccsBlocks().size(); i++) {
+        if (loop != block->GetSuccessor(i)->GetLoop()) {
+            block->SetMarker(marker);
+        }
+    }
+}
+
 /*
  * Mark blocks, which have successor from external loop
  */
@@ -633,12 +643,7 @@ void MarkLoopExits(const Graph *graph, Marker marker)
             }
         } else if (block->GetSuccsBlocks().size() > MAX_SUCCS_NUM) {
             ASSERT(block->IsTryEnd() || block->IsTryBegin() || block->GetLastInst()->GetOpcode() == Opcode::Throw);
-            auto loop = block->GetSuccessor(0)->GetLoop();
-            for (size_t i = 1; i < block->GetSuccsBlocks().size(); i++) {
-                if (loop != block->GetSuccessor(i)->GetLoop()) {
-                    block->SetMarker(marker);
-                }
-            }
+            MarkSuccessBlocks(block, marker);
         }
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,5 +17,6 @@
 #define PANDA_PLUGINS_ETS_COMPILER_ETS_CODEGEN_EXTENSIONS_H
 
 bool LaunchCallCodegen(CallInst *inst);
+void PrepareForCallLaunchVirtual(CallInst *callInst, RuntimeInterface::MethodPtr method, Reg &thisReg, Reg &param0);
 
 #endif  // PANDA_PLUGINS_ETS_COMPILER_ETS_CODEGEN_EXTENSIONS_H

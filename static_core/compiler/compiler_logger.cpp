@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,13 +33,13 @@ void CompilerLogger::SetComponents(const std::vector<std::string>& args)
             break;
         }
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF(COMPONENT, NAME)                \
-            if ((NAME) == arg) {              \
+#define CONTINUE_DEF(COMPONENT, NAME)       \
+            if ((NAME) == arg) {            \
                 components_.set(COMPONENT); \
                 continue;                   \
             }
-        COMPILER_LOG_COMPONENTS(DEF)
-#undef DEF
+        COMPILER_LOG_COMPONENTS(CONTINUE_DEF)
+#undef CONTINUE_DEF
 
         UNREACHABLE();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,39 @@ protected:
         return false;
     }
 
+#ifndef __clang_analyzer__
+    bool VisitBlockInLoop(BasicBlock *block, Loop *loop, Marker marker)
+    {
+        if constexpr (EXIT_POINT == LoopExitPoint::LOOP_EXIT_HEADER) {
+            // NOTE (a.popov) Support infinite loops unrolling
+            if (!block->IsMarked(marker) && block->IsLoopHeader()) {
+                COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+                    << "Loop without exit-point from loop-header isn't visited, id = " << loop->GetId();
+                return false;
+            }
+            if (block->IsMarked(marker) && !block->IsLoopHeader()) {
+                COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+                    << "Loop with loop-exit not from loop-header isn't visited, id = " << loop->GetId();
+                return false;
+            }
+        } else if constexpr (EXIT_POINT == LoopExitPoint::LOOP_EXIT_BACKEDGE) {
+            ASSERT(loop->GetBackEdges().size() == 1);
+            auto back_edge = loop->GetBackEdges()[0];
+            if (!block->IsMarked(marker) && block == back_edge) {
+                COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+                    << "Loop without exit-point from back-edge isn't visited, id = " << loop->GetId();
+                return false;
+            }
+            if (block->IsMarked(marker) && block != back_edge) {
+                COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+                    << "Loop with loop-exit not from last block isn't visited, id = " << loop->GetId();
+                return false;
+            }
+        }
+        return true;
+    }
+#endif
+
     bool VisitLoop(Loop *loop, [[maybe_unused]] Marker marker)
     {
 #ifndef __clang_analyzer__
@@ -92,31 +125,8 @@ protected:
                 return false;
             }
             for (auto block : loop->GetBlocks()) {
-                if constexpr (EXIT_POINT == LoopExitPoint::LOOP_EXIT_HEADER) {
-                    // NOTE (a.popov) Support infinite loops unrolling
-                    if (!block->IsMarked(marker) && block->IsLoopHeader()) {
-                        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-                            << "Loop without exit-point from loop-header isn't visited, id = " << loop->GetId();
-                        return false;
-                    }
-                    if (block->IsMarked(marker) && !block->IsLoopHeader()) {
-                        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-                            << "Loop with loop-exit not from loop-header isn't visited, id = " << loop->GetId();
-                        return false;
-                    }
-                } else if constexpr (EXIT_POINT == LoopExitPoint::LOOP_EXIT_BACKEDGE) {
-                    ASSERT(loop->GetBackEdges().size() == 1);
-                    auto back_edge = loop->GetBackEdges()[0];
-                    if (!block->IsMarked(marker) && block == back_edge) {
-                        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-                            << "Loop without exit-point from back-edge isn't visited, id = " << loop->GetId();
-                        return false;
-                    }
-                    if (block->IsMarked(marker) && block != back_edge) {
-                        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
-                            << "Loop with loop-exit not from last block isn't visited, id = " << loop->GetId();
-                        return false;
-                    }
+                if (!VisitBlockInLoop(block, loop, marker)) {
+                    return false;
                 }
             }
         }

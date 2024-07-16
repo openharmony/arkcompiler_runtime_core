@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,19 @@
 #include "compiler/optimizer/code_generator/codegen.h"
 
 namespace ark::compiler {
+
+inline void Codegen::PrepareForCallLaunchVirtual(CallInst *callInst, RuntimeInterface::MethodPtr method, Reg &thisReg,
+                                                 Reg &param0)
+{
+    thisReg = ConvertRegister(callInst->GetLocation(1).GetValue(), DataType::REFERENCE);
+    LoadClassFromObject(param0, thisReg);
+    // Get index
+    auto vtableIndex = GetRuntime()->GetVTableIndex(method);
+    // Load from VTable, address = klass + ((index << shift) + vtable_offset)
+    auto totalOffset = GetRuntime()->GetVTableOffset(GetArch()) + (vtableIndex << GetVtableShift());
+    // Class ref was loaded to method_reg
+    GetEncoder()->EncodeLdr(param0, false, MemRef(param0, totalOffset));
+}
 
 bool Codegen::LaunchCallCodegen(CallInst *callInst)
 {
@@ -59,14 +72,7 @@ bool Codegen::LaunchCallCodegen(CallInst *callInst)
             GetEncoder()->EncodeMov(param0, Imm(reinterpret_cast<size_t>(method)));
         } else {
             ASSERT(callInst->GetOpcode() == Opcode::CallLaunchVirtual);
-            thisReg = ConvertRegister(callInst->GetLocation(1).GetValue(), DataType::REFERENCE);
-            LoadClassFromObject(param0, thisReg);
-            // Get index
-            auto vtableIndex = GetRuntime()->GetVTableIndex(method);
-            // Load from VTable, address = klass + ((index << shift) + vtable_offset)
-            auto totalOffset = GetRuntime()->GetVTableOffset(GetArch()) + (vtableIndex << GetVtableShift());
-            // Class ref was loaded to method_reg
-            GetEncoder()->EncodeLdr(param0, false, MemRef(param0, totalOffset));
+            PrepareForCallLaunchVirtual(callInst, method, thisReg, param0);
         }
     }
 

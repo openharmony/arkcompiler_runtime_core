@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -372,11 +372,7 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
             AdjustCatchPhiInputsLifetime(inst);
         } else {
             if (inst->GetOpcode() == Opcode::LiveOut) {
-                if (block->GetSuccsBlocks().size() == 1 && block->GetSuccessor(0)->IsEndBlock()) {
-                    interval->AppendRange({instLifeNumber, GetBlockLiveRange(block).GetEnd()});
-                } else {
-                    interval->AppendRange({instLifeNumber, GetBlockLiveRange(GetGraph()->GetEndBlock()).GetBegin()});
-                }
+                ProcessOpcodeLiveOut(block, interval, instLifeNumber);
             }
             auto currentLiveRange = LiveRange {GetBlockLiveRange(block).GetBegin(), instLifeNumber};
             AdjustInputsLifetime(inst, currentLiveRange, liveSet);
@@ -402,6 +398,15 @@ void LivenessAnalyzer::ProcessBlockLiveInstructions(BasicBlock *block, InstLiveS
         }
     }
     SetBlockLiveSet(block, liveSet);
+}
+
+void LivenessAnalyzer::ProcessOpcodeLiveOut(BasicBlock *block, LifeIntervals *interval, LifeNumber instLifeNumber)
+{
+    if (block->GetSuccsBlocks().size() == 1 && block->GetSuccessor(0)->IsEndBlock()) {
+        interval->AppendRange({instLifeNumber, GetBlockLiveRange(block).GetEnd()});
+    } else {
+        interval->AppendRange({instLifeNumber, GetBlockLiveRange(GetGraph()->GetEndBlock()).GetBegin()});
+    }
 }
 
 /* static */
@@ -563,6 +568,56 @@ void LivenessAnalyzer::SetBlockLiveRange(BasicBlock *block, LiveRange lifeRange)
     blockLiveRanges_[block->GetId()] = lifeRange;
 }
 
+const ArenaVector<BasicBlock *> &LivenessAnalyzer::GetLinearizedBlocks() const
+{
+    return linearBlocks_;
+}
+
+Inst *LivenessAnalyzer::GetInstByLifeNumber(LifeNumber ln) const
+{
+    return instsByLifeNumber_[ln / LIFE_NUMBER_GAP];
+}
+
+BasicBlock *LivenessAnalyzer::GetBlockCoversPoint(LifeNumber ln) const
+{
+    for (auto bb : linearBlocks_) {
+        if (GetBlockLiveRange(bb).Contains(ln)) {
+            return bb;
+        }
+    }
+    return nullptr;
+}
+
+void LivenessAnalyzer::Cleanup()
+{
+    for (auto *interv : instLifeIntervals_) {
+        if (!interv->IsPhysical() && !interv->IsPreassigned()) {
+            interv->ClearLocation();
+        }
+        if (interv->GetSibling() != nullptr) {
+            interv->MergeSibling();
+        }
+    }
+}
+
+void LivenessAnalyzer::Finalize()
+{
+    for (auto *interv : instLifeIntervals_) {
+        interv->Finalize();
+    }
+    for (auto *interv : intervalsForTemps_) {
+        interv->Finalize();
+    }
+#ifndef NDEBUG
+    finalized_ = true;
+#endif
+}
+
+const ArenaVector<LifeIntervals *> &LivenessAnalyzer::GetLifeIntervals() const
+{
+    return instLifeIntervals_;
+}
+
 LiveRange LivenessAnalyzer::GetBlockLiveRange(const BasicBlock *block) const
 {
     return blockLiveRanges_[block->GetId()];
@@ -576,6 +631,34 @@ void LivenessAnalyzer::SetBlockLiveSet(BasicBlock *block, InstLiveSet *liveSet)
 InstLiveSet *LivenessAnalyzer::GetBlockLiveSet(BasicBlock *block) const
 {
     return blockLiveSets_[block->GetId()];
+}
+
+const UseTable &LivenessAnalyzer::GetUseTable() const
+{
+    return useTable_;
+}
+
+LifeIntervals *LivenessAnalyzer::GetTmpRegInterval(const Inst *inst)
+{
+    auto instLn = GetInstLifeNumber(inst);
+    auto it = std::find_if(intervalsForTemps_.begin(), intervalsForTemps_.end(),
+                           [instLn](auto li) { return li->GetBegin() == instLn - 1; });
+    return it == intervalsForTemps_.end() ? nullptr : *it;
+}
+
+const char *LivenessAnalyzer::GetPassName() const
+{
+    return "LivenessAnalysis";
+}
+
+size_t LivenessAnalyzer::GetBlocksCount() const
+{
+    return blockLiveRanges_.size();
+}
+
+ArenaAllocator *LivenessAnalyzer::GetAllocator()
+{
+    return allocator_;
 }
 
 void LivenessAnalyzer::DumpLifeIntervals(std::ostream &out) const
@@ -710,6 +793,11 @@ void LivenessAnalyzer::BlockPhysicalRegisters(LifeNumber blockFrom)
             BlockReg<IS_FP>(reg, blockFrom, blockFrom + 1U, true);
         }
     }
+}
+
+void LivenessAnalyzer::BlockFixedLocationRegister(Location location, LifeNumber ln)
+{
+    BlockFixedLocationRegister(location, ln, ln + 1U, true);
 }
 
 void LivenessAnalyzer::BlockFixedLocationRegister(Location location, LifeNumber blockFrom, LifeNumber blockTo,

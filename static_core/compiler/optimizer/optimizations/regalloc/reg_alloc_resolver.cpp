@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,7 +96,6 @@ void RegAllocResolver::ResolveInputs(Inst *inst)
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
         auto location = inst->GetLocation(i);
         auto inputInterval = liveness_->GetInstLifeIntervals(inst->GetDataFlowInput(i));
-
         if (CanReadFromAccumulator(inst, i) || inputInterval->NoDest() || location.IsInvalid()) {
             continue;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,13 +39,14 @@ BasicBlock *RedundantLoopElimination::IsRedundant(Loop *loop)
     for (auto block : loop->GetBlocks()) {
         // check that loop have only one exit and one outside blocks
         for (auto succ : block->GetSuccsBlocks()) {
-            if (succ->GetLoop() != loop) {
-                if (outsideSucc == nullptr) {
-                    outsideSucc = succ;
-                    loopExit_ = block;
-                } else {
-                    return nullptr;
-                }
+            if (succ->GetLoop() == loop) {
+                continue;
+            }
+            if (outsideSucc == nullptr) {
+                outsideSucc = succ;
+                loopExit_ = block;
+            } else {
+                return nullptr;
             }
         }
         // check that loop doesn't contains not redundant insts

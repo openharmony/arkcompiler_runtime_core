@@ -1041,6 +1041,19 @@ bool BoundsAnalysis::ProcessCountableLoop(PhiInst *phi, BoundsRangeInfo *bri)
     return false;
 }
 
+// "static" keyword for internal linkage
+static void MoveRangeAccordingCC(ConditionCode cc, BoundsRange &lowerRange, BoundsRange &upperRange, const Inst *upper)
+{
+    if (cc == CC_GT) {
+        lowerRange = lowerRange.Add(BoundsRange(1));
+    } else if (cc == CC_LT) {
+        upperRange = upperRange.Sub(BoundsRange(1));
+        if (IsLenArray(upper)) {
+            upperRange.SetLenArray(upper);
+        }
+    }
+}
+
 bool BoundsAnalysis::ProcessIndexPhi(Loop *loop, BoundsRangeInfo *bri, CountableLoopInfo &loopInfoValue)
 {
     auto *indexPhi = loopInfoValue.index;
@@ -1056,14 +1069,7 @@ bool BoundsAnalysis::ProcessIndexPhi(Loop *loop, BoundsRangeInfo *bri, Countable
     }
     auto lowerRange = bri->FindBoundsRange(phiBlock, lower);
     auto upperRange = bri->FindBoundsRange(phiBlock, upper);
-    if (cc == CC_GT) {
-        lowerRange = lowerRange.Add(BoundsRange(1));
-    } else if (cc == CC_LT) {
-        upperRange = upperRange.Sub(BoundsRange(1));
-        if (IsLenArray(upper)) {
-            upperRange.SetLenArray(upper);
-        }
-    }
+    MoveRangeAccordingCC(cc, lowerRange, upperRange, upper);
     if (lowerRange.GetLeft() > upperRange.GetRight()) {
         return false;
     }

@@ -53,20 +53,25 @@ const size_t MAX_VECTOR_PARAM_ID = 7;  // v0-v7
 
 class Aarch64CallingConvention;
 
+static inline vixl::aarch64::Register VixlRegCaseScalar(Reg reg)
+{
+    size_t regSize = reg.GetSize();
+    if (regSize < WORD_SIZE) {
+        regSize = WORD_SIZE;
+    }
+    if (regSize > DOUBLE_WORD_SIZE) {
+        regSize = DOUBLE_WORD_SIZE;
+    }
+    auto vixlReg = vixl::aarch64::Register(reg.GetId(), regSize);
+    ASSERT(vixlReg.IsValid());
+    return vixlReg;
+}
+
 static inline vixl::aarch64::Register VixlReg(Reg reg)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        size_t regSize = reg.GetSize();
-        if (regSize < WORD_SIZE) {
-            regSize = WORD_SIZE;
-        }
-        if (regSize > DOUBLE_WORD_SIZE) {
-            regSize = DOUBLE_WORD_SIZE;
-        }
-        auto vixlReg = vixl::aarch64::Register(reg.GetId(), regSize);
-        ASSERT(vixlReg.IsValid());
-        return vixlReg;
+        return VixlRegCaseScalar(reg);
     }
     if (reg.GetId() == vixl::aarch64::sp.GetCode()) {
         return vixl::aarch64::sp;
@@ -77,13 +82,18 @@ static inline vixl::aarch64::Register VixlReg(Reg reg)
     return vixl::aarch64::xzr;
 }
 
+static inline vixl::aarch64::Register VixlRegCaseScalar(Reg reg, const uint8_t size)
+{
+    auto vixlReg = vixl::aarch64::Register(reg.GetId(), (size < WORD_SIZE ? WORD_SIZE : size));
+    ASSERT(vixlReg.IsValid());
+    return vixlReg;
+}
+
 static inline vixl::aarch64::Register VixlReg(Reg reg, const uint8_t size)
 {
     ASSERT(reg.IsValid());
     if (reg.IsScalar()) {
-        auto vixlReg = vixl::aarch64::Register(reg.GetId(), (size < WORD_SIZE ? WORD_SIZE : size));
-        ASSERT(vixlReg.IsValid());
-        return vixlReg;
+        return VixlRegCaseScalar(reg, size);
     }
     if (reg.GetId() == vixl::aarch64::sp.GetCode()) {
         return vixl::aarch64::sp;

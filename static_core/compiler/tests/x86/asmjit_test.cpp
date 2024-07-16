@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,7 @@ TEST_F(AsmJitTest, Add)
     ASSERT_FALSE(err);
 
     size_t result {fn(size_t(2), size_t(3))};
-    ASSERT_EQ(size_t(5), result);
+    ASSERT_EQ(size_t(5U), result);
 }
 
 TEST_F(AsmJitTest, AddExplicit)
@@ -141,7 +141,7 @@ TEST_F(AsmJitTest, AddExplicit)
     Func fn = (Func)ro_ptr;
 
     size_t result {fn(size_t(2), size_t(3))};
-    ASSERT_EQ(size_t(5), result);
+    ASSERT_EQ(size_t(5U), result);
 
     err = allocator.release(ro_ptr);
     ASSERT_FALSE(err);

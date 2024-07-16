@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -376,6 +376,17 @@ void LinearOrder::MarkSideExitsBlocks()
     }
 }
 
+void LinearOrder::DumpUnreachableBlocks()
+{
+    std::cerr << "There are unreachable blocks:\n";
+    for (auto bb : *GetGraph()) {
+        if (bb != nullptr && !bb->IsMarked(marker_)) {
+            bb->Dump(&std::cerr);
+        }
+    }
+    UNREACHABLE();
+}
+
 bool LinearOrder::RunImpl()
 {
     if (GetGraph()->IsBytecodeOptimizer()) {
@@ -397,13 +408,7 @@ bool LinearOrder::RunImpl()
         DFSAndDeferLeastFrequentBranches<true>(GetGraph()->GetStartBlock(), &blocksCount);
 #ifndef NDEBUG
         if (blocksCount != 0) {
-            std::cerr << "There are unreachable blocks:\n";
-            for (auto bb : *GetGraph()) {
-                if (bb != nullptr && !bb->IsMarked(marker_)) {
-                    bb->Dump(&std::cerr);
-                }
-            }
-            UNREACHABLE();
+            DumpUnreachableBlocks();
         }
 #endif  // NDEBUG
         MakeLinearOrder(reorderedBlocks_);

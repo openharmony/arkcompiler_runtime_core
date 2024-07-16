@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,9 @@ public:
         }
         return graph;
     }
+
+    Graph *CreateDifferentInstCountGraph1();
+    Graph *CreateComparePhi1Graph1();
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -93,9 +96,8 @@ TEST_F(GraphComparatorTest, CompareIDs)
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
 }
 
-TEST_F(GraphComparatorTest, ComparePhi1)
+Graph *GraphComparatorTest::CreateComparePhi1Graph1()
 {
-    // graph1 and graph2 is equal but have different ids
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
@@ -120,6 +122,13 @@ TEST_F(GraphComparatorTest, ComparePhi1)
             INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
+    return graph1;
+}
+
+TEST_F(GraphComparatorTest, ComparePhi1)
+{
+    // graph1 and graph2 is equal but have different ids
+    auto graph1 = CreateComparePhi1Graph1();
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {
@@ -172,7 +181,7 @@ TEST_F(GraphComparatorTest, ComparePhi2)
     ASSERT_TRUE(GraphComparator().Compare(graph5, graph6));
 }
 
-TEST_F(GraphComparatorTest, CompareDifferentInstCount)
+Graph *GraphComparatorTest::CreateDifferentInstCountGraph1()
 {
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -200,7 +209,12 @@ TEST_F(GraphComparatorTest, CompareDifferentInstCount)
             INST(7U, Opcode::Return).s32().Inputs(6U);
         }
     }
+    return graph1;
+}
 
+TEST_F(GraphComparatorTest, CompareDifferentInstCount)
+{
+    auto graph1 = CreateDifferentInstCountGraph1();
     auto graph2 = CreateEmptyGraph();
     GRAPH(graph2)
     {

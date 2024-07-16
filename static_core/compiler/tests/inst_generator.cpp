@@ -462,6 +462,50 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
     return graph;
 }
 
+Inst *GraphCreator::CreateCheckInstByPackArgs(const PackArgsForCkeckInst &pack)
+{
+    Inst *ret = nullptr;
+    DataType::Type type = pack.type;
+    if (pack.inst->GetOpcode() == Opcode::CheckCast) {
+        ret = pack.graph->CreateInstReturn(type, INVALID_PC, pack.param1);
+    } else {
+        auto newInst = pack.graph->CreateInst(pack.opcode);
+        if (pack.opcode == Opcode::NewArray || pack.opcode == Opcode::NewObject) {
+            auto initInst = pack.graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
+            initInst->SetSaveState(pack.saveState);
+            pack.block->AppendInst(initInst);
+            if (pack.opcode == Opcode::NewArray) {
+                newInst->SetInput(NewArrayInst::INDEX_CLASS, initInst);
+                newInst->SetInput(NewArrayInst::INDEX_SIZE, pack.inst);
+            } else {
+                newInst->SetInput(0U, initInst);
+            }
+            newInst->SetSaveState(pack.saveState);
+            type = DataType::REFERENCE;
+        } else if (pack.opcode == Opcode::LoadArray) {
+            newInst->SetInput(0U, pack.param1);
+            newInst->SetInput(1U, pack.param2);
+            type = DataType::REFERENCE;
+        } else {
+            newInst->SetInput(0U, pack.param1);
+            newInst->SetInput(1U, pack.inst);
+            type = DataType::UINT64;
+        }
+        newInst->SetType(type);
+        pack.block->AppendInst(newInst);
+
+        ret = pack.graph->CreateInstReturn();
+        if (pack.opcode == Opcode::NewArray) {
+            ret->SetType(DataType::UINT32);
+            ret->SetInput(0U, pack.param2);
+        } else {
+            ret->SetType(type);
+            ret->SetInput(0U, newInst);
+        }
+    }
+    return ret;
+}
+
 Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
 {
     Opcode opcode;
@@ -505,44 +549,7 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
     }
     block->AppendInst(inst);
 
-    Inst *ret = nullptr;
-    if (inst->GetOpcode() == Opcode::CheckCast) {
-        ret = graph->CreateInstReturn(type, INVALID_PC, param1);
-    } else {
-        auto newInst = graph->CreateInst(opcode);
-        if (opcode == Opcode::NewArray || opcode == Opcode::NewObject) {
-            auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
-            initInst->SetSaveState(saveState);
-            block->AppendInst(initInst);
-            if (opcode == Opcode::NewArray) {
-                newInst->SetInput(NewArrayInst::INDEX_CLASS, initInst);
-                newInst->SetInput(NewArrayInst::INDEX_SIZE, inst);
-            } else {
-                newInst->SetInput(0U, initInst);
-            }
-            newInst->SetSaveState(saveState);
-            type = DataType::REFERENCE;
-        } else if (opcode == Opcode::LoadArray) {
-            newInst->SetInput(0U, param1);
-            newInst->SetInput(1U, param2);
-            type = DataType::REFERENCE;
-        } else {
-            newInst->SetInput(0U, param1);
-            newInst->SetInput(1U, inst);
-            type = DataType::UINT64;
-        }
-        newInst->SetType(type);
-        block->AppendInst(newInst);
-
-        ret = graph->CreateInstReturn();
-        if (opcode == Opcode::NewArray) {
-            ret->SetType(DataType::UINT32);
-            ret->SetInput(0U, param2);
-        } else {
-            ret->SetType(type);
-            ret->SetInput(0U, newInst);
-        }
-    }
+    Inst *ret = CreateCheckInstByPackArgs({opcode, type, inst, param1, param2, saveState, block, graph});
     block->AppendInst(ret);
     return graph;
 }
@@ -920,6 +927,14 @@ std::vector<Inst *> &InstGenerator::GenerateOperationsImm<IfImmInst>(Opcode opCo
     return insts_;
 }
 
+void InstGenerator::SetFlagsNoCseNoHoistIfReference(Inst *inst, DataType::Type dstType)
+{
+    if (dstType == DataType::REFERENCE) {
+        inst->SetFlag(inst_flags::NO_CSE);
+        inst->SetFlag(inst_flags::NO_HOIST);
+    }
+}
+
 template <>
 std::vector<Inst *> &InstGenerator::GenerateOperations<SelectInst>(Opcode opCode)
 {
@@ -936,10 +951,7 @@ std::vector<Inst *> &InstGenerator::GenerateOperations<SelectInst>(Opcode opCode
                 inst->SetOperandsType(cmpType);
                 inst->SetType(dstType);
                 inst->SetCc(cc);
-                if (dstType == DataType::REFERENCE) {
-                    inst->SetFlag(inst_flags::NO_CSE);
-                    inst->SetFlag(inst_flags::NO_HOIST);
-                }
+                SetFlagsNoCseNoHoistIfReference(inst, dstType);
                 insts_.push_back(inst);
             }
         }
@@ -964,10 +976,7 @@ std::vector<Inst *> &InstGenerator::GenerateOperationsImm<SelectImmInst>(Opcode 
                 inst->SetType(dstType);
                 inst->SetCc(cc);
                 inst->SetImm(cmpType == DataType::REFERENCE ? 0U : 1U);
-                if (dstType == DataType::REFERENCE) {
-                    inst->SetFlag(inst_flags::NO_CSE);
-                    inst->SetFlag(inst_flags::NO_HOIST);
-                }
+                SetFlagsNoCseNoHoistIfReference(inst, dstType);
                 insts_.push_back(inst);
             }
         }
@@ -1166,10 +1175,8 @@ constexpr std::array<const char *, 15U> LABELS = {"NO_TYPE", "REF",     "BOOL", 
                                                   "UINT16",  "INT16",   "UINT32",  "INT32", "UINT64",
                                                   "INT64",   "FLOAT32", "FLOAT64", "ANY",   "VOID"};
 
-void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
+void StatisticGenerator::FillHTMLPageHeadPart(std::ofstream &htmlPage)
 {
-    std::ofstream htmlPage;
-    htmlPage.open(fileName);
     htmlPage << "<!DOCTYPE html>\n"
              << "<html>\n"
              << "<head>\n"
@@ -1205,6 +1212,52 @@ void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
              << "\t<h3>Detailed information</h3>"
              << "\t\t<table>"
              << "\t\t<tr><th>Opcode\\Type</th>";
+}
+
+void StatisticGenerator::FillHTMLPageOpcodeStatistic(std::ofstream &htmlPage, Opcode opc)
+{
+    htmlPage << "\t\t<tr>";
+    htmlPage << "<th>" << GetOpcodeString(opc) << "</th>";
+    if (statistic_.first.find(opc) != statistic_.first.end()) {
+        auto item = statistic_.first[opc];
+        int positivCount = 0;
+        int negativCount = 0;
+        for (auto &j : item) {
+            std::string flag;
+            std::string color;
+            switch (j.second) {
+                case 0U:
+                    flag = "-";
+                    color = "bgcolor=\"#fd0000\"";
+                    negativCount++;
+                    break;
+                case 1U:
+                    flag = "+";
+                    color = "bgcolor=\"#00fd00\"";
+                    positivCount++;
+                    break;
+                default:
+                    break;
+            }
+            htmlPage << "<td align=\"center\" " << color << ">" << flag << "</td>";
+        }
+        if (positivCount + negativCount != 0U) {
+            htmlPage << "<td align=\"right\">" << positivCount * 100.0F / (positivCount + negativCount) << "</td>";
+        }
+    } else {
+        for (auto j = tmplt_.begin(); j != tmplt_.end(); ++j) {
+            htmlPage << R"(<td align=" center " bgcolor=" #808080"></td>)";
+        }
+        htmlPage << "<td align=\"right\">0</td>";
+    }
+    htmlPage << "</tr>\n";
+}
+
+void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
+{
+    std::ofstream htmlPage;
+    htmlPage.open(fileName);
+    FillHTMLPageHeadPart(htmlPage);
     for (auto label : LABELS) {
         htmlPage << "<th style=\"width:90px\">" << label << "</th>";
     }
@@ -1215,41 +1268,7 @@ void StatisticGenerator::GenerateHTMLPage(const std::string &fileName)
         if (opc == Opcode::NOP || opc == Opcode::Intrinsic || opc == Opcode::LoadPairPart) {
             continue;
         }
-        htmlPage << "\t\t<tr>";
-        htmlPage << "<th>" << GetOpcodeString(opc) << "</th>";
-        if (statistic_.first.find(opc) != statistic_.first.end()) {
-            auto item = statistic_.first[opc];
-            int positivCount = 0;
-            int negativCount = 0;
-            for (auto &j : item) {
-                std::string flag;
-                std::string color;
-                switch (j.second) {
-                    case 0U:
-                        flag = "-";
-                        color = "bgcolor=\"#fd0000\"";
-                        negativCount++;
-                        break;
-                    case 1U:
-                        flag = "+";
-                        color = "bgcolor=\"#00fd00\"";
-                        positivCount++;
-                        break;
-                    default:
-                        break;
-                }
-                htmlPage << "<td align=\"center\" " << color << ">" << flag << "</td>";
-            }
-            if (positivCount + negativCount != 0U) {
-                htmlPage << "<td align=\"right\">" << positivCount * 100.0F / (positivCount + negativCount) << "</td>";
-            }
-        } else {
-            for (auto j = tmplt_.begin(); j != tmplt_.end(); ++j) {
-                htmlPage << R"(<td align=" center " bgcolor=" #808080"></td>)";
-            }
-            htmlPage << "<td align=\"right\">0</td>";
-        }
-        htmlPage << "</tr>\n";
+        FillHTMLPageOpcodeStatistic(htmlPage, opc);
     }
     htmlPage << "\t</table>\n";
 

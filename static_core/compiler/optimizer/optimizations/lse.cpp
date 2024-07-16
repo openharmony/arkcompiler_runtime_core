@@ -188,6 +188,24 @@ public:
         return true;
     }
 
+    void VisitIntrinsicCheckInvariant(Inst *inv)
+    {
+        for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
+            auto &blockHeap = heaps_[eqClass].first.at(inv->GetBasicBlock());
+            for (auto heapIter = blockHeap.begin(), heapLast = blockHeap.end(); heapIter != heapLast;) {
+                auto hinst = heapIter->first;
+                aliasCalls_++;
+
+                if (!HasBaseObject(hinst) || aa_.CheckRefAlias(inv, hinst->GetDataFlowInput(0)) == NO_ALIAS) {
+                    heapIter++;
+                } else {
+                    COMPILER_LOG(DEBUG, LSE_OPT)
+                        << "\tDrop from heap { " << LogInst(hinst) << ", v" << heapIter->second.val->GetId() << "}";
+                    heapIter = blockHeap.erase(heapIter);
+                }
+            }
+        }
+    }
     void VisitIntrinsic(Inst *inst, InstVector *invs)
     {
         switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
@@ -196,21 +214,7 @@ public:
                 return;
         }
         for (auto inv : *invs) {
-            for (int eqClass = Lse::EquivClass::EQ_ARRAY; eqClass != Lse::EquivClass::EQ_LAST; eqClass++) {
-                auto &blockHeap = heaps_[eqClass].first.at(inv->GetBasicBlock());
-                for (auto heapIter = blockHeap.begin(), heapLast = blockHeap.end(); heapIter != heapLast;) {
-                    auto hinst = heapIter->first;
-                    aliasCalls_++;
-
-                    if (!HasBaseObject(hinst) || aa_.CheckRefAlias(inv, hinst->GetDataFlowInput(0)) == NO_ALIAS) {
-                        heapIter++;
-                    } else {
-                        COMPILER_LOG(DEBUG, LSE_OPT)
-                            << "\tDrop from heap { " << LogInst(hinst) << ", v" << heapIter->second.val->GetId() << "}";
-                        heapIter = blockHeap.erase(heapIter);
-                    }
-                }
-            }
+            VisitIntrinsicCheckInvariant(inv);
         }
         invs->clear();
     }
@@ -703,9 +707,9 @@ void Lse::InitializeHeap(BasicBlock *block, HeapEqClasses *heaps)
 void Lse::MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps)
 {
     ASSERT(block->IsLoopHeader());
-    auto loop = block->GetLoop();
 
     // Do not eliminate anything in irreducible or osr loops
+    auto loop = block->GetLoop();
     if (loop->IsIrreducible() || loop->IsOsrLoop() || loop->IsTryCatchLoop()) {
         return;
     }
@@ -821,14 +825,15 @@ void Lse::FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk)
         }
         if (!phi->HasUsers()) {
             block->RemoveInst(phi);
-        } else if (!GetGraph()->IsBytecodeOptimizer() && phi->IsReferenceOrAny()) {
-            for (auto i = 0U; i < phi->GetInputsCount(); i++) {
-                auto input = phi->GetInput(i);
-                if (input.GetInst()->IsMovableObject()) {
-                    auto bb = phi->GetPhiInputBb(i);
-                    ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), input.GetInst(), bb->GetLastInst(), nullptr,
-                                                              bb);
-                }
+        } else if (GetGraph()->IsBytecodeOptimizer() || !phi->IsReferenceOrAny()) {
+            continue;
+        }
+        // Here case: !GetGraph()->IsBytecodeOptimizer() && phi->IsReferenceOrAny()
+        for (auto i = 0U; i < phi->GetInputsCount(); i++) {
+            auto input = phi->GetInput(i);
+            if (input.GetInst()->IsMovableObject()) {
+                auto bb = phi->GetPhiInputBb(i);
+                ssb_.SearchAndCreateMissingObjInSaveState(GetGraph(), input.GetInst(), bb->GetLastInst(), nullptr, bb);
             }
         }
     }

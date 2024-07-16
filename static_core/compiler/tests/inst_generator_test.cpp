@@ -337,78 +337,78 @@ public:
         for (auto &inst : it) {
             auto type = inst->GetType();
             auto shiftType = ShiftType::INVALID_SHIFT;
-            if (VixlExecModule::GetType<ParamType>() == type) {
-                auto param1 = std::get<0U>(vals);
-                auto param2 = std::get<1U>(vals);
-                auto param3 = std::get<2U>(vals);
-                FixParams<ParamType>(&param1, &param2, &param3, opc);
-                if (IsImmOps(opc)) {
-                    static_cast<BinaryImmOperation *>(inst)->SetImm(param2);
-                } else if (IsUnaryShiftedRegisterOps(opc)) {
-                    static_cast<UnaryShiftedRegisterOperation *>(inst)->SetImm(param2);
-                    shiftType = static_cast<UnaryShiftedRegisterOperation *>(inst)->GetShiftType();
-                } else if (IsBinaryShiftedRegisterOps(opc)) {
-                    static_cast<BinaryShiftedRegisterOperation *>(inst)->SetImm(param3);
-                    shiftType = static_cast<BinaryShiftedRegisterOperation *>(inst)->GetShiftType();
-                }
-                auto graph = graphCreator_.GenerateGraph(inst);
-
-                auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
-                    if (graph != nullptr) {
-                        graph->~Graph();
-                    }
-                };
-                std::unique_ptr<void, decltype(finalizer)> fin(&finalizer, finalizer);
-
-                graph->RunPass<RegAllocLinearScan>();
-                if (!graph->RunPass<Codegen>()) {
-                    return;
-                };
-                auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                auto codeExit = codeEntry + graph->GetCode().Size();
-                ASSERT(codeEntry != nullptr && codeExit != nullptr);
-                execModule_.SetInstructions(codeEntry, codeExit);
-
-                execModule_.SetDump(false);
-
-                execModule_.SetParameter(0U, param1);
-
-                if (!IsImmOps(opc)) {
-                    execModule_.SetParameter(1U, param2);
-                }
-
-                if (IsTernary(opc)) {
-                    execModule_.SetParameter(2U, param3);
-                }
-
-                execModule_.Execute();
-
-                struct RetValue {
-                    uint64_t data;
-                    uint64_t type;
-                };
-
-                auto retData = execModule_.GetRetValue<ParamType>();
-                auto calcData = DoLogic<ParamType>(opc, param1, param2, param3, shiftType,
-                                                   DataType::GetTypeSize(type, graph->GetArch()));
-                if (calcData != retData) {
-                    std::cout << "  data " << retData << " sizeof type  "
-                              << static_cast<uint64_t>(sizeof(ParamType) * 8U) << " \n";
-                    std::cout << std::hex << "parameter_1 = " << param1 << " parameter_2 = " << param2
-                              << "parameter_3 = " << param3 << "\n";
-                    inst->Dump(&std::cerr);
-                    std::cout << "calculated = " << calcData << " returned " << retData << "\n";
-                    execModule_.SetDump(true);
-                    execModule_.PrintInstructions();
-                    execModule_.SetParameter(0U, param1);
-                    execModule_.SetParameter(1U, param2);
-                    execModule_.SetParameter(2U, param3);
-                    execModule_.Execute();
-                    execModule_.SetDump(false);
-                }
-                ASSERT_EQ(calcData, retData);
+            if (VixlExecModule::GetType<ParamType>() != type) {
+                continue;
             }
+            auto param1 = std::get<0U>(vals);
+            auto param2 = std::get<1U>(vals);
+            auto param3 = std::get<2U>(vals);
+            FixParams<ParamType>(&param1, &param2, &param3, opc);
+            if (IsImmOps(opc)) {
+                static_cast<BinaryImmOperation *>(inst)->SetImm(param2);
+            } else if (IsUnaryShiftedRegisterOps(opc)) {
+                static_cast<UnaryShiftedRegisterOperation *>(inst)->SetImm(param2);
+                shiftType = static_cast<UnaryShiftedRegisterOperation *>(inst)->GetShiftType();
+            } else if (IsBinaryShiftedRegisterOps(opc)) {
+                static_cast<BinaryShiftedRegisterOperation *>(inst)->SetImm(param3);
+                shiftType = static_cast<BinaryShiftedRegisterOperation *>(inst)->GetShiftType();
+            }
+            auto graph = graphCreator_.GenerateGraph(inst);
+            auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
+                if (graph != nullptr) {
+                    graph->~Graph();
+                }
+            };
+            std::unique_ptr<void, decltype(finalizer)> fin(&finalizer, finalizer);
+
+            graph->RunPass<RegAllocLinearScan>();
+            if (!graph->RunPass<Codegen>()) {
+                return;
+            };
+            auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            auto codeExit = codeEntry + graph->GetCode().Size();
+            ASSERT(codeEntry != nullptr && codeExit != nullptr);
+            execModule_.SetInstructions(codeEntry, codeExit);
+
+            execModule_.SetDump(false);
+
+            execModule_.SetParameter(0U, param1);
+
+            if (!IsImmOps(opc)) {
+                execModule_.SetParameter(1U, param2);
+            }
+
+            if (IsTernary(opc)) {
+                execModule_.SetParameter(2U, param3);
+            }
+
+            execModule_.Execute();
+
+            struct RetValue {
+                uint64_t data;
+                uint64_t type;
+            };
+
+            auto retData = execModule_.GetRetValue<ParamType>();
+            auto calcData = DoLogic<ParamType>(opc, param1, param2, param3, shiftType,
+                                               DataType::GetTypeSize(type, graph->GetArch()));
+            if (calcData != retData) {
+                std::cout << "  data " << retData << " sizeof type  " << static_cast<uint64_t>(sizeof(ParamType) * 8U)
+                          << " \n";
+                std::cout << std::hex << "parameter_1 = " << param1 << " parameter_2 = " << param2
+                          << "parameter_3 = " << param3 << "\n";
+                inst->Dump(&std::cerr);
+                std::cout << "calculated = " << calcData << " returned " << retData << "\n";
+                execModule_.SetDump(true);
+                execModule_.PrintInstructions();
+                execModule_.SetParameter(0U, param1);
+                execModule_.SetParameter(1U, param2);
+                execModule_.SetParameter(2U, param3);
+                execModule_.Execute();
+                execModule_.SetDump(false);
+            }
+            ASSERT_EQ(calcData, retData);
         }
     }
 
@@ -420,74 +420,75 @@ public:
         auto it = instGenerator_.Generate(opc);
         for (auto &inst : it) {
             auto type = inst->GetType();
-            if (VixlExecModule::GetType<ParamType>() == type) {
-                ParamType param1 = val;
+            if (VixlExecModule::GetType<ParamType>() != type) {
+                continue;
+            }
+            ParamType param1 = val;
 
-                auto graph = graphCreator_.GenerateGraph(inst);
+            auto graph = graphCreator_.GenerateGraph(inst);
 
-                auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
-                    if (graph != nullptr) {
-                        graph->~Graph();
-                    }
-                };
-                std::unique_ptr<void, decltype(finalizer)> fin(&finalizer, finalizer);
-
-                // Reset type for Cast-destination:
-                inst->SetType(VixlExecModule::GetType<ResultType>());
-                // Fix return value
-                for (auto &iter : inst->GetUsers()) {
-                    iter.GetInst()->SetType(VixlExecModule::GetType<ResultType>());
+            auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
+                if (graph != nullptr) {
+                    graph->~Graph();
                 }
-                graph->RunPass<RegAllocLinearScan>();
-                if (!graph->RunPass<Codegen>()) {
-                    return;
-                };
-                auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                auto codeExit = codeEntry + graph->GetCode().Size();
-                ASSERT(codeEntry != nullptr && codeExit != nullptr);
-                execModule_.SetInstructions(codeEntry, codeExit);
+            };
+            std::unique_ptr<void, decltype(finalizer)> fin(&finalizer, finalizer);
 
-                execModule_.SetDump(false);
-                execModule_.SetParameter(0U, param1);
-                execModule_.Execute();
+            // Reset type for Cast-destination:
+            inst->SetType(VixlExecModule::GetType<ResultType>());
+            // Fix return value
+            for (auto &iter : inst->GetUsers()) {
+                iter.GetInst()->SetType(VixlExecModule::GetType<ResultType>());
+            }
+            graph->RunPass<RegAllocLinearScan>();
+            if (!graph->RunPass<Codegen>()) {
+                return;
+            };
+            auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            auto codeExit = codeEntry + graph->GetCode().Size();
+            ASSERT(codeEntry != nullptr && codeExit != nullptr);
+            execModule_.SetInstructions(codeEntry, codeExit);
 
-                auto retData = execModule_.GetRetValue<ResultType>();
-                ResultType calcData;
+            execModule_.SetDump(false);
+            execModule_.SetParameter(0U, param1);
+            execModule_.Execute();
 
-                if constexpr ((GetCommonType(VixlExecModule::GetType<ResultType>()) == DataType::Type::INT64) &&
-                              (std::is_same_v<ParamType, float> || std::is_same_v<ParamType, double>)) {
-                    if (param1 > (ParamType)std::numeric_limits<ResultType>::max()) {
-                        calcData = std::numeric_limits<ResultType>::max();
-                    } else if (param1 < (ParamType)std::numeric_limits<ResultType>::min()) {
-                        calcData = std::numeric_limits<ResultType>::min();
-                    } else {
-                        calcData = static_cast<ResultType>(param1);
-                    }
+            auto retData = execModule_.GetRetValue<ResultType>();
+            ResultType calcData;
+
+            if constexpr ((GetCommonType(VixlExecModule::GetType<ResultType>()) == DataType::Type::INT64) &&
+                          (std::is_same_v<ParamType, float> || std::is_same_v<ParamType, double>)) {
+                if (param1 > (ParamType)std::numeric_limits<ResultType>::max()) {
+                    calcData = std::numeric_limits<ResultType>::max();
+                } else if (param1 < (ParamType)std::numeric_limits<ResultType>::min()) {
+                    calcData = std::numeric_limits<ResultType>::min();
                 } else {
                     calcData = static_cast<ResultType>(param1);
                 }
+            } else {
+                calcData = static_cast<ResultType>(param1);
+            }
 
-                if (calcData != retData) {
-                    if constexpr (std::is_same_v<ResultType, double> || std::is_same_v<ParamType, double>) {
-                        std::cout << std::hex << " in parameter = " << param1 << "\n";
-                        std::cout << std::hex << "parameter_1 = " << static_cast<double>(param1) << "\n";
-                    }
+            if (calcData != retData) {
+                if constexpr (std::is_same_v<ResultType, double> || std::is_same_v<ParamType, double>) {
+                    std::cout << std::hex << " in parameter = " << param1 << "\n";
+                    std::cout << std::hex << "parameter_1 = " << static_cast<double>(param1) << "\n";
+                }
 
 #ifndef NDEBUG
-                    std::cout << " cast from " << DataType::ToString(VixlExecModule::GetType<ParamType>()) << " to "
-                              << DataType::ToString(VixlExecModule::GetType<ResultType>()) << "\n";
+                std::cout << " cast from " << DataType::ToString(VixlExecModule::GetType<ParamType>()) << " to "
+                          << DataType::ToString(VixlExecModule::GetType<ResultType>()) << "\n";
 #endif
-                    std::cout << "  data " << retData << " sizeof type  "
-                              << static_cast<uint64_t>(sizeof(ParamType) * 8U) << " \n";
-                    inst->Dump(&std::cerr);
-                    execModule_.SetDump(true);
-                    execModule_.SetParameter(0U, param1);
-                    execModule_.Execute();
-                    execModule_.SetDump(false);
-                }
-                ASSERT_EQ(calcData, retData);
+                std::cout << "  data " << retData << " sizeof type  " << static_cast<uint64_t>(sizeof(ParamType) * 8U)
+                          << " \n";
+                inst->Dump(&std::cerr);
+                execModule_.SetDump(true);
+                execModule_.SetParameter(0U, param1);
+                execModule_.Execute();
+                execModule_.SetDump(false);
             }
+            ASSERT_EQ(calcData, retData);
         }
     }
 
@@ -685,7 +686,7 @@ void OneTest(ArithGenerator &gen, Opcode opc)
     gen.Generate<uint64_t>(opc, gen.GetRandValues());
 }
 
-void OneTestCast(ArithGenerator &gen)
+static void OneTestCastSignedInt(ArithGenerator &gen)
 {
     gen.GenCast<int8_t, uint8_t>(gen.GetRandValue());
     gen.GenCast<int8_t, uint16_t>(gen.GetRandValue());
@@ -730,7 +731,10 @@ void OneTestCast(ArithGenerator &gen)
     gen.GenCast<int64_t, int64_t>(gen.GetRandValue());
     gen.GenCast<int64_t, float>(gen.GetRandValue());
     gen.GenCast<int64_t, double>(gen.GetRandValue());
+}
 
+static void OneTestCastUnsignedInt(ArithGenerator &gen)
+{
     gen.GenCast<uint8_t, uint8_t>(gen.GetRandValue());
     gen.GenCast<uint8_t, uint16_t>(gen.GetRandValue());
     gen.GenCast<uint8_t, uint32_t>(gen.GetRandValue());
@@ -774,6 +778,12 @@ void OneTestCast(ArithGenerator &gen)
     gen.GenCast<uint64_t, int64_t>(gen.GetRandValue());
     gen.GenCast<uint64_t, float>(gen.GetRandValue());
     gen.GenCast<uint64_t, double>(gen.GetRandValue());
+}
+
+void OneTestCast(ArithGenerator &gen)
+{
+    OneTestCastSignedInt(gen);
+    OneTestCastUnsignedInt(gen);
 
     // We DON'T support cast from float32 to int8/16.
     gen.GenCast<float, uint32_t>(gen.GetRandValue());
@@ -934,6 +944,13 @@ TEST_F(InstGeneratorTest, GenArithVixlCode)
     NotRandomTests();
 }
 
+static void DestroyIfNotNull(Graph *graph)
+{
+    if (graph != nullptr) {
+        graph->~Graph();
+    }
+}
+
 /**
  * Check that all possible instructions that introduce a reference as a result
  * are handled in analysis.  On failed test add a case to AliasVisitor.
@@ -955,11 +972,7 @@ TEST_F(InstGeneratorTest, AliasAnalysisSupportTest)
             }
             auto graph = graphCreator.GenerateGraph(i);
 
-            auto finalizer = [&graph]([[maybe_unused]] void *ptr) {
-                if (graph != nullptr) {
-                    graph->~Graph();
-                }
-            };
+            auto finalizer = [&graph]([[maybe_unused]] void *ptr) { DestroyIfNotNull(graph); };
             std::unique_ptr<void, decltype(finalizer)> fin(&finalizer, finalizer);
 
             graph->RunPass<AliasAnalysis>();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,10 +38,7 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
         return std::nullopt;
     }
     auto loopExit = FindLoopExitBlock();
-    if (loopExit->IsEmpty()) {
-        return std::nullopt;
-    }
-    if (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]) {
+    if (loopExit->IsEmpty() || (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0])) {
         return std::nullopt;
     }
     isHeadLoopExit_ = (loopExit == loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]);

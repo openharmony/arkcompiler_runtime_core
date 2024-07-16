@@ -639,7 +639,6 @@ void SaveStateBridgesBuilder::SearchInSaveStateAndFillBridgeVector(Inst *inst, I
     auto user = std::find_if(inst->GetInputs().begin(), inst->GetInputs().end(), [searchedInst, inst](Input input) {
         return inst->GetDataFlowInput(input.GetInst()) == searchedInst;
     });
-
     if (user == inst->GetInputs().end()) {
         COMPILER_LOG(DEBUG, BRIDGES_SS) << "\tNot found";
         bridges->push_back(inst);

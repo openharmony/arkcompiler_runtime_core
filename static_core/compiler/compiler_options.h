@@ -125,13 +125,13 @@ private:
                 break;
             }
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF(FEATURE, NAME)         \
-    if ((NAME) == arg) {           \
-        EnableCpuFeature(FEATURE); \
-        continue;                  \
+#define CONTINUE_DEF(FEATURE, NAME) \
+    if ((NAME) == arg) {            \
+        EnableCpuFeature(FEATURE);  \
+        continue;                   \
     }
-            CPU_FEATURE(DEF)
-#undef DEF
+            CPU_FEATURE(CONTINUE_DEF)
+#undef CONTINUE_DEF
 
             UNREACHABLE();
         }

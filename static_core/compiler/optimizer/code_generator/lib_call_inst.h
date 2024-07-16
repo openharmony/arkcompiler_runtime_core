@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,40 +20,52 @@
 #include "compiler/optimizer/ir/inst.h"
 
 namespace ark::compiler {
-inline bool HasLibCall(Inst *inst, Arch arch)
+
+inline bool HasLibCall64BitArch(Inst *inst)
 {
     auto opcode = inst->GetOpcode();
     auto type = inst->GetType();
+    if (opcode == Opcode::Mod) {
+        return DataType::IsFloatType(type);
+    }
+    return false;
+}
+
+inline bool HasLibCallAarch32(Inst *inst)
+{
+    auto opcode = inst->GetOpcode();
+    auto type = inst->GetType();
+    if (opcode == Opcode::Mod) {
+        return true;
+    }
+    if (opcode == Opcode::Div) {
+        return type == DataType::INT64 || type == DataType::UINT64;
+    }
+    if (opcode == Opcode::Cast) {
+        auto srcType = inst->GetInputType(0);
+        if (DataType::IsFloatType(type)) {
+            return srcType == DataType::INT64 || srcType == DataType::UINT64;
+        }
+        if (DataType::IsFloatType(srcType)) {
+            return type == DataType::INT64 || type == DataType::UINT64;
+        }
+    }
+    return false;
+}
+
+inline bool HasLibCall(Inst *inst, Arch arch)
+{
     switch (arch) {
         case Arch::X86_64:
-        case Arch::AARCH64: {
-            if (opcode == Opcode::Mod) {
-                return DataType::IsFloatType(type);
-            }
-            return false;
-        }
-        case Arch::AARCH32: {
-            if (opcode == Opcode::Mod) {
-                return true;
-            }
-            if (opcode == Opcode::Div) {
-                return type == DataType::INT64 || type == DataType::UINT64;
-            }
-            if (opcode == Opcode::Cast) {
-                auto srcType = inst->GetInputType(0);
-                if (DataType::IsFloatType(type)) {
-                    return srcType == DataType::INT64 || srcType == DataType::UINT64;
-                }
-                if (DataType::IsFloatType(srcType)) {
-                    return type == DataType::INT64 || type == DataType::UINT64;
-                }
-            }
-            return false;
-        }
+        case Arch::AARCH64:
+            return HasLibCall64BitArch(inst);
+        case Arch::AARCH32:
+            return HasLibCallAarch32(inst);
         default:
             UNREACHABLE();
     }
 }
+
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_CODEGEN_LIB_CALL_INST_H

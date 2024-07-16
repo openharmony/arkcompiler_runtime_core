@@ -30,6 +30,417 @@ BasicBlock::BasicBlock(Graph *graph, uint32_t guestPc)
 {
 }
 
+void BasicBlock::SetId(uint32_t id)
+{
+    bbId_ = id;
+}
+uint32_t BasicBlock::GetId() const
+{
+    return bbId_;
+}
+
+ArenaVector<BasicBlock *> &BasicBlock::GetPredsBlocks()
+{
+    return preds_;
+}
+const ArenaVector<BasicBlock *> &BasicBlock::GetPredsBlocks() const
+{
+    return preds_;
+}
+
+BasicBlock::SuccsVector &BasicBlock::GetSuccsBlocks()
+{
+    return succs_;
+}
+const BasicBlock::SuccsVector &BasicBlock::GetSuccsBlocks() const
+{
+    return succs_;
+}
+
+BasicBlock *BasicBlock::GetSuccessor(size_t index) const
+{
+    ASSERT(index < succs_.size());
+    return succs_[index];
+}
+
+BasicBlock *BasicBlock::GetPredecessor(size_t index) const
+{
+    ASSERT(index < preds_.size());
+    return preds_[index];
+}
+
+bool BasicBlock::IsInverted() const
+{
+    return inverted_;
+}
+
+void BasicBlock::SetHotness(int64_t hotness)
+{
+    hotness_ = hotness;
+}
+
+int64_t BasicBlock::GetHotness() const
+{
+    return hotness_;
+}
+
+BasicBlock *BasicBlock::GetTrueSuccessor() const
+{
+    ASSERT(!succs_.empty());
+    return succs_[TRUE_SUCC_IDX];
+}
+
+BasicBlock *BasicBlock::GetFalseSuccessor() const
+{
+    ASSERT(succs_.size() > 1);
+    return succs_[FALSE_SUCC_IDX];
+}
+
+size_t BasicBlock::GetPredBlockIndex(const BasicBlock *block) const
+{
+    auto it = std::find(preds_.begin(), preds_.end(), block);
+    ASSERT(it != preds_.end());
+    ASSERT(std::find(it + 1, preds_.end(), block) == preds_.end());
+    return std::distance(preds_.begin(), it);
+}
+
+size_t BasicBlock::GetSuccBlockIndex(const BasicBlock *block) const
+{
+    auto it = std::find(succs_.begin(), succs_.end(), block);
+    ASSERT(it != succs_.end());
+    ASSERT(std::find(it + 1, succs_.end(), block) == succs_.end());
+    return std::distance(succs_.begin(), it);
+}
+
+BasicBlock *BasicBlock::GetPredBlockByIndex(size_t index) const
+{
+    ASSERT(index < preds_.size());
+    return preds_[index];
+}
+
+Graph *BasicBlock::GetGraph()
+{
+    return graph_;
+}
+
+const Graph *BasicBlock::GetGraph() const
+{
+    return graph_;
+}
+
+void BasicBlock::SetGraph(Graph *graph)
+{
+    graph_ = graph;
+}
+
+void BasicBlock::SetGuestPc(uint32_t guestPc)
+{
+    guestPc_ = guestPc;
+}
+
+uint32_t BasicBlock::GetGuestPc() const
+{
+    return guestPc_;
+}
+
+bool BasicBlock::HasSucc(BasicBlock *succ)
+{
+    return std::find(succs_.begin(), succs_.end(), succ) != succs_.end();
+}
+
+void BasicBlock::ReplacePred(BasicBlock *prevPred, BasicBlock *newPred)
+{
+    preds_[GetPredBlockIndex(prevPred)] = newPred;
+    newPred->succs_.push_back(this);
+}
+
+void BasicBlock::ReplaceTrueSuccessor(BasicBlock *newSucc)
+{
+    ASSERT(!succs_.empty());
+    succs_[TRUE_SUCC_IDX] = newSucc;
+    newSucc->preds_.push_back(this);
+}
+
+void BasicBlock::ReplaceFalseSuccessor(BasicBlock *newSucc)
+{
+    ASSERT(succs_.size() > 1);
+    succs_[FALSE_SUCC_IDX] = newSucc;
+    newSucc->preds_.push_back(this);
+}
+
+void BasicBlock::PrependInst(Inst *inst)
+{
+    AddInst<false>(inst);
+}
+// Insert new instruction(NOT PHI) in BasicBlock at the end of instructions
+void BasicBlock::AppendInst(Inst *inst)
+{
+    AddInst<true>(inst);
+}
+void BasicBlock::AppendInsts(std::initializer_list<Inst *> &&insts)
+{
+    for (auto inst : insts) {
+        AddInst<true>(inst);
+    }
+}
+
+Inst *BasicBlock::GetLastInst() const
+{
+    return lastInst_;
+}
+
+bool BasicBlock::IsEndWithThrowOrDeoptimize() const
+{
+    if (lastInst_ == nullptr) {
+        return false;
+    }
+    return lastInst_->IsControlFlow() && lastInst_->CanThrow() && lastInst_->IsTerminator();
+}
+
+Inst *BasicBlock::GetFirstInst() const
+{
+    return firstInst_;
+}
+
+Inst *BasicBlock::GetFirstPhi() const
+{
+    return firstPhi_;
+}
+
+bool BasicBlock::IsEmpty() const
+{
+    return firstInst_ == nullptr;
+}
+
+bool BasicBlock::HasPhi() const
+{
+    return firstPhi_ != nullptr;
+}
+
+void BasicBlock::SetDominator(BasicBlock *dominator)
+{
+    dominator_ = dominator;
+}
+void BasicBlock::ClearDominator()
+{
+    dominator_ = nullptr;
+}
+
+void BasicBlock::AddDominatedBlock(BasicBlock *block)
+{
+    domBlocks_.push_back(block);
+}
+
+void BasicBlock::RemoveDominatedBlock(BasicBlock *block)
+{
+    domBlocks_.erase(std::find(domBlocks_.begin(), domBlocks_.end(), block));
+}
+
+void BasicBlock::ClearDominatedBlocks()
+{
+    domBlocks_.clear();
+}
+
+void BasicBlock::RemovePred(const BasicBlock *pred)
+{
+    ASSERT(GetPredBlockIndex(pred) < preds_.size());
+    preds_[GetPredBlockIndex(pred)] = preds_.back();
+    preds_.pop_back();
+}
+
+void BasicBlock::RemovePred(size_t index)
+{
+    ASSERT(index < preds_.size());
+    preds_[index] = preds_.back();
+    preds_.pop_back();
+}
+
+void BasicBlock::RemoveSucc(BasicBlock *succ)
+{
+    auto it = std::find(succs_.begin(), succs_.end(), succ);
+    ASSERT(it != succs_.end());
+    succs_.erase(it);
+}
+
+Loop *BasicBlock::GetLoop() const
+{
+    return loop_;
+}
+void BasicBlock::SetLoop(Loop *loop)
+{
+    loop_ = loop;
+}
+bool BasicBlock::IsLoopValid() const
+{
+    return GetLoop() != nullptr;
+}
+
+void BasicBlock::SetNextLoop(Loop *loop)
+{
+    nextLoop_ = loop;
+}
+
+Loop *BasicBlock::GetNextLoop()
+{
+    return nextLoop_;
+}
+
+bool BasicBlock::IsLoopPreHeader() const
+{
+    return (nextLoop_ != nullptr);
+}
+
+void BasicBlock::SetAllFields(uint32_t bitFields)
+{
+    bitFields_ = bitFields;
+}
+
+uint32_t BasicBlock::GetAllFields() const
+{
+    return bitFields_;
+}
+
+void BasicBlock::SetMonitorEntryBlock(bool v)
+{
+    SetField<MonitorEntryBlock>(v);
+}
+
+bool BasicBlock::GetMonitorEntryBlock()
+{
+    return GetField<MonitorEntryBlock>();
+}
+
+void BasicBlock::SetMonitorExitBlock(bool v)
+{
+    SetField<MonitorExitBlock>(v);
+}
+
+bool BasicBlock::GetMonitorExitBlock() const
+{
+    return GetField<MonitorExitBlock>();
+}
+
+void BasicBlock::SetMonitorBlock(bool v)
+{
+    SetField<MonitorBlock>(v);
+}
+
+bool BasicBlock::GetMonitorBlock() const
+{
+    return GetField<MonitorBlock>();
+}
+
+void BasicBlock::SetCatch(bool v)
+{
+    SetField<CatchBlock>(v);
+}
+
+bool BasicBlock::IsCatch() const
+{
+    return GetField<CatchBlock>();
+}
+
+void BasicBlock::SetCatchBegin(bool v)
+{
+    SetField<CatchBeginBlock>(v);
+}
+
+bool BasicBlock::IsCatchBegin() const
+{
+    return GetField<CatchBeginBlock>();
+}
+
+void BasicBlock::SetCatchEnd(bool v)
+{
+    SetField<CatchEndBlock>(v);
+}
+
+bool BasicBlock::IsCatchEnd() const
+{
+    return GetField<CatchEndBlock>();
+}
+
+void BasicBlock::SetTry(bool v)
+{
+    SetField<TryBlock>(v);
+}
+
+bool BasicBlock::IsTry() const
+{
+    return GetField<TryBlock>();
+}
+
+void BasicBlock::SetTryBegin(bool v)
+{
+    SetField<TryBeginBlock>(v);
+}
+
+bool BasicBlock::IsTryBegin() const
+{
+    return GetField<TryBeginBlock>();
+}
+
+void BasicBlock::SetTryEnd(bool v)
+{
+    SetField<TryEndBlock>(v);
+}
+
+bool BasicBlock::IsTryEnd() const
+{
+    return GetField<TryEndBlock>();
+}
+
+void BasicBlock::SetOsrEntry(bool v)
+{
+    SetField<OsrEntry>(v);
+}
+
+bool BasicBlock::IsOsrEntry() const
+{
+    return GetField<OsrEntry>();
+}
+
+void BasicBlock::CopyTryCatchProps(BasicBlock *block)
+{
+    if (block->IsTry()) {
+        SetTry(true);
+        SetTryId(block->GetTryId());
+    }
+    if (block->IsCatch()) {
+        SetCatch(true);
+    }
+}
+
+uint32_t BasicBlock::GetTryId() const
+{
+    return tryId_;
+}
+
+void BasicBlock::SetTryId(uint32_t tryId)
+{
+    tryId_ = tryId;
+}
+
+void BasicBlock::SetNeedsJump(bool v)
+{
+    SetField<JumpFlag>(v);
+}
+
+bool BasicBlock::NeedsJump() const
+{
+    return GetField<JumpFlag>();
+}
+
+bool BasicBlock::IsIfBlock() const
+{
+    if (lastInst_ != nullptr) {
+        if (lastInst_->GetOpcode() == Opcode::If || lastInst_->GetOpcode() == Opcode::IfImm) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool BasicBlock::IsStartBlock() const
 {
     return (graph_->GetStartBlock() == this);

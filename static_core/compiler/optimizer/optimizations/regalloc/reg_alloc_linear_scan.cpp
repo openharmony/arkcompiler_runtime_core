@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,7 +244,6 @@ bool RegAllocLinearScan::TryToAssignRegister(LifeIntervals *currentInterval)
     // Try to assign blocked register
     auto [blocked_reg, next_blocked_use] = GetBlockedRegister(currentInterval);
     auto nextUse = currentInterval->GetNextUsage(currentInterval->GetBegin());
-
     // Spill current interval if its first use later than use of blocked register
     if (blocked_reg != INVALID_REG && next_blocked_use < nextUse && !IsNonSpillableConstInterval(currentInterval)) {
         SplitBeforeUse<IS_FP>(currentInterval, nextUse);

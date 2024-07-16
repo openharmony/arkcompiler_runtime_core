@@ -380,7 +380,6 @@ bool Lowering::TryReplaceDivModNonPowerOfTwo([[maybe_unused]] GraphVisitor *v, I
 
     auto input0 = inst->GetInput(0).GetInst();
     bool isSigned = DataType::IsTypeSigned(input0->GetType());
-
     if (!graph->GetEncoder()->CanOptimizeImmDivMod(uValue, isSigned)) {
         return false;
     }

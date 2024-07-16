@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -634,7 +634,7 @@ private:
     std::vector<RuntimeInterface::ClassPtr> classes_;
 };
 
-TEST_F(InliningTest, PolymorphicInlineWithThrow)
+const char *CreateSourcePolymorphicInlineWithThrow()
 {
     auto source = R"(
         .record Base {}
@@ -669,7 +669,12 @@ TEST_F(InliningTest, PolymorphicInlineWithThrow)
             return
         }
     )";
+    return source;
+}
 
+TEST_F(InliningTest, PolymorphicInlineWithThrow)
+{
+    auto source = CreateSourcePolymorphicInlineWithThrow();
     auto skipThrow = g_options.IsCompilerInliningSkipThrowBlocks();
     auto skipThrowMethods = g_options.IsCompilerInliningSkipAlwaysThrowMethods();
     g_options.SetCompilerInliningSkipThrowBlocks(false);

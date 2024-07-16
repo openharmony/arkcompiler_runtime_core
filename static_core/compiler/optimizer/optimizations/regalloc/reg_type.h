@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,20 @@
 
 namespace ark::compiler {
 
+inline DataType::Type ConvertRegTypeNotFloat(const Graph *graph, DataType::Type type)
+{
+    if (graph->IsBytecodeOptimizer() && type == DataType::REFERENCE) {
+        return type;
+    }
+
+    bool useReg32 = graph->IsRegScalarMapped() || graph->IsBytecodeOptimizer();
+    if (useReg32 && DataType::Is32Bits(type, graph->GetArch())) {
+        return DataType::Type::UINT32;
+    }
+
+    return DataType::Type::UINT64;
+}
+
 inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
 {
     if (DataType::IsFloatType(type)) {
@@ -31,16 +45,7 @@ inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
 
     ASSERT(GetCommonType(type) == DataType::INT64 || type == DataType::REFERENCE || type == DataType::POINTER ||
            type == DataType::ANY);
-    if (graph->IsBytecodeOptimizer() && type == DataType::REFERENCE) {
-        return type;
-    }
-
-    bool useReg32 = graph->IsRegScalarMapped() || graph->IsBytecodeOptimizer();
-    if (useReg32 && DataType::Is32Bits(type, graph->GetArch())) {
-        return DataType::Type::UINT32;
-    }
-
-    return DataType::Type::UINT64;
+    return ConvertRegTypeNotFloat(graph, type);
 }
 
 }  // namespace ark::compiler

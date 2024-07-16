@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,17 +70,25 @@ private:
     template <bool LIGHT_MODE>
     void MarkLiveInstructions(Marker deadMrk, Marker liveMrk);
     template <bool LIGHT_MODE>
+    void MarkOneLiveInst(Marker deadMrk, Marker liveMrk, Inst *inst);
+    template <bool LIGHT_MODE>
     bool Dce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks);
+    template <bool LIGHT_MODE>
+    bool TryToRemoveNonLiveInst(Inst *inst, BasicBlock *bb, ArenaSet<BasicBlock *> *newEmptyBlocks, Marker liveMrk);
 
     void SetLiveRec(Inst *inst, Marker mrk, Marker liveMrk);
     void LiveUserSearchRec(Inst *inst, Marker mrk, Marker liveMrk, Marker deadMrk);
     bool SimpleDce(Marker deadMrk, ArenaSet<BasicBlock *> *newEmptyBlocks);
     void Marking(Marker deadMrk, Marker mrk, Marker liveMrk);
+    void TryMarkInstIsDead(Inst *inst, Marker deadMrk, Marker mrk, Marker liveMrk);
+
     bool Removal(ArenaSet<BasicBlock *> *newEmptyBlocks);
+    void RemovalPhi(BasicBlock *bb, ArenaSet<BasicBlock *> *newEmptyBlocks);
 
     bool PhiChecker();
     bool PhiCheckerLight() const;
     void BuildDominators();
+    void BuildDominatorsVisitPhi(Inst *inst, size_t &amount);
 
     ArenaSet<BasicBlock *> empty1_;
     ArenaSet<BasicBlock *> empty2_;
@@ -196,6 +204,9 @@ private:
     void DfsNumbering(Inst *inst);
     Inst *Eval(Inst *inst);
     void Init(size_t count);
+#ifndef NDEBUG
+    void CheckBBPhisUsers(BasicBlock *succ, BasicBlock *bb);
+#endif
 };
 }  // namespace ark::compiler
 

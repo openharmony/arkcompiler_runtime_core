@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -522,58 +522,16 @@ public:
     ~LivenessAnalyzer() override = default;
 
     bool RunImpl() override;
+    void Cleanup();
+    void Finalize();
+    const char *GetPassName() const override;
 
-    const ArenaVector<BasicBlock *> &GetLinearizedBlocks() const
-    {
-        return linearBlocks_;
-    }
+    const ArenaVector<BasicBlock *> &GetLinearizedBlocks() const;
+    const ArenaVector<LifeIntervals *> &GetLifeIntervals() const;
+
     LifeIntervals *GetInstLifeIntervals(const Inst *inst) const;
-
-    Inst *GetInstByLifeNumber(LifeNumber ln) const
-    {
-        return instsByLifeNumber_[ln / LIFE_NUMBER_GAP];
-    }
-
-    BasicBlock *GetBlockCoversPoint(LifeNumber ln) const
-    {
-        for (auto bb : linearBlocks_) {
-            if (GetBlockLiveRange(bb).Contains(ln)) {
-                return bb;
-            }
-        }
-        return nullptr;
-    }
-
-    void Cleanup()
-    {
-        for (auto *interv : instLifeIntervals_) {
-            if (!interv->IsPhysical() && !interv->IsPreassigned()) {
-                interv->ClearLocation();
-            }
-            if (interv->GetSibling() != nullptr) {
-                interv->MergeSibling();
-            }
-        }
-    }
-
-    void Finalize()
-    {
-        for (auto *interv : instLifeIntervals_) {
-            interv->Finalize();
-        }
-        for (auto *interv : intervalsForTemps_) {
-            interv->Finalize();
-        }
-#ifndef NDEBUG
-        finalized_ = true;
-#endif
-    }
-
-    const ArenaVector<LifeIntervals *> &GetLifeIntervals() const
-    {
-        return instLifeIntervals_;
-    }
-
+    Inst *GetInstByLifeNumber(LifeNumber ln) const;
+    BasicBlock *GetBlockCoversPoint(LifeNumber ln) const;
     LiveRange GetBlockLiveRange(const BasicBlock *block) const;
 
     template <typename Func>
@@ -623,40 +581,16 @@ public:
         }
     }
 
-    const char *GetPassName() const override
-    {
-        return "LivenessAnalysis";
-    }
-
-    size_t GetBlocksCount() const
-    {
-        return blockLiveRanges_.size();
-    }
-
+    const UseTable &GetUseTable() const;
+    size_t GetBlocksCount() const;
+    LifeIntervals *GetTmpRegInterval(const Inst *inst);
     bool IsCallBlockingRegisters(Inst *inst) const;
 
     void DumpLifeIntervals(std::ostream &out = std::cout) const;
     void DumpLocationsUsage(std::ostream &out = std::cout) const;
 
-    const UseTable &GetUseTable() const
-    {
-        return useTable_;
-    }
-
-    LifeIntervals *GetTmpRegInterval(const Inst *inst)
-    {
-        auto instLn = GetInstLifeNumber(inst);
-        auto it = std::find_if(intervalsForTemps_.begin(), intervalsForTemps_.end(),
-                               [instLn](auto li) { return li->GetBegin() == instLn - 1; });
-        return it == intervalsForTemps_.end() ? nullptr : *it;
-    }
-
 private:
-    ArenaAllocator *GetAllocator()
-    {
-        return allocator_;
-    }
-
+    ArenaAllocator *GetAllocator();
     void ResetLiveness();
 
     /*
@@ -694,11 +628,9 @@ private:
     void BlockReg(Register reg, LifeNumber blockFrom, LifeNumber blockTo, bool isUse);
     template <bool IS_FP>
     void BlockPhysicalRegisters(LifeNumber blockFrom);
-    void BlockFixedLocationRegister(Location location, LifeNumber ln)
-    {
-        BlockFixedLocationRegister(location, ln, ln + 1U, true);
-    }
+    void BlockFixedLocationRegister(Location location, LifeNumber ln);
     void BlockFixedLocationRegister(Location location, LifeNumber blockFrom, LifeNumber blockTo, bool isUse);
+    void ProcessOpcodeLiveOut(BasicBlock *block, LifeIntervals *interval, LifeNumber instLifeNumber);
 
 private:
     ArenaAllocator *allocator_;

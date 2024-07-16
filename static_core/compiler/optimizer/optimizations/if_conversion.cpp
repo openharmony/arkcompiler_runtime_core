@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -238,7 +238,6 @@ bool IfConversion::IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *
 
         auto inst1 = phi->GetInput(index1).GetInst();
         auto inst2 = phi->GetInput(index2).GetInst();
-
         if (inst1 == inst2) {
             // Otherwise DCE should remove Phi
             [[maybe_unused]] constexpr auto IMM_2 = 2;
