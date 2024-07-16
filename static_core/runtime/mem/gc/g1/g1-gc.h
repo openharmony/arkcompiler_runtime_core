@@ -277,6 +277,11 @@ private:
 
     bool IsInCollectionSet(ObjectHeader *object);
 
+    template <bool FULL_GC>
+    void UpdateRefsAndClear(const CollectionSet &collectionSet, MovedObjectsContainer<FULL_GC> *movedObjectsContainer,
+                            PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector,
+                            HeapVerifierIntoGC<LanguageConfig> *collectVerifier);
+
     /**
      * Collect dead objects in young generation and move survivors
      * @return true if moving was success, false otherwise
@@ -305,6 +310,13 @@ private:
     std::conditional_t<FULL_GC, UpdateRemsetRefUpdater<LanguageConfig, NEED_LOCK>,
                        EnqueueRemsetRefUpdater<LanguageConfig>>
     CreateRefUpdater(GCG1BarrierSet::ThreadLocalCardQueues *updatedRefQueue) const;
+
+    template <class ObjectsContainer>
+    void ProcessMovedObjects(ObjectsContainer *movedObjects);
+
+    /// Update refs to objects which were moved while garbage collection
+    template <bool FULL_GC, bool ENABLE_WORKERS, class Visitor>
+    void UpdateMovedObjectsReferences(MovedObjectsContainer<FULL_GC> *movedObjectsContainer, const Visitor &refUpdater);
 
     /// Update all refs to moved objects
     template <bool FULL_GC, bool USE_WORKERS>

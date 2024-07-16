@@ -290,18 +290,15 @@ bool GC::NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) 
     return (newCounter == counterBeforeWaiting || lastCause_.load(std::memory_order_acquire) < task.reason);
 }
 
-// NOLINTNEXTLINE(performance-unnecessary-value-param)
-void GC::RunPhases(GCTask &task)
+bool GC::GCPhasesPreparation(const GCTask &task)
 {
-    DCHECK_ALLOW_GARBAGE_COLLECTION;
-    trace::ScopedTrace scopedTrace(__FUNCTION__);
     // Atomic with acquire order reason: data race with gc_counter_ with dependecies on reads after the load which
     // should become visible
     auto oldCounter = gcCounter_.load(std::memory_order_acquire);
     WaitForIdleGC();
     if (!this->NeedRunGCAfterWaiting(oldCounter, task)) {
         SetGCPhase(GCPhase::GC_PHASE_IDLE);
-        return;
+        return false;
     }
     this->SetupCpuAffinity();
     this->GetTiming()->Reset();  // Clear records.
@@ -323,6 +320,43 @@ void GC::RunPhases(GCTask &task)
         os << "Heap dump before GC" << std::endl;
         GetPandaVm()->DumpHeap(&os);
         std::cerr << os.str() << std::endl;
+    }
+    return true;
+}
+
+void GC::GCPhasesFinish(const GCTask &task)
+{
+    ASSERT(task.collectionType != GCCollectionType::NONE);
+    LOG(INFO, GC) << "[" << gcCounter_ << "] [" << task.collectionType << " (" << task.reason << ")] "
+                  << GetPandaVm()->GetGCStats()->GetStatistics();
+
+    if (gcSettings_.IsDumpHeap()) {
+        PandaOStringStream os;
+        os << "Heap dump after GC" << std::endl;
+        GetPandaVm()->DumpHeap(&os);
+        std::cerr << os.str() << std::endl;
+    }
+
+    if (gcSettings_.PostGCHeapVerification()) {
+        trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier");
+        size_t failCount = VerifyHeap();
+        if (gcSettings_.FailOnHeapVerification() && failCount > 0) {
+            LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << failCount << " corruptions";
+        }
+    }
+    this->RestoreCpuAffinity();
+
+    SetGCPhase(GCPhase::GC_PHASE_IDLE);
+}
+
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
+void GC::RunPhases(GCTask &task)
+{
+    DCHECK_ALLOW_GARBAGE_COLLECTION;
+    trace::ScopedTrace scopedTrace(__FUNCTION__);
+    bool needRunGCAfterWaiting = GCPhasesPreparation(task);
+    if (!needRunGCAfterWaiting) {
+        return;
     }
     size_t bytesInHeapBeforeGc = GetPandaVm()->GetMemStats()->GetFootprintHeap();
     LOG_DEBUG_GC << "Bytes in heap before GC " << std::dec << bytesInHeapBeforeGc;
@@ -351,27 +385,7 @@ void GC::RunPhases(GCTask &task)
         LOG_DEBUG_GC << "Bytes in heap after GC " << std::dec << bytesInHeapAfterGc;
         FireGCFinished(task, bytesInHeapBeforeGc, bytesInHeapAfterGc);
     }
-    ASSERT(task.collectionType != GCCollectionType::NONE);
-    LOG(INFO, GC) << "[" << gcCounter_ << "] [" << task.collectionType << " (" << task.reason << ")] "
-                  << GetPandaVm()->GetGCStats()->GetStatistics();
-
-    if (gcSettings_.IsDumpHeap()) {
-        PandaOStringStream os;
-        os << "Heap dump after GC" << std::endl;
-        GetPandaVm()->DumpHeap(&os);
-        std::cerr << os.str() << std::endl;
-    }
-
-    if (gcSettings_.PostGCHeapVerification()) {
-        trace::ScopedTrace postHeapVerifierTrace("PostGCHeapVeriFier");
-        size_t failCount = VerifyHeap();
-        if (gcSettings_.FailOnHeapVerification() && failCount > 0) {
-            LOG(FATAL, GC) << "Heap corrupted after GC, HeapVerifier found " << failCount << " corruptions";
-        }
-    }
-    this->RestoreCpuAffinity();
-
-    SetGCPhase(GCPhase::GC_PHASE_IDLE);
+    GCPhasesFinish(task);
 }
 
 template <class LanguageConfig>
@@ -886,17 +900,18 @@ void GC::UpdateRefsInVRegs(ManagedThread *thread)
                 return true;
             }
             MarkWord markWord = objectHeader->AtomicGetMark();
-            if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
-                MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
-                LOG_DEBUG_GC << "Update vreg, vreg old val = " << std::hex << objectHeader << ", new val = 0x" << addr;
-                LOG_IF(regInfo.IsAccumulator(), DEBUG, GC) << "^ acc reg";
-                if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
-                    LOG_DEBUG_GC << "^ acc updated";
-                    vreg.SetReference(reinterpret_cast<ObjectHeader *>(addr));
-                } else {
-                    pframe.template SetVRegValue<std::is_same_v<decltype(vreg), interpreter::DynamicVRegisterRef &>>(
-                        regInfo, reinterpret_cast<ObjectHeader *>(addr));
-                }
+            if (markWord.GetState() != MarkWord::ObjectState::STATE_GC) {
+                return true;
+            }
+            MarkWord::MarkWordSize addr = markWord.GetForwardingAddress();
+            LOG_DEBUG_GC << "Update vreg, vreg old val = " << std::hex << objectHeader << ", new val = 0x" << addr;
+            LOG_IF(regInfo.IsAccumulator(), DEBUG, GC) << "^ acc reg";
+            if (!pframe.IsCFrame() && regInfo.IsAccumulator()) {
+                LOG_DEBUG_GC << "^ acc updated";
+                vreg.SetReference(reinterpret_cast<ObjectHeader *>(addr));
+            } else {
+                pframe.template SetVRegValue<std::is_same_v<decltype(vreg), interpreter::DynamicVRegisterRef &>>(
+                    regInfo, reinterpret_cast<ObjectHeader *>(addr));
             }
             return true;
         };

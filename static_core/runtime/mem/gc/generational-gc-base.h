@@ -284,6 +284,11 @@ protected:
 
     void CreateCardTable(InternalAllocatorPtr internalAllocatorPtr, uintptr_t minAddress, size_t size);
 
+    template <typename Marker>
+    void VisitCardTableConcurrent(Marker *marker, GCMarkingStackType *objectsStack,
+                                  const ReferenceCheckPredicateT &refPred, const MemRangeChecker &memRangeChecker,
+                                  const GC::MarkPreprocess &markPreprocess);
+
     void PrintDetailedLog() override
     {
         LOG(INFO, GC) << memStats_.Dump();

@@ -667,7 +667,6 @@ bool GenGC<LanguageConfig>::InGCSweepRange(const ObjectHeader *obj) const
 {
     bool inYoungSpace = this->GetObjectAllocator()->IsObjectInYoungSpace(obj);
     auto phase = this->GetGCPhase();
-
     // Do young GC and the object is in the young space
     if (phase == GCPhase::GC_PHASE_MARK_YOUNG && inYoungSpace) {
         return true;
