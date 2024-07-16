@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,125 @@ Logger::Buffer GetDebugInfoAboutObject(const ObjectHeader *header)
     return buffer;
 }
 
+static void DumpArrayClassObject(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_traits<char>> *oStream)
+{
+    auto *cls = objectHeader->ClassAddr<Class>();
+    ASSERT(cls->IsArrayClass());
+    auto array = static_cast<coretypes::Array *>(objectHeader);
+    *oStream << "Array " << std::hex << objectHeader << " " << cls->GetComponentType()->GetName()
+             << " length = " << std::dec << array->GetLength() << std::endl;
+}
+
+static void DumpStringClass(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_traits<char>> *oStream)
+{
+    auto *strObject = static_cast<ark::coretypes::String *>(objectHeader);
+    if (strObject->GetLength() > 0 && !strObject->IsUtf16()) {
+        *oStream << "length = " << std::dec << strObject->GetLength() << std::endl;
+        constexpr size_t BUFF_SIZE = 256;
+        std::array<char, BUFF_SIZE> buff {0};
+        auto strRes = strncpy_s(&buff[0], BUFF_SIZE, reinterpret_cast<const char *>(strObject->GetDataMUtf8()),
+                                std::min(BUFF_SIZE - 1, static_cast<size_t>(strObject->GetLength())));
+        if (UNLIKELY(strRes != EOK)) {
+            LOG(ERROR, RUNTIME) << "Couldn't copy string by strncpy_s, error code: " << strRes;
+        }
+        *oStream << "String data: " << &buff[0] << std::endl;
+    }
+}
+
+static void DumpReferenceField(ObjectHeader *objectHeader, const Field &field,
+                               std::basic_ostream<char, std::char_traits<char>> *oStream)
+{
+    size_t offset = field.GetOffset();
+    ObjectHeader *fieldObject = objectHeader->GetFieldObject(offset);
+    if (fieldObject != nullptr) {
+        *oStream << std::hex << fieldObject << std::endl;
+    } else {
+        *oStream << "NULL" << std::endl;
+    }
+}
+
+static void DumpPrimitivesField(ObjectHeader *objectHeader, const Field &field,
+                                std::basic_ostream<char, std::char_traits<char>> *oStream)
+{
+    size_t offset = field.GetOffset();
+    panda_file::Type::TypeId typeId = field.GetTypeId();
+    *oStream << std::dec;
+    switch (typeId) {
+        case panda_file::Type::TypeId::U1: {
+            auto val = objectHeader->GetFieldPrimitive<bool>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::I8: {
+            auto val = objectHeader->GetFieldPrimitive<int8_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::U8: {
+            auto val = objectHeader->GetFieldPrimitive<uint8_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::I16: {
+            auto val = objectHeader->GetFieldPrimitive<int16_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::U16: {
+            auto val = objectHeader->GetFieldPrimitive<uint16_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::I32: {
+            auto val = objectHeader->GetFieldPrimitive<int32_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::U32: {
+            auto val = objectHeader->GetFieldPrimitive<uint32_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::F32: {
+            auto val = objectHeader->GetFieldPrimitive<float>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::F64: {
+            auto val = objectHeader->GetFieldPrimitive<double>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::I64: {
+            auto val = objectHeader->GetFieldPrimitive<int64_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        case panda_file::Type::TypeId::U64: {
+            auto val = objectHeader->GetFieldPrimitive<uint64_t>(offset);
+            *oStream << val << std::endl;
+            break;
+        }
+        default:
+            LOG(FATAL, COMMON) << "Error at object dump - wrong type id";
+    }
+}
+
+void DumpObjectFields(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_traits<char>> *oStream)
+{
+    auto *cls = objectHeader->ClassAddr<Class>();
+    Span<Field> fields = cls->GetInstanceFields();
+    for (Field &field : fields) {
+        *oStream << "\tfield \"" << GetFieldName(field) << "\" ";
+        panda_file::Type::TypeId typeId = field.GetTypeId();
+        if (typeId == panda_file::Type::TypeId::REFERENCE) {
+            DumpReferenceField(objectHeader, field, oStream);
+        } else if (typeId != panda_file::Type::TypeId::VOID) {
+            DumpPrimitivesField(objectHeader, field, oStream);
+        }
+    }
+}
+
 void DumpObject(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_traits<char>> *oStream)
 {
     auto *cls = objectHeader->ClassAddr<Class>();
@@ -62,101 +181,13 @@ void DumpObject(ObjectHeader *objectHeader, std::basic_ostream<char, std::char_t
              << std::endl;
 
     if (cls->IsArrayClass()) {
-        auto array = static_cast<coretypes::Array *>(objectHeader);
-        *oStream << "Array " << std::hex << objectHeader << " " << cls->GetComponentType()->GetName()
-                 << " length = " << std::dec << array->GetLength() << std::endl;
+        DumpArrayClassObject(objectHeader, oStream);
     } else {
         while (cls != nullptr) {
-            Span<Field> fields = cls->GetInstanceFields();
             if (cls->IsStringClass()) {
-                auto *strObject = static_cast<ark::coretypes::String *>(objectHeader);
-                if (strObject->GetLength() > 0 && !strObject->IsUtf16()) {
-                    *oStream << "length = " << std::dec << strObject->GetLength() << std::endl;
-                    constexpr size_t BUFF_SIZE = 256;
-                    std::array<char, BUFF_SIZE> buff {0};
-                    auto strRes =
-                        strncpy_s(&buff[0], BUFF_SIZE, reinterpret_cast<const char *>(strObject->GetDataMUtf8()),
-                                  std::min(BUFF_SIZE - 1, static_cast<size_t>(strObject->GetLength())));
-                    if (UNLIKELY(strRes != EOK)) {
-                        LOG(ERROR, RUNTIME) << "Couldn't copy string by strncpy_s, error code: " << strRes;
-                    }
-                    *oStream << "String data: " << &buff[0] << std::endl;
-                }
+                DumpStringClass(objectHeader, oStream);
             }
-            for (Field &field : fields) {
-                *oStream << "\tfield \"" << GetFieldName(field) << "\" ";
-                size_t offset = field.GetOffset();
-                panda_file::Type::TypeId typeId = field.GetTypeId();
-                if (typeId == panda_file::Type::TypeId::REFERENCE) {
-                    ObjectHeader *fieldObject = objectHeader->GetFieldObject(offset);
-                    if (fieldObject != nullptr) {
-                        *oStream << std::hex << fieldObject << std::endl;
-                    } else {
-                        *oStream << "NULL" << std::endl;
-                    }
-                } else if (typeId != panda_file::Type::TypeId::VOID) {
-                    *oStream << std::dec;
-                    switch (typeId) {
-                        case panda_file::Type::TypeId::U1: {
-                            auto val = objectHeader->GetFieldPrimitive<bool>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::I8: {
-                            auto val = objectHeader->GetFieldPrimitive<int8_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::U8: {
-                            auto val = objectHeader->GetFieldPrimitive<uint8_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::I16: {
-                            auto val = objectHeader->GetFieldPrimitive<int16_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::U16: {
-                            auto val = objectHeader->GetFieldPrimitive<uint16_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::I32: {
-                            auto val = objectHeader->GetFieldPrimitive<int32_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::U32: {
-                            auto val = objectHeader->GetFieldPrimitive<uint32_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::F32: {
-                            auto val = objectHeader->GetFieldPrimitive<float>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::F64: {
-                            auto val = objectHeader->GetFieldPrimitive<double>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::I64: {
-                            auto val = objectHeader->GetFieldPrimitive<int64_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        case panda_file::Type::TypeId::U64: {
-                            auto val = objectHeader->GetFieldPrimitive<uint64_t>(offset);
-                            *oStream << val << std::endl;
-                            break;
-                        }
-                        default:
-                            LOG(FATAL, COMMON) << "Error at object dump - wrong type id";
-                    }
-                }
-            }
+            DumpObjectFields(objectHeader, oStream);
             cls = cls->GetBase();
         }
     }

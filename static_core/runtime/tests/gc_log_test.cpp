@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,8 +209,7 @@ TEST_F(GCTestLog, G1GCMixedCollectionLogTest)
     size_t bigStringLen2 = (garbageRate + 2U) * DEFAULT_REGION_SIZE / 100U + sizeof(coretypes::String);
     size_t smallLen = DEFAULT_REGION_SIZE / 2U + sizeof(coretypes::String);
 
-    Runtime *runtime = Runtime::GetCurrent();
-    GC *gc = runtime->GetPandaVM()->GetGC();
+    GC *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
     ScopedManagedCodeThread s(thread);
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);

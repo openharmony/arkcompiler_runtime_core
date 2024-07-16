@@ -229,13 +229,13 @@ class SyncPoint:
 
 
     def to_string(self):
-        s = ["file: %s"%(self.file), "index: %s"%(str(self.index))]
+        s = ["file: %s" % (self.file), "index: %s" % (str(self.index))]
         if(self.has_class()):
-            s.append("class: %s"%(str(self.cl)))
+            s.append("class: %s" % (str(self.cl)))
         if(self.has_method()):
-            s.append("method: %s"%(str(self.method)))
+            s.append("method: %s" % (str(self.method)))
         if(self.has_source()):
-            s.append("source: %s"%(str(self.source)))
+            s.append("source: %s" % (str(self.source)))
         return ", ".join(s)
 
 

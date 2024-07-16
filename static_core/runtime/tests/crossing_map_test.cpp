@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -240,6 +240,8 @@ TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
     static constexpr size_t FIRST_OBJ_SIZE = 4_MB;
     static constexpr size_t SECOND_OBJ_SIZE = MIN_GAP_BETWEEN_OBJECTS;
     static constexpr size_t THIRD_OBJ_SIZE = 1_KB;
+    auto seedInfo = " seed = " + std::to_string(GetSeed());
+
     // Add some extra memory for possible shifts
     void *firstObjAddr = GetRandomObjAddr(FIRST_OBJ_SIZE + SECOND_OBJ_SIZE + THIRD_OBJ_SIZE + 3U * SECOND_OBJ_SIZE);
     void *secondObjAddr = IncreaseAddr(firstObjAddr, FIRST_OBJ_SIZE);
@@ -252,7 +254,7 @@ TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
         thirdObjAddr = IncreaseAddr(secondObjAddr, SECOND_OBJ_SIZE);
         ASSERT_TRUE(GetMapNumFromAddr(GetLastObjectByte(firstObjAddr, FIRST_OBJ_SIZE)) ==
                     GetMapNumFromAddr(secondObjAddr))
-            << " seed = " << GetSeed();
+            << seedInfo;
     }
 
     // We must be sure that the second and the third object will be saved in the same locations
@@ -262,8 +264,8 @@ TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
         thirdObjAddr = IncreaseAddr(secondObjAddr, SECOND_OBJ_SIZE);
         ASSERT_TRUE(GetMapNumFromAddr(GetLastObjectByte(firstObjAddr, FIRST_OBJ_SIZE)) ==
                     GetMapNumFromAddr(secondObjAddr))
-            << " seed = " << GetSeed();
-        ASSERT_TRUE(GetMapNumFromAddr(secondObjAddr) == GetMapNumFromAddr(thirdObjAddr)) << " seed = " << GetSeed();
+            << seedInfo;
+        ASSERT_TRUE(GetMapNumFromAddr(secondObjAddr) == GetMapNumFromAddr(thirdObjAddr)) << seedInfo;
     }
 
     GetCrossingMap()->AddObject(firstObjAddr, FIRST_OBJ_SIZE);
@@ -271,32 +273,26 @@ TEST_F(CrossingMapTest, ThreeSequentialObjectsTest)
     GetCrossingMap()->AddObject(thirdObjAddr, THIRD_OBJ_SIZE);
 
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr)
-            << " seed = " << GetSeed();
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr) << seedInfo;
     } else {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == secondObjAddr)
-            << " seed = " << GetSeed();
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == secondObjAddr) << seedInfo;
     }
 
     GetCrossingMap()->RemoveObject(secondObjAddr, SECOND_OBJ_SIZE, thirdObjAddr, firstObjAddr, FIRST_OBJ_SIZE);
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr)
-            << " seed = " << GetSeed();
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr) << seedInfo;
     } else {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == thirdObjAddr)
-            << " seed = " << GetSeed();
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == thirdObjAddr) << seedInfo;
     }
     GetCrossingMap()->RemoveObject(thirdObjAddr, THIRD_OBJ_SIZE, nullptr, firstObjAddr, FIRST_OBJ_SIZE);
     if (PANDA_CROSSING_MAP_MANAGE_CROSSED_BORDER) {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr)
-            << " seed = " << GetSeed();
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == firstObjAddr) << seedInfo;
     } else {
-        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == nullptr)
-            << " seed = " << GetSeed();
+        ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == nullptr) << seedInfo;
     }
 
     GetCrossingMap()->RemoveObject(firstObjAddr, FIRST_OBJ_SIZE);
-    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == nullptr) << " seed = " << GetSeed();
+    ASSERT_TRUE(GetCrossingMap()->FindFirstObject(secondObjAddr, secondObjAddr) == nullptr) << seedInfo;
 }
 
 TEST_F(CrossingMapTest, InitializeCrosingMapForMemoryTest)

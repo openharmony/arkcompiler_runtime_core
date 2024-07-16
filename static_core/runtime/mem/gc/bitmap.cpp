@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,9 @@ namespace ark::mem {
 void Bitmap::CopyTo(Bitmap *dest) const
 {
     ASSERT(dest->bitmap_.SizeBytes() == bitmap_.SizeBytes());
-    memmove_s(dest->bitmap_.Data(), dest->bitmap_.SizeBytes(), bitmap_.Data(), bitmap_.SizeBytes());
+    [[maybe_unused]] auto err =
+        memmove_s(dest->bitmap_.Data(), dest->bitmap_.SizeBytes(), bitmap_.Data(), bitmap_.SizeBytes());
+    ASSERT(err == EOK);
 }
 
 void Bitmap::ClearBitsInRange(size_t begin, size_t end)

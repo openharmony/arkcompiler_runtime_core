@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -278,6 +278,10 @@ private:
         }
 
         FreeListHeader *FindTheMostSuitableBlockInOrderedList(size_t index, size_t size);
+
+        FreeListHeader *FindSuitableBlockInList(FreeListHeader *head, size_t size);
+
+        inline FreeListHeader *TryGetSuitableBlockBySize(FreeListHeader *head, size_t size, size_t index);
 
         // Each element of this array consists of memory blocks with size
         // from (FREELIST_ALLOCATOR_MIN_SIZE + SEGREGATED_LIST_FREE_BLOCK_RANGE * (N))

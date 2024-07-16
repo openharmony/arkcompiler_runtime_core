@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -507,8 +507,8 @@ bool FreeListAllocator<AllocConfigT, LockConfigT>::AllocatedByFreeListAllocatorU
     MemoryPoolHeader *currentPool = mempoolHead_;
     while (currentPool != nullptr) {
         // This assert means that we asked about memory inside MemoryPoolHeader
-        ASSERT(!((ToUintPtr(currentPool->GetFirstMemoryHeader()) > ToUintPtr(mem)) &&
-                 (ToUintPtr(currentPool) < ToUintPtr(mem))));
+        ASSERT(ToUintPtr(currentPool->GetFirstMemoryHeader()) > ToUintPtr(mem) ||
+               ToUintPtr(currentPool) < ToUintPtr(mem));
         if ((ToUintPtr(currentPool->GetFirstMemoryHeader()) < ToUintPtr(mem)) &&
             ((ToUintPtr(currentPool) + currentPool->GetSize()) > ToUintPtr(mem))) {
             return true;
@@ -620,57 +620,29 @@ freelist::FreeListHeader *FreeListAllocator<AllocConfigT, LockConfigT>::Segregat
         if (SEGREGATED_LIST_FAST_INSERT) {
             // We don't have any order in inserting blocks,
             // and we need to iterate over the whole list
-            FreeListHeader *current = head;
-            while (current != nullptr) {
-                if (current->GetSize() >= size) {
-                    if (SEGREGATED_LIST_FAST_EXTRACT) {
-                        suitableBlock = current;
-                        break;
-                    } else {  // NOLINT(readability-else-after-return)
-                        if (suitableBlock != nullptr) {
-                            suitableBlock = current;
-                        } else {
-                            if (suitableBlock->GetSize() > current->GetSize()) {
-                                suitableBlock = current;
-                            }
-                        }
-                        if (suitableBlock->GetSize() == size) {
-                            break;
-                        }
-                    }
-                }
-                current = current->GetNextFree();
-            }
+            suitableBlock = FindSuitableBlockInList(head, size);
         } else {
             // All blocks in this list are in descending order.
             // We can check the first one to determine if we have a block
             // with this size or not.
-            if (head->GetSize() >= size) {
-                if (SEGREGATED_LIST_FAST_EXTRACT) {
-                    // Just get the first element
-                    suitableBlock = head;
-                } else {
-                    // Try to find the mist suitable memory for this size.
-                    suitableBlock = FindTheMostSuitableBlockInOrderedList(index, size);
-                }
-            }
+            suitableBlock = TryGetSuitableBlockBySize(head, size, index);
         }
     }
 
     if (suitableBlock == nullptr) {
         // We didn't find the block in the head list. Try to find block in other lists.
         index++;
-        while (index < SEGREGATED_LIST_SIZE) {
-            if (GetFirstBlock(index) != nullptr) {
-                if (SEGREGATED_LIST_FAST_INSERT || SEGREGATED_LIST_FAST_EXTRACT) {
-                    // Just get the first one
-                    suitableBlock = GetFirstBlock(index);
-                } else {
-                    suitableBlock = FindTheMostSuitableBlockInOrderedList(index, size);
-                }
-                break;
+        for (; index < SEGREGATED_LIST_SIZE; index++) {
+            if (GetFirstBlock(index) == nullptr) {
+                continue;
             }
-            index++;
+            if constexpr (SEGREGATED_LIST_FAST_INSERT || SEGREGATED_LIST_FAST_EXTRACT) {
+                // Just get the first one
+                suitableBlock = GetFirstBlock(index);
+            } else {
+                suitableBlock = FindTheMostSuitableBlockInOrderedList(index, size);
+            }
+            break;
         }
     }
 
@@ -679,6 +651,48 @@ freelist::FreeListHeader *FreeListAllocator<AllocConfigT, LockConfigT>::Segregat
     }
 
     return suitableBlock;
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+freelist::FreeListHeader *FreeListAllocator<AllocConfigT, LockConfigT>::SegregatedList::FindSuitableBlockInList(
+    freelist::FreeListHeader *head, size_t size)
+{
+    FreeListHeader *suitableBlock = nullptr;
+    for (FreeListHeader *current = head; current != nullptr; current = current->GetNextFree()) {
+        if (current->GetSize() < size) {
+            continue;
+        }
+        if constexpr (SEGREGATED_LIST_FAST_EXTRACT) {
+            suitableBlock = current;
+            break;
+        }
+        if (suitableBlock != nullptr) {
+            suitableBlock = current;
+        } else {
+            if (suitableBlock->GetSize() > current->GetSize()) {
+                suitableBlock = current;
+            }
+        }
+        if (suitableBlock->GetSize() == size) {
+            break;
+        }
+    }
+    return suitableBlock;
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+freelist::FreeListHeader *FreeListAllocator<AllocConfigT, LockConfigT>::SegregatedList::TryGetSuitableBlockBySize(
+    freelist::FreeListHeader *head, size_t size, size_t index)
+{
+    if (head->GetSize() >= size) {
+        if constexpr (SEGREGATED_LIST_FAST_EXTRACT) {
+            // Just get the first element
+            return head;
+        }
+        // Try to find the mist suitable memory for this size.
+        return FindTheMostSuitableBlockInOrderedList(index, size);
+    }
+    return nullptr;
 }
 
 template <typename AllocConfigT, typename LockConfigT>

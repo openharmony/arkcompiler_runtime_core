@@ -90,7 +90,8 @@ bool ThreadedCoroutineContext::RetrieveStackInfo(void *&stackAddr, size_t &stack
     return error == 0;
 }
 
-/*static*/ void ThreadedCoroutineContext::ThreadProc(ThreadedCoroutineContext *ctx)
+/*static*/
+void ThreadedCoroutineContext::ThreadProc(ThreadedCoroutineContext *ctx)
 {
     auto *co = ctx->GetCoroutine();
     auto *threadManager = static_cast<CoroutineManager *>(co->GetVM()->GetThreadManager());

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,10 +86,11 @@ bool GCStaticObjectHelpers::TraverseObject(ObjectHeader *object, Class *cls, Han
             }
             ValidateObject(object, fieldObject);
             [[maybe_unused]] bool res = handler(object, fieldObject, offset, isVolatile);
-            if constexpr (INTERRUPTIBLE) {
-                if (!res) {
-                    return false;
-                }
+            if constexpr (!INTERRUPTIBLE) {
+                continue;
+            }
+            if (!res) {
+                return false;
             }
         }
 
@@ -124,10 +125,11 @@ bool GCStaticObjectHelpers::TraverseArray(coretypes::Array *array, [[maybe_unuse
         auto *arrayElement = array->Get<ObjectHeader *>(i);
         if (arrayElement != nullptr) {
             [[maybe_unused]] bool res = handler(array, arrayElement, offset, false);
-            if constexpr (INTERRUPTIBLE) {
-                if (!res) {
-                    return false;
-                }
+            if constexpr (!INTERRUPTIBLE) {
+                continue;
+            }
+            if (!res) {
+                return false;
             }
         }
     }
@@ -172,10 +174,11 @@ bool GCDynamicObjectHelpers::TraverseClass(coretypes::DynClass *dynClass, Handle
         auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(dynClass, fieldOffset);
         if (taggedValue.IsHeapObject()) {
             [[maybe_unused]] bool res = handler(dynClass, taggedValue.GetHeapObject(), fieldOffset, false);
-            if constexpr (INTERRUPTIBLE) {
-                if (!res) {
-                    return false;
-                }
+            if constexpr (!INTERRUPTIBLE) {
+                continue;
+            }
+            if (!res) {
+                return false;
             }
         }
     }
@@ -200,10 +203,11 @@ bool GCDynamicObjectHelpers::TraverseObject(ObjectHeader *object, HClass *cls, H
         auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(object, fieldOffset);
         if (taggedValue.IsHeapObject()) {
             [[maybe_unused]] bool res = handler(object, taggedValue.GetHeapObject(), fieldOffset, false);
-            if constexpr (INTERRUPTIBLE) {
-                if (!res) {
-                    return false;
-                }
+            if constexpr (!INTERRUPTIBLE) {
+                continue;
+            }
+            if (!res) {
+                return false;
             }
         }
     }
@@ -235,10 +239,11 @@ bool GCDynamicObjectHelpers::TraverseArray(coretypes::Array *array, [[maybe_unus
         TaggedValue arrayElement(array->Get<TaggedType, false, true>(i));
         if (arrayElement.IsHeapObject()) {
             [[maybe_unused]] bool res = handler(array, arrayElement.GetHeapObject(), offset, false);
-            if constexpr (INTERRUPTIBLE) {
-                if (!res) {
-                    return false;
-                }
+            if constexpr (!INTERRUPTIBLE) {
+                continue;
+            }
+            if (!res) {
+                return false;
             }
         }
     }

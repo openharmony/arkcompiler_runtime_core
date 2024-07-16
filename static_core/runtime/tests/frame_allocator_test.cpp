@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,7 +140,7 @@ public:
                     << "Didn't allocate " << FRAME_SIZE << " bytes in " << j << " cycle, seed: " << seed_;
                 vec.emplace_back(mem, SetBytesFromByteArray(mem, FRAME_SIZE));
             }
-            for (size_t i = 1; i <= ITERATIONS / 2; i++) {
+            for (size_t i = 1; i <= ITERATIONS / 2U; i++) {
                 std::pair<void *, size_t> lastPair = vec.back();
                 ASSERT_TRUE(CompareBytesWithByteArray(lastPair.first, FRAME_SIZE, lastPair.second))
                     << "iteration: " << i << ", size: " << FRAME_SIZE << ", address: " << std::hex << lastPair.first

@@ -64,7 +64,10 @@ void EtsPromise::EnsureCapacity(EtsCoroutine *coro)
     auto *newCoroPtrQueue = EtsLongArray::Create(newQueueLength);
     if (queueSize_ != 0) {
         auto *coroPtrQueueData = GetCoroPtrQueue(coro)->GetData<EtsCoroutine *>();
-        std::memcpy(newCoroPtrQueue->GetData<EtsCoroutine *>(), coroPtrQueueData, queueLength * sizeof(EtsCoroutine *));
+        [[maybe_unused]] auto err =
+            memcpy_s(newCoroPtrQueue->GetData<EtsCoroutine *>(), newQueueLength * sizeof(EtsLong), coroPtrQueueData,
+                     queueLength * sizeof(EtsCoroutine *));
+        ASSERT(err == EOK);
     }
     ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, coroPtrQueue_), newCoroPtrQueue->GetCoreType());
 }
