@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,6 +169,17 @@ public:
     {
         auto alignSize = AlignUp(size, GetAlignmentInBytes(DEFAULT_ALIGNMENT));
         return allocator.AllocRegular<RegionFlag::IS_EDEN>(alignSize);
+    }
+
+    auto ObjectChecker(size_t &objectFound)
+    {
+        auto ptrObjectFound = &objectFound;
+        auto objectChecker = [ptrObjectFound](ObjectHeader *object) {
+            (void)object;
+            (*ptrObjectFound)++;
+            return ObjectStatus::ALIVE_OBJECT;
+        };
+        return objectChecker;
     }
 
     static const int LOOP_COUNT = 100;
@@ -406,7 +417,7 @@ TEST_F(RegionAllocatorTest, IterateOverObjectsTest)
 #ifndef NDEBUG
     ASSERT_TRUE(region->SetAllocating(true));
     // can't iterating the region while allocating
-    ASSERT_DEATH(region->IterateOverObjects([]([[maybe_unused]] ObjectHeader *object) {});, "");
+    ASSERT_DEATH(region->IterateOverObjects([]([[maybe_unused]] ObjectHeader *object) {}), "");
     ASSERT_TRUE(region->SetAllocating(false));
 #endif
 }
@@ -474,12 +485,7 @@ TEST_F(RegionAllocatorTest, AllocateAndCompactTenuredObjects)
     allocator.ClearCurrentRegion<RegionFlag::IS_OLD>();
     size_t objectFound = 0;
     allocator.CompactSeveralSpecificRegions<RegionFlag::IS_OLD, RegionFlag::IS_OLD>(
-        regionsVector,
-        [&objectFound](ObjectHeader *object) {
-            (void)object;
-            objectFound++;
-            return ObjectStatus::ALIVE_OBJECT;
-        },
+        regionsVector, ObjectChecker(objectFound),
         []([[maybe_unused]] ObjectHeader *from, [[maybe_unused]] ObjectHeader *to) {
             // no need anything here
         });

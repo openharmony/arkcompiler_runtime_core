@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +47,7 @@ public:
         spaces_.youngSpace_.Initialize(spaceSize, spaceSize);
         spaces_.memSpace_.Initialize(spaceSize, spaceSize);
         // NOLINTNEXTLINE(readability-magic-numbers)
-        spaces_.InitializePercentages(0, 100);
+        spaces_.InitializePercentages(0, 100U);
         spaces_.isInitialized_ = true;
         thread_ = ark::MTManagedThread::GetCurrent();
         thread_->ManagedCodeBegin();

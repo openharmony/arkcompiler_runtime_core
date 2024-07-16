@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,8 +54,30 @@ public:
     }
 
 private:
+    void SetAligment(size_t allocSize, size_t objectMaxSize, size_t &aligmentSize, size_t &aligmentDiff);
+    void SetAllocatedStats(uint64_t &allocatedObjects, uint64_t &allocatedBytes, size_t allocSize,
+                           uint64_t objectCount);
+
     ark::MTManagedThread *thread_ {};
 };
+
+void MemStatsGCTest::SetAligment(size_t allocSize, size_t objectMaxSize, size_t &aligmentSize, size_t &aligmentDiff)
+{
+    if (allocSize < objectMaxSize) {
+        aligmentSize = 1UL << RunSlots<>::ConvertToPowerOfTwoUnsafe(allocSize);
+        aligmentDiff = aligmentSize - allocSize;
+    } else {
+        aligmentSize = AlignUp(allocSize, GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT));
+        aligmentDiff = 2U * (aligmentSize - allocSize);
+    }
+}
+
+void MemStatsGCTest::SetAllocatedStats(uint64_t &allocatedObjects, uint64_t &allocatedBytes, size_t allocSize,
+                                       uint64_t objectCount)
+{
+    allocatedObjects += objectCount;
+    allocatedBytes += objectCount * allocSize;
+}
 
 template <uint64_t OBJECT_COUNT>
 void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t objectSize)
@@ -79,13 +101,7 @@ void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t objectSize)
     size_t allocSize = simpleString.size() + sizeof(coretypes::String);
     size_t aligmentSize = 0;
     size_t aligmentDiff = 0;
-    if (allocSize < objectAllocator->GetRegularObjectMaxSize()) {
-        aligmentSize = 1UL << RunSlots<>::ConvertToPowerOfTwoUnsafe(allocSize);
-        aligmentDiff = aligmentSize - allocSize;
-    } else {
-        aligmentSize = AlignUp(allocSize, GetAlignmentInBytes(FREELIST_DEFAULT_ALIGNMENT));
-        aligmentDiff = 2U * (aligmentSize - allocSize);
-    }
+    SetAligment(allocSize, objectAllocator->GetRegularObjectMaxSize(), aligmentSize, aligmentDiff);
 
     uint64_t allocatedObjects = stats->GetTotalObjectsAllocated();
     uint64_t allocatedBytes = stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT);
@@ -102,8 +118,8 @@ void MemStatsGCTest::MemStatsTest(uint64_t tries, size_t objectSize)
             ASSERT_NE(stringObj, nullptr);
             handlers[j] = allocator->New<VMHandle<coretypes::String>>(thread_, stringObj);
         }
-        allocatedObjects += OBJECT_COUNT;
-        allocatedBytes += OBJECT_COUNT * allocSize;
+
+        SetAllocatedStats(allocatedObjects, allocatedBytes, allocSize, OBJECT_COUNT);
         diffTotal += OBJECT_COUNT * aligmentDiff;
         ASSERT_EQ(allocatedObjects, stats->GetTotalObjectsAllocated());
         ASSERT_LE(allocatedBytes, stats->GetAllocated(SpaceType::SPACE_TYPE_OBJECT));

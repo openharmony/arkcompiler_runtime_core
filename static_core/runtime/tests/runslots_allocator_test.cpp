@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,12 +230,6 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
     constexpr char CHAR5 = 'e';
     constexpr char CHAR6 = 'f';
     AddMemoryPoolToAllocatorProtected(allocator);
-    char *strA;
-    char *strB;
-    char *strC;
-    char *strD;
-    char *strE;
-    char *strF;
     auto fillStr = [](char *str, char c, size_t size) {
         for (size_t i = 0; i < size - 1; i++) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -253,9 +247,9 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
         }
         return true;
     };
-    strA = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
-    strB = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
-    strC = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
+    char *strA = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
+    char *strB = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
+    char *strC = reinterpret_cast<char *>(allocator.Alloc(SIZE1));
     fillStr(strA, CHAR1, SIZE1);
     fillStr(strB, CHAR2, SIZE1);
     fillStr(strC, CHAR3, SIZE1);
@@ -265,9 +259,9 @@ TEST_F(RunSlotsAllocatorTest, AllocateReuse2)
     allocator.Free(static_cast<void *>(strA));
     allocator.Free(static_cast<void *>(strB));
     allocator.Free(static_cast<void *>(strC));
-    strD = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
-    strE = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
-    strF = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
+    char *strD = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
+    char *strE = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
+    char *strF = reinterpret_cast<char *>(allocator.Alloc(SIZE2));
     fillStr(strD, CHAR4, SIZE2);
     fillStr(strE, CHAR5, SIZE2);
     fillStr(strF, CHAR6, SIZE2);
