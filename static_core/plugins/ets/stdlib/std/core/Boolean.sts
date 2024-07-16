@@ -22,13 +22,6 @@ export final class Boolean extends Object implements Comparable<Boolean> {
     private value: boolean;
 
     /**
-     * Constructs a new Boolean with false value
-     */
-    public constructor() {
-        this.value = false;
-    }
-
-    /**
      * Constructs a new Boolean with provided value
      *
      * @param value value to construct class instance with
@@ -37,27 +30,139 @@ export final class Boolean extends Object implements Comparable<Boolean> {
         this.value = value
     }
 
-
     /**
-     * Constructs a new Boolean with provided value
+     * Constructs a new Boolean with provided byte value
      *
      * @param value value to construct class instance with
      */
-    public constructor(value: boolean | undefined) {
-        if (value == undefined) {
-            this.value = false
+    public constructor(value: byte) {
+        this.value = value != 0;
+    }
+
+    /**
+     * Constructs a new Boolean with provided short value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: short) {
+        this.value = value != 0;
+    }
+
+    /**
+     * Constructs a new Boolean with provided int value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: int) {
+        this.value = value != 0;
+    }
+
+    /**
+     * Constructs a new Boolean with provided long value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: long) {
+        this.value = value != 0;
+    }
+
+    /**
+     * Constructs a new Boolean with provided bigint value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: bigint) {
+        this.value = value != new BigInt(0);
+    }
+
+    /**
+     * Constructs a new Boolean with provided char value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: char) {
+        this.value = value != c'\u0000';
+    }
+
+    /**
+     * Constructs a new Boolean with provided float value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: float) {
+        this.value = (value != 0.0 && !isNaN(value));
+    }
+
+    /**
+     * Constructs a new Boolean with provided number value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: number) {
+        this.value = (value != 0 && !isNaN(value));
+    }
+
+
+    /**
+     * Constructs a new Boolean with provided string value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: string) {
+        this.value = value != "";
+    }
+
+    /**
+     * Constructs a new Boolean with provided Object value
+     *
+     * @param value value to construct class instance with
+     */
+    public constructor(value: NullishType = undefined) {
+        if (value == null || value == undefined) {
+            this.value = false;
+        } else if (value instanceof Boolean) {
+            this.value = value.unboxed();
+        } else if (value instanceof Number) {
+            this.value = (value.unboxed() != 0 && !isNaN(value.unboxed()));
+        } else if (value instanceof Char) {
+            this.value = value.unboxed() != c'\u0000';
+        } else if (value instanceof Float) {
+            this.value = (value.unboxed() != 0.0 && !isNaN(value.unboxed()));
+        } else if (value instanceof Long) {
+            this.value = value.unboxed() != 0;
+        } else if (value instanceof Int) {
+            this.value = value.unboxed() != 0;
+        } else if (value instanceof Byte) {
+            this.value = value.unboxed() != 0;
+        } else if (value instanceof Short) {
+            this.value = value.unboxed() != 0;
+        } else if (value instanceof String) {
+            this.value = value != "";
         } else {
-            this.value = value
+            this.value = false;
         }
     }
 
     /**
-     * Constructs a new Boolean with provided value
+     * Creates a new instance of a Boolean based on the specified value
      *
-     * @param value value to construct class instance with
+     * @param value The value to be converted to a Boolean (optional).
+     *
+     * @returns A new Boolean instance representing the specified value.
      */
-    public constructor(value: Boolean) {
-        this.value = value.unboxed();
+    static invoke(): boolean {
+        return Boolean.FALSE;
+    }
+
+    /**
+     * Creates a new instance of a Boolean based on the specified value
+     *
+     * @param value The value to be converted to a Boolean (optional).
+     *
+     * @returns A new Boolean instance representing the specified value.
+     */
+    static invoke<T>(value: T): boolean {
+        return new Boolean(value).valueOf();
     }
 
     /**
