@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -228,89 +228,89 @@ std::ostream &operator<<(std::ostream &out, std::nullptr_t);
 #endif
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define _ASSERT_FAIL(val1, val2, strval1, strval2, msg)                              \
-    std::cerr << "Assertion failed at " << __FILE__ << ':' << __LINE__ << std::endl; \
-    std::cerr << "Expected that " strval1 " is " << msg << " " strval2 << std::endl; \
-    std::cerr << "\t" strval1 ": " << (val1) << std::endl;                           \
-    std::cerr << "\t" strval2 ": " << (val2) << std::endl;                           \
-    std::abort();
+#define ASSERT_FAIL_IMPL(val1, val2, strval1, strval2, msg)                            \
+    std::cerr << "Assertion failed at " << __FILE__ << ':' << __LINE__ << std::endl;   \
+    std::cerr << "Expected that " strval1 " is " << (msg) << " " strval2 << std::endl; \
+    std::cerr << "\t" strval1 ": " << (val1) << std::endl;                             \
+    std::cerr << "\t" strval2 ": " << (val2) << std::endl;                             \
+    std::abort()
 
-#define ASSERT_TRUE(cond)                                      \
-    do {                                                       \
-        auto res = (cond);                                     \
-        if (!res) {                                            \
-            _ASSERT_FAIL(res, true, #cond, "true", "equal to") \
-        }                                                      \
+#define ASSERT_TRUE(cond)                                           \
+    do {                                                            \
+        auto res = (cond);                                          \
+        if (!res) {                                                 \
+            ASSERT_FAIL_IMPL(res, true, #cond, "true", "equal to"); \
+        }                                                           \
     } while (0)
 
-#define ASSERT_FALSE(cond)                                       \
-    do {                                                         \
-        auto res = (cond);                                       \
-        if (res) {                                               \
-            _ASSERT_FAIL(res, false, #cond, "false", "equal to") \
-        }                                                        \
+#define ASSERT_FALSE(cond)                                            \
+    do {                                                              \
+        auto res = (cond);                                            \
+        if (res) {                                                    \
+            ASSERT_FAIL_IMPL(res, false, #cond, "false", "equal to"); \
+        }                                                             \
     } while (0)
 
-#define ASSERT_EQ(lhs, rhs)                                  \
+#define ASSERT_EQ(lhs, rhs)                                       \
+    do {                                                          \
+        auto res1 = (lhs);                                        \
+        decltype(res1) res2 = (rhs);                              \
+        if (res1 != res2) {                                       \
+            ASSERT_FAIL_IMPL(res1, res2, #lhs, #rhs, "equal to"); \
+        }                                                         \
+    } while (0)
+
+#define ASSERT_NE(lhs, rhs)                                           \
+    do {                                                              \
+        auto res1 = (lhs);                                            \
+        decltype(res1) res2 = (rhs);                                  \
+        if (res1 == res2) {                                           \
+            ASSERT_FAIL_IMPL(res1, res2, #lhs, #rhs, "not equal to"); \
+        }                                                             \
+    } while (0)
+
+#define ASSERT_STREQ(lhs, rhs)                                    \
+    do {                                                          \
+        auto res1 = (lhs);                                        \
+        decltype(res1) res2 = (rhs);                              \
+        if (::strcmp(res1, res2) != 0) {                          \
+            ASSERT_FAIL_IMPL(res1, res2, #lhs, #rhs, "equal to"); \
+        }                                                         \
+    } while (0)
+
+#define ASSERT_SUCCESS(api_call)                                                                        \
+    do {                                                                                                \
+        auto error = api_call;                                                                          \
+        if (error) {                                                                                    \
+            ASSERT_FAIL_IMPL(error.value().GetMessage(), "Success", "API call result", "Expected", ""); \
+        }                                                                                               \
+    } while (0)
+
+#define ASSERT_EXITED()                                                                                   \
+    do {                                                                                                  \
+        bool res = TestUtil::WaitForExit();                                                               \
+        if (!res) {                                                                                       \
+            ASSERT_FAIL_IMPL(TestUtil::IsTestFinished(), true, "TestUtil::IsTestFinished()", "true", ""); \
+        }                                                                                                 \
+    } while (0)
+
+#define ASSERT_LOCATION_EQ(lhs, rhs)                                                 \
+    do {                                                                             \
+        ASSERT_STREQ((lhs).GetPandaFile(), (rhs).GetPandaFile());                    \
+        ASSERT_EQ((lhs).GetMethodId().GetOffset(), (rhs).GetMethodId().GetOffset()); \
+        ASSERT_EQ((lhs).GetBytecodeOffset(), (rhs).GetBytecodeOffset());             \
+    } while (0)
+
+#define ASSERT_THREAD_VALID(thread)                          \
     do {                                                     \
-        auto res1 = (lhs);                                   \
-        decltype(res1) res2 = (rhs);                         \
-        if (res1 != res2) {                                  \
-            _ASSERT_FAIL(res1, res2, #lhs, #rhs, "equal to") \
-        }                                                    \
+        ASSERT_NE((thread).GetId(), PtThread::NONE.GetId()); \
     } while (0)
-
-#define ASSERT_NE(lhs, rhs)                                      \
-    do {                                                         \
-        auto res1 = (lhs);                                       \
-        decltype(res1) res2 = (rhs);                             \
-        if (res1 == res2) {                                      \
-            _ASSERT_FAIL(res1, res2, #lhs, #rhs, "not equal to") \
-        }                                                        \
-    } while (0)
-
-#define ASSERT_STREQ(lhs, rhs)                               \
-    do {                                                     \
-        auto res1 = (lhs);                                   \
-        decltype(res1) res2 = (rhs);                         \
-        if (::strcmp(res1, res2) != 0) {                     \
-            _ASSERT_FAIL(res1, res2, #lhs, #rhs, "equal to") \
-        }                                                    \
-    } while (0)
-
-#define ASSERT_SUCCESS(api_call)                                                                   \
-    do {                                                                                           \
-        auto error = api_call;                                                                     \
-        if (error) {                                                                               \
-            _ASSERT_FAIL(error.value().GetMessage(), "Success", "API call result", "Expected", "") \
-        }                                                                                          \
-    } while (0)
-
-#define ASSERT_EXITED()                                                                              \
-    do {                                                                                             \
-        bool res = TestUtil::WaitForExit();                                                          \
-        if (!res) {                                                                                  \
-            _ASSERT_FAIL(TestUtil::IsTestFinished(), true, "TestUtil::IsTestFinished()", "true", "") \
-        }                                                                                            \
-    } while (0)
-
-#define ASSERT_LOCATION_EQ(lhs, rhs)                                             \
-    do {                                                                         \
-        ASSERT_STREQ(lhs.GetPandaFile(), rhs.GetPandaFile());                    \
-        ASSERT_EQ(lhs.GetMethodId().GetOffset(), rhs.GetMethodId().GetOffset()); \
-        ASSERT_EQ(lhs.GetBytecodeOffset(), rhs.GetBytecodeOffset());             \
-    } while (0);
-
-#define ASSERT_THREAD_VALID(thread)                        \
-    do {                                                   \
-        ASSERT_NE(thread.GetId(), PtThread::NONE.GetId()); \
-    } while (0);
 
 #define ASSERT_BREAKPOINT_SUCCESS(location)                         \
     do {                                                            \
         PtThread suspended = TestUtil::WaitForBreakpoint(location); \
         ASSERT_THREAD_VALID(suspended);                             \
-    } while (0);
+    } while (0)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 }  // namespace ark::tooling::test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@
 
 namespace ark::dprof::ipc {
 constexpr char SOCKET_NAME[] = "\0dprof.socket";  // NOLINT(modernize-avoid-c-arrays)
-static_assert(sizeof(SOCKET_NAME) <= sizeof(static_cast<sockaddr_un *>(nullptr)->sun_path), "Socket name too large");
+static_assert(sizeof(static_cast<sockaddr_un *>(nullptr)->sun_path) >= sizeof(SOCKET_NAME), "Socket name too large");
 
 os::unique_fd::UniqueFd CreateUnixServerSocket(int backlog)
 {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_TESTS_TOOLING_API_TEST_H
 #define PANDA_RUNTIME_TESTS_TOOLING_API_TEST_H
 
+#include <array>
 #include <utility>
 #include "runtime/include/tooling/debug_interface.h"
 
@@ -55,40 +56,60 @@ using MonitorContendedEnteredCallback = std::function<bool(PtThread, ObjectHeade
 
 using Scenario = std::function<bool()>;
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEBUG_EVENTS_LIST(_)       \
+    _(BREAKPOINT)                  \
+    _(LOAD_MODULE)                 \
+    _(PAUSED)                      \
+    _(EXCEPTION)                   \
+    _(EXCEPTION_CATCH)             \
+    _(FIELD_ACCESS)                \
+    _(FIELD_MODIFICATION)          \
+    _(FRAME_POP)                   \
+    _(GARBAGE_COLLECTIION_START)   \
+    _(GARBAGE_COLLECTIION_FINISH)  \
+    _(METHOD_ENTRY)                \
+    _(METHOD_EXIT)                 \
+    _(SINGLE_STEP)                 \
+    _(THREAD_START)                \
+    _(THREAD_END)                  \
+    _(VM_START)                    \
+    _(VM_INITIALIZATION)           \
+    _(VM_DEATH)                    \
+    _(EXCEPTION_REVOKED)           \
+    _(EXECUTION_CONTEXT_CREATED)   \
+    _(EXECUTION_CONTEXT_DESTROYED) \
+    _(EXECUTION_CONTEXT_CLEARED)   \
+    _(INSPECT_REQUESTED)           \
+    _(CLASS_LOAD)                  \
+    _(CLASS_PREPARE)               \
+    _(MONITOR_WAIT)                \
+    _(MONITOR_WAITED)              \
+    _(MONITOR_CONTENDED_ENTER)     \
+    _(MONITOR_CONTENDED_ENTERED)   \
+    _(UNINITIALIZED)
+
 enum class DebugEvent {
-    BREAKPOINT,
-    LOAD_MODULE,
-    PAUSED,
-    EXCEPTION,
-    EXCEPTION_CATCH,
-    FIELD_ACCESS,
-    FIELD_MODIFICATION,
-    FRAME_POP,
-    GARBAGE_COLLECTIION_START,
-    GARBAGE_COLLECTIION_FINISH,
-    METHOD_ENTRY,
-    METHOD_EXIT,
-    SINGLE_STEP,
-    THREAD_START,
-    THREAD_END,
-    VM_START,
-    VM_INITIALIZATION,
-    VM_DEATH,
-    EXCEPTION_REVOKED,
-    EXECUTION_CONTEXT_CREATED,
-    EXECUTION_CONTEXT_DESTROYED,
-    EXECUTION_CONTEXT_CLEARED,
-    INSPECT_REQUESTED,
-    CLASS_LOAD,
-    CLASS_PREPARE,
-    MONITOR_WAIT,
-    MONITOR_WAITED,
-    MONITOR_CONTENDED_ENTER,
-    MONITOR_CONTENDED_ENTERED,
-    UNINITIALIZED
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFINE_EVENT_DEF(NAME) NAME,
+    DEBUG_EVENTS_LIST(DEFINE_EVENT_DEF)
+#undef DEFINE_EVENT_DEF
 };
 
-std::ostream &operator<<(std::ostream &out, DebugEvent value);
+namespace internal {
+inline constexpr std::array<const char *, static_cast<size_t>(DebugEvent::UNINITIALIZED) + 1> DEBUG_EVENT_NAMES = {
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define DEFINE_EVENT_NAME(NAME) #NAME,
+    DEBUG_EVENTS_LIST(DEFINE_EVENT_NAME)
+#undef DEFINE_EVENT_NAME
+};
+}  // namespace internal
+
+inline std::ostream &operator<<(std::ostream &out, DebugEvent value)
+{
+    ASSERT(static_cast<size_t>(value) < internal::DEBUG_EVENT_NAMES.size());
+    return out << internal::DEBUG_EVENT_NAMES[static_cast<size_t>(value)];
+}
 
 struct ApiTest {
     NO_COPY_SEMANTIC(ApiTest);

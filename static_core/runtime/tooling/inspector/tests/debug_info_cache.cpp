@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,10 +30,10 @@ static constexpr const char *g_source = R"(
     .record Test {}
 
     .function i32 Test.foo(u64 a0, u64 a1) {
-        mov v0, v1         # line 2, offset 0,1
-        mov v100, v101     # line 3, offset 2,3,4
-        movi v0, 4         # line 4, offset 5,6
-        ldai 222           # line 5, offset 7,8,9
+        mov v0, v1         # line 2, offset 0, 1
+        mov v100, v101     # line 3, offset 2, 3, 4
+        movi v0, 4         # line 4, offset 5, 6
+        ldai 222           # line 5, offset 7, 8, 9
         return             # line 6, offset 10
     }
 )";
