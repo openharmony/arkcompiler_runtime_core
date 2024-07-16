@@ -2161,9 +2161,6 @@
 # es2panda: #17766 Order of initialization of global const and let
 07.expressions/17.typeof_expression/tof_const_11.sts
 
-# es2panda: #18121 Failed to verifier
-06.contexts_and_conversions/05.implicit_conversions/09.constant_string_to_char_conversion/str2char_7.sts
-
 # 17488: Separate module initializer not implemented yet
 13.compilation_units_packages_and_modules/02.separate_module_initializer/import_statements.sts
 
