@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,6 +161,10 @@ private:
     using MallocProxyAllocatorT = MallocProxyAllocator<InternalAllocConfigT>;
     template <AllocScope ALLOC_SCOPE_T>
     void *AllocViaPandaAllocators(size_t size, Alignment align);
+    template <AllocScope ALLOC_SCOPE_T>
+    void *AllocViaRunSlotsAllocator(size_t size, Alignment align);
+    void *AllocViaFreeListAllocator(size_t size, Alignment align);
+    void *AllocViaHumongousAllocator(size_t size, Alignment align);
     void FreeViaPandaAllocators(void *ptr);
     RunSlotsAllocatorT *runslotsAllocator_ {nullptr};
     FreeListAllocatorT *freelistAllocator_ {nullptr};

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,7 +203,7 @@ TEST_F(MemStatsTest, NonObjectTestViaMallocAllocator)
 // testing MemStats via allocators.
 TEST_F(MemStatsTest, NonObjectTestViaSlotsAllocator)
 {
-    static constexpr uint64_t POOL_SIZE = SIZE_1M * 4;
+    static constexpr uint64_t POOL_SIZE = 4_MB;
     static constexpr size_t REAL_BYTES_ALLOC1 = 23;
     // RunSlotsAllocator uses 32 bytes for allocation 23 bytes
     static constexpr size_t BYTES_IN_ALLOCATOR_ALLOC1 = 32;

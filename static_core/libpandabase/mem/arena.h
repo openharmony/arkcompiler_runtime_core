@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ WEAK_FOR_LTO_START
 
 namespace ark {
 
-constexpr size_t ARENA_DEFAULT_SIZE = SIZE_1M;
+constexpr size_t ARENA_DEFAULT_SIZE = 1_MB;
 constexpr Alignment ARENA_DEFAULT_ALIGNMENT = DEFAULT_ALIGNMENT;
 
 class Arena {

@@ -89,10 +89,10 @@ public:
         options.SetGcTriggerType("debug");
         options.SetGcDebugTriggerStart(std::numeric_limits<int>::max());
         options.SetCompilerEnableJit(false);
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetHeapSizeLimit(33554432);
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        options.SetYoungSpaceSize(4194304);
+        constexpr size_t HEAP_SIZE = 33554432U;
+        options.SetHeapSizeLimit(HEAP_SIZE);
+        constexpr size_t YOUNG_SIZE = 4194304U;
+        options.SetYoungSpaceSize(YOUNG_SIZE);
         options.SetExplicitConcurrentGcEnabled(false);
         [[maybe_unused]] bool success = Runtime::Create(options);
         ASSERT(success);
@@ -178,8 +178,8 @@ G1GCFullGCTest::ObjVec G1GCFullGCTest::MakeAllocations(size_t minSize, size_t ma
             // Leaving 5MB in tenured seems OK
             auto free =
                 reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            if (size + 5000000 > free) {
+            constexpr size_t BIG_SIZE = 5000000U;
+            if (size + BIG_SIZE > free) {
                 return result;
             }
         }
@@ -401,8 +401,7 @@ TEST_F(G1GCFullGCTest, TestIntensiveAlloc)
 
 TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
 {
-    std::string gctype = static_cast<std::string>(GCStringFromType(GCType::G1_GC));
-    SetupRuntime(gctype);
+    SetupRuntime(static_cast<std::string>(GCStringFromType(GCType::G1_GC)));
     {
         HandleScope<ObjectHeader *> scope(thread);
         PrepareTest<ark::PandaAssemblyLanguageConfig>();
@@ -415,13 +414,12 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
                 ->GetCurrentYoungSize();
         [[maybe_unused]] size_t heapSize = mem::MemConfig::GetHeapSizeLimit();
         [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
-        [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
         [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
         [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto tFree =
             reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-        const size_t yObjSize = maxYSize / 10;
+        const size_t yObjSize = g1Alloc->GetYoungAllocMaxSize() / 10U;
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
         size_t initialHeap = ms->GetFootprintHeap();
 
@@ -463,8 +461,7 @@ TEST_F(G1GCFullGCTest, TestExplicitFullNearLimit)
 
 TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
 {
-    std::string gctype = static_cast<std::string>(GCStringFromType(GCType::G1_GC));
-    SetupRuntime(gctype);
+    SetupRuntime(static_cast<std::string>(GCStringFromType(GCType::G1_GC)));
     {
         HandleScope<ObjectHeader *> scope(thread);
         PrepareTest<ark::PandaAssemblyLanguageConfig>();
@@ -477,13 +474,12 @@ TEST_F(G1GCFullGCTest, TestOOMFullNearLimit)
                 ->GetCurrentYoungSize();
         [[maybe_unused]] size_t heapSize = mem::MemConfig::GetHeapSizeLimit();
         [[maybe_unused]] auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
-        [[maybe_unused]] size_t maxYSize = g1Alloc->GetYoungAllocMaxSize();
 
         [[maybe_unused]] auto ySpaceCheck = [this](uintptr_t addr) -> bool { return IsInYoung(addr); };
         [[maybe_unused]] auto hSpaceCheck = [this](uintptr_t addr) -> bool { return !IsInYoung(addr); };
         [[maybe_unused]] auto tFree =
             reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-        const size_t yObjSize = maxYSize / 10U;
+        const size_t yObjSize = g1Alloc->GetYoungAllocMaxSize() / 10U;
         gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
         size_t initialHeap = ms->GetFootprintHeap();
 

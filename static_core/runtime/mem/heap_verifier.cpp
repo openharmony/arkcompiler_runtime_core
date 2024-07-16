@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,6 +125,35 @@ size_t HeapVerifier<LanguageConfig>::VerifyRoot() const
 }
 
 template <class LanguageConfig>
+static PandaString GetClassName(const ObjectHeader *obj)
+{
+    if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_STATIC) {
+        auto *cls = obj->template ClassAddr<Class>();
+        if (IsAddressInObjectsHeap(cls)) {
+            return cls->GetName().c_str();  // NOLINT(readability-redundant-string-cstr)
+        }
+    }
+    return "unknown class";
+}
+
+template <class LanguageConfig>
+size_t FastHeapVerifier<LanguageConfig>::CheckHeap(const PandaUnorderedSet<const ObjectHeader *> &heapObjects,
+                                                   const PandaVector<ObjectCache> &referentObjects) const
+{
+    size_t failsCount = 0;
+    for (auto objectCache : referentObjects) {
+        if (heapObjects.find(objectCache.referent) == heapObjects.end()) {
+            LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectCache.heapObject << " ("
+                              << GetClassName<LanguageConfig>(objectCache.heapObject)
+                              << ") references a dead object at " << objectCache.referent << " ("
+                              << GetClassName<LanguageConfig>(objectCache.referent) << ")";
+            ++failsCount;
+        }
+    }
+    return failsCount;
+}
+
+template <class LanguageConfig>
 size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
 {
     PandaUnorderedSet<const ObjectHeader *> heapObjects;
@@ -162,26 +191,7 @@ size_t FastHeapVerifier<LanguageConfig>::VerifyAll() const
     // get alive. That is why we mark all strings as alive by visiting the string table.
     Thread::GetCurrent()->GetVM()->VisitStrings(collectObjects);
     heap_->IterateOverObjects(collectObjects);
-    for (auto objectCache : referentObjects) {
-        if (heapObjects.find(objectCache.referent) == heapObjects.end()) {
-            static constexpr const char *UNKNOWN_CLASS = "unknown class";
-            PandaString refClassStr = UNKNOWN_CLASS;
-            PandaString objClassStr = UNKNOWN_CLASS;
-            if constexpr (LanguageConfig::LANG_TYPE == LANG_TYPE_STATIC) {
-                auto *cls = objectCache.referent->template ClassAddr<Class>();
-                if (IsAddressInObjectsHeap(cls)) {
-                    refClassStr = cls->GetName();
-                }
-                cls = objectCache.heapObject->template ClassAddr<Class>();
-                if (IsAddressInObjectsHeap(cls)) {
-                    objClassStr = cls->GetName();
-                }
-            }
-            LOG_HEAP_VERIFIER << "Heap object " << std::hex << objectCache.heapObject << " (" << objClassStr
-                              << ") references a dead object at " << objectCache.referent << " (" << refClassStr << ")";
-            ++failsCount;
-        }
-    }
+    failsCount += this->CheckHeap(heapObjects, referentObjects);
     // Stack verifier
     RootManager<LanguageConfig> rootManager;
     rootManager.SetPandaVM(heap_->GetPandaVM());

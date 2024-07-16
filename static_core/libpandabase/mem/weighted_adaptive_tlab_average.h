@@ -92,7 +92,8 @@ public:
 
     size_t GetLastCountedSumInSizeT() const
     {
-        ASSERT(lowerSumBorder_ <= lastCountedSum_ && lastCountedSum_ <= upperSumBorder_);
+        ASSERT(lowerSumBorder_ <= lastCountedSum_);
+        ASSERT(lastCountedSum_ <= upperSumBorder_);
         return static_cast<size_t>(lastCountedSum_);
     }
 
