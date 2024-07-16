@@ -53,10 +53,9 @@ sub:
               (v: string, k: number): void => { self.set(-k, v + v) }
 # Issue 18208
       - expr: valsArr
-        excluded: true
         setup: |
           let valsArr = Array.of<string>()
-          self.forEach((): void | number => valsArr.push('call'))
+          self.forEach((): void => { valsArr.push('call') })
       - expr: valsArr
         setup: |
           let valsArr = Array.of<string>()
