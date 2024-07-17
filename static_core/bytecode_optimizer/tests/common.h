@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -342,9 +342,10 @@ public:
         }
 
         if (inst1->GetOpcode() != Opcode::Phi) {
-            if (!std::equal(
-                    inst1->GetInputs().begin(), inst1->GetInputs().end(), inst2->GetInputs().begin(),
-                    [this](Input input1, Input input2) { return Compare(input1.GetInst(), input2.GetInst()); })) {
+            bool equal =
+                std::equal(inst1->GetInputs().begin(), inst1->GetInputs().end(), inst2->GetInputs().begin(),
+                           [this](Input input1, Input input2) { return Compare(input1.GetInst(), input2.GetInst()); });
+            if (!equal) {
                 instCompareMap_.erase(inst1);
                 return false;
             }
@@ -430,6 +431,31 @@ public:
 private:
     std::unordered_map<Inst *, Inst *> instCompareMap_;
 };
+
+inline std::string JccMnemonic(compiler::ConditionCode cc)
+{
+    switch (cc) {
+        case compiler::ConditionCode::CC_EQ:
+            return "jeq";
+        case compiler::ConditionCode::CC_NE:
+            return "jne";
+        case compiler::ConditionCode::CC_LT:
+            return "jlt";
+        case compiler::ConditionCode::CC_GT:
+            return "jgt";
+        case compiler::ConditionCode::CC_LE:
+            return "jle";
+        case compiler::ConditionCode::CC_GE:
+            return "jge";
+        default:
+            UNREACHABLE();
+    }
+}
+
+inline std::string JcczMnemonic(compiler::ConditionCode cc)
+{
+    return JccMnemonic(cc) + "z";
+}
 
 class IrBuilderTest : public AsmTest {
 public:
@@ -589,30 +615,7 @@ public:
     template <bool IS_OBJ>
     void CheckCondJumpWithZero(compiler::ConditionCode cc)
     {
-        std::string cmd;
-        switch (cc) {
-            case compiler::ConditionCode::CC_EQ:
-                cmd = "jeqz";
-                break;
-            case compiler::ConditionCode::CC_NE:
-                cmd = "jnez";
-                break;
-            case compiler::ConditionCode::CC_LT:
-                cmd = "jltz";
-                break;
-            case compiler::ConditionCode::CC_GT:
-                cmd = "jgtz";
-                break;
-            case compiler::ConditionCode::CC_LE:
-                cmd = "jlez";
-                break;
-            case compiler::ConditionCode::CC_GE:
-                cmd = "jgez";
-                break;
-            default:
-                UNREACHABLE();
-        }
-
+        std::string cmd = JcczMnemonic(cc);
         std::string instPostfix {};
         std::string paramType = "i32";
         auto type = compiler::DataType::INT32;
@@ -659,29 +662,7 @@ public:
     template <bool IS_OBJ>
     void CheckCondJump(compiler::ConditionCode cc)
     {
-        std::string cmd;
-        switch (cc) {
-            case compiler::ConditionCode::CC_EQ:
-                cmd = "jeq";
-                break;
-            case compiler::ConditionCode::CC_NE:
-                cmd = "jne";
-                break;
-            case compiler::ConditionCode::CC_LT:
-                cmd = "jlt";
-                break;
-            case compiler::ConditionCode::CC_GT:
-                cmd = "jgt";
-                break;
-            case compiler::ConditionCode::CC_LE:
-                cmd = "jle";
-                break;
-            case compiler::ConditionCode::CC_GE:
-                cmd = "jge";
-                break;
-            default:
-                UNREACHABLE();
-        }
+        std::string cmd = JccMnemonic(cc);
         std::string instPostfix {};
         std::string paramType = "i32";
         auto type = compiler::DataType::INT32;
@@ -720,7 +701,7 @@ public:
             BASIC_BLOCK(3U, 4_I) {}
             BASIC_BLOCK(4U, -1)
             {
-                INST(4, Opcode::ReturnVoid).v0id();
+                INST(4U, Opcode::ReturnVoid).v0id();
             }
         }
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));

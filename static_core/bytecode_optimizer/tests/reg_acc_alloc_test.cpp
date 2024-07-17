@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -402,9 +402,7 @@ TEST_F(RegAccAllocTest, PhiInstructionInLoop)
 
 /*
  * Test multiple branches.
- *
  * Test Graph:
- *
  *            /---[2]---\
  *            |         |
  *            v         v
@@ -453,9 +451,7 @@ TEST_F(RegAccAllocTest, MultipleBranches)
 /*
  * Test Phi with multiple inputs.
  * Phi cannot be optimized because one of the inputs is a CONSTANT.
- *
  * Test Graph:
- *
  *          /---[2]---\
  *          |         |
  *          v         |

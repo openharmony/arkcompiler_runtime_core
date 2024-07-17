@@ -1065,20 +1065,14 @@ void BytecodeGen::IfImm64(GraphVisitor *v, Inst *instBase)
 
     std::string label = LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
 
-    switch (inst->GetInputType(0U)) {
-        case compiler::DataType::INT64: {
-            enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0U)));
-            break;
-        }
-        case compiler::DataType::UINT64: {
-            enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0U)));
-            break;
-        }
-        default:
-            LOG(ERROR, BYTECODE_OPTIMIZER)
-                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-            enc->success_ = false;
-            return;
+    if (inst->GetInputType(0) == compiler::DataType::INT64) {
+        enc->result_.emplace_back(pandasm::Create_CMP_64(inst->GetSrcReg(0U)));
+    } else if (inst->GetInputType(0) == compiler::DataType::UINT64) {
+        enc->result_.emplace_back(pandasm::Create_UCMP_64(inst->GetSrcReg(0U)));
+    } else {
+        LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+        enc->success_ = false;
+        return;
     }
 
     switch (inst->GetCc()) {
@@ -1409,6 +1403,27 @@ void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *instBase)
     }
 }
 
+void BytecodeGen::VisitReturnAny(GraphVisitor *v, [[maybe_unused]] Inst *instBase)
+{
+    auto enc = static_cast<BytecodeGen *>(v);
+    [[maybe_unused]] auto inst = instBase->CastToReturn();
+#if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
+    auto testArg = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
+    if (testArg.has_value() && testArg->IsUndefined()) {
+        enc->result_.emplace_back(pandasm::Create_ECMA_RETURNUNDEFINED());
+        return;
+    }
+#endif
+#ifdef ARK_INTRINSIC_SET
+    DoLdaDyn(inst->GetSrcReg(0U), enc->result_);
+    enc->result_.emplace_back(pandasm::Create_ECMA_RETURN_DYN());
+#else
+    // Do not support DataType::ANY in this case
+    LOG(ERROR, BYTECODE_OPTIMIZER) << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+    enc->success_ = false;
+#endif  // ARK_INTRINSIC_SET
+}
+
 void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *instBase)
 {
     pandasm::Ins ins;
@@ -1444,22 +1459,7 @@ void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *instBase)
             break;
         }
         case compiler::DataType::ANY: {
-#if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
-            auto testArg = IsEcmaConstTemplate(inst->GetInput(0U).GetInst());
-            if (testArg.has_value() && testArg->IsUndefined()) {
-                enc->result_.emplace_back(pandasm::Create_ECMA_RETURNUNDEFINED());
-                break;
-            }
-#endif
-            DoLdaDyn(inst->GetSrcReg(0U), enc->result_);
-#ifdef ARK_INTRINSIC_SET
-            enc->result_.emplace_back(pandasm::Create_ECMA_RETURN_DYN());
-#else
-            // Do not support DataType::ANY in this case
-            LOG(ERROR, BYTECODE_OPTIMIZER)
-                << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
-            enc->success_ = false;
-#endif  // ARK_INTRINSIC_SET
+            BytecodeGen::VisitReturnAny(v, instBase);
             break;
         }
         default:
@@ -1469,7 +1469,14 @@ void BytecodeGen::VisitReturn(GraphVisitor *v, Inst *instBase)
     }
 }
 
-void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *instBase)
+#if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
+static auto IntToLdBool(int64_t v)
+{
+    return v != 0 ? pandasm::Create_ECMA_LDTRUE() : pandasm::Create_ECMA_LDFALSE();
+}
+#endif
+
+void BytecodeGen::VisitCastValueToAnyType(GraphVisitor *v, [[maybe_unused]] Inst *instBase)
 {
     auto enc = static_cast<BytecodeGen *>(v);
 
@@ -1486,44 +1493,31 @@ void BytecodeGen::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[ma
             }
             enc->result_.emplace_back(pandasm::Create_ECMA_LDUNDEFINED());
             break;
-        case compiler::AnyBaseType::ECMASCRIPT_INT_TYPE: {
+        case compiler::AnyBaseType::ECMASCRIPT_INT_TYPE:
             ASSERT(cvat->GetInput(0U).GetInst()->IsConst());
-            auto input = cvat->GetInput(0U).GetInst()->CastToConstant();
-            enc->result_.emplace_back(pandasm::Create_LDAI_DYN(input->GetIntValue()));
+            enc->result_.emplace_back(
+                pandasm::Create_LDAI_DYN(cvat->GetInput(0U).GetInst()->CastToConstant()->GetIntValue()));
             break;
-        }
-        case compiler::AnyBaseType::ECMASCRIPT_DOUBLE_TYPE: {
+        case compiler::AnyBaseType::ECMASCRIPT_DOUBLE_TYPE:
             ASSERT(cvat->GetInput(0U).GetInst()->IsConst());
-            auto input = cvat->GetInput(0U).GetInst()->CastToConstant();
-            enc->result_.emplace_back(pandasm::Create_FLDAI_DYN(input->GetDoubleValue()));
+            enc->result_.emplace_back(
+                pandasm::Create_FLDAI_DYN(cvat->GetInput(0U).GetInst()->CastToConstant()->GetDoubleValue()));
             break;
-        }
-        case compiler::AnyBaseType::ECMASCRIPT_BOOLEAN_TYPE: {
+        case compiler::AnyBaseType::ECMASCRIPT_BOOLEAN_TYPE:
             ASSERT(cvat->GetInput(0U).GetInst()->IsBoolConst());
-            auto input = cvat->GetInput(0U).GetInst()->CastToConstant();
             if (!HasUserPredicate(cvat, [](Inst const *inst) { return inst->GetOpcode() != compiler::Opcode::If; })) {
                 return;
             }
-            uint64_t val = input->GetInt64Value();
-            if (val != 0U) {
-                enc->result_.emplace_back(pandasm::Create_ECMA_LDTRUE());
-            } else {
-                enc->result_.emplace_back(pandasm::Create_ECMA_LDFALSE());
-            }
+            enc->result_.emplace_back(IntToLdBool((cvat->GetInput(0U).GetInst()->CastToConstant()->GetInt64Value())));
             break;
-        }
-        case compiler::AnyBaseType::ECMASCRIPT_STRING_TYPE: {
-            auto input = cvat->GetInput(0U).GetInst()->CastToLoadString();
-            enc->result_.emplace_back(
-                pandasm::Create_LDA_STR(enc->irInterface_->GetStringIdByOffset(input->GetTypeId())));
+        case compiler::AnyBaseType::ECMASCRIPT_STRING_TYPE:
+            enc->result_.emplace_back(pandasm::Create_LDA_STR(
+                enc->irInterface_->GetStringIdByOffset(cvat->GetInput(0U).GetInst()->CastToLoadString()->GetTypeId())));
             break;
-        }
-        case compiler::AnyBaseType::ECMASCRIPT_BIGINT_TYPE: {
-            auto input = cvat->GetInput(0U).GetInst()->CastToLoadString();
-            enc->result_.emplace_back(
-                pandasm::Create_ECMA_LDBIGINT(enc->irInterface_->GetStringIdByOffset(input->GetTypeId())));
+        case compiler::AnyBaseType::ECMASCRIPT_BIGINT_TYPE:
+            enc->result_.emplace_back(pandasm::Create_ECMA_LDBIGINT(
+                enc->irInterface_->GetStringIdByOffset(cvat->GetInput(0U).GetInst()->CastToLoadString()->GetTypeId())));
             break;
-        }
         default:
             UNREACHABLE();
     }

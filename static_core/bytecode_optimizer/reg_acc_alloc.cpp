@@ -20,6 +20,51 @@
 
 namespace ark::bytecodeopt {
 
+// If false returns also BasicBlock pointer in which search stopped
+static std::pair<bool, compiler::BasicBlock *> IsAccWriteBetweenBlocks(compiler::BasicBlock *block,
+                                                                       compiler::Inst *dstInst)
+{
+    do {
+        // NOTE(rtakacs): visit all the successors to get information about the
+        // accumulator usage. Only linear flow is supported right now.
+        if (block->GetSuccsBlocks().size() > 1U) {
+            return {true, nullptr};
+        }
+
+        ASSERT(block->GetSuccsBlocks().size() == 1U);
+        block = block->GetSuccessor(0U);
+        // NOTE(rtakacs): only linear flow is supported right now.
+        if (!dstInst->IsPhi() && block->GetPredsBlocks().size() > 1U) {
+            return {true, nullptr};
+        }
+    } while (block->IsEmpty() && !block->HasPhi());
+    return {false, block};
+}
+
+static bool IsAccWriteInInst(compiler::Inst *inst)
+{
+    if (!inst->IsAccWrite()) {
+        return false;
+    }
+    if (!inst->IsConst()) {
+        return true;
+    }
+    if (inst->GetDstReg() == compiler::ACC_REG_ID) {
+        return true;
+    }
+    return false;
+}
+
+// Check that acc_read instruction reads from input allocated to vreg
+static bool IsAccReadFromReg(compiler::Inst *srcInst, compiler::Inst *inst)
+{
+    if (!inst->IsAccRead()) {
+        return false;
+    }
+    compiler::Inst *input = inst->GetInput(AccReadIndex(inst)).GetInst();
+    return (input != srcInst && input->GetDstReg() != compiler::ACC_REG_ID);
+}
+
 /// Decide if accumulator register gets dirty between two instructions.
 bool IsAccWriteBetween(compiler::Inst *srcInst, compiler::Inst *dstInst)
 {
@@ -30,40 +75,22 @@ bool IsAccWriteBetween(compiler::Inst *srcInst, compiler::Inst *dstInst)
 
     while (inst != dstInst) {
         if (UNLIKELY(inst == nullptr)) {
-            do {
-                // NOTE(rtakacs): visit all the successors to get information about the
-                // accumulator usage. Only linear flow is supported right now.
-                if (block->GetSuccsBlocks().size() > 1U) {
-                    return true;
-                }
-
-                ASSERT(block->GetSuccsBlocks().size() == 1U);
-                block = block->GetSuccessor(0U);
-                // NOTE(rtakacs): only linear flow is supported right now.
-                if (!dstInst->IsPhi() && block->GetPredsBlocks().size() > 1U) {
-                    return true;
-                }
-            } while (block->IsEmpty() && !block->HasPhi());
-
+            bool accWrite;
+            std::tie(accWrite, block) = IsAccWriteBetweenBlocks(block, dstInst);
+            if (accWrite) {
+                // fast exit if we know the answer
+                return true;
+            }
             // Get first phi instruction if exist.
-            // This is requred if dst_inst is a phi node.
+            // This is required if dstInst is a phi node.
             inst = *(block->AllInsts());
         } else {
-            if (inst->IsAccWrite()) {
-                if (!inst->IsConst()) {
-                    return true;
-                }
-                if (inst->GetDstReg() == compiler::ACC_REG_ID) {
-                    return true;
-                }
+            if (IsAccWriteInInst(inst)) {
+                return true;
             }
 
-            if (inst->IsAccRead()) {
-                compiler::Inst *input = inst->GetInput(AccReadIndex(inst)).GetInst();
-
-                if (input != srcInst && input->GetDstReg() != compiler::ACC_REG_ID) {
-                    return true;
-                }
+            if (IsAccReadFromReg(srcInst, inst)) {
+                return true;
             }
 
             inst = inst->GetNext();
@@ -226,48 +253,48 @@ static inline bool MaybeRegDst(compiler::Inst *inst)
     return inst->IsConst() || inst->IsBinaryInst() || inst->IsBinaryImmInst() || opcode == compiler::Opcode::LoadObject;
 }
 
-/**
- * Determine the accumulator usage between instructions.
- * Eliminate unnecessary register allocations by applying
- * a special value (ACC_REG_ID) to the destination and
- * source registers.
- * This special value is a marker for the code generator
- * not to produce lda/sta instructions.
- */
-bool RegAccAlloc::RunImpl()
+static void InitRegistersForInst(compiler::Inst *inst)
 {
-    GetGraph()->InitDefaultLocations();
-    // Initialize all source register of all instructions.
-    for (auto block : GetGraph()->GetBlocksRPO()) {
+    if (inst->IsSaveState() || inst->IsCatchPhi()) {
+        return;
+    }
+    if (inst->IsConst()) {
+        inst->SetFlag(compiler::inst_flags::ACC_WRITE);
+    }
+    for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
+        inst->SetSrcReg(i, compiler::INVALID_REG);
+        if (MaybeRegDst(inst)) {
+            inst->SetDstReg(compiler::INVALID_REG);
+        }
+    }
+}
+
+static void InitRegisters(compiler::Graph *graph)
+{
+    for (auto block : graph->GetBlocksRPO()) {
         for (auto inst : block->Insts()) {
-            if (inst->IsSaveState() || inst->IsCatchPhi()) {
-                continue;
-            }
-            if (inst->IsConst()) {
-                inst->SetFlag(compiler::inst_flags::ACC_WRITE);
-            }
-            for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-                inst->SetSrcReg(i, compiler::INVALID_REG);
-                if (MaybeRegDst(inst)) {
-                    inst->SetDstReg(compiler::INVALID_REG);
-                }
+            InitRegistersForInst(inst);
+        }
+    }
+}
+
+static bool HasUnsupportedOpcode(compiler::Graph *graph)
+{
+    if (graph->IsDynamicMethod()) {
+        return false;
+    }
+    for (auto block : graph->GetBlocksRPO()) {
+        for (auto inst : block->AllInsts()) {
+            if (inst->GetOpcode() == compiler::Opcode::Builtin) {
+                return true;
             }
         }
     }
+    return false;
+}
 
-    // Drop the pass if the function contains unsupported opcodes
-    // NOTE(rtakacs): support these opcodes.
-    if (!GetGraph()->IsDynamicMethod()) {
-        for (auto block : GetGraph()->GetBlocksRPO()) {
-            for (auto inst : block->AllInsts()) {
-                if (inst->GetOpcode() == compiler::Opcode::Builtin) {
-                    return false;
-                }
-            }
-        }
-    }
-
-    // Mark Phi instructions if they can be optimized for acc.
+void RegAccAlloc::MarkPhiInstructions() const
+{
     for (auto block : GetGraph()->GetBlocksRPO()) {
         for (auto phi : block->PhiInsts()) {
             if (IsPhiAccReady(phi)) {
@@ -275,49 +302,62 @@ bool RegAccAlloc::RunImpl()
             }
         }
     }
+}
 
-    // Mark instructions if they can be optimized for acc.
+void RegAccAlloc::ClearAccForInstAndUsers(compiler::Inst *inst)
+{
+    inst->ClearFlag(compiler::inst_flags::ACC_WRITE);
+    for (auto &user : inst->GetUsers()) {
+        compiler::Inst *uinst = user.GetInst();
+        if (uinst->IsSaveState()) {
+            continue;
+        }
+        SetNeedLda(uinst, true);
+    }
+}
+
+void RegAccAlloc::MarkInstruction(compiler::Inst *inst)
+{
+    if (inst->NoDest() || !IsAccWrite(inst)) {
+        return;
+    }
+
+    bool useAccDstReg = true;
+
+    std::unordered_set<compiler::Inst *> usersThatRequiredSwapInputs;
+    for (auto &user : inst->GetUsers()) {
+        compiler::Inst *uinst = user.GetInst();
+        if (uinst->IsSaveState()) {
+            continue;
+        }
+        if (CanUserReadAcc(inst, uinst)) {
+            if (UserNeedSwapInputs(inst, uinst)) {
+                usersThatRequiredSwapInputs.insert(uinst);
+            }
+            SetNeedLda(uinst, false);
+        } else {
+            useAccDstReg = false;
+        }
+    }
+    for (auto uinst : usersThatRequiredSwapInputs) {
+        uinst->SwapInputs();
+    }
+
+    if (useAccDstReg) {
+        inst->SetDstReg(compiler::ACC_REG_ID);
+    } else if (MaybeRegDst(inst)) {
+        ClearAccForInstAndUsers(inst);
+    }
+}
+
+void RegAccAlloc::MarkInstructions()
+{
     for (auto block : GetGraph()->GetBlocksRPO()) {
         for (auto inst : block->AllInsts()) {
-            if (inst->NoDest() || !IsAccWrite(inst)) {
-                continue;
-            }
-
-            bool useAccDstReg = true;
-
-            std::unordered_set<compiler::Inst *> usersThatRequiredSwapInputs;
-            for (auto &user : inst->GetUsers()) {
-                compiler::Inst *uinst = user.GetInst();
-                if (uinst->IsSaveState()) {
-                    continue;
-                }
-                if (CanUserReadAcc(inst, uinst)) {
-                    if (UserNeedSwapInputs(inst, uinst)) {
-                        usersThatRequiredSwapInputs.insert(uinst);
-                    }
-                    SetNeedLda(uinst, false);
-                } else {
-                    useAccDstReg = false;
-                }
-            }
-            for (auto uinst : usersThatRequiredSwapInputs) {
-                uinst->SwapInputs();
-            }
-
-            if (useAccDstReg) {
-                inst->SetDstReg(compiler::ACC_REG_ID);
-            } else if (MaybeRegDst(inst)) {
-                inst->ClearFlag(compiler::inst_flags::ACC_WRITE);
-                for (auto &user : inst->GetUsers()) {
-                    compiler::Inst *uinst = user.GetInst();
-                    if (uinst->IsSaveState()) {
-                        continue;
-                    }
-                    SetNeedLda(uinst, true);
-                }
-            }
+            MarkInstruction(inst);
         }
 
+        // Check if acc is written between inst and its intput
         for (auto inst : block->Insts()) {
             if (inst->GetInputsCount() == 0U) {
                 continue;
@@ -329,20 +369,38 @@ bool RegAccAlloc::RunImpl()
 
             compiler::Inst *input = inst->GetInput(AccReadIndex(inst)).GetInst();
 
-            if (IsAccWriteBetween(input, inst)) {
-                input->SetDstReg(compiler::INVALID_REG);
-                SetNeedLda(inst, true);
+            if (!IsAccWriteBetween(input, inst)) {
+                continue;
+            }
+            input->SetDstReg(compiler::INVALID_REG);
+            SetNeedLda(inst, true);
 
-                if (MaybeRegDst(input)) {
-                    input->ClearFlag(compiler::inst_flags::ACC_WRITE);
-                    for (auto &user : input->GetUsers()) {
-                        compiler::Inst *uinst = user.GetInst();
-                        SetNeedLda(uinst, true);
-                    }
-                }
+            if (MaybeRegDst(input)) {
+                ClearAccForInstAndUsers(input);
             }
         }
     }
+}
+
+/**
+ * Determine the accumulator usage between instructions.
+ * Eliminate unnecessary register allocations by applying
+ * a special value (ACC_REG_ID) to the destination and
+ * source registers.
+ * This special value is a marker for the code generator
+ * not to produce lda/sta instructions.
+ */
+bool RegAccAlloc::RunImpl()
+{
+    GetGraph()->InitDefaultLocations();
+    InitRegisters(GetGraph());
+
+    if (HasUnsupportedOpcode(GetGraph())) {
+        return false;
+    }
+
+    MarkPhiInstructions();
+    MarkInstructions();
 
 #ifndef NDEBUG
     GetGraph()->SetRegAccAllocApplied();

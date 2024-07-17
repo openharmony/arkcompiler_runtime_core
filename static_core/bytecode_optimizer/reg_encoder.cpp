@@ -182,6 +182,31 @@ static void RenumberSpillFillRegs(ark::compiler::SpillFillInst *inst, const ark:
     }
 }
 
+static void RenumberRegsForInst(compiler::Inst *inst, const compiler::Register minReg, const compiler::Register delta)
+{
+    // Renumber output of any instruction, if applicable:
+    if (RegNeedsRenumbering(inst->GetDstReg()) && inst->GetDstReg() >= minReg) {
+        inst->SetDstReg(RenumberReg(inst->GetDstReg(), delta));
+    }
+
+    if (inst->IsPhi() || inst->IsCatchPhi()) {
+        return;
+    }
+
+    // Renumber inputs and outputs of SpillFill instructions:
+    if (inst->IsSpillFill()) {
+        RenumberSpillFillRegs(inst->CastToSpillFill(), minReg, delta);
+        return;
+    }
+
+    // Fix inputs of common instructions:
+    for (size_t i = 0; i < inst->GetInputsCount(); i++) {
+        if (RegNeedsRenumbering(inst->GetSrcReg(i)) && inst->GetSrcReg(i) >= minReg) {
+            inst->SetSrcReg(i, RenumberReg(inst->GetSrcReg(i), delta));
+        }
+    }
+}
+
 void RegEncoder::RenumberRegs(const compiler::Register minReg, const compiler::Register delta)
 {
     // Renumbering always advances register number `delta` positions forward,
@@ -192,29 +217,34 @@ void RegEncoder::RenumberRegs(const compiler::Register minReg, const compiler::R
 
     for (auto *bb : GetGraph()->GetBlocksRPO()) {
         for (auto inst : bb->AllInsts()) {
-            // Renumber output of any instruction, if applicable:
-            if (RegNeedsRenumbering(inst->GetDstReg()) && inst->GetDstReg() >= minReg) {
-                inst->SetDstReg(RenumberReg(inst->GetDstReg(), delta));
-            }
-
-            if (inst->IsPhi() || inst->IsCatchPhi()) {
-                continue;
-            }
-
-            // Renumber inputs and outputs of SpillFill instructions:
-            if (inst->IsSpillFill()) {
-                RenumberSpillFillRegs(inst->CastToSpillFill(), minReg, delta);
-                continue;
-            }
-
-            // Fix inputs of common instructions:
-            for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-                if (RegNeedsRenumbering(inst->GetSrcReg(i)) && inst->GetSrcReg(i) >= minReg) {
-                    inst->SetSrcReg(i, RenumberReg(inst->GetSrcReg(i), delta));
-                }
-            }
+            RenumberRegsForInst(inst, minReg, delta);
         }
     }
+}
+
+static compiler::Register CalculateNumLocals(const ArenaVector<bool> *usageMask, compiler::Register numNonArgs)
+{
+    compiler::Register numLocals = 0;
+    if (numNonArgs != 0U) {
+        while (numLocals != numNonArgs && usageMask->at(numLocals)) {
+            ++numLocals;
+        }
+    }
+    return numLocals;
+}
+
+static compiler::Register CalculateNumTemps(const ArenaVector<bool> *usageMask, compiler::Register numNonArgs,
+                                            compiler::Register numLocals)
+{
+    compiler::Register numTemps = 0;
+    if (numLocals != numNonArgs) {
+        compiler::Register r = numNonArgs - 1L;
+        while (r < numNonArgs && usageMask->at(r)) {
+            ++numTemps;
+            --r;
+        }
+    }
+    return numTemps;
 }
 
 bool RegEncoder::RenumberArgRegs()
@@ -232,21 +262,8 @@ bool RegEncoder::RenumberArgRegs()
         return false;
     }
 
-    compiler::Register numLocals = 0;
-    if (numNonArgs != 0U) {
-        while (numLocals != numNonArgs && usageMask->at(numLocals)) {
-            ++numLocals;
-        }
-    }
-
-    compiler::Register numTemps = 0;
-    if (numLocals != numNonArgs) {
-        compiler::Register r = numNonArgs - 1L;
-        while (r < numNonArgs && usageMask->at(r)) {
-            ++numTemps;
-            --r;
-        }
-    }
+    auto numLocals = CalculateNumLocals(usageMask, numNonArgs);
+    auto numTemps = CalculateNumTemps(usageMask, numNonArgs, numLocals);
 
     if (numLocals + numTemps > numNonArgs - numMaxRangeInput_) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "RegEncoder: The free regs for range call are not enough";
@@ -254,46 +271,41 @@ bool RegEncoder::RenumberArgRegs()
     }
 
     rangeTempsStart_ = numLocals;
-
-    bool doRenumber = true;
+    SaveNumLocalsToGraph(numLocals + numTemps + numMaxRangeInput_);
 
     if (numNonArgs == 0U && numMaxRangeInput_ == 0U) {  // all registers are arguments: no need to renumber
-        doRenumber = false;
+        return true;
     }
 
-    // All free regs will be just enough to encode call.rang: no need to renumber
+    // All free regs will be just enough to encode call.range: no need to renumber
     if (numLocals + numTemps + numMaxRangeInput_ == numNonArgs) {
-        doRenumber = false;
+        return true;
     }
 
     if (numTemps + numArgs == 0U) {  // no temps and no args: nothing to renumber
-        doRenumber = false;
+        return true;
     }
 
-    if (doRenumber) {
-        const auto minReg = static_cast<compiler::Register>(numNonArgs - numTemps);
-        ASSERT(minReg > MIN_REGISTER_NUMBER);
+    const auto minReg = static_cast<compiler::Register>(numNonArgs - numTemps);
+    ASSERT(minReg > MIN_REGISTER_NUMBER);
 
-        // Assert that if temps are present, they are marked allocated in the mask:
-        for (compiler::Register r = minReg; r < minReg + numTemps; r++) {
-            ASSERT(usageMask->at(r));
-        }
-
-        // Assert that there are no used regs between locals and temps + arguments:
-        for (compiler::Register r = numLocals; r < minReg; r++) {
-            ASSERT(!usageMask->at(r));
-        }
-
-        auto delta = static_cast<compiler::Register>(numLocals + numTemps + numMaxRangeInput_ - numNonArgs);
-        RenumberRegs(minReg, delta);
-
-        for (compiler::Register r = minReg; r < frameSize; r++) {
-            usageMask->at(RenumberReg(r, delta)) = usageMask->at(r);
-            usageMask->at(r) = false;
-        }
+    // Assert that if temps are present, they are marked allocated in the mask:
+    for (compiler::Register r = minReg; r < minReg + numTemps; r++) {
+        ASSERT(usageMask->at(r));
     }
 
-    SaveNumLocalsToGraph(numLocals + numTemps + numMaxRangeInput_);
+    // Assert that there are no used regs between locals and temps + arguments:
+    for (compiler::Register r = numLocals; r < minReg; r++) {
+        ASSERT(!usageMask->at(r));
+    }
+
+    auto delta = static_cast<compiler::Register>(numLocals + numTemps + numMaxRangeInput_ - numNonArgs);
+    RenumberRegs(minReg, delta);
+
+    for (compiler::Register r = minReg; r < frameSize; r++) {
+        usageMask->at(RenumberReg(r, delta)) = usageMask->at(r);
+        usageMask->at(r) = false;
+    }
     return true;
 }
 
@@ -531,11 +543,12 @@ void RegEncoder::CalculateNumNeededTempsForInst(compiler::Inst *inst)
                 continue;
             }
             auto reg = inst->GetSrcReg(i);
-            if (RegNeedsRenumbering(reg) && reg >= NUM_COMPACTLY_ENCODED_REGS) {
-                numTemps++;
-                if (inst->IsBinaryInst()) {
-                    numChangedWidth++;
-                }
+            if (!RegNeedsRenumbering(reg) || reg < NUM_COMPACTLY_ENCODED_REGS) {
+                continue;
+            }
+            numTemps++;
+            if (inst->IsBinaryInst()) {
+                numChangedWidth++;
             }
         }
     } else {
