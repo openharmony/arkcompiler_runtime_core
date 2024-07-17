@@ -67,14 +67,6 @@ protected:
 TEST_F(EtsArrayBufferTest, MemoryLayout)
 {
     EtsClass *klass = vm_->GetClassLinker()->GetArrayBufferClass();
-    ASSERT_NE(nullptr, klass);
-    std::vector<MirrorFieldInfo> members = GetMembers();
-    ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
-
-    for (const MirrorFieldInfo &memb : members) {
-        EtsField *field = klass->GetFieldIDByName(memb.Name());
-        ASSERT_NE(nullptr, field);
-        ASSERT_EQ(memb.Offset(), field->GetOffset()) << "Offsets of the field '" << memb.Name() << "' are different";
-    }
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 }  // namespace ark::ets::test

@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -301,6 +302,28 @@ extern "C" ObjectHeader *StringBuilderToStringEntrypoint(ObjectHeader *sb, [[may
 {
     ASSERT(sb != nullptr);
     return StringBuilderToString(sb)->GetCoreType();
+}
+
+extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, uint64_t number,
+                                                         [[maybe_unused]] uint64_t unused)
+{
+    ASSERT(cache != nullptr);
+    return DoubleToStringCache::FromCoreType(cache)
+        ->GetOrCache(EtsCoroutine::GetCurrent(), bit_cast<double>(number))
+        ->GetCoreType();
+}
+
+extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint64_t number, uint64_t cached)
+{
+    auto *cache = PandaEtsVM::GetCurrent()->GetDoubleToStringCache();
+    ASSERT(cache != nullptr);
+    return cache->CacheAndGetNoCheck(EtsCoroutine::GetCurrent(), bit_cast<double>(number), elem, cached)->GetCoreType();
+}
+
+extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number, [[maybe_unused]] uint64_t unused1,
+                                                                [[maybe_unused]] uint64_t unused2)
+{
+    return DoubleToStringCache::GetNoCache(bit_cast<double>(number))->GetCoreType();
 }
 
 }  // namespace ark::ets

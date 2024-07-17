@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -245,9 +245,12 @@ MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t m
             }
         }
         for (size_t i = 0; i < REPEAT; ++i) {
-            coretypes::String *stringObj = coretypes::String::CreateFromMUtf8(
-                reinterpret_cast<const uint8_t *>(&objTemplates[j][0]), objTemplates[j].length(), ctx, vm);
+            // create string of '\0's
+            coretypes::String *stringObj =
+                coretypes::String::CreateFromMUtf8(reinterpret_cast<const uint8_t *>(&objTemplates[j][0]),
+                                                   objTemplates[j].length(), objTemplates[j].length(), true, ctx, vm);
             ASSERT(stringObj != nullptr);
+            ASSERT(stringObj->GetLength() == objTemplates[j].length());
             ASSERT(spaceChecker(ToUintPtr(stringObj)) == true);
             if (gcType == GCType::G1_GC && SPACE == TargetSpace::HUMONGOUS) {
                 // for humongous objects in G1 we calculate size of the region instead of just alignment size

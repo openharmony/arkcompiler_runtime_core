@@ -326,6 +326,7 @@ public:
     static void VisitCallResolvedVirtual(GraphVisitor *v, Inst *inst);
     static void VisitGetManagedClassObject(GraphVisitor *v, Inst *inst);
     static void VisitResolveObjectFieldStatic(GraphVisitor *v, Inst *inst);
+    static void VisitBitcast(GraphVisitor *v, Inst *inst);
 
     /// Instructions that introduce static fields (global variables).
     static void VisitLoadStatic(GraphVisitor *v, Inst *inst);

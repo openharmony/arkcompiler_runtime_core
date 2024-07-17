@@ -93,16 +93,19 @@ String *String::CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t utf16Length, 
                                 bool movable, bool pinned)
 {
     bool canBeCompressed = CanBeCompressedMUtf8(mutf8Data);
-    return CreateFromMUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), utf16Length, canBeCompressed, ctx, vm, movable,
-                           pinned);
+    auto mutf8Length = utf::Mutf8Size(mutf8Data);
+    ASSERT(utf16Length == utf::MUtf8ToUtf16Size(mutf8Data, mutf8Length));
+    return CreateFromMUtf8(mutf8Data, mutf8Length, utf16Length, canBeCompressed, ctx, vm, movable, pinned);
 }
 
 /* static */
 String *String::CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t utf16Length, bool canBeCompressed,
                                 const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned)
 {
-    return CreateFromMUtf8(mutf8Data, utf::Mutf8Size(mutf8Data), utf16Length, canBeCompressed, ctx, vm, movable,
-                           pinned);
+    auto mutf8Length = utf::Mutf8Size(mutf8Data);
+    ASSERT(utf16Length == utf::MUtf8ToUtf16Size(mutf8Data, mutf8Length));
+    ASSERT(canBeCompressed == CanBeCompressedMUtf8(mutf8Data));
+    return CreateFromMUtf8(mutf8Data, mutf8Length, utf16Length, canBeCompressed, ctx, vm, movable, pinned);
 }
 
 /* static */
@@ -112,6 +115,15 @@ String *String::CreateFromMUtf8(const uint8_t *mutf8Data, const LanguageContext 
     size_t mutf8Length = utf::Mutf8Size(mutf8Data);
     size_t utf16Length = utf::MUtf8ToUtf16Size(mutf8Data, mutf8Length);
     bool canBeCompressed = CanBeCompressedMUtf8(mutf8Data);
+    return CreateFromMUtf8(mutf8Data, mutf8Length, utf16Length, canBeCompressed, ctx, vm, movable, pinned);
+}
+
+/* static */
+String *String::CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length, uint32_t utf16Length,
+                                const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned)
+{
+    ASSERT(utf16Length == utf::MUtf8ToUtf16Size(mutf8Data, mutf8Length));
+    auto canBeCompressed = CanBeCompressedMUtf8(mutf8Data, mutf8Length);
     return CreateFromMUtf8(mutf8Data, mutf8Length, utf16Length, canBeCompressed, ctx, vm, movable, pinned);
 }
 
@@ -649,6 +661,7 @@ bool String::StringsAreEqual(String *str1, String *str2)
 /* static */
 bool String::StringsAreEqualMUtf8(String *str1, const uint8_t *mutf8Data, uint32_t utf16Length)
 {
+    ASSERT(utf16Length == utf::MUtf8ToUtf16Size(mutf8Data));
     if (str1->GetLength() != utf16Length) {
         return false;
     }

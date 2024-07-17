@@ -931,6 +931,13 @@ void AliasAnalysis::VisitResolveObjectFieldStatic(GraphVisitor *v, Inst *inst)
     }
 }
 
+void AliasAnalysis::VisitBitcast(GraphVisitor *v, Inst *inst)
+{
+    if (inst->IsReferenceOrAny()) {
+        static_cast<AliasAnalysis *>(v)->AddDirectEdge(Pointer::CreateObject(inst));
+    }
+}
+
 /// Instructions that introduce static fields (global variables).
 void AliasAnalysis::VisitLoadStatic(GraphVisitor *v, Inst *inst)
 {

@@ -75,6 +75,7 @@
         header_path_compiler_inst_builder_extension: plugins/ets/compiler/optimizer/ir_builder/ets_inst_builder.h
         header_path_implementation_codegen: plugins/ets/compiler/optimizer/ets_codegen_extensions.h
         launch_call_codegen: LaunchCallCodegen
+        load_immediate_codegen: LoadImmediateCodegen
         pipeline_includes: plugins/ets/compiler/optimizer/ets_pipeline_includes.inl.h
         optimizations_after_unroll: plugins/ets/compiler/optimizer/ets_optimizations_after_unroll.inl
       runtime_defines:

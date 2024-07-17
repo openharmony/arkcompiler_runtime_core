@@ -4710,6 +4710,17 @@ void LLVMIrConstructor::VisitCallResolvedLaunchVirtual(GraphVisitor *v, Inst *in
     ctor->CreateLaunchCall(inst->CastToCallResolvedLaunchVirtual());
 }
 
+void LLVMIrConstructor::VisitLoadImmediate(GraphVisitor *v, Inst *inst)
+{
+    auto ctor = static_cast<LLVMIrConstructor *>(v);
+    auto loadImm = inst->CastToLoadImmediate();
+    ASSERT_DO(loadImm->IsTlsOffset(), (std::cerr << "Unsupported llvm lowering for \n", inst->Dump(&std::cerr, true)));
+    ASSERT(inst->GetType() == DataType::POINTER);
+    auto result = llvmbackend::runtime_calls::LoadTLSValue(&ctor->builder_, ctor->arkInterface_,
+                                                           loadImm->GetTlsOffset(), ctor->builder_.getPtrTy());
+    ctor->ValueMapAdd(inst, result);
+}
+
 void LLVMIrConstructor::VisitDefault([[maybe_unused]] Inst *inst)
 {
     ASSERT_DO(false, (std::cerr << "Unsupported llvm lowering for \n", inst->Dump(&std::cerr, true)));

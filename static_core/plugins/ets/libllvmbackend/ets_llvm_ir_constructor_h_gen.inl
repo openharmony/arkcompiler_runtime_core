@@ -30,3 +30,4 @@ llvm::Value *CreateStringBuilderAppendString(Inst *inst);
 void StringBuilderAppendStringNull(Inst *inst, llvm::PHINode *result, llvm::BasicBlock *contBb);
 void StringBuilderAppendStringMain(Inst *inst, llvm::Value *sbIndexOffset, llvm::Value *sbIndex, llvm::Value *sbBuffer,
                                    llvm::BasicBlock *contBb);
+bool EmitDoubleToStringDecimal(Inst *inst);

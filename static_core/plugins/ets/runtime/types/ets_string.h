@@ -40,11 +40,11 @@ public:
         return reinterpret_cast<EtsString *>(s);
     }
 
-    static EtsString *CreateFromMUtf8(const char *mutf8, uint32_t length)
+    static EtsString *CreateFromMUtf8(const char *mutf8, uint32_t utf16Length)
     {
         ASSERT_HAVE_ACCESS_TO_MANAGED_OBJECTS();
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
-        if (length == 0) {
+        if (utf16Length == 0) {
             return reinterpret_cast<EtsString *>(
                 coretypes::String::CreateEmptyString(ctx, Runtime::GetCurrent()->GetPandaVM()));
         }
@@ -54,7 +54,7 @@ public:
         }
         const auto *data = reinterpret_cast<const uint8_t *>(mutf8);
         coretypes::String *s =
-            coretypes::String::CreateFromMUtf8(data, length, ctx, Runtime::GetCurrent()->GetPandaVM());
+            coretypes::String::CreateFromMUtf8(data, utf16Length, ctx, Runtime::GetCurrent()->GetPandaVM());
         return reinterpret_cast<EtsString *>(s);
     }
 
@@ -263,7 +263,7 @@ public:
     bool IsEqual(const char *str)
     {
         auto *mutf8Str = utf::CStringAsMutf8(str);
-        return coretypes::String::StringsAreEqualMUtf8(GetCoreType(), mutf8Str, utf::Mutf8Size(mutf8Str));
+        return coretypes::String::StringsAreEqualMUtf8(GetCoreType(), mutf8Str, utf::MUtf8ToUtf16Size(mutf8Str));
     }
 
     PandaString GetMutf8()

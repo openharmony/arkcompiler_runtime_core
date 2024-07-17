@@ -281,3 +281,73 @@
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # string builder
     - ark::Class*         # string class pointer
+
+- name: DoubleToStringDecimal
+  entrypoint: DoubleToStringDecimal
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache
+    - uint64_t            # number
+    - uint64_t            # unused
+
+- name: DoubleToStringDecimalSlowPath
+  entrypoint: DoubleToStringDecimalEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache
+    - uint64_t            # number
+    - uint64_t            # unused
+
+- name: DoubleToStringDecimalOddSaved
+  entrypoint: DoubleToStringDecimalEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache
+    - uint64_t            # number
+    - uint64_t            # unused
+
+- name: DoubleToStringDecimalStoreSlowPath
+  entrypoint: DoubleToStringDecimalStoreEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache element
+    - uint64_t            # number
+    - uint64_t            # cache data
+
+- name: DoubleToStringDecimalStoreOddSaved
+  entrypoint: DoubleToStringDecimalStoreEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # cache element
+    - uint64_t            # number
+    - uint64_t            # cache data
+
+- name: DoubleToStringDecimalNoCacheSlowPath
+  entrypoint: DoubleToStringDecimalNoCacheEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - uint64_t            # number
+    - uint64_t            # unused
+    - uint64_t            # unused
+
+- name: DoubleToStringDecimalNoCacheOddSaved
+  entrypoint: DoubleToStringDecimalNoCacheEntrypoint
+  bridge: odd_saved
+  properties: []
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - uint64_t            # number
+    - uint64_t            # unused
+    - uint64_t            # unused

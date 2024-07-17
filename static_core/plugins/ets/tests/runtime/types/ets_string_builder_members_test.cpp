@@ -86,14 +86,7 @@ private:
 TEST_F(EtsStringBuilderMembersTest, MemoryLayout)
 {
     EtsClass *klass = vm_->GetClassLinker()->GetStringBuilderClass();
-    ASSERT_NE(nullptr, klass);
-    std::vector<MirrorFieldInfo> members = GetMembers();
-    ASSERT_EQ(members.size(), klass->GetInstanceFieldsNumber());
-    for (const MirrorFieldInfo &memb : members) {
-        EtsField *field = klass->GetFieldIDByName(memb.Name());
-        ASSERT_NE(nullptr, field);
-        ASSERT_EQ(memb.Offset(), field->GetOffset()) << "Offsets of the field '" << memb.Name() << "' are different";
-    }
+    MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
 }  // namespace ark::ets::test

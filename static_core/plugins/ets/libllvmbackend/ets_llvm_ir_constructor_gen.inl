@@ -251,3 +251,8 @@ void LLVMIrConstructor::StringBuilderAppendStringMain(Inst *inst, llvm::Value *s
     CreatePostWRB(inst, sbBuffer, sbDataOffset, str);
     builder_.CreateBr(contBb);
 }
+
+bool LLVMIrConstructor::EmitDoubleToStringDecimal(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::DOUBLE_TO_STRING_DECIMAL, 3U);
+}

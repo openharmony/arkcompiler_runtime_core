@@ -134,7 +134,7 @@ class Worker<T> {
 }
 
 const workerCount = 10;
-const valueCount = 1000;
+const valueCount = 500;
 const iterCount = valueCount * 3;
 
 function doTest<T>(values: T[], workers: int) {

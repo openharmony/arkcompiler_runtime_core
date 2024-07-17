@@ -51,6 +51,9 @@ public:
     PANDA_PUBLIC_API static String *CreateFromMUtf8(const uint8_t *mutf8Data, const LanguageContext &ctx, PandaVM *vm,
                                                     bool movable = true, bool pinned = false);
 
+    static String *CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length, uint32_t utf16Length,
+                                   const LanguageContext &ctx, PandaVM *vm, bool movable, bool pinned);
+
     PANDA_PUBLIC_API static String *CreateFromUtf8(const uint8_t *utf8Data, uint32_t utf8Length,
                                                    const LanguageContext &ctx, PandaVM *vm, bool movable = true,
                                                    bool pinned = false);

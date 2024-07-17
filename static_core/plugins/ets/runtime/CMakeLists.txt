@@ -124,3 +124,55 @@ if (PANDA_ETS_INTEROP_JS)
 endif()
 
 add_subdirectory(napi)
+
+set(IRTOC_ETS_SCRIPTS ${PANDA_ROOT}/plugins/ets/irtoc_scripts)
+set(IRTOC_ETS_SCRIPTS ${IRTOC_ETS_SCRIPTS} PARENT_SCOPE)
+if(NOT (CMAKE_CROSSCOMPILING OR PANDA_TARGET_OHOS))
+    irtoc_compile(TARGET_NAME irtoc_ets_fastpath
+                  INPUT_FILES ${IRTOC_ETS_SCRIPTS}/to_string_cache.irt
+                  TARGET_VARIABLE IRTOC_ETS_FASTPATH_OBJ
+                  TARGET_VARIABLE_LLVM IRTOC_ETS_FASTPATH_LLVM_OBJ)
+
+    if (NOT EXISTS ${IRTOC_ETS_FASTPATH_OBJ})
+        file(TOUCH ${IRTOC_ETS_FASTPATH_OBJ})
+    endif()
+    if (PANDA_LLVM_FASTPATH AND NOT EXISTS ${IRTOC_ETS_FASTPATH_LLVM_OBJ})
+        file(TOUCH ${IRTOC_ETS_FASTPATH_LLVM_OBJ})
+    endif()
+    set(irtoc_ets_fastpath_target irtoc_ets_fastpath)
+else()
+    ExternalProject_Get_Property(panda_host_tools binary_dir)
+    set(IRTOC_ETS_FASTPATH_OBJ "${binary_dir}/irtoc/irtoc_ets_fastpath/irtoc_ets_fastpath.o")
+    set(IRTOC_ETS_FASTPATH_LLVM_OBJ "${binary_dir}/irtoc/irtoc_ets_fastpath/irtoc_ets_fastpath_llvm.o")
+
+    SET_SOURCE_FILES_PROPERTIES(${IRTOC_ETS_FASTPATH_OBJ} PROPERTIES
+        EXTERNAL_OBJECT true
+        GENERATED true
+    )
+    SET_SOURCE_FILES_PROPERTIES(${IRTOC_ETS_FASTPATH_LLVM_OBJ} PROPERTIES
+        EXTERNAL_OBJECT true
+        GENERATED true
+    )
+
+    # Due to cmake complain about absence of the irtoc file, we just fake it until it will be generated
+    file(MAKE_DIRECTORY ${binary_dir}/irtoc/irtoc_ets_fastpath)
+    if (NOT EXISTS ${IRTOC_ETS_FASTPATH_OBJ})
+        file(TOUCH ${IRTOC_ETS_FASTPATH_OBJ})
+    endif()
+    if (NOT EXISTS ${IRTOC_ETS_FASTPATH_LLVM_OBJ})
+        file(TOUCH ${IRTOC_ETS_FASTPATH_LLVM_OBJ})
+    endif()
+    set(irtoc_ets_fastpath_target panda_host_tools-build)
+endif()
+
+add_dependencies(arkruntime_obj
+    ${irtoc_ets_fastpath_target}
+)
+
+set(IRTOC_ETS_LLVM_OBJECTS "")
+if (PANDA_LLVM_FASTPATH)
+    list(APPEND IRTOC_ETS_LLVM_OBJECTS ${IRTOC_ETS_FASTPATH_LLVM_OBJ})
+endif()
+
+panda_target_sources(arkruntime_interpreter_static PRIVATE ${IRTOC_ETS_FASTPATH_OBJ} ${IRTOC_ETS_LLVM_OBJECTS})
+panda_target_sources(arkruntime_static PRIVATE ${IRTOC_ETS_FASTPATH_OBJ} ${IRTOC_ETS_LLVM_OBJECTS})

@@ -165,3 +165,16 @@ intrinsics:
     set_flags: [ commutative ]
     clear_flags: [ acc_read, require_state, can_throw, heap_inv, no_dce, no_cse, no_hoist ]
     peephole_func: PeepholeEquals
+
+  - name: CompilerEtsDoubleToStringDecimal
+    space: ets
+    compiler_only: true
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ ref, u64, u64 ]
+    impl: ark::ets::intrinsics::CompilerDoubleToStringDecimal
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateDoubleToStringDecimal
+    llvm_codegen_func: EmitDoubleToStringDecimal
+    need_param_locations: true

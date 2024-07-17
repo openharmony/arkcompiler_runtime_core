@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -516,7 +516,8 @@ TEST_F(EtsStringTest, StringsAreEqual)
     std::vector<char> data2 {'a', 'b', 's', 0};
 
     EtsString *str1 = EtsString::CreateFromMUtf8(data1.data(), data1.size() - 1);
-    EtsString *str2 = EtsString::CreateFromMUtf8(data1.data(), data1.size() - 4);
+    data1[data1.size() - 4U] = 0;
+    EtsString *str2 = EtsString::CreateFromMUtf8(data1.data(), data1.size() - 4U);
     EtsString *str3 = EtsString::CreateFromMUtf8(data2.data());
 
     ASSERT_TRUE(str1->StringsAreEqual(reinterpret_cast<EtsObject *>(str1)));

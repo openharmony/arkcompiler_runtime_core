@@ -21,11 +21,14 @@
 #include "gtest/gtest.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/thread.h"
+#include "tests/runtime/types/ets_test_mirror_classes.h"
 
 #include <array>
 #include <thread>
 #include <random>
 #include <sstream>
+
+#include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.cpp"
 
 namespace ark::ets::test {
 
@@ -36,9 +39,9 @@ static constexpr int32_t VALUE_RANGE = 1000;
 
 enum GenType { COPY, SHUFFLE, INDEPENDENT };
 
-class EtsToStringCacheTest : public testing::TestWithParam<std::tuple<const char *, GenType>> {
+class EtsToStringCacheTest : public testing::Test {
 public:
-    EtsToStringCacheTest() : engine_(std::random_device {}())
+    explicit EtsToStringCacheTest(const char *gcType = nullptr) : engine_(std::random_device {}())
     {
         // Logger::InitializeStdLogging(Logger::Level::INFO, Logger::ComponentMaskFromString("runtime") |
         // Logger::ComponentMaskFromString("coroutines"));
@@ -55,7 +58,9 @@ public:
         }
         options.SetBootPandaFiles({stdlib});
 
-        options.SetGcType(std::get<0>(GetParam()));
+        if (gcType != nullptr) {
+            options.SetGcType(gcType);
+        }
         options.SetCompilerEnableJit(false);
         if (!Runtime::Create(options)) {
             UNREACHABLE();
@@ -77,13 +82,12 @@ public:
         mainCoro_ = EtsCoroutine::CastFromThread(PandaEtsVM::GetCurrent()->GetCoroutineManager()->GetMainThread());
         ASSERT(mainCoro_ != nullptr);
     }
-
     void TestMainLoop(double value, [[maybe_unused]] bool needCheck)
     {
         auto etsVm = mainCoro_->GetPandaVM();
         auto *cache = etsVm->GetDoubleToStringCache();
         auto *etsCoro = EtsCoroutine::GetCurrent();
-        [[maybe_unused]] auto *str = cache->GetOrCache(etsCoro, value);
+        [[maybe_unused]] auto [str, result] = cache->GetOrCacheImpl(etsCoro, value);
 #ifndef NDEBUG
         // don't always check to increase pressure
         if (needCheck) {
@@ -121,27 +125,6 @@ public:
         mainCoro_->GetCoroutineManager()->DestroyEntrypointlessCoroutine(coro);
     }
 
-    void DoTest(void (EtsToStringCacheTest::*setup)())
-    {
-        (this->*setup)();
-        for (uint32_t i = 0; i < TEST_THREADS; i++) {
-            if (std::get<1>(GetParam()) == GenType::SHUFFLE) {
-                std::shuffle(values_.begin(), values_.end(), engine_);
-            } else if (std::get<1>(GetParam()) == GenType::INDEPENDENT && i > 0) {
-                (this->*setup)();
-            }
-            threadValues_[i] = values_;
-        }
-
-        for (uint32_t i = 0; i < TEST_THREADS; i++) {
-            threads_[i] = std::thread([this, i]() { TestConcurrentInsertion(threadValues_[i]); });
-        }
-
-        for (uint32_t i = 0; i < TEST_THREADS; i++) {
-            threads_[i].join();
-        }
-    }
-
     void SetupSimple()
     {
         std::uniform_real_distribution<double> dist(-VALUE_RANGE, VALUE_RANGE);
@@ -163,9 +146,27 @@ public:
             double value;
             do {
                 value = dist(engine_);
-            } while (DoubleToStringCache::GetIndex(value) > UNIQUE_HASHES);
+            } while (DoubleToStringCache::GetIndex(value) >= UNIQUE_HASHES);
             return value;
         });
+    }
+
+    void SetupRepeatedHashesAndValues()
+    {
+        std::uniform_real_distribution<double> dist(-VALUE_RANGE, VALUE_RANGE);
+
+        static constexpr auto UNIQUE_VALUES = 8;
+        std::generate(values_.begin(), values_.begin() + UNIQUE_VALUES, [&dist, this]() {
+            constexpr auto UNIQUE_HASHES = 2;
+            double value;
+            do {
+                value = dist(engine_);
+            } while (DoubleToStringCache::GetIndex(value) >= UNIQUE_HASHES);
+            return value;
+        });
+        for (size_t i = UNIQUE_VALUES; i < values_.size(); i++) {
+            values_[i] = values_[i - UNIQUE_VALUES];
+        }
     }
 
     void SetupUniqueHashes()
@@ -196,36 +197,93 @@ public:
         return engine_;
     }
 
+    template <typename T>
+    static void CheckCacheElementMembers()
+    {
+        ASSERT(detail::EtsToStringCacheElement<T>::STRING_OFFSET ==
+               MEMBER_OFFSET(detail::EtsToStringCacheElement<T>, data_));
+
+        auto *klass = detail::EtsToStringCacheElement<T>::GetClass(EtsCoroutine::GetCurrent());
+        std::vector<MirrorFieldInfo> members {
+            MirrorFieldInfo("string", detail::EtsToStringCacheElement<T>::STRING_OFFSET),
+            MirrorFieldInfo("lock", detail::EtsToStringCacheElement<T>::FLAG_OFFSET),
+            MIRROR_FIELD_INFO(detail::EtsToStringCacheElement<T>, number_, "number")};
+        MirrorFieldInfo::CompareMemberOffsets(klass, members);
+    }
+
+protected:
+    void DoTest(void (EtsToStringCacheTest::*setup)(), GenType genType)
+    {
+        (this->*setup)();
+        for (uint32_t i = 0; i < TEST_THREADS; i++) {
+            if (genType == GenType::SHUFFLE) {
+                std::shuffle(values_.begin(), values_.end(), GetEngine());
+            } else if (genType == GenType::INDEPENDENT && i > 0) {
+                (this->*setup)();
+            }
+            threadValues_[i] = values_;
+        }
+
+        for (uint32_t i = 0; i < TEST_THREADS; i++) {
+            threads_[i] = std::thread([this, i]() { TestConcurrentInsertion(threadValues_[i]); });
+        }
+
+        for (uint32_t i = 0; i < TEST_THREADS; i++) {
+            threads_[i].join();
+        }
+    }
+
 private:
     std::array<double, TEST_ARRAY_SIZE> values_ {};
     std::array<std::array<double, TEST_ARRAY_SIZE>, TEST_THREADS> threadValues_ {};
-    std::mt19937 engine_;
 
-    EtsCoroutine *mainCoro_ {};
     std::array<std::thread, TEST_THREADS> threads_;
+    std::mt19937 engine_;
+    EtsCoroutine *mainCoro_ {};
 };
 
-TEST_P(EtsToStringCacheTest, ConcurrentInsertion)
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class EtsToStringCacheParamTest : public EtsToStringCacheTest,
+                                  public testing::WithParamInterface<std::tuple<const char *, GenType>> {
+public:
+    EtsToStringCacheParamTest() : EtsToStringCacheTest(std::get<0>(GetParam())) {}
+
+    void DoTest(void (EtsToStringCacheTest::*setup)())
+    {
+        EtsToStringCacheTest::DoTest(setup, std::get<1>(GetParam()));
+    }
+};
+
+TEST_P(EtsToStringCacheParamTest, ConcurrentInsertion)
 {
     DoTest(&EtsToStringCacheTest::SetupSimple);
 }
 
-TEST_P(EtsToStringCacheTest, ConcurrentInsertionExp)
+TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionExp)
 {
     DoTest(&EtsToStringCacheTest::SetupExp);
 }
 
-TEST_P(EtsToStringCacheTest, ConcurrentInsertionRepeatedHashes)
+TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionRepeatedHashes)
 {
     DoTest(&EtsToStringCacheTest::SetupRepeatedHashes);
 }
 
-TEST_P(EtsToStringCacheTest, ConcurrentInsertionUniqueHashes)
+TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionRepeatedHashesAndValues)
+{
+    DoTest(&EtsToStringCacheTest::SetupRepeatedHashesAndValues);
+}
+
+TEST_P(EtsToStringCacheParamTest, ConcurrentInsertionUniqueHashes)
 {
     DoTest(&EtsToStringCacheTest::SetupUniqueHashes);
 }
 
-TEST_P(EtsToStringCacheTest, BitcastTestCached)
+INSTANTIATE_TEST_SUITE_P(EtsToStringCacheTestSuite, EtsToStringCacheParamTest,
+                         testing::Combine(testing::Values("stw", "gen-gc", "g1-gc"),
+                                          testing::Values(GenType::COPY, GenType::SHUFFLE, GenType::INDEPENDENT)));
+
+TEST_F(EtsToStringCacheTest, BitcastTestCached)
 {
     auto &engine = GetEngine();
     auto coro = GetMainCoro();
@@ -268,7 +326,7 @@ TEST_P(EtsToStringCacheTest, BitcastTestCached)
     coro->ManagedCodeEnd();
 }
 
-TEST_P(EtsToStringCacheTest, BitcastTestRaw)
+TEST_F(EtsToStringCacheTest, BitcastTestRaw)
 {
     auto &engine = GetEngine();
     std::uniform_int_distribution<uint32_t> dis(0, std::numeric_limits<uint32_t>::max());
@@ -312,7 +370,7 @@ TEST_P(EtsToStringCacheTest, BitcastTestRaw)
     return delta <= eps;
 }
 
-TEST_P(EtsToStringCacheTest, BitcastTestFloat)
+TEST_F(EtsToStringCacheTest, BitcastTestFloat)
 {
     auto &engine = GetEngine();
     std::uniform_int_distribution<uint32_t> dis(0, std::numeric_limits<uint32_t>::max());
@@ -352,8 +410,11 @@ TEST_P(EtsToStringCacheTest, BitcastTestFloat)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(EtsToStringCacheTestSuite, EtsToStringCacheTest,
-                         testing::Combine(testing::Values("stw", "gen-gc", "g1-gc"),
-                                          testing::Values(GenType::COPY, GenType::SHUFFLE, GenType::INDEPENDENT)));
+TEST_F(EtsToStringCacheTest, ToStringCacheElementLayout)
+{
+    CheckCacheElementMembers<EtsDouble>();
+    CheckCacheElementMembers<EtsFloat>();
+    CheckCacheElementMembers<EtsLong>();
+}
 
 }  // namespace ark::ets::test
