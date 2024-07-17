@@ -119,7 +119,10 @@ class DetailedReport:
             self.__calculate_one_test(test)
 
     def __report_one_line(self, folder: str) -> str:
-        summary = self.result[folder]
+        try:
+            summary: Summary = self.result[folder]
+        except KeyError as key_error:
+            raise KeyError(f"No folder {folder} in result") from key_error
         report = (f"| {folder} | {summary.total} | "
                   f"{summary.passed} | {summary.failed} | "
                   f"{summary.ignored_but_passed} | {summary.ignored} |")

@@ -99,15 +99,15 @@ class PandaBinaries:
     def ark_quick(self) -> str:
         return ""
 
-    def __get_binary_path(self, binary: str) -> str:
-        return self.check_path(self.build_dir, 'bin', get_platform_binary_name(binary))
-
     @staticmethod
     def check_path(*path_parts: str) -> str:
         path_ = path.join(*path_parts)
         if not path.isfile(path_):
             Log.exception_and_raise(_LOGGER, f"Cannot find binary file: {path_}", FileNotFoundError)
         return str(path_)
+
+    def __get_binary_path(self, binary: str) -> str:
+        return self.check_path(self.build_dir, 'bin', get_platform_binary_name(binary))
 
 
 class RunnerFileBased(Runner):
@@ -153,10 +153,6 @@ class RunnerFileBased(Runner):
     def default_work_dir_root(self) -> Path:
         pass
 
-    @cached_property
-    def work_dir(self) -> WorkDir:
-        return WorkDir(self.config.general, self.default_work_dir_root)
-
     @staticmethod
     def _set_cmd_prefix(config: Config) -> List[str]:
         if config.general.qemu == QemuKind.ARM64:
@@ -166,6 +162,21 @@ class RunnerFileBased(Runner):
             return ["qemu-arm", "-L", "/usr/arm-linux-gnueabihf"]
 
         return []
+
+    @staticmethod
+    def _get_error_message(error: str) -> str:
+        lines = [line.strip() for line in error.split('\n') if len(line.strip()) > 0]
+        if len(lines) > 0:
+            error_message = lines[0]
+            if error_message.startswith("["):
+                last_bracket = error_message.find("]")
+                error_message = error_message[last_bracket + 1:].strip()
+            return error_message
+        return ""
+
+    @cached_property
+    def work_dir(self) -> WorkDir:
+        return WorkDir(self.config.general, self.default_work_dir_root)
 
     def generate_quick_stdlib(self, stdlib_abc: str) -> str:
         Log.all(_LOGGER, "Generate quick stdlib")
@@ -264,39 +275,6 @@ class RunnerFileBased(Runner):
 
         return self.failed
 
-    def __generate_detailed_report(self, results: List[Test]) -> None:
-        if self.config.report.detailed_report:
-            detailed_report = DetailedReport(
-                results,
-                self.name,
-                self.work_dir.report,
-                self.config.report.detailed_report_file)
-            detailed_report.populate_report()
-
-    def __generate_spec_report(self, results: List[Test]) -> None:
-        if self.config.report.spec_report:
-            spec_report = SpecReport(
-                results,
-                self.name,
-                self.work_dir.report,
-                self.config.report.spec_report_file,
-                self.config.report.spec_report_yaml,
-                self.config.report.spec_file)
-            spec_report.populate_report()
-
-    def _process_failed(self, test_result: TestFileBased, ignored_still_failed: List[Test],
-                        excluded_still_failed: List[Test], fail_lists: Dict[FailKind, List[Test]]) -> None:
-        if test_result.ignored:
-            self.ignored += 1
-            ignored_still_failed.append(test_result)
-        elif test_result.path in self.excluded_tests:
-            excluded_still_failed.append(test_result)
-            self.excluded += 1
-        else:
-            self.failed += 1
-            assert test_result.fail_kind
-            fail_lists[test_result.fail_kind].append(test_result)
-
     def collect_excluded_test_lists(self, extra_list: Optional[List[str]] = None,
                                     test_name: Optional[str] = None) -> None:
         self.excluded_lists.extend(self.collect_test_lists("excluded", extra_list, test_name))
@@ -345,16 +323,38 @@ class RunnerFileBased(Runner):
 
         return test_lists
 
-    @staticmethod
-    def _get_error_message(error: str) -> str:
-        lines = [line.strip() for line in error.split('\n') if len(line.strip()) > 0]
-        if len(lines) > 0:
-            error_message = lines[0]
-            if error_message.startswith("["):
-                last_bracket = error_message.find("]")
-                error_message = error_message[last_bracket + 1:].strip()
-            return error_message
-        return ""
+    def _process_failed(self, test_result: TestFileBased, ignored_still_failed: List[Test],
+                        excluded_still_failed: List[Test], fail_lists: Dict[FailKind, List[Test]]) -> None:
+        if test_result.ignored:
+            self.ignored += 1
+            ignored_still_failed.append(test_result)
+        elif test_result.path in self.excluded_tests:
+            excluded_still_failed.append(test_result)
+            self.excluded += 1
+        else:
+            self.failed += 1
+            assert test_result.fail_kind
+            fail_lists[test_result.fail_kind].append(test_result)
+
+    def __generate_detailed_report(self, results: List[Test]) -> None:
+        if self.config.report.detailed_report:
+            detailed_report = DetailedReport(
+                results,
+                self.name,
+                self.work_dir.report,
+                self.config.report.detailed_report_file)
+            detailed_report.populate_report()
+
+    def __generate_spec_report(self, results: List[Test]) -> None:
+        if self.config.report.spec_report:
+            spec_report = SpecReport(
+                results,
+                self.name,
+                self.work_dir.report,
+                self.config.report.spec_report_file,
+                self.config.report.spec_report_yaml,
+                self.config.report.spec_file)
+            spec_report.populate_report()
 
     def __set_test_list_options(self) -> None:
         for san in ["ASAN_OPTIONS", "TSAN_OPTIONS", "MSAN_OPTIONS", "LSAN_OPTIONS"]:

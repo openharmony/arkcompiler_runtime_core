@@ -249,7 +249,7 @@ def dump_time_stats(logger, stats):
             logger.info(name.split(".")[0].ljust(
                 max_width + 5) + str(round(stats.time[name], 3)))
         else:
-            logger.info(name.split(".")[0].ljust(max_width+5) + "None")
+            logger.info(name.split(".")[0].ljust(max_width + 5) + "None")
 
 
 def dump_pass_rate(logger, skiplist_name, passed_tests, failed_tests):

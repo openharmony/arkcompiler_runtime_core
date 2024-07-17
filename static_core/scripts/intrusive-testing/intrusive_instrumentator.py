@@ -276,14 +276,14 @@ class SourceFile:
     def __hash__(self):
         return hash(self._path)
 
-    @property
-    def path(self):
-        return self._path
-
     def __eq__(self, other): 
         if not isinstance(other, SourceFile):
             return False
         return self.path == other.path
+
+    @property
+    def path(self):
+        return self._path
 
 
 # Abstraction for a header file, i.e.
@@ -320,8 +320,8 @@ class BindingsFileParser:
             f.close()
 
     #raise: yamale.YamaleError
-    def validate(self, schemaFile):
-        schema = yamale.make_schema(schemaFile)
+    def validate(self, schema_file):
+        schema = yamale.make_schema(schema_file)
         data = yamale.make_data(self.__file)
         yamale.validate(schema, data)
 
