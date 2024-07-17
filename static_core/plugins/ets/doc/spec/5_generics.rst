@@ -32,6 +32,10 @@ class, interface, union, array, function, or method.
 Instantiation (see :ref:`Generic Instantiations`) can be performed either
 explicitly or implicitly.
 
+There are special types in the |LANG| which syntactically look like generics
+and they allow to create new types durign compilation (see
+:ref:`Utility Types`).
+
 
 .. index::
    entity
@@ -61,7 +65,9 @@ an ordinary type inside a *generic*.
 Syntactically, a type parameter is an unqualified identifier with a proper
 scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
 can have a *constraint* (see :ref:`Type Parameter Constraint`). A type
-parameter can have a default type (see :ref:`Type Parameter Default`).
+parameter can have a default type (see :ref:`Type Parameter Default`). Also
+type parameter may specify its variance (see :ref:`Type Parameter Variance`) in
+'in' or 'out' form.
 
 .. index::
    generic parameter
@@ -76,6 +82,7 @@ parameter can have a default type (see :ref:`Type Parameter Default`).
    constraint
    default type
    type parameter
+   variance
 
 .. code-block:: abnf
 
@@ -146,7 +153,7 @@ variables and fields of a type parameter (see :ref:`Field Initialization`):
 .. _Type Parameter Constraint:
 
 Type Parameter Constraint
-*************************
+=========================
 
 .. meta:
     frontend_status: Partly
@@ -264,7 +271,7 @@ section depends on itself.
 .. _Type Parameter Default:
 
 Type Parameter Default
-**********************
+======================
 
 .. meta:
     frontend_status: Done
@@ -326,6 +333,99 @@ in the examples below:
 
 |
 
+.. _Type Parameter Variance:
+
+Type Parameter Variance
+=======================
+
+.. meta:
+    frontend_status: Partly
+    todo: Implement semantic checks, now in/out modifiers are only parsed ang ignored.
+
+Normally, two different argument types that specialize a generic class are
+handled as different and unrelated types (*invariance*). |LANG| supports type
+parameter variance which allows such specializations become base classes and
+derived classes (*covariance* :ref:`Covariance`), or vice versa
+(*contravariance* :ref:`Contravariance`), depending on the relationship of
+inheritance between argument types.
+
+.. index::
+   generic class
+   argument type
+   invariance
+   contravariance
+   covariance
+   inheritance
+   derived class
+   base class
+
+
+Special markers are used to specify the *declaration-site variance*. The
+markers are to be added to generic parameter declarations. These markers are
+expressed as keywords ``in`` or ``out`` (a *variance modifier*, which specifies
+the variance of the type parameter).
+
+Type parameters with the keyword ``out`` are *covariant* (see
+:ref:`Covariance`), and can be used in the out-position only:
+
+   - Methods may have ``out`` type parameters as return types
+   - Fields of ``out`` type parameters as type should be ``readonly``.
+
+Otherwise a :index:`compile-time error` occurs.
+
+Type parameters with the keyword ``in`` are *contravariant* (see
+:ref:`Contravariance`), and can be used in the in-position only:
+
+   - Methods may have ``in`` type parameters as parameter types
+
+Otherwise a :index:`compile-time error` occurs.
+
+
+.. TBD function types! Variance interleaving T, (T)=>..., (((T)=>...)=>...)
+
+
+Type parameters with no variance modifier are implicitly *invariant*, and can
+occur in any position.
+
+.. index::
+   generic
+   declaration-site variance
+   type parameter
+   keyword in
+   keyword out
+   variance modifier
+   in-position
+   out-position
+
+A :index:`compile-time error` occurs if a function, method, or constructor
+type parameters have a variance modifier specified.
+
+*Variance* is used to describe the subtyping (see :ref:`Subtyping`) operation
+on parameterized types (see :ref:`Generics`). The variance of the corresponding
+type parameter *F* defines the subtyping between *T<A>* and *T<B>* (in the case
+of declaration-site variance with two different types *A* <: *B*) as follows:
+
+-  Covariant :ref:`Covariance` (*out F*): *T<A>* <: *T<B>*;
+-  Contravariant :ref:`Contravariance` (*in F*): *T<A>* :> *T<B>*;
+-  Invariant (default) (*F*).
+
+.. index::
+   type parameter
+   variance modifier
+   function
+   method
+   constructor
+   variance
+   covariance
+   contravariance
+   invariance
+   type-parameterized declaration
+   parameterized type
+   subtyping
+   declaration-site variance
+
+|
+
 .. _Generic Instantiations:
 
 Generic Instantiations
@@ -346,8 +446,8 @@ function defines a set of non-generics classes, interfaces, unions, arrays,
 methods, or functions respectively.
 
 An explicit generic instantiation is the language construct that provides a
-list of *type arguments* that specify real types to substitute corresponding
-type parameters of a generic:
+list of *type arguments* (see :ref:`Type Arguments`) that specify real types to
+substitute corresponding type parameters of a generic:
 
 .. code-block:: typescript
    :linenos:
@@ -474,12 +574,12 @@ Implicit instantiation is only possible for functions and methods.
 .. _Type Arguments:
 
 Type Arguments
-**************
+==============
 
 .. meta:
     frontend_status: Done
 
-Type arguments can be reference types or wildcards.
+Type arguments can be reference types or array types.
 
 If a value type is specified as a type argument in the generic instantiation,
 then the boxing conversion applies to the type (see :ref:`Boxing Conversions`).
@@ -496,11 +596,7 @@ parameterized function.
 .. index::
    type argument
    reference type
-   wildcard
    boxing conversion
-   numeric type
-   predefined numeric types conversion
-   raw type
    parameterized function
    compile-time error
 
@@ -513,117 +609,7 @@ parameterized function.
     typeArgument:
         typeReference
         | arrayType
-        | wildcardType
         ;
-
-    wildcardType:
-        'in' typeReference
-        | 'out' typeReference?
-        ;
-
-
-.. _Type Argument Variance:
-
-Type Argument Variance
-======================
-
-.. meta:
-    frontend_status: Done
-
-The variance for type arguments can be specified with wildcards (*use-site
-variance*). It allows changing type variance of an *invariant* type parameter.
-
-**Note**: This description of *use-site variance* modifiers is tentative.
-The details are to be specified in the future versions of |LANG|.
-
-The syntax to signify a *covariant* :ref:`Covariance` type argument, or a
-wildcard with an upper bound (*T* is a ``typeReference``) is as follows:
-
-.. index::
-   variance
-   type argument
-   wildcard
-   use-site variance
-   modifier
-   type variance
-   invariant type parameter
-   covariant type parameter
-   upper bound
-
--  ``out`` *T*
-
-   This syntax restricts the methods available, and allows accessing only
-   the methods that do not use *T*, or use *T* in out-position.
-
-The syntax to signify a contravariant :ref:`Contravariance` type argument, or
-a wildcard with a lower bound (*T* is a ``typeReference``) is as follows:
-
--  ``in`` *T*
-
-   This syntax restricts the methods available, and allows accessing only
-   the methods that do not use *T*, or use *T* in in-position.
-
-.. index::
-   method
-   access
-   out-position
-   contravariant type argument
-   wildcard
-   lower bound
-   in-position
-
-The unbounded wildcard ``out``, and the wildcard ``out Object | null`` are
-equivalent.
-
-A :index:`compile-time error` occurs if:
-
--  A wildcard is used in a parameterization of a function; or
--  A *covariant* :ref:`Covariance` wildcard is specified for a *contravariant*
-   :ref:`Contravariance` type parameter; or
--  A *contravariant* wildcard is specified for a *covariant* :ref:`Covariance`
-   type parameter.
-
-.. index::
-   compile-time error
-   unbounded wildcard
-   wildcard
-   covariant wildcard
-   contravariant wildcard
-   function parameterization
-   contravariant type parameter
-   covariant type parameter
-
-The rules below apply to the subtyping (see :ref:`Subtyping`) of two
-non-equivalent types *A* <: *B*, and an invariant type parameter *F* in
-case of use-site variance:
-
--  ``T <out A>`` <: ``T <out B>``;
--  ``T <in A>`` :> ``T <in B>``;
--  ``T* <A>`` <: ``T <out A>``;
--  ``T <A>`` <: ``T <in A>``.
-
-.. index::
-   subtyping
-   invariant type parameter
-   use-site variance
-
-Any two type arguments are considered *provably distinct* if:
-
--  The two arguments are not of the same type, and neither is a type parameter
-   nor a wildcard; or
--  One type argument is a type parameter or a wildcard with an upper bound
-   of *S*, the other *T* is not a type parameter and not a wildcard, and
-   neither is compatible with the other (see :ref:`Type Compatibility`); or
--  Each type argument is a type parameter, or wildcard with upper bounds
-   *S* and *T*, and neither is compatible with the other (see
-   :ref:`Type Compatibility`).
-
-.. index::
-   provably distinct type argument
-   type parameter
-   wildcard
-   upper bound
-   type argument
 
 |
 

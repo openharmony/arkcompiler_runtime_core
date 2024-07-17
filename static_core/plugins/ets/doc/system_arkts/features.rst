@@ -11,38 +11,38 @@
     limitations under the License.
 
 Features
-============
+========
 
-In this section there are some examples for each feature.
-Prepared pieces of code will give ETS-Warnings if
-compilation happens. Warning messages are added to examples as comments.
+This section provides examples for each feature. Pieces of code cause
+ETS-Warnings as the compilation proceeds. The warning messages are included
+as comments to the examples.
 
-After badly performing code there is a rewritten version
-of ArkTS code with special note on each fixed line.
+If the code performs poorly, a rewritten version of |LANG| code appears
+with specific notes to each line of code that was fixed.
 
 
-Feature #1: Show implicit Boxing and Unboxing conversions
----------------------------------------------------------------------------------
+Feature #1: Show Implicit Boxing and Unboxing Conversions
+---------------------------------------------------------
 
 |CB_RULE| ``ets-implicit-boxing-unboxing``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rationales
-~~~~~~~~~~~~~~
+Rationale
+~~~~~~~~~
 
-|LANG| supports Boxing and Unboxing conversions, which perform badly. Use
-other constructions or types to avoid extra Boxing/Unboxing conversions and boost
-performance from 44% to 97.5%.
+|LANG| supports Boxing and Unboxing conversions. However, they perform badly.
+Use other constructions or types to avoid extra Boxing/Unboxing conversions,
+and boost the performance from 44.0% to 97.5%.
 
 |LANG|
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
 
 .. code-block:: typescript
 
     let k: Int = 5;
 
-|LANG| efficient
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Efficient
+~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -51,20 +51,21 @@ performance from 44% to 97.5%.
 
 
 Feature #2: Boost Equality Statements
---------------------------------------------
+-------------------------------------
 
 |CB_RULE| ``ets-boost-equality-statement``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rationales
-~~~~~~~~~~~~~~
+Rationale
+~~~~~~~~~
 
-|LANG| supports reference binary operators. If left part of statement
-is nullable type and right part is reference type, change sides of expression -
-it will work about 12% faster then in another order. Result of expression for both cases is the same.
+|LANG| supports reference binary operators. If the left part of a statement
+is a nullable type, and the right part is a reference type, then swapping the
+sides of the expression causes it work faster by about 12 %, while the result
+of the expression in both cases is the same.
 
-|LANG| badly performing
-~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Performs Badly
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -76,8 +77,8 @@ it will work about 12% faster then in another order. Result of expression for bo
 
     let k: boolean = x == null; // ETS Warning: Boost Equality Statement. Change sides of binary expression.
 
-|LANG| more efficient
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| is More Efficient
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -92,8 +93,8 @@ it will work about 12% faster then in another order. Result of expression for bo
 
 or
 
-|LANG| badly performing
-~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Performs Badly
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -103,8 +104,8 @@ or
         let i4: Long = 5 as long; // ETS Warning: Implicit Boxing to Long in Variable Declaration.
     }
 
-|LANG| more efficient version 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| is More Efficient Option 1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -116,8 +117,8 @@ or
 
 or
 
-|LANG| more efficient version 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| is More Efficient Option 2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -128,20 +129,20 @@ or
     }
 
 
-Feature #3: Prohibit Top-Level statements
+Feature #3: Prohibit Top-Level Statements
 ----------------------------------------------------
 
 |CB_RULE| ``ets-phohibit-top-level-statements``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rationales
-~~~~~~~~~~~~~~
+Rationale
+~~~~~~~~~
 
 |LANG| supports Top-Level statements. However, they can lead to slower
 startup times for application because of executing before the application's entry point.
 Encapsulate code within methods or classes.
 
-|LANG| bad startup
+|LANG| Bad Startup
 ~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
@@ -154,7 +155,7 @@ Encapsulate code within methods or classes.
         console.println("Oh no, 5 is equal to 6!");
     }
 
-|LANG| better startup
+|LANG| Better Startup
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
@@ -170,21 +171,21 @@ Encapsulate code within methods or classes.
         }
     }
 
-Feature #4: Use Coroutines instead of Async-functions
+Feature #4: Use Coroutines Instead of Async-functions
 -----------------------------------------------------------
 
 |CB_RULE| ``ets-remove-async``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rationales
+Rationale
+~~~~~~~~~
+
+|LANG| supports Async-functions and Coroutines. Async-function type is only
+supported for the backward |TS| compatibility.
+"System |LANG|" suggests using Coroutines instead of Async-functions.
+
+|LANG| Bad Way
 ~~~~~~~~~~~~~~
-
-|LANG| supports Async-functions and Coroutines. Async-function
-type is only supported for the backward |TS| compatibility.
-System ArkTS suggests to use Coroutines instead of Async-functions.
-
-|LANG| bad way
-~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -204,8 +205,8 @@ System ArkTS suggests to use Coroutines instead of Async-functions.
         bench_body();
     }
 
-|LANG| better way
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Better Way
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -226,20 +227,22 @@ System ArkTS suggests to use Coroutines instead of Async-functions.
         bench_body();
     }
 
-Feature #5: Suggest final modifier for classes and methods
+Feature #5: Suggest Final Modifier for Classes and Methods
 ----------------------------------------------------------
 
 |CB_RULE| ``ets-suggest-final``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rationales
-~~~~~~~~~~~~~~
+Rationale
+~~~~~~~~~
 
-|LANG| classes and methods have 'open' modifier as default. This requires runtime resolution.
-Making class or method ``final`` allows more efficient calls - up to 67% better performance.
+By default, all classes in |LANG| can be extended, and all method can be
+overriden. As a consequence, calling a method requires runtime resolution.
+Making class or method ``final`` allows more efficient calls, improving the
+performance by up to 67%.
 
-|LANG| badly performing
-~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Performs Badly
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -256,8 +259,8 @@ Making class or method ``final`` allows more efficient calls - up to 67% better 
         }
     }
 
-|LANG| more efficient
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| is More Efficient
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -274,28 +277,28 @@ Making class or method ``final`` allows more efficient calls - up to 67% better 
         }
     }
 
-Feature #6: Using function call instead of lambda
-----------------------------------------------------
+Feature #6: Using Function Call Instead of Lambda
+-------------------------------------------------
 
 |CB_RULE| ``ets-remove-lambda``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rationales
-~~~~~~~~~~~~~~
+Rationale
+~~~~~~~~~
 
-|LANG| supports lambda calls. However, using function call is 4 time faster
-then lambda. System ArkTS suggests to use function calls.
+|LANG| supports lambda calls. However, using a function call is four times
+as fast as lambda. "System |LANG|" suggests using function calls.
 
-|LANG| badly performing
-~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Performs Badly
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
     let foo: (i: int) => int
     foo = (i: int): int => {return i + 1} // ETS Warning: Replace the lambda function with a regular function.
 
-|LANG| more efficient
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| is More Efficient
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 

@@ -16,10 +16,10 @@ Introduction
 |
 
 
-Welcome to the "System |LANG|" guide. This document gives you short suggestions
-on how to rewrite your |LANG| code to better performing |LANG| code using System |LANG|
-warnings.
+Welcome to the "System |LANG|" guide. This document provides brief suggestions
+on how to rewrite your |LANG| code by using System |LANG| warnings.
 
-See next chapters to learn more and easily boost performance of ArkTS code.
+The next chapters will help you learn how to easily boost the performance of
+your |LANG| code.
 
 |

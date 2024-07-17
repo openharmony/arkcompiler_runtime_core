@@ -1582,9 +1582,6 @@ an interface.
 The syntax form that has a block associated with the method call is a special
 form called *trailing lambda call* (see :ref:`Trailing Lambda` for details.
 
-A :index:`compile-time error` occurs if ``typeArguments`` is present, and any
-of type arguments is a wildcard (see :ref:`Type Arguments`).
-
 A method call with '``?.``' (see :ref:`Chaining Operator`) is called a
 *safe method call* because it handles nullish values safely.
 
@@ -1599,7 +1596,6 @@ compile time (see :ref:`Step 1 Selection of Type to Use`,
 .. index::
    compile-time error
    type argument
-   wildcard
    method call
    chaining operator
    safe method call
@@ -1731,8 +1727,6 @@ call is called *trailing lambda call* (see :ref:`Trailing Lambda` for details).
 
 A :index:`compile-time error` occurs if:
 
--  Clause ``typeArguments`` is present, and any of type arguments is a
-   wildcard (see :ref:`Type Arguments`);
 -  The expression type is different than the function type;
 -  The expression type is nullish but without '``?.``' (see
    :ref:`Chaining Operator`).
@@ -1743,7 +1737,6 @@ A :index:`compile-time error` occurs if:
    lambda expression
    compile-time error
    type argument
-   wildcard
    expression type
    function type
    nullish type

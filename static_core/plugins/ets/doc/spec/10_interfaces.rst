@@ -167,13 +167,12 @@ A :index:`compile-time error` occurs if:
 
 -  ``typeReference`` in the ``extends`` clause of an interface declaration
    names an interface type that is not accessible (see :ref:`Accessible`).
--  Type arguments of ``typeReference`` denote a parameterized type that
-   is not well-formed (see :ref:`Generic Instantiations`).
+-  Type arguments (see :ref:`Type Arguments`) of ``typeReference`` denote a
+   parameterized type that is not well-formed (see
+   :ref:`Generic Instantiations`).
 -  The ``extends`` graph has a cycle.
 -  At least one ``typeReference`` is an alias of one of primitive, enumeration,
    union, or function  types.
--  Any type argument is a wildcard type.
-
 
 Each ``typeReference`` in the ``extends`` clause of an interface declaration
 must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
@@ -190,7 +189,6 @@ must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
    type-parameterized declaration
    primitive type
    enum type
-   wildcard
    extends clause
    interface type
 

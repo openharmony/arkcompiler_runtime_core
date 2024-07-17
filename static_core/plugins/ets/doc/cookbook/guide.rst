@@ -54,26 +54,27 @@ The original |TS| code containing the keyword ``var``:
 Severity Levels
 ---------------
 
-Each recipe is marked with the severity level. Supported values:
+Each recipe is marked with the severity level.
+The supported values are as follows:
 
-- |CB_ERROR|: The recipe should be followed, otherwise the program
-  will fail to compile.
-- |CB_WARNING|: It is highly recommended to follow the recipe. Although
-  violating the recipe does not currently affect the compilation, in future
-  versions, it will cause compilation to fail.
+- |CB_ERROR|: The recipe must be followed, otherwise the program
+  fails to compile.
+- |CB_WARNING|: It is highly recommended to follow the recipe. A violation of
+  the recipe does not currently affect the compilation, but will cause the
+  compilation to fail in the future versions.
 
 .. _Status of Unsupported Features:
 
 Status of Unsupported Features
 ------------------------------
 
-Currently unsupported are mainly the features which:
+Currently unsupported are mainly the features that degrade the following:
 
-- relate to dynamic typing that degrades runtime performance, or
-- require extra support in the compiler, thus degrading project build time.
+- Runtime performance, by being related to dynamic typing;
+- Project build time, by requiring extra support during compilation.
 
-However, the |LANG| team reserves the right to reconsider the list and
-**shrink** it in the future releases based on the feedback from the developers,
+However, the |LANG| team reserves the right to reconsider and **shrink** the
+list in the future releases based on the feedback from the developers,
 and on more real-world data experiments.
 
 |

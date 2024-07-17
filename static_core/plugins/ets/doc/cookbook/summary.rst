@@ -35,13 +35,14 @@ Static Typing is Enforced
 
 
 One of the most important features of |LANG| that helps achieving both goals
-is static typing. Indeed, if a program is statically typed, i.e. all types
-are known at compile time, then it is much easier to understand what data
-structures are used in the code. That all types are known before the program
-actually runs results in the compiler to verify code correctness, thus
-eliminating many runtime type checks and improving performance.
+is static typing. A statically typed program has all types known at compile
+time. As a result, understanding what data structures are used in the code
+is much easier.
 
-Therefore, the usage of the type ``any`` in |LANG| is prohibited.
+That all types are known before the program actually runs results in the
+compiler to verify code correctness, eliminates many runtime type checks,
+and improves performance. To achieve this, the usage of the type ``any`` is
+prohibited in |LANG|.
 
 |
 
@@ -76,12 +77,12 @@ Example
 Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~
 
-Our research and experiments let us conclude that ``any`` is already not welcome
+Our research and experiments let us conclude that ``any`` is not welcome already
 in |TS|. According to our measurements, ``any`` is used in approximately 1% of
 |TS| codebases. Moreover, today's code linters (e.g., ESLint) include a set
-of rules that prohibit the usage of ``any``. 
+of rules that prohibit the usage of ``any``.
 
-Prohibiting ``any`` results in a strong positive impact on performance at the
+Prohibiting ``any`` provides a strong positive impact on the performance at the
 cost of low-effort code refactoring.
 
 |
@@ -92,16 +93,18 @@ Changing Object Layout in Runtime Is Prohibited
 -----------------------------------------------
 
 To achieve maximum performance benefits, |LANG| requires the layout of objects
-to not change during program execution. In other words, it is prohibited to:
+to not change during program execution. In other words, it is prohibited to do
+the following:
 
-- add new properties or methods to objects;
-- delete existing properties or methods from objects;
-- assign values of arbitrary types to object properties.
+- Add new properties or methods to objects;
+- Delete the existing object properties or methods;
+- Assign values of arbitrary types to object properties.
 
 
 It is noteworthy that many such operations are already prohibited by the |TS|
-compiler. However, it still can be "tricked", e.g., by ``as any`` casts that
-|LANG| does not support (see the detailed example below).
+compiler. However, |TS| compiler still can be "tricked", e.g., by ``as any``
+casts. |LANG| does not support such prohibited casts completely as shown in
+the detailed example below.
 
 Example
 ~~~~~~~
@@ -166,19 +169,19 @@ Example
 Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~
 
-Unpredictable changing of object layout contradicts both good readability and
-good performance of code. Indeed, having class definition at one place and
-modifying actual object layout elsewhere is confusing and error-prone from the
-developer's point of view. It opposes the idea of static typing (why adding
-or removing additional properties if typing is to be as explicit as possible?)
-and requires extra runtime support that causes undesired execution overhead.
+An unpredictable change of an object layout contradicts both good readability
+and code performance. Having class definition at one place, and modifying
+actual object layout elsewhere is confusing and error-prone from the developer's
+point of view. It opposes the idea of static typing (why adding or removing
+additional properties if typing is to be as explicit as possible?), and requires
+extra runtime support that causes undesired execution overhead.
 
 According to our observations and experiments, this feature is already not
 welcome in |TS|: it is used in a marginal number of real-world projects,
-and state-of-the-art linters have rules to prohibit its usage.
+and state-of-the-art linters have rules that prohibit the usage.
 
-We conclude that prohibiting runtime changes to object layouts results in a
-strong positive impact on performance at the cost of low-effort refactoring.
+We conclude that prohibiting runtime changes to object layouts provides a
+strong positive impact on the performance at the cost of low-effort refactoring.
 
 |
 
@@ -187,9 +190,9 @@ strong positive impact on performance at the cost of low-effort refactoring.
 Semantics of Operators Is Restricted
 ------------------------------------
 
-To achieve better performance and encourage developers write clearer code,
+To achieve better performance and encourage developers to write clearer code,
 |LANG| restricts the semantics of some operators. An example is given below,
-and the full list of restrictions is outlined in :ref:`Recipes`.
+while the full list of restrictions is outlined in :ref:`Recipes`.
 
 Example
 ~~~~~~~
@@ -203,17 +206,17 @@ Example
 Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~
 
-Loading language operators with extra semantics complicates the language
-specification, and forces developers to remember all possible corner cases with
-appropriate handling rules. Besides, in certain cases it causes some undesired
-runtime overhead.
+Loading language operators with extra semantics overcomplicates the language
+specification, makes the developers remember all possible corner cases with
+appropriate handling rules, and in some cases causes some undesired runtime
+overhead.
 
-At the same time, according to our observations and experiments, this feature
-is not popular in |TS|. It is used in less than 1% of real-world codebases,
-and such cases are easy to refactor.
+According to our observations and experiments, this feature is not popular
+already in |TS|. It is used in less than 1% of real-world codebases, and such
+cases are easy to refactor.
 
-Restricting the operator semantics results in a clearer and more performant
-at the cost of low-effort changes in code.
+Restricting the operator semantics results in a clearer code that can
+perform better at the cost of low-effort changes.
 
 |
 
@@ -222,7 +225,7 @@ at the cost of low-effort changes in code.
 Structural Typing Is Not Supported (Yet)
 ----------------------------------------
 
-Assuming that two unrelated classes ``T`` and ``U`` have the same public API:
+Assume that two unrelated classes ``T`` and ``U`` have the same public API:
 
 .. code-block:: typescript
 
@@ -260,34 +263,31 @@ Can we pass a value of ``T`` to a function that accepts a parameter of ``U``?
     let t : T = new T()
     greeter(t) // Is this allowed?
 
-In other words, which approach will we take:
+In other words, which approach are we to take:
 
 - ``T`` and ``U`` are not related by inheritance or any common interface, but
-  they are "somewhat equivalent" since they have the same public API, and so
-  the answer to both questions above is "yes";
+  are "somewhat equivalent" since they have the same public API, and thus the
+  answer to both questions above is "yes";
 - ``T`` and ``U`` are not related by inheritance or any common interface, and
-  always must be considered as totally different types, so that the answer to
-  both questions above is "no".
+  must be considered totally different types at any time, and thus the answer
+  to both questions above is "no".
 
 The languages that take the first approach are said to support structural
 typing, while the languages that take the second approach do not support it.
 Currently, |TS| supports structural typing, and |LANG| does not.
 
-It is debatable whether or not structural typing helps to produce code that
-is clearer and more understandable, and both *pro* and *contra* arguments can
-be found. Why not just support it then?
+It is debatable whether or not structural typing helps to produce a clearer
+and more understandable code as both *pro* and *contra* arguments can be found.
+Why not just support it then? The answer is, because structural typing support
+is a major feature that needs much consideration and care for the implementation
+in the language specification, compiler, and runtime. More importantly in case
+of |LANG| that enforces static typing (see above), runtime support for
+structural typing implies performance overhead.
 
-The answer is that supporting structural typing is a major feature that needs
-a lot of consideration and careful implementation in language specification,
-compiler and runtime. More importantly, in case of |LANG|, which enforces static
-typing (see above), runtime support for structural typing implies performance
-overhead. So, since functionally correct and performant implementation requires
-taking that many aspects into account, the support to this feature is postponed.
-
+Since functionally correct and performant implementation requires taking so
+many aspects into account, the structural typing support is postponed.
 The |LANG| team is ready to reconsider based on real-world scenarios and
 feedback. More cases and suggested workarounds can be found in :ref:`Recipes`.
-
-|
 
 |
 
